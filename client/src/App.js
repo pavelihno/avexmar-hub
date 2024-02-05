@@ -1,10 +1,18 @@
-import './App.css';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Routes, Route } from 'react-router-dom';
+
+import Home from './components/Home';
+
 
 function App() {
+
+  const dispatch = useDispatch();
+
   return (
-    <div className="App">
-      <header className="App-header"></header>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+    </Routes>
   );
 }
 
