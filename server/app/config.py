@@ -9,6 +9,4 @@ class Config:
 
     CSRF_ENABLED = True
 
-    DEBUG = True
-
     basedir = os.path.abspath(os.path.dirname(__file__))

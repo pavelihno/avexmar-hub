@@ -5,34 +5,36 @@ services:
     container_name: server-app
     build: ./server
     ports:
-      - $SERVER_LOCAL_PORT:$SERVER_DOCKER_PORT
+      - 5000:5000
     environment:
       SECRET_KEY: $SERVER_SECRET_KEY
       DATABASE_URI: $SERVER_DATABASE_URI
+    volumes:
+      - ./server:/app
     env_file:
       - .env
     depends_on:
       - postgres
 
-  client-app:
-    container_name: client-app
-    build: ./client
-    ports:
-      - $CLIENT_LOCAL_PORT:$CLIENT_DOCKER_PORT
-    tty: true
-    environment:
-      - SERVER_URL=$CLIENT_SERVER_URL
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    env_file:
-      - .env
+  # client-app:
+  #   container_name: client-app
+  #   build: ./client
+  #   ports:
+  #     - 3000:3000
+  #   tty: true
+  #   environment:
+  #     - SERVER_URL=$CLIENT_SERVER_URL
+  #   volumes:
+  #     - ./client:/app
+  #     - /app/node_modules
+  #   env_file:
+  #     - .env
 
   postgres:
     container_name: postgres
     image: postgres:15  
     ports:
-      - $POSTGRES_LOCAL_PORT:$POSTGRES_DOCKER_PORT
+      - 5432:5432
     environment:
       POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
@@ -46,7 +48,7 @@ services:
   #   container_name: redis
   #   image: redis:7.2.1-alpine
   #   ports:
-  #     - $REDIS_LOCAL_PORT:$REDIS_DOCKER_PORT
+  #     - 6379:6379
   #   environment:
   #     - REDIS_PASSWORD=$REDIS_PASSWORD
   #   env_file:
@@ -56,7 +58,7 @@ services:
   #   container_name: redis-commander
   #   image: rediscommander/redis-commander:latest
   #   ports:
-  #       - $REDIS_COMMANDER_LOCAL_PORT:$REDIS_COMMANDER_DOCKER_PORT
+  #       - 8081:8081
   #   environment:
   #       - REDIS_HOSTS=$REDIS_COMMANDER_HOSTS
   #       - REDIS_PASSWORD=$REDIS_PASSWORD
@@ -65,12 +67,12 @@ services:
   #   depends_on:
   #       - redis
 
-  # adminer:
-  #   container_name: adminer
-  #   image: adminer:latest
-  #   ports:
-  #     - $ADMINER_LOCAL_PORT:$ADMINER_DOCKER_PORT
-  #   env_file:
-  #     - .env
-  #   depends_on: 
-  #     - postgres
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    ports:
+      - 8082:8080
+    env_file:
+      - .env
+    depends_on: 
+      - postgres
