@@ -6,8 +6,8 @@ from utils.jwt import signJWT
 def register():
     body = request.json
     new_user = User.create(**{
-        'email': body['email'],
-        'password': body['password'],
+        'email': body.get('email', ''),
+        'password': body.get('password', ''),
         'role': 'standard',
         'is_active': True
     })
@@ -17,8 +17,8 @@ def register():
 
 def login():
     body = request.json
-    email = body['email']
-    password = body['password']
+    email = body.get('email', '')
+    password = body.get('password', '')
 
     user = User.login(email, password)
     if user:

@@ -55,8 +55,8 @@ def deactivate_user(current_user, user_id):
 @login_required
 def change_password(current_user):
     body = request.json
-    password = body['password']
-    
+    password = body.get('password', '')
+
     if not password:
         return jsonify({'message': 'Invalid password'}), 404
     updated_user = User.change_password(current_user.id, password)

@@ -27,20 +27,14 @@ class User(db.Model):
             'is_active': self.is_active
         }
 
-    # https://github.com/LoginRadius/engineering-blog-samples/blob/master/Flask/loginRadius-flask-auth/models.py
-
-    # https://www.loginradius.com/blog/engineering/guest-post/securing-flask-api-with-jwt/
-
     @classmethod
     def create(cls, **data):
-        email = data['email']
+        existing_user = cls.get_by_email(data.get('email', ''))
 
-        existing_user = cls.get_by_email(email)
         if existing_user:
             return None
 
         user = cls()
-
         for key, value in data.items():
             if key == 'password':
                 value = cls.__encode_password(value)
