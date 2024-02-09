@@ -1,9 +1,13 @@
 import os
 import importlib
-from config import Config
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+from config import Config
+from database import db
+
+from controllers.auth_controller import *
+from controllers.user_controller import *
 
 def __import_models():
    app_dir = 'app'
@@ -16,25 +20,30 @@ def __import_models():
 
    return True
 
-def __create_database():
-   return SQLAlchemy()
-
 def __create_app(_config_class, _db):
    app = Flask(__name__)
    app.config.from_object(_config_class)
 
+   # Required for tracking migrations
    __import_models()
 
    _db.init_app(app)
 
    return app
 
-
-db = __create_database()
 app = __create_app(Config, db)
 migrate = Migrate(app, db)
 
+# auth
+app.route('/auth/register', methods=['POST'])(register)
+app.route('/auth/login', methods=['POST'])(login)
 
-@app.route("/")
-def index():
-   return "Hello World"
+# users
+app.route('/users', methods=['GET'])(get_users)
+app.route('/users', methods=['POST'])(create_user)
+app.route('/users/<int:user_id>', methods=['GET'])(get_user)
+app.route('/users/<int:user_id>', methods=['PUT'])(update_user)
+app.route('/users/<int:user_id>', methods=['DELETE'])(delete_user)
+app.route('/users/<int:user_id>/activate', methods=['PUT'])(activate_user)
+app.route('/users/<int:user_id>/deactivate', methods=['PUT'])(deactivate_user)
+app.route('/users/change-password', methods=['PUT'])(change_password)
