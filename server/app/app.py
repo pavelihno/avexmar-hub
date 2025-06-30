@@ -58,8 +58,8 @@ app.route('/users/change-password', methods=['PUT'])(change_password)
 # airports
 app.route('/airports', methods=['GET'])(get_airports)
 app.route('/airports', methods=['POST'])(create_airport)
-app.route('/airports/<string:code>', methods=['PUT'])(update_airport)
-app.route('/airports/<string:code>', methods=['DELETE'])(delete_airport)
+app.route('/airports/<string:iata_code>', methods=['PUT'])(update_airport)
+app.route('/airports/<string:iata_code>', methods=['DELETE'])(delete_airport)
 
 # flights
 app.route('/flights', methods=['GET'])(get_flights)

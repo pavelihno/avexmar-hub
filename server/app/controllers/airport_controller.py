@@ -17,17 +17,17 @@ def create_airport(current_user):
 
 
 @admin_required
-def update_airport(current_user, code):
+def update_airport(current_user, iata_code):
     body = request.json
-    updated = Airport.update(code, **body)
+    updated = Airport.update(iata_code, **body)
     if updated:
         return jsonify(updated.to_dict())
     return jsonify({'message': 'Airport not found'}), 404
 
 
 @admin_required
-def delete_airport(current_user, code):
-    deleted = Airport.delete(code)
+def delete_airport(current_user, iata_code):
+    deleted = Airport.delete(iata_code)
     if deleted:
         return jsonify(deleted.to_dict())
     return jsonify({'message': 'Airport not found'}), 404
