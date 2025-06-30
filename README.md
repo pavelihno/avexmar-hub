@@ -13,6 +13,8 @@ npm i --package-lock-only
 ```
 
 ### Create Flask migrations
+
+Inside Docker container:
 ```
 flask db init
 flask db migrate -m <migration-message>
