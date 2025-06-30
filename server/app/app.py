@@ -9,6 +9,8 @@ from database import db
 from controllers.auth_controller import *
 from controllers.user_controller import *
 from controllers.airport_controller import *
+from controllers.flight_controller import *
+from controllers.booking_controller import *
 
 
 def __import_models():
@@ -58,3 +60,15 @@ app.route('/airports', methods=['GET'])(get_airports)
 app.route('/airports', methods=['POST'])(create_airport)
 app.route('/airports/<string:code>', methods=['PUT'])(update_airport)
 app.route('/airports/<string:code>', methods=['DELETE'])(delete_airport)
+
+# flights
+app.route('/flights', methods=['GET'])(get_flights)
+app.route('/flights', methods=['POST'])(create_flight)
+app.route('/flights/<int:flight_id>', methods=['PUT'])(update_flight)
+app.route('/flights/<int:flight_id>', methods=['DELETE'])(delete_flight)
+
+# bookings
+app.route('/bookings', methods=['GET'])(get_bookings)
+app.route('/bookings', methods=['POST'])(create_booking)
+app.route('/bookings/<int:booking_id>', methods=['PUT'])(update_booking)
+app.route('/bookings/<int:booking_id>', methods=['DELETE'])(delete_booking)
