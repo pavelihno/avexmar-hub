@@ -8,7 +8,7 @@ export const login = createAsyncThunk(
     'auth/login',
     async (formData, { rejectWithValue }) => {
         try {
-            const res = await api.post('/login', formData);
+            const res = await serverApi.post('/login', formData);
             const { token, user } = res.data;
             setAuthToken(token);
             return user;
@@ -22,7 +22,7 @@ export const register = createAsyncThunk(
     'auth/register',
     async (formData, { rejectWithValue }) => {
         try {
-            const res = await api.post('/register', formData);
+            const res = await serverApi.post('/register', formData);
             const { token, user } = res.data;
             setAuthToken(token);
             return user;
@@ -40,7 +40,7 @@ export const logout = createAsyncThunk('auth/logout', () => {
 export const auth = createAsyncThunk(
     'auth',
     async () => {
-        const res = await api.get('/auth');
+        const res = await serverApi.get('/auth');
         const { user } = res.data;
         return user;
     }
