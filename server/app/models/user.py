@@ -2,8 +2,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 from database import db
+from models.base_model import BaseModel
 
-class User(db.Model):
+class User(BaseModel):
     __tablename__ = 'users'
 
     # use UUID instead of Integer
@@ -48,14 +49,6 @@ class User(db.Model):
         return user
 
     @classmethod
-    def get_all(cls):
-        return cls.query.all()
-
-    @classmethod
-    def get_by_id(cls, _id):
-        return cls.query.get(_id)
-
-    @classmethod
     def get_by_email(cls, _email):
         return cls.query.filter_by(email=_email).first()
 
@@ -66,15 +59,6 @@ class User(db.Model):
             for key, value in data.items():
                 if key in ['role', 'is_active']:
                     setattr(user, key, value)
-            db.session.commit()
-            return user
-        return None
-
-    @classmethod
-    def delete(cls, _id):
-        user = cls.get_by_id(_id)
-        if user:
-            db.session.delete(user)
             db.session.commit()
             return user
         return None
