@@ -5,7 +5,6 @@ from models.base_model import BaseModel
 class Booking(BaseModel):
     __tablename__ = 'bookings'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id'), nullable=False)
     date = db.Column('flight_date', db.Date, nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)

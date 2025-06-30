@@ -5,7 +5,6 @@ from models.base_model import BaseModel
 class FlightAvailability(BaseModel):
     __tablename__ = 'flight_availability'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id'), nullable=False)
     date = db.Column('flight_date', db.Date, nullable=False)
     available_economy_seats = db.Column('economy_seats', db.Integer, default=0)
