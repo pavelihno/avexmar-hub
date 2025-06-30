@@ -18,3 +18,31 @@ class Booking(BaseModel):
 
     flight = db.relationship('Flight', backref='bookings')
     passenger = db.relationship('Passenger', backref='bookings')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'flight_id': self.flight_id,
+            'date': self.date,
+            'passenger_id': self.passenger_id,
+            'seat_class': self.seat_class,
+            'booked_at': self.booked_at
+        }
+
+    @classmethod
+    def create(cls, **data):
+        booking = cls(**data)
+        db.session.add(booking)
+        db.session.commit()
+        return booking
+
+    @classmethod
+    def update(cls, _id, **data):
+        booking = cls.get_by_id(_id)
+        if booking:
+            for key, value in data.items():
+                if hasattr(booking, key):
+                    setattr(booking, key, value)
+            db.session.commit()
+            return booking
+        return None
