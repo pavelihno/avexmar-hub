@@ -16,11 +16,9 @@ class Flight(BaseModel):
     business_seats = db.Column(db.Integer, default=0)
     price_economy = db.Column(db.Numeric(10, 2))
     price_business = db.Column(db.Numeric(10, 2))
-    currency = db.Column(db.String(), default=Config.DEFAULT_CURRENCY,
-                         server_default=Config.DEFAULT_CURRENCY)
+    currency = db.Column(db.String(), default=Config.DEFAULT_CURRENCY, server_default=Config.DEFAULT_CURRENCY)
 
-    status = db.Column(db.String, nullable=False, default="scheduled",
-                       server_default="scheduled")
+    status = db.Column(db.String, nullable=False, default="scheduled", server_default="scheduled")
 
     __table_args__ = (
         db.CheckConstraint(status.in_([

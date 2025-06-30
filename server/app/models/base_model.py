@@ -6,8 +6,7 @@ class BaseModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
-    updated_at = db.Column(db.DateTime, default=db.func.now(),
-                          onupdate=db.func.now(), nullable=False)
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_by = db.Column(db.String, nullable=True)
     updated_by = db.Column(db.String, nullable=True)
