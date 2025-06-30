@@ -45,7 +45,7 @@ def delete_user(current_user, user_id):
 
 
 def __set_user_activity(user_id, is_active):
-    updated_user = User.update(user_id, {'is_active': is_active})
+    updated_user = User.update(user_id, is_active=is_active)
     if updated_user:
         return jsonify(updated_user.to_dict())
     return jsonify({'message': 'User not found'}), 404
@@ -71,5 +71,5 @@ def change_password(current_user):
     updated_user = User.change_password(current_user.id, password)
 
     if updated_user:
-        return updated_user
+        return jsonify(updated_user.to_dict())
     return jsonify({'message': 'User not found'}), 404
