@@ -2,6 +2,7 @@ from flask import request, jsonify
 
 from models.user import User
 from utils.jwt import signJWT
+from middlewares.auth_middleware import login_required
 
 def register():
     body = request.json
@@ -25,3 +26,7 @@ def login():
         token = signJWT(email)
         return jsonify(token), 200
     return jsonify({'message': 'Invalid email or password'}), 401
+
+@login_required
+def auth(current_user):
+    return jsonify(current_user.to_dict()), 200

@@ -35,8 +35,9 @@ app = __create_app(Config, db)
 migrate = Migrate(app, db)
 
 # auth
-app.route('/auth/register', methods=['POST'])(register)
-app.route('/auth/login', methods=['POST'])(login)
+app.route('/register', methods=['POST'])(register)
+app.route('/login', methods=['POST'])(login)
+app.route('/auth', methods=['GET'])(auth)
 
 # users
 app.route('/users', methods=['GET'])(get_users)
