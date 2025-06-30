@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from database import db
 from models.base_model import BaseModel
+
 
 class FlightAvailability(BaseModel):
     __tablename__ = 'flight_availability'

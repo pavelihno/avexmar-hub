@@ -4,6 +4,7 @@ from datetime import datetime
 from database import db
 from models.base_model import BaseModel
 
+
 class User(BaseModel):
     __tablename__ = 'users'
 
@@ -17,7 +18,7 @@ class User(BaseModel):
     is_active = db.Column(db.Boolean(), default=True)
 
     __table_args__ = (
-        db.CheckConstraint(role.in_(['admin', 'standard']), name='role_types'),      
+        db.CheckConstraint(role.in_(['admin', 'standard']), name='role_types'),
     )
 
     def to_dict(self):
@@ -45,7 +46,7 @@ class User(BaseModel):
 
         db.session.add(user)
         db.session.commit()
-        
+
         return user
 
     @classmethod
@@ -69,7 +70,7 @@ class User(BaseModel):
         if user and cls.__is_password_correct(user.password, _password):
             return user
         return None
-    
+
     @classmethod
     def change_password(cls, _id, _password):
         user = cls.get_by_id(_id)
@@ -82,9 +83,7 @@ class User(BaseModel):
     @classmethod
     def __encode_password(cls, _password):
         return generate_password_hash(_password)
-    
+
     @classmethod
     def __is_password_correct(cls, correct_password, input_password):
         return check_password_hash(correct_password, input_password)
-
-

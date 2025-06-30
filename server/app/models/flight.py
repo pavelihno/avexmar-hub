@@ -3,6 +3,7 @@ from datetime import datetime
 from database import db
 from models.base_model import BaseModel
 
+
 class Flight(BaseModel):
     __tablename__ = 'flights'
 

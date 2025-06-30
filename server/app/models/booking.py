@@ -1,6 +1,7 @@
 from database import db
 from models.base_model import BaseModel
 
+
 class Booking(BaseModel):
     __tablename__ = 'bookings'
 
@@ -12,7 +13,7 @@ class Booking(BaseModel):
     booked_at = db.Column('booking_time', db.DateTime, default=db.func.current_timestamp())
 
     __table_args__ = (
-        db.CheckConstraint("seat_class IN ('economy', 'business')", name='seat_class_types'),
+        db.CheckConstraint(seat_class.in_(['economy', 'business']), name='seat_class_types'),
     )
 
     flight = db.relationship('Flight', backref='bookings')

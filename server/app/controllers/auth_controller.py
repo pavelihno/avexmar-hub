@@ -4,6 +4,7 @@ from models.user import User
 from utils.jwt import signJWT
 from middlewares.auth_middleware import login_required
 
+
 def register():
     body = request.json
     new_user = User.create(**{
@@ -16,6 +17,7 @@ def register():
         return jsonify(new_user.to_dict()), 201
     return jsonify({'message': 'Invalid email or password'}), 400
 
+
 def login():
     body = request.json
     email = body.get('email', '')
@@ -26,6 +28,7 @@ def login():
         token = signJWT(email)
         return jsonify(token), 200
     return jsonify({'message': 'Invalid email or password'}), 401
+
 
 @login_required
 def auth(current_user):

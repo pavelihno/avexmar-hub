@@ -1,6 +1,7 @@
 from database import db
 from models.base_model import BaseModel
 
+
 class Passenger(BaseModel):
     __tablename__ = 'passengers'
 
