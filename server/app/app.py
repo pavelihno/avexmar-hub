@@ -8,6 +8,7 @@ from database import db
 
 from controllers.auth_controller import *
 from controllers.user_controller import *
+from controllers.airport_controller import *
 
 
 def __import_models():
@@ -51,3 +52,9 @@ app.route('/users/<int:user_id>', methods=['DELETE'])(delete_user)
 app.route('/users/<int:user_id>/activate', methods=['PUT'])(activate_user)
 app.route('/users/<int:user_id>/deactivate', methods=['PUT'])(deactivate_user)
 app.route('/users/change-password', methods=['PUT'])(change_password)
+
+# airports
+app.route('/airports', methods=['GET'])(get_airports)
+app.route('/airports', methods=['POST'])(create_airport)
+app.route('/airports/<string:code>', methods=['PUT'])(update_airport)
+app.route('/airports/<string:code>', methods=['DELETE'])(delete_airport)
