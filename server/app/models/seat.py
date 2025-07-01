@@ -16,6 +16,7 @@ class Seat(BaseModel):
 
     __table_args__ = (
         db.CheckConstraint(seat_class.in_(Config.ENUM_SEAT_CLASS), name='seat_class_types'),
+        db.UniqueConstraint('flight_id', 'seat_number'),
     )
 
     def to_dict(self):
