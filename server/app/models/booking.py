@@ -2,13 +2,12 @@ from database import db
 from models.base_model import BaseModel
 from config import Config
 
-# Association table between bookings and seats
+
 booking_seats = db.Table(
     'booking_seats',
     db.Column('booking_id', db.Integer, db.ForeignKey('bookings.id'), primary_key=True),
     db.Column('seat_id', db.Integer, db.ForeignKey('seats.id'), primary_key=True),
 )
-
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
