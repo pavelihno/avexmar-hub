@@ -14,7 +14,8 @@ def register():
         'is_active': True
     })
     if new_user:
-        return jsonify(new_user.to_dict()), 201
+        token = signJWT(new_user.email)
+        return jsonify({'token': token, 'user': new_user.to_dict()}), 201
     return jsonify({'message': 'Invalid email or password'}), 400
 
 
@@ -26,7 +27,7 @@ def login():
     user = User.login(email, password)
     if user:
         token = signJWT(email)
-        return jsonify(token), 200
+        return jsonify({'token': token, 'user': user.to_dict()}), 200
     return jsonify({'message': 'Invalid email or password'}), 401
 
 
