@@ -1,38 +1,27 @@
 from database import db
 from models.base_model import BaseModel
+from config import Config
 
 
 class Passenger(BaseModel):
     __tablename__ = 'passengers'
 
-    name = db.Column('full_name', db.String(), nullable=False)
+    full_name = db.Column(db.String(), nullable=False)
+    document_number = db.Column(db.String(), unique=True, nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
     gender = db.Column(db.String(), nullable=False)
-    document_id = db.Column('id_document', db.String(), unique=True, nullable=False)
+    is_infant = db.Column(db.Boolean, default=False, nullable=False)
+
+    __table_args__ = (
+        db.CheckConstraint(gender.in_(Config.ENUM_GENDER), name='passenger_gender_types'),
+    )
 
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'full_name': self.full_name,
             'birth_date': self.birth_date,
             'gender': self.gender,
-            'document_id': self.document_id
+            'document_number': self.document_number,
+            'is_infant': self.is_infant
         }
-
-    @classmethod
-    def create(cls, **data):
-        passenger = cls(**data)
-        db.session.add(passenger)
-        db.session.commit()
-        return passenger
-
-    @classmethod
-    def update(cls, _id, **data):
-        passenger = cls.get_by_id(_id)
-        if passenger:
-            for key, value in data.items():
-                if hasattr(passenger, key):
-                    setattr(passenger, key, value)
-            db.session.commit()
-            return passenger
-        return None
