@@ -1,13 +1,11 @@
-from datetime import datetime
-
 from database import db
 from models.base_model import BaseModel
+from config import Config
 
 
 class Flight(BaseModel):
     __tablename__ = 'flights'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     number = db.Column('flight_number', db.String(), nullable=False)
     origin_airport = db.Column('origin', db.String(), nullable=False)
     destination_airport = db.Column('destination', db.String(), nullable=False)
@@ -18,7 +16,15 @@ class Flight(BaseModel):
     business_seats = db.Column(db.Integer, default=0)
     price_economy = db.Column(db.Numeric(10, 2))
     price_business = db.Column(db.Numeric(10, 2))
-    currency = db.Column(db.String())
+    currency = db.Column(db.String(), default=Config.DEFAULT_CURRENCY, server_default=Config.DEFAULT_CURRENCY)
+
+    status = db.Column(db.String, nullable=False, default="scheduled", server_default="scheduled")
+
+    __table_args__ = (
+        db.CheckConstraint(status.in_([
+            'scheduled', 'delayed', 'departed', 'arrived', 'cancelled'
+        ]), name='flight_status_types'),
+    )
 
     def to_dict(self):
         return {

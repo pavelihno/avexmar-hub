@@ -1,5 +1,4 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 
 from database import db
 from models.base_model import BaseModel
@@ -9,13 +8,9 @@ class User(BaseModel):
     __tablename__ = 'users'
 
     # use UUID instead of Integer
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(), unique=True, nullable=False)
     password = db.Column(db.String(), nullable=False)
     role = db.Column(db.String(), default='standard')
-
-    created_at = db.Column(db.Date, nullable=False)
-    is_active = db.Column(db.Boolean(), default=True)
 
     __table_args__ = (
         db.CheckConstraint(role.in_(['admin', 'standard']), name='role_types'),
@@ -41,8 +36,6 @@ class User(BaseModel):
             if key == 'password':
                 value = cls.__encode_password(value)
             setattr(user, key, value)
-
-        user.created_at = datetime.now()
 
         db.session.add(user)
         db.session.commit()

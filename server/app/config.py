@@ -11,3 +11,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CSRF_ENABLED = True
+
+    # Default variables
+    DEFAULT_CURRENCY = os.environ.get('DEFAULT_CURRENCY')
