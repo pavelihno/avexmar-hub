@@ -11,6 +11,9 @@ from controllers.user_controller import *
 from controllers.airport_controller import *
 from controllers.flight_controller import *
 from controllers.booking_controller import *
+from controllers.passenger_controller import *
+from controllers.seat_controller import *
+from controllers.payment_controller import *
 
 
 def __import_models():
@@ -72,3 +75,22 @@ app.route('/bookings', methods=['GET'])(get_bookings)
 app.route('/bookings', methods=['POST'])(create_booking)
 app.route('/bookings/<int:booking_id>', methods=['PUT'])(update_booking)
 app.route('/bookings/<int:booking_id>', methods=['DELETE'])(delete_booking)
+
+# passengers
+app.route('/passengers', methods=['GET'])(get_passengers)
+app.route('/passengers', methods=['POST'])(create_passenger)
+app.route('/passengers/<int:passenger_id>', methods=['GET'])(get_passenger)
+app.route('/passengers/<int:passenger_id>', methods=['PUT'])(update_passenger)
+app.route('/passengers/<int:passenger_id>', methods=['DELETE'])(delete_passenger)
+
+# seats
+app.route('/seats', methods=['GET'])(get_seats)
+app.route('/seats', methods=['POST'])(create_seat)
+app.route('/seats/<int:seat_id>', methods=['PUT'])(update_seat)
+app.route('/seats/<int:seat_id>', methods=['DELETE'])(delete_seat)
+
+# payments
+app.route('/payments', methods=['GET'])(get_payments)
+app.route('/payments', methods=['POST'])(create_payment)
+app.route('/payments/<int:payment_id>', methods=['PUT'])(update_payment)
+app.route('/payments/<int:payment_id>', methods=['DELETE'])(delete_payment)
