@@ -2,12 +2,18 @@ from database import db
 from models.base_model import BaseModel
 from config import Config
 
+# Association table between bookings and seats
+booking_seats = db.Table(
+    'booking_seats',
+    db.Column('booking_id', db.Integer, db.ForeignKey('bookings.id'), primary_key=True),
+    db.Column('seat_id', db.Integer, db.ForeignKey('seats.id'), primary_key=True),
+)
+
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
 
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id'), nullable=False)
-    seat_ids = db.Column(db.ARRAY(db.Integer), nullable=False, default=[])
     booked_at = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
 
     base_price = db.Column(db.Float, nullable=False)
@@ -17,13 +23,13 @@ class Booking(BaseModel):
     currency = db.Column(db.String(), nullable=False, default=Config.DEFAULT_CURRENCY, server_default=Config.DEFAULT_CURRENCY)
 
     flight = db.relationship('Flight', backref='bookings')
-    seats = db.relationship('Seat', secondary='booking_seats', backref='booking')
+    seats = db.relationship('Seat', secondary=booking_seats, backref='bookings')
 
     def to_dict(self):
         return {
             'id': self.id,
             'flight_id': self.flight_id,
-            'seat_ids': self.seat_ids,
+            'seat_ids': [seat.id for seat in self.seats],
             'booked_at': self.booked_at,
             'base_price': float(self.base_price) if self.base_price is not None else None,
             'tax_amount': float(self.tax_amount) if self.tax_amount is not None else None,
