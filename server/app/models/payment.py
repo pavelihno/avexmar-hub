@@ -9,7 +9,6 @@ class Payment(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     payment_method = db.Column(db.String, nullable=False)
     payment_status = db.Column(db.String, nullable=False, default=Config.DEFAULT_PAYMENT_STATUS)
-    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
     booking = db.relationship('Booking', backref='payments')
 
