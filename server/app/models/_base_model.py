@@ -1,4 +1,5 @@
 from database import db
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class BaseModel(db.Model):
@@ -20,7 +21,11 @@ class BaseModel(db.Model):
     def create(cls, **data):
         instance = cls(**data)
         db.session.add(instance)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            raise exc
         return instance
 
     @classmethod
@@ -30,7 +35,11 @@ class BaseModel(db.Model):
             for key, value in data.items():
                 if hasattr(instance, key):
                     setattr(instance, key, value)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                raise exc
             return instance
         return None
 
@@ -39,6 +48,10 @@ class BaseModel(db.Model):
         instance = cls.get_by_id(_id)
         if instance:
             db.session.delete(instance)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                raise exc
             return instance
         return None
