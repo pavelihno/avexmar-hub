@@ -6,7 +6,7 @@ class Seat(BaseModel):
     __tablename__ = 'seats'
 
     seat_number = db.Column(db.String(10), nullable=False)
-    tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id', ondelete='RESTRICT'), nullable=False)
+    tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id', ondelete='CASCADE'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id', ondelete='RESTRICT'), nullable=True)
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='SET NULL'), nullable=True)
 
