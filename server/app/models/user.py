@@ -1,16 +1,16 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import db
-from models.base_model import BaseModel
+from models._base_model import BaseModel
 
 
 class User(BaseModel):
     __tablename__ = 'users'
 
-    # use UUID instead of Integer
-    email = db.Column(db.String(), unique=True, nullable=False)
+    email = db.Column(db.String(), unique=True, index=True, nullable=False)
     password = db.Column(db.String(), nullable=False)
     role = db.Column(db.String(), default='standard')
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
 
     __table_args__ = (
         db.CheckConstraint(role.in_(['admin', 'standard']), name='role_types'),
