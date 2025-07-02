@@ -1,6 +1,5 @@
 from database import db
-from models.base_model import BaseModel
-from config import Config
+from models._base_model import BaseModel
 
 
 class Seat(BaseModel):

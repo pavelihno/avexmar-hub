@@ -1,5 +1,5 @@
 from database import db
-from models.base_model import BaseModel
+from models._base_model import BaseModel
 from config import Config
 
 
