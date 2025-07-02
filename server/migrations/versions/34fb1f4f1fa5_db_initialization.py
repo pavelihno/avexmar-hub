@@ -1,8 +1,8 @@
-"""Initial migration
+"""DB initialization
 
-Revision ID: f7eb36c834fb
+Revision ID: 34fb1f4f1fa5
 Revises: 
-Create Date: 2025-07-01 14:57:34.050186
+Create Date: 2025-07-02 09:36:37.445218
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f7eb36c834fb'
+revision = '34fb1f4f1fa5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -60,30 +60,31 @@ def upgrade():
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_users_email'), ['email'], unique=True)
 
-    op.create_table('flights',
-    sa.Column('number', sa.String(), nullable=False),
+    op.create_table('routes',
+    sa.Column('flight_number', sa.String(), nullable=False),
     sa.Column('origin_airport_id', sa.Integer(), nullable=False),
     sa.Column('destination_airport_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['destination_airport_id'], ['airports.id'], ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['origin_airport_id'], ['airports.id'], ondelete='RESTRICT'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('flights',
+    sa.Column('route_id', sa.Integer(), nullable=False),
     sa.Column('scheduled_departure', sa.DateTime(), nullable=True),
     sa.Column('scheduled_arrival', sa.DateTime(), nullable=True),
-    sa.Column('economy_seats', sa.Integer(), nullable=False),
-    sa.Column('business_seats', sa.Integer(), nullable=False),
-    sa.Column('price_economy', sa.Float(), nullable=True),
-    sa.Column('price_business', sa.Float(), nullable=True),
-    sa.Column('currency', sa.String(), server_default='RUB', nullable=False),
     sa.Column('status', sa.String(), server_default='scheduled', nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.CheckConstraint("currency IN ('RUB')", name='flight_currency_types'),
     sa.CheckConstraint("status IN ('scheduled', 'delayed', 'departed', 'arrived', 'cancelled')", name='flight_status_types'),
-    sa.ForeignKeyConstraint(['destination_airport_id'], ['airports.id'], ),
-    sa.ForeignKeyConstraint(['origin_airport_id'], ['airports.id'], ),
+    sa.ForeignKeyConstraint(['route_id'], ['routes.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('bookings',
     sa.Column('flight_id', sa.Integer(), nullable=False),
-    sa.Column('seat_ids', sa.ARRAY(sa.Integer()), nullable=False),
     sa.Column('booked_at', sa.DateTime(), nullable=False),
     sa.Column('base_price', sa.Float(), nullable=False),
     sa.Column('tax_amount', sa.Float(), nullable=False),
@@ -93,43 +94,61 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['flight_id'], ['flights.id'], ),
+    sa.ForeignKeyConstraint(['flight_id'], ['flights.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('seats',
+    op.create_table('tariffs',
     sa.Column('flight_id', sa.Integer(), nullable=False),
-    sa.Column('passenger_id', sa.Integer(), nullable=False),
-    sa.Column('seat_number', sa.String(length=10), nullable=False),
     sa.Column('seat_class', sa.String(), nullable=False),
+    sa.Column('price', sa.Float(), nullable=False),
+    sa.Column('seats_number', sa.Integer(), nullable=False),
+    sa.Column('currency', sa.String(), server_default='RUB', nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.CheckConstraint("seat_class IN ('economy', 'business')", name='seat_class_types'),
-    sa.ForeignKeyConstraint(['flight_id'], ['flights.id'], ),
-    sa.ForeignKeyConstraint(['passenger_id'], ['passengers.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.CheckConstraint("currency IN ('RUB')", name='tariff_currency_types'),
+    sa.CheckConstraint("seat_class IN ('economy', 'business')", name='tariff_seat_class_types'),
+    sa.ForeignKeyConstraint(['flight_id'], ['flights.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('flight_id', 'seat_class', name='unique_flight_seat_class')
     )
     op.create_table('payments',
     sa.Column('booking_id', sa.Integer(), nullable=False),
     sa.Column('payment_method', sa.String(), nullable=False),
     sa.Column('payment_status', sa.String(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.CheckConstraint("payment_method IN ('card', 'cash')", name='payment_method_types'),
     sa.CheckConstraint("payment_status IN ('pending', 'paid', 'refunded', 'failed')", name='payment_status_types'),
-    sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ),
+    sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('seats',
+    sa.Column('seat_number', sa.String(length=10), nullable=False),
+    sa.Column('tariff_id', sa.Integer(), nullable=False),
+    sa.Column('passenger_id', sa.Integer(), nullable=True),
+    sa.Column('booking_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['passenger_id'], ['passengers.id'], ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['tariff_id'], ['tariffs.id'], ondelete='RESTRICT'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('tariff_id', 'seat_number')
     )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('payments')
     op.drop_table('seats')
+    op.drop_table('payments')
+    op.drop_table('tariffs')
     op.drop_table('bookings')
     op.drop_table('flights')
+    op.drop_table('routes')
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_users_email'))
 

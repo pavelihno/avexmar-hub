@@ -13,6 +13,7 @@ class Airport(BaseModel):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
             'name': self.name,
