@@ -13,6 +13,7 @@ class Flight(BaseModel):
 
     tariffs = db.relationship('Tariff', backref='flight', lazy='dynamic', cascade='all, delete-orphan')
     bookings = db.relationship('Booking', backref='flight', lazy='dynamic', cascade='all, delete-orphan')
+    seats = db.relationship('Seat', backref='flight', lazy='dynamic', cascade='all, delete-orphan')
 
     __table_args__ = (
         db.CheckConstraint(status.in_(Config.ENUM_FLIGHT_STATUS), name='flight_status_types'),
