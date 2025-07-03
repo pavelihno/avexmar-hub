@@ -1,8 +1,8 @@
 from flask import request, jsonify
 
-from models.payment import Payment
-from models.booking import Booking
-from middlewares.auth_middleware import login_required
+from app.models.payment import Payment
+from app.models.booking import Booking
+from app.middlewares.auth_middleware import login_required
 
 
 def get_payments(current_user=None):

@@ -1,6 +1,6 @@
-from database import db
-from models._base_model import BaseModel
-from config import Config
+from app.database import db
+from app.models._base_model import BaseModel
+from app.config import Config
 
 
 class Flight(BaseModel):

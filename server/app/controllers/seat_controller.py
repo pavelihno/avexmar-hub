@@ -1,10 +1,10 @@
 from flask import request, jsonify
 
-from models.seat import Seat
-from models.flight import Flight
-from models.tariff import Tariff
-from models.passenger import Passenger
-from middlewares.auth_middleware import login_required
+from app.models.seat import Seat
+from app.models.flight import Flight
+from app.models.tariff import Tariff
+from app.models.passenger import Passenger
+from app.middlewares.auth_middleware import login_required
 
 
 def get_seats(current_user=None):

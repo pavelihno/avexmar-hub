@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
-from models.user import User
-from middlewares.auth_middleware import admin_required, login_required
+from app.models.user import User
+from app.middlewares.auth_middleware import admin_required, login_required
 
 
 @admin_required

@@ -2,8 +2,8 @@ from functools import wraps
 
 from flask import request, jsonify
 
-from models.user import User
-from utils.jwt import verifyJWT
+from app.models.user import User
+from app.utils.jwt import verifyJWT
 
 
 def login_required(f):
