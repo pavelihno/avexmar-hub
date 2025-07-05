@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
-from models.passenger import Passenger
-from middlewares.auth_middleware import login_required
+from app.models.passenger import Passenger
+from app.middlewares.auth_middleware import login_required
 
 
 def get_passengers(current_user=None):

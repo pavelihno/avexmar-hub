@@ -7,7 +7,7 @@ class Config:
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 
-    JWT_EXP_HOURS = int(os.environ.get('SERVER_JWT_EXP_HOURS', '72'))
+    JWT_EXP_HOURS = int(os.environ.get('SERVER_JWT_EXP_HOURS'))
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('SERVER_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

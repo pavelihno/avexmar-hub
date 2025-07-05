@@ -1,5 +1,5 @@
-from database import db
-from models._base_model import BaseModel
+from app.database import db
+from app.models._base_model import BaseModel
 
 
 class Route(BaseModel):

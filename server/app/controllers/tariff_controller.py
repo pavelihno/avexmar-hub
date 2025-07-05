@@ -1,8 +1,8 @@
 from flask import request, jsonify
 
-from models.tariff import Tariff
-from models.flight import Flight
-from middlewares.auth_middleware import admin_required
+from app.models.tariff import Tariff
+from app.models.flight import Flight
+from app.middlewares.auth_middleware import admin_required
 
 
 def get_tariffs():

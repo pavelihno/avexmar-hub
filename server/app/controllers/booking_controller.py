@@ -1,8 +1,8 @@
 from flask import request, jsonify
 
-from models.booking import Booking
-from models.flight import Flight
-from middlewares.auth_middleware import login_required
+from app.models.booking import Booking
+from app.models.flight import Flight
+from app.middlewares.auth_middleware import login_required
 
 
 def get_bookings(current_user=None):

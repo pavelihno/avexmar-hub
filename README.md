@@ -21,14 +21,16 @@ flask db migrate -m <migration-message>
 flask db upgrade
 ```
 
-### Run Backend Tests
+### Run Server Tests
 
-Backend tests are written with **pytest**. The test suite relies on environment variables defined in `.example.env` and additional overrides in `server/tests/test.env`.
-Use Docker to execute the tests in an isolated environment:
 
+Run the server:
 ```
-docker-compose run --rm server pytest -q
+docker-compose up -d
 ```
 
-This command installs the required dependencies and executes the tests inside the server container.
+Run all tests:
+```
+docker-compose run --rm server-app pytest -sv tests
+```
 
