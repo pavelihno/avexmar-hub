@@ -2,6 +2,7 @@ from functools import wraps
 
 from flask import request, jsonify
 
+from app.config import Config
 from app.models.user import User
 from app.utils.jwt import verifyJWT
 
@@ -38,7 +39,7 @@ def admin_required(f):
     @wraps(f)
     def decorated(current_user, *args, **kwargs):
 
-        if current_user.role != 'admin':
+        if current_user.role != Config.USER_ROLE.ADMIN:
             return jsonify({'message': 'Access denied'}), 403
 
         return f(current_user, *args, **kwargs)

@@ -2,25 +2,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.config import Config
 
 
 class User(BaseModel):
     __tablename__ = 'users'
 
-    email = db.Column(db.String(), unique=True, index=True, nullable=False)
-    password = db.Column(db.String(), nullable=False)
-    role = db.Column(db.String(), default='standard')
+    email = db.Column(db.String, unique=True, index=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    role = db.Column(db.Enum(Config.USER_ROLE), nullable=False, default=Config.DEFAULT_USER_ROLE)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-
-    __table_args__ = (
-        db.CheckConstraint(role.in_(['admin', 'standard']), name='role_types'),
-    )
 
     def to_dict(self):
         return {
             'id': self.id,
             'email': self.email,
-            'role': self.role,
+            'role': self.role.value,
             'is_active': self.is_active
         }
 
