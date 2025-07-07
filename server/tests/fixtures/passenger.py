@@ -10,10 +10,10 @@ def adult_passenger():
     return Passenger.create(
         first_name='Ivan',
         last_name='Ivanov',
-        document_type=Config.DOCUMENT_TYPE.PASSPORT,
+        document_type=Config.DOCUMENT_TYPE.passport,
         document_number='1234567890',
         birth_date=date(1990, 1, 15),
-        gender=Config.GENDER.М
+        gender=Config.GENDER.м
     )
 
 
@@ -23,10 +23,10 @@ def child_passenger():
     return Passenger.create(
         first_name='Maria',
         last_name='Ivanova',
-        document_type=Config.DOCUMENT_TYPE.BIRTH_CERTIFICATE,
+        document_type=Config.DOCUMENT_TYPE.birth_certificate,
         document_number='0987654321',
         birth_date=date(2018, 5, 10),
-        gender=Config.GENDER.Ж
+        gender=Config.GENDER.ж
     )
 
 
@@ -36,8 +36,8 @@ def infant_passenger():
     return Passenger.create(
         first_name='Alexey',
         last_name='Ivanov',
-        document_type=Config.DOCUMENT_TYPE.BIRTH_CERTIFICATE,
+        document_type=Config.DOCUMENT_TYPE.birth_certificate,
         document_number='1122334455',
         birth_date=date(2023, 8, 20),
-        gender=Config.GENDER.М
+        gender=Config.GENDER.м
     )

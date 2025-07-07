@@ -3,6 +3,11 @@ from app.models._base_model import BaseModel
 from app.config import Config
 
 
+tariff_discount = db.Table('tariff_discount',
+    db.Column('tariff_id', db.Integer, db.ForeignKey('tariffs.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('discount_id', db.Integer, db.ForeignKey('discounts.id', ondelete='CASCADE'), primary_key=True)
+)
+
 class Tariff(BaseModel):
     __tablename__ = 'tariffs'
 
@@ -14,7 +19,7 @@ class Tariff(BaseModel):
     price = db.Column(db.Float, nullable=False)
 
     seats = db.relationship('Seat', backref=db.backref('tariff', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
-    discounts = db.relationship('Discount', backref=db.backref('tariff', lazy=True), lazy='dynamic', cascade='save-update, merge')
+    discounts = db.relationship('Discount', secondary=tariff_discount, backref=db.backref('tariffs', lazy=True), lazy='dynamic', cascade='all, delete')
 
     def to_dict(self):
         return {

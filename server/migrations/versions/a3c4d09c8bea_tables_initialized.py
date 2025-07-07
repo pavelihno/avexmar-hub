@@ -1,8 +1,8 @@
 """Tables initialized
 
-Revision ID: daa58f47a456
+Revision ID: a3c4d09c8bea
 Revises: 
-Create Date: 2025-07-06 15:00:15.982921
+Create Date: 2025-07-07 16:35:12.996029
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'daa58f47a456'
+revision = 'a3c4d09c8bea'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,12 +33,12 @@ def upgrade():
     )
     op.create_table('bookings',
     sa.Column('booking_number', sa.String(), nullable=False),
-    sa.Column('status', sa.Enum('CREATED', 'PENDING_PAYMENT', 'CONFIRMED', 'CANCELLED', name='booking_status'), nullable=False),
+    sa.Column('status', sa.Enum('created', 'pending_payment', 'confirmed', 'cancelled', name='booking_status'), nullable=False),
     sa.Column('email_address', sa.String(), nullable=False),
     sa.Column('phone_number', sa.String(), nullable=False),
     sa.Column('first_name', sa.String(), nullable=False),
     sa.Column('last_name', sa.String(), nullable=False),
-    sa.Column('currency', sa.Enum('RUB', name='currency'), nullable=False),
+    sa.Column('currency', sa.Enum('rub', name='currency'), nullable=False),
     sa.Column('base_price', sa.Float(), nullable=False),
     sa.Column('final_price', sa.Float(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -49,7 +49,7 @@ def upgrade():
     )
     op.create_table('discounts',
     sa.Column('discount_name', sa.String(), nullable=False),
-    sa.Column('discount_type', sa.Enum('ROUND_TRIP', 'INFANT', 'CHILD', name='discount_type'), nullable=False),
+    sa.Column('discount_type', sa.Enum('round_trip', 'infant', 'child', name='discount_type'), nullable=False),
     sa.Column('percentage_value', sa.Float(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -60,10 +60,10 @@ def upgrade():
     op.create_table('passengers',
     sa.Column('first_name', sa.String(), nullable=False),
     sa.Column('last_name', sa.String(), nullable=False),
-    sa.Column('document_type', sa.Enum('PASSPORT', 'FOREIGN_PASSPORT', 'INTERNATIONAL_PASSPORT', 'BIRTH_CERTIFICATE', name='document_type'), nullable=False),
+    sa.Column('document_type', sa.Enum('passport', 'foreign_passport', 'international_passport', 'birth_certificate', name='document_type'), nullable=False),
     sa.Column('document_number', sa.String(), nullable=False),
     sa.Column('birth_date', sa.Date(), nullable=False),
-    sa.Column('gender', sa.Enum('М', 'Ж', name='gender'), nullable=False),
+    sa.Column('gender', sa.Enum('м', 'ж', name='gender'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -74,7 +74,7 @@ def upgrade():
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
-    sa.Column('role', sa.Enum('ADMIN', 'STANDARD', name='user_role'), nullable=False),
+    sa.Column('role', sa.Enum('admin', 'standard', name='user_role'), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -86,8 +86,8 @@ def upgrade():
 
     op.create_table('payments',
     sa.Column('booking_id', sa.Integer(), nullable=False),
-    sa.Column('payment_method', sa.Enum('CARD', 'CASH', name='payment_method'), nullable=False),
-    sa.Column('payment_status', sa.Enum('PENDING', 'PAID', 'REFUNDED', 'FAILED', name='payment_status'), nullable=False),
+    sa.Column('payment_method', sa.Enum('card', 'cash', name='payment_method'), nullable=False),
+    sa.Column('payment_status', sa.Enum('pending', 'paid', 'refunded', 'failed', name='payment_status'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -109,7 +109,7 @@ def upgrade():
     sa.Column('route_id', sa.Integer(), nullable=False),
     sa.Column('scheduled_departure', sa.DateTime(), nullable=True),
     sa.Column('scheduled_arrival', sa.DateTime(), nullable=True),
-    sa.Column('status', sa.Enum('SCHEDULED', 'DELAYED', 'DEPARTED', 'ARRIVED', 'CANCELLED', name='flight_status'), nullable=False),
+    sa.Column('status', sa.Enum('scheduled', 'delayed', 'departed', 'arrived', 'cancelled', name='flight_status'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -118,9 +118,9 @@ def upgrade():
     )
     op.create_table('tariffs',
     sa.Column('flight_id', sa.Integer(), nullable=False),
-    sa.Column('seat_class', sa.Enum('ECONOMY', 'BUSINESS', name='seat_class'), nullable=False),
+    sa.Column('seat_class', sa.Enum('economy', 'business', name='seat_class'), nullable=False),
     sa.Column('seats_number', sa.Integer(), nullable=False),
-    sa.Column('currency', sa.Enum('RUB', name='currency'), nullable=False),
+    sa.Column('currency', sa.Enum('rub', name='currency'), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -139,6 +139,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['tariff_id'], ['tariffs.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('tariff_id', 'seat_number', name='uix_tariff_seat_number')
+    )
+    op.create_table('tariff_discount',
+    sa.Column('tariff_id', sa.Integer(), nullable=False),
+    sa.Column('discount_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['discount_id'], ['discounts.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['tariff_id'], ['tariffs.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('tariff_id', 'discount_id')
     )
     op.create_table('tickets',
     sa.Column('ticket_number', sa.String(length=20), nullable=False),
@@ -165,6 +172,7 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('tickets')
+    op.drop_table('tariff_discount')
     op.drop_table('seats')
     op.drop_table('tariffs')
     op.drop_table('flights')

@@ -9,7 +9,7 @@ def child_discount():
     """Create and return a child discount"""
     return Discount.create(
         discount_name="Child Discount",
-        discount_type=Config.DISCOUNT_TYPE.CHILD,
+        discount_type=Config.DISCOUNT_TYPE.child,
         percentage_value=25.0
     )
 
@@ -19,7 +19,7 @@ def round_trip_discount():
     """Create and return a round trip discount"""
     return Discount.create(
         discount_name="Round Trip Discount",
-        discount_type=Config.DISCOUNT_TYPE.ROUND_TRIP,
+        discount_type=Config.DISCOUNT_TYPE.round_trip,
         percentage_value=15.0
     )
 
@@ -29,6 +29,6 @@ def infant_discount():
     """Create and return an infant discount"""
     return Discount.create(
         discount_name="Infant Discount",
-        discount_type=Config.DISCOUNT_TYPE.INFANT,
+        discount_type=Config.DISCOUNT_TYPE.infant,
         percentage_value=100.0
     )

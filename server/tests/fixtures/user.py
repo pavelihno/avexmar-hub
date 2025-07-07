@@ -10,7 +10,7 @@ def admin_user():
     return User.create(
         email='admin@example.com',
         password='admin',
-        role=Config.USER_ROLE.ADMIN,
+        role=Config.USER_ROLE.admin,
         is_active=True
     )
 
@@ -21,7 +21,7 @@ def standard_user():
     return User.create(
         email='user@example.com',
         password='password',
-        role=Config.USER_ROLE.STANDARD,
+        role=Config.USER_ROLE.standard,
         is_active=True
     )
 
@@ -32,7 +32,7 @@ def inactive_user():
     return User.create(
         email='inactive@example.com',
         password='password',
-        role='standard',
+        role=Config.USER_ROLE.standard,
         is_active=False
     )
 

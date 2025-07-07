@@ -18,57 +18,57 @@ class Config:
 
     # Enum classes
     class USER_ROLE(enum.Enum):
-        ADMIN = 'admin'
-        STANDARD = 'standard'
+        admin = 'admin'
+        standard = 'standard'
 
     class BOOKING_STATUS(enum.Enum):
-        CREATED = 'created'
-        PENDING_PAYMENT = 'pending_payment'
-        CONFIRMED = 'confirmed'
-        CANCELLED = 'cancelled'
+        created = 'created'
+        pending_payment = 'pending_payment'
+        confirmed = 'confirmed'
+        cancelled = 'cancelled'
 
     class DISCOUNT_TYPE(enum.Enum):
-        ROUND_TRIP = 'round_trip'
-        INFANT = 'infant'
-        CHILD = 'child'
+        round_trip = 'round_trip'
+        infant = 'infant'
+        child = 'child'
 
     class GENDER(enum.Enum):
-        М = 'м'
-        Ж = 'ж'
+        м = 'м'
+        ж = 'ж'
 
     class DOCUMENT_TYPE(enum.Enum):
-        PASSPORT = 'passport'
-        FOREIGN_PASSPORT = 'foreign_passport'
-        INTERNATIONAL_PASSPORT = 'international_passport'
-        BIRTH_CERTIFICATE = 'birth_certificate'
+        passport = 'passport'
+        foreign_passport = 'foreign_passport'
+        international_passport = 'international_passport'
+        birth_certificate = 'birth_certificate'
 
     class CURRENCY(enum.Enum):
-        RUB = 'rub'
+        rub = 'rub'
 
     class FLIGHT_STATUS(enum.Enum):
-        SCHEDULED = 'scheduled'
-        DELAYED = 'delayed'
-        DEPARTED = 'departed'
-        ARRIVED = 'arrived'
-        CANCELLED = 'cancelled'
+        scheduled = 'scheduled'
+        delayed = 'delayed'
+        departed = 'departed'
+        arrived = 'arrived'
+        cancelled = 'cancelled'
 
     class SEAT_CLASS(enum.Enum):
-        ECONOMY = 'economy'
-        BUSINESS = 'business'
+        economy = 'economy'
+        business = 'business'
 
     class PAYMENT_STATUS(enum.Enum):
-        PENDING = 'pending'
-        PAID = 'paid'
-        REFUNDED = 'refunded'
-        FAILED = 'failed'
+        pending = 'pending'
+        paid = 'paid'
+        refunded = 'refunded'
+        failed = 'failed'
 
     class PAYMENT_METHOD(enum.Enum):
-        CARD = 'card'
-        CASH = 'cash'
+        card = 'card'
+        cash = 'cash'
 
     # Default variables
-    DEFAULT_USER_ROLE = USER_ROLE.STANDARD
-    DEFAULT_BOOKING_STATUS = BOOKING_STATUS.CREATED
-    DEFAULT_CURRENCY = CURRENCY.RUB
-    DEFAULT_FLIGHT_STATUS = FLIGHT_STATUS.SCHEDULED
-    DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.PENDING
+    DEFAULT_USER_ROLE = USER_ROLE.standard
+    DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
+    DEFAULT_CURRENCY = CURRENCY.rub
+    DEFAULT_FLIGHT_STATUS = FLIGHT_STATUS.scheduled
+    DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending

@@ -8,10 +8,10 @@ def economy_tariff(future_flight):
     """Create and return an economy tariff"""
     return Tariff.create(
         flight_id=future_flight.id,
-        seat_class=Config.SEAT_CLASS.ECONOMY,
+        seat_class=Config.SEAT_CLASS.economy,
         price=15000.0,
         seats_number=180,
-        currency=Config.CURRENCY.RUB
+        currency=Config.CURRENCY.rub
     )
 
 
@@ -20,8 +20,8 @@ def business_tariff(future_flight):
     """Create and return a business tariff"""
     return Tariff.create(
         flight_id=future_flight.id,
-        seat_class=Config.SEAT_CLASS.BUSINESS,
+        seat_class=Config.SEAT_CLASS.business,
         price=45000.0,
         seats_number=20,
-        currency=Config.CURRENCY.RUB
+        currency=Config.CURRENCY.rub
     )

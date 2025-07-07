@@ -39,7 +39,7 @@ def admin_required(f):
     @wraps(f)
     def decorated(current_user, *args, **kwargs):
 
-        if current_user.role != Config.USER_ROLE.ADMIN:
+        if current_user.role != Config.USER_ROLE.admin:
             return jsonify({'message': 'Access denied'}), 403
 
         return f(current_user, *args, **kwargs)
