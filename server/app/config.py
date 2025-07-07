@@ -14,6 +14,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CSRF_ENABLED = True
+    CORS_ORIGINS = os.environ.get('SERVER_CORS_ORIGINS')
 
     # Enum classes
     class USER_ROLE(enum.Enum):
