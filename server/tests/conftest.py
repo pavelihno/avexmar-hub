@@ -10,11 +10,9 @@ from app.app import __create_app
 
 from tests.fixtures import *
 
-# Load base and test environment variables
+# Load environment variables
 ROOT_DIR = Path(__file__).resolve().parents[2]
-# Load environment variables from root directory
 load_dotenv(f'{ROOT_DIR}/.env')
-load_dotenv(Path(__file__).with_name('test.env'), override=True)
 
 # Add server directory to Python path so `app` package can be imported
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -32,9 +30,6 @@ def app():
 
     with app.app_context():
 
-        # Clean existing tables
-        db.drop_all()
-
         # Create new tables
         db.create_all()
 
@@ -42,7 +37,7 @@ def app():
 
         # Clean up after tests
         db.session.remove()
-        # db.drop_all()
+        db.drop_all()
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 import pytest
 from app.models.user import User
 from app.utils.jwt import signJWT
+from app.config import Config
 
 
 @pytest.fixture
@@ -9,7 +10,7 @@ def admin_user():
     return User.create(
         email='admin@example.com',
         password='admin',
-        role='admin',
+        role=Config.USER_ROLE.ADMIN,
         is_active=True
     )
 
@@ -20,7 +21,7 @@ def standard_user():
     return User.create(
         email='user@example.com',
         password='password',
-        role='standard',
+        role=Config.USER_ROLE.STANDARD,
         is_active=True
     )
 
