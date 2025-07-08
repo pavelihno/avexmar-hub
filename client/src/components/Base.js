@@ -8,6 +8,7 @@ import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 
 import Header from './Header';
+import Footer from './Footer';
 
 import { pageTransition } from '../theme/animations';
 
@@ -36,6 +37,7 @@ const Base = ({ children }) => {
 					{children}
 				</motion.div>
 			</Container>
+			<Footer />
 		</Box>
 	);
 };

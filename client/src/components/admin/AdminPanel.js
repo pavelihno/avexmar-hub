@@ -12,6 +12,10 @@ import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
+import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
+import HailIcon from '@mui/icons-material/Hail';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 import Base from '../Base';
 
@@ -36,17 +40,41 @@ const AdminPanel = () => {
 			path: '/admin/discounts',
 		},
 		{
-			title: 'Рейсы и тарифы',
+			title: 'Рейсы',
 			description: 'Управление рейсами и тарифами',
 			icon: <FlightTakeoffIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/flights',
 		},
+        {
+            title: 'Бронирования',
+            description: 'Управление бронированиями',
+            icon: <BookOnlineIcon sx={{ fontSize: 50 }} />,
+            path: '/admin/bookings',
+        },
+        {
+            title: 'Билеты',
+            description: 'Управление билетами',
+            icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
+            path: '/admin/tickets',
+        },
+        {
+            title: 'Пассажиры',
+            description: 'Управление пассажирами',
+            icon: <HailIcon sx={{ fontSize: 50 }} />,
+            path: '/admin/passengers',
+        },
+        {
+            title: 'Пользователи',
+            description: 'Управление пользователями',
+            icon: <ManageAccountsIcon sx={{ fontSize: 50 }} />,
+            path: '/admin/users',
+        }
 	];
 
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h4' sx={{ mb: 4 }}>
+				<Typography variant='h3' sx={{ mb: 4 }}>
 					Панель администратора
 				</Typography>
 
