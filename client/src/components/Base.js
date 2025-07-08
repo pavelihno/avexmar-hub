@@ -1,24 +1,22 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 
-import theme from '../theme';
-import { pageTransition } from '../theme/animations';
 import Header from './Header';
+
+import { pageTransition } from '../theme/animations';
 
 const Base = ({ children }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
 	return (
-		<ThemeProvider theme={theme}>
+		<Box>
 			<CssBaseline />
 			<Container
 				sx={{
@@ -28,7 +26,7 @@ const Base = ({ children }) => {
 				}}
 				maxWidth='lg'
 			>
-				<Header/>
+				<Header />
 				<motion.div
 					initial={pageTransition.initial}
 					animate={pageTransition.animate}
@@ -38,7 +36,7 @@ const Base = ({ children }) => {
 					{children}
 				</motion.div>
 			</Container>
-		</ThemeProvider>
+		</Box>
 	);
 };
 
