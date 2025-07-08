@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Box,
@@ -11,6 +11,7 @@ import {
 	Divider,
 	Alert,
 	Fade,
+	CircularProgress,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
@@ -32,14 +33,9 @@ const Login = ({ isModal = false }) => {
 	});
 
 	const [errors, setErrors] = useState({});
+	const [successMessage, setSuccessMessage] = useState('');
 
 	const { email, password } = formData;
-
-	useEffect(() => {
-		if (isAuth && isModal) {
-			closeAuthModal();
-		}
-	}, [isAuth, closeAuthModal, isModal]);
 
 	const onChange = (e) =>
 		setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,7 +46,10 @@ const Login = ({ isModal = false }) => {
 		dispatch(login(formData))
 			.unwrap()
 			.then(() => {
-				if (isModal) closeAuthModal();
+				setSuccessMessage('Вход выполнен успешно');
+				if (isModal) {
+					setTimeout(() => closeAuthModal(), 1500);
+				}
 			})
 			.catch((res) => setErrors(res));
 	};
@@ -107,68 +106,102 @@ const Login = ({ isModal = false }) => {
 					</Box>
 				</Box>
 
-				{errors.message && (
-					<Alert severity='error' sx={{ mb: 2 }}>
-						{errors.message}
-					</Alert>
+				<Fade in={!!errors.message} timeout={300}>
+					<div>
+						{errors.message && (
+							<Alert severity='error' sx={{ mb: 2 }}>
+								{errors.message}
+							</Alert>
+						)}
+					</div>
+				</Fade>
+
+				<Fade in={!!successMessage} timeout={300}>
+					<div>
+						{successMessage && (
+							<Alert severity='success' sx={{ mb: 2 }}>
+								{successMessage}
+							</Alert>
+						)}
+					</div>
+				</Fade>
+
+				{!successMessage ? (
+					<Box component='form' onSubmit={onSubmit}>
+						<TextField
+							margin='dense'
+							required
+							fullWidth
+							id='email'
+							label='Электронная почта'
+							name='email'
+							autoComplete='email'
+							autoFocus
+							value={email}
+							onChange={onChange}
+							error={!!errors.email}
+							helperText={errors.email ? errors.email : ''}
+						/>
+						<TextField
+							margin='dense'
+							required
+							fullWidth
+							name='password'
+							label='Пароль'
+							type='password'
+							id='password'
+							autoComplete='current-password'
+							value={password}
+							onChange={onChange}
+							error={!!errors.password}
+							helperText={errors.password ? errors.password : ''}
+						/>
+						<Divider sx={{ my: 1 }} />
+						<Button type='submit' fullWidth variant='contained'>
+							Войти
+						</Button>
+					</Box>
+				) : (
+					<Box
+						sx={{
+							height: '160px',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
+						<CircularProgress color='primary' size={40} />
+					</Box>
 				)}
 
-				<Box component='form' onSubmit={onSubmit}>
-					<TextField
-						margin='normal'
-						required
-						fullWidth
-						id='email'
-						label='Электронная почта'
-						name='email'
-						autoComplete='email'
-						autoFocus
-						value={email}
-						onChange={onChange}
-						error={errors.email ? true : false}
-						helperText={errors.email ? errors.email : ''}
-					/>
-					<TextField
-						margin='normal'
-						required
-						fullWidth
-						name='password'
-						label='Пароль'
-						type='password'
-						id='password'
-						autoComplete='current-password'
-						value={password}
-						onChange={onChange}
-						error={errors.password ? true : false}
-						helperText={errors.password ? errors.password : ''}
-					/>
-					<Divider sx={{ my: 1 }} />
-					<Button type='submit' fullWidth variant='contained'>
-						Войти
-					</Button>
-				</Box>
+				{!successMessage && (
+					<>
+						<Divider sx={{ my: 2 }}>или</Divider>
 
-				<Divider sx={{ my: 2 }}>или</Divider>
-
-				<Box sx={{ textAlign: 'center' }}>
-					<Typography variant='body2'>
-						Нет аккаунта?{' '}
-						<Box
-							component='a'
-							href='#'
-							onClick={handleRegisterClick}
-							sx={{
-								color: '#6c63ff',
-								textDecoration: 'none',
-								cursor: 'pointer',
-							}}
-						>
-							<Typography variant='subtitle2' component='span'>
-								Зарегистрироваться
+						<Box sx={{ textAlign: 'center' }}>
+							<Typography variant='body2'>
+								Нет аккаунта?{' '}
+								<Box
+									component='a'
+									href='#'
+									onClick={handleRegisterClick}
+									sx={{
+										color: '#6c63ff',
+										textDecoration: 'none',
+										cursor: 'pointer',
+									}}
+								>
+									<Typography
+										variant='subtitle2'
+										component='span'
+									>
+										Зарегистрироваться
+									</Typography>
+								</Box>
 							</Typography>
 						</Box>
-					</Typography>
-				</Box>
+					</>
+				)}
 			</Paper>
 		</Fade>
 	);

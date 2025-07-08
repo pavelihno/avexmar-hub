@@ -14,6 +14,7 @@ import Alert from '@mui/material/Alert';
 
 import CloseIcon from '@mui/icons-material/Close';
 import LockIcon from '@mui/icons-material/Lock';
+import ConstructionIcon from '@mui/icons-material/Construction';
 
 import { changePassword } from '../../redux/actions/user';
 import { useProfileModal } from '../../context/ProfileModalContext';
@@ -27,7 +28,8 @@ const ProfileModal = () => {
 		newPassword: '',
 		confirmPassword: '',
 	});
-	const [passwordError, setPasswordError] = useState('');
+	const [errors, setErrors] = useState({});
+	const [successMessage, setSuccessMessage] = useState('');
 
 	const handlePasswordChange = (e) => {
 		setPasswordData({
@@ -40,7 +42,7 @@ const ProfileModal = () => {
 		e.preventDefault();
 
 		if (passwordData.newPassword !== passwordData.confirmPassword) {
-			setPasswordError('Пароли не совпадают');
+			setErrors({ confirmPassword: 'Пароли не совпадают' });
 			return;
 		}
 
@@ -52,11 +54,11 @@ const ProfileModal = () => {
 					newPassword: '',
 					confirmPassword: '',
 				});
-				setPasswordError('');
-				closeProfileModal();
+				setErrors({});
+				setSuccessMessage('Пароль успешно изменен');
 			})
-			.catch((error) => {
-				setPasswordError(error.message || 'Ошибка при смене пароля');
+			.catch((res) => {
+				setErrors(res);
 			});
 	};
 
@@ -65,7 +67,7 @@ const ProfileModal = () => {
 			open={profileModalOpen}
 			onClose={closeProfileModal}
 			aria-labelledby='profile-modal-title'
-            closeAfterTransition
+			closeAfterTransition
 			sx={{
 				display: 'flex',
 				alignItems: 'center',
@@ -78,7 +80,7 @@ const ProfileModal = () => {
 					sx={{
 						p: 4,
 						position: 'relative',
-						maxWidth: '400px',
+						maxWidth: '375px',
 						mx: 'auto',
 						outline: 'none',
 					}}
@@ -119,21 +121,44 @@ const ProfileModal = () => {
 						</Box>
 					</Box>
 
-					<Typography variant='body1' align='center' sx={{ mb: 3 }}>
+					<Alert
+						severity='warning'
+						icon={<ConstructionIcon />}
+						sx={{
+							mb: 3,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
 						Скоро здесь будет личный кабинет
-					</Typography>
+					</Alert>
 
 					<Divider sx={{ my: 2 }}>Сменить пароль</Divider>
 
-					{passwordError && (
-						<Alert severity='error' sx={{ mb: 2 }}>
-							{passwordError}
-						</Alert>
-					)}
+					<Fade in={!!errors.message} timeout={300}>
+						<div>
+							{errors.message && (
+								<Alert severity='error' sx={{ mb: 2 }}>
+									{errors.message}
+								</Alert>
+							)}
+						</div>
+					</Fade>
+
+					<Fade in={!!successMessage} timeout={300}>
+						<div>
+							{successMessage && (
+								<Alert severity='success' sx={{ mb: 2 }}>
+									{successMessage}
+								</Alert>
+							)}
+						</div>
+					</Fade>
 
 					<Box component='form' onSubmit={handleSubmitPasswordChange}>
 						<TextField
-							margin='normal'
+							margin='dense'
 							required
 							fullWidth
 							name='oldPassword'
@@ -142,9 +167,13 @@ const ProfileModal = () => {
 							id='oldPassword'
 							value={passwordData.oldPassword}
 							onChange={handlePasswordChange}
+							error={!!errors.oldPassword}
+							helperText={
+								errors.oldPassword ? errors.oldPassword : ''
+							}
 						/>
 						<TextField
-							margin='normal'
+							margin='dense'
 							required
 							fullWidth
 							name='newPassword'
@@ -153,9 +182,13 @@ const ProfileModal = () => {
 							id='newPassword'
 							value={passwordData.newPassword}
 							onChange={handlePasswordChange}
+							error={!!errors.newPassword}
+							helperText={
+								errors.newPassword ? errors.newPassword : ''
+							}
 						/>
 						<TextField
-							margin='normal'
+							margin='dense'
 							required
 							fullWidth
 							name='confirmPassword'
@@ -164,6 +197,12 @@ const ProfileModal = () => {
 							id='confirmPassword'
 							value={passwordData.confirmPassword}
 							onChange={handlePasswordChange}
+							error={!!errors.confirmPassword}
+							helperText={
+								errors.confirmPassword
+									? errors.confirmPassword
+									: ''
+							}
 						/>
 
 						<Divider sx={{ my: 2 }} />
