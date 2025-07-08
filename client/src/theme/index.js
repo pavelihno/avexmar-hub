@@ -21,11 +21,7 @@ const theme = createTheme({
 		easing: {
 			easeInOut: 'ease-in-out',
 		},
-	},
-	shadows: [
-		'none',
-		'0 2px 6px rgba(0,0,0,.08)', // shadow-elev1
-	],
+	}
 });
 
 export default theme;
