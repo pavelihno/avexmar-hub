@@ -8,51 +8,49 @@ import AdminPanel from '../components/admin/AdminPanel';
 
 import ProtectedRoute from './ProtectedRoute';
 
-const AdminRoutes = ({ isAdmin }) => {
-	return [
-		{
-			path: '/admin',
-			element: (
-				<ProtectedRoute children={<AdminPanel />} condition={isAdmin} />
-			),
-		},
-		// {
-		// 	path: '/admin/airports',
-		// 	element: (
-		// 		<ProtectedRoute
-		// 			children={<AirportManagement />}
-		// 			condition={isAdmin}
-		// 		/>
-		// 	),
-		// },
-		// {
-		// 	path: '/admin/routes',
-		// 	element: (
-		// 		<ProtectedRoute
-		// 			children={<RouteManagement />}
-		// 			condition={isAdmin}
-		// 		/>
-		// 	),
-		// },
-		// {
-		// 	path: '/admin/discounts',
-		// 	element: (
-		// 		<ProtectedRoute
-		// 			children={<DiscountManagement />}
-		// 			condition={isAdmin}
-		// 		/>
-		// 	),
-		// },
-		// {
-		// 	path: '/admin/flights',
-		// 	element: (
-		// 		<ProtectedRoute
-		// 			children={<FlightManagement />}
-		// 			condition={isAdmin}
-		// 		/>
-		// 	),
-		// },
-	];
-};
+const AdminRoutes = ({ isAdmin }) => [
+	{
+		path: '/admin',
+		element: (
+			<ProtectedRoute children={<AdminPanel />} condition={isAdmin} />
+		),
+	},
+	// {
+	// 	path: '/admin/airports',
+	// 	element: (
+	// 		<ProtectedRoute
+	// 			children={<AirportManagement />}
+	// 			condition={isAdmin}
+	// 		/>
+	// 	),
+	// },
+	// {
+	// 	path: '/admin/routes',
+	// 	element: (
+	// 		<ProtectedRoute
+	// 			children={<RouteManagement />}
+	// 			condition={isAdmin}
+	// 		/>
+	// 	),
+	// },
+	// {
+	// 	path: '/admin/discounts',
+	// 	element: (
+	// 		<ProtectedRoute
+	// 			children={<DiscountManagement />}
+	// 			condition={isAdmin}
+	// 		/>
+	// 	),
+	// },
+	// {
+	// 	path: '/admin/flights',
+	// 	element: (
+	// 		<ProtectedRoute
+	// 			children={<FlightManagement />}
+	// 			condition={isAdmin}
+	// 		/>
+	// 	),
+	// },
+];
 
 export default AdminRoutes;

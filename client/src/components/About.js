@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	Typography,
 	Grid,
@@ -7,11 +7,23 @@ import {
 	Paper,
 	Link,
 	Avatar,
+	IconButton,
+	Tooltip,
+	Snackbar,
 } from '@mui/material';
-import { LocationOn, Phone, Email, ArrowForward } from '@mui/icons-material';
+import {
+	LocationOn,
+	Phone,
+	Email,
+	ArrowForward,
+	ContentCopy,
+} from '@mui/icons-material';
 import Base from './Base';
 
 const About = () => {
+	const [snackbarOpen, setSnackbarOpen] = useState(false);
+	const [snackbarMessage, setSnackbarMessage] = useState('');
+
 	const cardsData = [
 		{
 			icon: 'images/icons/business.svg',
@@ -45,16 +57,32 @@ const About = () => {
 	const companyName = process.env.REACT_APP_COMPANY_NAME;
 	const foundingYear = process.env.REACT_APP_COMPANY_YEAR;
 
+	const handleCopy = (text, type) => {
+		navigator.clipboard
+			.writeText(text)
+			.then(() => {
+				setSnackbarMessage(`${type} скопирован`);
+				setSnackbarOpen(true);
+			})
+			.catch((err) => {
+				console.error('Ошибка при копировании: ', err);
+			});
+	};
+
+	const handleCloseSnackbar = () => {
+		setSnackbarOpen(false);
+	};
+
 	return (
 		<Base>
 			<Container maxWidth='lg' sx={{ py: 4 }}>
 				<Box mb={4} textAlign='center'>
 					<Typography variant='h4' component='h1' gutterBottom>
-                        {companyName}
+						{companyName}
 					</Typography>
 					<Typography variant='subtitle1' color='text.secondary'>
-						Надежный партнер в сфере организации
-						пассажирских и грузовых авиаперевозок с {foundingYear} года
+						Надежный партнер в сфере организации пассажирских и
+						грузовых авиаперевозок с {foundingYear} года
 					</Typography>
 				</Box>
 
@@ -141,16 +169,45 @@ const About = () => {
 								}}
 							>
 								<LocationOn color='primary' sx={{ mr: 2 }} />
-								<Box>
+								<Box sx={{ flexGrow: 1 }}>
 									<Typography
 										variant='subtitle2'
 										color='text.secondary'
 									>
 										Адрес
 									</Typography>
-									<Typography variant='body2'>
-										{contactInfo.address}
-									</Typography>
+									<Box
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+										}}
+									>
+										<Typography
+											variant='body2'
+											sx={{ mr: 1 }}
+										>
+											{contactInfo.address}
+										</Typography>
+										<Tooltip title='Копировать'>
+											<IconButton
+												size='small'
+												onClick={() =>
+													handleCopy(
+														contactInfo.address,
+														'Адрес'
+													)
+												}
+												aria-label='копировать адрес'
+											>
+												<ContentCopy
+													fontSize='small'
+													sx={{
+														color: 'text.secondary',
+													}}
+												/>
+											</IconButton>
+										</Tooltip>
+									</Box>
 								</Box>
 							</Grid>
 							<Grid
@@ -164,16 +221,54 @@ const About = () => {
 								}}
 							>
 								<Phone color='primary' sx={{ mr: 2 }} />
-								<Box>
+								<Box sx={{ flexGrow: 1 }}>
 									<Typography
 										variant='subtitle2'
 										color='text.secondary'
 									>
 										Телефон
 									</Typography>
-									<Typography variant='body2'>
-										{contactInfo.phone}
-									</Typography>
+									<Box
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+										}}
+									>
+										<Link
+											href={`tel:${contactInfo.phone}`}
+											variant='body2'
+											sx={{
+												mr: 1,
+												textDecoration: 'none',
+												color: 'text.primary',
+												'&:hover': {
+													textDecoration: 'underline',
+													color: 'primary.main',
+												},
+											}}
+										>
+											{contactInfo.phone}
+										</Link>
+										<Tooltip title='Копировать'>
+											<IconButton
+												size='small'
+												onClick={() =>
+													handleCopy(
+														contactInfo.phone,
+														'Телефон'
+													)
+												}
+												aria-label='копировать телефон'
+											>
+												<ContentCopy
+													fontSize='small'
+													sx={{
+														color: 'text.secondary',
+													}}
+												/>
+											</IconButton>
+										</Tooltip>
+									</Box>
 								</Box>
 							</Grid>
 							<Grid
@@ -187,16 +282,54 @@ const About = () => {
 								}}
 							>
 								<Email color='primary' sx={{ mr: 2 }} />
-								<Box>
+								<Box sx={{ flexGrow: 1 }}>
 									<Typography
 										variant='subtitle2'
 										color='text.secondary'
 									>
 										Электронная почта
 									</Typography>
-									<Typography variant='body2'>
-										{contactInfo.email}
-									</Typography>
+									<Box
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+										}}
+									>
+										<Link
+											href={`mailto:${contactInfo.email}`}
+											variant='body2'
+											sx={{
+												mr: 1,
+												textDecoration: 'none',
+												color: 'text.primary',
+												'&:hover': {
+													textDecoration: 'underline',
+													color: 'primary.main',
+												},
+											}}
+										>
+											{contactInfo.email}
+										</Link>
+										<Tooltip title='Копировать'>
+											<IconButton
+												size='small'
+												onClick={() =>
+													handleCopy(
+														contactInfo.email,
+														'Адрес электронной почты'
+													)
+												}
+												aria-label='копировать адрес электронной почты'
+											>
+												<ContentCopy
+													fontSize='small'
+													sx={{
+														color: 'text.secondary',
+													}}
+												/>
+											</IconButton>
+										</Tooltip>
+									</Box>
 								</Box>
 							</Grid>
 						</Grid>
@@ -265,6 +398,14 @@ const About = () => {
 						</Grid>
 					</Paper>
 				</Box>
+
+				<Snackbar
+					open={snackbarOpen}
+					autoHideDuration={2000}
+					onClose={handleCloseSnackbar}
+					message={snackbarMessage}
+					anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+				/>
 			</Container>
 		</Base>
 	);

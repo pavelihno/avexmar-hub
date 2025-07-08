@@ -33,25 +33,23 @@ function App() {
 		initAuth();
 	}, [dispatch]);
 
-	const routes = isLoading
-		? []
-		: [...PublicRoutes(), ...AdminRoutes({ isAdmin })];
+	const routes = [...PublicRoutes(), ...AdminRoutes({ isAdmin })];
 	const routing = useRoutes(routes);
 
 	// Show loading indicator while authenticating
 	if (isLoading) {
 		return (
-            <ThemeProvider theme={theme}>
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    minHeight="100vh"
-                >
-                    <CircularProgress color="primary" size={60} />
-                </Box>
-            </ThemeProvider>
-        );
+			<ThemeProvider theme={theme}>
+				<Box
+					display='flex'
+					justifyContent='center'
+					alignItems='center'
+					minHeight='100vh'
+				>
+					<CircularProgress color='primary' size={60} />
+				</Box>
+			</ThemeProvider>
+		);
 	}
 
 	return (
