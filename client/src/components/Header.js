@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
+import { useAuthModal } from '../context/AuthModalContext';
+
 const Header = () => {
+	const { openLoginModal, openRegisterModal } = useAuthModal();
+
 	return (
 		<Box
 			component='header'
@@ -36,18 +40,26 @@ const Header = () => {
 				</Typography>
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-				<Link
-					to='/login'
-					style={{ textDecoration: 'none', color: 'inherit' }}
+				<Box
+					onClick={openLoginModal}
+					sx={{
+						cursor: 'pointer',
+						textDecoration: 'none',
+						color: 'inherit',
+					}}
 				>
 					<Typography variant='body1'>Войти</Typography>
-				</Link>
-				<Link
-					to='/register'
-					style={{ textDecoration: 'none', color: 'inherit' }}
+				</Box>
+				<Box
+					onClick={openRegisterModal}
+					sx={{
+						cursor: 'pointer',
+						textDecoration: 'none',
+						color: 'inherit',
+					}}
 				>
 					<Typography variant='body1'>Зарегистрироваться</Typography>
-				</Link>
+				</Box>
 			</Box>
 		</Box>
 	);

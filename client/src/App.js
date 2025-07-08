@@ -3,9 +3,10 @@ import { useDispatch } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 
+import { AuthModalProvider } from './context/AuthModalContext';
+
 import Home from './components/Home';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
+import AuthModal from './components/auth/AuthModal';
 
 import theme from './theme';
 import { auth } from './redux/actions/auth';
@@ -19,11 +20,12 @@ function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Routes>
-				<Route path='/' element={<Home />} />
-				<Route path='/login' element={<Login />} />
-				<Route path='/register' element={<Register />} />
-			</Routes>
+			<AuthModalProvider>
+				<Routes>
+					<Route path='/' element={<Home />} />
+				</Routes>
+				<AuthModal />
+			</AuthModalProvider>
 		</ThemeProvider>
 	);
 }
