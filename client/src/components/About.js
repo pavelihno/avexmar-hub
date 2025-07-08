@@ -199,12 +199,7 @@ const About = () => {
 												}
 												aria-label='копировать адрес'
 											>
-												<ContentCopy
-													fontSize='small'
-													sx={{
-														color: 'text.secondary',
-													}}
-												/>
+												<ContentCopy fontSize='small' />
 											</IconButton>
 										</Tooltip>
 									</Box>
@@ -260,12 +255,7 @@ const About = () => {
 												}
 												aria-label='копировать телефон'
 											>
-												<ContentCopy
-													fontSize='small'
-													sx={{
-														color: 'text.secondary',
-													}}
-												/>
+												<ContentCopy fontSize='small' />
 											</IconButton>
 										</Tooltip>
 									</Box>
@@ -321,12 +311,7 @@ const About = () => {
 												}
 												aria-label='копировать адрес электронной почты'
 											>
-												<ContentCopy
-													fontSize='small'
-													sx={{
-														color: 'text.secondary',
-													}}
-												/>
+												<ContentCopy fontSize='small' />
 											</IconButton>
 										</Tooltip>
 									</Box>

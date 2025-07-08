@@ -13,7 +13,7 @@ const palette = {
 		contrastText: '#FFFFFF',
 	},
 	action: {
-		active: '#FF6F00', // orange
+		active: '#717280', // gray
 		hover: 'rgba(0, 132, 255, 0.08)',
 		selected: 'rgba(0, 132, 255, 0.16)',
 	},
