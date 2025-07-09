@@ -35,7 +35,7 @@ const AdminDataTable = ({
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
-	const handleOpenDialog = (item = null) => {
+	const handleOpenDialog = (item) => {
 		setCurrentItem(item);
 		setIsEditing(!!item);
 		setOpenDialog(true);
@@ -51,7 +51,6 @@ const AdminDataTable = ({
 		} else {
 			onAdd(formData);
 		}
-		setOpenDialog(false);
 	};
 
 	return (
@@ -81,11 +80,17 @@ const AdminDataTable = ({
 									<TableCell
 										key={index}
 										align={column.align || 'left'}
+										sx={{ fontWeight: 'bold' }}
 									>
 										{column.header}
 									</TableCell>
 								))}
-								<TableCell align='right'>Действия</TableCell>
+								<TableCell
+									align='right'
+									sx={{ fontWeight: 'bold' }}
+								>
+									Действия
+								</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
