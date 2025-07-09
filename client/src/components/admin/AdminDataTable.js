@@ -155,6 +155,10 @@ const AdminDataTable = ({
 										>
 											{column.render
 												? column.render(item)
+												: column.formatter
+												? column.formatter(
+														item[column.field]
+												  )
 												: item[column.field]}
 										</TableCell>
 									))}

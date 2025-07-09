@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TextField } from '@mui/material';
-
 import AdminDataTable from '../../components/admin/AdminDataTable';
-import AdminEntityForm from '../../components/admin/AdminEntityForm';
 
 import {
 	fetchAirports,
@@ -12,10 +9,10 @@ import {
 	updateAirport,
 	deleteAirport,
 } from '../../redux/actions/airport';
+import { FIELD_TYPES, createAdminManager } from './utils';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
-
 	const { airports, isLoading, errors } = useSelector(
 		(state) => state.airports
 	);
@@ -24,131 +21,80 @@ const AirportManagement = () => {
 		dispatch(fetchAirports());
 	}, [dispatch]);
 
-	const handleAddAirport = (airportData) => {
-		const formattedData = {
-			iata_code: airportData.iata_code,
-			icao_code: airportData.icao_code,
-			name: airportData.name,
-			city_code: airportData.city,
-			country_code: airportData.country,
-		};
+	const FIELDS = {
+		id: { key: 'id', apiKey: 'id' },
+		name: {
+			key: 'name',
+			apiKey: 'name',
+			label: 'Название аэропорта',
+			type: FIELD_TYPES.TEXT,
+			fullWidth: true,
+		},
+		iataCode: {
+			key: 'iata_code',
+			apiKey: 'iata_code',
+			label: 'Код IATA',
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				!value
+					? 'IATA код обязателен'
+					: value.length !== 3
+					? 'IATA код должен содержать 3 символа'
+					: null,
+			inputProps: { maxLength: 3 },
+		},
+		icaoCode: {
+			key: 'icao_code',
+			apiKey: 'icao_code',
+			label: 'Код ICAO',
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				value && value.length !== 4
+					? 'ICAO код должен содержать 4 символа'
+					: null,
+			inputProps: { maxLength: 4 },
+		},
+		city: {
+			key: 'city',
+			apiKey: 'city_code',
+			label: 'Код города',
+			type: FIELD_TYPES.TEXT,
+		},
+		country: {
+			key: 'country',
+			apiKey: 'country_code',
+			label: 'Код страны',
+			type: FIELD_TYPES.TEXT,
+		},
+	};
 
-		dispatch(createAirport(formattedData));
+	const adminManager = createAdminManager(FIELDS, {
+		entityTitle: 'аэропорт',
+	});
+
+	const handleAddAirport = (airportData) => {
+		dispatch(createAirport(adminManager.toApiFormat(airportData)));
 	};
 
 	const handleEditAirport = (airportData) => {
-		const formattedData = {
-			id: airportData.id,
-			iata_code: airportData.iata_code,
-			icao_code: airportData.icao_code,
-			name: airportData.name,
-			city_code: airportData.city,
-			country_code: airportData.country,
-		};
-
-		dispatch(updateAirport(formattedData));
+		dispatch(updateAirport(adminManager.toApiFormat(airportData)));
 	};
 
 	const handleDeleteAirport = (id) => {
-        return dispatch(deleteAirport(id));
-    };
+		return dispatch(deleteAirport(id));
+	};
 
-	const formattedAirports = airports.map((airport) => ({
-		id: airport.id,
-		iata_code: airport.iata_code,
-		icao_code: airport.icao_code,
-		name: airport.name,
-		city: airport.city_code,
-		country: airport.country_code,
-	}));
-
-	const columns = [
-		{ field: 'name', header: 'Название аэропорта' },
-		{ field: 'iata_code', header: 'Код IATA' },
-		{ field: 'icao_code', header: 'Код ICAO' },
-		{ field: 'city', header: 'Код города' },
-		{ field: 'country', header: 'Код страны' },
-	];
-
-	const formFields = [
-		{
-			name: 'name',
-			renderField: (props) => (
-				<TextField
-					label='Название аэропорта'
-					value={props.value}
-					onChange={(e) => props.onChange(e.target.value)}
-					fullWidth={props.fullWidth}
-				/>
-			),
-			fullWidth: true,
-		},
-		{
-			name: 'iata_code',
-			renderField: (props) => (
-				<TextField
-					label='Код IATA'
-					value={props.value}
-					onChange={(e) => props.onChange(e.target.value)}
-					fullWidth={props.fullWidth}
-				/>
-			),
-		},
-		{
-			name: 'icao_code',
-			renderField: (props) => (
-				<TextField
-					label='Код ICAO'
-					value={props.value}
-					onChange={(e) => props.onChange(e.target.value)}
-					fullWidth={props.fullWidth}
-				/>
-			),
-		},
-		{
-			name: 'city',
-			renderField: (props) => (
-				<TextField
-					label='Код города'
-					value={props.value}
-					onChange={(e) => props.onChange(e.target.value)}
-					fullWidth={props.fullWidth}
-				/>
-			),
-		},
-		{
-			name: 'country',
-			renderField: (props) => (
-				<TextField
-					label='Код страны'
-					value={props.value}
-					onChange={(e) => props.onChange(e.target.value)}
-					fullWidth={props.fullWidth}
-				/>
-			),
-		},
-	];
-
-	const renderForm = ({ isEditing, currentItem, onClose, onSave }) => (
-		<AdminEntityForm
-			title='аэропорт'
-			fields={formFields}
-			initialData={currentItem}
-			onSave={onSave}
-			onClose={onClose}
-			isEditing={isEditing}
-		/>
-	);
+	const formattedAirports = airports.map(adminManager.toUiFormat);
 
 	return (
 		<AdminDataTable
 			title='Управление аэропортами'
 			data={formattedAirports}
-			columns={columns}
+			columns={adminManager.columns}
 			onAdd={handleAddAirport}
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
-			renderForm={renderForm}
+			renderForm={adminManager.renderForm}
 			addButtonText='Добавить аэропорт'
 			isLoading={isLoading}
 			error={errors}
