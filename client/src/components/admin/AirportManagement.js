@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import {
-	DialogTitle,
-	DialogContent,
-	DialogActions,
-	TextField,
-	Button,
-} from '@mui/material';
+import { TextField } from '@mui/material';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminEntityForm from '../../components/admin/AdminEntityForm';
 
 import {
 	fetchAirports,
@@ -20,6 +15,7 @@ import {
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
+
 	const { airports, isLoading, errors } = useSelector(
 		(state) => state.airports
 	);
@@ -54,8 +50,8 @@ const AirportManagement = () => {
 	};
 
 	const handleDeleteAirport = (id) => {
-		dispatch(deleteAirport(id));
-	};
+        return dispatch(deleteAirport(id));
+    };
 
 	const formattedAirports = airports.map((airport) => ({
 		id: airport.id,
@@ -74,84 +70,75 @@ const AirportManagement = () => {
 		{ field: 'country', header: 'Код страны' },
 	];
 
-	const renderForm = ({ isEditing, currentItem, onClose, onSave }) => {
-		const [formData, setFormData] = useState(
-			isEditing
-				? { ...currentItem }
-				: {
-						iata_code: '',
-						icao_code: '',
-						name: '',
-						city: '',
-						country: '',
-				  }
-		);
+	const formFields = [
+		{
+			name: 'name',
+			renderField: (props) => (
+				<TextField
+					label='Название аэропорта'
+					value={props.value}
+					onChange={(e) => props.onChange(e.target.value)}
+					fullWidth={props.fullWidth}
+				/>
+			),
+			fullWidth: true,
+		},
+		{
+			name: 'iata_code',
+			renderField: (props) => (
+				<TextField
+					label='Код IATA'
+					value={props.value}
+					onChange={(e) => props.onChange(e.target.value)}
+					fullWidth={props.fullWidth}
+				/>
+			),
+		},
+		{
+			name: 'icao_code',
+			renderField: (props) => (
+				<TextField
+					label='Код ICAO'
+					value={props.value}
+					onChange={(e) => props.onChange(e.target.value)}
+					fullWidth={props.fullWidth}
+				/>
+			),
+		},
+		{
+			name: 'city',
+			renderField: (props) => (
+				<TextField
+					label='Код города'
+					value={props.value}
+					onChange={(e) => props.onChange(e.target.value)}
+					fullWidth={props.fullWidth}
+				/>
+			),
+		},
+		{
+			name: 'country',
+			renderField: (props) => (
+				<TextField
+					label='Код страны'
+					value={props.value}
+					onChange={(e) => props.onChange(e.target.value)}
+					fullWidth={props.fullWidth}
+				/>
+			),
+		},
+	];
 
-		const handleInputChange = (e) => {
-			const { name, value } = e.target;
-			setFormData({ ...formData, [name]: value });
-		};
-
-		const handleSubmit = () => {
-			onSave(formData);
-			onClose();
-		};
-
-		return (
-			<>
-				<DialogTitle>
-					{isEditing ? 'Редактировать аэропорт' : 'Добавить аэропорт'}
-				</DialogTitle>
-				<DialogContent>
-					<TextField
-						autoFocus
-						margin='dense'
-						name='iata_code'
-						label='Код IATA'
-						fullWidth
-						value={formData.iata_code}
-						onChange={handleInputChange}
-					/>
-					<TextField
-						margin='dense'
-						name='icao_code'
-						label='Код ICAO'
-						fullWidth
-						value={formData.icao_code}
-						onChange={handleInputChange}
-					/>
-					<TextField
-						margin='dense'
-						name='name'
-						label='Название аэропорта'
-						fullWidth
-						value={formData.name}
-						onChange={handleInputChange}
-					/>
-					<TextField
-						margin='dense'
-						name='city'
-						label='Код города'
-						fullWidth
-						value={formData.city}
-						onChange={handleInputChange}
-					/>
-					<TextField
-						margin='dense'
-						name='country'
-						label='Код страны'
-						fullWidth
-						value={formData.country}
-						onChange={handleInputChange}
-					/>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={onClose}>Отмена</Button>
-					<Button onClick={handleSubmit}>Сохранить</Button>
-				</DialogActions>
-			</>
-		);
-	};
+	const renderForm = ({ isEditing, currentItem, onClose, onSave }) => (
+		<AdminEntityForm
+			title='аэропорт'
+			fields={formFields}
+			initialData={currentItem}
+			onSave={onSave}
+			onClose={onClose}
+			isEditing={isEditing}
+		/>
+	);
 
 	return (
 		<AdminDataTable
