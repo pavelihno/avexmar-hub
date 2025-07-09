@@ -4,6 +4,8 @@ import { thunk } from 'redux-thunk';
 import authReducer from './reducers/auth';
 import airportReducer from './reducers/airport';
 import routesReducer from './reducers/route';
+import discountReducer from './reducers/discount';
+import userReducer from './reducers/user';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -11,6 +13,8 @@ const rootReducer = combineReducers({
 	auth: authReducer,
 	airports: airportReducer,
 	routes: routesReducer,
+	discounts: discountReducer,
+	users: userReducer,
 });
 
 const store = createStore(

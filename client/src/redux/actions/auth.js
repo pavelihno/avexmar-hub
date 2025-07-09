@@ -34,15 +34,18 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', () => {
 	setAuthToken(false);
-	setCurrentUser(null);
+	return null;
 });
 
-export const auth = createAsyncThunk('auth', async (_, { rejectWithValue }) => {
-    try {
-        const res = await serverApi.get('/auth');
-        return res.data;
-    } catch (err) {
-        setAuthToken(false);
-        return rejectWithValue(getErrorData(err));
-    }
-});
+export const auth = createAsyncThunk(
+	'auth/verify',
+	async (_, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get('/auth');
+			return res.data;
+		} catch (err) {
+			setAuthToken(false);
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);

@@ -3,14 +3,14 @@ from flask import request, jsonify
 from app.models.user import User
 from app.utils.jwt import signJWT
 from app.middlewares.auth_middleware import login_required
-
+from app.config import Config
 
 def register():
     body = request.json
     new_user = User.create(**{
         'email': body.get('email', ''),
         'password': body.get('password', ''),
-        'role': 'standard',
+        'role': Config.DEFAULT_USER_ROLE,
         'is_active': True
     })
     if new_user:

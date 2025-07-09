@@ -1,17 +1,35 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
+import { createCrudActions, getErrorData } from '../utils';
 import { serverApi } from '../../api';
-import { getErrorData } from '../utils';
 
-export const changePassword = createAsyncThunk(
-	'user/changePassword',
+const {
+	fetchAll: fetchUsers,
+	fetchOne: fetchUser,
+	create: createUser,
+	update: updateUser,
+	remove: deleteUser,
+} = createCrudActions('users');
+
+const changePassword = createAsyncThunk(
+	'users/changePassword',
 	async (password, { rejectWithValue }) => {
 		try {
-			const res = await serverApi.put('/users/change-password', { password });
-			const user = res.data;
-			return user;
+			const res = await serverApi.put('/users/change_password', {
+				password,
+			});
+			return res.data;
 		} catch (err) {
 			return rejectWithValue(getErrorData(err));
 		}
 	}
 );
+
+export {
+	fetchUsers,
+	fetchUser,
+	createUser,
+	updateUser,
+	deleteUser,
+	changePassword,
+};
