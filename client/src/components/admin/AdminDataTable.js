@@ -14,6 +14,8 @@ import {
 	Paper,
 	IconButton,
 	Dialog,
+	Snackbar,
+	Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -30,12 +32,19 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
+	addButtonText = 'Добавить',
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
-	const handleOpenDialog = (item = null) => {
+	const [notification, setNotification] = useState({
+		open: false,
+		message: '',
+		severity: 'success',
+	});
+
+	const handleOpenDialog = (item) => {
 		setCurrentItem(item);
 		setIsEditing(!!item);
 		setOpenDialog(true);
@@ -46,12 +55,54 @@ const AdminDataTable = ({
 	};
 
 	const handleSave = (formData) => {
-		if (isEditing) {
-			onEdit(formData);
-		} else {
-			onAdd(formData);
+		try {
+			if (isEditing) {
+				onEdit(formData);
+			} else {
+				onAdd(formData);
+			}
+		} catch (error) {
+			showNotification(error.message || 'Ошибка при сохранении', 'error');
 		}
-		setOpenDialog(false);
+	};
+
+	const handleDelete = (id) => {
+		try {
+			const result = onDelete(id);
+
+			result
+				.then(() => {
+					showNotification('Запись успешно удалена', 'success');
+				})
+				.catch((error) => {
+					showNotification(
+						`Ошибка: ${
+							error.message || 'Не удалось удалить запись'
+						}`,
+						'error'
+					);
+				});
+		} catch (error) {
+			showNotification(
+				`Ошибка: ${error.message || 'Не удалось удалить запись'}`,
+				'error'
+			);
+		}
+	};
+
+	const showNotification = (message, severity = 'success') => {
+		setNotification({
+			open: true,
+			message,
+			severity,
+		});
+	};
+
+	const handleCloseNotification = () => {
+		setNotification({
+			...notification,
+			open: false,
+		});
 	};
 
 	return (
@@ -70,7 +121,7 @@ const AdminDataTable = ({
 					onClick={() => handleOpenDialog()}
 					sx={{ mb: 3 }}
 				>
-					Добавить
+					{addButtonText}
 				</Button>
 
 				<TableContainer component={Paper}>
@@ -81,11 +132,17 @@ const AdminDataTable = ({
 									<TableCell
 										key={index}
 										align={column.align || 'left'}
+										sx={{ fontWeight: 'bold' }}
 									>
 										{column.header}
 									</TableCell>
 								))}
-								<TableCell align='right'>Действия</TableCell>
+								<TableCell
+									align='right'
+									sx={{ fontWeight: 'bold' }}
+								>
+									Действия
+								</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
@@ -98,6 +155,10 @@ const AdminDataTable = ({
 										>
 											{column.render
 												? column.render(item)
+												: column.formatter
+												? column.formatter(
+														item[column.field]
+												  )
 												: item[column.field]}
 										</TableCell>
 									))}
@@ -110,7 +171,9 @@ const AdminDataTable = ({
 											<EditIcon />
 										</IconButton>
 										<IconButton
-											onClick={() => onDelete(item.id)}
+											onClick={() =>
+												handleDelete(item.id)
+											}
 										>
 											<DeleteIcon />
 										</IconButton>
@@ -134,6 +197,21 @@ const AdminDataTable = ({
 						onSave: handleSave,
 					})}
 				</Dialog>
+
+				<Snackbar
+					open={notification.open}
+					autoHideDuration={4000}
+					onClose={handleCloseNotification}
+					anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+				>
+					<Alert
+						onClose={handleCloseNotification}
+						severity={notification.severity}
+						sx={{ width: '100%' }}
+					>
+						{notification.message}
+					</Alert>
+				</Snackbar>
 			</Box>
 		</Base>
 	);

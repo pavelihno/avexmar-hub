@@ -5,6 +5,9 @@ import {
 	DialogActions,
 	Button,
 	Grid,
+	Alert,
+	Fade,
+	Box,
 } from '@mui/material';
 
 const AdminEntityForm = ({
@@ -16,6 +19,8 @@ const AdminEntityForm = ({
 	isEditing,
 }) => {
 	const [formData, setFormData] = useState(initialData || {});
+	const [successMessage, setSuccessMessage] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
 
 	useEffect(() => {
 		setFormData(initialData || {});
@@ -26,7 +31,22 @@ const AdminEntityForm = ({
 	};
 
 	const handleSubmit = () => {
-		onSave(formData);
+		try {
+			onSave(formData);
+			setSuccessMessage(
+				isEditing
+					? 'Данные успешно обновлены'
+					: 'Запись успешно добавлена'
+			);
+			setErrorMessage('');
+
+			if (!isEditing) {
+				setTimeout(() => onClose(), 1000);
+			}
+		} catch (error) {
+			setErrorMessage(error);
+			setSuccessMessage('');
+		}
 	};
 
 	return (
@@ -34,6 +54,29 @@ const AdminEntityForm = ({
 			<DialogTitle>
 				{isEditing ? `Редактировать ${title}` : `Добавить ${title}`}
 			</DialogTitle>
+
+			<Box sx={{ px: 3 }}>
+				<Fade in={!!errorMessage} timeout={300}>
+					<div>
+						{errorMessage && (
+							<Alert severity='error'>
+								{errorMessage}
+							</Alert>
+						)}
+					</div>
+				</Fade>
+
+				<Fade in={!!successMessage} timeout={300}>
+					<div>
+						{successMessage && (
+							<Alert severity='success'>
+								{successMessage}
+							</Alert>
+						)}
+					</div>
+				</Fade>
+			</Box>
+
 			<DialogContent>
 				<Grid container spacing={2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
@@ -58,7 +101,11 @@ const AdminEntityForm = ({
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Отмена</Button>
-				<Button onClick={handleSubmit} variant='contained'>
+				<Button
+					onClick={handleSubmit}
+					variant='contained'
+					disabled={!!successMessage}
+				>
 					Сохранить
 				</Button>
 			</DialogActions>
