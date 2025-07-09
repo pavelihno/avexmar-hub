@@ -1,8 +1,8 @@
 from flask import request, jsonify
 
-from models.flight import Flight
-from models.route import Route
-from middlewares.auth_middleware import admin_required
+from app.models.flight import Flight
+from app.models.route import Route
+from app.middlewares.auth_middleware import admin_required
 
 
 def get_flights():

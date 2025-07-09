@@ -20,3 +20,17 @@ flask db init
 flask db migrate -m <migration-message>
 flask db upgrade
 ```
+
+### Run Server Tests
+
+
+Run the server:
+```
+docker-compose up -d
+```
+
+Run all tests:
+```
+docker-compose run --rm server-app pytest -sv tests
+```
+

@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
-from models.airport import Airport
-from middlewares.auth_middleware import admin_required
+from app.models.airport import Airport
+from app.middlewares.auth_middleware import admin_required
 
 
 def get_airports():

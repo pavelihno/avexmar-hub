@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import jwt
 
-from config import Config
+from app.config import Config
 
 
 def signJWT(email):

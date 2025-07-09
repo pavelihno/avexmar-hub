@@ -1,12 +1,12 @@
-from database import db
-from models._base_model import BaseModel
+from app.database import db
+from app.models._base_model import BaseModel
 
 
 class Airport(BaseModel):
     __tablename__ = 'airports'
 
-    iata_code = db.Column(db.String(3), unique=True, index=True, nullable=False)
-    icao_code = db.Column(db.String(4), unique=True, index=True, nullable=False)
+    iata_code = db.Column(db.String(3), unique=True, nullable=False)
+    icao_code = db.Column(db.String(4), unique=True, nullable=False)
     name = db.Column(db.String, nullable=False)
     city_code = db.Column(db.String, nullable=False)
     country_code = db.Column(db.String, nullable=False)

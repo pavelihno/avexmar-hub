@@ -1,31 +1,41 @@
-from database import db
-from models._base_model import BaseModel
-from config import Config
+from app.database import db
+from app.models._base_model import BaseModel
+from app.config import Config
 
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
 
-    flight_id = db.Column(db.Integer, db.ForeignKey('flights.id', ondelete='RESTRICT'), nullable=False)
-    booked_at = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
+    # Booking details
+    booking_number = db.Column(db.String, unique=True, nullable=False)
+    status = db.Column(db.Enum(Config.BOOKING_STATUS), nullable=False, default=Config.DEFAULT_BOOKING_STATUS)
 
+    # Customer details
+    email_address = db.Column(db.String, nullable=False)
+    phone_number = db.Column(db.String, nullable=False)
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+
+    # Price details
+    currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
     base_price = db.Column(db.Float, nullable=False)
-    tax_amount = db.Column(db.Float, nullable=False, default=0.0)
-    discount_amount = db.Column(db.Float, nullable=False, default=0.0)
     final_price = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.String(), nullable=False, default=Config.DEFAULT_CURRENCY, server_default=Config.DEFAULT_CURRENCY)
 
-    payments = db.relationship('Payment', backref='booking', lazy='dynamic', cascade='all, delete-orphan')
-    seats = db.relationship('Seat', backref='booking', lazy='dynamic')
+    # Relationships
+    payments = db.relationship('Payment', backref=db.backref('booking', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
+    tickets = db.relationship('Ticket', backref=db.backref('booking', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
+    seats = db.relationship('Seat', backref=db.backref('booking', lazy=True),lazy='dynamic', cascade='save-update, merge')
 
     def to_dict(self):
         return {
             'id': self.id,
-            'flight_id': self.flight_id,
-            'booked_at': self.booked_at,
+            'booking_number': self.booking_number,
+            'status': self.status.value,
+            'email_address': self.email_address,
+            'phone_number': self.phone_number,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'currency': self.currency,
             'base_price': self.base_price,
-            'tax_amount': self.tax_amount,
-            'discount_amount': self.discount_amount,
-            'final_price': self.final_price,
-            'currency': self.currency
+            'final_price': self.final_price
         }
