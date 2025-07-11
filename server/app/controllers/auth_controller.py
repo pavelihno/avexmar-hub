@@ -5,6 +5,7 @@ from app.utils.jwt import signJWT
 from app.middlewares.auth_middleware import login_required
 from app.config import Config
 
+
 def register():
     body = request.json
     new_user = User.create(**{

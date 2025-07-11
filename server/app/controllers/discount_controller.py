@@ -4,9 +4,18 @@ from app.models.discount import Discount
 from app.middlewares.auth_middleware import admin_required
 
 
-def get_discounts():
+@admin_required
+def get_discounts(current_user):
     discounts = Discount.get_all()
     return jsonify([d.to_dict() for d in discounts])
+
+
+@admin_required
+def get_discount(current_user, discount_id):
+    discount = Discount.get_by_id(discount_id)
+    if discount:
+        return jsonify(discount.to_dict()), 200
+    return jsonify({'message': 'Discount not found'}), 404
 
 
 @admin_required

@@ -1,28 +1,31 @@
 from flask import request, jsonify
 
 from app.models.booking import Booking
-from app.models.flight import Flight
-from app.middlewares.auth_middleware import login_required
+from app.middlewares.auth_middleware import admin_required
 
 
-def get_bookings(current_user=None):
+@admin_required
+def get_bookings(current_user):
     bookings = Booking.get_all()
     return jsonify([booking.to_dict() for booking in bookings])
 
 
-@login_required
+@admin_required
+def get_booking(current_user, booking_id):
+    booking = Booking.get_by_id(booking_id)
+    if booking:
+        return jsonify(booking.to_dict()), 200
+    return jsonify({'message': 'Booking not found'}), 404
+
+
+@admin_required
 def create_booking(current_user):
     body = request.json
-    flight_id = body.get('flight_id')
-
-    if not Flight.get_by_id(flight_id):
-        return jsonify({'message': 'Flight not found'}), 404
-
     booking = Booking.create(**body)
     return jsonify(booking.to_dict()), 201
 
 
-@login_required
+@admin_required
 def update_booking(current_user, booking_id):
     body = request.json
     updated = Booking.update(booking_id, **body)
@@ -31,7 +34,7 @@ def update_booking(current_user, booking_id):
     return jsonify({'message': 'Booking not found'}), 404
 
 
-@login_required
+@admin_required
 def delete_booking(current_user, booking_id):
     deleted = Booking.delete(booking_id)
     if deleted:

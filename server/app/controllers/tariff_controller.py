@@ -5,9 +5,18 @@ from app.models.flight import Flight
 from app.middlewares.auth_middleware import admin_required
 
 
-def get_tariffs():
+@admin_required
+def get_tariffs(current_user):
     tariffs = Tariff.get_all()
     return jsonify([t.to_dict() for t in tariffs])
+
+
+@admin_required
+def get_tariff(current_user, tariff_id):
+    tariff = Tariff.get_by_id(tariff_id)
+    if tariff:
+        return jsonify(tariff.to_dict()), 200
+    return jsonify({'message': 'Tariff not found'}), 404
 
 
 @admin_required
