@@ -15,11 +15,14 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Название аэропорта обязательно',
 		},
 		iata_code: {
-			REQUIRED: 'IATA код обязателен',
-			LENGTH: 'IATA код должен содержать 3 символа',
+			REQUIRED: 'Код IATA обязателен',
+			LENGTH: 'Код IATA должен содержать 3 символа',
 		},
 		icao_code: {
-			LENGTH: 'ICAO код должен содержать 4 символа',
+			LENGTH: 'Код ICAO должен содержать 4 символа',
+		},
+		city_code: {
+			REQUIRED: 'Город обязателен',
 		},
 	},
 	ROUTE: {
@@ -68,6 +71,35 @@ export const VALIDATION_MESSAGES = {
 			INVALID: 'Введите корректный номер телефона',
 		},
 	},
+	FLIGHT: {
+		route_id: {
+			REQUIRED: 'Маршрут рейса обязателен',
+		},
+		scheduled_departure: {
+			REQUIRED: 'Время отправления обязательно',
+		},
+		scheduled_arrival: {
+			REQUIRED: 'Время прибытия обязательно',
+		},
+		status: {
+			REQUIRED: 'Статус рейса обязателен',
+		},
+	},
+	TARIFF: {
+		seat_class: {
+			REQUIRED: 'Класс места обязателен',
+		},
+		seats_number: {
+			REQUIRED: 'Количество мест обязательно',
+		},
+		currency: {
+			REQUIRED: 'Валюта обязательна',
+		},
+		price: {
+			REQUIRED: 'Цена обязательна',
+		},
+
+	}
 };
 
 export default VALIDATION_MESSAGES;

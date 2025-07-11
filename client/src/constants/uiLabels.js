@@ -1,3 +1,5 @@
+import tariff from "../redux/reducers/tariff";
+
 export const UI_LABELS = {
 	BUTTONS: {
 		save: 'Сохранить',
@@ -12,6 +14,7 @@ export const UI_LABELS = {
 		delete: 'Удалить',
 		cancel: 'Отмена',
 		back: 'Назад',
+		close: 'Закрыть',
 	},
 	TITLES: {
 		login: 'Вход',
@@ -104,6 +107,15 @@ export const UI_LABELS = {
 				management: 'Управление рейсами',
 				add_button: 'Добавить рейс',
 				edit_button: 'Редактировать рейс',
+				manage_tariffs: 'Изменить тарифы',
+			},
+			tariffs: {
+				title: 'Тарифы',
+				description: 'Управление тарифами рейсов',
+				management: 'Управление тарифами',
+				add_button: 'Добавить тариф',
+				edit_button: 'Редактировать тариф',
+				manage_tariffs: 'Изменить тарифы',
 			},
 			bookings: {
 				title: 'Бронирования',

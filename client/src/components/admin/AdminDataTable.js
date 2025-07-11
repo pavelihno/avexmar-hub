@@ -193,8 +193,8 @@ const AdminDataTable = ({
 					fullWidth
 				>
 					{renderForm({
-						isEditing,
-						currentItem,
+						isEditing: isEditing,
+						currentItem: currentItem,
 						onClose: handleCloseDialog,
 						onSave: handleSave,
 					})}

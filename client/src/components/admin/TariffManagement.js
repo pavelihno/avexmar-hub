@@ -1,14 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { DialogTitle, DialogContent } from '@mui/material';
+import { Dialog, DialogContent, Typography } from '@mui/material';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
-
-import {
-	createTariff,
-	updateTariff,
-	deleteTariff,
-} from '../../redux/actions/tariff';
+import { createTariff, updateTariff } from '../../redux/actions/tariff';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import {
 	FIELD_LABELS,
@@ -17,16 +11,19 @@ import {
 	getEnumOptions,
 } from '../../constants';
 
-export const TariffManagement = ({ flight, onClose }) => {
+export const TariffManagement = ({
+	flight,
+	tariffDialogOpen,
+	onClose,
+	action = 'add',
+	tariffId = null,
+}) => {
 	const dispatch = useDispatch();
-	const { tariffs, isLoading: tariffsLoading } = useSelector(
-		(state) => state.tariffs
-	);
-	const flightTariffs = tariffs.filter(
-		(tariff) => tariff.flight_id === flight.id
-	);
+	const { tariffs, isLoading } = useSelector((state) => state.tariffs);
 
-	const TARIFF_FIELDS = {
+	const [editingTariff, setEditingTariff] = useState(null);
+
+	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
 		flightId: {
 			key: 'flightId',
@@ -47,12 +44,14 @@ export const TariffManagement = ({ flight, onClose }) => {
 			apiKey: 'seats_number',
 			label: FIELD_LABELS.TARIFF.seats_number,
 			type: FIELD_TYPES.NUMBER,
+			inputProps: {
+				min: 0,
+				max: 100,
+				step: 0.01,
+			},
 			validate: (value) => {
 				if (value === null || value === undefined || value === '') {
 					return VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED;
-				}
-				if (value <= 0) {
-					return VALIDATION_MESSAGES.TARIFF.seats_number.POSITIVE;
 				}
 				return null;
 			},
@@ -87,52 +86,69 @@ export const TariffManagement = ({ flight, onClose }) => {
 
 	const tariffManager = useMemo(
 		() =>
-			createAdminManager(TARIFF_FIELDS, {
+			createAdminManager(FIELDS, {
 				addButtonText: UI_LABELS.ADMIN.modules.tariffs.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.tariffs.edit_button,
 			}),
-		[TARIFF_FIELDS]
+		[FIELDS, tariffs]
 	);
 
+	useEffect(() => {
+		if (action === 'edit' && tariffId && !editingTariff) {
+			const tariffToEdit = tariffs.find((t) => t.id === tariffId);
+			if (tariffToEdit) {
+				setEditingTariff(tariffManager.toUiFormat(tariffToEdit));
+			}
+		}
+	}, [action, tariffId, tariffs, tariffManager, editingTariff]);
+
 	const handleAddTariff = (tariffData) => {
-		// Set flight_id to current flight
 		const newTariff = {
 			...tariffData,
 			flightId: flight.id,
 		};
 		dispatch(createTariff(tariffManager.toApiFormat(newTariff)));
+		onClose();
 	};
 
 	const handleEditTariff = (tariffData) => {
 		dispatch(updateTariff(tariffManager.toApiFormat(tariffData)));
+		onClose();
 	};
 
-	const handleDeleteTariff = (id) => {
-		return dispatch(deleteTariff(id));
-	};
-
-	const formattedTariffs = flightTariffs.map(tariffManager.toUiFormat);
+	if (!tariffManager) {
+		return (
+			<DialogContent>
+				<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
+			</DialogContent>
+		);
+	}
 
 	return (
 		<>
-			<DialogTitle>
-				{UI_LABELS.ADMIN.modules.tariffs.management_for_flight}{' '}
-				{flight.id}
-			</DialogTitle>
-			<DialogContent>
-				<AdminDataTable
-					data={formattedTariffs}
-					columns={tariffManager.columns}
-					onAdd={handleAddTariff}
-					onEdit={handleEditTariff}
-					onDelete={handleDeleteTariff}
-					renderForm={tariffManager.renderForm}
-					addButtonText={UI_LABELS.ADMIN.modules.tariffs.add_button}
-					isLoading={tariffsLoading}
-					error={null}
-					hideTitle
-				/>
-			</DialogContent>
+			<Dialog
+				open={tariffDialogOpen}
+				onClose={onClose}
+				maxWidth='md'
+				fullWidth
+			>
+				<DialogContent>
+					{action === 'add'
+						? tariffManager.renderForm({
+								isEditing: false,
+								currentItem: { flightId: flight.id },
+								onClose: onClose,
+								onSave: handleAddTariff,
+						  })
+						: editingTariff &&
+						  tariffManager.renderForm({
+								isEditing: true,
+								currentItem: editingTariff, // Ensure this is passed correctly
+								onClose: onClose,
+								onSave: handleEditTariff,
+						  })}
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 };

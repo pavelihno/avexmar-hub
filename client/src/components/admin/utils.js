@@ -146,7 +146,9 @@ export const createFieldRenderer = (field) => {
 			);
 
 		case FIELD_TYPES.CUSTOM:
-			return field.renderField;
+			return (props) => {
+				return field.renderField(props);
+			};
 
 		default:
 			return (props) => (
@@ -180,11 +182,16 @@ export const createFormFields = (fields) => {
 export const createTableColumns = (fields) => {
 	return Object.values(fields)
 		.filter((field) => field.key !== 'id' && !field.excludeFromTable)
-		.map((field) => ({
-			field: field.key,
-			header: field.label,
-			formatter: field.formatter,
-		}));
+		.map((field) => {
+			const column = {
+				field: field.key,
+				header: field.label,
+				formatter: field.formatter,
+				render: field.renderField ? (item) => field.renderField(item) : null,
+			};
+
+			return column;
+		});
 };
 
 /**
@@ -223,7 +230,6 @@ export const createToUiFormatter = (fields) => {
 
 		Object.values(fields).forEach((field) => {
 			if (field.key !== 'id' && field.apiKey) {
-				// Handle special transformations if needed
 				if (field.toUi) {
 					result[field.key] = field.toUi(apiData[field.apiKey]);
 				} else {

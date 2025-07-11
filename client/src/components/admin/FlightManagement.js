@@ -1,9 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import {
+	Tooltip,
+	IconButton,
+	Box,
+	Typography,
+} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
-
 import TariffManagement from './TariffManagement';
 
 import {
@@ -12,7 +19,7 @@ import {
 	updateFlight,
 	deleteFlight,
 } from '../../redux/actions/flight';
-import { fetchTariffs } from '../../redux/actions/tariff';
+import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import {
@@ -30,9 +37,12 @@ const FlightManagement = () => {
 	const { routes, isLoading: routesLoading } = useSelector(
 		(state) => state.routes
 	);
+	const { tariffs } = useSelector((state) => state.tariffs);
 
 	const [selectedFlight, setSelectedFlight] = useState(null);
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
+	const [tariffAction, setTariffAction] = useState(null);
+	const [selectedTariffId, setSelectedTariffId] = useState(null);
 
 	useEffect(() => {
 		dispatch(fetchFlights());
@@ -59,14 +69,30 @@ const FlightManagement = () => {
 
 	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
 
-	const handleTariffManagement = (flight) => {
+	const handleAddTariff = (flight) => {
 		setSelectedFlight(flight);
+		setTariffAction('add');
 		setTariffDialogOpen(true);
 	};
 
+	const handleEditTariff = (flight, tariffId) => {
+		setSelectedFlight(flight);
+		setTariffAction('edit');
+		setSelectedTariffId(tariffId);
+		setTariffDialogOpen(true);
+	};
+
+	const handleDeleteTariff = (tariffId) => {
+		if (window.confirm(UI_LABELS.ADMIN.confirm_delete)) {
+			dispatch(deleteTariff(tariffId));
+		}
+	};
+
 	const handleTariffDialogClose = () => {
-		setTariffDialogOpen(false);
 		setSelectedFlight(null);
+		setTariffAction(null);
+		setSelectedTariffId(null);
+		setTariffDialogOpen(false);
 	};
 
 	const FIELDS = {
@@ -79,7 +105,9 @@ const FlightManagement = () => {
 			options: routeOptions,
 			formatter: (value) => {
 				const route = getRouteById(value);
-				return route ? `${route.flight_number}` : value;
+				return route
+					? `${route.flight_number} (${route.origin_airport_id} - ${route.destination_airport_id})`
+					: value;
 			},
 			validate: (value) =>
 				!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null,
@@ -115,36 +143,154 @@ const FlightManagement = () => {
 		},
 		tariffs: {
 			key: 'tariffs',
+			type: FIELD_TYPES.CUSTOM,
 			label: FIELD_LABELS.FLIGHT.tariffs,
 			excludeFromForm: true,
-			formatter: () => UI_LABELS.ADMIN.modules.flights.manage_tariffs,
+			renderField: (item) => {
+				const flightTariffs = tariffs.filter(
+					(tariff) => tariff.flight_id === item.id
+				);
+
+				return (
+					<Box
+						sx={{
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'flex-start',
+							minWidth: '200px',
+						}}
+					>
+						{flightTariffs.length === 0 ? (
+							<Tooltip
+								title={
+									UI_LABELS.ADMIN.modules.tariffs.add_button
+								}
+								placement='top'
+							>
+								<IconButton
+									size='small'
+									color='primary'
+									onClick={(e) => {
+										e.stopPropagation();
+										const flightCopy = { ...item };
+										handleAddTariff(flightCopy);
+									}}
+								>
+									<AddCircleIcon />
+								</IconButton>
+							</Tooltip>
+						) : (
+							<>
+								{flightTariffs.map((tariff) => (
+									<Box
+										key={tariff.id}
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+											mb: 0.5,
+											backgroundColor: 'rgba(0,0,0,0.04)',
+											borderRadius: 1,
+											p: 0.5,
+											width: '100%',
+										}}
+									>
+										<Typography
+											variant='body2'
+											sx={{
+												mr: 1,
+												flexGrow: 1,
+												whiteSpace: 'nowrap',
+												overflow: 'hidden',
+												textOverflow: 'ellipsis',
+											}}
+										>
+											{`${tariff.seat_class}: ${tariff.price} ${tariff.currency}`}
+										</Typography>
+										<Box
+											sx={{
+												display: 'flex',
+												flexShrink: 0,
+											}}
+										>
+											<Tooltip
+												title={
+													UI_LABELS.ADMIN.modules
+														.tariffs.edit_button
+												}
+												placement='top'
+											>
+												<IconButton
+													size='small'
+													color='primary'
+													onClick={(e) => {
+														e.stopPropagation();
+														const flightCopy = {
+															...item,
+														};
+														handleEditTariff(
+															flightCopy,
+															tariff.id
+														);
+													}}
+												>
+													<EditIcon fontSize='small' />
+												</IconButton>
+											</Tooltip>
+											<Tooltip
+												title={
+													UI_LABELS.ADMIN.modules
+														.tariffs.delete_button
+												}
+												placement='top'
+											>
+												<IconButton
+													size='small'
+													color='error'
+													onClick={(e) => {
+														e.stopPropagation();
+														handleDeleteTariff(
+															tariff.id
+														);
+													}}
+												>
+													<DeleteIcon fontSize='small' />
+												</IconButton>
+											</Tooltip>
+										</Box>
+									</Box>
+								))}
+
+								<Tooltip
+									title={
+										UI_LABELS.ADMIN.modules.flights
+											.add_tariff
+									}
+									placement='top'
+								>
+									<IconButton
+										size='small'
+										color='primary'
+										onClick={(e) => {
+											e.stopPropagation();
+											const flightCopy = { ...item };
+											handleAddTariff(flightCopy);
+										}}
+										sx={{ mt: 0.5 }}
+									>
+										<AddCircleIcon />
+									</IconButton>
+								</Tooltip>
+							</>
+						)}
+					</Box>
+				);
+			},
 		},
 	};
 
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				renderOverrides: {
-					routeId: (item) => {
-						const route = getRouteById(item.routeId);
-						return route
-							? `${route.flight_number} (${route.origin_airport_id} - ${route.destination_airport_id})`
-							: '';
-					},
-					tariffs: (item) => (
-						<Button
-							variant='contained'
-							color='primary'
-							size='small'
-							onClick={(e) => {
-								e.stopPropagation();
-								handleTariffManagement(item);
-							}}
-						>
-							{UI_LABELS.ADMIN.modules.flights.manage_tariffs}
-						</Button>
-					),
-				},
 				addButtonText: UI_LABELS.ADMIN.modules.flights.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.flights.edit_button,
 			}),
@@ -180,19 +326,13 @@ const FlightManagement = () => {
 				error={errors}
 			/>
 
-			<Dialog
-				open={tariffDialogOpen}
+			<TariffManagement
+				flight={selectedFlight}
+				tariffDialogOpen={tariffDialogOpen}
 				onClose={handleTariffDialogClose}
-				maxWidth='md'
-				fullWidth
-			>
-				{selectedFlight && (
-					<TariffManagement
-						flight={selectedFlight}
-						onClose={handleTariffDialogClose}
-					/>
-				)}
-			</Dialog>
+				action={tariffAction}
+				tariffId={selectedTariffId}
+			/>
 		</>
 	);
 };

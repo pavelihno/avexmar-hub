@@ -92,22 +92,6 @@ const RouteManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				renderOverrides: {
-					originAirportId: (item) => {
-						const airport = getAirportById(item.originAirportId);
-						return airport
-							? `${airport.name} (${airport.iata_code})`
-							: '';
-					},
-					destinationAirportId: (item) => {
-						const airport = getAirportById(
-							item.destinationAirportId
-						);
-						return airport
-							? `${airport.name} (${airport.iata_code})`
-							: '';
-					},
-				},
 				addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
 			}),
