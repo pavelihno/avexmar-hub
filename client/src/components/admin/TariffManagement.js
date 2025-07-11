@@ -1,8 +1,12 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dialog, DialogContent, Typography } from '@mui/material';
 
-import { createTariff, updateTariff } from '../../redux/actions/tariff';
+import {
+	createTariff,
+	updateTariff,
+	fetchTariff,
+} from '../../redux/actions/tariff';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import {
 	FIELD_LABELS,
@@ -12,77 +16,73 @@ import {
 } from '../../constants';
 
 export const TariffManagement = ({
-	flight,
+	flightId,
 	tariffDialogOpen,
 	onClose,
 	action = 'add',
-	tariffId = null,
+	tariffId,
 }) => {
 	const dispatch = useDispatch();
-	const { tariffs, isLoading } = useSelector((state) => state.tariffs);
+	const { tariff, isLoading } = useSelector((state) => state.tariffs);
 
-	const [editingTariff, setEditingTariff] = useState(null);
+	const isEditing = action === 'edit';
 
-	const FIELDS = {
-		id: { key: 'id', apiKey: 'id' },
-		flightId: {
-			key: 'flightId',
-			apiKey: 'flight_id',
-			excludeFromForm: true,
-		},
-		seatClass: {
-			key: 'seatClass',
-			apiKey: 'seat_class',
-			label: FIELD_LABELS.TARIFF.seat_class,
-			type: FIELD_TYPES.SELECT,
-			options: getEnumOptions('SEAT_CLASS'),
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null,
-		},
-		seatsNumber: {
-			key: 'seatsNumber',
-			apiKey: 'seats_number',
-			label: FIELD_LABELS.TARIFF.seats_number,
-			type: FIELD_TYPES.NUMBER,
-			inputProps: {
-				min: 0,
-				max: 100,
-				step: 0.01,
+	const FIELDS = useMemo(
+		() => ({
+			id: { key: 'id', apiKey: 'id' },
+			flightId: {
+				key: 'flightId',
+				apiKey: 'flight_id',
+				excludeFromForm: true,
 			},
-			validate: (value) => {
-				if (value === null || value === undefined || value === '') {
-					return VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED;
-				}
-				return null;
+			seatClass: {
+				key: 'seatClass',
+				apiKey: 'seat_class',
+				label: FIELD_LABELS.TARIFF.seat_class,
+				type: FIELD_TYPES.SELECT,
+				options: getEnumOptions('SEAT_CLASS'),
+				validate: (value) =>
+					!value
+						? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED
+						: null,
 			},
-		},
-		currency: {
-			key: 'currency',
-			apiKey: 'currency',
-			label: FIELD_LABELS.TARIFF.currency,
-			type: FIELD_TYPES.SELECT,
-			options: getEnumOptions('CURRENCY'),
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null,
-		},
-		price: {
-			key: 'price',
-			apiKey: 'price',
-			label: FIELD_LABELS.TARIFF.price,
-			type: FIELD_TYPES.NUMBER,
-			float: true,
-			inputProps: {
-				min: 0,
-				step: 0.01,
+			seatsNumber: {
+				key: 'seatsNumber',
+				apiKey: 'seats_number',
+				label: FIELD_LABELS.TARIFF.seats_number,
+				type: FIELD_TYPES.NUMBER,
+				inputProps: { min: 0, max: 100, step: 0.01 },
+				validate: (value) =>
+					value === null || value === undefined || value === ''
+						? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
+						: null,
 			},
-			validate: (value) => {
-				if (value === null || value === undefined || value === '') {
-					return VALIDATION_MESSAGES.TARIFF.price.REQUIRED;
-				}
-				return null;
+			currency: {
+				key: 'currency',
+				apiKey: 'currency',
+				label: FIELD_LABELS.TARIFF.currency,
+				type: FIELD_TYPES.SELECT,
+				options: getEnumOptions('CURRENCY'),
+				validate: (value) =>
+					!value
+						? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED
+						: null,
 			},
-		},
-	};
+			price: {
+				key: 'price',
+				apiKey: 'price',
+				label: FIELD_LABELS.TARIFF.price,
+				type: FIELD_TYPES.NUMBER,
+				float: true,
+				inputProps: { min: 0, step: 0.01 },
+				validate: (value) =>
+					value === null || value === undefined || value === ''
+						? VALIDATION_MESSAGES.TARIFF.price.REQUIRED
+						: null,
+			},
+		}),
+		[]
+	);
 
 	const tariffManager = useMemo(
 		() =>
@@ -90,42 +90,35 @@ export const TariffManagement = ({
 				addButtonText: UI_LABELS.ADMIN.modules.tariffs.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.tariffs.edit_button,
 			}),
-		[FIELDS, tariffs]
+		[FIELDS]
 	);
 
+	const currentItem = useMemo(() => {
+		if (isEditing) return tariff ? tariffManager.toUiFormat(tariff) : null;
+		return { flightId };
+	}, [isEditing, tariff, tariffManager, flightId]);
+
 	useEffect(() => {
-		if (action === 'edit' && tariffId && !editingTariff) {
-			const tariffToEdit = tariffs.find((t) => t.id === tariffId);
-			if (tariffToEdit) {
-				setEditingTariff(tariffManager.toUiFormat(tariffToEdit));
-			}
+		if (isEditing && tariffId) {
+			dispatch(fetchTariff(tariffId));
 		}
-	}, [action, tariffId, tariffs, tariffManager, editingTariff]);
+	}, [isEditing, tariffId, dispatch]);
 
-	const handleAddTariff = (tariffData) => {
-		const newTariff = {
+	const handleSaveTariff = (tariffData) => {
+		const formattedData = tariffManager.toApiFormat({
 			...tariffData,
-			flightId: flight.id,
-		};
-		dispatch(createTariff(tariffManager.toApiFormat(newTariff)));
-		onClose();
-	};
-
-	const handleEditTariff = (tariffData) => {
-		dispatch(updateTariff(tariffManager.toApiFormat(tariffData)));
-		onClose();
-	};
-
-	if (!tariffManager) {
-		return (
-			<DialogContent>
-				<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
-			</DialogContent>
+			flightId,
+		});
+		dispatch(
+			isEditing
+				? updateTariff(formattedData)
+				: createTariff(formattedData)
 		);
-	}
+		onClose();
+	};
 
-	return (
-		<>
+	if (isEditing && isLoading) {
+		return (
 			<Dialog
 				open={tariffDialogOpen}
 				onClose={onClose}
@@ -133,23 +126,28 @@ export const TariffManagement = ({
 				fullWidth
 			>
 				<DialogContent>
-					{action === 'add'
-						? tariffManager.renderForm({
-								isEditing: false,
-								currentItem: { flightId: flight.id },
-								onClose: onClose,
-								onSave: handleAddTariff,
-						  })
-						: editingTariff &&
-						  tariffManager.renderForm({
-								isEditing: true,
-								currentItem: editingTariff, // Ensure this is passed correctly
-								onClose: onClose,
-								onSave: handleEditTariff,
-						  })}
+					<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
 				</DialogContent>
 			</Dialog>
-		</>
+		);
+	}
+
+	return (
+		<Dialog
+			open={tariffDialogOpen}
+			onClose={onClose}
+			maxWidth='md'
+			fullWidth
+		>
+			<DialogContent>
+				{tariffManager.renderForm({
+					isEditing,
+					currentItem,
+					onClose,
+					onSave: handleSaveTariff,
+				})}
+			</DialogContent>
+		</Dialog>
 	);
 };
 

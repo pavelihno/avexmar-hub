@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-	Tooltip,
-	IconButton,
-	Box,
-	Typography,
-} from '@mui/material';
+import { Tooltip, IconButton, Box, Typography } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -39,9 +34,9 @@ const FlightManagement = () => {
 	);
 	const { tariffs } = useSelector((state) => state.tariffs);
 
-	const [selectedFlight, setSelectedFlight] = useState(null);
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
+	const [selectedFlightId, setSelectedFlightId] = useState(null);
 	const [selectedTariffId, setSelectedTariffId] = useState(null);
 
 	useEffect(() => {
@@ -69,15 +64,15 @@ const FlightManagement = () => {
 
 	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
 
-	const handleAddTariff = (flight) => {
-		setSelectedFlight(flight);
+	const handleAddTariff = (flightId) => {
 		setTariffAction('add');
+		setSelectedFlightId(flightId);
 		setTariffDialogOpen(true);
 	};
 
-	const handleEditTariff = (flight, tariffId) => {
-		setSelectedFlight(flight);
+	const handleEditTariff = (flightId, tariffId) => {
 		setTariffAction('edit');
+		setSelectedFlightId(flightId);
 		setSelectedTariffId(tariffId);
 		setTariffDialogOpen(true);
 	};
@@ -89,7 +84,7 @@ const FlightManagement = () => {
 	};
 
 	const handleTariffDialogClose = () => {
-		setSelectedFlight(null);
+		setSelectedFlightId(null);
 		setTariffAction(null);
 		setSelectedTariffId(null);
 		setTariffDialogOpen(false);
@@ -172,8 +167,7 @@ const FlightManagement = () => {
 									color='primary'
 									onClick={(e) => {
 										e.stopPropagation();
-										const flightCopy = { ...item };
-										handleAddTariff(flightCopy);
+										handleAddTariff(item.id);
 									}}
 								>
 									<AddCircleIcon />
@@ -224,11 +218,8 @@ const FlightManagement = () => {
 													color='primary'
 													onClick={(e) => {
 														e.stopPropagation();
-														const flightCopy = {
-															...item,
-														};
 														handleEditTariff(
-															flightCopy,
+															item.id,
 															tariff.id
 														);
 													}}
@@ -272,8 +263,7 @@ const FlightManagement = () => {
 										color='primary'
 										onClick={(e) => {
 											e.stopPropagation();
-											const flightCopy = { ...item };
-											handleAddTariff(flightCopy);
+											handleAddTariff(item.id);
 										}}
 										sx={{ mt: 0.5 }}
 									>
@@ -327,7 +317,7 @@ const FlightManagement = () => {
 			/>
 
 			<TariffManagement
-				flight={selectedFlight}
+				flightId={selectedFlightId}
 				tariffDialogOpen={tariffDialogOpen}
 				onClose={handleTariffDialogClose}
 				action={tariffAction}
