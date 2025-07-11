@@ -13,6 +13,7 @@ import {
 import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns';
 
 import AdminEntityForm from './AdminEntityForm';
 
@@ -187,7 +188,9 @@ export const createTableColumns = (fields) => {
 				field: field.key,
 				header: field.label,
 				formatter: field.formatter,
-				render: field.renderField ? (item) => field.renderField(item) : null,
+				render: field.renderField
+					? (item) => field.renderField(item)
+					: null,
 			};
 
 			return column;
@@ -269,4 +272,24 @@ export const createAdminManager = (fields, options = {}) => {
 			/>
 		),
 	};
+};
+
+export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
+    if (!value) return '';
+    try {
+        return format(new Date(value), dateFormat);
+    } catch (error) {
+        console.error('Invalid date value:', value);
+        return value;
+    }
+};
+
+export const formatDateTime = (value, dateTimeFormat = 'dd.MM.yyyy HH:mm') => {
+    if (!value) return '';
+    try {
+        return format(new Date(value), dateTimeFormat);
+    } catch (error) {
+        console.error('Invalid datetime value:', value);
+        return value;
+    }
 };

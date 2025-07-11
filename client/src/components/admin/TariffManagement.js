@@ -51,7 +51,7 @@ export const TariffManagement = ({
 				apiKey: 'seats_number',
 				label: FIELD_LABELS.TARIFF.seats_number,
 				type: FIELD_TYPES.NUMBER,
-				inputProps: { min: 0, max: 100, step: 0.01 },
+				inputProps: { min: 0, step: 1 },
 				validate: (value) =>
 					value === null || value === undefined || value === ''
 						? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED

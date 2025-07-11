@@ -1,5 +1,3 @@
-import tariff from "../redux/reducers/tariff";
-
 export const UI_LABELS = {
 	BUTTONS: {
 		save: 'Сохранить',
@@ -15,6 +13,7 @@ export const UI_LABELS = {
 		cancel: 'Отмена',
 		back: 'Назад',
 		close: 'Закрыть',
+		confirm: 'Подтвердить',
 	},
 	TITLES: {
 		login: 'Вход',
@@ -22,6 +21,8 @@ export const UI_LABELS = {
 		settings: 'Настройки',
 	},
 	MESSAGES: {
+		confirm_action: 'Подтвердите действие',
+		confirm_delete: 'Вы уверены, что хотите удалить запись?',
 		loading: 'Загрузка...',
 		required_field: 'Это поле обязательно',
 	},
@@ -116,6 +117,7 @@ export const UI_LABELS = {
 				add_button: 'Добавить тариф',
 				edit_button: 'Редактировать тариф',
 				manage_tariffs: 'Изменить тарифы',
+				confirm_delete: 'Вы уверены, что хотите удалить тариф?',
 			},
 			bookings: {
 				title: 'Бронирования',

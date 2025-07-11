@@ -1,6 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Tooltip, IconButton, Box, Typography } from '@mui/material';
+import {
+	Tooltip,
+	IconButton,
+	Button,
+	Box,
+	Typography,
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogActions,
+} from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,8 +26,9 @@ import {
 } from '../../redux/actions/flight';
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
 import {
+	ENUM_LABELS,
 	FIELD_LABELS,
 	UI_LABELS,
 	VALIDATION_MESSAGES,
@@ -64,6 +75,11 @@ const FlightManagement = () => {
 
 	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
 
+	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
+		open: false,
+		tariffId: null,
+	});
+
 	const handleAddTariff = (flightId) => {
 		setTariffAction('add');
 		setSelectedFlightId(flightId);
@@ -77,10 +93,17 @@ const FlightManagement = () => {
 		setTariffDialogOpen(true);
 	};
 
-	const handleDeleteTariff = (tariffId) => {
-		if (window.confirm(UI_LABELS.ADMIN.confirm_delete)) {
-			dispatch(deleteTariff(tariffId));
-		}
+	const handleOpenDeleteTariffDialog = (tariffId) => {
+		setDeleteTariffDialog({ open: true, tariffId });
+	};
+
+	const handleCloseDeleteTariffDialog = () => {
+		setDeleteTariffDialog({ open: false, tariffId: null });
+	};
+
+	const confirmDeleteTariff = () => {
+		dispatch(deleteTariff(deleteTariffDialog.tariffId));
+		handleCloseDeleteTariffDialog();
 	};
 
 	const handleTariffDialogClose = () => {
@@ -107,11 +130,22 @@ const FlightManagement = () => {
 			validate: (value) =>
 				!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null,
 		},
+		status: {
+			key: 'status',
+			apiKey: 'status',
+			label: FIELD_LABELS.FLIGHT.status,
+			type: FIELD_TYPES.SELECT,
+			options: getEnumOptions('FLIGHT_STATUS'),
+			formatter: (value) => ENUM_LABELS.FLIGHT_STATUS[value] || value,
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.FLIGHT.status.REQUIRED : null,
+		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
 			apiKey: 'scheduled_departure',
 			label: FIELD_LABELS.FLIGHT.scheduled_departure,
 			type: FIELD_TYPES.DATETIME,
+			formatter: (value) => formatDateTime(value),
 			validate: (value) =>
 				!value
 					? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED
@@ -122,19 +156,11 @@ const FlightManagement = () => {
 			apiKey: 'scheduled_arrival',
 			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
 			type: FIELD_TYPES.DATETIME,
+			formatter: (value) => formatDateTime(value),
 			validate: (value) =>
 				!value
 					? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED
 					: null,
-		},
-		status: {
-			key: 'status',
-			apiKey: 'status',
-			label: FIELD_LABELS.FLIGHT.status,
-			type: FIELD_TYPES.SELECT,
-			options: getEnumOptions('FLIGHT_STATUS'),
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.FLIGHT.status.REQUIRED : null,
 		},
 		tariffs: {
 			key: 'tariffs',
@@ -198,7 +224,15 @@ const FlightManagement = () => {
 												textOverflow: 'ellipsis',
 											}}
 										>
-											{`${tariff.seat_class}: ${tariff.price} ${tariff.currency}`}
+											{`${
+												ENUM_LABELS.SEAT_CLASS[
+													tariff.seat_class
+												] || tariff.seat_class
+											} - ${tariff.price} ${
+												ENUM_LABELS.CURRENCY[
+													tariff.currency
+												] || tariff.currency
+											}`}
 										</Typography>
 										<Box
 											sx={{
@@ -239,7 +273,7 @@ const FlightManagement = () => {
 													color='error'
 													onClick={(e) => {
 														e.stopPropagation();
-														handleDeleteTariff(
+														handleOpenDeleteTariffDialog(
 															tariff.id
 														);
 													}}
@@ -323,6 +357,36 @@ const FlightManagement = () => {
 				action={tariffAction}
 				tariffId={selectedTariffId}
 			/>
+
+			{/* Delete tariff dialog */}
+			<Dialog
+				open={deleteTariffDialog.open}
+				onClose={handleCloseDeleteTariffDialog}
+			>
+				<DialogTitle id='delete-tariff-dialog-title'>
+					{UI_LABELS.MESSAGES.confirm_action}
+				</DialogTitle>
+				<DialogContent>
+					<Typography id='delete-tariff-dialog-description'>
+						{UI_LABELS.ADMIN.modules.tariffs.confirm_delete}
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<Button
+						onClick={handleCloseDeleteTariffDialog}
+						color='primary'
+					>
+						{UI_LABELS.BUTTONS.cancel}
+					</Button>
+					<Button
+						onClick={confirmDeleteTariff}
+						color='error'
+						variant='contained'
+					>
+						{UI_LABELS.BUTTONS.delete}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 };

@@ -25,7 +25,7 @@ export const ENUM_LABELS = {
 		birth_certificate: 'Свидетельство о рождении',
 	},
 	CURRENCY: {
-		rub: 'Рубль',
+		rub: 'РУБ',
 	},
 	FLIGHT_STATUS: {
 		scheduled: 'Запланирован',
@@ -48,6 +48,13 @@ export const ENUM_LABELS = {
 		card: 'Банковская карта',
 		cash: 'Наличные',
 	},
+};
+
+export const getEnumOptions = (enumType) => {
+	return Object.entries(ENUM_LABELS[enumType]).map(([value, label]) => ({
+		value,
+		label,
+	}));
 };
 
 export default ENUM_LABELS;

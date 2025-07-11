@@ -11,6 +11,7 @@ import {
 } from '../../redux/actions/discount';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import {
+	ENUM_LABELS,
 	FIELD_LABELS,
 	UI_LABELS,
 	VALIDATION_MESSAGES,
@@ -46,6 +47,7 @@ const DiscountManagement = () => {
 			label: FIELD_LABELS.DISCOUNT.discount_type,
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('DISCOUNT_TYPE'),
+			formatter: (value) => ENUM_LABELS.DISCOUNT_TYPE[value] || value,
 			validate: (value) =>
 				!value
 					? VALIDATION_MESSAGES.DISCOUNT.discount_type.REQUIRED
@@ -62,6 +64,7 @@ const DiscountManagement = () => {
 				max: 100,
 				step: 0.01,
 			},
+			formatter: (value) => (value !== null && value !== undefined ? `${value}%` : ''),
 			validate: (value) =>
 				value === null || value === undefined || value === ''
 					? VALIDATION_MESSAGES.DISCOUNT.percentage_value.REQUIRED

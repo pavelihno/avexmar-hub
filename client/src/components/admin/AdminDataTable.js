@@ -14,6 +14,9 @@ import {
 	Paper,
 	IconButton,
 	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
 	Snackbar,
 	Alert,
 } from '@mui/material';
@@ -36,6 +39,10 @@ const AdminDataTable = ({
 	addButtonText,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
+	const [deleteDialog, setDeleteDialog] = useState({
+		open: false,
+		itemId: null,
+	});
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
@@ -53,6 +60,19 @@ const AdminDataTable = ({
 
 	const handleCloseDialog = () => {
 		setOpenDialog(false);
+	};
+
+	const handleOpenDeleteDialog = (id) => {
+		setDeleteDialog({ open: true, itemId: id });
+	};
+
+	const handleCloseDeleteDialog = () => {
+		setDeleteDialog({ open: false, itemId: null });
+	};
+
+	const confirmDelete = () => {
+		handleDelete(deleteDialog.itemId);
+		handleCloseDeleteDialog();
 	};
 
 	const handleSave = (formData) => {
@@ -174,7 +194,7 @@ const AdminDataTable = ({
 										</IconButton>
 										<IconButton
 											onClick={() =>
-												handleDelete(item.id)
+												handleOpenDeleteDialog(item.id)
 											}
 										>
 											<DeleteIcon />
@@ -186,6 +206,7 @@ const AdminDataTable = ({
 					</Table>
 				</TableContainer>
 
+				{/* Add/edit dialog */}
 				<Dialog
 					open={openDialog}
 					onClose={handleCloseDialog}
@@ -198,6 +219,37 @@ const AdminDataTable = ({
 						onClose: handleCloseDialog,
 						onSave: handleSave,
 					})}
+				</Dialog>
+
+				{/* Delete dialog */}
+				<Dialog
+					open={deleteDialog.open}
+					onClose={handleCloseDeleteDialog}
+				>
+					<DialogTitle id='delete-dialog-title'>
+						{UI_LABELS.MESSAGES.confirm_action}
+					</DialogTitle>
+
+					<DialogContent>
+						<Typography id='delete-dialog-description'>
+							{UI_LABELS.MESSAGES.confirm_delete}
+						</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button
+							onClick={handleCloseDeleteDialog}
+							color='primary'
+						>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
+						<Button
+							onClick={confirmDelete}
+							color='error'
+							variant='contained'
+						>
+							{UI_LABELS.BUTTONS.delete}
+						</Button>
+					</DialogActions>
 				</Dialog>
 
 				<Snackbar
