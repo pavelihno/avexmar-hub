@@ -10,6 +10,11 @@ import {
 	deleteAirport,
 } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
+import {
+	FIELD_LABELS,
+	UI_LABELS,
+	VALIDATION_MESSAGES,
+} from '../../constants';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
@@ -26,50 +31,51 @@ const AirportManagement = () => {
 		name: {
 			key: 'name',
 			apiKey: 'name',
-			label: 'Название аэропорта',
+			label: FIELD_LABELS.AIRPORT.name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
 		},
 		iataCode: {
 			key: 'iata_code',
 			apiKey: 'iata_code',
-			label: 'Код IATA',
+			label: FIELD_LABELS.AIRPORT.iata_code,
 			type: FIELD_TYPES.TEXT,
 			validate: (value) =>
 				!value
-					? 'IATA код обязателен'
+					? VALIDATION_MESSAGES.AIRPORT.iata_code.REQUIRED
 					: value.length !== 3
-					? 'IATA код должен содержать 3 символа'
+					? VALIDATION_MESSAGES.AIRPORT.iata_code.LENGTH
 					: null,
 			inputProps: { maxLength: 3 },
 		},
 		icaoCode: {
 			key: 'icao_code',
 			apiKey: 'icao_code',
-			label: 'Код ICAO',
+			label: FIELD_LABELS.AIRPORT.icao_code,
 			type: FIELD_TYPES.TEXT,
 			validate: (value) =>
 				value && value.length !== 4
-					? 'ICAO код должен содержать 4 символа'
+					? VALIDATION_MESSAGES.AIRPORT.icao_code.LENGTH
 					: null,
 			inputProps: { maxLength: 4 },
 		},
 		city: {
 			key: 'city',
 			apiKey: 'city_code',
-			label: 'Код города',
+			label: FIELD_LABELS.AIRPORT.city_code,
 			type: FIELD_TYPES.TEXT,
 		},
 		country: {
 			key: 'country',
 			apiKey: 'country_code',
-			label: 'Код страны',
+			label: FIELD_LABELS.AIRPORT.country_code,
 			type: FIELD_TYPES.TEXT,
 		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		entityTitle: 'аэропорт',
+		addButtonText: UI_LABELS.ADMIN.modules.airports.add_button,
+		editButtonText: UI_LABELS.ADMIN.modules.airports.edit_button,
 	});
 
 	const handleAddAirport = (airportData) => {
@@ -88,14 +94,14 @@ const AirportManagement = () => {
 
 	return (
 		<AdminDataTable
-			title='Управление аэропортами'
+			title={UI_LABELS.ADMIN.modules.airports.management}
 			data={formattedAirports}
 			columns={adminManager.columns}
 			onAdd={handleAddAirport}
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
 			renderForm={adminManager.renderForm}
-			addButtonText='Добавить аэропорт'
+			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
 			isLoading={isLoading}
 			error={errors}
 		/>

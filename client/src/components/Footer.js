@@ -4,9 +4,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Box, Container, Typography, Link, Stack } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 
+import { UI_LABELS } from '../constants';
+
 const Footer = () => {
 	const companyName = process.env.REACT_APP_COMPANY_NAME;
-	const companyYear = process.env.REACT_APP_COMPANY_YEAR;
 	const currentYear = new Date().getFullYear();
 	const contactEmail = process.env.REACT_APP_CONTACT_EMAIL;
 
@@ -34,8 +35,8 @@ const Footer = () => {
 							color='text.secondary'
 							align='center'
 						>
-							© {companyYear}-{currentYear}, {companyName}. Все
-							права защищены
+							© {currentYear}, {companyName}.{' '}
+							{UI_LABELS.ABOUT.all_rights_reserved}
 						</Typography>
 					</Stack>
 
@@ -51,7 +52,7 @@ const Footer = () => {
 							underline='hover'
 							sx={{ px: 1 }}
 						>
-							О нас
+							{UI_LABELS.ABOUT.about_us}
 						</Link>
 						<Link
 							href={`mailto:${contactEmail}`}

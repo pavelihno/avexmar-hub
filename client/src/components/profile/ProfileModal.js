@@ -18,6 +18,7 @@ import ConstructionIcon from '@mui/icons-material/Construction';
 
 import { changePassword } from '../../redux/actions/user';
 import { useProfileModal } from '../../context/ProfileModalContext';
+import { UI_LABELS } from '../../constants/uiLabels';
 
 const ProfileModal = () => {
 	const { profileModalOpen, closeProfileModal } = useProfileModal();
@@ -42,7 +43,9 @@ const ProfileModal = () => {
 		e.preventDefault();
 
 		if (passwordData.newPassword !== passwordData.confirmPassword) {
-			setErrors({ confirmPassword: 'Пароли не совпадают' });
+			setErrors({
+				confirmPassword: UI_LABELS.PROFILE.passwords_dont_match,
+			});
 			return;
 		}
 
@@ -55,7 +58,7 @@ const ProfileModal = () => {
 					confirmPassword: '',
 				});
 				setErrors({});
-				setSuccessMessage('Пароль успешно изменен');
+				setSuccessMessage(UI_LABELS.PROFILE.password_changed);
 			})
 			.catch((res) => {
 				setErrors(res);
@@ -98,7 +101,7 @@ const ProfileModal = () => {
 						align='center'
 						gutterBottom
 					>
-						Настройки профиля
+						{UI_LABELS.PROFILE.settings}
 					</Typography>
 					<Box
 						sx={{
@@ -131,10 +134,10 @@ const ProfileModal = () => {
 							justifyContent: 'center',
 						}}
 					>
-						Скоро здесь будет личный кабинет
+						{UI_LABELS.PROFILE.maintenance}
 					</Alert>
 
-					<Divider sx={{ my: 2 }}>Сменить пароль</Divider>
+					<Divider sx={{ my: 2 }}>{UI_LABELS.PROFILE.change_password}</Divider>
 
 					<Fade in={!!errors.message} timeout={300}>
 						<div>
@@ -162,7 +165,7 @@ const ProfileModal = () => {
 							required
 							fullWidth
 							name='oldPassword'
-							label='Текущий пароль'
+							label={UI_LABELS.AUTH.old_password}
 							type='password'
 							id='oldPassword'
 							value={passwordData.oldPassword}
@@ -177,7 +180,7 @@ const ProfileModal = () => {
 							required
 							fullWidth
 							name='newPassword'
-							label='Новый пароль'
+							label={UI_LABELS.AUTH.new_password}
 							type='password'
 							id='newPassword'
 							value={passwordData.newPassword}
@@ -192,7 +195,7 @@ const ProfileModal = () => {
 							required
 							fullWidth
 							name='confirmPassword'
-							label='Подтвердите новый пароль'
+							label={UI_LABELS.AUTH.confirm_password}
 							type='password'
 							id='confirmPassword'
 							value={passwordData.confirmPassword}
@@ -208,7 +211,7 @@ const ProfileModal = () => {
 						<Divider sx={{ my: 2 }} />
 
 						<Button type='submit' fullWidth variant='contained'>
-							Сохранить изменения
+							{UI_LABELS.BUTTONS.save_changes}
 						</Button>
 					</Box>
 				</Paper>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+
 import {
 	Box,
 	Button,
@@ -19,12 +20,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import Base from '../Base';
 
 import { login } from '../../redux/actions/auth';
-import { selectIsAuth } from '../../redux/reducers/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
+import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
-	const isAuth = useSelector(selectIsAuth);
 	const { closeAuthModal, openRegisterModal } = useAuthModal();
 
 	const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const Login = ({ isModal = false }) => {
 		dispatch(login(formData))
 			.unwrap()
 			.then(() => {
-				setSuccessMessage('Вход выполнен успешно');
+				setSuccessMessage(UI_LABELS.SUCCESS.login);
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
@@ -83,7 +83,7 @@ const Login = ({ isModal = false }) => {
 					align='center'
 					gutterBottom
 				>
-					Вход
+					{UI_LABELS.TITLES.login}
 				</Typography>
 				<Box
 					sx={{
@@ -133,7 +133,7 @@ const Login = ({ isModal = false }) => {
 							required
 							fullWidth
 							id='email'
-							label='Электронная почта'
+							label={FIELD_LABELS.USER.email}
 							name='email'
 							autoComplete='email'
 							autoFocus
@@ -147,7 +147,7 @@ const Login = ({ isModal = false }) => {
 							required
 							fullWidth
 							name='password'
-							label='Пароль'
+							label={FIELD_LABELS.USER.password}
 							type='password'
 							id='password'
 							autoComplete='current-password'
@@ -158,7 +158,7 @@ const Login = ({ isModal = false }) => {
 						/>
 						<Divider sx={{ my: 1 }} />
 						<Button type='submit' fullWidth variant='contained'>
-							Войти
+							{UI_LABELS.BUTTONS.login}
 						</Button>
 					</Box>
 				) : (
@@ -176,11 +176,11 @@ const Login = ({ isModal = false }) => {
 
 				{!successMessage && (
 					<>
-						<Divider sx={{ my: 2 }}>или</Divider>
+						<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
 
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>
-								Нет аккаунта?{' '}
+								{UI_LABELS.AUTH.no_account}{' '}
 								<Box
 									component='a'
 									href='#'
@@ -195,7 +195,7 @@ const Login = ({ isModal = false }) => {
 										variant='subtitle2'
 										component='span'
 									>
-										Зарегистрироваться
+										{UI_LABELS.BUTTONS.register}
 									</Typography>
 								</Box>
 							</Typography>

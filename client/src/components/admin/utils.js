@@ -233,12 +233,13 @@ export const createAdminManager = (fields, options = {}) => {
 		toUiFormat,
 		renderForm: ({ isEditing, currentItem, onClose, onSave }) => (
 			<AdminEntityForm
-				title={options.entityTitle || 'запись'}
 				fields={formFields}
 				initialData={currentItem}
 				onSave={onSave}
 				onClose={onClose}
 				isEditing={isEditing}
+				addButtonText={options.addButtonText}
+				editButtonText={options.editButtonText}
 			/>
 		),
 	};

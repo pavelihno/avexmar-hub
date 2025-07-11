@@ -10,13 +10,16 @@ import {
 	Box,
 } from '@mui/material';
 
+import { UI_LABELS } from '../../constants';
+
 const AdminEntityForm = ({
-	title,
 	fields,
 	initialData,
 	onSave,
 	onClose,
 	isEditing,
+	addButtonText,
+	editButtonText,
 }) => {
 	const [formData, setFormData] = useState(initialData || {});
 	const [successMessage, setSuccessMessage] = useState('');
@@ -34,9 +37,7 @@ const AdminEntityForm = ({
 		try {
 			onSave(formData);
 			setSuccessMessage(
-				isEditing
-					? 'Данные успешно обновлены'
-					: 'Запись успешно добавлена'
+				isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add
 			);
 			setErrorMessage('');
 
@@ -52,16 +53,14 @@ const AdminEntityForm = ({
 	return (
 		<>
 			<DialogTitle>
-				{isEditing ? `Редактировать ${title}` : `Добавить ${title}`}
+				{isEditing ? editButtonText : addButtonText}
 			</DialogTitle>
 
 			<Box sx={{ px: 3 }}>
 				<Fade in={!!errorMessage} timeout={300}>
 					<div>
 						{errorMessage && (
-							<Alert severity='error'>
-								{errorMessage}
-							</Alert>
+							<Alert severity='error'>{errorMessage}</Alert>
 						)}
 					</div>
 				</Fade>
@@ -69,9 +68,7 @@ const AdminEntityForm = ({
 				<Fade in={!!successMessage} timeout={300}>
 					<div>
 						{successMessage && (
-							<Alert severity='success'>
-								{successMessage}
-							</Alert>
+							<Alert severity='success'>{successMessage}</Alert>
 						)}
 					</div>
 				</Fade>
@@ -100,13 +97,13 @@ const AdminEntityForm = ({
 				</Grid>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose}>Отмена</Button>
+				<Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
 				<Button
 					onClick={handleSubmit}
 					variant='contained'
 					disabled={!!successMessage}
 				>
-					Сохранить
+					{UI_LABELS.BUTTONS.save}
 				</Button>
 			</DialogActions>
 		</>

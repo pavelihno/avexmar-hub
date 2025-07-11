@@ -18,8 +18,11 @@ import { useAuthModal } from '../context/AuthModalContext';
 import { useProfileModal } from '../context/ProfileModalContext';
 import { selectIsAuth, selectIsAdmin } from '../redux/reducers/auth';
 import { logout } from '../redux/actions/auth';
+import { UI_LABELS } from '../constants';
 
 const Header = () => {
+	const companyName = process.env.REACT_APP_COMPANY_NAME;
+
 	const dispatch = useDispatch();
 
 	const { openLoginModal, openRegisterModal } = useAuthModal();
@@ -29,7 +32,6 @@ const Header = () => {
 	const isAdmin = useSelector(selectIsAdmin);
 	const currentUser = useSelector((state) => state.auth.currentUser);
 
-	// Profile menu state
 	const [anchorEl, setAnchorEl] = useState(null);
 	const open = Boolean(anchorEl);
 
@@ -80,7 +82,7 @@ const Header = () => {
 					sx={{ width: 32, height: 32, mr: 1 }}
 				/>
 				<Typography variant='h4' component='span'>
-					АВЕКСМАР
+					{companyName.toUpperCase()}
 				</Typography>
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -96,7 +98,7 @@ const Header = () => {
 						}
 						sx={{ textTransform: 'none' }}
 					>
-						Панель администратора
+						{UI_LABELS.ADMIN.panel}
 					</Button>
 				)}
 
@@ -110,7 +112,7 @@ const Header = () => {
 							}
 							sx={{ textTransform: 'none' }}
 						>
-							{currentUser?.name || 'Профиль'}
+							{currentUser?.name || UI_LABELS.PROFILE.profile}
 						</Button>
 
 						<Menu
@@ -128,11 +130,14 @@ const Header = () => {
 						>
 							<MenuItem onClick={handleOpenProfileModal}>
 								<SettingsIcon fontSize='small' sx={{ mr: 1 }} />
-								Настройки
+								{UI_LABELS.TITLES.settings}
 							</MenuItem>
 							<MenuItem onClick={handleLogout}>
-								<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />
-								Выйти
+								<LoginIcon
+									fontSize='small'
+									sx={{ mr: 1, color: 'red' }}
+								/>
+								{UI_LABELS.BUTTONS.exit}
 							</MenuItem>
 						</Menu>
 					</>
@@ -144,7 +149,7 @@ const Header = () => {
 							startIcon={<LoginIcon />}
 							sx={{ textTransform: 'none' }}
 						>
-							Войти
+							{UI_LABELS.BUTTONS.login}
 						</Button>
 						<Button
 							color='inherit'
@@ -152,7 +157,7 @@ const Header = () => {
 							startIcon={<PersonAddIcon />}
 							sx={{ textTransform: 'none' }}
 						>
-							Зарегистрироваться
+							{UI_LABELS.BUTTONS.register}
 						</Button>
 					</>
 				)}

@@ -21,6 +21,7 @@ import Base from '../Base';
 import { register } from '../../redux/actions/auth';
 import { selectIsAuth } from '../../redux/reducers/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
+import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Register = ({ isModal = false }) => {
 	const dispatch = useDispatch();
@@ -45,7 +46,7 @@ const Register = ({ isModal = false }) => {
 		e.preventDefault();
 
 		if (password !== password2) {
-			setErrors({ password2: 'Пароли не совпадают' });
+			setErrors({ password2: UI_LABELS.PROFILE.passwords_dont_match });
 			return;
 		}
 
@@ -53,7 +54,7 @@ const Register = ({ isModal = false }) => {
 		dispatch(register(formData))
 			.unwrap()
 			.then(() => {
-				setSuccessMessage('Регистрация выполнена успешно');
+				setSuccessMessage(UI_LABELS.SUCCESS.register);
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
@@ -90,7 +91,7 @@ const Register = ({ isModal = false }) => {
 					align='center'
 					gutterBottom
 				>
-					Регистрация
+					{UI_LABELS.TITLES.register}
 				</Typography>
 				<Box
 					sx={{
@@ -142,7 +143,7 @@ const Register = ({ isModal = false }) => {
 							required
 							fullWidth
 							id='email'
-							label='Электронная почта'
+							label={FIELD_LABELS.USER.email}
 							name='email'
 							autoComplete='email'
 							autoFocus
@@ -156,7 +157,7 @@ const Register = ({ isModal = false }) => {
 							required
 							fullWidth
 							name='password'
-							label='Пароль'
+							label={FIELD_LABELS.USER.password}
 							type='password'
 							id='password'
 							autoComplete='new-password'
@@ -170,7 +171,7 @@ const Register = ({ isModal = false }) => {
 							required
 							fullWidth
 							name='password2'
-							label='Подтвердите пароль'
+							label={UI_LABELS.AUTH.confirm_password}
 							type='password'
 							id='password2'
 							autoComplete='new-password'
@@ -183,7 +184,7 @@ const Register = ({ isModal = false }) => {
 						/>
 						<Divider sx={{ my: 1 }} />
 						<Button type='submit' fullWidth variant='contained'>
-							Зарегистрироваться
+							{UI_LABELS.BUTTONS.register}
 						</Button>
 					</Box>
 				) : (
@@ -201,11 +202,11 @@ const Register = ({ isModal = false }) => {
 
 				{!successMessage && (
 					<>
-						<Divider sx={{ my: 2 }}>или</Divider>
+						<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
 
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>
-								Уже есть аккаунт?{' '}
+								{UI_LABELS.AUTH.have_account}{' '}
 								<Box
 									component='a'
 									href='#'
@@ -220,7 +221,7 @@ const Register = ({ isModal = false }) => {
 										variant='subtitle2'
 										component='span'
 									>
-										Войти
+										{UI_LABELS.BUTTONS.login}
 									</Typography>
 								</Box>
 							</Typography>

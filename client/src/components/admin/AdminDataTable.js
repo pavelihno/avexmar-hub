@@ -23,6 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import Base from '../Base';
+import { UI_LABELS } from '../../constants';
 
 const AdminDataTable = ({
 	title,
@@ -32,7 +33,7 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
-	addButtonText = 'Добавить',
+	addButtonText,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [currentItem, setCurrentItem] = useState(null);
@@ -62,7 +63,10 @@ const AdminDataTable = ({
 				onAdd(formData);
 			}
 		} catch (error) {
-			showNotification(error.message || 'Ошибка при сохранении', 'error');
+			showNotification(
+				`${UI_LABELS.ERRORS.save}: ${error.message}`,
+				'error'
+			);
 		}
 	};
 
@@ -72,19 +76,17 @@ const AdminDataTable = ({
 
 			result
 				.then(() => {
-					showNotification('Запись успешно удалена', 'success');
+					showNotification(UI_LABELS.SUCCESS.delete, 'success');
 				})
 				.catch((error) => {
 					showNotification(
-						`Ошибка: ${
-							error.message || 'Не удалось удалить запись'
-						}`,
+						`${UI_LABELS.ERRORS.delete}: ${error.message}`,
 						'error'
 					);
 				});
 		} catch (error) {
 			showNotification(
-				`Ошибка: ${error.message || 'Не удалось удалить запись'}`,
+				`${UI_LABELS.ERRORS.delete}: ${error.message}`,
 				'error'
 			);
 		}
@@ -141,7 +143,7 @@ const AdminDataTable = ({
 									align='right'
 									sx={{ fontWeight: 'bold' }}
 								>
-									Действия
+									{UI_LABELS.ADMIN.actions}
 								</TableCell>
 							</TableRow>
 						</TableHead>
