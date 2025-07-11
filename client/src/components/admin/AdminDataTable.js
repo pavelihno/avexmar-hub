@@ -14,6 +14,9 @@ import {
 	Paper,
 	IconButton,
 	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
 	Snackbar,
 	Alert,
 } from '@mui/material';
@@ -23,6 +26,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import Base from '../Base';
+import { UI_LABELS } from '../../constants';
 
 const AdminDataTable = ({
 	title,
@@ -32,9 +36,13 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
-	addButtonText = 'Добавить',
+	addButtonText,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
+	const [deleteDialog, setDeleteDialog] = useState({
+		open: false,
+		itemId: null,
+	});
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
@@ -54,6 +62,19 @@ const AdminDataTable = ({
 		setOpenDialog(false);
 	};
 
+	const handleOpenDeleteDialog = (id) => {
+		setDeleteDialog({ open: true, itemId: id });
+	};
+
+	const handleCloseDeleteDialog = () => {
+		setDeleteDialog({ open: false, itemId: null });
+	};
+
+	const confirmDelete = () => {
+		handleDelete(deleteDialog.itemId);
+		handleCloseDeleteDialog();
+	};
+
 	const handleSave = (formData) => {
 		try {
 			if (isEditing) {
@@ -62,7 +83,10 @@ const AdminDataTable = ({
 				onAdd(formData);
 			}
 		} catch (error) {
-			showNotification(error.message || 'Ошибка при сохранении', 'error');
+			showNotification(
+				`${UI_LABELS.ERRORS.save}: ${error.message}`,
+				'error'
+			);
 		}
 	};
 
@@ -72,19 +96,17 @@ const AdminDataTable = ({
 
 			result
 				.then(() => {
-					showNotification('Запись успешно удалена', 'success');
+					showNotification(UI_LABELS.SUCCESS.delete, 'success');
 				})
 				.catch((error) => {
 					showNotification(
-						`Ошибка: ${
-							error.message || 'Не удалось удалить запись'
-						}`,
+						`${UI_LABELS.ERRORS.delete}: ${error.message}`,
 						'error'
 					);
 				});
 		} catch (error) {
 			showNotification(
-				`Ошибка: ${error.message || 'Не удалось удалить запись'}`,
+				`${UI_LABELS.ERRORS.delete}: ${error.message}`,
 				'error'
 			);
 		}
@@ -141,7 +163,7 @@ const AdminDataTable = ({
 									align='right'
 									sx={{ fontWeight: 'bold' }}
 								>
-									Действия
+									{UI_LABELS.ADMIN.actions}
 								</TableCell>
 							</TableRow>
 						</TableHead>
@@ -172,7 +194,7 @@ const AdminDataTable = ({
 										</IconButton>
 										<IconButton
 											onClick={() =>
-												handleDelete(item.id)
+												handleOpenDeleteDialog(item.id)
 											}
 										>
 											<DeleteIcon />
@@ -184,6 +206,7 @@ const AdminDataTable = ({
 					</Table>
 				</TableContainer>
 
+				{/* Add/edit dialog */}
 				<Dialog
 					open={openDialog}
 					onClose={handleCloseDialog}
@@ -191,11 +214,42 @@ const AdminDataTable = ({
 					fullWidth
 				>
 					{renderForm({
-						isEditing,
-						currentItem,
+						isEditing: isEditing,
+						currentItem: currentItem,
 						onClose: handleCloseDialog,
 						onSave: handleSave,
 					})}
+				</Dialog>
+
+				{/* Delete dialog */}
+				<Dialog
+					open={deleteDialog.open}
+					onClose={handleCloseDeleteDialog}
+				>
+					<DialogTitle id='delete-dialog-title'>
+						{UI_LABELS.MESSAGES.confirm_action}
+					</DialogTitle>
+
+					<DialogContent>
+						<Typography id='delete-dialog-description'>
+							{UI_LABELS.MESSAGES.confirm_delete}
+						</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button
+							onClick={handleCloseDeleteDialog}
+							color='primary'
+						>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
+						<Button
+							onClick={confirmDelete}
+							color='error'
+							variant='contained'
+						>
+							{UI_LABELS.BUTTONS.delete}
+						</Button>
+					</DialogActions>
 				</Dialog>
 
 				<Snackbar

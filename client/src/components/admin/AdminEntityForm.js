@@ -10,17 +10,21 @@ import {
 	Box,
 } from '@mui/material';
 
+import { UI_LABELS } from '../../constants';
+
 const AdminEntityForm = ({
-	title,
 	fields,
 	initialData,
 	onSave,
 	onClose,
 	isEditing,
+	addButtonText,
+	editButtonText,
 }) => {
 	const [formData, setFormData] = useState(initialData || {});
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+	const [validationErrors, setValidationErrors] = useState({});
 
 	useEffect(() => {
 		setFormData(initialData || {});
@@ -28,15 +32,41 @@ const AdminEntityForm = ({
 
 	const handleChange = (field, value) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
+
+		if (successMessage) {
+			setSuccessMessage('');
+		}
+
+		if (validationErrors[field]) {
+			setValidationErrors((prev) => ({ ...prev, [field]: '' }));
+		}
+	};
+
+	const validateForm = () => {
+		const errors = {};
+		let isValid = true;
+
+		fields.forEach((field) => {
+			if (field.validate) {
+				const error = field.validate(formData[field.name]);
+				if (error) {
+					errors[field.name] = error;
+					isValid = false;
+				}
+			}
+		});
+
+		setValidationErrors(errors);
+		return isValid;
 	};
 
 	const handleSubmit = () => {
+		if (!validateForm()) return;
+
 		try {
 			onSave(formData);
 			setSuccessMessage(
-				isEditing
-					? 'Данные успешно обновлены'
-					: 'Запись успешно добавлена'
+				isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add
 			);
 			setErrorMessage('');
 
@@ -52,16 +82,14 @@ const AdminEntityForm = ({
 	return (
 		<>
 			<DialogTitle>
-				{isEditing ? `Редактировать ${title}` : `Добавить ${title}`}
+				{isEditing ? editButtonText : addButtonText}
 			</DialogTitle>
 
 			<Box sx={{ px: 3 }}>
 				<Fade in={!!errorMessage} timeout={300}>
 					<div>
 						{errorMessage && (
-							<Alert severity='error'>
-								{errorMessage}
-							</Alert>
+							<Alert severity='error'>{errorMessage}</Alert>
 						)}
 					</div>
 				</Fade>
@@ -69,9 +97,7 @@ const AdminEntityForm = ({
 				<Fade in={!!successMessage} timeout={300}>
 					<div>
 						{successMessage && (
-							<Alert severity='success'>
-								{successMessage}
-							</Alert>
+							<Alert severity='success'>{successMessage}</Alert>
 						)}
 					</div>
 				</Fade>
@@ -94,19 +120,21 @@ const AdminEntityForm = ({
 								onChange: (value) =>
 									handleChange(field.name, value),
 								fullWidth: true,
+								error: !!validationErrors[field.name],
+								helperText: validationErrors[field.name],
 							})}
 						</Grid>
 					))}
 				</Grid>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose}>Отмена</Button>
+				<Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
 				<Button
 					onClick={handleSubmit}
 					variant='contained'
 					disabled={!!successMessage}
 				>
-					Сохранить
+					{UI_LABELS.BUTTONS.save}
 				</Button>
 			</DialogActions>
 		</>

@@ -36,7 +36,7 @@ def __create_app(_config_class, _db):
     app.config.from_object(_config_class)
 
     # Enable CORS for all routes
-    CORS(app, resources={r"/*": {"origins": Config.CORS_ORIGINS}})
+    CORS(app, resources={r"/*": {'origins': Config.CORS_ORIGINS}})
 
     # Required for tracking migrations
     __import_models()
@@ -56,41 +56,47 @@ def __create_app(_config_class, _db):
     app.route('/users/<int:user_id>', methods=['DELETE'])(delete_user)
     app.route('/users/<int:user_id>/activate', methods=['PUT'])(activate_user)
     app.route('/users/<int:user_id>/deactivate', methods=['PUT'])(deactivate_user)
-    app.route('/users/change-password', methods=['PUT'])(change_password)
+    app.route('/users/change_password', methods=['PUT'])(change_password)
 
     # airports
     app.route('/airports', methods=['GET'])(get_airports)
     app.route('/airports', methods=['POST'])(create_airport)
+    app.route('/airports/<int:airport_id>', methods=['GET'])(get_airport)
     app.route('/airports/<int:airport_id>', methods=['PUT'])(update_airport)
     app.route('/airports/<int:airport_id>', methods=['DELETE'])(delete_airport)
 
     # routes
     app.route('/routes', methods=['GET'])(get_routes)
     app.route('/routes', methods=['POST'])(create_route)
+    app.route('/routes/<int:route_id>', methods=['GET'])(get_route)
     app.route('/routes/<int:route_id>', methods=['PUT'])(update_route)
     app.route('/routes/<int:route_id>', methods=['DELETE'])(delete_route)
 
     # flights
     app.route('/flights', methods=['GET'])(get_flights)
     app.route('/flights', methods=['POST'])(create_flight)
+    app.route('/flights/<int:flight_id>', methods=['GET'])(get_flight)
     app.route('/flights/<int:flight_id>', methods=['PUT'])(update_flight)
     app.route('/flights/<int:flight_id>', methods=['DELETE'])(delete_flight)
 
     # tariffs
     app.route('/tariffs', methods=['GET'])(get_tariffs)
     app.route('/tariffs', methods=['POST'])(create_tariff)
+    app.route('/tariffs/<int:tariff_id>', methods=['GET'])(get_tariff)
     app.route('/tariffs/<int:tariff_id>', methods=['PUT'])(update_tariff)
     app.route('/tariffs/<int:tariff_id>', methods=['DELETE'])(delete_tariff)
 
     # discounts
     app.route('/discounts', methods=['GET'])(get_discounts)
     app.route('/discounts', methods=['POST'])(create_discount)
+    app.route('/discounts/<int:discount_id>', methods=['GET'])(get_discount)
     app.route('/discounts/<int:discount_id>', methods=['PUT'])(update_discount)
     app.route('/discounts/<int:discount_id>', methods=['DELETE'])(delete_discount)
 
     # seats
     app.route('/seats', methods=['GET'])(get_seats)
     app.route('/seats', methods=['POST'])(create_seat)
+    app.route('/seats/<int:seat_id>', methods=['GET'])(get_seat)
     app.route('/seats/<int:seat_id>', methods=['PUT'])(update_seat)
     app.route('/seats/<int:seat_id>', methods=['DELETE'])(delete_seat)
 

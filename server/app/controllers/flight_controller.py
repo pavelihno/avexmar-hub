@@ -5,9 +5,18 @@ from app.models.route import Route
 from app.middlewares.auth_middleware import admin_required
 
 
-def get_flights():
+@admin_required
+def get_flights(current_user):
     flights = Flight.get_all()
     return jsonify([flight.to_dict() for flight in flights])
+
+
+@admin_required
+def get_flight(current_user, flight_id):
+    flight = Flight.get_by_id(flight_id)
+    if flight:
+        return jsonify(flight.to_dict()), 200
+    return jsonify({'message': 'Flight not found'}), 404
 
 
 @admin_required

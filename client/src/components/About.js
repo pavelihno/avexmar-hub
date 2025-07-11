@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
 	Typography,
 	Grid,
@@ -19,34 +20,18 @@ import {
 	ContentCopy,
 } from '@mui/icons-material';
 import Base from './Base';
+import { UI_LABELS } from '../constants/uiLabels';
 
 const About = () => {
 	const [snackbarOpen, setSnackbarOpen] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
 
-	const cardsData = [
-		{
-			icon: 'images/icons/business.svg',
-			alt: 'партнеры',
-			title: 'Широкий спектр клиентов и партнёров в сфере воздушных перевозок',
-			content:
-				'Компания «АВЕКСМАР» является надежным партнером для старательских артелей, предприятий и организаций, таких как ОАО «Полиметалл», Морской порт Певек, ООО «Инкомнефтеремонт», ООО «Уранцветмет», ООО «Атомредметзолото», а также предприятий, связанных с ПАТЭС, обслуживаемых компаниями ООО «Запсибгидрострой», ООО «Ленмонтаж», ООО «Гидропромстрой», ООО «Плавстройотряд-34» и Нововоронежской АЭС',
-		},
-		{
-			icon: 'images/icons/history.svg',
-			alt: 'история',
-			title: 'Опытная компания с богатой историей',
-			content:
-				'Коллектив ООО «АВЕКСМАР» занимается организацией пассажирских и грузовых авиаперевозок с 1995 года. Компания имеет многолетний опыт организации воздушных перевозок пассажиров, проживающих или работающих на территории Чукотского автономного округа',
-		},
-		{
-			icon: 'images/icons/airplane.svg',
-			alt: 'авиакомпании',
-			title: 'Долгосрочное сотрудничество с ведущими авиакомпаниями',
-			content:
-				'Организация сотрудничала с такими авиакомпаниями, как «Внуковские авиалинии», «Красноярские авиалинии», «Авиаэнерго», «Кавминводыавиа», «Трансаэро», «ЮТэйр». С апреля 2017 года ООО «АВЕКСМАР» организует регулярные рейсы по маршруту Москва-Якутск-Певек-Якутск-Москва с авиакомпанией «Якутия». За это время было выполнено более 500 рейсов и перевезено более 55 000 пассажиров',
-		},
-	];
+	const cardsData = UI_LABELS.ABOUT.cards.map((card, _) => ({
+		...card,
+		icon: `images/icons/${card.icon}.svg`,
+	}));
+
+	const companyDescription = UI_LABELS.ABOUT.company_description;
 
 	const contactInfo = {
 		address: process.env.REACT_APP_ADDRESS,
@@ -55,17 +40,18 @@ const About = () => {
 	};
 
 	const companyName = process.env.REACT_APP_COMPANY_NAME;
-	const foundingYear = process.env.REACT_APP_COMPANY_YEAR;
 
 	const handleCopy = (text, type) => {
 		navigator.clipboard
 			.writeText(text)
 			.then(() => {
-				setSnackbarMessage(`${type} скопирован`);
+				setSnackbarMessage(
+					`${type} ${UI_LABELS.ABOUT.copied.toLowerCase()}`
+				);
 				setSnackbarOpen(true);
 			})
 			.catch((err) => {
-				console.error('Ошибка при копировании: ', err);
+				console.error(`${UI_LABELS.ERRORS.copy}: ${err}`);
 			});
 	};
 
@@ -81,8 +67,7 @@ const About = () => {
 						{companyName}
 					</Typography>
 					<Typography variant='subtitle1' color='text.secondary'>
-						Надежный партнер в сфере организации пассажирских и
-						грузовых авиаперевозок с {foundingYear} года
+						{companyDescription}
 					</Typography>
 				</Box>
 
@@ -154,7 +139,7 @@ const About = () => {
 
 				<Box mb={4}>
 					<Typography variant='h4' component='h2' gutterBottom>
-						Контактная информация
+						{UI_LABELS.ABOUT.contact_info}
 					</Typography>
 					<Paper elevation={1} sx={{ p: 2 }}>
 						<Grid container alignItems='center'>
@@ -174,7 +159,7 @@ const About = () => {
 										variant='subtitle2'
 										color='text.secondary'
 									>
-										Адрес
+										{UI_LABELS.ABOUT.address}
 									</Typography>
 									<Box
 										sx={{
@@ -188,16 +173,16 @@ const About = () => {
 										>
 											{contactInfo.address}
 										</Typography>
-										<Tooltip title='Копировать'>
+										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
 												onClick={() =>
 													handleCopy(
 														contactInfo.address,
-														'Адрес'
+														UI_LABELS.ABOUT.address
 													)
 												}
-												aria-label='копировать адрес'
+												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.address}`}
 											>
 												<ContentCopy fontSize='small' />
 											</IconButton>
@@ -221,7 +206,7 @@ const About = () => {
 										variant='subtitle2'
 										color='text.secondary'
 									>
-										Телефон
+										{UI_LABELS.ABOUT.phone}
 									</Typography>
 									<Box
 										sx={{
@@ -244,16 +229,16 @@ const About = () => {
 										>
 											{contactInfo.phone}
 										</Link>
-										<Tooltip title='Копировать'>
+										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
 												onClick={() =>
 													handleCopy(
 														contactInfo.phone,
-														'Телефон'
+														UI_LABELS.ABOUT.phone
 													)
 												}
-												aria-label='копировать телефон'
+												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.phone}`}
 											>
 												<ContentCopy fontSize='small' />
 											</IconButton>
@@ -277,7 +262,7 @@ const About = () => {
 										variant='subtitle2'
 										color='text.secondary'
 									>
-										Электронная почта
+										{UI_LABELS.ABOUT.email}
 									</Typography>
 									<Box
 										sx={{
@@ -300,16 +285,17 @@ const About = () => {
 										>
 											{contactInfo.email}
 										</Link>
-										<Tooltip title='Копировать'>
+										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
 												onClick={() =>
 													handleCopy(
 														contactInfo.email,
-														'Адрес электронной почты'
+														UI_LABELS.ABOUT
+															.email_address
 													)
 												}
-												aria-label='копировать адрес электронной почты'
+												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.email_address}`}
 											>
 												<ContentCopy fontSize='small' />
 											</IconButton>
@@ -323,7 +309,7 @@ const About = () => {
 
 				<Box mb={4}>
 					<Typography variant='h4' component='h2' gutterBottom>
-						Правовая информация
+						{UI_LABELS.ABOUT.legal_info}
 					</Typography>
 					<Paper elevation={1} sx={{ p: 2 }}>
 						<Grid container spacing={2}>
@@ -349,8 +335,10 @@ const About = () => {
 										sx={{ mr: 1 }}
 									/>
 									<Typography variant='body2'>
-										Согласие на обработку персональных
-										данных
+										{
+											UI_LABELS.ABOUT
+												.privacy_policy_agreement
+										}
 									</Typography>
 								</Box>
 							</Grid>
@@ -376,7 +364,7 @@ const About = () => {
 										sx={{ mr: 1 }}
 									/>
 									<Typography variant='body2'>
-										Согласие на получение рекламной рассылки
+										{UI_LABELS.ABOUT.marketing_consent}
 									</Typography>
 								</Box>
 							</Grid>

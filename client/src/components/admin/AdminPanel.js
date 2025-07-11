@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+
 import {
 	Box,
 	Typography,
@@ -19,63 +20,65 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 import Base from '../Base';
 
+import { UI_LABELS } from '../../constants';
+
 const AdminPanel = () => {
 	const adminModules = [
 		{
-			title: 'Аэропорты',
-			description: 'Управление аэропортами',
+			title: UI_LABELS.ADMIN.modules.airports.title,
+			description: UI_LABELS.ADMIN.modules.airports.description,
 			icon: <AirportIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/airports',
 		},
 		{
-			title: 'Маршруты',
-			description: 'Управление маршрутами',
+			title: UI_LABELS.ADMIN.modules.routes.title,
+			description: UI_LABELS.ADMIN.modules.routes.description,
 			icon: <RouteIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/routes',
 		},
 		{
-			title: 'Скидки',
-			description: 'Управление скидками',
+			title: UI_LABELS.ADMIN.modules.discounts.title,
+			description: UI_LABELS.ADMIN.modules.discounts.description,
 			icon: <DiscountIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/discounts',
 		},
 		{
-			title: 'Рейсы',
-			description: 'Управление рейсами и тарифами',
+			title: UI_LABELS.ADMIN.modules.flights.title,
+			description: UI_LABELS.ADMIN.modules.flights.description,
 			icon: <FlightTakeoffIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/flights',
 		},
-        {
-            title: 'Бронирования',
-            description: 'Управление бронированиями',
-            icon: <BookOnlineIcon sx={{ fontSize: 50 }} />,
-            path: '/admin/bookings',
-        },
-        {
-            title: 'Билеты',
-            description: 'Управление билетами',
-            icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
-            path: '/admin/tickets',
-        },
-        {
-            title: 'Пассажиры',
-            description: 'Управление пассажирами',
-            icon: <HailIcon sx={{ fontSize: 50 }} />,
-            path: '/admin/passengers',
-        },
-        {
-            title: 'Пользователи',
-            description: 'Управление пользователями',
-            icon: <ManageAccountsIcon sx={{ fontSize: 50 }} />,
-            path: '/admin/users',
-        }
+		{
+			title: UI_LABELS.ADMIN.modules.bookings.title,
+			description: UI_LABELS.ADMIN.modules.bookings.description,
+			icon: <BookOnlineIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/bookings',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.tickets.title,
+			description: UI_LABELS.ADMIN.modules.tickets.description,
+			icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/tickets',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.passengers.title,
+			description: UI_LABELS.ADMIN.modules.passengers.description,
+			icon: <HailIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/passengers',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.users.title,
+			description: UI_LABELS.ADMIN.modules.users.description,
+			icon: <ManageAccountsIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/users',
+		},
 	];
 
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
 				<Typography variant='h3' sx={{ mb: 4 }}>
-					Панель администратора
+					{UI_LABELS.ADMIN.panel}
 				</Typography>
 
 				<Grid container spacing={3}>

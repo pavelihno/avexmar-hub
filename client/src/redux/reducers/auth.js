@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import { login, register, auth, logout } from '../actions/auth';
 import { changePassword } from '../actions/user';
+import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
 	currentUser: null,
@@ -22,65 +23,50 @@ const authSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			.addCase(login.pending, (state) => {
-				state.isLoading = true;
-			})
+			// Login
+			.addCase(login.pending, handlePending)
 			.addCase(login.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(login.rejected, (state, action) => {
-				state.errors = action.payload;
-				state.isLoading = false;
-			})
-			.addCase(register.pending, (state) => {
-				state.isLoading = true;
-			})
+			.addCase(login.rejected, handleRejected)
+
+			// Register
+			.addCase(register.pending, handlePending)
 			.addCase(register.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(register.rejected, (state, action) => {
-				state.errors = action.payload;
-				state.isLoading = false;
-			})
-			.addCase(auth.pending, (state) => {
-				state.isLoading = true;
-			})
+			.addCase(register.rejected, handleRejected)
+
+			// Auth verification
+			.addCase(auth.pending, handlePending)
 			.addCase(auth.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(auth.rejected, (state, action) => {
-				state.errors = action.payload;
-				state.isLoading = false;
-			})
-			.addCase(logout.pending, (state) => {
-				state.isLoading = true;
-			})
+			.addCase(auth.rejected, handleRejected)
+
+			// Logout
+			.addCase(logout.pending, handlePending)
 			.addCase(logout.fulfilled, (state) => {
 				state.currentUser = null;
 				state.isLoading = false;
 			})
-			.addCase(logout.rejected, (state, action) => {
-				state.errors = action.payload;
-				state.isLoading = false;
-			})
-			.addCase(changePassword.pending, (state) => {
-				state.isLoading = true;
-			})
+			.addCase(logout.rejected, handleRejected)
+
+			// Change password
+			.addCase(changePassword.pending, handlePending)
 			.addCase(changePassword.fulfilled, (state) => {
 				state.isLoading = false;
 			})
-			.addCase(changePassword.rejected, (state, action) => {
-				state.errors = action.payload;
-				state.isLoading = false;
-			});
+			.addCase(changePassword.rejected, handleRejected);
 	},
 });
 
 export const { setCurrentUser, setErrors } = authSlice.actions;
 export const selectIsAuth = (state) => !!state.auth.currentUser;
-export const selectIsAdmin = (state) => !!state.auth.currentUser && state.auth.currentUser.role == 'admin';
+export const selectIsAdmin = (state) =>
+	!!state.auth.currentUser && state.auth.currentUser.role === 'admin';
 
 export default authSlice.reducer;

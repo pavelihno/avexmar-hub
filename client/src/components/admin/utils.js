@@ -10,9 +10,10 @@ import {
 	FormHelperText,
 } from '@mui/material';
 
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns';
 
 import AdminEntityForm from './AdminEntityForm';
 
@@ -23,6 +24,7 @@ export const FIELD_TYPES = {
 	TEXT: 'text',
 	NUMBER: 'number',
 	DATE: 'date',
+	DATETIME: 'dateTime',
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
@@ -42,8 +44,8 @@ export const createFieldRenderer = (field) => {
 					value={props.value || ''}
 					onChange={(e) => props.onChange(e.target.value)}
 					fullWidth={props.fullWidth}
-					error={!!props.error}
-					helperText={props.error}
+					error={props.error}
+					helperText={props.error ? props.helperText : ''}
 					inputProps={field.inputProps}
 				/>
 			);
@@ -62,8 +64,8 @@ export const createFieldRenderer = (field) => {
 					}}
 					type='number'
 					fullWidth={props.fullWidth}
-					error={!!props.error}
-					helperText={props.error}
+					error={props.error}
+					helperText={props.error ? props.helperText : ''}
 					inputProps={{
 						step: field.float ? 0.01 : 1,
 						...field.inputProps,
@@ -81,11 +83,30 @@ export const createFieldRenderer = (field) => {
 						slotProps={{
 							textField: {
 								fullWidth: props.fullWidth,
-								error: !!props.error,
-								helperText: props.error,
+								error: props.error,
+								helperText: props.error ? props.helperText : '',
 							},
 						}}
-						format={field.dateFormat || 'dd/MM/yyyy'}
+						format={field.dateFormat || 'dd.MM.yyyy'}
+					/>
+				</LocalizationProvider>
+			);
+
+		case FIELD_TYPES.DATETIME:
+			return (props) => (
+				<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<DateTimePicker
+						label={field.label}
+						value={props.value ? new Date(props.value) : null}
+						onChange={(dateTime) => props.onChange(dateTime)}
+						slotProps={{
+							textField: {
+								fullWidth: props.fullWidth,
+								error: props.error,
+								helperText: props.error ? props.helperText : '',
+							},
+						}}
+						format={field.dateTimeFormat || 'dd.MM.yyyy HH:mm'}
 					/>
 				</LocalizationProvider>
 			);
@@ -106,7 +127,7 @@ export const createFieldRenderer = (field) => {
 						))}
 					</Select>
 					{props.error && (
-						<FormHelperText>{props.error}</FormHelperText>
+						<FormHelperText>{props.helperText}</FormHelperText>
 					)}
 				</FormControl>
 			);
@@ -126,7 +147,9 @@ export const createFieldRenderer = (field) => {
 			);
 
 		case FIELD_TYPES.CUSTOM:
-			return field.renderField;
+			return (props) => {
+				return field.renderField(props);
+			};
 
 		default:
 			return (props) => (
@@ -160,11 +183,18 @@ export const createFormFields = (fields) => {
 export const createTableColumns = (fields) => {
 	return Object.values(fields)
 		.filter((field) => field.key !== 'id' && !field.excludeFromTable)
-		.map((field) => ({
-			field: field.key,
-			header: field.label,
-			formatter: field.formatter,
-		}));
+		.map((field) => {
+			const column = {
+				field: field.key,
+				header: field.label,
+				formatter: field.formatter,
+				render: field.renderField
+					? (item) => field.renderField(item)
+					: null,
+			};
+
+			return column;
+		});
 };
 
 /**
@@ -203,7 +233,6 @@ export const createToUiFormatter = (fields) => {
 
 		Object.values(fields).forEach((field) => {
 			if (field.key !== 'id' && field.apiKey) {
-				// Handle special transformations if needed
 				if (field.toUi) {
 					result[field.key] = field.toUi(apiData[field.apiKey]);
 				} else {
@@ -233,13 +262,34 @@ export const createAdminManager = (fields, options = {}) => {
 		toUiFormat,
 		renderForm: ({ isEditing, currentItem, onClose, onSave }) => (
 			<AdminEntityForm
-				title={options.entityTitle || 'запись'}
 				fields={formFields}
 				initialData={currentItem}
 				onSave={onSave}
 				onClose={onClose}
 				isEditing={isEditing}
+				addButtonText={options.addButtonText}
+				editButtonText={options.editButtonText}
 			/>
 		),
 	};
+};
+
+export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
+    if (!value) return '';
+    try {
+        return format(new Date(value), dateFormat);
+    } catch (error) {
+        console.error('Invalid date value:', value);
+        return value;
+    }
+};
+
+export const formatDateTime = (value, dateTimeFormat = 'dd.MM.yyyy HH:mm') => {
+    if (!value) return '';
+    try {
+        return format(new Date(value), dateTimeFormat);
+    } catch (error) {
+        console.error('Invalid datetime value:', value);
+        return value;
+    }
 };
