@@ -24,6 +24,7 @@ const AdminEntityForm = ({
 	const [formData, setFormData] = useState(initialData || {});
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+	const [validationErrors, setValidationErrors] = useState({});
 
 	useEffect(() => {
 		setFormData(initialData || {});
@@ -31,9 +32,33 @@ const AdminEntityForm = ({
 
 	const handleChange = (field, value) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
+
+		if (validationErrors[field]) {
+			setValidationErrors((prev) => ({ ...prev, [field]: '' }));
+		}
+	};
+
+	const validateForm = () => {
+		const errors = {};
+		let isValid = true;
+
+		fields.forEach((field) => {
+			if (field.validate) {
+				const error = field.validate(formData[field.name]);
+				if (error) {
+					errors[field.name] = error;
+					isValid = false;
+				}
+			}
+		});
+
+		setValidationErrors(errors);
+		return isValid;
 	};
 
 	const handleSubmit = () => {
+		if (!validateForm()) return;
+
 		try {
 			onSave(formData);
 			setSuccessMessage(
@@ -91,6 +116,8 @@ const AdminEntityForm = ({
 								onChange: (value) =>
 									handleChange(field.name, value),
 								fullWidth: true,
+								error: !!validationErrors[field.name],
+								helperText: validationErrors[field.name],
 							})}
 						</Grid>
 					))}

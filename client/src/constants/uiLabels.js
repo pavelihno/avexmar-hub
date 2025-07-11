@@ -19,6 +19,7 @@ export const UI_LABELS = {
 		settings: 'Настройки',
 	},
 	MESSAGES: {
+		loading: 'Загрузка...',
 		required_field: 'Это поле обязательно',
 	},
 	SUCCESS: {
@@ -150,7 +151,6 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
-	LOADING: 'Загрузка...',
 };
 
 export default UI_LABELS;

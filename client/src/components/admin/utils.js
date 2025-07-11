@@ -42,8 +42,8 @@ export const createFieldRenderer = (field) => {
 					value={props.value || ''}
 					onChange={(e) => props.onChange(e.target.value)}
 					fullWidth={props.fullWidth}
-					error={!!props.error}
-					helperText={props.error}
+					error={props.error}
+					helperText={props.error ? props.helperText : ''}
 					inputProps={field.inputProps}
 				/>
 			);
@@ -62,8 +62,8 @@ export const createFieldRenderer = (field) => {
 					}}
 					type='number'
 					fullWidth={props.fullWidth}
-					error={!!props.error}
-					helperText={props.error}
+					error={props.error}
+					helperText={props.error ? props.helperText : ''}
 					inputProps={{
 						step: field.float ? 0.01 : 1,
 						...field.inputProps,
@@ -81,8 +81,8 @@ export const createFieldRenderer = (field) => {
 						slotProps={{
 							textField: {
 								fullWidth: props.fullWidth,
-								error: !!props.error,
-								helperText: props.error,
+								error: props.error,
+								helperText: props.error ? props.helperText : '',
 							},
 						}}
 						format={field.dateFormat || 'dd/MM/yyyy'}
@@ -106,7 +106,7 @@ export const createFieldRenderer = (field) => {
 						))}
 					</Select>
 					{props.error && (
-						<FormHelperText>{props.error}</FormHelperText>
+						<FormHelperText>{props.helperText}</FormHelperText>
 					)}
 				</FormControl>
 			);
