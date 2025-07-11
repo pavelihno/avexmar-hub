@@ -11,7 +11,7 @@ import {
 } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import { UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const RouteManagement = () => {
 	const dispatch = useDispatch();
@@ -49,7 +49,7 @@ const RouteManagement = () => {
 		flightNumber: {
 			key: 'flightNumber',
 			apiKey: 'flight_number',
-			label: 'Номер рейса',
+			label: FIELD_LABELS.ROUTE.flight_number,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
 			validate: (value) =>
@@ -60,7 +60,7 @@ const RouteManagement = () => {
 		originAirportId: {
 			key: 'originAirportId',
 			apiKey: 'origin_airport_id',
-			label: 'Аэропорт отправления',
+			label: FIELD_LABELS.ROUTE.origin_airport_id,
 			type: FIELD_TYPES.SELECT,
 			options: airportOptions,
 			formatter: (value) => {
@@ -75,7 +75,7 @@ const RouteManagement = () => {
 		destinationAirportId: {
 			key: 'destinationAirportId',
 			apiKey: 'destination_airport_id',
-			label: 'Аэропорт прибытия',
+			label: FIELD_LABELS.ROUTE.destination_airport_id,
 			type: FIELD_TYPES.SELECT,
 			options: airportOptions,
 			formatter: (value) => {

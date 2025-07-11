@@ -33,6 +33,10 @@ const AdminEntityForm = ({
 	const handleChange = (field, value) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 
+		if (successMessage) {
+			setSuccessMessage('');
+		}
+
 		if (validationErrors[field]) {
 			setValidationErrors((prev) => ({ ...prev, [field]: '' }));
 		}

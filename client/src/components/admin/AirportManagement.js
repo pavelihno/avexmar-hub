@@ -10,11 +10,7 @@ import {
 	deleteAirport,
 } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-} from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
@@ -34,6 +30,8 @@ const AirportManagement = () => {
 			label: FIELD_LABELS.AIRPORT.name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRPORT.name.REQUIRED : null,
 		},
 		iataCode: {
 			key: 'iata_code',
@@ -64,6 +62,8 @@ const AirportManagement = () => {
 			apiKey: 'city_code',
 			label: FIELD_LABELS.AIRPORT.city_code,
 			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRPORT.city_code.REQUIRED : null,
 		},
 		country: {
 			key: 'country',

@@ -10,7 +10,7 @@ import {
 	FormHelperText,
 } from '@mui/material';
 
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -23,6 +23,7 @@ export const FIELD_TYPES = {
 	TEXT: 'text',
 	NUMBER: 'number',
 	DATE: 'date',
+	DATETIME: 'dateTime',
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
@@ -85,7 +86,26 @@ export const createFieldRenderer = (field) => {
 								helperText: props.error ? props.helperText : '',
 							},
 						}}
-						format={field.dateFormat || 'dd/MM/yyyy'}
+						format={field.dateFormat || 'dd.MM.yyyy'}
+					/>
+				</LocalizationProvider>
+			);
+
+		case FIELD_TYPES.DATETIME:
+			return (props) => (
+				<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<DateTimePicker
+						label={field.label}
+						value={props.value ? new Date(props.value) : null}
+						onChange={(dateTime) => props.onChange(dateTime)}
+						slotProps={{
+							textField: {
+								fullWidth: props.fullWidth,
+								error: props.error,
+								helperText: props.error ? props.helperText : '',
+							},
+						}}
+						format={field.dateTimeFormat || 'dd.MM.yyyy HH:mm'}
 					/>
 				</LocalizationProvider>
 			);
