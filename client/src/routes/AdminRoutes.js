@@ -5,6 +5,10 @@ import AirportManagement from '../components/admin/AirportManagement';
 import RouteManagement from '../components/admin/RouteManagement';
 import DiscountManagement from '../components/admin/DiscountManagement';
 import FlightManagement from '../components/admin/FlightManagement';
+import BookingManagement from '../components/admin/BookingManagement';
+import TicketManagement from '../components/admin/TicketManagement';
+import PassengerManagement from '../components/admin/PassengerManagement';
+import UserManagement from '../components/admin/UserManagement';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -42,15 +46,51 @@ const AdminRoutes = ({ isAdmin }) => [
 			/>
 		),
 	},
-	{
-		path: '/admin/flights',
-		element: (
-			<ProtectedRoute
-				children={<FlightManagement />}
-				condition={isAdmin}
-			/>
-		),
-	},
+        {
+                path: '/admin/flights',
+                element: (
+                        <ProtectedRoute
+                                children={<FlightManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/bookings',
+                element: (
+                        <ProtectedRoute
+                                children={<BookingManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/tickets',
+                element: (
+                        <ProtectedRoute
+                                children={<TicketManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/passengers',
+                element: (
+                        <ProtectedRoute
+                                children={<PassengerManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/users',
+                element: (
+                        <ProtectedRoute
+                                children={<UserManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
 ];
 
 export default AdminRoutes;

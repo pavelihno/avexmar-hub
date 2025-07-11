@@ -9,6 +9,8 @@ import tariffsReducer from './reducers/tariff';
 import ticketsReducer from './reducers/ticket';
 import discountReducer from './reducers/discount';
 import userReducer from './reducers/user';
+import bookingReducer from './reducers/booking';
+import passengerReducer from './reducers/passenger';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -16,11 +18,13 @@ const rootReducer = combineReducers({
 	auth: authReducer,
 	airports: airportReducer,
 	routes: routesReducer,
-	flights: flightReducer,
-	tariffs: tariffsReducer,
-	tickets: ticketsReducer,
-	discounts: discountReducer,
-	users: userReducer,
+        flights: flightReducer,
+        tariffs: tariffsReducer,
+        tickets: ticketsReducer,
+        discounts: discountReducer,
+        bookings: bookingReducer,
+        passengers: passengerReducer,
+        users: userReducer,
 });
 
 const store = createStore(
