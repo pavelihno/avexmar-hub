@@ -5,8 +5,6 @@ from app.models._base_model import BaseModel
 class Route(BaseModel):
     __tablename__ = 'routes'
 
-    flight_number = db.Column(db.String, nullable=False)
-    airline_id = db.Column(db.Integer, db.ForeignKey('airlines.id', ondelete='RESTRICT'), nullable=False)
     origin_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
     destination_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
 

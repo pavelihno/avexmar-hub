@@ -1,8 +1,8 @@
-"""Tables initialized
+"""DB initialized
 
-Revision ID: d838251eca81
+Revision ID: 7f5625189057
 Revises: 
-Create Date: 2025-07-14 10:45:23.712035
+Create Date: 2025-07-14 16:02:32.935595
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd838251eca81'
+revision = '7f5625189057'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -123,28 +123,29 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('routes',
-    sa.Column('flight_number', sa.String(), nullable=False),
-    sa.Column('airline_id', sa.Integer(), nullable=False),
     sa.Column('origin_airport_id', sa.Integer(), nullable=False),
     sa.Column('destination_airport_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['airline_id'], ['airlines.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['destination_airport_id'], ['airports.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['origin_airport_id'], ['airports.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('flights',
+    sa.Column('flight_number', sa.String(), nullable=False),
     sa.Column('route_id', sa.Integer(), nullable=False),
+    sa.Column('airline_id', sa.Integer(), nullable=False),
     sa.Column('scheduled_departure', sa.DateTime(), nullable=True),
     sa.Column('scheduled_arrival', sa.DateTime(), nullable=True),
     sa.Column('status', sa.Enum('scheduled', 'delayed', 'departed', 'arrived', 'cancelled', name='flight_status'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['airline_id'], ['airlines.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['route_id'], ['routes.id'], ondelete='RESTRICT'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('flight_number')
     )
     op.create_table('tariffs',
     sa.Column('flight_id', sa.Integer(), nullable=False),
