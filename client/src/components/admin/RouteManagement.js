@@ -10,20 +10,25 @@ import {
 	deleteRoute,
 } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
+import { fetchAirlines } from '../../redux/actions/airline';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const RouteManagement = () => {
 	const dispatch = useDispatch();
 	const { routes, isLoading, errors } = useSelector((state) => state.routes);
-	const { airports, isLoading: airportsLoading } = useSelector(
-		(state) => state.airports
-	);
+        const { airports, isLoading: airportsLoading } = useSelector(
+                (state) => state.airports
+        );
+        const { airlines, isLoading: airlinesLoading } = useSelector(
+                (state) => state.airlines
+        );
 
-	useEffect(() => {
-		dispatch(fetchRoutes());
-		dispatch(fetchAirports());
-	}, [dispatch]);
+        useEffect(() => {
+                dispatch(fetchRoutes());
+                dispatch(fetchAirports());
+                dispatch(fetchAirlines());
+        }, [dispatch]);
 
 	const getAirportOptions = () => {
 		if (!airports || !Array.isArray(airports)) {
@@ -35,29 +40,60 @@ const RouteManagement = () => {
 		}));
 	};
 
-	const getAirportById = (id) => {
-		if (!airports || !Array.isArray(airports)) {
-			return null;
-		}
-		return airports.find((airport) => airport.id === id);
-	};
+        const getAirportById = (id) => {
+                if (!airports || !Array.isArray(airports)) {
+                        return null;
+                }
+                return airports.find((airport) => airport.id === id);
+        };
 
-	const airportOptions = useMemo(() => getAirportOptions(), [airports]);
+        const getAirlineOptions = () => {
+                if (!airlines || !Array.isArray(airlines)) {
+                        return [];
+                }
+                return airlines.map((airline) => ({
+                        value: airline.id,
+                        label: `${airline.name} (${airline.iata_code})`,
+                }));
+        };
 
-	const FIELDS = {
-		id: { key: 'id', apiKey: 'id' },
-		flightNumber: {
-			key: 'flightNumber',
-			apiKey: 'flight_number',
-			label: FIELD_LABELS.ROUTE.flight_number,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.ROUTE.flight_number.REQUIRED
-					: null,
-		},
-		originAirportId: {
+        const getAirlineById = (id) => {
+                if (!airlines || !Array.isArray(airlines)) {
+                        return null;
+                }
+                return airlines.find((airline) => airline.id === id);
+        };
+
+        const airportOptions = useMemo(() => getAirportOptions(), [airports]);
+        const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
+
+        const FIELDS = {
+                id: { key: 'id', apiKey: 'id' },
+                flightNumber: {
+                        key: 'flightNumber',
+                        apiKey: 'flight_number',
+                        label: FIELD_LABELS.ROUTE.flight_number,
+                        type: FIELD_TYPES.TEXT,
+                        fullWidth: true,
+                        validate: (value) =>
+                                !value
+                                        ? VALIDATION_MESSAGES.ROUTE.flight_number.REQUIRED
+                                        : null,
+                },
+                airlineId: {
+                        key: 'airlineId',
+                        apiKey: 'airline_id',
+                        label: FIELD_LABELS.ROUTE.airline_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: airlineOptions,
+                        formatter: (value) => {
+                                const airline = getAirlineById(value);
+                                return airline ? `${airline.iata_code}` : value;
+                        },
+                        validate: (value) =>
+                                !value ? VALIDATION_MESSAGES.ROUTE.airline_id.REQUIRED : null,
+                },
+                originAirportId: {
 			key: 'originAirportId',
 			apiKey: 'origin_airport_id',
 			label: FIELD_LABELS.ROUTE.origin_airport_id,
@@ -89,14 +125,14 @@ const RouteManagement = () => {
 		},
 	};
 
-	const adminManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
-			}),
-		[FIELDS, getAirportById]
-	);
+        const adminManager = useMemo(
+                () =>
+                        createAdminManager(FIELDS, {
+                                addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
+                                editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
+                        }),
+                [FIELDS, getAirportById, getAirlineById]
+        );
 
 	const handleAddRoute = (routeData) => {
 		dispatch(createRoute(adminManager.toApiFormat(routeData)));
@@ -122,7 +158,7 @@ const RouteManagement = () => {
 			onDelete={handleDeleteRoute}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.routes.add_button}
-			isLoading={isLoading || airportsLoading}
+                        isLoading={isLoading || airportsLoading || airlinesLoading}
 			error={errors}
 		/>
 	);
