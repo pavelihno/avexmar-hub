@@ -56,23 +56,21 @@ Replace `'1234'` with a strong password if necessary.
 ### Add ReactJS Dependencies
 
 ```bash
-npm install <package-name> --save-prod
-npm i --package-lock-only
+docker-compose exec client-app npm install <package-name> --save-prod
+docker-compose exec client-app npm i --package-lock-only
 ```
 
-### Create Flask Migrations
-
-Inside Docker container:
+### Create and Apply Flask Migrations
 
 ```bash
 # Initialize migrations (first time only)
-flask db init
+docker-compose exec server-app flask db init
 
 # Create a new migration
-flask db migrate -m <migration-message>
+docker-compose exec server-app flask db migrate -m <migration-message>
 
 # Apply migrations
-flask db upgrade
+docker-compose exec server-app flask db upgrade
 ```
 
 ### Drop Database
@@ -84,6 +82,7 @@ docker-compose exec server-app python -c "
 from app.app import app, db
 
 with app.app_context():
+    db.drop_all()
     db.metadata.reflect(bind=db.engine)
     db.metadata.drop_all(bind=db.engine)
 
