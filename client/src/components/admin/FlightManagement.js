@@ -41,8 +41,12 @@ const FlightManagement = () => {
 	const { flights, isLoading, errors } = useSelector(
 		(state) => state.flights
 	);
-        const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-        const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
+	const { routes, isLoading: routesLoading } = useSelector(
+		(state) => state.routes
+	);
+	const { airlines, isLoading: airlinesLoading } = useSelector(
+		(state) => state.airlines
+	);
 	const { tariffs } = useSelector((state) => state.tariffs);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
@@ -50,12 +54,12 @@ const FlightManagement = () => {
 	const [selectedFlightId, setSelectedFlightId] = useState(null);
 	const [selectedTariffId, setSelectedTariffId] = useState(null);
 
-        useEffect(() => {
-                dispatch(fetchFlights());
-                dispatch(fetchRoutes());
-                dispatch(fetchAirlines());
-                dispatch(fetchTariffs());
-        }, [dispatch]);
+	useEffect(() => {
+		dispatch(fetchFlights());
+		dispatch(fetchRoutes());
+		dispatch(fetchAirlines());
+		dispatch(fetchTariffs());
+	}, [dispatch]);
 
 	const getRouteOptions = () => {
 		if (!routes || !Array.isArray(routes)) {
@@ -67,32 +71,32 @@ const FlightManagement = () => {
 		}));
 	};
 
-        const getRouteById = (id) => {
-                if (!routes || !Array.isArray(routes)) {
-                        return null;
-                }
-                return routes.find((route) => route.id === id);
-        };
+	const getRouteById = (id) => {
+		if (!routes || !Array.isArray(routes)) {
+			return null;
+		}
+		return routes.find((route) => route.id === id);
+	};
 
-        const getAirlineOptions = () => {
-                if (!airlines || !Array.isArray(airlines)) {
-                        return [];
-                }
-                return airlines.map((airline) => ({
-                        value: airline.id,
-                        label: `${airline.name} (${airline.iata_code})`,
-                }));
-        };
+	const getAirlineOptions = () => {
+		if (!airlines || !Array.isArray(airlines)) {
+			return [];
+		}
+		return airlines.map((airline) => ({
+			value: airline.id,
+			label: `${airline.name} (${airline.iata_code})`,
+		}));
+	};
 
-        const getAirlineById = (id) => {
-                if (!airlines || !Array.isArray(airlines)) {
-                        return null;
-                }
-                return airlines.find((airline) => airline.id === id);
-        };
+	const getAirlineById = (id) => {
+		if (!airlines || !Array.isArray(airlines)) {
+			return null;
+		}
+		return airlines.find((airline) => airline.id === id);
+	};
 
-        const routeOptions = useMemo(() => getRouteOptions(), [routes]);
-        const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
+	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
+	const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
 
 	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
 		open: false,
@@ -132,38 +136,39 @@ const FlightManagement = () => {
 		setTariffDialogOpen(false);
 	};
 
-        const FIELDS = {
-                id: { key: 'id', apiKey: 'id' },
-                routeId: {
-                        key: 'routeId',
-                        apiKey: 'route_id',
-                        label: FIELD_LABELS.FLIGHT.route_id,
-                        type: FIELD_TYPES.SELECT,
-                        options: routeOptions,
-                        formatter: (value) => {
-                                const route = getRouteById(value);
-                                return route
-                                        ? `${route.flight_number} (${route.origin_airport_id} - ${route.destination_airport_id})`
-                                        : value;
-                        },
-                        validate: (value) =>
-                                !value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null,
-                },
-                airlineId: {
-                        key: 'airlineId',
-                        apiKey: 'airline_id',
-                        label: FIELD_LABELS.FLIGHT.airline_id,
-                        type: FIELD_TYPES.SELECT,
-                        options: airlineOptions,
-                        formatter: (value) => {
-                                const airline = getAirlineById(value);
-                                return airline ? `${airline.iata_code}` : value;
-                        },
-                        validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
-                },
-                status: {
-                        key: 'status',
-                        apiKey: 'status',
+	const FIELDS = {
+		id: { key: 'id', apiKey: 'id' },
+		routeId: {
+			key: 'routeId',
+			apiKey: 'route_id',
+			label: FIELD_LABELS.FLIGHT.route_id,
+			type: FIELD_TYPES.SELECT,
+			options: routeOptions,
+			formatter: (value) => {
+				const route = getRouteById(value);
+				return route
+					? `${route.flight_number} (${route.origin_airport_id} - ${route.destination_airport_id})`
+					: value;
+			},
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null,
+		},
+		airlineId: {
+			key: 'airlineId',
+			apiKey: 'airline_id',
+			label: FIELD_LABELS.FLIGHT.airline_id,
+			type: FIELD_TYPES.SELECT,
+			options: airlineOptions,
+			formatter: (value) => {
+				const airline = getAirlineById(value);
+				return airline ? `${airline.iata_code}` : value;
+			},
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null,
+		},
+		status: {
+			key: 'status',
+			apiKey: 'status',
 			label: FIELD_LABELS.FLIGHT.status,
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('FLIGHT_STATUS'),
@@ -377,7 +382,7 @@ const FlightManagement = () => {
 				onDelete={handleDeleteFlight}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-                                isLoading={isLoading || routesLoading || airlinesLoading}
+				isLoading={isLoading || routesLoading || airlinesLoading}
 				error={errors}
 			/>
 

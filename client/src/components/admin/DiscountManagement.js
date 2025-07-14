@@ -64,7 +64,8 @@ const DiscountManagement = () => {
 				max: 100,
 				step: 0.01,
 			},
-			formatter: (value) => (value !== null && value !== undefined ? `${value}%` : ''),
+			formatter: (value) =>
+				value !== null && value !== undefined ? `${value}%` : '',
 			validate: (value) =>
 				value === null || value === undefined || value === ''
 					? VALIDATION_MESSAGES.DISCOUNT.percentage_value.REQUIRED

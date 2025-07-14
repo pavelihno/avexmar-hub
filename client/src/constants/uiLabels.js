@@ -80,33 +80,33 @@ export const UI_LABELS = {
 	ADMIN: {
 		actions: 'Действия',
 		panel: 'Панель администратора',
-                modules: {
-                        airports: {
-                                title: 'Аэропорты',
-                                description: 'Управление аэропортами',
-                                management: 'Управление аэропортами',
-                                add_button: 'Добавить аэропорт',
-                                edit_button: 'Редактировать аэропорт',
-                        },
-                        airlines: {
-                                title: 'Авиакомпании',
-                                description: 'Управление авиакомпаниями',
-                                management: 'Управление авиакомпаниями',
-                                add_button: 'Добавить авиакомпанию',
-                                edit_button: 'Редактировать авиакомпанию',
-                        },
-                        countries: {
-                                title: 'Страны',
-                                description: 'Управление странами',
-                                management: 'Управление странами',
-                                add_button: 'Добавить страну',
-                                edit_button: 'Редактировать страну',
-                        },
-                        routes: {
-                                title: 'Маршруты',
-                                description: 'Управление маршрутами',
-                                management: 'Управление маршрутами',
-                                add_button: 'Добавить маршрут',
+		modules: {
+			airports: {
+				title: 'Аэропорты',
+				description: 'Управление аэропортами',
+				management: 'Управление аэропортами',
+				add_button: 'Добавить аэропорт',
+				edit_button: 'Редактировать аэропорт',
+			},
+			airlines: {
+				title: 'Авиакомпании',
+				description: 'Управление авиакомпаниями',
+				management: 'Управление авиакомпаниями',
+				add_button: 'Добавить авиакомпанию',
+				edit_button: 'Редактировать авиакомпанию',
+			},
+			countries: {
+				title: 'Страны',
+				description: 'Управление странами',
+				management: 'Управление странами',
+				add_button: 'Добавить страну',
+				edit_button: 'Редактировать страну',
+			},
+			routes: {
+				title: 'Маршруты',
+				description: 'Управление маршрутами',
+				management: 'Управление маршрутами',
+				add_button: 'Добавить маршрут',
 				edit_button: 'Редактировать маршрут',
 			},
 			discounts: {

@@ -17,12 +17,12 @@ import passengerReducer from './reducers/passenger';
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
 const rootReducer = combineReducers({
-        auth: authReducer,
-        airports: airportReducer,
-        airlines: airlineReducer,
-        countries: countryReducer,
-        routes: routesReducer,
-        flights: flightReducer,
+	auth: authReducer,
+	airports: airportReducer,
+	airlines: airlineReducer,
+	countries: countryReducer,
+	routes: routesReducer,
+	flights: flightReducer,
 	tariffs: tariffsReducer,
 	tickets: ticketsReducer,
 	discounts: discountReducer,

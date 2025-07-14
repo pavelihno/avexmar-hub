@@ -14,10 +14,7 @@ import { fetchBookings } from '../../redux/actions/booking';
 import { fetchPassengers } from '../../redux/actions/passenger';
 import { fetchDiscounts } from '../../redux/actions/discount';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	FIELD_LABELS,
-	UI_LABELS,
-} from '../../constants';
+import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const TicketManagement = () => {
 	const dispatch = useDispatch();

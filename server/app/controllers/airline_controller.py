@@ -4,10 +4,12 @@ from app.models.airline import Airline
 from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
 
+
 @admin_required
 def get_airlines(current_user):
     airlines = Airline.get_all()
     return jsonify([a.to_dict() for a in airlines])
+
 
 @admin_required
 def get_airline(current_user, airline_id):
@@ -15,6 +17,7 @@ def get_airline(current_user, airline_id):
     if airline:
         return jsonify(airline.to_dict()), 200
     return jsonify({'message': 'Airline not found'}), 404
+
 
 @admin_required
 def create_airline(current_user):
@@ -24,6 +27,7 @@ def create_airline(current_user):
         return jsonify({'message': 'Country not found'}), 404
     airline = Airline.create(**body)
     return jsonify(airline.to_dict()), 201
+
 
 @admin_required
 def update_airline(current_user, airline_id):
@@ -35,6 +39,7 @@ def update_airline(current_user, airline_id):
     if updated:
         return jsonify(updated.to_dict())
     return jsonify({'message': 'Airline not found'}), 404
+
 
 @admin_required
 def delete_airline(current_user, airline_id):

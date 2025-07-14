@@ -21,38 +21,38 @@ const AdminRoutes = ({ isAdmin }) => [
 			<ProtectedRoute children={<AdminPanel />} condition={isAdmin} />
 		),
 	},
-        {
-                path: '/admin/airports',
-                element: (
-                        <ProtectedRoute
-                                children={<AirportManagement />}
-                                condition={isAdmin}
-                        />
-                ),
-        },
-        {
-                path: '/admin/airlines',
-                element: (
-                        <ProtectedRoute
-                                children={<AirlineManagement />}
-                                condition={isAdmin}
-                        />
-                ),
-        },
-        {
-                path: '/admin/countries',
-                element: (
-                        <ProtectedRoute
-                                children={<CountryManagement />}
-                                condition={isAdmin}
-                        />
-                ),
-        },
-        {
-                path: '/admin/routes',
-                element: (
-                        <ProtectedRoute
-                                children={<RouteManagement />}
+	{
+		path: '/admin/airports',
+		element: (
+			<ProtectedRoute
+				children={<AirportManagement />}
+				condition={isAdmin}
+			/>
+		),
+	},
+	{
+		path: '/admin/airlines',
+		element: (
+			<ProtectedRoute
+				children={<AirlineManagement />}
+				condition={isAdmin}
+			/>
+		),
+	},
+	{
+		path: '/admin/countries',
+		element: (
+			<ProtectedRoute
+				children={<CountryManagement />}
+				condition={isAdmin}
+			/>
+		),
+	},
+	{
+		path: '/admin/routes',
+		element: (
+			<ProtectedRoute
+				children={<RouteManagement />}
 				condition={isAdmin}
 			/>
 		),
