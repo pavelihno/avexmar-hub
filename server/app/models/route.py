@@ -14,6 +14,7 @@ class Route(BaseModel):
         return {
             'id': self.id,
             'flight_number': self.flight_number,
+            'airline_id': self.airline_id,
             'origin_airport_id': self.origin_airport_id,
             'destination_airport_id': self.destination_airport_id
         }
