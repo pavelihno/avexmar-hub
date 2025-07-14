@@ -31,12 +31,12 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Страна обязательна',
 		},
 	},
-        ROUTE: {
-                origin_airport_id: {
-                        REQUIRED: 'Аэропорт отправления обязателен',
-                },
-                destination_airport_id: {
-                        REQUIRED: 'Аэропорт прибытия обязателен',
+	ROUTE: {
+		origin_airport_id: {
+			REQUIRED: 'Аэропорт отправления обязателен',
+		},
+		destination_airport_id: {
+			REQUIRED: 'Аэропорт прибытия обязателен',
 		},
 	},
 	USER: {
@@ -103,16 +103,16 @@ export const VALIDATION_MESSAGES = {
 			LENGTH: 'Код A3 должен содержать 3 символа',
 		},
 	},
-        FLIGHT: {
-                flight_number: {
-                        REQUIRED: 'Номер рейса обязателен',
-                },
-                airline_id: {
-                        REQUIRED: 'Авиакомпания обязательна',
-                },
-                route_id: {
-                        REQUIRED: 'Маршрут рейса обязателен',
-                },
+	FLIGHT: {
+		flight_number: {
+			REQUIRED: 'Номер рейса обязателен',
+		},
+		airline_id: {
+			REQUIRED: 'Авиакомпания обязательна',
+		},
+		route_id: {
+			REQUIRED: 'Маршрут рейса обязателен',
+		},
 		scheduled_departure: {
 			REQUIRED: 'Время отправления обязательно',
 		},

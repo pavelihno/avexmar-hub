@@ -21,9 +21,9 @@ const RouteManagement = () => {
 	);
 
 	useEffect(() => {
-                dispatch(fetchRoutes());
-                dispatch(fetchAirports());
-        }, [dispatch]);
+		dispatch(fetchRoutes());
+		dispatch(fetchAirports());
+	}, [dispatch]);
 
 	const getAirportOptions = () => {
 		if (!airports || !Array.isArray(airports)) {
@@ -42,7 +42,7 @@ const RouteManagement = () => {
 		return airports.find((airport) => airport.id === id);
 	};
 
-        const airportOptions = useMemo(() => getAirportOptions(), [airports]);
+	const airportOptions = useMemo(() => getAirportOptions(), [airports]);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -84,8 +84,8 @@ const RouteManagement = () => {
 				addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
 			}),
-                [FIELDS, getAirportById]
-        );
+		[FIELDS, getAirportById]
+	);
 
 	const handleAddRoute = (routeData) => {
 		dispatch(createRoute(adminManager.toApiFormat(routeData)));
@@ -111,7 +111,7 @@ const RouteManagement = () => {
 			onDelete={handleDeleteRoute}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.routes.add_button}
-                        isLoading={isLoading || airportsLoading}
+			isLoading={isLoading || airportsLoading}
 			error={errors}
 		/>
 	);
