@@ -43,7 +43,7 @@ const FlightManagement = () => {
 	const { routes, isLoading: routesLoading } = useSelector(
 		(state) => state.routes
 	);
-        const { tariffs } = useSelector((state) => state.tariffs);
+	const { tariffs } = useSelector((state) => state.tariffs);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
@@ -52,8 +52,8 @@ const FlightManagement = () => {
 
 	useEffect(() => {
 		dispatch(fetchFlights());
-                dispatch(fetchRoutes());
-                dispatch(fetchTariffs());
+		dispatch(fetchRoutes());
+		dispatch(fetchTariffs());
 	}, [dispatch]);
 
 	const getRouteOptions = () => {
@@ -73,7 +73,7 @@ const FlightManagement = () => {
 		return routes.find((route) => route.id === id);
 	};
 
-        const routeOptions = useMemo(() => getRouteOptions(), [routes]);
+	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
 
 	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
 		open: false,
@@ -346,7 +346,7 @@ const FlightManagement = () => {
 				onDelete={handleDeleteFlight}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-                                isLoading={isLoading || routesLoading}
+				isLoading={isLoading || routesLoading}
 				error={errors}
 			/>
 
