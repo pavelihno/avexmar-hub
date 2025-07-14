@@ -2,7 +2,6 @@ from flask import request, jsonify
 
 from app.models.route import Route
 from app.models.airport import Airport
-from app.models.airline import Airline
 from app.middlewares.auth_middleware import admin_required
 
 
@@ -25,14 +24,11 @@ def create_route(current_user):
     body = request.json
     origin_id = body.get('origin_airport_id')
     destination_id = body.get('destination_airport_id')
-    airline_id = body.get('airline_id')
 
     if not Airport.get_by_id(origin_id):
         return jsonify({'message': 'Origin airport not found'}), 404
     if not Airport.get_by_id(destination_id):
         return jsonify({'message': 'Destination airport not found'}), 404
-    if not Airline.get_by_id(airline_id):
-        return jsonify({'message': 'Airline not found'}), 404
 
     route = Route.create(**body)
     return jsonify(route.to_dict()), 201
@@ -41,9 +37,6 @@ def create_route(current_user):
 @admin_required
 def update_route(current_user, route_id):
     body = request.json
-    airline_id = body.get('airline_id')
-    if airline_id is not None and not Airline.get_by_id(airline_id):
-        return jsonify({'message': 'Airline not found'}), 404
     updated = Route.update(route_id, **body)
     if updated:
         return jsonify(updated.to_dict())

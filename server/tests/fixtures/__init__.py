@@ -1,4 +1,6 @@
 from tests.fixtures.airport import *
+from tests.fixtures.country import *
+from tests.fixtures.airline import *
 from tests.fixtures.route import *
 from tests.fixtures.flight import *
 from tests.fixtures.passenger import *
