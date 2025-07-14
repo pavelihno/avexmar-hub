@@ -1,26 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
-	fetchAirports,
-	createAirport,
-	updateAirport,
-	deleteAirport,
+        fetchAirports,
+        createAirport,
+        updateAirport,
+        deleteAirport,
 } from '../../redux/actions/airport';
+import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const AirportManagement = () => {
-	const dispatch = useDispatch();
-	const { airports, isLoading, errors } = useSelector(
-		(state) => state.airports
-	);
+        const dispatch = useDispatch();
+        const { airports, isLoading, errors } = useSelector((state) => state.airports);
+        const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
 
-	useEffect(() => {
-		dispatch(fetchAirports());
-	}, [dispatch]);
+        useEffect(() => {
+                dispatch(fetchAirports());
+                dispatch(fetchCountries());
+        }, [dispatch]);
+
+        const countryOptions = useMemo(() => {
+                if (!countries || !Array.isArray(countries)) return [];
+                return countries.map((c) => ({ value: c.id, label: c.name }));
+        }, [countries]);
+
+        const getCountryById = (id) => {
+                if (!countries || !Array.isArray(countries)) return null;
+                return countries.find((c) => c.id === id);
+        };
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -65,13 +76,20 @@ const AirportManagement = () => {
 			validate: (value) =>
 				!value ? VALIDATION_MESSAGES.AIRPORT.city_code.REQUIRED : null,
 		},
-		country: {
-			key: 'country',
-			apiKey: 'country_code',
-			label: FIELD_LABELS.AIRPORT.country_code,
-			type: FIELD_TYPES.TEXT,
-		},
-	};
+                countryId: {
+                        key: 'countryId',
+                        apiKey: 'country_id',
+                        label: FIELD_LABELS.AIRPORT.country_code,
+                        type: FIELD_TYPES.SELECT,
+                        options: countryOptions,
+                        formatter: (value) => {
+                                const c = getCountryById(value);
+                                return c ? c.name : value;
+                        },
+                        validate: (value) =>
+                                !value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null,
+                },
+        };
 
 	const adminManager = createAdminManager(FIELDS, {
 		addButtonText: UI_LABELS.ADMIN.modules.airports.add_button,
@@ -102,7 +120,7 @@ const AirportManagement = () => {
 			onDelete={handleDeleteAirport}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
-			isLoading={isLoading}
+                        isLoading={isLoading || countriesLoading}
 			error={errors}
 		/>
 	);

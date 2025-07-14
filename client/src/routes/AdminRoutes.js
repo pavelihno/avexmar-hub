@@ -2,6 +2,8 @@ import React from 'react';
 
 import AdminPanel from '../components/admin/AdminPanel';
 import AirportManagement from '../components/admin/AirportManagement';
+import AirlineManagement from '../components/admin/AirlineManagement';
+import CountryManagement from '../components/admin/CountryManagement';
 import RouteManagement from '../components/admin/RouteManagement';
 import DiscountManagement from '../components/admin/DiscountManagement';
 import FlightManagement from '../components/admin/FlightManagement';
@@ -19,20 +21,38 @@ const AdminRoutes = ({ isAdmin }) => [
 			<ProtectedRoute children={<AdminPanel />} condition={isAdmin} />
 		),
 	},
-	{
-		path: '/admin/airports',
-		element: (
-			<ProtectedRoute
-				children={<AirportManagement />}
-				condition={isAdmin}
-			/>
-		),
-	},
-	{
-		path: '/admin/routes',
-		element: (
-			<ProtectedRoute
-				children={<RouteManagement />}
+        {
+                path: '/admin/airports',
+                element: (
+                        <ProtectedRoute
+                                children={<AirportManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/airlines',
+                element: (
+                        <ProtectedRoute
+                                children={<AirlineManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/countries',
+                element: (
+                        <ProtectedRoute
+                                children={<CountryManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/routes',
+                element: (
+                        <ProtectedRoute
+                                children={<RouteManagement />}
 				condition={isAdmin}
 			/>
 		),

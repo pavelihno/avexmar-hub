@@ -3,6 +3,8 @@ import { thunk } from 'redux-thunk';
 
 import authReducer from './reducers/auth';
 import airportReducer from './reducers/airport';
+import airlineReducer from './reducers/airline';
+import countryReducer from './reducers/country';
 import routesReducer from './reducers/route';
 import flightReducer from './reducers/flight';
 import tariffsReducer from './reducers/tariff';
@@ -15,10 +17,12 @@ import passengerReducer from './reducers/passenger';
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
 const rootReducer = combineReducers({
-	auth: authReducer,
-	airports: airportReducer,
-	routes: routesReducer,
-	flights: flightReducer,
+        auth: authReducer,
+        airports: airportReducer,
+        airlines: airlineReducer,
+        countries: countryReducer,
+        routes: routesReducer,
+        flights: flightReducer,
 	tariffs: tariffsReducer,
 	tickets: ticketsReducer,
 	discounts: discountReducer,
