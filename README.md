@@ -75,6 +75,23 @@ flask db migrate -m <migration-message>
 flask db upgrade
 ```
 
+### Drop Database
+
+Run the following command to drop the database:
+
+```bash
+docker-compose exec server-app python -c "
+from app.app import app, db
+
+with app.app_context():
+    db.metadata.reflect(bind=db.engine)
+    db.metadata.drop_all(bind=db.engine)
+
+    with db.engine.connect() as conn:
+        conn.execute(db.text('DROP TABLE IF EXISTS alembic_version;'))
+"
+```
+
 ### Run Server Tests
 
 Start the server:
