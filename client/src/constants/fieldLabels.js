@@ -24,11 +24,12 @@ export const FIELD_LABELS = {
 		city_code: 'Код города',
 		country_id: 'Страна',
 	},
-	FLIGHT: {
-		flight_number: 'Номер рейса',
-		route_id: 'Маршрут рейса',
-		origin_airport_id: 'Аэропорт отправления',
-		destination_airport_id: 'Аэропорт прибытия',
+        FLIGHT: {
+                flight_number: 'Номер рейса',
+                airline_id: 'Авиакомпания',
+                route_id: 'Маршрут рейса',
+                origin_airport_id: 'Аэропорт отправления',
+                destination_airport_id: 'Аэропорт прибытия',
 		scheduled_departure: 'Время отправления',
 		scheduled_arrival: 'Время прибытия',
 		status: 'Статус рейса',
@@ -73,14 +74,12 @@ export const FIELD_LABELS = {
 		code_a2: 'Код A2',
 		code_a3: 'Код A3',
 	},
-	ROUTE: {
-		flight_number: 'Номер рейса',
-		airline_id: 'Авиакомпания',
-		origin_airport_id: 'Аэропорт отправления',
-		destination_airport_id: 'Аэропорт прибытия',
-		departure_time: 'Время отправления',
-		arrival_time: 'Время прибытия',
-	},
+        ROUTE: {
+                origin_airport_id: 'Аэропорт отправления',
+                destination_airport_id: 'Аэропорт прибытия',
+                departure_time: 'Время отправления',
+                arrival_time: 'Время прибытия',
+        },
 	TARIFF: {
 		name: 'Название тарифа',
 		description: 'Описание',
