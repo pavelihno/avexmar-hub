@@ -36,7 +36,7 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
-	addButtonText,
+	addButtonText = null,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -137,14 +137,16 @@ const AdminDataTable = ({
 					<Typography variant='h4'>{title}</Typography>
 				</Box>
 
-				<Button
-					variant='contained'
-					startIcon={<AddIcon />}
-					onClick={() => handleOpenDialog()}
-					sx={{ mb: 3 }}
-				>
-					{addButtonText}
-				</Button>
+				{addButtonText && (
+					<Button
+						variant='contained'
+						startIcon={<AddIcon />}
+						onClick={() => handleOpenDialog()}
+						sx={{ mb: 3 }}
+					>
+						{addButtonText}
+					</Button>
+				)}
 
 				<TableContainer component={Paper}>
 					<Table>

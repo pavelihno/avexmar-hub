@@ -18,13 +18,13 @@ const rootReducer = combineReducers({
 	auth: authReducer,
 	airports: airportReducer,
 	routes: routesReducer,
-        flights: flightReducer,
-        tariffs: tariffsReducer,
-        tickets: ticketsReducer,
-        discounts: discountReducer,
-        bookings: bookingReducer,
-        passengers: passengerReducer,
-        users: userReducer,
+	flights: flightReducer,
+	tariffs: tariffsReducer,
+	tickets: ticketsReducer,
+	discounts: discountReducer,
+	bookings: bookingReducer,
+	passengers: passengerReducer,
+	users: userReducer,
 });
 
 const store = createStore(
