@@ -7,6 +7,7 @@ class Flight(BaseModel):
     __tablename__ = 'flights'
 
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)
+    airline_id = db.Column(db.Integer, db.ForeignKey('airlines.id', ondelete='RESTRICT'), nullable=False)
     scheduled_departure = db.Column(db.DateTime, nullable=True)
     scheduled_arrival = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.Enum(Config.FLIGHT_STATUS), nullable=False, default=Config.DEFAULT_FLIGHT_STATUS)
