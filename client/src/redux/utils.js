@@ -2,11 +2,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { serverApi } from '../api';
 
 export const getErrorData = (error) => {
-	return (
-		error.response?.data?.message ||
-		error.message ||
-		'An unknown error occurred'
-	);
+        if (error.response?.data) {
+                return error.response.data;
+        }
+
+        return { message: error.message || 'An unknown error occurred' };
 };
 
 export const handlePending = (state) => {
