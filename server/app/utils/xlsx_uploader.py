@@ -67,6 +67,10 @@ def parse_xlsx(file, fields: dict, required_fields: list = []) -> list:
 
     result = []
     for row in ws.iter_rows(min_row=2, values_only=True):
+        # Stop parsing if the row has no values in any column
+        if all(value is None for value in row):
+            break
+
         item = {}
         for idx, value in enumerate(row):
             field = col_idx_to_field.get(idx)
@@ -80,7 +84,7 @@ def parse_xlsx(file, fields: dict, required_fields: list = []) -> list:
 
         # Check required fields
         if required_fields:
-            missing = [f for f in required_fields if not item.get(f)]
+            missing = [fields[f] for f in required_fields if not item.get(f)]
             if missing:
                 item['error'] = f"Missing required fields: {', '.join(missing)}"
         result.append(item)

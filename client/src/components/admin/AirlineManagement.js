@@ -39,6 +39,27 @@ const AirlineManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
+		name: {
+			key: 'name',
+			apiKey: 'name',
+			label: FIELD_LABELS.AIRLINE.name,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRLINE.name.REQUIRED : null,
+		},
+		countryId: {
+			key: 'countryId',
+			apiKey: 'country_id',
+			label: FIELD_LABELS.AIRLINE.country_id,
+			type: FIELD_TYPES.SELECT,
+			options: countryOptions,
+			formatter: (value) => {
+				const c = getCountryById(value);
+				return c ? c.name : value;
+			},
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRLINE.country_id.REQUIRED : null,
+		},
 		iataCode: {
 			key: 'iataCode',
 			apiKey: 'iata_code',
@@ -65,28 +86,6 @@ const AirlineManagement = () => {
 					: null,
 			inputProps: { maxLength: 3 },
 		},
-		name: {
-			key: 'name',
-			apiKey: 'name',
-			label: FIELD_LABELS.AIRLINE.name,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRLINE.name.REQUIRED : null,
-		},
-		countryId: {
-			key: 'countryId',
-			apiKey: 'country_id',
-			label: FIELD_LABELS.AIRLINE.country_id,
-			type: FIELD_TYPES.SELECT,
-			options: countryOptions,
-			formatter: (value) => {
-				const c = getCountryById(value);
-				return c ? c.name : value;
-			},
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRLINE.country_id.REQUIRED : null,
-		},
 	};
 
 	const adminManager = useMemo(
@@ -104,11 +103,11 @@ const AirlineManagement = () => {
 		dispatch(updateAirline(adminManager.toApiFormat(data)));
 	const handleDelete = (id) => dispatch(deleteAirline(id));
 
-        const handleUpload = async (file) => {
-                const res = await uploadFile('airlines', file);
-                dispatch(fetchAirlines());
-                return res;
-        };
+	const handleUpload = async (file) => {
+		const res = await uploadFile('airlines', file);
+		dispatch(fetchAirlines());
+		return res;
+	};
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('airlines', 'airlines_template.xlsx');

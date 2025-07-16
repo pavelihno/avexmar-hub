@@ -79,7 +79,6 @@ const AirportManagement = () => {
 			apiKey: 'city_name',
 			label: FIELD_LABELS.AIRPORT.city_name,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 			validate: (value) =>
 				!value ? VALIDATION_MESSAGES.AIRPORT.city_name.REQUIRED : null,
 		},
@@ -89,7 +88,6 @@ const AirportManagement = () => {
 			label: FIELD_LABELS.AIRPORT.city_name_en,
 			type: FIELD_TYPES.TEXT,
 			excludeFromTable: true,
-			fullWidth: true,
 		},
 		cityCode: {
 			key: 'cityCode',
@@ -131,11 +129,11 @@ const AirportManagement = () => {
 		return dispatch(deleteAirport(id));
 	};
 
-        const handleUpload = async (file) => {
-                const res = await uploadFile('airports', file);
-                dispatch(fetchAirports());
-                return res;
-        };
+	const handleUpload = async (file) => {
+		const res = await uploadFile('airports', file);
+		dispatch(fetchAirports());
+		return res;
+	};
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('airports', 'airports_template.xlsx');

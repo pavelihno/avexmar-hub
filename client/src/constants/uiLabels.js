@@ -26,22 +26,22 @@ export const UI_LABELS = {
 		loading: 'Загрузка...',
 		required_field: 'Это поле обязательно',
 	},
-        SUCCESS: {
-                add: 'Запись успешно добавлена',
-                upload: 'Файл успешно загружен',
-                update: 'Запись успешно обновлена',
-                delete: 'Запись успешно удалена',
-                login: 'Вход выполнен успешно',
-                register: 'Регистрация выполнена успешно',
-        },
-        WARNINGS: {
-                upload: 'Некоторые строки не были импортированы. Скачайте файл с ошибками',
-        },
-        ERRORS: {
-                copy: 'Ошибка при копировании',
-                save: 'Ошибка при сохранении',
-                delete: 'Ошибка при удалении',
-        },
+	SUCCESS: {
+		add: 'Запись успешно добавлена',
+		upload: 'Файл успешно загружен',
+		update: 'Запись успешно обновлена',
+		delete: 'Запись успешно удалена',
+		login: 'Вход выполнен успешно',
+		register: 'Регистрация выполнена успешно',
+	},
+	WARNINGS: {
+		upload: 'Некоторые записи не были созданы. Подробнее в файле',
+	},
+	ERRORS: {
+		copy: 'Ошибка при копировании',
+		save: 'Ошибка при сохранении',
+		delete: 'Ошибка при удалении',
+	},
 
 	ABOUT: {
 		about_us: 'О нас',
@@ -92,7 +92,7 @@ export const UI_LABELS = {
 				add_button: 'Добавить аэропорт',
 				edit_button: 'Редактировать аэропорт',
 				upload_button: 'Загрузить аэропорты',
-				upload_template_button: 'Создать шаблон загрузки',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			airlines: {
 				title: 'Авиакомпании',
@@ -101,7 +101,7 @@ export const UI_LABELS = {
 				add_button: 'Добавить авиакомпанию',
 				edit_button: 'Редактировать авиакомпанию',
 				upload_button: 'Загрузить авиакомпании',
-				upload_template_button: 'Создать шаблон загрузки',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			countries: {
 				title: 'Страны',
@@ -110,7 +110,7 @@ export const UI_LABELS = {
 				add_button: 'Добавить страну',
 				edit_button: 'Редактировать страну',
 				upload_button: 'Загрузить страны',
-				upload_template_button: 'Создать шаблон загрузки',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			routes: {
 				title: 'Маршруты',

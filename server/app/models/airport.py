@@ -1,5 +1,6 @@
 from app.database import db
 from app.models._base_model import BaseModel
+from app.models.country import Country
 from app.utils.xlsx_uploader import parse_xlsx, generate_xlsx_template
 
 
@@ -62,21 +63,14 @@ class Airport(BaseModel):
         for row in rows:
             if not row.get('error'):
                 try:
-                    from app.models.country import Country
-
                     country = Country.get_by_code(row.get('country_code'))
                     if not country:
                         raise ValueError('Invalid country code')
 
-                    airport = cls.create(
-                        name=row.get('name'),
-                        iata_code=row.get('iata_code'),
-                        icao_code=row.get('icao_code'),
-                        city_name=row.get('city_name'),
-                        city_name_en=row.get('city_name_en'),
-                        city_code=row.get('city_code'),
-                        country_id=country.id,
-                    )
+                    airport = cls.create(**{
+                        **row,
+                        'country_id': country.id,
+                    })
                     airports.append(airport)
                 except Exception as e:
                     row['error'] = str(e)

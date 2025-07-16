@@ -42,37 +42,37 @@ export const downloadTemplate = async (endpoint, filename) => {
 };
 
 export const uploadFile = async (endpoint, file) => {
-        const formData = new FormData();
-        formData.append('file', file);
+	const formData = new FormData();
+	formData.append('file', file);
 
-        try {
-                const res = await serverApi.post(`/${endpoint}/upload`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                        responseType: 'blob',
-                });
+	try {
+		const res = await serverApi.post(`/${endpoint}/upload`, formData, {
+			headers: { 'Content-Type': 'multipart/form-data' },
+			responseType: 'blob',
+		});
 
-                const contentType = res.headers['content-type'];
+		const contentType = res.headers['content-type'];
 
-                if (contentType && contentType.includes('application/json')) {
-                        const text = await res.data.text();
-                        return { message: JSON.parse(text).message };
-                }
+		if (contentType && contentType.includes('application/json')) {
+			const text = await res.data.text();
+			return { message: JSON.parse(text).message };
+		}
 
-                return { errorFile: res.data };
-        } catch (error) {
-                let message = error.message;
+		return { errorFile: res.data };
+	} catch (error) {
+		let message = error.message;
 
-                if (error.response?.data) {
-                        try {
-                                const text = await error.response.data.text();
-                                try {
-                                        message = JSON.parse(text).message;
-                                } catch {
-                                        message = text;
-                                }
-                        } catch {}
-                }
+		if (error.response?.data) {
+			try {
+				const text = await error.response.data.text();
+				try {
+					message = JSON.parse(text).message;
+				} catch {
+					message = text;
+				}
+			} catch {}
+		}
 
-                throw new Error(message);
-        }
+		throw new Error(message);
+	}
 };
