@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import {
 	Box,
@@ -20,14 +21,18 @@ import PersonIcon from '@mui/icons-material/Person';
 import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 
 import Base from '../Base';
-
+import { selectIsAdmin } from '../../redux/reducers/auth';
 import { login } from '../../redux/actions/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
 	const { closeAuthModal, openRegisterModal, openForgotPasswordModal } = useAuthModal();
+
+	const isAdmin = useSelector(selectIsAdmin);
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -36,6 +41,12 @@ const Login = ({ isModal = false }) => {
 
 	const [errors, setErrors] = useState({});
 	const [successMessage, setSuccessMessage] = useState('');
+
+	useEffect(() => {
+		if (successMessage && isAdmin) {
+			navigate('/admin');
+		}
+	}, [successMessage, isAdmin, navigate]);
 
 	const { email, password } = formData;
 
