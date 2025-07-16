@@ -1,5 +1,6 @@
 from app.database import db
 from app.models._base_model import BaseModel
+from app.utils.xlsx_uploader import parse_xlsx, generate_xlsx_template
 
 
 class Airport(BaseModel):
@@ -25,3 +26,21 @@ class Airport(BaseModel):
             'city_code': self.city_code,
             'country_id': self.country_id
         }
+
+    upload_fields = {
+        'name': 'Аэропорт',
+        'city_name': 'Город',
+        'city_name_en': 'Город (англ)',
+        'iata_code': 'Код IATA',
+        'icao_code': 'Код ICAO',
+        'city_code': 'Код города',
+        'country_id': 'Код страны'
+    }
+
+    @classmethod
+    def get_xlsx_template(cls):
+        return generate_xlsx_template(cls.upload_fields)
+
+    @classmethod
+    def upload_from_file(cls, file):
+        pass

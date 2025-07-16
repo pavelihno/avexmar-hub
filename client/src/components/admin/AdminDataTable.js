@@ -21,6 +21,8 @@ import {
 	Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -36,7 +38,10 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
+	getUploadTemplate = () => {},
 	addButtonText = null,
+	uploadButtonText = null,
+	uploadTemplateButtonText = null,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -57,6 +62,8 @@ const AdminDataTable = ({
 		setIsEditing(!!item);
 		setOpenDialog(true);
 	};
+
+	const handleUploadDialog = () => {};
 
 	const handleCloseDialog = () => {
 		setOpenDialog(false);
@@ -140,12 +147,36 @@ const AdminDataTable = ({
 				{addButtonText && (
 					<Button
 						variant='contained'
+						color='primary'
 						startIcon={<AddIcon />}
 						onClick={() => handleOpenDialog()}
 						sx={{ mb: 3 }}
 					>
 						{addButtonText}
 					</Button>
+				)}
+
+				{uploadButtonText && uploadTemplateButtonText && (
+					<>
+						<Button
+							variant='outlined'
+							startIcon={<DownloadIcon />}
+							onClick={() => getUploadTemplate()}
+							sx={{ mb: 3, ml: 2 }}
+						>
+							{uploadTemplateButtonText}
+						</Button>
+
+						<Button
+							variant='outlined'
+							color='secondary'
+							startIcon={<UploadIcon />}
+							onClick={() => handleUploadDialog()}
+							sx={{ mb: 3, ml: 2 }}
+						>
+							{uploadButtonText}
+						</Button>
+					</>
 				)}
 
 				<TableContainer component={Paper}>
@@ -188,6 +219,7 @@ const AdminDataTable = ({
 									))}
 									<TableCell align='right'>
 										<IconButton
+											color='info'
 											onClick={() =>
 												handleOpenDialog(item)
 											}
@@ -195,6 +227,7 @@ const AdminDataTable = ({
 											<EditIcon />
 										</IconButton>
 										<IconButton
+											color='error'
 											onClick={() =>
 												handleOpenDeleteDialog(item.id)
 											}

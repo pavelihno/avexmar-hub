@@ -1,5 +1,6 @@
 from app.database import db
 from app.models._base_model import BaseModel
+from app.utils.xlsx_uploader import parse_xlsx, generate_xlsx_template
 
 
 class Country(BaseModel):
@@ -18,3 +19,35 @@ class Country(BaseModel):
             'code_a2': self.code_a2,
             'code_a3': self.code_a3
         }
+
+    upload_fields = {
+        'name': 'Страна',
+        'name_en': 'Страна (англ)',
+        'code_a2': 'Код A2',
+        'code_a3': 'Код A3'
+    }
+
+    @classmethod
+    def get_xlsx_template(cls):
+        return generate_xlsx_template(cls.upload_fields)
+
+    @classmethod
+    def upload_from_file(cls, file):
+        rows = parse_xlsx(
+            file, cls.upload_fields, 
+            required_fields=['name', 'code_a2', 'code_a3']
+        )
+        countries = []
+        error_rows = []
+        for row in rows:
+            if not row.get('error'):
+                try:
+                    country = cls.create(**row)
+                    countries.append(country)
+                except Exception as e:
+                    row['error'] = str(e)
+
+            if row.get('error'):
+                error_rows.append(row)
+
+        return countries, error_rows

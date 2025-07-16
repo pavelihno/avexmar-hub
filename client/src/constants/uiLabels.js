@@ -101,6 +101,8 @@ export const UI_LABELS = {
 				management: 'Управление странами',
 				add_button: 'Добавить страну',
 				edit_button: 'Редактировать страну',
+				upload_button: 'Загрузить страны',
+				upload_template_button: 'Создать шаблон загрузки',
 			},
 			routes: {
 				title: 'Маршруты',

@@ -47,3 +47,15 @@ def delete_airline(current_user, airline_id):
     if deleted:
         return jsonify(deleted.to_dict())
     return jsonify({'message': 'Airline not found'}), 404
+
+
+@admin_required
+def upload(current_user):
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'message': 'No file provided'}), 400
+    try:
+        airlines = Airline.upload_from_file(file)
+        return jsonify([a.to_dict() for a in airlines]), 201
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500

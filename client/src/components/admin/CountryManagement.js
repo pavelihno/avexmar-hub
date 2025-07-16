@@ -90,6 +90,9 @@ const CountryManagement = () => {
 			onDelete={handleDelete}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
+			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
+			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.countries.upload_template_button}
+			// getUploadTemplate={adminManager.getUploadTemplate}
 			isLoading={isLoading}
 			error={errors}
 		/>
