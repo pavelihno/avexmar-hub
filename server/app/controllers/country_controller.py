@@ -3,7 +3,7 @@ from flask import request, jsonify, send_file
 from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
 from app.models._base_model import ModelValidationError
-from app.utils.xlsx_uploader import create_xlsx, is_xlsx_file
+from app.utils.xlsx import create_xlsx, is_xlsx_file
 
 
 @admin_required

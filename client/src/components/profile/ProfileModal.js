@@ -97,12 +97,7 @@ const ProfileModal = () => {
 					>
 						<CloseIcon />
 					</IconButton>
-					<Typography
-						variant='h4'
-						component='h4'
-						align='center'
-						gutterBottom
-					>
+					<Typography variant='h4' component='h4' align='center' gutterBottom>
 						{UI_LABELS.PROFILE.settings}
 					</Typography>
 					<Box
@@ -112,9 +107,9 @@ const ProfileModal = () => {
 							my: 3,
 						}}
 					>
-                                                <Box sx={authIconContainer}>
-                                                        <LockIcon sx={authIcon} />
-                                                </Box>
+						<Box sx={authIconContainer}>
+							<LockIcon sx={authIcon} />
+						</Box>
 					</Box>
 
 					<Alert
@@ -164,9 +159,7 @@ const ProfileModal = () => {
 							value={passwordData.oldPassword}
 							onChange={handlePasswordChange}
 							error={!!errors.oldPassword}
-							helperText={
-								errors.oldPassword ? errors.oldPassword : ''
-							}
+							helperText={errors.oldPassword ? errors.oldPassword : ''}
 						/>
 						<TextField
 							margin='dense'
@@ -179,9 +172,7 @@ const ProfileModal = () => {
 							value={passwordData.newPassword}
 							onChange={handlePasswordChange}
 							error={!!errors.newPassword}
-							helperText={
-								errors.newPassword ? errors.newPassword : ''
-							}
+							helperText={errors.newPassword ? errors.newPassword : ''}
 						/>
 						<TextField
 							margin='dense'
@@ -194,11 +185,7 @@ const ProfileModal = () => {
 							value={passwordData.confirmPassword}
 							onChange={handlePasswordChange}
 							error={!!errors.confirmPassword}
-							helperText={
-								errors.confirmPassword
-									? errors.confirmPassword
-									: ''
-							}
+							helperText={errors.confirmPassword ? errors.confirmPassword : ''}
 						/>
 
 						<Divider sx={{ my: 2 }} />

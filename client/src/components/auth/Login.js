@@ -39,8 +39,7 @@ const Login = ({ isModal = false }) => {
 
 	const { email, password } = formData;
 
-	const onChange = (e) =>
-		setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
@@ -72,19 +71,10 @@ const Login = ({ isModal = false }) => {
 					outline: 'none',
 				}}
 			>
-				<IconButton
-					aria-label='close'
-					onClick={closeAuthModal}
-					sx={{ position: 'absolute', right: 8, top: 8 }}
-				>
+				<IconButton aria-label='close' onClick={closeAuthModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
 					<CloseIcon />
 				</IconButton>
-				<Typography
-					variant='h4'
-					component='h4'
-					align='center'
-					gutterBottom
-				>
+				<Typography variant='h4' component='h4' align='center' gutterBottom>
 					{UI_LABELS.TITLES.login}
 				</Typography>
 				<Box
@@ -94,9 +84,9 @@ const Login = ({ isModal = false }) => {
 						my: 3,
 					}}
 				>
-                                        <Box sx={authIconContainer}>
-                                                <PersonIcon sx={authIcon} />
-                                        </Box>
+					<Box sx={authIconContainer}>
+						<PersonIcon sx={authIcon} />
+					</Box>
 				</Box>
 
 				<Fade in={!!errors.message} timeout={300}>
@@ -174,16 +164,8 @@ const Login = ({ isModal = false }) => {
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>
 								{UI_LABELS.AUTH.no_account}{' '}
-                                                                <Box
-                                                                        component='a'
-                                                                        href='#'
-                                                                        onClick={handleRegisterClick}
-                                                                        sx={authLink}
-                                                                >
-									<Typography
-										variant='subtitle2'
-										component='span'
-									>
+								<Box component='a' href='#' onClick={handleRegisterClick} sx={authLink}>
+									<Typography variant='subtitle2' component='span'>
 										{UI_LABELS.BUTTONS.register}
 									</Typography>
 								</Box>

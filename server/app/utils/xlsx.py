@@ -89,3 +89,5 @@ def parse_xlsx(file, fields: dict, required_fields: list = []) -> list:
         result.append(item)
 
     return result
+
+

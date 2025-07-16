@@ -1,7 +1,7 @@
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
-from app.utils.xlsx_uploader import parse_xlsx, generate_xlsx_template
+from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 
 
 class Airport(BaseModel):

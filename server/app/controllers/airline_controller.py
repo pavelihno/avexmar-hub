@@ -4,7 +4,7 @@ from app.models.airline import Airline
 from app.models.country import Country
 from app.models._base_model import ModelValidationError
 from app.middlewares.auth_middleware import admin_required
-from app.utils.xlsx_uploader import is_xlsx_file, create_xlsx
+from app.utils.xlsx import is_xlsx_file, create_xlsx
 
 
 @admin_required
