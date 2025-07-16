@@ -32,6 +32,13 @@ class Country(BaseModel):
         return generate_xlsx_template(cls.upload_fields)
 
     @classmethod
+    def get_by_code(cls, code):
+        """Get country by A2 or A3 code"""
+        if not code:
+            return None
+        return cls.query.filter((cls.code_a2 == code) | (cls.code_a3 == code)).first()
+
+    @classmethod
     def upload_from_file(cls, file):
         rows = parse_xlsx(
             file, cls.upload_fields, 

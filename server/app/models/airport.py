@@ -34,7 +34,7 @@ class Airport(BaseModel):
         'iata_code': 'Код IATA',
         'icao_code': 'Код ICAO',
         'city_code': 'Код города',
-        'country_id': 'Код страны'
+        'country_code': 'Код страны'
     }
 
     @classmethod
@@ -43,4 +43,45 @@ class Airport(BaseModel):
 
     @classmethod
     def upload_from_file(cls, file):
-        pass
+        rows = parse_xlsx(
+            file,
+            cls.upload_fields,
+            required_fields=[
+                "name",
+                "iata_code",
+                "icao_code",
+                "city_name",
+                "city_code",
+                "country_code",
+            ],
+        )
+
+        airports = []
+        error_rows = []
+
+        for row in rows:
+            if not row.get("error"):
+                try:
+                    from app.models.country import Country
+
+                    country = Country.get_by_code(row.get("country_code"))
+                    if not country:
+                        raise ValueError("Invalid country code")
+
+                    airport = cls.create(
+                        name=row.get("name"),
+                        iata_code=row.get("iata_code"),
+                        icao_code=row.get("icao_code"),
+                        city_name=row.get("city_name"),
+                        city_name_en=row.get("city_name_en"),
+                        city_code=row.get("city_code"),
+                        country_id=country.id,
+                    )
+                    airports.append(airport)
+                except Exception as e:
+                    row["error"] = str(e)
+
+            if row.get("error"):
+                error_rows.append(row)
+
+        return airports, error_rows

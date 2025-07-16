@@ -1,8 +1,9 @@
-from flask import request, jsonify
+from flask import request, jsonify, send_file
 
 from app.models.airline import Airline
 from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
+from app.utils.xlsx_uploader import is_xlsx_file, create_xlsx
 
 
 @admin_required
@@ -50,12 +51,36 @@ def delete_airline(current_user, airline_id):
 
 
 @admin_required
-def upload(current_user):
+def get_airline_template(current_user):
+    xlsx = Airline.get_xlsx_template()
+    xlsx.seek(0)
+    return send_file(
+        xlsx,
+        as_attachment=True,
+        download_name="airlines_template.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@admin_required
+def upload_airline(current_user):
     file = request.files.get('file')
     if not file:
         return jsonify({'message': 'No file provided'}), 400
+    if not is_xlsx_file(file):
+        return jsonify({'message': 'Invalid file type'}), 400
     try:
-        airlines = Airline.upload_from_file(file)
-        return jsonify([a.to_dict() for a in airlines]), 201
+        airlines, error_rows = Airline.upload_from_file(file)
+        if error_rows:
+            error_xlsx = create_xlsx(Airline.upload_fields, error_rows)
+            error_xlsx.seek(0)
+            return send_file(
+                error_xlsx,
+                as_attachment=True,
+                download_name="upload_errors.xlsx",
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ), 201
+
+        return jsonify({'message': 'Airlines created successfully'}), 201
     except Exception as e:
         return jsonify({'message': str(e)}), 500

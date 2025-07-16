@@ -2,6 +2,13 @@ from openpyxl import Workbook, load_workbook
 from io import BytesIO
 
 
+def is_xlsx_file(file) -> bool:
+    """Return True if uploaded file appears to be an XLSX file"""
+    if not file or not getattr(file, "filename", ""):
+        return False
+    return file.filename.lower().endswith(".xlsx")
+
+
 def create_xlsx(fields: dict, data: list) -> BytesIO:
     """
     Create an XLSX file with given fields and data
