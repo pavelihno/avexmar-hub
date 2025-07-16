@@ -27,7 +27,7 @@ import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
-	const { closeAuthModal, openRegisterModal } = useAuthModal();
+        const { closeAuthModal, openRegisterModal, openForgotPasswordModal } = useAuthModal();
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -55,10 +55,15 @@ const Login = ({ isModal = false }) => {
 			.catch((res) => setErrors(res));
 	};
 
-	const handleRegisterClick = (e) => {
-		e.preventDefault();
-		openRegisterModal();
-	};
+        const handleRegisterClick = (e) => {
+                e.preventDefault();
+                openRegisterModal();
+        };
+
+        const handleForgotPasswordClick = (e) => {
+                e.preventDefault();
+                openForgotPasswordModal();
+        };
 
 	const content = (
 		<Fade in={true} timeout={500}>
@@ -161,18 +166,23 @@ const Login = ({ isModal = false }) => {
 					<>
 						<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
 
-						<Box sx={{ textAlign: 'center' }}>
-							<Typography variant='body2'>
-								{UI_LABELS.AUTH.no_account}{' '}
-								<Box component='a' href='#' onClick={handleRegisterClick} sx={authLink}>
-									<Typography variant='subtitle2' component='span'>
-										{UI_LABELS.BUTTONS.register}
-									</Typography>
-								</Box>
-							</Typography>
-						</Box>
-					</>
-				)}
+                                                <Box sx={{ textAlign: 'center' }}>
+                                                        <Typography variant='body2'>
+                                                                {UI_LABELS.AUTH.no_account}{' '}
+                                                                <Box component='a' href='#' onClick={handleRegisterClick} sx={authLink}>
+                                                                        <Typography variant='subtitle2' component='span'>
+                                                                                {UI_LABELS.BUTTONS.register}
+                                                                        </Typography>
+                                                                </Box>
+                                                        </Typography>
+                                                        <Box component='a' href='#' onClick={handleForgotPasswordClick} sx={{ ...authLink, display: 'block', mt: 1 }}>
+                                                                <Typography variant='subtitle2' component='span'>
+                                                                        {UI_LABELS.AUTH.forgot_password}
+                                                                </Typography>
+                                                        </Box>
+                                                </Box>
+                                        </>
+                                )}
 			</Paper>
 		</Fade>
 	);
