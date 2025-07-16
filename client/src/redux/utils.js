@@ -2,11 +2,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { serverApi } from '../api';
 
 export const getErrorData = (error) => {
-        if (error.response?.data) {
-                return error.response.data;
-        }
+	if (error.response?.data) {
+		return error.response.data;
+	}
 
-        return { message: error.message || 'An unknown error occurred' };
+	return { message: error.message || 'An unknown error occurred' };
 };
 
 export const handlePending = (state) => {
@@ -22,72 +22,54 @@ export const handleRejected = (state, action) => {
 // Standard CRUD action creators
 export const createCrudActions = (endpoint) => {
 	// Fetch all
-	const fetchAll = createAsyncThunk(
-		`${endpoint}/getAll`,
-		async (_, { rejectWithValue }) => {
-			try {
-				const res = await serverApi.get(`/${endpoint}`);
-				return res.data;
-			} catch (err) {
-				return rejectWithValue(getErrorData(err));
-			}
+	const fetchAll = createAsyncThunk(`${endpoint}/getAll`, async (_, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/${endpoint}`);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
 		}
-	);
+	});
 
 	// Fetch one
-	const fetchOne = createAsyncThunk(
-		`${endpoint}/get`,
-		async (id, { rejectWithValue }) => {
-			try {
-				const res = await serverApi.get(`/${endpoint}/${id}`);
-				return res.data;
-			} catch (err) {
-				return rejectWithValue(getErrorData(err));
-			}
+	const fetchOne = createAsyncThunk(`${endpoint}/get`, async (id, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/${endpoint}/${id}`);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
 		}
-	);
+	});
 
 	// Create
-	const create = createAsyncThunk(
-		`${endpoint}/create`,
-		async (data, { rejectWithValue }) => {
-			try {
-				const res = await serverApi.post(`/${endpoint}`, data);
-				return res.data;
-			} catch (err) {
-				return rejectWithValue(getErrorData(err));
-			}
+	const create = createAsyncThunk(`${endpoint}/create`, async (data, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.post(`/${endpoint}`, data);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
 		}
-	);
+	});
 
 	// Update
-	const update = createAsyncThunk(
-		`${endpoint}/update`,
-		async (data, { rejectWithValue }) => {
-			try {
-				const res = await serverApi.put(
-					`/${endpoint}/${data.id}`,
-					data
-				);
-				return res.data;
-			} catch (err) {
-				return rejectWithValue(getErrorData(err));
-			}
+	const update = createAsyncThunk(`${endpoint}/update`, async (data, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.put(`/${endpoint}/${data.id}`, data);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
 		}
-	);
+	});
 
 	// Delete
-	const remove = createAsyncThunk(
-		`${endpoint}/delete`,
-		async (id, { rejectWithValue }) => {
-			try {
-				const res = await serverApi.delete(`/${endpoint}/${id}`);
-				return { id, data: res.data };
-			} catch (err) {
-				return rejectWithValue(getErrorData(err));
-			}
+	const remove = createAsyncThunk(`${endpoint}/delete`, async (id, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.delete(`/${endpoint}/${id}`);
+			return { id, data: res.data };
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
 		}
-	);
+	});
 
 	return {
 		fetchAll,
@@ -133,9 +115,7 @@ export const addCrudCases = (builder, actions, pluralKey, singleKey) => {
 	builder
 		.addCase(update.pending, handlePending)
 		.addCase(update.fulfilled, (state, action) => {
-			state[pluralKey] = state[pluralKey].map((item) =>
-				item.id === action.payload.id ? action.payload : item
-			);
+			state[pluralKey] = state[pluralKey].map((item) => (item.id === action.payload.id ? action.payload : item));
 			state.isLoading = false;
 		})
 		.addCase(update.rejected, handleRejected);
@@ -144,13 +124,8 @@ export const addCrudCases = (builder, actions, pluralKey, singleKey) => {
 	builder
 		.addCase(remove.pending, handlePending)
 		.addCase(remove.fulfilled, (state, action) => {
-			const idToRemove =
-				typeof action.payload === 'object'
-					? action.payload.id
-					: action.payload;
-			state[pluralKey] = state[pluralKey].filter(
-				(item) => item.id !== idToRemove
-			);
+			const idToRemove = typeof action.payload === 'object' ? action.payload.id : action.payload;
+			state[pluralKey] = state[pluralKey].filter((item) => item.id !== idToRemove);
 			state.isLoading = false;
 		})
 		.addCase(remove.rejected, handleRejected);

@@ -22,7 +22,6 @@ const CountryManagement = () => {
 			apiKey: 'name',
 			label: FIELD_LABELS.COUNTRY.name,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.COUNTRY.name.REQUIRED : null),
 		},
 		nameEn: {
@@ -30,7 +29,6 @@ const CountryManagement = () => {
 			apiKey: 'name_en',
 			label: FIELD_LABELS.COUNTRY.name_en,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 		},
 		codeA2: {
 			key: 'codeA2',
