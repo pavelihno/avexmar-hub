@@ -16,6 +16,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
+import { authIconContainer, authIcon, authLink } from '../../theme/styles';
+
 import Base from '../Base';
 
 import { register } from '../../redux/actions/auth';
@@ -100,20 +102,9 @@ const Register = ({ isModal = false }) => {
 						my: 3,
 					}}
 				>
-					<Box
-						sx={{
-							bgcolor: '#f0f2ff',
-							borderRadius: '50%',
-							p: 2,
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<PersonAddIcon
-							sx={{ fontSize: 40, color: '#6c63ff' }}
-						/>
-					</Box>
+                                        <Box sx={authIconContainer}>
+                                                <PersonAddIcon sx={authIcon} />
+                                        </Box>
 				</Box>
 
 				<Fade in={!!errors.message} timeout={300}>
@@ -207,16 +198,12 @@ const Register = ({ isModal = false }) => {
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>
 								{UI_LABELS.AUTH.have_account}{' '}
-								<Box
-									component='a'
-									href='#'
-									onClick={handleLoginClick}
-									sx={{
-										color: '#6c63ff',
-										textDecoration: 'none',
-										cursor: 'pointer',
-									}}
-								>
+                                                                <Box
+                                                                        component='a'
+                                                                        href='#'
+                                                                        onClick={handleLoginClick}
+                                                                        sx={authLink}
+                                                                >
 									<Typography
 										variant='subtitle2'
 										component='span'
