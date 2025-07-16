@@ -55,8 +55,18 @@ const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addB
 				setTimeout(() => onClose(), 1000);
 			}
 		} catch (error) {
-			const message = error?.message || error;
-			setErrorMessage(message);
+			let message = '';
+			if (typeof error === 'string') {
+				setErrorMessage(error);
+			} else if (error?.message) {
+				setErrorMessage(error.message);
+			} else if (error?.errors) {
+				setErrorMessage(Object.entries(error.errors)
+				.map(([field, msg]) => `${field}: ${msg}`)
+				.join('; '));
+			} else {
+				message = UI_LABELS.ERRORS.unknown;
+			}
 			setSuccessMessage('');
 		}
 	};
