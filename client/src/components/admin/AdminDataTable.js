@@ -78,7 +78,7 @@ const AdminDataTable = ({
 		if (!file) return;
 		try {
 			await onUpload(file);
-			showNotification(UI_LABELS.SUCCESS.add, 'success');
+			showNotification(UI_LABELS.SUCCESS.upload, 'success');
 		} catch (error) {
 			showNotification(`${UI_LABELS.ERRORS.save}: ${error}`, 'error');
 		}

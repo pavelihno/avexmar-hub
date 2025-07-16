@@ -50,8 +50,8 @@ def get_country_template(current_user):
     return send_file(
         xlsx,
         as_attachment=True,
-        download_name="countries_template.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        download_name='countries_template.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
 
@@ -71,8 +71,8 @@ def upload_country(current_user):
             return send_file(
                 error_xlsx,
                 as_attachment=True,
-                download_name="upload_errors.xlsx",
-                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                download_name='upload_errors.xlsx',
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             ), 201
 
         return jsonify({'message': 'Countries created successfully'}), 201

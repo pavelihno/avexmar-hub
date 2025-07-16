@@ -57,8 +57,8 @@ def get_airline_template(current_user):
     return send_file(
         xlsx,
         as_attachment=True,
-        download_name="airlines_template.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        download_name='airlines_template.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
 
@@ -77,8 +77,8 @@ def upload_airline(current_user):
             return send_file(
                 error_xlsx,
                 as_attachment=True,
-                download_name="upload_errors.xlsx",
-                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                download_name='upload_errors.xlsx',
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ), 201
 
         return jsonify({'message': 'Airlines created successfully'}), 201
