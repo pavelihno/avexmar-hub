@@ -157,12 +157,12 @@ const AdminDataTable = ({
 		setPage(0);
 	};
 
-        const handleSave = (formData) => {
-                if (isEditing) {
-                        return onEdit(formData);
-                }
-                return onAdd(formData);
-        };
+	const handleSave = (formData) => {
+		if (isEditing) {
+			return onEdit(formData);
+		}
+		return onAdd(formData);
+	};
 
 	const handleDelete = (id) => {
 		try {

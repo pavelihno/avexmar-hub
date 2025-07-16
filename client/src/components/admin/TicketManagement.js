@@ -3,12 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchTickets,
-	createTicket,
-	updateTicket,
-	deleteTicket,
-} from '../../redux/actions/ticket';
+import { fetchTickets, createTicket, updateTicket, deleteTicket } from '../../redux/actions/ticket';
 import { fetchFlights } from '../../redux/actions/flight';
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchPassengers } from '../../redux/actions/passenger';
@@ -18,9 +13,7 @@ import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const TicketManagement = () => {
 	const dispatch = useDispatch();
-	const { tickets, isLoading, errors } = useSelector(
-		(state) => state.tickets
-	);
+	const { tickets, isLoading, errors } = useSelector((state) => state.tickets);
 	const { flights } = useSelector((state) => state.flights);
 	const { bookings } = useSelector((state) => state.bookings);
 	const { passengers } = useSelector((state) => state.passengers);
@@ -120,13 +113,13 @@ const TicketManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.tickets.edit_button,
 	});
 
-        const handleAddTicket = (data) => {
-                return dispatch(createTicket(adminManager.toApiFormat(data))).unwrap();
-        };
+	const handleAddTicket = (data) => {
+		return dispatch(createTicket(adminManager.toApiFormat(data))).unwrap();
+	};
 
-        const handleEditTicket = (data) => {
-                return dispatch(updateTicket(adminManager.toApiFormat(data))).unwrap();
-        };
+	const handleEditTicket = (data) => {
+		return dispatch(updateTicket(adminManager.toApiFormat(data))).unwrap();
+	};
 
 	const handleDeleteTicket = (id) => {
 		return dispatch(deleteTicket(id));

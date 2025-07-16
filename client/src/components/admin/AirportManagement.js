@@ -4,24 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
 
-import {
-	fetchAirports,
-	createAirport,
-	updateAirport,
-	deleteAirport,
-} from '../../redux/actions/airport';
+import { fetchAirports, createAirport, updateAirport, deleteAirport } from '../../redux/actions/airport';
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
-	const { airports, isLoading, errors } = useSelector(
-		(state) => state.airports
-	);
-	const { countries, isLoading: countriesLoading } = useSelector(
-		(state) => state.countries
-	);
+	const { airports, isLoading, errors } = useSelector((state) => state.airports);
+	const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
 
 	useEffect(() => {
 		dispatch(fetchAirports());
@@ -46,8 +37,7 @@ const AirportManagement = () => {
 			label: FIELD_LABELS.AIRPORT.name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRPORT.name.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.name.REQUIRED : null),
 		},
 		iataCode: {
 			key: 'iataCode',
@@ -68,10 +58,7 @@ const AirportManagement = () => {
 			label: FIELD_LABELS.AIRPORT.icao_code,
 			type: FIELD_TYPES.TEXT,
 			excludeFromTable: true,
-			validate: (value) =>
-				value && value.length !== 4
-					? VALIDATION_MESSAGES.AIRPORT.icao_code.LENGTH
-					: null,
+			validate: (value) => (value && value.length !== 4 ? VALIDATION_MESSAGES.AIRPORT.icao_code.LENGTH : null),
 			inputProps: { maxLength: 4 },
 		},
 		cityName: {
@@ -79,8 +66,7 @@ const AirportManagement = () => {
 			apiKey: 'city_name',
 			label: FIELD_LABELS.AIRPORT.city_name,
 			type: FIELD_TYPES.TEXT,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRPORT.city_name.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.city_name.REQUIRED : null),
 		},
 		cityNameEn: {
 			key: 'cityNameEn',
@@ -94,8 +80,7 @@ const AirportManagement = () => {
 			apiKey: 'city_code',
 			label: FIELD_LABELS.AIRPORT.city_code,
 			type: FIELD_TYPES.TEXT,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRPORT.city_code.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.city_code.REQUIRED : null),
 		},
 		countryId: {
 			key: 'countryId',
@@ -107,8 +92,7 @@ const AirportManagement = () => {
 				const c = getCountryById(value);
 				return c ? c.name : value;
 			},
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null),
 		},
 	};
 
@@ -117,13 +101,13 @@ const AirportManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.airports.edit_button,
 	});
 
-        const handleAddAirport = (airportData) => {
-                return dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();
-        };
+	const handleAddAirport = (airportData) => {
+		return dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();
+	};
 
-        const handleEditAirport = (airportData) => {
-                return dispatch(updateAirport(adminManager.toApiFormat(airportData))).unwrap();
-        };
+	const handleEditAirport = (airportData) => {
+		return dispatch(updateAirport(adminManager.toApiFormat(airportData))).unwrap();
+	};
 
 	const handleDeleteAirport = (id) => {
 		return dispatch(deleteAirport(id));
@@ -152,9 +136,7 @@ const AirportManagement = () => {
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}
-			uploadTemplateButtonText={
-				UI_LABELS.ADMIN.modules.airports.upload_template_button
-			}
+			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.airports.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
 			onUpload={handleUpload}
 			isLoading={isLoading || countriesLoading}

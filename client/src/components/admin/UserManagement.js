@@ -3,20 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchUsers,
-	createUser,
-	updateUser,
-	deleteUser,
-} from '../../redux/actions/user';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../../redux/actions/user';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const UserManagement = () => {
 	const dispatch = useDispatch();
@@ -34,8 +23,7 @@ const UserManagement = () => {
 			label: FIELD_LABELS.USER.email,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.USER.email.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.USER.email.REQUIRED : null),
 		},
 		role: {
 			key: 'role',
@@ -59,13 +47,13 @@ const UserManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.users.edit_button,
 	});
 
-        const handleAddUser = (data) => {
-                return dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
-        };
+	const handleAddUser = (data) => {
+		return dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
+	};
 
-        const handleEditUser = (data) => {
-                return dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
-        };
+	const handleEditUser = (data) => {
+		return dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
+	};
 
 	const handleDeleteUser = (id) => {
 		return dispatch(deleteUser(id));

@@ -2,26 +2,11 @@ import React, { useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dialog, DialogContent, Typography } from '@mui/material';
 
-import {
-	createTariff,
-	updateTariff,
-	fetchTariff,
-} from '../../redux/actions/tariff';
+import { createTariff, updateTariff, fetchTariff } from '../../redux/actions/tariff';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
-export const TariffManagement = ({
-	flightId,
-	tariffDialogOpen,
-	onClose,
-	action = 'add',
-	tariffId,
-}) => {
+export const TariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', tariffId }) => {
 	const dispatch = useDispatch();
 	const { tariff, isLoading } = useSelector((state) => state.tariffs);
 
@@ -41,10 +26,7 @@ export const TariffManagement = ({
 				label: FIELD_LABELS.TARIFF.seat_class,
 				type: FIELD_TYPES.SELECT,
 				options: getEnumOptions('SEAT_CLASS'),
-				validate: (value) =>
-					!value
-						? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED
-						: null,
+				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
 			},
 			seatsNumber: {
 				key: 'seatsNumber',
@@ -63,10 +45,7 @@ export const TariffManagement = ({
 				label: FIELD_LABELS.TARIFF.currency,
 				type: FIELD_TYPES.SELECT,
 				options: getEnumOptions('CURRENCY'),
-				validate: (value) =>
-					!value
-						? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED
-						: null,
+				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
 			},
 			price: {
 				key: 'price',
@@ -104,32 +83,23 @@ export const TariffManagement = ({
 		}
 	}, [isEditing, tariffId, dispatch]);
 
-        const handleSaveTariff = async (tariffData) => {
-                const formattedData = tariffManager.toApiFormat({
-                        ...tariffData,
-                        flightId,
-                });
+	const handleSaveTariff = async (tariffData) => {
+		const formattedData = tariffManager.toApiFormat({
+			...tariffData,
+			flightId,
+		});
 
-                try {
-                        await dispatch(
-                                isEditing
-                                        ? updateTariff(formattedData)
-                                        : createTariff(formattedData)
-                        ).unwrap();
-                        onClose();
-                } catch (error) {
-                        throw error;
-                }
-        };
+		try {
+			await dispatch(isEditing ? updateTariff(formattedData) : createTariff(formattedData)).unwrap();
+			onClose();
+		} catch (error) {
+			throw error;
+		}
+	};
 
 	if (isEditing && isLoading) {
 		return (
-			<Dialog
-				open={tariffDialogOpen}
-				onClose={onClose}
-				maxWidth='md'
-				fullWidth
-			>
+			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
 				<DialogContent>
 					<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
 				</DialogContent>
@@ -138,12 +108,7 @@ export const TariffManagement = ({
 	}
 
 	return (
-		<Dialog
-			open={tariffDialogOpen}
-			onClose={onClose}
-			maxWidth='md'
-			fullWidth
-		>
+		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
 			<DialogContent>
 				{tariffManager.renderForm({
 					isEditing,
