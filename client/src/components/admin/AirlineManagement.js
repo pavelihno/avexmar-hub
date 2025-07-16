@@ -97,11 +97,11 @@ const AirlineManagement = () => {
 		[FIELDS, getCountryById]
 	);
 
-	const handleAdd = (data) =>
-		dispatch(createAirline(adminManager.toApiFormat(data)));
-	const handleEdit = (data) =>
-		dispatch(updateAirline(adminManager.toApiFormat(data)));
-	const handleDelete = (id) => dispatch(deleteAirline(id));
+        const handleAdd = (data) =>
+                dispatch(createAirline(adminManager.toApiFormat(data))).unwrap();
+        const handleEdit = (data) =>
+                dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
+        const handleDelete = (id) => dispatch(deleteAirline(id));
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airlines', file);

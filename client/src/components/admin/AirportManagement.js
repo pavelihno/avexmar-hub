@@ -117,13 +117,13 @@ const AirportManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.airports.edit_button,
 	});
 
-	const handleAddAirport = (airportData) => {
-		dispatch(createAirport(adminManager.toApiFormat(airportData)));
-	};
+        const handleAddAirport = (airportData) => {
+                return dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();
+        };
 
-	const handleEditAirport = (airportData) => {
-		dispatch(updateAirport(adminManager.toApiFormat(airportData)));
-	};
+        const handleEditAirport = (airportData) => {
+                return dispatch(updateAirport(adminManager.toApiFormat(airportData))).unwrap();
+        };
 
 	const handleDeleteAirport = (id) => {
 		return dispatch(deleteAirport(id));

@@ -110,13 +110,13 @@ const BookingManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.bookings.edit_button,
 	});
 
-	const handleAddBooking = (data) => {
-		dispatch(createBooking(adminManager.toApiFormat(data)));
-	};
+        const handleAddBooking = (data) => {
+                return dispatch(createBooking(adminManager.toApiFormat(data))).unwrap();
+        };
 
-	const handleEditBooking = (data) => {
-		dispatch(updateBooking(adminManager.toApiFormat(data)));
-	};
+        const handleEditBooking = (data) => {
+                return dispatch(updateBooking(adminManager.toApiFormat(data))).unwrap();
+        };
 
 	const handleDeleteBooking = (id) => {
 		return dispatch(deleteBooking(id));

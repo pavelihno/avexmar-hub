@@ -78,13 +78,13 @@ const DiscountManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.discounts.edit_button,
 	});
 
-	const handleAddDiscount = (discountData) => {
-		dispatch(createDiscount(adminManager.toApiFormat(discountData)));
-	};
+        const handleAddDiscount = (discountData) => {
+                return dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap();
+        };
 
-	const handleEditDiscount = (discountData) => {
-		dispatch(updateDiscount(adminManager.toApiFormat(discountData)));
-	};
+        const handleEditDiscount = (discountData) => {
+                return dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap();
+        };
 
 	const handleDeleteDiscount = (id) => {
 		return dispatch(deleteDiscount(id));

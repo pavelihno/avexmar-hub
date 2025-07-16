@@ -120,13 +120,13 @@ const TicketManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.tickets.edit_button,
 	});
 
-	const handleAddTicket = (data) => {
-		dispatch(createTicket(adminManager.toApiFormat(data)));
-	};
+        const handleAddTicket = (data) => {
+                return dispatch(createTicket(adminManager.toApiFormat(data))).unwrap();
+        };
 
-	const handleEditTicket = (data) => {
-		dispatch(updateTicket(adminManager.toApiFormat(data)));
-	};
+        const handleEditTicket = (data) => {
+                return dispatch(updateTicket(adminManager.toApiFormat(data))).unwrap();
+        };
 
 	const handleDeleteTicket = (id) => {
 		return dispatch(deleteTicket(id));

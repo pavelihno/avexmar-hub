@@ -87,13 +87,13 @@ const RouteManagement = () => {
 		[FIELDS, getAirportById]
 	);
 
-	const handleAddRoute = (routeData) => {
-		dispatch(createRoute(adminManager.toApiFormat(routeData)));
-	};
+        const handleAddRoute = (routeData) => {
+                return dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
+        };
 
-	const handleEditRoute = (routeData) => {
-		dispatch(updateRoute(adminManager.toApiFormat(routeData)));
-	};
+        const handleEditRoute = (routeData) => {
+                return dispatch(updateRoute(adminManager.toApiFormat(routeData))).unwrap();
+        };
 
 	const handleDeleteRoute = (id) => {
 		return dispatch(deleteRoute(id));
