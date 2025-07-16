@@ -79,10 +79,11 @@ const CountryManagement = () => {
 		dispatch(updateCountry(adminManager.toApiFormat(data)));
 	const handleDelete = (id) => dispatch(deleteCountry(id));
 
-	const handleUpload = async (file) => {
-		await uploadFile('countries', file);
-		dispatch(fetchCountries());
-	};
+        const handleUpload = async (file) => {
+                const res = await uploadFile('countries', file);
+                dispatch(fetchCountries());
+                return res;
+        };
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('countries', 'countries_template.xlsx');
