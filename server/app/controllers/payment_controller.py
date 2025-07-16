@@ -11,6 +11,7 @@ def get_payments(current_user):
     payments = Payment.get_all()
     return jsonify([p.to_dict() for p in payments])
 
+
 @admin_required
 def get_payment(current_user, payment_id):
     payment = Payment.get_by_id(payment_id)

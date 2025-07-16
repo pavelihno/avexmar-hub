@@ -28,7 +28,7 @@ class BaseModel(db.Model):
         mapper = inspect(self.__class__)
         valid = set(mapper.attrs.keys())
         return {k: v for k, v in kwargs.items() if k in valid}
-    
+
     def __init__(self, **kwargs) -> None:
         filtered_kwargs = self.__filter_out_non_existing_fields(kwargs)
         super().__init__(**filtered_kwargs)

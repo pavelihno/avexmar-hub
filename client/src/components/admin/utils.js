@@ -181,19 +181,19 @@ export const createFormFields = (fields) => {
  * Create column configurations for AdminDataTable
  */
 export const createTableColumns = (fields) => {
-        return Object.values(fields)
-                .filter((field) => field.key !== 'id' && !field.excludeFromTable)
-                .map((field) => {
-                        const column = {
-                                field: field.key,
-                                header: field.label,
-                                formatter: field.formatter,
-                                render: field.renderField
-                                        ? (item) => field.renderField(item)
-                                        : null,
-                                type: field.type,
-                                options: field.options,
-                        };
+	return Object.values(fields)
+		.filter((field) => field.key !== 'id' && !field.excludeFromTable)
+		.map((field) => {
+			const column = {
+				field: field.key,
+				header: field.label,
+				formatter: field.formatter,
+				render: field.renderField
+					? (item) => field.renderField(item)
+					: null,
+				type: field.type,
+				options: field.options,
+			};
 
 			return column;
 		});
@@ -277,21 +277,21 @@ export const createAdminManager = (fields, options = {}) => {
 };
 
 export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
-    if (!value) return '';
-    try {
-        return format(new Date(value), dateFormat);
-    } catch (error) {
-        console.error('Invalid date value:', value);
-        return value;
-    }
+	if (!value) return '';
+	try {
+		return format(new Date(value), dateFormat);
+	} catch (error) {
+		console.error('Invalid date value:', value);
+		return value;
+	}
 };
 
 export const formatDateTime = (value, dateTimeFormat = 'dd.MM.yyyy HH:mm') => {
-    if (!value) return '';
-    try {
-        return format(new Date(value), dateTimeFormat);
-    } catch (error) {
-        console.error('Invalid datetime value:', value);
-        return value;
-    }
+	if (!value) return '';
+	try {
+		return format(new Date(value), dateTimeFormat);
+	} catch (error) {
+		console.error('Invalid datetime value:', value);
+		return value;
+	}
 };

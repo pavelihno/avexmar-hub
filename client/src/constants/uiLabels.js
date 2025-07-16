@@ -84,6 +84,18 @@ export const UI_LABELS = {
 	ADMIN: {
 		actions: 'Действия',
 		panel: 'Панель администратора',
+		filter: {
+			show: 'Показать фильтры',
+			hide: 'Скрыть фильтры',
+			all: 'Все',
+			apply: 'Применить фильтр',
+			clear: 'Очистить фильтр',
+		},
+		rows: {
+			per_page: 'Записей на странице',
+			from: 'из',
+			more_than: 'более',
+		},
 		modules: {
 			airports: {
 				title: 'Аэропорты',
