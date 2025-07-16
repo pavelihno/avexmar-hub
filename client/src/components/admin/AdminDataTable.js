@@ -37,9 +37,9 @@ const AdminDataTable = ({
 	onAdd,
 	onEdit,
 	onDelete,
-        renderForm,
-        getUploadTemplate = () => {},
-        onUpload = () => Promise.resolve(),
+	renderForm,
+	getUploadTemplate = () => {},
+	onUpload = () => Promise.resolve(),
 	addButtonText = null,
 	uploadButtonText = null,
 	uploadTemplateButtonText = null,
@@ -64,25 +64,25 @@ const AdminDataTable = ({
 		setOpenDialog(true);
 	};
 
-        const fileInputRef = React.useRef();
+	const fileInputRef = React.useRef();
 
-        const handleUploadDialog = () => {
-                if (fileInputRef.current) {
-                        fileInputRef.current.value = null;
-                        fileInputRef.current.click();
-                }
-        };
+	const handleUploadDialog = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.value = null;
+			fileInputRef.current.click();
+		}
+	};
 
-        const handleFileChange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                try {
-                        await onUpload(file);
-                        showNotification(UI_LABELS.SUCCESS.add, 'success');
-                } catch (error) {
-                        showNotification(`${UI_LABELS.ERRORS.save}: ${error}`, 'error');
-                }
-        };
+	const handleFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+		try {
+			await onUpload(file);
+			showNotification(UI_LABELS.SUCCESS.add, 'success');
+		} catch (error) {
+			showNotification(`${UI_LABELS.ERRORS.save}: ${error}`, 'error');
+		}
+	};
 
 	const handleCloseDialog = () => {
 		setOpenDialog(false);
@@ -186,23 +186,23 @@ const AdminDataTable = ({
 							{uploadTemplateButtonText}
 						</Button>
 
-                                                <Button
-                                                        variant='outlined'
-                                                        color='secondary'
-                                                        startIcon={<UploadIcon />}
-                                                        onClick={() => handleUploadDialog()}
-                                                        sx={{ mb: 3, ml: 2 }}
-                                                >
-                                                        {uploadButtonText}
-                                                </Button>
-                                                <input
-                                                        type='file'
-                                                        ref={fileInputRef}
-                                                        style={{ display: 'none' }}
-                                                        onChange={handleFileChange}
-                                                />
-                                        </>
-                                )}
+						<Button
+							variant='outlined'
+							color='secondary'
+							startIcon={<UploadIcon />}
+							onClick={() => handleUploadDialog()}
+							sx={{ mb: 3, ml: 2 }}
+						>
+							{uploadButtonText}
+						</Button>
+						<input
+							type='file'
+							ref={fileInputRef}
+							style={{ display: 'none' }}
+							onChange={handleFileChange}
+						/>
+					</>
+				)}
 
 				<TableContainer component={Paper}>
 					<Table>

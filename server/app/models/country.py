@@ -41,7 +41,7 @@ class Country(BaseModel):
     @classmethod
     def upload_from_file(cls, file):
         rows = parse_xlsx(
-            file, cls.upload_fields, 
+            file, cls.upload_fields,
             required_fields=['name', 'code_a2', 'code_a3']
         )
         countries = []

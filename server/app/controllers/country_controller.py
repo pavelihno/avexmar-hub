@@ -4,6 +4,7 @@ from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx_uploader import create_xlsx, is_xlsx_file
 
+
 @admin_required
 def get_countries(current_user):
     countries = Country.get_all()

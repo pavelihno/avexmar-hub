@@ -127,18 +127,18 @@ const AirportManagement = () => {
 		dispatch(updateAirport(adminManager.toApiFormat(airportData)));
 	};
 
-        const handleDeleteAirport = (id) => {
-                return dispatch(deleteAirport(id));
-        };
+	const handleDeleteAirport = (id) => {
+		return dispatch(deleteAirport(id));
+	};
 
-        const handleUpload = async (file) => {
-                await uploadFile('airports', file);
-                dispatch(fetchAirports());
-        };
+	const handleUpload = async (file) => {
+		await uploadFile('airports', file);
+		dispatch(fetchAirports());
+	};
 
-        const handleGetTemplate = async () => {
-                await downloadTemplate('airports', 'airports_template.xlsx');
-        };
+	const handleGetTemplate = async () => {
+		await downloadTemplate('airports', 'airports_template.xlsx');
+	};
 
 	const formattedAirports = airports.map(adminManager.toUiFormat);
 
@@ -151,14 +151,16 @@ const AirportManagement = () => {
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
 			renderForm={adminManager.renderForm}
-                        addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
-                        uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}
-                        uploadTemplateButtonText={UI_LABELS.ADMIN.modules.airports.upload_template_button}
-                        getUploadTemplate={handleGetTemplate}
-                        onUpload={handleUpload}
-                        isLoading={isLoading || countriesLoading}
-                        error={errors}
-                />
+			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
+			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}
+			uploadTemplateButtonText={
+				UI_LABELS.ADMIN.modules.airports.upload_template_button
+			}
+			getUploadTemplate={handleGetTemplate}
+			onUpload={handleUpload}
+			isLoading={isLoading || countriesLoading}
+			error={errors}
+		/>
 	);
 };
 

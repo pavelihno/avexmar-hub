@@ -77,16 +77,16 @@ const CountryManagement = () => {
 		dispatch(createCountry(adminManager.toApiFormat(data)));
 	const handleEdit = (data) =>
 		dispatch(updateCountry(adminManager.toApiFormat(data)));
-        const handleDelete = (id) => dispatch(deleteCountry(id));
+	const handleDelete = (id) => dispatch(deleteCountry(id));
 
-        const handleUpload = async (file) => {
-                await uploadFile('countries', file);
-                dispatch(fetchCountries());
-        };
+	const handleUpload = async (file) => {
+		await uploadFile('countries', file);
+		dispatch(fetchCountries());
+	};
 
-        const handleGetTemplate = async () => {
-                await downloadTemplate('countries', 'countries_template.xlsx');
-        };
+	const handleGetTemplate = async () => {
+		await downloadTemplate('countries', 'countries_template.xlsx');
+	};
 
 	const formatted = countries.map(adminManager.toUiFormat);
 
@@ -100,13 +100,15 @@ const CountryManagement = () => {
 			onDelete={handleDelete}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
-                        uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
-                        uploadTemplateButtonText={UI_LABELS.ADMIN.modules.countries.upload_template_button}
-                        getUploadTemplate={handleGetTemplate}
-                        onUpload={handleUpload}
-                        isLoading={isLoading}
-                        error={errors}
-                />
+			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
+			uploadTemplateButtonText={
+				UI_LABELS.ADMIN.modules.countries.upload_template_button
+			}
+			getUploadTemplate={handleGetTemplate}
+			onUpload={handleUpload}
+			isLoading={isLoading}
+			error={errors}
+		/>
 	);
 };
 
