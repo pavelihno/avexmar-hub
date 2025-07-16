@@ -2,6 +2,7 @@ from flask import request, jsonify, send_file
 
 from app.models.airport import Airport
 from app.middlewares.auth_middleware import admin_required
+from app.models._base_model import ModelValidationError
 from app.utils.xlsx_uploader import is_xlsx_file, create_xlsx
 
 
@@ -22,17 +23,23 @@ def get_airport(current_user, airport_id):
 @admin_required
 def create_airport(current_user):
     body = request.json
-    airport = Airport.create(**body)
-    return jsonify(airport.to_dict()), 201
+    try:
+        airport = Airport.create(**body)
+        return jsonify(airport.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
 def update_airport(current_user, airport_id):
     body = request.json
-    updated = Airport.update(airport_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Airport not found'}), 404
+    try:
+        updated = Airport.update(airport_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Airport not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
