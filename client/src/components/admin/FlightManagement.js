@@ -18,35 +18,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import TariffManagement from './TariffManagement';
 
-import {
-	fetchFlights,
-	createFlight,
-	updateFlight,
-	deleteFlight,
-} from '../../redux/actions/flight';
+import { fetchFlights, createFlight, updateFlight, deleteFlight } from '../../redux/actions/flight';
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();
-	const { flights, isLoading, errors } = useSelector(
-		(state) => state.flights
-	);
-	const { routes, isLoading: routesLoading } = useSelector(
-		(state) => state.routes
-	);
-	const { airlines, isLoading: airlinesLoading } = useSelector(
-		(state) => state.airlines
-	);
+	const { flights, isLoading, errors } = useSelector((state) => state.flights);
+	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
+	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { tariffs } = useSelector((state) => state.tariffs);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
@@ -143,10 +126,7 @@ const FlightManagement = () => {
 			apiKey: 'flight_number',
 			label: FIELD_LABELS.FLIGHT.flight_number,
 			type: FIELD_TYPES.TEXT,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
 		},
 		airlineId: {
 			key: 'airlineId',
@@ -158,8 +138,7 @@ const FlightManagement = () => {
 				const airline = getAirlineById(value);
 				return airline ? `${airline.iata_code}` : value;
 			},
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
 		},
 		routeId: {
 			key: 'routeId',
@@ -169,12 +148,9 @@ const FlightManagement = () => {
 			options: routeOptions,
 			formatter: (value) => {
 				const route = getRouteById(value);
-				return route
-					? `${route.origin_airport_id} -> ${route.destination_airport_id}`
-					: value;
+				return route ? `${route.origin_airport_id} -> ${route.destination_airport_id}` : value;
 			},
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
 		},
 		status: {
 			key: 'status',
@@ -183,8 +159,7 @@ const FlightManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('FLIGHT_STATUS'),
 			formatter: (value) => ENUM_LABELS.FLIGHT_STATUS[value] || value,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.FLIGHT.status.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.status.REQUIRED : null),
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
@@ -192,10 +167,7 @@ const FlightManagement = () => {
 			label: FIELD_LABELS.FLIGHT.scheduled_departure,
 			type: FIELD_TYPES.DATETIME,
 			formatter: (value) => formatDateTime(value),
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
 		},
 		scheduledArrival: {
 			key: 'scheduledArrival',
@@ -203,10 +175,7 @@ const FlightManagement = () => {
 			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
 			type: FIELD_TYPES.DATETIME,
 			formatter: (value) => formatDateTime(value),
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
 		},
 		tariffs: {
 			key: 'tariffs',
@@ -214,9 +183,7 @@ const FlightManagement = () => {
 			label: FIELD_LABELS.FLIGHT.tariffs,
 			excludeFromForm: true,
 			renderField: (item) => {
-				const flightTariffs = tariffs.filter(
-					(tariff) => tariff.flight_id === item.id
-				);
+				const flightTariffs = tariffs.filter((tariff) => tariff.flight_id === item.id);
 
 				return (
 					<Box
@@ -228,12 +195,7 @@ const FlightManagement = () => {
 						}}
 					>
 						{flightTariffs.length === 0 ? (
-							<Tooltip
-								title={
-									UI_LABELS.ADMIN.modules.tariffs.add_button
-								}
-								placement='top'
-							>
+							<Tooltip title={UI_LABELS.ADMIN.modules.tariffs.add_button} placement='top'>
 								<IconButton
 									size='small'
 									color='primary'
@@ -270,15 +232,9 @@ const FlightManagement = () => {
 												textOverflow: 'ellipsis',
 											}}
 										>
-											{`${
-												ENUM_LABELS.SEAT_CLASS[
-													tariff.seat_class
-												] || tariff.seat_class
-											} - ${tariff.price} ${
-												ENUM_LABELS.CURRENCY[
-													tariff.currency
-												] || tariff.currency
-											}`}
+											{`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class] || tariff.seat_class} - ${
+												tariff.price
+											} ${ENUM_LABELS.CURRENCY[tariff.currency] || tariff.currency}`}
 										</Typography>
 										<Box
 											sx={{
@@ -287,10 +243,7 @@ const FlightManagement = () => {
 											}}
 										>
 											<Tooltip
-												title={
-													UI_LABELS.ADMIN.modules
-														.tariffs.edit_button
-												}
+												title={UI_LABELS.ADMIN.modules.tariffs.edit_button}
 												placement='top'
 											>
 												<IconButton
@@ -298,20 +251,14 @@ const FlightManagement = () => {
 													color='primary'
 													onClick={(e) => {
 														e.stopPropagation();
-														handleEditTariff(
-															item.id,
-															tariff.id
-														);
+														handleEditTariff(item.id, tariff.id);
 													}}
 												>
 													<EditIcon fontSize='small' />
 												</IconButton>
 											</Tooltip>
 											<Tooltip
-												title={
-													UI_LABELS.ADMIN.modules
-														.tariffs.delete_button
-												}
+												title={UI_LABELS.ADMIN.modules.tariffs.delete_button}
 												placement='top'
 											>
 												<IconButton
@@ -319,9 +266,7 @@ const FlightManagement = () => {
 													color='error'
 													onClick={(e) => {
 														e.stopPropagation();
-														handleOpenDeleteTariffDialog(
-															tariff.id
-														);
+														handleOpenDeleteTariffDialog(tariff.id);
 													}}
 												>
 													<DeleteIcon fontSize='small' />
@@ -331,13 +276,7 @@ const FlightManagement = () => {
 									</Box>
 								))}
 
-								<Tooltip
-									title={
-										UI_LABELS.ADMIN.modules.flights
-											.add_tariff
-									}
-									placement='top'
-								>
+								<Tooltip title={UI_LABELS.ADMIN.modules.flights.add_tariff} placement='top'>
 									<IconButton
 										size='small'
 										color='primary'
@@ -368,11 +307,11 @@ const FlightManagement = () => {
 	);
 
 	const handleAddFlight = (flightData) => {
-		dispatch(createFlight(adminManager.toApiFormat(flightData)));
+		return dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
 	};
 
 	const handleEditFlight = (flightData) => {
-		dispatch(updateFlight(adminManager.toApiFormat(flightData)));
+		return dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();
 	};
 
 	const handleDeleteFlight = (id) => {
@@ -405,30 +344,18 @@ const FlightManagement = () => {
 			/>
 
 			{/* Delete tariff dialog */}
-			<Dialog
-				open={deleteTariffDialog.open}
-				onClose={handleCloseDeleteTariffDialog}
-			>
-				<DialogTitle id='delete-tariff-dialog-title'>
-					{UI_LABELS.MESSAGES.confirm_action}
-				</DialogTitle>
+			<Dialog open={deleteTariffDialog.open} onClose={handleCloseDeleteTariffDialog}>
+				<DialogTitle id='delete-tariff-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
 				<DialogContent>
 					<Typography id='delete-tariff-dialog-description'>
 						{UI_LABELS.ADMIN.modules.tariffs.confirm_delete}
 					</Typography>
 				</DialogContent>
 				<DialogActions>
-					<Button
-						onClick={handleCloseDeleteTariffDialog}
-						color='primary'
-					>
+					<Button onClick={handleCloseDeleteTariffDialog} color='primary'>
 						{UI_LABELS.BUTTONS.cancel}
 					</Button>
-					<Button
-						onClick={confirmDeleteTariff}
-						color='error'
-						variant='contained'
-					>
+					<Button onClick={confirmDeleteTariff} color='error' variant='contained'>
 						{UI_LABELS.BUTTONS.delete}
 					</Button>
 				</DialogActions>

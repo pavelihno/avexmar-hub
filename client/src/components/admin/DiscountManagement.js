@@ -3,26 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchDiscounts,
-	createDiscount,
-	updateDiscount,
-	deleteDiscount,
-} from '../../redux/actions/discount';
+import { fetchDiscounts, createDiscount, updateDiscount, deleteDiscount } from '../../redux/actions/discount';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const DiscountManagement = () => {
 	const dispatch = useDispatch();
-	const { discounts, isLoading, errors } = useSelector(
-		(state) => state.discounts
-	);
+	const { discounts, isLoading, errors } = useSelector((state) => state.discounts);
 
 	useEffect(() => {
 		dispatch(fetchDiscounts());
@@ -36,10 +23,7 @@ const DiscountManagement = () => {
 			label: FIELD_LABELS.DISCOUNT.discount_name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.DISCOUNT.discount_name.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.DISCOUNT.discount_name.REQUIRED : null),
 		},
 		discountType: {
 			key: 'discountType',
@@ -48,10 +32,7 @@ const DiscountManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('DISCOUNT_TYPE'),
 			formatter: (value) => ENUM_LABELS.DISCOUNT_TYPE[value] || value,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.DISCOUNT.discount_type.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.DISCOUNT.discount_type.REQUIRED : null),
 		},
 		percentageValue: {
 			key: 'percentageValue',
@@ -64,8 +45,7 @@ const DiscountManagement = () => {
 				max: 100,
 				step: 0.01,
 			},
-			formatter: (value) =>
-				value !== null && value !== undefined ? `${value}%` : '',
+			formatter: (value) => (value !== null && value !== undefined ? `${value}%` : ''),
 			validate: (value) =>
 				value === null || value === undefined || value === ''
 					? VALIDATION_MESSAGES.DISCOUNT.percentage_value.REQUIRED
@@ -79,11 +59,11 @@ const DiscountManagement = () => {
 	});
 
 	const handleAddDiscount = (discountData) => {
-		dispatch(createDiscount(adminManager.toApiFormat(discountData)));
+		return dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap();
 	};
 
 	const handleEditDiscount = (discountData) => {
-		dispatch(updateDiscount(adminManager.toApiFormat(discountData)));
+		return dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap();
 	};
 
 	const handleDeleteDiscount = (id) => {

@@ -3,12 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchRoutes,
-	createRoute,
-	updateRoute,
-	deleteRoute,
-} from '../../redux/actions/route';
+import { fetchRoutes, createRoute, updateRoute, deleteRoute } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -16,9 +11,7 @@ import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 const RouteManagement = () => {
 	const dispatch = useDispatch();
 	const { routes, isLoading, errors } = useSelector((state) => state.routes);
-	const { airports, isLoading: airportsLoading } = useSelector(
-		(state) => state.airports
-	);
+	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	useEffect(() => {
 		dispatch(fetchRoutes());
@@ -56,10 +49,7 @@ const RouteManagement = () => {
 				const airport = getAirportById(value);
 				return airport ? `${airport.iata_code}` : value;
 			},
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.ROUTE.origin_airport_id.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.ROUTE.origin_airport_id.REQUIRED : null),
 		},
 		destinationAirportId: {
 			key: 'destinationAirportId',
@@ -71,10 +61,7 @@ const RouteManagement = () => {
 				const airport = getAirportById(value);
 				return airport ? `${airport.iata_code}` : value;
 			},
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.ROUTE.destination_airport_id.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.ROUTE.destination_airport_id.REQUIRED : null),
 		},
 	};
 
@@ -88,11 +75,11 @@ const RouteManagement = () => {
 	);
 
 	const handleAddRoute = (routeData) => {
-		dispatch(createRoute(adminManager.toApiFormat(routeData)));
+		return dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
 	};
 
 	const handleEditRoute = (routeData) => {
-		dispatch(updateRoute(adminManager.toApiFormat(routeData)));
+		return dispatch(updateRoute(adminManager.toApiFormat(routeData))).unwrap();
 	};
 
 	const handleDeleteRoute = (id) => {

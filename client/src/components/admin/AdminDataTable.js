@@ -158,15 +158,10 @@ const AdminDataTable = ({
 	};
 
 	const handleSave = (formData) => {
-		try {
-			if (isEditing) {
-				onEdit(formData);
-			} else {
-				onAdd(formData);
-			}
-		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.save}: ${error.message}`, 'error');
+		if (isEditing) {
+			return onEdit(formData);
 		}
+		return onAdd(formData);
 	};
 
 	const handleDelete = (id) => {

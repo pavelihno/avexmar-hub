@@ -3,26 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchBookings,
-	createBooking,
-	updateBooking,
-	deleteBooking,
-} from '../../redux/actions/booking';
+import { fetchBookings, createBooking, updateBooking, deleteBooking } from '../../redux/actions/booking';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();
-	const { bookings, isLoading, errors } = useSelector(
-		(state) => state.bookings
-	);
+	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
 
 	useEffect(() => {
 		dispatch(fetchBookings());
@@ -51,10 +38,7 @@ const BookingManagement = () => {
 			label: FIELD_LABELS.BOOKING.email_address,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED : null),
 		},
 		phoneNumber: {
 			key: 'phoneNumber',
@@ -62,10 +46,7 @@ const BookingManagement = () => {
 			label: FIELD_LABELS.BOOKING.phone_number,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : null),
 		},
 		firstName: {
 			key: 'firstName',
@@ -111,11 +92,11 @@ const BookingManagement = () => {
 	});
 
 	const handleAddBooking = (data) => {
-		dispatch(createBooking(adminManager.toApiFormat(data)));
+		return dispatch(createBooking(adminManager.toApiFormat(data))).unwrap();
 	};
 
 	const handleEditBooking = (data) => {
-		dispatch(updateBooking(adminManager.toApiFormat(data)));
+		return dispatch(updateBooking(adminManager.toApiFormat(data))).unwrap();
 	};
 
 	const handleDeleteBooking = (id) => {

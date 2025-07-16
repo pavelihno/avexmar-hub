@@ -25,11 +25,9 @@ const AuthModal = () => {
 		>
 			<Fade in={isOpen}>
 				<div>
-                                        {type === 'login' && <Login isModal={true} />}
-                                        {type === 'register' && <Register isModal={true} />}
-                                        {type === 'forgotPassword' && (
-                                                <ForgotPassword isModal={true} />
-                                        )}
+					{type === 'login' && <Login isModal={true} />}
+					{type === 'register' && <Register isModal={true} />}
+					{type === 'forgotPassword' && <ForgotPassword isModal={true} />}
 				</div>
 			</Fade>
 		</Modal>

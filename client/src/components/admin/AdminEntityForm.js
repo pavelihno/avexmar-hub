@@ -1,26 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-	DialogTitle,
-	DialogContent,
-	DialogActions,
-	Button,
-	Grid,
-	Alert,
-	Fade,
-	Box,
-} from '@mui/material';
+import { DialogTitle, DialogContent, DialogActions, Button, Grid, Alert, Fade, Box } from '@mui/material';
 
 import { UI_LABELS } from '../../constants';
 
-const AdminEntityForm = ({
-	fields,
-	initialData,
-	onSave,
-	onClose,
-	isEditing,
-	addButtonText,
-	editButtonText,
-}) => {
+const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addButtonText, editButtonText }) => {
 	const [formData, setFormData] = useState(initialData || {});
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
@@ -60,65 +43,55 @@ const AdminEntityForm = ({
 		return isValid;
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		if (!validateForm()) return;
 
 		try {
-			onSave(formData);
-			setSuccessMessage(
-				isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add
-			);
+			await onSave(formData);
+			setSuccessMessage(isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add);
 			setErrorMessage('');
 
 			if (!isEditing) {
 				setTimeout(() => onClose(), 1000);
 			}
 		} catch (error) {
-			setErrorMessage(error);
+			let message = '';
+			if (typeof error === 'string') {
+				setErrorMessage(error);
+			} else if (error?.message) {
+				setErrorMessage(error.message);
+			} else if (error?.errors) {
+				setErrorMessage(Object.entries(error.errors)
+				.map(([field, msg]) => `${field}: ${msg}`)
+				.join('; '));
+			} else {
+				message = UI_LABELS.ERRORS.unknown;
+			}
 			setSuccessMessage('');
 		}
 	};
 
 	return (
 		<>
-			<DialogTitle>
-				{isEditing ? editButtonText : addButtonText}
-			</DialogTitle>
+			<DialogTitle>{isEditing ? editButtonText : addButtonText}</DialogTitle>
 
 			<Box sx={{ px: 3 }}>
 				<Fade in={!!errorMessage} timeout={300}>
-					<div>
-						{errorMessage && (
-							<Alert severity='error'>{errorMessage}</Alert>
-						)}
-					</div>
+					<div>{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}</div>
 				</Fade>
 
 				<Fade in={!!successMessage} timeout={300}>
-					<div>
-						{successMessage && (
-							<Alert severity='success'>{successMessage}</Alert>
-						)}
-					</div>
+					<div>{successMessage && <Alert severity='success'>{successMessage}</Alert>}</div>
 				</Fade>
 			</Box>
 
 			<DialogContent>
 				<Grid container spacing={2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
-						<Grid
-							item
-							xs={12}
-							sm={field.fullWidth ? 12 : 6}
-							key={index}
-						>
+						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
 							{field.renderField({
-								value:
-									formData[field.name] ||
-									field.defaultValue ||
-									'',
-								onChange: (value) =>
-									handleChange(field.name, value),
+								value: formData[field.name] || field.defaultValue || '',
+								onChange: (value) => handleChange(field.name, value),
 								fullWidth: true,
 								error: !!validationErrors[field.name],
 								helperText: validationErrors[field.name],
@@ -129,11 +102,7 @@ const AdminEntityForm = ({
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
-				<Button
-					onClick={handleSubmit}
-					variant='contained'
-					disabled={!!successMessage}
-				>
+				<Button onClick={handleSubmit} variant='contained' disabled={!!successMessage}>
 					{UI_LABELS.BUTTONS.save}
 				</Button>
 			</DialogActions>

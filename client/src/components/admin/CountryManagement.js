@@ -3,20 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
-import {
-	fetchCountries,
-	createCountry,
-	updateCountry,
-	deleteCountry,
-} from '../../redux/actions/country';
+import { fetchCountries, createCountry, updateCountry, deleteCountry } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const CountryManagement = () => {
 	const dispatch = useDispatch();
-	const { countries, isLoading, errors } = useSelector(
-		(state) => state.countries
-	);
+	const { countries, isLoading, errors } = useSelector((state) => state.countries);
 
 	useEffect(() => {
 		dispatch(fetchCountries());
@@ -29,16 +22,13 @@ const CountryManagement = () => {
 			apiKey: 'name',
 			label: FIELD_LABELS.COUNTRY.name,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) =>
-				!value ? VALIDATION_MESSAGES.COUNTRY.name.REQUIRED : null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.COUNTRY.name.REQUIRED : null),
 		},
 		nameEn: {
 			key: 'nameEn',
 			apiKey: 'name_en',
 			label: FIELD_LABELS.COUNTRY.name_en,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 		},
 		codeA2: {
 			key: 'codeA2',
@@ -73,10 +63,8 @@ const CountryManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.countries.edit_button,
 	});
 
-	const handleAdd = (data) =>
-		dispatch(createCountry(adminManager.toApiFormat(data)));
-	const handleEdit = (data) =>
-		dispatch(updateCountry(adminManager.toApiFormat(data)));
+	const handleAdd = (data) => dispatch(createCountry(adminManager.toApiFormat(data))).unwrap();
+	const handleEdit = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteCountry(id));
 
 	const handleUpload = async (file) => {
@@ -102,9 +90,7 @@ const CountryManagement = () => {
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
-			uploadTemplateButtonText={
-				UI_LABELS.ADMIN.modules.countries.upload_template_button
-			}
+			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.countries.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
 			onUpload={handleUpload}
 			isLoading={isLoading}

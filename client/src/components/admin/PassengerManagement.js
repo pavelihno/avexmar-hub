@@ -3,26 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import {
-	fetchPassengers,
-	createPassenger,
-	updatePassenger,
-	deletePassenger,
-} from '../../redux/actions/passenger';
+import { fetchPassengers, createPassenger, updatePassenger, deletePassenger } from '../../redux/actions/passenger';
 import { FIELD_TYPES, createAdminManager, formatDate } from './utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const PassengerManagement = () => {
 	const dispatch = useDispatch();
-	const { passengers, isLoading, errors } = useSelector(
-		(state) => state.passengers
-	);
+	const { passengers, isLoading, errors } = useSelector((state) => state.passengers);
 
 	useEffect(() => {
 		dispatch(fetchPassengers());
@@ -36,10 +23,7 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.first_name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
 		},
 		lastName: {
 			key: 'lastName',
@@ -47,10 +31,7 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.last_name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
 		},
 		middleName: {
 			key: 'middleName',
@@ -87,10 +68,7 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.document_number,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED
-					: null,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : null),
 		},
 	};
 
@@ -100,11 +78,11 @@ const PassengerManagement = () => {
 	});
 
 	const handleAddPassenger = (data) => {
-		dispatch(createPassenger(adminManager.toApiFormat(data)));
+		return dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
 	};
 
 	const handleEditPassenger = (data) => {
-		dispatch(updatePassenger(adminManager.toApiFormat(data)));
+		return dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
 	};
 
 	const handleDeletePassenger = (id) => {
