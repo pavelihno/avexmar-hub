@@ -3,6 +3,7 @@ from flask import request, jsonify
 from app.models.tariff import Tariff
 from app.models.flight import Flight
 from app.middlewares.auth_middleware import admin_required
+from app.models._base_model import ModelValidationError
 
 
 @admin_required
@@ -27,17 +28,23 @@ def create_tariff(current_user):
     if not Flight.get_by_id(flight_id):
         return jsonify({'message': 'Flight not found'}), 404
 
-    tariff = Tariff.create(**body)
-    return jsonify(tariff.to_dict()), 201
+    try:
+        tariff = Tariff.create(**body)
+        return jsonify(tariff.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
 def update_tariff(current_user, tariff_id):
     body = request.json
-    updated = Tariff.update(tariff_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Tariff not found'}), 404
+    try:
+        updated = Tariff.update(tariff_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Tariff not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

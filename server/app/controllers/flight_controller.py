@@ -4,6 +4,7 @@ from app.models.flight import Flight
 from app.models.route import Route
 from app.models.airline import Airline
 from app.middlewares.auth_middleware import admin_required
+from app.models._base_model import ModelValidationError
 
 
 @admin_required
@@ -30,9 +31,11 @@ def create_flight(current_user):
         return jsonify({'message': 'Route not found'}), 404
     if not Airline.get_by_id(airline_id):
         return jsonify({'message': 'Airline not found'}), 404
-
-    flight = Flight.create(**body)
-    return jsonify(flight.to_dict()), 201
+    try:
+        flight = Flight.create(**body)
+        return jsonify(flight.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
@@ -46,10 +49,13 @@ def update_flight(current_user, flight_id):
     if airline_id is not None and not Airline.get_by_id(airline_id):
         return jsonify({'message': 'Airline not found'}), 404
 
-    updated = Flight.update(flight_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Flight not found'}), 404
+    try:
+        updated = Flight.update(flight_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Flight not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

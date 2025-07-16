@@ -3,6 +3,7 @@ from flask import request, jsonify
 from app.models.seat import Seat
 from app.models.tariff import Tariff
 from app.models.booking import Booking
+from app.models._base_model import ModelValidationError
 from app.middlewares.auth_middleware import admin_required
 
 
@@ -31,8 +32,11 @@ def create_seat(current_user):
     if booking_id is not None and not Booking.get_by_id(booking_id):
         return jsonify({'message': 'Booking not found'}), 404
 
-    seat = Seat.create(**body)
-    return jsonify(seat.to_dict()), 201
+    try:
+        seat = Seat.create(**body)
+        return jsonify(seat.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
@@ -46,10 +50,13 @@ def update_seat(current_user, seat_id):
     if booking_id is not None and not Booking.get_by_id(booking_id):
         return jsonify({'message': 'Booking not found'}), 404
 
-    updated = Seat.update(seat_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Seat not found'}), 404
+    try:
+        updated = Seat.update(seat_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Seat not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

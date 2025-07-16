@@ -61,7 +61,8 @@ const Header = () => {
 				alignItems: 'center',
 				justifyContent: 'space-between',
 				py: 2,
-				borderBottom: '1px solid #E0E0E0',
+				borderBottom: 1,
+				borderColor: 'divider',
 				mb: 3,
 			}}
 		>
@@ -91,11 +92,7 @@ const Header = () => {
 						component={Link}
 						to='/admin'
 						color='inherit'
-						startIcon={
-							<AdminPanelSettingsIcon
-								sx={{ width: 32, height: 32 }}
-							/>
-						}
+						startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
 						sx={{ textTransform: 'none' }}
 					>
 						{UI_LABELS.ADMIN.panel}
@@ -107,9 +104,7 @@ const Header = () => {
 						<Button
 							color='inherit'
 							onClick={handleProfileClick}
-							startIcon={
-								<Avatar sx={{ width: 32, height: 32 }} />
-							}
+							startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
 							sx={{ textTransform: 'none' }}
 						>
 							{currentUser?.name || UI_LABELS.PROFILE.profile}
@@ -133,10 +128,7 @@ const Header = () => {
 								{UI_LABELS.TITLES.settings}
 							</MenuItem>
 							<MenuItem onClick={handleLogout}>
-								<LoginIcon
-									fontSize='small'
-									sx={{ mr: 1, color: 'red' }}
-								/>
+								<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />
 								{UI_LABELS.BUTTONS.exit}
 							</MenuItem>
 						</Menu>

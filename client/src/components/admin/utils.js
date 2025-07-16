@@ -191,6 +191,8 @@ export const createTableColumns = (fields) => {
 				render: field.renderField
 					? (item) => field.renderField(item)
 					: null,
+				type: field.type,
+				options: field.options,
 			};
 
 			return column;
@@ -275,21 +277,21 @@ export const createAdminManager = (fields, options = {}) => {
 };
 
 export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
-    if (!value) return '';
-    try {
-        return format(new Date(value), dateFormat);
-    } catch (error) {
-        console.error('Invalid date value:', value);
-        return value;
-    }
+	if (!value) return '';
+	try {
+		return format(new Date(value), dateFormat);
+	} catch (error) {
+		console.error('Invalid date value:', value);
+		return value;
+	}
 };
 
 export const formatDateTime = (value, dateTimeFormat = 'dd.MM.yyyy HH:mm') => {
-    if (!value) return '';
-    try {
-        return format(new Date(value), dateTimeFormat);
-    } catch (error) {
-        console.error('Invalid datetime value:', value);
-        return value;
-    }
+	if (!value) return '';
+	try {
+		return format(new Date(value), dateTimeFormat);
+	} catch (error) {
+		console.error('Invalid datetime value:', value);
+		return value;
+	}
 };

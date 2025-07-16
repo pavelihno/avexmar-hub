@@ -16,6 +16,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
+import { authIconContainer, authIcon, authLink } from '../../theme/styles';
+
 import Base from '../Base';
 
 import { register } from '../../redux/actions/auth';
@@ -39,8 +41,7 @@ const Register = ({ isModal = false }) => {
 
 	const { email, password, password2 } = formData;
 
-	const onChange = (e) =>
-		setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
@@ -78,19 +79,10 @@ const Register = ({ isModal = false }) => {
 					outline: 'none',
 				}}
 			>
-				<IconButton
-					aria-label='close'
-					onClick={closeAuthModal}
-					sx={{ position: 'absolute', right: 8, top: 8 }}
-				>
+				<IconButton aria-label='close' onClick={closeAuthModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
 					<CloseIcon />
 				</IconButton>
-				<Typography
-					variant='h4'
-					component='h4'
-					align='center'
-					gutterBottom
-				>
+				<Typography variant='h4' component='h4' align='center' gutterBottom>
 					{UI_LABELS.TITLES.register}
 				</Typography>
 				<Box
@@ -100,19 +92,8 @@ const Register = ({ isModal = false }) => {
 						my: 3,
 					}}
 				>
-					<Box
-						sx={{
-							bgcolor: '#f0f2ff',
-							borderRadius: '50%',
-							p: 2,
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<PersonAddIcon
-							sx={{ fontSize: 40, color: '#6c63ff' }}
-						/>
+					<Box sx={authIconContainer}>
+						<PersonAddIcon sx={authIcon} />
 					</Box>
 				</Box>
 
@@ -178,9 +159,7 @@ const Register = ({ isModal = false }) => {
 							value={password2}
 							onChange={onChange}
 							error={!!errors.password2}
-							helperText={
-								errors.password2 ? errors.password2 : ''
-							}
+							helperText={errors.password2 ? errors.password2 : ''}
 						/>
 						<Divider sx={{ my: 1 }} />
 						<Button type='submit' fullWidth variant='contained'>
@@ -207,20 +186,8 @@ const Register = ({ isModal = false }) => {
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>
 								{UI_LABELS.AUTH.have_account}{' '}
-								<Box
-									component='a'
-									href='#'
-									onClick={handleLoginClick}
-									sx={{
-										color: '#6c63ff',
-										textDecoration: 'none',
-										cursor: 'pointer',
-									}}
-								>
-									<Typography
-										variant='subtitle2'
-										component='span'
-									>
+								<Box component='a' href='#' onClick={handleLoginClick} sx={authLink}>
+									<Typography variant='subtitle2' component='span'>
 										{UI_LABELS.BUTTONS.login}
 									</Typography>
 								</Box>

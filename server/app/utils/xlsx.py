@@ -3,10 +3,9 @@ from io import BytesIO
 
 
 def is_xlsx_file(file) -> bool:
-    """Return True if uploaded file appears to be an XLSX file"""
-    if not file or not getattr(file, "filename", ""):
+    if not file or not getattr(file, 'filename', ''):
         return False
-    return file.filename.lower().endswith(".xlsx")
+    return file.filename.lower().endswith('.xlsx')
 
 
 def create_xlsx(fields: dict, data: list) -> BytesIO:
@@ -90,3 +89,5 @@ def parse_xlsx(file, fields: dict, required_fields: list = []) -> list:
         result.append(item)
 
     return result
+
+

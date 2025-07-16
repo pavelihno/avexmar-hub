@@ -1,7 +1,9 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
-from app.models._base_model import BaseModel
+from app.models._base_model import BaseModel, ModelValidationError
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from app.config import Config
 
 
@@ -22,11 +24,11 @@ class User(BaseModel):
         }
 
     @classmethod
-    def create(cls, **data):
+    def create(cls, session: Session | None = None, **data):
+        session = session or db.session
         existing_user = cls.get_by_email(data.get('email', ''))
-
         if existing_user:
-            return None
+            raise ModelValidationError({'email': 'must be unique'})
 
         user = cls()
         for key, value in data.items():
@@ -34,8 +36,12 @@ class User(BaseModel):
                 value = cls.__encode_password(value)
             setattr(user, key, value)
 
-        db.session.add(user)
-        db.session.commit()
+        session.add(user)
+        try:
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'database': str(e)}) from e
 
         return user
 
@@ -44,15 +50,22 @@ class User(BaseModel):
         return cls.query.filter_by(email=_email).first()
 
     @classmethod
-    def update(cls, _id, **data):
+    def update(cls, _id, session: Session | None = None, **data):
+        session = session or db.session
         user = cls.get_by_id(_id)
-        if user:
-            for key, value in data.items():
-                if key in ['role', 'is_active']:
-                    setattr(user, key, value)
-            db.session.commit()
-            return user
-        return None
+        if not user:
+            return None
+
+        for key, value in data.items():
+            if key in ['role', 'is_active']:
+                setattr(user, key, value)
+
+        try:
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'database': str(e)}) from e
+        return user
 
     @classmethod
     def login(cls, _email, _password):
@@ -62,13 +75,18 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def change_password(cls, _id, _password):
+    def change_password(cls, _id, _password, session: Session | None = None):
+        session = session or db.session
         user = cls.get_by_id(_id)
-        if user:
-            user.password = cls.__encode_password(_password)
-            db.session.commit()
-            return user
-        return None
+        if not user:
+            return None
+        user.password = cls.__encode_password(_password)
+        try:
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'database': str(e)}) from e
+        return user
 
     @classmethod
     def __encode_password(cls, _password):
