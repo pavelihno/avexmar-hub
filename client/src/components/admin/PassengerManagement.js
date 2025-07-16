@@ -99,13 +99,13 @@ const PassengerManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.passengers.edit_button,
 	});
 
-	const handleAddPassenger = (data) => {
-		dispatch(createPassenger(adminManager.toApiFormat(data)));
-	};
+        const handleAddPassenger = (data) => {
+                return dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
+        };
 
-	const handleEditPassenger = (data) => {
-		dispatch(updatePassenger(adminManager.toApiFormat(data)));
-	};
+        const handleEditPassenger = (data) => {
+                return dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
+        };
 
 	const handleDeletePassenger = (id) => {
 		return dispatch(deletePassenger(id));

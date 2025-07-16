@@ -367,13 +367,13 @@ const FlightManagement = () => {
 		[FIELDS, getRouteById, getAirlineById]
 	);
 
-	const handleAddFlight = (flightData) => {
-		dispatch(createFlight(adminManager.toApiFormat(flightData)));
-	};
+        const handleAddFlight = (flightData) => {
+                return dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
+        };
 
-	const handleEditFlight = (flightData) => {
-		dispatch(updateFlight(adminManager.toApiFormat(flightData)));
-	};
+        const handleEditFlight = (flightData) => {
+                return dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();
+        };
 
 	const handleDeleteFlight = (id) => {
 		return dispatch(deleteFlight(id));

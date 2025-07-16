@@ -73,11 +73,11 @@ const CountryManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.countries.edit_button,
 	});
 
-	const handleAdd = (data) =>
-		dispatch(createCountry(adminManager.toApiFormat(data)));
-	const handleEdit = (data) =>
-		dispatch(updateCountry(adminManager.toApiFormat(data)));
-	const handleDelete = (id) => dispatch(deleteCountry(id));
+        const handleAdd = (data) =>
+                dispatch(createCountry(adminManager.toApiFormat(data))).unwrap();
+        const handleEdit = (data) =>
+                dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
+        const handleDelete = (id) => dispatch(deleteCountry(id));
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('countries', file);

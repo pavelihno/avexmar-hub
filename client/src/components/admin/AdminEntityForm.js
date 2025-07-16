@@ -60,24 +60,25 @@ const AdminEntityForm = ({
 		return isValid;
 	};
 
-	const handleSubmit = () => {
-		if (!validateForm()) return;
+        const handleSubmit = async () => {
+                if (!validateForm()) return;
 
-		try {
-			onSave(formData);
-			setSuccessMessage(
-				isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add
-			);
-			setErrorMessage('');
+                try {
+                        await onSave(formData);
+                        setSuccessMessage(
+                                isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add
+                        );
+                        setErrorMessage('');
 
-			if (!isEditing) {
-				setTimeout(() => onClose(), 1000);
-			}
-		} catch (error) {
-			setErrorMessage(error);
-			setSuccessMessage('');
-		}
-	};
+                        if (!isEditing) {
+                                setTimeout(() => onClose(), 1000);
+                        }
+                } catch (error) {
+                        const message = error?.message || error;
+                        setErrorMessage(message);
+                        setSuccessMessage('');
+                }
+        };
 
 	return (
 		<>

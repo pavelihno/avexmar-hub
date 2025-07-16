@@ -104,18 +104,23 @@ export const TariffManagement = ({
 		}
 	}, [isEditing, tariffId, dispatch]);
 
-	const handleSaveTariff = (tariffData) => {
-		const formattedData = tariffManager.toApiFormat({
-			...tariffData,
-			flightId,
-		});
-		dispatch(
-			isEditing
-				? updateTariff(formattedData)
-				: createTariff(formattedData)
-		);
-		onClose();
-	};
+        const handleSaveTariff = async (tariffData) => {
+                const formattedData = tariffManager.toApiFormat({
+                        ...tariffData,
+                        flightId,
+                });
+
+                try {
+                        await dispatch(
+                                isEditing
+                                        ? updateTariff(formattedData)
+                                        : createTariff(formattedData)
+                        ).unwrap();
+                        onClose();
+                } catch (error) {
+                        throw error;
+                }
+        };
 
 	if (isEditing && isLoading) {
 		return (
