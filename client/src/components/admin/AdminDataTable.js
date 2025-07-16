@@ -73,16 +73,29 @@ const AdminDataTable = ({
 		}
 	};
 
-	const handleFileChange = async (e) => {
-		const file = e.target.files[0];
-		if (!file) return;
-		try {
-			await onUpload(file);
-			showNotification(UI_LABELS.SUCCESS.upload, 'success');
-		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.save}: ${error}`, 'error');
-		}
-	};
+        const handleFileChange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                        const result = await onUpload(file);
+
+                        if (result?.errorFile) {
+                                const url = window.URL.createObjectURL(result.errorFile);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', 'upload_errors.xlsx');
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+
+                                showNotification(UI_LABELS.WARNINGS.upload, 'warning');
+                        } else {
+                                showNotification(UI_LABELS.SUCCESS.upload, 'success');
+                        }
+                } catch (error) {
+                        showNotification(`${UI_LABELS.ERRORS.save}: ${error.message}`, 'error');
+                }
+        };
 
 	const handleCloseDialog = () => {
 		setOpenDialog(false);

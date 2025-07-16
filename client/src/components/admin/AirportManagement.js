@@ -131,10 +131,11 @@ const AirportManagement = () => {
 		return dispatch(deleteAirport(id));
 	};
 
-	const handleUpload = async (file) => {
-		await uploadFile('airports', file);
-		dispatch(fetchAirports());
-	};
+        const handleUpload = async (file) => {
+                const res = await uploadFile('airports', file);
+                dispatch(fetchAirports());
+                return res;
+        };
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('airports', 'airports_template.xlsx');

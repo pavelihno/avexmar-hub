@@ -104,10 +104,11 @@ const AirlineManagement = () => {
 		dispatch(updateAirline(adminManager.toApiFormat(data)));
 	const handleDelete = (id) => dispatch(deleteAirline(id));
 
-	const handleUpload = async (file) => {
-		await uploadFile('airlines', file);
-		dispatch(fetchAirlines());
-	};
+        const handleUpload = async (file) => {
+                const res = await uploadFile('airlines', file);
+                dispatch(fetchAirlines());
+                return res;
+        };
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('airlines', 'airlines_template.xlsx');
