@@ -61,7 +61,8 @@ const Header = () => {
 				alignItems: 'center',
 				justifyContent: 'space-between',
 				py: 2,
-				borderBottom: '1px solid #E0E0E0',
+                                borderBottom: 1,
+                                borderColor: 'divider',
 				mb: 3,
 			}}
 		>
