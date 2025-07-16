@@ -1,4 +1,8 @@
 export const ENUM_LABELS = {
+	BOOLEAN: {
+		true: 'Да',
+		false: 'Нет',
+	},
 	DISCOUNT_TYPE: {
 		round_trip: 'Туда-обратно',
 		infant: 'Младенец',

@@ -1,19 +1,14 @@
 from app.database import db
 from app.models._base_model import BaseModel
-from app.models.country import Country
 from app.utils.xlsx_uploader import parse_xlsx, generate_xlsx_template
 
 
-class Airport(BaseModel):
-    __tablename__ = 'airports'
+class Airline(BaseModel):
+    __tablename__ = 'airlines'
 
-    iata_code = db.Column(db.String(3), unique=True, nullable=False)
-    icao_code = db.Column(db.String(4), unique=True, nullable=False)
+    iata_code = db.Column(db.String(2), unique=True, nullable=False)
+    icao_code = db.Column(db.String(3), unique=True, nullable=False)
     name = db.Column(db.String, nullable=False)
-
-    city_name = db.Column(db.String, nullable=False)
-    city_name_en = db.Column(db.String, nullable=True)
-    city_code = db.Column(db.String, nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
 
     def to_dict(self):
@@ -22,19 +17,13 @@ class Airport(BaseModel):
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
             'name': self.name,
-            'city_name': self.city_name,
-            'city_name_en': self.city_name_en,
-            'city_code': self.city_code,
             'country_id': self.country_id
         }
 
     upload_fields = {
-        'name': 'Аэропорт',
-        'city_name': 'Город',
-        'city_name_en': 'Город (англ)',
+        'name': 'Авиакомпания',
         'iata_code': 'Код IATA',
         'icao_code': 'Код ICAO',
-        'city_code': 'Код города',
         'country_code': 'Код страны'
     }
 
@@ -47,35 +36,30 @@ class Airport(BaseModel):
         rows = parse_xlsx(
             file,
             cls.upload_fields,
-            required_fields=[
-                'name',
-                'iata_code',
-                'icao_code',
-                'city_name',
-                'city_code',
-                'country_code',
-            ],
+            required_fields=['name', 'iata_code', 'icao_code', 'country_code'],
         )
 
-        airports = []
+        airlines = []
         error_rows = []
 
         for row in rows:
             if not row.get('error'):
                 try:
+                    from app.models.country import Country
+
                     country = Country.get_by_code(row.get('country_code'))
                     if not country:
                         raise ValueError('Invalid country code')
 
-                    airport = cls.create(**{
+                    airline = cls.create(**{
                         **row,
                         'country_id': country.id,
                     })
-                    airports.append(airport)
+                    airlines.append(airline)
                 except Exception as e:
                     row['error'] = str(e)
 
             if row.get('error'):
                 error_rows.append(row)
 
-        return airports, error_rows
+        return airlines, error_rows

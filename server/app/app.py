@@ -18,6 +18,8 @@ from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.payment_controller import *
+from app.controllers.airline_controller import *
+from app.controllers.country_controller import *
 
 
 def __import_models():
@@ -64,6 +66,26 @@ def __create_app(_config_class, _db):
     app.route('/airports/<int:airport_id>', methods=['GET'])(get_airport)
     app.route('/airports/<int:airport_id>', methods=['PUT'])(update_airport)
     app.route('/airports/<int:airport_id>', methods=['DELETE'])(delete_airport)
+    app.route('/airports/upload', methods=['POST'])(upload_airport)
+    app.route('/airports/template', methods=['GET'])(get_airport_template)
+
+    # airlines
+    app.route('/airlines', methods=['GET'])(get_airlines)
+    app.route('/airlines', methods=['POST'])(create_airline)
+    app.route('/airlines/<int:airline_id>', methods=['GET'])(get_airline)
+    app.route('/airlines/<int:airline_id>', methods=['PUT'])(update_airline)
+    app.route('/airlines/<int:airline_id>', methods=['DELETE'])(delete_airline)
+    app.route('/airlines/upload', methods=['POST'])(upload_airline)
+    app.route('/airlines/template', methods=['GET'])(get_airline_template)
+
+    # countries
+    app.route('/countries', methods=['GET'])(get_countries)
+    app.route('/countries', methods=['POST'])(create_country)
+    app.route('/countries/<int:country_id>', methods=['GET'])(get_country)
+    app.route('/countries/<int:country_id>', methods=['PUT'])(update_country)
+    app.route('/countries/<int:country_id>', methods=['DELETE'])(delete_country)
+    app.route('/countries/upload', methods=['POST'])(upload_country)
+    app.route('/countries/template', methods=['GET'])(get_country_template)
 
     # routes
     app.route('/routes', methods=['GET'])(get_routes)

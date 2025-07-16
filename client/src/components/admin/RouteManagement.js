@@ -46,17 +46,6 @@ const RouteManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
-		flightNumber: {
-			key: 'flightNumber',
-			apiKey: 'flight_number',
-			label: FIELD_LABELS.ROUTE.flight_number,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) =>
-				!value
-					? VALIDATION_MESSAGES.ROUTE.flight_number.REQUIRED
-					: null,
-		},
 		originAirportId: {
 			key: 'originAirportId',
 			apiKey: 'origin_airport_id',

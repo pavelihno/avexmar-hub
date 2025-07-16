@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
+import { downloadTemplate, uploadFile } from '../../api';
 
 import {
 	fetchAirports,
@@ -9,6 +10,7 @@ import {
 	updateAirport,
 	deleteAirport,
 } from '../../redux/actions/airport';
+import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
@@ -17,10 +19,24 @@ const AirportManagement = () => {
 	const { airports, isLoading, errors } = useSelector(
 		(state) => state.airports
 	);
+	const { countries, isLoading: countriesLoading } = useSelector(
+		(state) => state.countries
+	);
 
 	useEffect(() => {
 		dispatch(fetchAirports());
+		dispatch(fetchCountries());
 	}, [dispatch]);
+
+	const countryOptions = useMemo(() => {
+		if (!countries || !Array.isArray(countries)) return [];
+		return countries.map((c) => ({ value: c.id, label: c.name }));
+	}, [countries]);
+
+	const getCountryById = (id) => {
+		if (!countries || !Array.isArray(countries)) return null;
+		return countries.find((c) => c.id === id);
+	};
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -34,7 +50,7 @@ const AirportManagement = () => {
 				!value ? VALIDATION_MESSAGES.AIRPORT.name.REQUIRED : null,
 		},
 		iataCode: {
-			key: 'iata_code',
+			key: 'iataCode',
 			apiKey: 'iata_code',
 			label: FIELD_LABELS.AIRPORT.iata_code,
 			type: FIELD_TYPES.TEXT,
@@ -47,29 +63,52 @@ const AirportManagement = () => {
 			inputProps: { maxLength: 3 },
 		},
 		icaoCode: {
-			key: 'icao_code',
+			key: 'icaoCode',
 			apiKey: 'icao_code',
 			label: FIELD_LABELS.AIRPORT.icao_code,
 			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 			validate: (value) =>
 				value && value.length !== 4
 					? VALIDATION_MESSAGES.AIRPORT.icao_code.LENGTH
 					: null,
 			inputProps: { maxLength: 4 },
 		},
-		city: {
-			key: 'city',
+		cityName: {
+			key: 'cityName',
+			apiKey: 'city_name',
+			label: FIELD_LABELS.AIRPORT.city_name,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRPORT.city_name.REQUIRED : null,
+		},
+		cityNameEn: {
+			key: 'cityNameEn',
+			apiKey: 'city_name_en',
+			label: FIELD_LABELS.AIRPORT.city_name_en,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
+		},
+		cityCode: {
+			key: 'cityCode',
 			apiKey: 'city_code',
 			label: FIELD_LABELS.AIRPORT.city_code,
 			type: FIELD_TYPES.TEXT,
 			validate: (value) =>
 				!value ? VALIDATION_MESSAGES.AIRPORT.city_code.REQUIRED : null,
 		},
-		country: {
-			key: 'country',
-			apiKey: 'country_code',
-			label: FIELD_LABELS.AIRPORT.country_code,
-			type: FIELD_TYPES.TEXT,
+		countryId: {
+			key: 'countryId',
+			apiKey: 'country_id',
+			label: FIELD_LABELS.AIRPORT.country_id,
+			type: FIELD_TYPES.SELECT,
+			options: countryOptions,
+			formatter: (value) => {
+				const c = getCountryById(value);
+				return c ? c.name : value;
+			},
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null,
 		},
 	};
 
@@ -90,6 +129,16 @@ const AirportManagement = () => {
 		return dispatch(deleteAirport(id));
 	};
 
+	const handleUpload = async (file) => {
+		const res = await uploadFile('airports', file);
+		dispatch(fetchAirports());
+		return res;
+	};
+
+	const handleGetTemplate = async () => {
+		await downloadTemplate('airports', 'airports_template.xlsx');
+	};
+
 	const formattedAirports = airports.map(adminManager.toUiFormat);
 
 	return (
@@ -102,7 +151,13 @@ const AirportManagement = () => {
 			onDelete={handleDeleteAirport}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
-			isLoading={isLoading}
+			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}
+			uploadTemplateButtonText={
+				UI_LABELS.ADMIN.modules.airports.upload_template_button
+			}
+			getUploadTemplate={handleGetTemplate}
+			onUpload={handleUpload}
+			isLoading={isLoading || countriesLoading}
 			error={errors}
 		/>
 	);

@@ -28,10 +28,14 @@ export const UI_LABELS = {
 	},
 	SUCCESS: {
 		add: 'Запись успешно добавлена',
+		upload: 'Файл успешно загружен',
 		update: 'Запись успешно обновлена',
 		delete: 'Запись успешно удалена',
 		login: 'Вход выполнен успешно',
 		register: 'Регистрация выполнена успешно',
+	},
+	WARNINGS: {
+		upload: 'Некоторые записи не были созданы. Подробнее в файле',
 	},
 	ERRORS: {
 		copy: 'Ошибка при копировании',
@@ -87,6 +91,26 @@ export const UI_LABELS = {
 				management: 'Управление аэропортами',
 				add_button: 'Добавить аэропорт',
 				edit_button: 'Редактировать аэропорт',
+				upload_button: 'Загрузить аэропорты',
+				upload_template_button: 'Скачать шаблон загрузки',
+			},
+			airlines: {
+				title: 'Авиакомпании',
+				description: 'Управление авиакомпаниями',
+				management: 'Управление авиакомпаниями',
+				add_button: 'Добавить авиакомпанию',
+				edit_button: 'Редактировать авиакомпанию',
+				upload_button: 'Загрузить авиакомпании',
+				upload_template_button: 'Скачать шаблон загрузки',
+			},
+			countries: {
+				title: 'Страны',
+				description: 'Управление странами',
+				management: 'Управление странами',
+				add_button: 'Добавить страну',
+				edit_button: 'Редактировать страну',
+				upload_button: 'Загрузить страны',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			routes: {
 				title: 'Маршруты',

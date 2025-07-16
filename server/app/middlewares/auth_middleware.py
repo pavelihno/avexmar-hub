@@ -1,6 +1,7 @@
 from functools import wraps
 
 from flask import request, jsonify
+from jwt import InvalidTokenError
 
 from app.config import Config
 from app.models.user import User
@@ -11,9 +12,10 @@ def login_required(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization', '')
         token = None
-        if 'Authorization' in request.headers:
-            token = request.headers['Authorization'].split('Bearer ')[1]
+        if auth_header.startswith('Bearer '):
+            token = auth_header.split('Bearer ', 1)[1]
         if not token:
             return jsonify({'message': 'Authentication required'}), 401
         try:
@@ -26,8 +28,10 @@ def login_required(f):
             if not current_user.is_active:
                 return jsonify({'message': 'Authentication failed'}), 403
 
-        except Exception as e:
-            return jsonify({'message': 'Something went wrong'}), 500
+        except InvalidTokenError:
+            return jsonify({'message': 'Authentication failed'}), 401
+        except Exception:
+            return jsonify({'message': 'Authentication failed'}), 401
 
         return f(current_user, *args, **kwargs)
 

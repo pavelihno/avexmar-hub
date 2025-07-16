@@ -1,3 +1,5 @@
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from app.database import db
 from app.models._base_model import BaseModel
 
@@ -25,3 +27,8 @@ class Seat(BaseModel):
             'tariff_id': self.tariff_id,
             'is_booked': self.is_booked
         }
+
+    @hybrid_property
+    def is_booked(self):
+        """Return True if the seat is associated with a booking"""
+        return self.booking_id is not None

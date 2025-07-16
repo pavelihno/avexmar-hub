@@ -26,6 +26,7 @@ import {
 } from '../../redux/actions/flight';
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
+import { fetchAirlines } from '../../redux/actions/airline';
 import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
 import {
 	ENUM_LABELS,
@@ -43,6 +44,9 @@ const FlightManagement = () => {
 	const { routes, isLoading: routesLoading } = useSelector(
 		(state) => state.routes
 	);
+	const { airlines, isLoading: airlinesLoading } = useSelector(
+		(state) => state.airlines
+	);
 	const { tariffs } = useSelector((state) => state.tariffs);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
@@ -53,6 +57,7 @@ const FlightManagement = () => {
 	useEffect(() => {
 		dispatch(fetchFlights());
 		dispatch(fetchRoutes());
+		dispatch(fetchAirlines());
 		dispatch(fetchTariffs());
 	}, [dispatch]);
 
@@ -62,7 +67,7 @@ const FlightManagement = () => {
 		}
 		return routes.map((route) => ({
 			value: route.id,
-			label: `${route.flight_number} - ${route.origin_airport_id} -> ${route.destination_airport_id}`,
+			label: `${route.origin_airport_id} -> ${route.destination_airport_id}`,
 		}));
 	};
 
@@ -73,7 +78,25 @@ const FlightManagement = () => {
 		return routes.find((route) => route.id === id);
 	};
 
+	const getAirlineOptions = () => {
+		if (!airlines || !Array.isArray(airlines)) {
+			return [];
+		}
+		return airlines.map((airline) => ({
+			value: airline.id,
+			label: `${airline.name} (${airline.iata_code})`,
+		}));
+	};
+
+	const getAirlineById = (id) => {
+		if (!airlines || !Array.isArray(airlines)) {
+			return null;
+		}
+		return airlines.find((airline) => airline.id === id);
+	};
+
 	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
+	const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
 
 	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
 		open: false,
@@ -115,6 +138,29 @@ const FlightManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
+		flightNumber: {
+			key: 'flightNumber',
+			apiKey: 'flight_number',
+			label: FIELD_LABELS.FLIGHT.flight_number,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				!value
+					? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED
+					: null,
+		},
+		airlineId: {
+			key: 'airlineId',
+			apiKey: 'airline_id',
+			label: FIELD_LABELS.FLIGHT.airline_id,
+			type: FIELD_TYPES.SELECT,
+			options: airlineOptions,
+			formatter: (value) => {
+				const airline = getAirlineById(value);
+				return airline ? `${airline.iata_code}` : value;
+			},
+			validate: (value) =>
+				!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null,
+		},
 		routeId: {
 			key: 'routeId',
 			apiKey: 'route_id',
@@ -124,7 +170,7 @@ const FlightManagement = () => {
 			formatter: (value) => {
 				const route = getRouteById(value);
 				return route
-					? `${route.flight_number} (${route.origin_airport_id} - ${route.destination_airport_id})`
+					? `${route.origin_airport_id} -> ${route.destination_airport_id}`
 					: value;
 			},
 			validate: (value) =>
@@ -318,7 +364,7 @@ const FlightManagement = () => {
 				addButtonText: UI_LABELS.ADMIN.modules.flights.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.flights.edit_button,
 			}),
-		[FIELDS, getRouteById]
+		[FIELDS, getRouteById, getAirlineById]
 	);
 
 	const handleAddFlight = (flightData) => {
@@ -346,7 +392,7 @@ const FlightManagement = () => {
 				onDelete={handleDeleteFlight}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-				isLoading={isLoading || routesLoading}
+				isLoading={isLoading || routesLoading || airlinesLoading}
 				error={errors}
 			/>
 

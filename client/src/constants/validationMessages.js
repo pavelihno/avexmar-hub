@@ -22,13 +22,16 @@ export const VALIDATION_MESSAGES = {
 			LENGTH: 'Код ICAO должен содержать 4 символа',
 		},
 		city_code: {
-			REQUIRED: 'Город обязателен',
+			REQUIRED: 'Код города обязателен',
+		},
+		city_name: {
+			REQUIRED: 'Название города обязательно',
+		},
+		country_id: {
+			REQUIRED: 'Страна обязательна',
 		},
 	},
 	ROUTE: {
-		flight_number: {
-			REQUIRED: 'Номер рейса обязателен',
-		},
 		origin_airport_id: {
 			REQUIRED: 'Аэропорт отправления обязателен',
 		},
@@ -71,7 +74,42 @@ export const VALIDATION_MESSAGES = {
 			INVALID: 'Введите корректный номер телефона',
 		},
 	},
+	AIRLINE: {
+		iata_code: {
+			REQUIRED: 'Код IATA обязателен',
+			LENGTH: 'Код IATA должен содержать 2 символа',
+		},
+		icao_code: {
+			REQUIRED: 'Код ICAO обязателен',
+			LENGTH: 'Код ICAO должен содержать 3 символа',
+		},
+		name: {
+			REQUIRED: 'Название авиакомпании обязательно',
+		},
+		country_id: {
+			REQUIRED: 'Страна обязательна',
+		},
+	},
+	COUNTRY: {
+		name: {
+			REQUIRED: 'Название обязательно',
+		},
+		code_a2: {
+			REQUIRED: 'Код A2 обязателен',
+			LENGTH: 'Код A2 должен содержать 2 символа',
+		},
+		code_a3: {
+			REQUIRED: 'Код A3 обязателен',
+			LENGTH: 'Код A3 должен содержать 3 символа',
+		},
+	},
 	FLIGHT: {
+		flight_number: {
+			REQUIRED: 'Номер рейса обязателен',
+		},
+		airline_id: {
+			REQUIRED: 'Авиакомпания обязательна',
+		},
 		route_id: {
 			REQUIRED: 'Маршрут рейса обязателен',
 		},
@@ -98,8 +136,7 @@ export const VALIDATION_MESSAGES = {
 		price: {
 			REQUIRED: 'Цена обязательна',
 		},
-
-	}
+	},
 };
 
 export default VALIDATION_MESSAGES;

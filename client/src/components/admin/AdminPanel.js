@@ -17,6 +17,8 @@ import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
 import HailIcon from '@mui/icons-material/Hail';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import AirlinesIcon from '@mui/icons-material/Airlines';
+import PublicIcon from '@mui/icons-material/Public';
 
 import Base from '../Base';
 
@@ -25,10 +27,22 @@ import { UI_LABELS } from '../../constants';
 const AdminPanel = () => {
 	const adminModules = [
 		{
+			title: UI_LABELS.ADMIN.modules.countries.title,
+			description: UI_LABELS.ADMIN.modules.countries.description,
+			icon: <PublicIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/countries',
+		},
+		{
 			title: UI_LABELS.ADMIN.modules.airports.title,
 			description: UI_LABELS.ADMIN.modules.airports.description,
 			icon: <AirportIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/airports',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.airlines.title,
+			description: UI_LABELS.ADMIN.modules.airlines.description,
+			icon: <AirlinesIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/airlines',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.routes.title,

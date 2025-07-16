@@ -21,6 +21,8 @@ import {
 	Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -36,7 +38,11 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	renderForm,
-	addButtonText,
+	getUploadTemplate = () => {},
+	onUpload = () => Promise.resolve(),
+	addButtonText = null,
+	uploadButtonText = null,
+	uploadTemplateButtonText = null,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -56,6 +62,42 @@ const AdminDataTable = ({
 		setCurrentItem(item);
 		setIsEditing(!!item);
 		setOpenDialog(true);
+	};
+
+	const fileInputRef = React.useRef();
+
+	const handleUploadDialog = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.value = null;
+			fileInputRef.current.click();
+		}
+	};
+
+	const handleFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+		try {
+			const result = await onUpload(file);
+
+			if (result?.errorFile) {
+				const url = window.URL.createObjectURL(result.errorFile);
+				const link = document.createElement('a');
+				link.href = url;
+				link.setAttribute('download', 'upload_errors.xlsx');
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+
+				showNotification(UI_LABELS.WARNINGS.upload, 'warning');
+			} else {
+				showNotification(UI_LABELS.SUCCESS.upload, 'success');
+			}
+		} catch (error) {
+			showNotification(
+				`${UI_LABELS.ERRORS.save}: ${error.message}`,
+				'error'
+			);
+		}
 	};
 
 	const handleCloseDialog = () => {
@@ -137,14 +179,46 @@ const AdminDataTable = ({
 					<Typography variant='h4'>{title}</Typography>
 				</Box>
 
-				<Button
-					variant='contained'
-					startIcon={<AddIcon />}
-					onClick={() => handleOpenDialog()}
-					sx={{ mb: 3 }}
-				>
-					{addButtonText}
-				</Button>
+				{addButtonText && (
+					<Button
+						variant='contained'
+						color='primary'
+						startIcon={<AddIcon />}
+						onClick={() => handleOpenDialog()}
+						sx={{ mb: 3 }}
+					>
+						{addButtonText}
+					</Button>
+				)}
+
+				{uploadButtonText && uploadTemplateButtonText && (
+					<>
+						<Button
+							variant='outlined'
+							startIcon={<DownloadIcon />}
+							onClick={() => getUploadTemplate()}
+							sx={{ mb: 3, ml: 2 }}
+						>
+							{uploadTemplateButtonText}
+						</Button>
+
+						<Button
+							variant='outlined'
+							color='secondary'
+							startIcon={<UploadIcon />}
+							onClick={() => handleUploadDialog()}
+							sx={{ mb: 3, ml: 2 }}
+						>
+							{uploadButtonText}
+						</Button>
+						<input
+							type='file'
+							ref={fileInputRef}
+							style={{ display: 'none' }}
+							onChange={handleFileChange}
+						/>
+					</>
+				)}
 
 				<TableContainer component={Paper}>
 					<Table>
@@ -186,6 +260,7 @@ const AdminDataTable = ({
 									))}
 									<TableCell align='right'>
 										<IconButton
+											color='info'
 											onClick={() =>
 												handleOpenDialog(item)
 											}
@@ -193,6 +268,7 @@ const AdminDataTable = ({
 											<EditIcon />
 										</IconButton>
 										<IconButton
+											color='error'
 											onClick={() =>
 												handleOpenDeleteDialog(item.id)
 											}
