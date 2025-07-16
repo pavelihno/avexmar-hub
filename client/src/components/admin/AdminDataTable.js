@@ -11,7 +11,12 @@ import {
 	TableContainer,
 	TableHead,
 	TableRow,
-	Paper,
+        Paper,
+        TableSortLabel,
+        TablePagination,
+        TextField,
+        Select,
+        MenuItem,
 	IconButton,
 	Dialog,
 	DialogTitle,
@@ -29,6 +34,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import Base from '../Base';
 import { UI_LABELS } from '../../constants';
+import { FIELD_TYPES } from './utils';
 
 const AdminDataTable = ({
 	title,
@@ -52,11 +58,16 @@ const AdminDataTable = ({
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
-	const [notification, setNotification] = useState({
-		open: false,
-		message: '',
-		severity: 'success',
-	});
+        const [notification, setNotification] = useState({
+                open: false,
+                message: '',
+                severity: 'success',
+        });
+
+        const [sortConfig, setSortConfig] = useState({ field: null, direction: 'asc' });
+        const [filters, setFilters] = useState({});
+        const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(10);
 
 	const handleOpenDialog = (item) => {
 		setCurrentItem(item);
@@ -112,10 +123,33 @@ const AdminDataTable = ({
 		setDeleteDialog({ open: false, itemId: null });
 	};
 
-	const confirmDelete = () => {
-		handleDelete(deleteDialog.itemId);
-		handleCloseDeleteDialog();
-	};
+        const confirmDelete = () => {
+                handleDelete(deleteDialog.itemId);
+                handleCloseDeleteDialog();
+        };
+
+        const handleSort = (field) => {
+                setSortConfig((prev) => {
+                        if (prev.field === field) {
+                                return { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+                        }
+                        return { field, direction: 'asc' };
+                });
+        };
+
+        const handleFilterChange = (field, value) => {
+                setFilters((prev) => ({ ...prev, [field]: value }));
+                setPage(0);
+        };
+
+        const handleChangePage = (event, newPage) => {
+                setPage(newPage);
+        };
+
+        const handleChangeRowsPerPage = (event) => {
+                setRowsPerPage(parseInt(event.target.value, 10));
+                setPage(0);
+        };
 
 	const handleSave = (formData) => {
 		try {
@@ -162,12 +196,41 @@ const AdminDataTable = ({
 		});
 	};
 
-	const handleCloseNotification = () => {
-		setNotification({
-			...notification,
-			open: false,
-		});
-	};
+        const handleCloseNotification = () => {
+                setNotification({
+                        ...notification,
+                        open: false,
+                });
+        };
+
+        const applyFilters = (items) => {
+                return items.filter((item) =>
+                        columns.every((col) => {
+                                const value = filters[col.field];
+                                if (value === undefined || value === '' || value === null) return true;
+                                const itemValue = item[col.field];
+                                if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
+                                        return itemValue === value;
+                                }
+                                return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
+                        })
+                );
+        };
+
+        const applySorting = (items) => {
+                if (!sortConfig.field) return items;
+                return [...items].sort((a, b) => {
+                        const aVal = a[sortConfig.field];
+                        const bVal = b[sortConfig.field];
+                        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                        return 0;
+                });
+        };
+
+        const filteredData = applyFilters(data);
+        const sortedData = applySorting(filteredData);
+        const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
 	return (
 		<Base>
@@ -220,29 +283,63 @@ const AdminDataTable = ({
 					</>
 				)}
 
-				<TableContainer component={Paper}>
-					<Table>
-						<TableHead>
-							<TableRow>
-								{columns.map((column, index) => (
-									<TableCell
-										key={index}
-										align={column.align || 'left'}
-										sx={{ fontWeight: 'bold' }}
-									>
-										{column.header}
-									</TableCell>
-								))}
-								<TableCell
-									align='right'
-									sx={{ fontWeight: 'bold' }}
-								>
-									{UI_LABELS.ADMIN.actions}
-								</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{data.map((item) => (
+                                <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
+                                        <Table stickyHeader>
+                                                <TableHead>
+                                                        <TableRow>
+                                                                {columns.map((column, index) => (
+                                                                        <TableCell
+                                                                                key={index}
+                                                                                align={column.align || 'left'}
+                                                                                sx={{ fontWeight: 'bold', cursor: 'pointer' }}
+                                                                                onClick={() => handleSort(column.field)}
+                                                                        >
+                                                                                <TableSortLabel
+                                                                                        active={sortConfig.field === column.field}
+                                                                                        direction={sortConfig.direction}
+                                                                                >
+                                                                                        {column.header}
+                                                                                </TableSortLabel>
+                                                                        </TableCell>
+                                                                ))}
+                                                                <TableCell
+                                                                        align='right'
+                                                                        sx={{ fontWeight: 'bold' }}
+                                                                >
+                                                                        {UI_LABELS.ADMIN.actions}
+                                                                </TableCell>
+                                                        </TableRow>
+                                                        <TableRow>
+                                                                {columns.map((column, index) => (
+                                                                        <TableCell key={index} align={column.align || 'left'}>
+                                                                                {column.type === FIELD_TYPES.SELECT || column.type === FIELD_TYPES.BOOLEAN ? (
+                                                                                        <Select
+                                                                                                value={filters[column.field] || ''}
+                                                                                                onChange={(e) => handleFilterChange(column.field, e.target.value)}
+                                                                                                displayEmpty
+                                                                                                size='small'
+                                                                                        >
+                                                                                                <MenuItem value=''>All</MenuItem>
+                                                                                                {column.options && column.options.map((opt) => (
+                                                                                                        <MenuItem key={opt.value} value={opt.value}>
+                                                                                                                {opt.label}
+                                                                                                        </MenuItem>
+                                                                                                ))}
+                                                                                        </Select>
+                                                                                ) : (
+                                                                                        <TextField
+                                                                                                value={filters[column.field] || ''}
+                                                                                                onChange={(e) => handleFilterChange(column.field, e.target.value)}
+                                                                                                size='small'
+                                                                                        />
+                                                                                )}
+                                                                        </TableCell>
+                                                                ))}
+                                                                <TableCell align='right' />
+                                                        </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                        {paginatedData.map((item) => (
 								<TableRow key={item.id}>
 									{columns.map((column, index) => (
 										<TableCell
@@ -280,7 +377,17 @@ const AdminDataTable = ({
 							))}
 						</TableBody>
 					</Table>
-				</TableContainer>
+                                </TableContainer>
+
+                                <TablePagination
+                                        component='div'
+                                        count={sortedData.length}
+                                        page={page}
+                                        onPageChange={handleChangePage}
+                                        rowsPerPage={rowsPerPage}
+                                        onRowsPerPageChange={handleChangeRowsPerPage}
+                                        rowsPerPageOptions={[5, 10, 25, 50]}
+                                />
 
 				{/* Add/edit dialog */}
 				<Dialog

@@ -1,8 +1,19 @@
-from typing import Optional
+from typing import Optional, List, Dict
 
 from sqlalchemy import inspect
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from app.database import db
+
+
+class ModelValidationError(Exception):
+    """Exception raised for model validation errors."""
+
+    def __init__(self, errors: Dict[str, str]):
+        self.errors = errors
+        message = "; ".join(f"{k}: {v}" for k, v in errors.items())
+        super().__init__(message)
 
 
 class BaseModel(db.Model):
@@ -31,14 +42,56 @@ class BaseModel(db.Model):
         return cls.query.get(_id)
 
     @classmethod
-    def create(cls, **data) -> Optional['BaseModel']:
+    def _unique_constraints(cls) -> List[List[str]]:
+        """Return list of unique constraint column name lists."""
+        uniques: List[List[str]] = []
+        for column in cls.__table__.columns:
+            if column.unique:
+                uniques.append([column.name])
+        for constraint in cls.__table__.constraints:
+            if isinstance(constraint, db.UniqueConstraint):
+                uniques.append([c.name for c in constraint.columns])
+        return uniques
+
+    @classmethod
+    def _check_unique(
+        cls, session: Session, data: dict, instance_id: Optional[int] = None
+    ) -> Dict[str, str]:
+        errors: Dict[str, str] = {}
+        for columns in cls._unique_constraints():
+            if not all(col in data for col in columns):
+                continue
+            query = session.query(cls)
+            for col in columns:
+                query = query.filter(getattr(cls, col) == data[col])
+            if instance_id is not None:
+                query = query.filter(cls.id != instance_id)
+            if query.first() is not None:
+                for col in columns:
+                    errors[col] = "must be unique"
+        return errors
+
+    @classmethod
+    def create(cls, session: Session | None = None, **data) -> Optional['BaseModel']:
+        session = session or db.session
         instance = cls(**data)
-        db.session.add(instance)
-        db.session.commit()
+        errors = cls._check_unique(session, data)
+        if errors:
+            raise ModelValidationError(errors)
+
+        session.add(instance)
+        try:
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({"database": str(e)}) from e
         return instance
 
     @classmethod
-    def update(cls, _id, **data) -> Optional['BaseModel']:
+    def update(
+        cls, _id, session: Session | None = None, **data
+    ) -> Optional['BaseModel']:
+        session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
             return None
@@ -47,14 +100,26 @@ class BaseModel(db.Model):
         for key, value in filtered_data.items():
             setattr(instance, key, value)
 
-        db.session.commit()
+        errors = cls._check_unique(session, filtered_data, instance.id)
+        if errors:
+            session.rollback()
+            raise ModelValidationError(errors)
+
+        try:
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({"database": str(e)}) from e
         return instance
 
     @classmethod
-    def delete(cls, _id) -> Optional['BaseModel']:
+    def delete(
+        cls, _id, session: Session | None = None
+    ) -> Optional['BaseModel']:
+        session = session or db.session
         instance = cls.get_by_id(_id)
         if instance:
-            db.session.delete(instance)
-            db.session.commit()
+            session.delete(instance)
+            session.commit()
             return instance
         return None

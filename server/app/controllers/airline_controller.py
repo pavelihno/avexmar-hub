@@ -2,6 +2,7 @@ from flask import request, jsonify, send_file
 
 from app.models.airline import Airline
 from app.models.country import Country
+from app.models._base_model import ModelValidationError
 from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx_uploader import is_xlsx_file, create_xlsx
 
@@ -26,8 +27,11 @@ def create_airline(current_user):
     country_id = body.get('country_id')
     if country_id is not None and not Country.get_by_id(country_id):
         return jsonify({'message': 'Country not found'}), 404
-    airline = Airline.create(**body)
-    return jsonify(airline.to_dict()), 201
+    try:
+        airline = Airline.create(**body)
+        return jsonify(airline.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
@@ -36,10 +40,13 @@ def update_airline(current_user, airline_id):
     country_id = body.get('country_id')
     if country_id is not None and not Country.get_by_id(country_id):
         return jsonify({'message': 'Country not found'}), 404
-    updated = Airline.update(airline_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Airline not found'}), 404
+    try:
+        updated = Airline.update(airline_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Airline not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

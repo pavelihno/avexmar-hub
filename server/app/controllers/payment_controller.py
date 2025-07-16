@@ -3,6 +3,7 @@ from flask import request, jsonify
 from app.models.payment import Payment
 from app.models.booking import Booking
 from app.middlewares.auth_middleware import admin_required
+from app.models._base_model import ModelValidationError
 
 
 @admin_required
@@ -26,17 +27,23 @@ def create_payment(current_user):
     if not Booking.get_by_id(booking_id):
         return jsonify({'message': 'Booking not found'}), 404
 
-    payment = Payment.create(**body)
-    return jsonify(payment.to_dict()), 201
+    try:
+        payment = Payment.create(**body)
+        return jsonify(payment.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
 def update_payment(current_user, payment_id):
     body = request.json
-    updated = Payment.update(payment_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Payment not found'}), 404
+    try:
+        updated = Payment.update(payment_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Payment not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

@@ -2,6 +2,7 @@ from flask import request, jsonify, send_file
 
 from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
+from app.models._base_model import ModelValidationError
 from app.utils.xlsx_uploader import create_xlsx, is_xlsx_file
 
 
@@ -22,17 +23,23 @@ def get_country(current_user, country_id):
 @admin_required
 def create_country(current_user):
     body = request.json
-    country = Country.create(**body)
-    return jsonify(country.to_dict()), 201
+    try:
+        country = Country.create(**body)
+        return jsonify(country.to_dict()), 201
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
 def update_country(current_user, country_id):
     body = request.json
-    updated = Country.update(country_id, **body)
-    if updated:
-        return jsonify(updated.to_dict())
-    return jsonify({'message': 'Country not found'}), 404
+    try:
+        updated = Country.update(country_id, **body)
+        if updated:
+            return jsonify(updated.to_dict())
+        return jsonify({'message': 'Country not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

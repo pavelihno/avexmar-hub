@@ -181,17 +181,19 @@ export const createFormFields = (fields) => {
  * Create column configurations for AdminDataTable
  */
 export const createTableColumns = (fields) => {
-	return Object.values(fields)
-		.filter((field) => field.key !== 'id' && !field.excludeFromTable)
-		.map((field) => {
-			const column = {
-				field: field.key,
-				header: field.label,
-				formatter: field.formatter,
-				render: field.renderField
-					? (item) => field.renderField(item)
-					: null,
-			};
+        return Object.values(fields)
+                .filter((field) => field.key !== 'id' && !field.excludeFromTable)
+                .map((field) => {
+                        const column = {
+                                field: field.key,
+                                header: field.label,
+                                formatter: field.formatter,
+                                render: field.renderField
+                                        ? (item) => field.renderField(item)
+                                        : null,
+                                type: field.type,
+                                options: field.options,
+                        };
 
 			return column;
 		});
