@@ -49,6 +49,7 @@ def __create_app(_config_class, _db):
     app.route('/register', methods=['POST'])(register)
     app.route('/login', methods=['POST'])(login)
     app.route('/auth', methods=['GET'])(auth)
+    app.route('/forgot_password', methods=['POST'])(forgot_password)
 
     # users
     app.route('/users', methods=['GET'])(get_users)

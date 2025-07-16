@@ -32,6 +32,21 @@ def login():
     return jsonify({'message': 'Invalid email or password'}), 401
 
 
+def forgot_password():
+    body = request.json
+    email = body.get('email', '')
+
+    if not email:
+        return jsonify({'message': 'Email is required'}), 400
+
+    user = User.get_by_email(email)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    # Placeholder for sending email
+    return jsonify({'message': 'Password reset instructions sent'}), 200
+
+
 @login_required
 def auth(current_user):
     return jsonify(current_user.to_dict()), 200

@@ -38,14 +38,26 @@ export const logout = createAsyncThunk('auth/logout', () => {
 });
 
 export const auth = createAsyncThunk(
-	'auth/verify',
-	async (_, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get('/auth');
-			return res.data;
-		} catch (err) {
-			setAuthToken(false);
-			return rejectWithValue(getErrorData(err));
-		}
-	}
+        'auth/verify',
+        async (_, { rejectWithValue }) => {
+                try {
+                        const res = await serverApi.get('/auth');
+                        return res.data;
+                } catch (err) {
+                        setAuthToken(false);
+                        return rejectWithValue(getErrorData(err));
+                }
+        }
+);
+
+export const forgotPassword = createAsyncThunk(
+        'auth/forgotPassword',
+        async (data, { rejectWithValue }) => {
+                try {
+                        const res = await serverApi.post('/forgot_password', data);
+                        return res.data;
+                } catch (err) {
+                        return rejectWithValue(getErrorData(err));
+                }
+        }
 );

@@ -20,3 +20,14 @@ def test_login_and_auth(client, standard_user):
     auth_resp = client.get('/auth', headers={'Authorization': f'Bearer {token}'})
     assert auth_resp.status_code == 200
     assert auth_resp.get_json()['email'] == standard_user.email
+
+
+def test_forgot_password(client, standard_user):
+    resp = client.post('/forgot_password', json={'email': standard_user.email})
+    assert resp.status_code == 200
+    assert resp.get_json()['message'] == 'Password reset instructions sent'
+
+
+def test_forgot_password_not_found(client):
+    resp = client.post('/forgot_password', json={'email': 'missing@example.com'})
+    assert resp.status_code == 404

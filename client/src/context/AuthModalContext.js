@@ -3,18 +3,22 @@ import React, { createContext, useContext, useState } from 'react';
 const AuthModalContext = createContext();
 
 export const AuthModalProvider = ({ children }) => {
-	const [authModal, setAuthModal] = useState({
-		isOpen: false,
-		type: null, // 'login' or 'register'
-	});
+        const [authModal, setAuthModal] = useState({
+                isOpen: false,
+                type: null, // 'login', 'register' or 'forgotPassword'
+        });
 
 	const openLoginModal = () => {
 		setAuthModal({ isOpen: true, type: 'login' });
 	};
 
-	const openRegisterModal = () => {
-		setAuthModal({ isOpen: true, type: 'register' });
-	};
+        const openRegisterModal = () => {
+                setAuthModal({ isOpen: true, type: 'register' });
+        };
+
+        const openForgotPasswordModal = () => {
+                setAuthModal({ isOpen: true, type: 'forgotPassword' });
+        };
 
 	const closeAuthModal = () => {
 		setAuthModal({ isOpen: false, type: null });
@@ -25,8 +29,9 @@ export const AuthModalProvider = ({ children }) => {
 			value={{
 				authModal,
 				openLoginModal,
-				openRegisterModal,
-				closeAuthModal,
+                                openRegisterModal,
+                                openForgotPasswordModal,
+                                closeAuthModal,
 			}}
 		>
 			{children}
