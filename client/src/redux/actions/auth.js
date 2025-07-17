@@ -42,10 +42,19 @@ export const auth = createAsyncThunk('auth/verify', async (_, { rejectWithValue 
 });
 
 export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (data, { rejectWithValue }) => {
-	try {
-		const res = await serverApi.post('/forgot_password', data);
-		return res.data;
-	} catch (err) {
-		return rejectWithValue(getErrorData(err));
-	}
+        try {
+                const res = await serverApi.post('/forgot_password', data);
+                return res.data;
+        } catch (err) {
+                return rejectWithValue(getErrorData(err));
+        }
+});
+
+export const resetPassword = createAsyncThunk('auth/resetPassword', async (data, { rejectWithValue }) => {
+        try {
+                const res = await serverApi.post('/reset_password', data);
+                return res.data;
+        } catch (err) {
+                return rejectWithValue(getErrorData(err));
+        }
 });

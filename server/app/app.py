@@ -52,6 +52,7 @@ def __create_app(_config_class, _db):
     app.route('/login', methods=['POST'])(login)
     app.route('/auth', methods=['GET'])(auth)
     app.route('/forgot_password', methods=['POST'])(forgot_password)
+    app.route('/reset_password', methods=['POST'])(reset_password)
 
     # users
     app.route('/users', methods=['GET'])(get_users)
