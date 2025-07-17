@@ -15,6 +15,7 @@ services:
       - .env
     depends_on:
       - postgres
+      - mailhog
 
   client-app:
     container_name: client-app
@@ -74,5 +75,12 @@ services:
       - 8082:8080
     env_file:
       - .env
-    depends_on: 
+    depends_on:
       - postgres
+
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025

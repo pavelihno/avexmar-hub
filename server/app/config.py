@@ -16,6 +16,15 @@ class Config:
     CSRF_ENABLED = True
     CORS_ORIGINS = os.environ.get('SERVER_CORS_ORIGINS')
 
+    # Mail settings
+    MAIL_SERVER = os.environ.get('SERVER_MAIL_SERVER')
+    MAIL_PORT = int(os.environ.get('SERVER_MAIL_PORT', 25))
+    MAIL_USERNAME = os.environ.get('SERVER_MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('SERVER_MAIL_PASSWORD')
+    MAIL_USE_TLS = os.environ.get('SERVER_MAIL_USE_TLS', 'False') == 'True'
+    MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL', 'False') == 'True'
+    MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
+
     # Enum classes
     class USER_ROLE(enum.Enum):
         admin = 'admin'
