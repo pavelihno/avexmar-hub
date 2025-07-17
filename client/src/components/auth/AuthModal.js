@@ -9,7 +9,7 @@ import { useAuthModal } from '../../context/AuthModalContext';
 
 const AuthModal = () => {
 	const { authModal, closeAuthModal } = useAuthModal();
-        const { isOpen, type } = authModal;
+	const { isOpen, type } = authModal;
 
 	const lastFocusedRef = useRef(null);
 

@@ -7,7 +7,7 @@ import ResetPassword from '../components/auth/ResetPassword';
 const PublicRoutes = () => [
 	{ path: '/', element: <Home /> },
 	{ path: '/about', element: <About /> },
-        { path: '/reset_password', element: <ResetPassword /> },
+	{ path: '/reset_password', element: <ResetPassword /> },
 ];
 
 export default PublicRoutes;
