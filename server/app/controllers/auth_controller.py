@@ -86,7 +86,8 @@ def reset_password():
         token.used = True
         db.session.commit()
         if user:
-            return jsonify({'message': 'Password reset successful'}), 200
+            token_jwt = signJWT(user.email)
+            return jsonify({'token': token_jwt, 'user': user.to_dict()}), 200
         return jsonify({'message': 'User not found'}), 404
     except ModelValidationError as e:
         db.session.rollback()

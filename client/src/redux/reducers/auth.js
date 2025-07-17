@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { login, register, auth, logout } from '../actions/auth';
+import { login, register, auth, logout, resetPassword } from '../actions/auth';
 import { changePassword } from '../actions/user';
 import { handlePending, handleRejected } from '../utils';
 
@@ -56,12 +56,20 @@ const authSlice = createSlice({
 			.addCase(logout.rejected, handleRejected)
 
 			// Change password
-			.addCase(changePassword.pending, handlePending)
-			.addCase(changePassword.fulfilled, (state) => {
-				state.isLoading = false;
-			})
-			.addCase(changePassword.rejected, handleRejected);
-	},
+                        .addCase(changePassword.pending, handlePending)
+                        .addCase(changePassword.fulfilled, (state) => {
+                                state.isLoading = false;
+                        })
+                        .addCase(changePassword.rejected, handleRejected)
+
+                        // Reset password
+                        .addCase(resetPassword.pending, handlePending)
+                        .addCase(resetPassword.fulfilled, (state, action) => {
+                                state.currentUser = action.payload;
+                                state.isLoading = false;
+                        })
+                        .addCase(resetPassword.rejected, handleRejected);
+        },
 });
 
 export const { setCurrentUser, setErrors } = authSlice.actions;
