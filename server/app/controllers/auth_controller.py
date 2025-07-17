@@ -2,6 +2,7 @@ from flask import request, jsonify
 
 from app.models.user import User
 from app.utils.jwt import signJWT
+from app.utils.email import send_email
 from app.middlewares.auth_middleware import login_required
 from app.config import Config
 from app.models._base_model import ModelValidationError
@@ -56,7 +57,13 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    # Placeholder for sending email
+    reset_url = f"http://localhost:3000/reset_password?email={user.email}"
+    send_email(
+        'Password Reset',
+        [user.email],
+        'forgot_password.txt',
+        reset_url=reset_url,
+    )
     return jsonify({'message': 'Password reset instructions sent'}), 200
 
 
