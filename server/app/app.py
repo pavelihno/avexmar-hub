@@ -8,6 +8,7 @@ from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
 
+from app.controllers.dev_controller import clear_table
 from app.controllers.auth_controller import *
 from app.controllers.user_controller import *
 from app.controllers.airport_controller import *
@@ -144,6 +145,7 @@ def __create_app(_config_class, _db):
     app.route('/payments', methods=['POST'])(create_payment)
     app.route('/payments/<int:payment_id>', methods=['PUT'])(update_payment)
     app.route('/payments/<int:payment_id>', methods=['DELETE'])(delete_payment)
+    app.route("/dev/clear/<string:table_name>", methods=["DELETE"])(clear_table)
 
     migrate = Migrate(app, db)
 
