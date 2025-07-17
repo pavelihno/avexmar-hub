@@ -450,22 +450,22 @@ const AdminDataTable = ({
 							))}
 						</TableBody>
 					</Table>
-					<TablePagination
-						component='div'
-						count={sortedData.length}
-						page={page}
-						onPageChange={handleChangePage}
-						rowsPerPage={rowsPerPage}
-						onRowsPerPageChange={handleChangeRowsPerPage}
-						rowsPerPageOptions={[10, 25, 50]}
-						labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-						labelDisplayedRows={({ from, to, count }) =>
-							`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-								count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-							}`
-						}
-					/>
 				</TableContainer>
+				<TablePagination
+					component='div'
+					count={sortedData.length}
+					page={page}
+					onPageChange={handleChangePage}
+					rowsPerPage={rowsPerPage}
+					onRowsPerPageChange={handleChangeRowsPerPage}
+					rowsPerPageOptions={[10, 25, 50]}
+					labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
+					labelDisplayedRows={({ from, to, count }) =>
+						`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
+							count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
+						}`
+					}
+				/>
 
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>

@@ -57,7 +57,7 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    reset_url = f"http://localhost:3000/reset_password?email={user.email}"
+    reset_url = f"{Config.CLIENT_URL}/reset_password?email={user.email}"
     send_email(
         'Password Reset',
         [user.email],
