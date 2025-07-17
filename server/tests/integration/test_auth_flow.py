@@ -7,6 +7,14 @@ def test_register(client):
     assert 'token' in data
 
 
+def test_register_uppercase_email(client):
+    """Registration should store email in lowercase"""
+    resp = client.post('/register', json={'email': 'MIXED@Example.COM', 'password': 'pass'})
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data['user']['email'] == 'mixed@example.com'
+
+
 def test_login_and_auth(client, standard_user):
     """Test login and authentication flow using standard user fixture"""
     # Use the standard_user fixture instead of creating a new user
@@ -17,6 +25,15 @@ def test_login_and_auth(client, standard_user):
     assert resp.status_code == 200
     token = resp.get_json()['token']
 
+    auth_resp = client.get('/auth', headers={'Authorization': f'Bearer {token}'})
+    assert auth_resp.status_code == 200
+    assert auth_resp.get_json()['email'] == standard_user.email
+
+
+def test_login_case_insensitive(client, standard_user):
+    resp = client.post('/login', json={'email': 'USER@EXAMPLE.COM', 'password': 'password'})
+    assert resp.status_code == 200
+    token = resp.get_json()['token']
     auth_resp = client.get('/auth', headers={'Authorization': f'Bearer {token}'})
     assert auth_resp.status_code == 200
     assert auth_resp.get_json()['email'] == standard_user.email

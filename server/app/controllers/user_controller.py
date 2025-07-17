@@ -8,6 +8,8 @@ from app.models._base_model import ModelValidationError
 @admin_required
 def create_user(current_user):
     body = request.json
+    if 'email' in body and isinstance(body['email'], str):
+        body['email'] = body['email'].lower()
     try:
         new_user = User.create(**body)
         if new_user:

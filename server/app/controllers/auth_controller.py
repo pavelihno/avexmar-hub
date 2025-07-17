@@ -9,7 +9,7 @@ from app.models._base_model import ModelValidationError
 
 def register():
     body = request.json
-    email = body.get('email', '')
+    email = body.get('email', '').lower()
     password = body.get('password', '')
     if not email or not password:
         return jsonify({'message': 'Email and password are required'}), 400
@@ -20,8 +20,8 @@ def register():
 
     try:
         new_user = User.create(**{
-            'email': body.get('email', ''),
-            'password': body.get('password', ''),
+            'email': email,
+            'password': password,
             'role': Config.DEFAULT_USER_ROLE,
             'is_active': True
         })
@@ -35,19 +35,19 @@ def register():
 
 def login():
     body = request.json
-    email = body.get('email', '')
+    email = body.get('email', '').lower()
     password = body.get('password', '')
 
     user = User.login(email, password)
     if user:
-        token = signJWT(email)
+        token = signJWT(user.email)
         return jsonify({'token': token, 'user': user.to_dict()}), 200
     return jsonify({'message': 'Invalid email or password'}), 401
 
 
 def forgot_password():
     body = request.json
-    email = body.get('email', '')
+    email = body.get('email', '').lower()
 
     if not email:
         return jsonify({'message': 'Email is required'}), 400
