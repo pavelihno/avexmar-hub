@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchRoutes, createRoute, updateRoute, deleteRoute } from '../../redux/actions/route';
+import { fetchRoutes, createRoute, updateRoute, deleteRoute, deleteAllRoutes } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -86,6 +86,11 @@ const RouteManagement = () => {
 		return dispatch(deleteRoute(id));
 	};
 
+	const handleDeleteAll = async () => {
+		dispatch(deleteAllRoutes());
+		dispatch(fetchRoutes());
+	};
+
 	const formattedRoutes = routes.map(adminManager.toUiFormat);
 
 	return (
@@ -96,6 +101,7 @@ const RouteManagement = () => {
 			onAdd={handleAddRoute}
 			onEdit={handleEditRoute}
 			onDelete={handleDeleteRoute}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.routes.add_button}
 			isLoading={isLoading || airportsLoading}

@@ -77,4 +77,6 @@ export const selectIsAuth = (state) => !!state.auth.currentUser;
 export const selectIsAdmin = (state) =>
 	!!state.auth.currentUser && state.auth.currentUser.role === 'admin';
 
+export const isDev = () => process.env.REACT_APP_APP_ENV in ('dev', 'test');
+
 export default authSlice.reducer;

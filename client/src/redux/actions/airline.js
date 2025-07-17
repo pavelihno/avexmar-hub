@@ -1,17 +1,10 @@
 import { createCrudActions } from '../utils';
 
-const {
+export const {
 	fetchAll: fetchAirlines,
 	fetchOne: fetchAirline,
 	create: createAirline,
 	update: updateAirline,
 	remove: deleteAirline,
+	removeAll: deleteAllAirlines,
 } = createCrudActions('airlines');
-
-export {
-	fetchAirlines,
-	fetchAirline,
-	createAirline,
-	updateAirline,
-	deleteAirline,
-};

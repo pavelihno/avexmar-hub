@@ -5,6 +5,9 @@ export const getErrorData = (error) => {
 	if (error.response?.data) {
 		return error.response.data;
 	}
+	else if (error.response?.errors) {
+		return error.response.errors;
+	}
 
 	return { message: error.message || 'An unknown error occurred' };
 };
@@ -71,12 +74,23 @@ export const createCrudActions = (endpoint) => {
 		}
 	});
 
+	// Delete all
+	const removeAll = createAsyncThunk(`${endpoint}/deleteAll`, async (_, { rejectWithValue }) => {
+        try {
+            const res = await serverApi.delete(`/dev/clear/${endpoint}`);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(getErrorData(err));
+        }
+    });
+
 	return {
 		fetchAll,
 		fetchOne,
 		create,
 		update,
 		remove,
+		removeAll,
 	};
 };
 
@@ -131,4 +145,3 @@ export const addCrudCases = (builder, actions, pluralKey, singleKey) => {
 		.addCase(remove.rejected, handleRejected);
 };
 
-export const fullWidthStyle = { width: '100%' };

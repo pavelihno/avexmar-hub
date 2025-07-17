@@ -145,6 +145,8 @@ def __create_app(_config_class, _db):
     app.route('/payments', methods=['POST'])(create_payment)
     app.route('/payments/<int:payment_id>', methods=['PUT'])(update_payment)
     app.route('/payments/<int:payment_id>', methods=['DELETE'])(delete_payment)
+
+    # dev
     app.route("/dev/clear/<string:table_name>", methods=["DELETE"])(clear_table)
 
     migrate = Migrate(app, db)

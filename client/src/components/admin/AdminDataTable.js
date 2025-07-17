@@ -37,6 +37,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { FIELD_TYPES } from './utils';
+import { isDev } from '../../redux/reducers/auth';
 
 const AdminDataTable = ({
 	title,
@@ -45,12 +46,11 @@ const AdminDataTable = ({
 	onAdd,
 	onEdit,
 	onDelete,
+	onDeleteAll = null,
 	renderForm,
 	getUploadTemplate = () => {},
 	onUpload = () => Promise.resolve(),
 	addButtonText = null,
-        onDeleteAll = () => Promise.resolve(),
-        deleteAllButtonText = null,
 	uploadButtonText = null,
 	uploadTemplateButtonText = null,
 }) => {
@@ -60,7 +60,7 @@ const AdminDataTable = ({
 		itemId: null,
 	});
 	const [showFilters, setShowFilters] = useState(false);
-        const [deleteAllDialog, setDeleteAllDialog] = useState(false);
+	const [deleteAllDialog, setDeleteAllDialog] = useState(false);
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
@@ -78,7 +78,6 @@ const AdminDataTable = ({
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
-        const isDev = process.env.REACT_APP_APP_ENV !== "production";
 	const handleOpenDialog = (item) => {
 		setCurrentItem(item);
 		setIsEditing(!!item);
@@ -134,18 +133,18 @@ const AdminDataTable = ({
 		handleDelete(deleteDialog.itemId);
 		handleCloseDeleteDialog();
 	};
-        const handleOpenDeleteAllDialog = () => {
-                setDeleteAllDialog(true);
-        };
+	const handleOpenDeleteAllDialog = () => {
+		setDeleteAllDialog(true);
+	};
 
-        const handleCloseDeleteAllDialog = () => {
-                setDeleteAllDialog(false);
-        };
+	const handleCloseDeleteAllDialog = () => {
+		setDeleteAllDialog(false);
+	};
 
-        const confirmDeleteAll = () => {
-                handleDeleteAll();
-                setDeleteAllDialog(false);
-        };
+	const confirmDeleteAll = () => {
+		handleDeleteAll();
+		setDeleteAllDialog(false);
+	};
 
 	const handleSort = (field) => {
 		setSortConfig((prev) => {
@@ -196,20 +195,20 @@ const AdminDataTable = ({
 		}
 	};
 
-        const handleDeleteAll = () => {
-                try {
-                        const result = onDeleteAll();
-                        Promise.resolve(result)
-                                .then(() => {
-                                        showNotification(UI_LABELS.SUCCESS.delete, "success");
-                                })
-                                .catch((error) => {
-                                        showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, "error");
-                                });
-                } catch (error) {
-                        showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, "error");
-                }
-        };
+	const handleDeleteAll = () => {
+		try {
+			const result = onDeleteAll();
+			result
+				.then(() => {
+					showNotification(UI_LABELS.SUCCESS.delete_all, 'success');
+				})
+				.catch((error) => {
+					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+				});
+		} catch (error) {
+			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+		}
+	};
 
 	const showNotification = (message, severity = 'success') => {
 		setNotification({
@@ -298,12 +297,27 @@ const AdminDataTable = ({
 							{uploadButtonText}
 						</Button>
 						<input type='file' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-                                                {isDev && deleteAllButtonText && (
-                                                    <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={handleOpenDeleteAllDialog} sx={{ ml: 2 }}>
-                                                        {deleteAllButtonText}
-                                                    </Button>
-                                                )}
 					</>
+				)}
+
+				{isDev && onDeleteAll && (
+					<Button
+						variant='outlined'
+						color='error'
+						size='small'
+						startIcon={<DeleteIcon />}
+						onClick={handleOpenDeleteAllDialog}
+						sx={{
+							ml: 2,
+							fontSize: '0.75rem',
+							fontWeight: 400,
+							minHeight: 28,
+							px: 1.5,
+							py: 0.5,
+						}}
+					>
+						{UI_LABELS.BUTTONS.delete_all}
+					</Button>
 				)}
 				<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
 					<Box
@@ -530,21 +544,21 @@ const AdminDataTable = ({
 					</DialogActions>
 				</Dialog>
 
-                                {/* Delete all dialog */}
-                                <Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
-                                        <DialogTitle id="delete-all-dialog-title">{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
-                                        <DialogContent>
-                                                <Typography id="delete-all-dialog-description">{UI_LABELS.MESSAGES.confirm_delete}</Typography>
-                                        </DialogContent>
-                                        <DialogActions>
-                                                <Button onClick={handleCloseDeleteAllDialog} color="primary">
-                                                        {UI_LABELS.BUTTONS.cancel}
-                                                </Button>
-                                                <Button onClick={confirmDeleteAll} color="error" variant="contained">
-                                                        {UI_LABELS.BUTTONS.delete}
-                                                </Button>
-                                        </DialogActions>
-                                </Dialog>
+				{/* Delete all dialog */}
+				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
+					<DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogContent>
+						<Typography id='delete-all-dialog-description'>{UI_LABELS.MESSAGES.confirm_delete_all}</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={handleCloseDeleteAllDialog} color='primary'>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
+						<Button onClick={confirmDeleteAll} color='error' variant='contained'>
+							{UI_LABELS.BUTTONS.delete}
+						</Button>
+					</DialogActions>
+				</Dialog>
 				<Snackbar
 					open={notification.open}
 					autoHideDuration={4000}

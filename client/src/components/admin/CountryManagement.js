@@ -2,8 +2,14 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { downloadTemplate, uploadFile, deleteAllRecords } from "../../api";
-import { fetchCountries, createCountry, updateCountry, deleteCountry } from '../../redux/actions/country';
+import { downloadTemplate, uploadFile } from '../../api';
+import {
+	fetchCountries,
+	createCountry,
+	updateCountry,
+	deleteCountry,
+	deleteAllCountries,
+} from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
@@ -67,10 +73,10 @@ const CountryManagement = () => {
 	const handleEdit = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteCountry(id));
 
-        const handleDeleteAll = async () => {
-                await deleteAllRecords("countries");
-                dispatch(fetchCountries());
-        };
+	const handleDeleteAll = async () => {
+		dispatch(deleteAllCountries()).unwrap();
+		// dispatch(fetchCountries());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('countries', file);
@@ -92,6 +98,7 @@ const CountryManagement = () => {
 			onAdd={handleAdd}
 			onEdit={handleEdit}
 			onDelete={handleDelete}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
@@ -100,8 +107,8 @@ const CountryManagement = () => {
 			onUpload={handleUpload}
 			isLoading={isLoading}
 			error={errors}
-                        deleteAllButtonText={UI_LABELS.BUTTONS.delete_all}
-                        onDeleteAll={handleDeleteAll}
 		/>
 	);
 };
+
+export default CountryManagement;

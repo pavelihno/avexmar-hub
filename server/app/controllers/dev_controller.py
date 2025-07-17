@@ -1,7 +1,7 @@
 from flask import jsonify
 
 from app.config import Config
-from app.middlewares.auth_middleware import admin_required
+from app.middlewares.auth_middleware import dev_tool
 from app.models.airport import Airport
 from app.models.airline import Airline
 from app.models.country import Country
@@ -15,6 +15,7 @@ from app.models.booking import Booking
 from app.models.payment import Payment
 from app.models.user import User
 from app.models.ticket import Ticket
+from app.models._base_model import ModelValidationError
 
 MODEL_MAP = {
     'airports': Airport,
@@ -33,14 +34,16 @@ MODEL_MAP = {
 }
 
 
-@admin_required
+@dev_tool
 def clear_table(current_user, table_name: str):
-    if not Config.DELETE_ALL_ALLOWED:
-        return jsonify({'message': 'Operation not permitted'}), 403
 
     model = MODEL_MAP.get(table_name)
     if not model:
         return jsonify({'message': 'Invalid table name'}), 404
 
-    deleted = model.delete_all()
+    try:
+        deleted = model.delete_all()
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
+
     return jsonify({'deleted': deleted})

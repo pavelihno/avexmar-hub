@@ -18,7 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import TariffManagement from './TariffManagement';
 
-import { fetchFlights, createFlight, updateFlight, deleteFlight } from '../../redux/actions/flight';
+import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
@@ -318,6 +318,11 @@ const FlightManagement = () => {
 		return dispatch(deleteFlight(id));
 	};
 
+	const handleDeleteAll = async () => {
+		dispatch(deleteAllFlights());
+		dispatch(fetchFlights());
+	};
+
 	const formattedFlights = flights.map(adminManager.toUiFormat);
 
 	return (
@@ -329,6 +334,7 @@ const FlightManagement = () => {
 				onAdd={handleAddFlight}
 				onEdit={handleEditFlight}
 				onDelete={handleDeleteFlight}
+				onDeleteAll={handleDeleteAll}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
 				isLoading={isLoading || routesLoading || airlinesLoading}

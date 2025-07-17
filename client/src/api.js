@@ -76,7 +76,3 @@ export const uploadFile = async (endpoint, file) => {
 		throw new Error(message);
 	}
 };
-export const deleteAllRecords = async (endpoint) => {
-        const res = await serverApi.delete(`/dev/clear/${endpoint}`);
-        return res.data;
-};

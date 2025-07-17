@@ -4,7 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
 
-import { fetchAirports, createAirport, updateAirport, deleteAirport } from '../../redux/actions/airport';
+import {
+	fetchAirports,
+	createAirport,
+	updateAirport,
+	deleteAirport,
+	deleteAllAirports,
+} from '../../redux/actions/airport';
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -113,6 +119,11 @@ const AirportManagement = () => {
 		return dispatch(deleteAirport(id));
 	};
 
+	const handleDeleteAll = async () => {
+		dispatch(deleteAllAirports());
+		dispatch(fetchAirports());
+	};
+
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airports', file);
 		dispatch(fetchAirports());
@@ -133,6 +144,7 @@ const AirportManagement = () => {
 			onAdd={handleAddAirport}
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}

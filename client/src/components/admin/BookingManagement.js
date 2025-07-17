@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchBookings, createBooking, updateBooking, deleteBooking } from '../../redux/actions/booking';
+import {
+	fetchBookings,
+	createBooking,
+	updateBooking,
+	deleteBooking,
+	deleteAllBookings,
+} from '../../redux/actions/booking';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
@@ -103,6 +109,11 @@ const BookingManagement = () => {
 		return dispatch(deleteBooking(id));
 	};
 
+	const handleDeleteAll = async () => {
+		dispatch(deleteAllBookings());
+		dispatch(fetchBookings());
+	};
+
 	const formattedBookings = bookings.map(adminManager.toUiFormat);
 
 	return (
@@ -113,6 +124,7 @@ const BookingManagement = () => {
 			onAdd={handleAddBooking}
 			onEdit={handleEditBooking}
 			onDelete={handleDeleteBooking}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
 			isLoading={isLoading}

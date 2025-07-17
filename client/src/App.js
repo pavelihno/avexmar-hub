@@ -40,12 +40,7 @@ function App() {
 	if (isLoading) {
 		return (
 			<ThemeProvider theme={theme}>
-				<Box
-					display='flex'
-					justifyContent='center'
-					alignItems='center'
-					minHeight='100vh'
-				>
+				<Box display='flex' justifyContent='center' alignItems='center' minHeight='100vh'>
 					<CircularProgress color='primary' size={60} />
 				</Box>
 			</ThemeProvider>
