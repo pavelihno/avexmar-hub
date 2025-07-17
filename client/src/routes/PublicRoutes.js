@@ -2,12 +2,12 @@ import React from 'react';
 
 import Home from '../components/Home';
 import About from '../components/About';
-import ResetPasswordEntry from '../components/auth/ResetPasswordEntry';
+import ResetPassword from '../components/auth/ResetPassword';
 
 const PublicRoutes = () => [
 	{ path: '/', element: <Home /> },
 	{ path: '/about', element: <About /> },
-	{ path: '/reset_password', element: <ResetPasswordEntry /> },
+        { path: '/reset_password', element: <ResetPassword /> },
 ];
 
 export default PublicRoutes;

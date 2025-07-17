@@ -11,7 +11,9 @@ def test_password_reset_flow(client, standard_user):
 
     resp = client.post('/reset_password', json={'token': token.token, 'password': 'newpass'})
     assert resp.status_code == 200
-    assert resp.get_json()['message'] == 'Password reset successful'
+    data = resp.get_json()
+    assert 'token' in data
+    assert data['user']['email'] == standard_user.email
 
     # token should be marked used
     assert token.used is True
