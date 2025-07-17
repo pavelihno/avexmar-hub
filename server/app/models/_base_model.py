@@ -123,3 +123,10 @@ class BaseModel(db.Model):
             session.commit()
             return instance
         return None
+    @classmethod
+    def delete_all(cls, session: Session | None = None) -> int:
+        session = session or db.session
+        count = session.query(cls).delete()
+        session.commit()
+        return count
+

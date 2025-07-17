@@ -12,6 +12,7 @@ export const UI_LABELS = {
 		delete: 'Удалить',
 		cancel: 'Отмена',
 		back: 'Назад',
+                delete_all: 'Удалить все',
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',

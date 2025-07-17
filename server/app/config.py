@@ -5,6 +5,8 @@ import enum
 class Config:
 
     CLIENT_URL = os.environ.get('SERVER_CLIENT_URL')
+    APP_ENV = os.environ.get("APP_ENV", "production")
+    DELETE_ALL_ALLOWED = APP_ENV in ("development", "testing")
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
