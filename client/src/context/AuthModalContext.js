@@ -5,7 +5,8 @@ const AuthModalContext = createContext();
 export const AuthModalProvider = ({ children }) => {
         const [authModal, setAuthModal] = useState({
                 isOpen: false,
-                type: null, // 'login', 'register' or 'forgotPassword'
+                type: null, // 'login', 'register', 'forgotPassword' or 'resetPassword'
+                token: null,
         });
 
 	const openLoginModal = () => {
@@ -17,12 +18,16 @@ export const AuthModalProvider = ({ children }) => {
         };
 
         const openForgotPasswordModal = () => {
-                setAuthModal({ isOpen: true, type: 'forgotPassword' });
+                setAuthModal({ isOpen: true, type: 'forgotPassword', token: null });
         };
 
-	const closeAuthModal = () => {
-		setAuthModal({ isOpen: false, type: null });
-	};
+        const openResetPasswordModal = (token) => {
+                setAuthModal({ isOpen: true, type: 'resetPassword', token });
+        };
+
+        const closeAuthModal = () => {
+                setAuthModal({ isOpen: false, type: null, token: null });
+        };
 
 	return (
 		<AuthModalContext.Provider
@@ -31,6 +36,7 @@ export const AuthModalProvider = ({ children }) => {
 				openLoginModal,
                                 openRegisterModal,
                                 openForgotPasswordModal,
+                                openResetPasswordModal,
                                 closeAuthModal,
 			}}
 		>

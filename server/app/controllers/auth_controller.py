@@ -6,6 +6,8 @@ from app.utils.email import send_email
 from app.middlewares.auth_middleware import login_required
 from app.config import Config
 from app.models._base_model import ModelValidationError
+from app.models.password_reset_token import PasswordResetToken
+from app.database import db
 
 
 def register():
@@ -57,7 +59,8 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    reset_url = f"{Config.CLIENT_URL}/reset_password?email={user.email}"
+    token = PasswordResetToken.create_token(user, expires_in_hours=1)
+    reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
         'Password Reset',
         [user.email],
@@ -65,6 +68,29 @@ def forgot_password():
         reset_url=reset_url,
     )
     return jsonify({'message': 'Password reset instructions sent'}), 200
+
+
+def reset_password():
+    body = request.json
+    token_value = body.get('token')
+    password = body.get('password', '')
+    if not token_value or not password:
+        return jsonify({'message': 'Invalid request'}), 400
+
+    token = PasswordResetToken.verify_token(token_value)
+    if not token:
+        return jsonify({'message': 'Invalid or expired token'}), 400
+
+    try:
+        user = User.change_password(token.user_id, password)
+        token.used = True
+        db.session.commit()
+        if user:
+            return jsonify({'message': 'Password reset successful'}), 200
+        return jsonify({'message': 'User not found'}), 404
+    except ModelValidationError as e:
+        db.session.rollback()
+        return jsonify({'errors': e.errors}), 400
 
 
 @login_required
