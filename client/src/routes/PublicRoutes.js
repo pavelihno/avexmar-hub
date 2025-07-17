@@ -5,9 +5,9 @@ import About from '../components/About';
 import ResetPasswordEntry from '../components/auth/ResetPasswordEntry';
 
 const PublicRoutes = () => [
-        { path: '/', element: <Home /> },
-        { path: '/about', element: <About /> },
-        { path: '/reset_password', element: <ResetPasswordEntry /> },
+	{ path: '/', element: <Home /> },
+	{ path: '/about', element: <About /> },
+	{ path: '/reset_password', element: <ResetPasswordEntry /> },
 ];
 
 export default PublicRoutes;
