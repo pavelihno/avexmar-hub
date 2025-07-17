@@ -1,5 +1,14 @@
 from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font, DEFAULT_FONT, Border, Side
+from openpyxl.utils import get_column_letter
 from io import BytesIO
+
+
+def get_xlsx_styles():
+    font = Font(bold=True, size=12)
+    thin = Side(border_style='thin', color='000000')
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    return font, border
 
 
 def is_xlsx_file(file) -> bool:
@@ -24,10 +33,24 @@ def create_xlsx(fields: dict, data: list) -> BytesIO:
     headers = list(fields.values())
     ws.append(headers)
 
+    # Header styles
+    font, border = get_xlsx_styles()
+    for cell in ws[1]:
+        cell.font = font
+        cell.border = border
+
     # Write data rows
     for item in data:
         row = [item.get(field, '') for field in fields.keys()]
         ws.append(row)
+
+    # Adjust column widths dynamically
+    for idx, column_cells in enumerate(ws.columns, start=1):
+        max_length = 0
+        for cell in column_cells:
+            if cell.value is not None:
+                max_length = max(max_length, len(str(cell.value)))
+        ws.column_dimensions[get_column_letter(idx)].width = max_length + 2
 
     output = BytesIO()
     wb.save(output)
@@ -42,7 +65,23 @@ def generate_xlsx_template(fields: dict) -> BytesIO:
     """
     wb = Workbook()
     ws = wb.active
+
+    # Default font size
+    DEFAULT_FONT.size = 12
+
     ws.append(list(fields.values()))
+
+    # Header styles
+    font, border = get_xlsx_styles()
+    for cell in ws[1]:
+        cell.font = font
+        cell.border = border
+
+    # Adjust column widths based on header length
+    for idx, header in enumerate(fields.values(), start=1):
+        ws.column_dimensions[get_column_letter(
+            idx)].width = len(str(header)) + 2
+
     output = BytesIO()
     wb.save(output)
     output.seek(0)
@@ -89,5 +128,3 @@ def parse_xlsx(file, fields: dict, required_fields: list = []) -> list:
         result.append(item)
 
     return result
-
-
