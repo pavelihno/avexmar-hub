@@ -49,7 +49,10 @@ def update_tariff(current_user, tariff_id):
 
 @admin_required
 def delete_tariff(current_user, tariff_id):
-    deleted = Tariff.delete(tariff_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Tariff not found'}), 404
+    try:
+        deleted = Tariff.delete(tariff_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Tariff not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

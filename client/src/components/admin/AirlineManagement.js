@@ -96,10 +96,10 @@ const AirlineManagement = () => {
 	const handleEdit = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteAirline(id));
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllAirlines());
-		dispatch(fetchAirlines());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllAirlines()).unwrap();
+               dispatch(fetchAirlines());
+       };
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airlines', file);

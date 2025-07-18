@@ -43,7 +43,10 @@ def update_passenger(current_user, passenger_id):
 
 @admin_required
 def delete_passenger(current_user, passenger_id):
-    deleted = Passenger.delete(passenger_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Passenger not found'}), 404
+    try:
+        deleted = Passenger.delete(passenger_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Passenger not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

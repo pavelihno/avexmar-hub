@@ -51,10 +51,13 @@ def update_airline(current_user, airline_id):
 
 @admin_required
 def delete_airline(current_user, airline_id):
-    deleted = Airline.delete(airline_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Airline not found'}), 404
+    try:
+        deleted = Airline.delete(airline_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Airline not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

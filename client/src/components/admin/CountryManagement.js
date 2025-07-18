@@ -73,10 +73,10 @@ const CountryManagement = () => {
 	const handleEdit = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteCountry(id));
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllCountries()).unwrap();
-		// dispatch(fetchCountries());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllCountries()).unwrap();
+               dispatch(fetchCountries());
+       };
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('countries', file);

@@ -318,10 +318,10 @@ const FlightManagement = () => {
 		return dispatch(deleteFlight(id));
 	};
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllFlights());
-		dispatch(fetchFlights());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllFlights()).unwrap();
+               dispatch(fetchFlights());
+       };
 
 	const formattedFlights = flights.map(adminManager.toUiFormat);
 

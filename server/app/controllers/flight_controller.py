@@ -60,7 +60,10 @@ def update_flight(current_user, flight_id):
 
 @admin_required
 def delete_flight(current_user, flight_id):
-    deleted = Flight.delete(flight_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Flight not found'}), 404
+    try:
+        deleted = Flight.delete(flight_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Flight not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

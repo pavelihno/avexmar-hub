@@ -86,10 +86,10 @@ const RouteManagement = () => {
 		return dispatch(deleteRoute(id));
 	};
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllRoutes());
-		dispatch(fetchRoutes());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllRoutes()).unwrap();
+               dispatch(fetchRoutes());
+       };
 
 	const formattedRoutes = routes.map(adminManager.toUiFormat);
 

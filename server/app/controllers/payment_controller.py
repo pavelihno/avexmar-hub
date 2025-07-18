@@ -49,7 +49,10 @@ def update_payment(current_user, payment_id):
 
 @admin_required
 def delete_payment(current_user, payment_id):
-    deleted = Payment.delete(payment_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Payment not found'}), 404
+    try:
+        deleted = Payment.delete(payment_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Payment not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

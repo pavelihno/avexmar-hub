@@ -61,7 +61,10 @@ def update_seat(current_user, seat_id):
 
 @admin_required
 def delete_seat(current_user, seat_id):
-    deleted = Seat.delete(seat_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Seat not found'}), 404
+    try:
+        deleted = Seat.delete(seat_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Seat not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
