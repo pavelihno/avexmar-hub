@@ -22,8 +22,10 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogActions,
-	Snackbar,
-	Alert,
+        Snackbar,
+        Alert,
+        Backdrop,
+        CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -75,8 +77,11 @@ const AdminDataTable = ({
 		direction: 'asc',
 	});
 	const [filters, setFilters] = useState({});
-	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+        const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(10);
+
+        const [uploadDialog, setUploadDialog] = useState(false);
+        const [uploading, setUploading] = useState(false);
 
 	const handleOpenDialog = (item) => {
 		setCurrentItem(item);
@@ -84,20 +89,21 @@ const AdminDataTable = ({
 		setOpenDialog(true);
 	};
 
-	const fileInputRef = React.useRef();
+        const fileInputRef = React.useRef();
 
-	const handleUploadDialog = () => {
-		if (fileInputRef.current) {
-			fileInputRef.current.value = null;
-			fileInputRef.current.click();
-		}
-	};
+        const openUploadDialog = () => {
+                setUploadDialog(true);
+        };
 
-	const handleFileChange = async (e) => {
-		const file = e.target.files[0];
-		if (!file) return;
-		try {
-			const result = await onUpload(file);
+        const closeUploadDialog = () => {
+                setUploadDialog(false);
+        };
+
+        const processFile = async (file) => {
+                if (!file) return;
+                setUploading(true);
+                try {
+                        const result = await onUpload(file);
 
 			if (result?.errorFile) {
 				const url = window.URL.createObjectURL(result.errorFile);
@@ -113,9 +119,16 @@ const AdminDataTable = ({
 				showNotification(UI_LABELS.SUCCESS.upload, 'success');
 			}
 		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.save}: ${error.message}`, 'error');
-		}
-	};
+                        showNotification(`${UI_LABELS.ERRORS.save}: ${error.message}`, 'error');
+                }
+                setUploading(false);
+        };
+
+        const handleFileChange = async (e) => {
+                const file = e.target.files[0];
+                await processFile(file);
+                closeUploadDialog();
+        };
 
 	const handleCloseDialog = () => {
 		setOpenDialog(false);
@@ -313,18 +326,17 @@ const AdminDataTable = ({
 							{uploadTemplateButtonText}
 						</Button>
 
-						<Button
-							variant='outlined'
-							color='secondary'
-							startIcon={<UploadIcon />}
-							onClick={() => handleUploadDialog()}
-							sx={{ ml: 2 }}
-						>
-							{uploadButtonText}
-						</Button>
-						<input type='file' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-					</>
-				)}
+                                                <Button
+                                                        variant='outlined'
+                                                        color='secondary'
+                                                        startIcon={<UploadIcon />}
+                                                        onClick={() => openUploadDialog()}
+                                                        sx={{ ml: 2 }}
+                                                >
+                                                        {uploadButtonText}
+                                                </Button>
+                                        </>
+                                )}
 
 				{isDev && onDeleteAll && (
 					<Button
@@ -579,22 +591,58 @@ const AdminDataTable = ({
 				</Dialog>
 
 				{/* Delete all dialog */}
-				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
-					<DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
-					<DialogContent>
-						<Typography id='delete-all-dialog-description'>
-							{UI_LABELS.MESSAGES.confirm_delete_all}
-						</Typography>
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleCloseDeleteAllDialog} color='primary'>
-							{UI_LABELS.BUTTONS.cancel}
-						</Button>
-						<Button onClick={confirmDeleteAll} color='error' variant='contained'>
-							{UI_LABELS.BUTTONS.delete}
-						</Button>
-					</DialogActions>
-				</Dialog>
+                                <Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
+                                        <DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+                                        <DialogContent>
+                                                <Typography id='delete-all-dialog-description'>
+                                                        {UI_LABELS.MESSAGES.confirm_delete_all}
+                                                </Typography>
+                                        </DialogContent>
+                                        <DialogActions>
+                                                <Button onClick={handleCloseDeleteAllDialog} color='primary'>
+                                                        {UI_LABELS.BUTTONS.cancel}
+                                                </Button>
+                                                <Button onClick={confirmDeleteAll} color='error' variant='contained'>
+                                                        {UI_LABELS.BUTTONS.delete}
+                                                </Button>
+                                        </DialogActions>
+                                </Dialog>
+
+                                {/* Upload dialog */}
+                                <Dialog open={uploadDialog} onClose={closeUploadDialog}>
+                                        <DialogTitle>{UI_LABELS.ADMIN.upload.title}</DialogTitle>
+                                        <DialogContent>
+                                                <Box
+                                                        onDragOver={(e) => e.preventDefault()}
+                                                        onDrop={(e) => {
+                                                                e.preventDefault();
+                                                                processFile(e.dataTransfer.files[0]);
+                                                                closeUploadDialog();
+                                                        }}
+                                                        sx={{
+                                                                border: '2px dashed',
+                                                                borderColor: 'grey.400',
+                                                                p: 4,
+                                                                textAlign: 'center',
+                                                        }}
+                                                >
+                                                        <Typography sx={{ mb: 2 }}>
+                                                                {UI_LABELS.ADMIN.upload.drag}
+                                                        </Typography>
+                                                        <Button variant='outlined' onClick={() => fileInputRef.current?.click()}>
+                                                                {UI_LABELS.ADMIN.upload.select}
+                                                        </Button>
+                                                        <input type='file' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+                                                </Box>
+                                        </DialogContent>
+                                        <DialogActions>
+                                                <Button onClick={closeUploadDialog}>{UI_LABELS.BUTTONS.cancel}</Button>
+                                        </DialogActions>
+                                </Dialog>
+
+                                <Backdrop open={uploading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                                        <CircularProgress color='inherit' />
+                                </Backdrop>
 				<Snackbar
 					open={notification.open}
 					autoHideDuration={4000}
