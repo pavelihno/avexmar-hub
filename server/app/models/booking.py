@@ -39,3 +39,7 @@ class Booking(BaseModel):
             'base_price': self.base_price,
             'final_price': self.final_price
         }
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='booking_number', descending=False)

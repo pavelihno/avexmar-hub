@@ -33,6 +33,10 @@ class Passenger(BaseModel):
             'birth_date': self.birth_date.isoformat()
         }
 
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='last_name', descending=False)
+    
     def is_infant(self, date=datetime.date.today()):
         """Check if the passenger is an infant (under 1 year old)"""
         years = date.year - self.birth_date.year - ((date.month, date.day) < (self.birth_date.month, self.birth_date.day))

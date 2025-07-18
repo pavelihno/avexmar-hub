@@ -24,6 +24,10 @@ class User(BaseModel):
         }
 
     @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='email', descending=False)
+
+    @classmethod
     def create(cls, session: Session | None = None, **data):
         session = session or db.session
         if 'email' in data and isinstance(data['email'], str):

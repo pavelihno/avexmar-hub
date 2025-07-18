@@ -34,8 +34,13 @@ class BaseModel(db.Model):
         super().__init__(**filtered_kwargs)
 
     @classmethod
-    def get_all(cls) -> list['BaseModel']:
-        return cls.query.all()
+    def get_all(cls, sort_by: str = None, descending: bool = False) -> List['BaseModel']:
+        query = cls.query
+        if sort_by:
+            column = getattr(cls, sort_by, None)
+            if column is not None:
+                query = query.order_by(column.desc() if descending else column.asc())
+        return query.all()
 
     @classmethod
     def get_by_id(cls, _id) -> Optional['BaseModel']:

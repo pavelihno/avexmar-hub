@@ -25,3 +25,7 @@ class Flight(BaseModel):
             'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
             'status': self.status.value
         }
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='flight_number', descending=False)
