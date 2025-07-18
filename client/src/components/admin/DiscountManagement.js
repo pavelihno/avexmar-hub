@@ -64,19 +64,11 @@ const DiscountManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.discounts.edit_button,
 	});
 
-	const handleAddDiscount = (discountData) => {
-		return dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap();
-	};
+	const handleAddDiscount = (discountData) => dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap()
+	const handleEditDiscount = (discountData) => dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap()
+	const handleDeleteDiscount = (id) => dispatch(deleteDiscount(id)).unwrap()
 
-	const handleEditDiscount = (discountData) => {
-		return dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap();
-	};
-
-	const handleDeleteDiscount = (id) => {
-		return dispatch(deleteDiscount(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllDiscounts = async () => {
 		await dispatch(deleteAllDiscounts()).unwrap();
 		dispatch(fetchDiscounts());
 	};
@@ -91,7 +83,7 @@ const DiscountManagement = () => {
 			onAdd={handleAddDiscount}
 			onEdit={handleEditDiscount}
 			onDelete={handleDeleteDiscount}
-			onDeleteAll={handleDeleteAll}
+			onDeleteAll={handleDeleteAllDiscounts}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.discounts.add_button}
 			isLoading={isLoading}

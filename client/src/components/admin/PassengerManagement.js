@@ -83,19 +83,11 @@ const PassengerManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.passengers.edit_button,
 	});
 
-	const handleAddPassenger = (data) => {
-		return dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
-	};
+	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
+	const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
+	const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
 
-	const handleEditPassenger = (data) => {
-		return dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
-	};
-
-	const handleDeletePassenger = (id) => {
-		return dispatch(deletePassenger(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllPassengers = async () => {
 		await dispatch(deleteAllPassengers()).unwrap();
 		dispatch(fetchPassengers());
 	};
@@ -110,7 +102,7 @@ const PassengerManagement = () => {
 			onAdd={handleAddPassenger}
 			onEdit={handleEditPassenger}
 			onDelete={handleDeletePassenger}
-			onDeleteAll={handleDeleteAll}
+			onDeleteAll={handleDeleteAllPassengers}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
 			isLoading={isLoading}

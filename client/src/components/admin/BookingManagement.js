@@ -97,19 +97,11 @@ const BookingManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.bookings.edit_button,
 	});
 
-	const handleAddBooking = (data) => {
-		return dispatch(createBooking(adminManager.toApiFormat(data))).unwrap();
-	};
+	const handleAddBooking = (data) => dispatch(createBooking(adminManager.toApiFormat(data))).unwrap();
+	const handleEditBooking = (data) => dispatch(updateBooking(adminManager.toApiFormat(data))).unwrap();
+	const handleDeleteBooking = (id) => dispatch(deleteBooking(id)).unwrap();
 
-	const handleEditBooking = (data) => {
-		return dispatch(updateBooking(adminManager.toApiFormat(data))).unwrap();
-	};
-
-	const handleDeleteBooking = (id) => {
-		return dispatch(deleteBooking(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllBookings = async () => {
 		await dispatch(deleteAllBookings()).unwrap();
 		dispatch(fetchBookings());
 	};
@@ -124,7 +116,7 @@ const BookingManagement = () => {
 			onAdd={handleAddBooking}
 			onEdit={handleEditBooking}
 			onDelete={handleDeleteBooking}
-			onDeleteAll={handleDeleteAll}
+			onDeleteAll={handleDeleteAllBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
 			isLoading={isLoading}

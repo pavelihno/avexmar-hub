@@ -107,19 +107,11 @@ const AirportManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.airports.edit_button,
 	});
 
-	const handleAddAirport = (airportData) => {
-		return dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();
-	};
+	const handleAddAirport = (airportData) => dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();
+	const handleEditAirport = (airportData) => dispatch(updateAirport(adminManager.toApiFormat(airportData))).unwrap();
+	const handleDeleteAirport = (id) => dispatch(deleteAirport(id)).unwrap();
 
-	const handleEditAirport = (airportData) => {
-		return dispatch(updateAirport(adminManager.toApiFormat(airportData))).unwrap();
-	};
-
-	const handleDeleteAirport = (id) => {
-		return dispatch(deleteAirport(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllAirports = async () => {
 		await dispatch(deleteAllAirports()).unwrap();
 		dispatch(fetchAirports());
 	};
@@ -144,7 +136,7 @@ const AirportManagement = () => {
 			onAdd={handleAddAirport}
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
-			onDeleteAll={handleDeleteAll}
+			onDeleteAll={handleDeleteAllAirports}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}
