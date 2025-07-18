@@ -158,10 +158,20 @@ const AdminDataTable = ({
 		});
 	};
 
-	const handleFilterChange = (field, value) => {
-		setFilters((prev) => ({ ...prev, [field]: value }));
-		setPage(0);
-	};
+       const handleFilterChange = (field, value, type = null) => {
+               setFilters((prev) => {
+                       if (
+                               (type === FIELD_TYPES.SELECT || type === FIELD_TYPES.BOOLEAN) &&
+                               (value === '' || value === undefined || value === null)
+                       ) {
+                               const updated = { ...prev };
+                               delete updated[field];
+                               return updated;
+                       }
+                       return { ...prev, [field]: value };
+               });
+               setPage(0);
+       };
 
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
@@ -240,16 +250,32 @@ const AdminDataTable = ({
 		);
 	};
 
-	const applySorting = (items) => {
-		if (!sortConfig.field) return items;
-		return [...items].sort((a, b) => {
-			const aVal = a[sortConfig.field];
-			const bVal = b[sortConfig.field];
-			if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-			if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-			return 0;
-		});
-	};
+       const applySorting = (items) => {
+               if (!sortConfig.field) return items;
+               const column = columns.find((c) => c.field === sortConfig.field);
+
+               const getSortValue = (item) => {
+                       const raw = item[sortConfig.field];
+                       if (!column) return raw;
+                       if (column.formatter) return column.formatter(raw);
+                       if (column.type === FIELD_TYPES.SELECT) {
+                               const opt = column.options?.find((o) => o.value === raw);
+                               return opt ? opt.label : raw;
+                       }
+                       if (column.type === FIELD_TYPES.BOOLEAN) {
+                               return raw ? ENUM_LABELS.BOOLEAN.true : ENUM_LABELS.BOOLEAN.false;
+                       }
+                       return raw;
+               };
+
+               return [...items].sort((a, b) => {
+                       const aVal = getSortValue(a);
+                       const bVal = getSortValue(b);
+                       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                       return 0;
+               });
+       };
 
 	const filteredData = applyFilters(data);
 	const sortedData = applySorting(filteredData);
@@ -378,9 +404,9 @@ const AdminDataTable = ({
 												column.type === FIELD_TYPES.BOOLEAN ? (
 													<Select
 														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(column.field, e.target.value)
-														}
+                                                                              onChange={(e) =>
+                                                                                handleFilterChange(column.field, e.target.value, column.type)
+                                                                              }
 														displayEmpty
 														size='small'
 														fullWidth
@@ -408,40 +434,30 @@ const AdminDataTable = ({
 														>
 															{UI_LABELS.ADMIN.filter.all}
 														</MenuItem>
-														{(
-															column.options ||
-															(column.type === FIELD_TYPES.BOOLEAN
-																? [
-																		{
-																			value: true,
-																			label: ENUM_LABELS.BOOLEAN.true,
-																		},
-																		{
-																			value: false,
-																			label: ENUM_LABELS.BOOLEAN.false,
-																		},
-																  ]
-																: [])
-														).map((opt) => (
-															<MenuItem
-																key={opt.value}
-																value={opt.value}
-																sx={{
-																	fontSize: '0.75rem',
-																	minHeight: 28,
-																	height: 28,
-																}}
-															>
-																{opt.label}
-															</MenuItem>
-														))}
+														{(() => {
+        const opts = [
+                ...(column.options ||
+                        (column.type === FIELD_TYPES.BOOLEAN
+                                ? [
+                                        { value: true, label: ENUM_LABELS.BOOLEAN.true },
+                                        { value: false, label: ENUM_LABELS.BOOLEAN.false },
+                                ]
+                                : [])),
+        ];
+        opts.sort((a, b) => a.label.localeCompare(b.label));
+        return opts.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: '0.75rem', minHeight: 28, height: 28 }}>
+                        {opt.label}
+                </MenuItem>
+        ));
+})()}
 													</Select>
 												) : (
 													<TextField
 														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(column.field, e.target.value)
-														}
+                                                                              onChange={(e) =>
+                                                                                handleFilterChange(column.field, e.target.value)
+                                                                              }
 														size='small'
 														fullWidth
 														inputProps={{
