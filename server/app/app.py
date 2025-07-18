@@ -8,7 +8,7 @@ from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
 
-from app.controllers.dev_controller import clear_table
+from app.controllers._dev_controller import *
 from app.controllers.auth_controller import *
 from app.controllers.user_controller import *
 from app.controllers.airport_controller import *
@@ -19,6 +19,7 @@ from app.controllers.discount_controller import *
 from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
+from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
 from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
@@ -137,17 +138,26 @@ def __create_app(_config_class, _db):
     # bookings
     app.route('/bookings', methods=['GET'])(get_bookings)
     app.route('/bookings', methods=['POST'])(create_booking)
+    app.route('/bookings/<int:booking_id>', methods=['GET'])(get_booking)
     app.route('/bookings/<int:booking_id>', methods=['PUT'])(update_booking)
     app.route('/bookings/<int:booking_id>', methods=['DELETE'])(delete_booking)
+
+    # tickets
+    app.route('/tickets', methods=['GET'])(get_tickets)
+    app.route('/tickets', methods=['POST'])(create_ticket)
+    app.route('/tickets/<int:ticket_id>', methods=['GET'])(get_ticket)
+    app.route('/tickets/<int:ticket_id>', methods=['PUT'])(update_ticket)
+    app.route('/tickets/<int:ticket_id>', methods=['DELETE'])(delete_ticket)
 
     # payments
     app.route('/payments', methods=['GET'])(get_payments)
     app.route('/payments', methods=['POST'])(create_payment)
+    app.route('/payments/<int:payment_id>', methods=['GET'])(get_payment)
     app.route('/payments/<int:payment_id>', methods=['PUT'])(update_payment)
     app.route('/payments/<int:payment_id>', methods=['DELETE'])(delete_payment)
 
     # dev
-    app.route("/dev/clear/<string:table_name>", methods=["DELETE"])(clear_table)
+    app.route("/dev/clear/<string:table_name>", methods=['DELETE'])(clear_table)
 
     migrate = Migrate(app, db)
 
