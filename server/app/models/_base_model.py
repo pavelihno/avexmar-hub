@@ -8,11 +8,11 @@ from app.database import db
 
 
 class ModelValidationError(Exception):
-    """Exception raised for model validation errors."""
+    """Exception raised for model validation errors"""
 
     def __init__(self, errors: Dict[str, str]):
         self.errors = errors
-        message = "; ".join(f"{k}: {v}" for k, v in errors.items())
+        message = '; '.join(f'{k}: {v}' for k, v in errors.items())
         super().__init__(message)
 
 
@@ -34,8 +34,13 @@ class BaseModel(db.Model):
         super().__init__(**filtered_kwargs)
 
     @classmethod
-    def get_all(cls) -> list['BaseModel']:
-        return cls.query.all()
+    def get_all(cls, sort_by: str = None, descending: bool = False) -> List['BaseModel']:
+        query = cls.query
+        if sort_by:
+            column = getattr(cls, sort_by, None)
+            if column is not None:
+                query = query.order_by(column.desc() if descending else column.asc())
+        return query.all()
 
     @classmethod
     def get_by_id(cls, _id) -> Optional['BaseModel']:
@@ -43,7 +48,7 @@ class BaseModel(db.Model):
 
     @classmethod
     def _unique_constraints(cls) -> List[List[str]]:
-        """Return list of unique constraint column name lists."""
+        """Return list of unique constraint column name lists"""
         uniques: List[List[str]] = []
         for column in cls.__table__.columns:
             if column.unique:
@@ -68,7 +73,7 @@ class BaseModel(db.Model):
                 query = query.filter(cls.id != instance_id)
             if query.first() is not None:
                 for col in columns:
-                    errors[col] = "must be unique"
+                    errors[col] = 'must be unique'
         return errors
 
     @classmethod
@@ -84,7 +89,7 @@ class BaseModel(db.Model):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({"database": str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return instance
 
     @classmethod
@@ -109,7 +114,7 @@ class BaseModel(db.Model):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({"database": str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return instance
 
     @classmethod
@@ -119,7 +124,22 @@ class BaseModel(db.Model):
         session = session or db.session
         instance = cls.get_by_id(_id)
         if instance:
-            session.delete(instance)
-            session.commit()
-            return instance
+            try:
+                session.delete(instance)
+                session.commit()
+                return instance
+            except IntegrityError as e:
+                session.rollback()
+                raise ModelValidationError({'message': str(e)}) from e
         return None
+
+    @classmethod
+    def delete_all(cls, session: Session | None = None) -> int:
+        session = session or db.session
+        try:
+            count = session.query(cls).delete()
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'message': str(e)}) from e
+        return count

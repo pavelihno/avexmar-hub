@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchTickets, createTicket, updateTicket, deleteTicket } from '../../redux/actions/ticket';
+import { fetchTickets, createTicket, updateTicket, deleteTicket, deleteAllTickets } from '../../redux/actions/ticket';
 import { fetchFlights } from '../../redux/actions/flight';
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchPassengers } from '../../redux/actions/passenger';
@@ -125,6 +125,11 @@ const TicketManagement = () => {
 		return dispatch(deleteTicket(id));
 	};
 
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllTickets()).unwrap();
+		dispatch(fetchTickets());
+	};
+
 	const formattedTickets = tickets.map(adminManager.toUiFormat);
 
 	return (
@@ -135,6 +140,7 @@ const TicketManagement = () => {
 			onAdd={handleAddTicket}
 			onEdit={handleEditTicket}
 			onDelete={handleDeleteTicket}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.tickets.add_button}
 			isLoading={isLoading}

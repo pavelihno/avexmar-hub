@@ -4,17 +4,32 @@ import enum
 
 class Config:
 
+    APP_ENV = os.environ.get('SERVER_APP_ENV')
+
+    CLIENT_URL = os.environ.get('SERVER_CLIENT_URL')
+
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 
     JWT_EXP_HOURS = int(os.environ.get('SERVER_JWT_EXP_HOURS'))
 
+    # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('SERVER_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Security settings
     CSRF_ENABLED = True
-    CORS_ORIGINS = os.environ.get('SERVER_CORS_ORIGINS')
+    CORS_ORIGINS = CLIENT_URL
+
+    # Mail settings
+    MAIL_SERVER = os.environ.get('SERVER_MAIL_SERVER')
+    MAIL_PORT = int(os.environ.get('SERVER_MAIL_PORT', 25))
+    MAIL_USERNAME = os.environ.get('SERVER_MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('SERVER_MAIL_PASSWORD')
+    MAIL_USE_TLS = os.environ.get('SERVER_MAIL_USE_TLS') == 'True'
+    MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
+    MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
 
     # Enum classes
     class USER_ROLE(enum.Enum):

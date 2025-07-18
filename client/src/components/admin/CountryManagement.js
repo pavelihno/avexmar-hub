@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
-import { fetchCountries, createCountry, updateCountry, deleteCountry } from '../../redux/actions/country';
+import {
+	fetchCountries,
+	createCountry,
+	updateCountry,
+	deleteCountry,
+	deleteAllCountries,
+} from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
@@ -67,6 +73,11 @@ const CountryManagement = () => {
 	const handleEdit = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteCountry(id));
 
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllCountries()).unwrap();
+		dispatch(fetchCountries());
+	};
+
 	const handleUpload = async (file) => {
 		const res = await uploadFile('countries', file);
 		dispatch(fetchCountries());
@@ -87,6 +98,7 @@ const CountryManagement = () => {
 			onAdd={handleAdd}
 			onEdit={handleEdit}
 			onDelete={handleDelete}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}

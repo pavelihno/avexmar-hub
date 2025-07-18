@@ -49,3 +49,14 @@ def admin_required(f):
         return f(current_user, *args, **kwargs)
 
     return login_required(decorated)
+
+
+def dev_tool(f):
+
+    @wraps(f)
+    def decorated(current_user, *args, **kwargs):
+        if Config.APP_ENV not in ('dev', 'test'):
+            return jsonify({'message': 'Operation not permitted'}), 403
+        return f(current_user, *args, **kwargs)
+
+    return admin_required(decorated)

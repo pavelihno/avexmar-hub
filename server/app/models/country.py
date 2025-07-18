@@ -28,6 +28,10 @@ class Country(BaseModel):
     }
 
     @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='name', descending=False)
+
+    @classmethod
     def get_xlsx_template(cls):
         return generate_xlsx_template(cls.upload_fields)
 

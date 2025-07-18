@@ -1,11 +1,10 @@
 import { createCrudActions } from '../utils';
 
-const {
+export const {
 	fetchAll: fetchRoutes,
 	fetchOne: fetchRoute,
 	create: createRoute,
 	update: updateRoute,
 	remove: deleteRoute,
+	removeAll: deleteAllRoutes,
 } = createCrudActions('routes');
-
-export { fetchRoutes, fetchRoute, createRoute, updateRoute, deleteRoute };

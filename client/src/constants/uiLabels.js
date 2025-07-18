@@ -12,6 +12,7 @@ export const UI_LABELS = {
 		delete: 'Удалить',
 		cancel: 'Отмена',
 		back: 'Назад',
+		delete_all: 'Удалить все',
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',
@@ -25,6 +26,7 @@ export const UI_LABELS = {
 	MESSAGES: {
 		confirm_action: 'Подтвердите действие',
 		confirm_delete: 'Вы уверены, что хотите удалить запись?',
+		confirm_delete_all: 'Вы уверены, что хотите удалить все записи?',
 		loading: 'Загрузка...',
 		required_field: 'Это поле обязательно',
 	},
@@ -33,9 +35,10 @@ export const UI_LABELS = {
 		upload: 'Файл успешно загружен',
 		update: 'Запись успешно обновлена',
 		delete: 'Запись успешно удалена',
+		delete_all: 'Все записи успешно удалены',
 		login: 'Вход выполнен успешно',
 		register: 'Регистрация выполнена успешно',
-		password_reset: 'Инструкция отправлена на ваш email',
+		password_reset: 'Инструкция отправлена на электронную почту',
 	},
 	WARNINGS: {
 		upload: 'Некоторые записи не были созданы. Подробнее в файле',
@@ -91,8 +94,6 @@ export const UI_LABELS = {
 			show: 'Показать фильтры',
 			hide: 'Скрыть фильтры',
 			all: 'Все',
-			apply: 'Применить фильтр',
-			clear: 'Очистить фильтр',
 		},
 		rows: {
 			per_page: 'Записей на странице',

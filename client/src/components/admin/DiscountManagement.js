@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchDiscounts, createDiscount, updateDiscount, deleteDiscount } from '../../redux/actions/discount';
+import {
+	fetchDiscounts,
+	createDiscount,
+	updateDiscount,
+	deleteDiscount,
+	deleteAllDiscounts,
+} from '../../redux/actions/discount';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
@@ -70,6 +76,11 @@ const DiscountManagement = () => {
 		return dispatch(deleteDiscount(id));
 	};
 
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllDiscounts()).unwrap();
+		dispatch(fetchDiscounts());
+	};
+
 	const formattedDiscounts = discounts.map(adminManager.toUiFormat);
 
 	return (
@@ -80,6 +91,7 @@ const DiscountManagement = () => {
 			onAdd={handleAddDiscount}
 			onEdit={handleEditDiscount}
 			onDelete={handleDeleteDiscount}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.discounts.add_button}
 			isLoading={isLoading}

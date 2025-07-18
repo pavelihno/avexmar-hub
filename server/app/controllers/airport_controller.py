@@ -44,10 +44,13 @@ def update_airport(current_user, airport_id):
 
 @admin_required
 def delete_airport(current_user, airport_id):
-    deleted = Airport.delete(airport_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Airport not found'}), 404
+    try:
+        deleted = Airport.delete(airport_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Airport not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required

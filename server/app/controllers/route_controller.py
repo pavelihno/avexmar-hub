@@ -52,7 +52,10 @@ def update_route(current_user, route_id):
 
 @admin_required
 def delete_route(current_user, route_id):
-    deleted = Route.delete(route_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Route not found'}), 404
+    try:
+        deleted = Route.delete(route_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Route not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

@@ -23,3 +23,7 @@ class Ticket(BaseModel):
             'discount_id': self.discount_id,
             'seat_id': self.seat_id
         }
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='ticket_number', descending=False)

@@ -32,3 +32,7 @@ class Seat(BaseModel):
     def is_booked(self):
         """Return True if the seat is associated with a booking"""
         return self.booking_id is not None
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='seat_number', descending=False) 

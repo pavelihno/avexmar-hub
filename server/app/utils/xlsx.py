@@ -50,7 +50,7 @@ def create_xlsx(fields: dict, data: list) -> BytesIO:
         for cell in column_cells:
             if cell.value is not None:
                 max_length = max(max_length, len(str(cell.value)))
-        ws.column_dimensions[get_column_letter(idx)].width = max_length + 2
+        ws.column_dimensions[get_column_letter(idx)].width = max_length + 4
 
     output = BytesIO()
     wb.save(output)
@@ -79,8 +79,7 @@ def generate_xlsx_template(fields: dict) -> BytesIO:
 
     # Adjust column widths based on header length
     for idx, header in enumerate(fields.values(), start=1):
-        ws.column_dimensions[get_column_letter(
-            idx)].width = len(str(header)) + 2
+        ws.column_dimensions[get_column_letter(idx)].width = len(str(header)) + 4
 
     output = BytesIO()
     wb.save(output)

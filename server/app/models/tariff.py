@@ -30,3 +30,7 @@ class Tariff(BaseModel):
             'currency': self.currency.value,
             'price': self.price
         }
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='seat_class', descending=False)

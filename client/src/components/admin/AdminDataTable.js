@@ -37,6 +37,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { FIELD_TYPES } from './utils';
+import { isDev } from '../../redux/reducers/auth';
 
 const AdminDataTable = ({
 	title,
@@ -45,6 +46,7 @@ const AdminDataTable = ({
 	onAdd,
 	onEdit,
 	onDelete,
+	onDeleteAll = null,
 	renderForm,
 	getUploadTemplate = () => {},
 	onUpload = () => Promise.resolve(),
@@ -58,6 +60,7 @@ const AdminDataTable = ({
 		itemId: null,
 	});
 	const [showFilters, setShowFilters] = useState(false);
+	const [deleteAllDialog, setDeleteAllDialog] = useState(false);
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
@@ -130,6 +133,18 @@ const AdminDataTable = ({
 		handleDelete(deleteDialog.itemId);
 		handleCloseDeleteDialog();
 	};
+	const handleOpenDeleteAllDialog = () => {
+		setDeleteAllDialog(true);
+	};
+
+	const handleCloseDeleteAllDialog = () => {
+		setDeleteAllDialog(false);
+	};
+
+	const confirmDeleteAll = () => {
+		handleDeleteAll();
+		setDeleteAllDialog(false);
+	};
 
 	const handleSort = (field) => {
 		setSortConfig((prev) => {
@@ -143,8 +158,18 @@ const AdminDataTable = ({
 		});
 	};
 
-	const handleFilterChange = (field, value) => {
-		setFilters((prev) => ({ ...prev, [field]: value }));
+	const handleFilterChange = (field, value, type = null) => {
+		setFilters((prev) => {
+			if (
+				(type === FIELD_TYPES.SELECT || type === FIELD_TYPES.BOOLEAN) &&
+				(value === '' || value === undefined || value === null)
+			) {
+				const updated = { ...prev };
+				delete updated[field];
+				return updated;
+			}
+			return { ...prev, [field]: value };
+		});
 		setPage(0);
 	};
 
@@ -171,6 +196,21 @@ const AdminDataTable = ({
 			result
 				.then(() => {
 					showNotification(UI_LABELS.SUCCESS.delete, 'success');
+				})
+				.catch((error) => {
+					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+				});
+		} catch (error) {
+			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+		}
+	};
+
+	const handleDeleteAll = () => {
+		try {
+			const result = onDeleteAll();
+			result
+				.then(() => {
+					showNotification(UI_LABELS.SUCCESS.delete_all, 'success');
 				})
 				.catch((error) => {
 					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
@@ -212,9 +252,25 @@ const AdminDataTable = ({
 
 	const applySorting = (items) => {
 		if (!sortConfig.field) return items;
+		const column = columns.find((c) => c.field === sortConfig.field);
+
+		const getSortValue = (item) => {
+			const raw = item[sortConfig.field];
+			if (!column) return raw;
+			if (column.formatter) return column.formatter(raw);
+			if (column.type === FIELD_TYPES.SELECT) {
+				const opt = column.options?.find((o) => o.value === raw);
+				return opt ? opt.label : raw;
+			}
+			if (column.type === FIELD_TYPES.BOOLEAN) {
+				return raw ? ENUM_LABELS.BOOLEAN.true : ENUM_LABELS.BOOLEAN.false;
+			}
+			return raw;
+		};
+
 		return [...items].sort((a, b) => {
-			const aVal = a[sortConfig.field];
-			const bVal = b[sortConfig.field];
+			const aVal = getSortValue(a);
+			const bVal = getSortValue(b);
 			if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
 			if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
 			return 0;
@@ -268,6 +324,26 @@ const AdminDataTable = ({
 						</Button>
 						<input type='file' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
 					</>
+				)}
+
+				{isDev && onDeleteAll && (
+					<Button
+						variant='outlined'
+						color='error'
+						size='small'
+						startIcon={<DeleteIcon />}
+						onClick={handleOpenDeleteAllDialog}
+						sx={{
+							ml: 2,
+							fontSize: '0.75rem',
+							fontWeight: 400,
+							minHeight: 28,
+							px: 1.5,
+							py: 0.5,
+						}}
+					>
+						{UI_LABELS.BUTTONS.delete_all}
+					</Button>
 				)}
 				<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
 					<Box
@@ -329,7 +405,11 @@ const AdminDataTable = ({
 													<Select
 														value={filters[column.field] || ''}
 														onChange={(e) =>
-															handleFilterChange(column.field, e.target.value)
+															handleFilterChange(
+																column.field,
+																e.target.value,
+																column.type
+															)
 														}
 														displayEmpty
 														size='small'
@@ -358,33 +438,37 @@ const AdminDataTable = ({
 														>
 															{UI_LABELS.ADMIN.filter.all}
 														</MenuItem>
-														{(
-															column.options ||
-															(column.type === FIELD_TYPES.BOOLEAN
-																? [
-																		{
-																			value: true,
-																			label: ENUM_LABELS.BOOLEAN.true,
-																		},
-																		{
-																			value: false,
-																			label: ENUM_LABELS.BOOLEAN.false,
-																		},
-																  ]
-																: [])
-														).map((opt) => (
-															<MenuItem
-																key={opt.value}
-																value={opt.value}
-																sx={{
-																	fontSize: '0.75rem',
-																	minHeight: 28,
-																	height: 28,
-																}}
-															>
-																{opt.label}
-															</MenuItem>
-														))}
+														{(() => {
+															const opts = [
+																...(column.options ||
+																	(column.type === FIELD_TYPES.BOOLEAN
+																		? [
+																				{
+																					value: true,
+																					label: ENUM_LABELS.BOOLEAN.true,
+																				},
+																				{
+																					value: false,
+																					label: ENUM_LABELS.BOOLEAN.false,
+																				},
+																		  ]
+																		: [])),
+															];
+															opts.sort((a, b) => a.label.localeCompare(b.label));
+															return opts.map((opt) => (
+																<MenuItem
+																	key={opt.value}
+																	value={opt.value}
+																	sx={{
+																		fontSize: '0.75rem',
+																		minHeight: 28,
+																		height: 28,
+																	}}
+																>
+																	{opt.label}
+																</MenuItem>
+															));
+														})()}
 													</Select>
 												) : (
 													<TextField
@@ -450,22 +534,22 @@ const AdminDataTable = ({
 							))}
 						</TableBody>
 					</Table>
-					<TablePagination
-						component='div'
-						count={sortedData.length}
-						page={page}
-						onPageChange={handleChangePage}
-						rowsPerPage={rowsPerPage}
-						onRowsPerPageChange={handleChangeRowsPerPage}
-						rowsPerPageOptions={[10, 25, 50]}
-						labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-						labelDisplayedRows={({ from, to, count }) =>
-							`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-								count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-							}`
-						}
-					/>
 				</TableContainer>
+				<TablePagination
+					component='div'
+					count={sortedData.length}
+					page={page}
+					onPageChange={handleChangePage}
+					rowsPerPage={rowsPerPage}
+					onRowsPerPageChange={handleChangeRowsPerPage}
+					rowsPerPageOptions={[10, 25, 50]}
+					labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
+					labelDisplayedRows={({ from, to, count }) =>
+						`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
+							count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
+						}`
+					}
+				/>
 
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
@@ -494,6 +578,23 @@ const AdminDataTable = ({
 					</DialogActions>
 				</Dialog>
 
+				{/* Delete all dialog */}
+				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
+					<DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogContent>
+						<Typography id='delete-all-dialog-description'>
+							{UI_LABELS.MESSAGES.confirm_delete_all}
+						</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={handleCloseDeleteAllDialog} color='primary'>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
+						<Button onClick={confirmDeleteAll} color='error' variant='contained'>
+							{UI_LABELS.BUTTONS.delete}
+						</Button>
+					</DialogActions>
+				</Dialog>
 				<Snackbar
 					open={notification.open}
 					autoHideDuration={4000}

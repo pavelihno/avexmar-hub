@@ -17,3 +17,7 @@ class Discount(BaseModel):
             'discount_type': self.discount_type.value,
             'percentage_value': self.percentage_value
         }
+
+    @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='discount_name', descending=False)

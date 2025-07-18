@@ -8,6 +8,8 @@ from app.models._base_model import ModelValidationError
 @admin_required
 def create_user(current_user):
     body = request.json
+    if 'email' in body and isinstance(body['email'], str):
+        body['email'] = body['email'].lower()
     try:
         new_user = User.create(**body)
         if new_user:
@@ -45,10 +47,13 @@ def update_user(current_user, user_id):
 
 @admin_required
 def delete_user(current_user, user_id):
-    deleted_user = User.delete(user_id)
-    if deleted_user:
-        return jsonify(deleted_user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+    try:
+        deleted_user = User.delete(user_id)
+        if deleted_user:
+            return jsonify(deleted_user.to_dict())
+        return jsonify({'message': 'User not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 def __set_user_activity(user_id, is_active):

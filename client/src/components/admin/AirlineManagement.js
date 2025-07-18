@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
-import { fetchAirlines, createAirline, updateAirline, deleteAirline } from '../../redux/actions/airline';
+import {
+	fetchAirlines,
+	createAirline,
+	updateAirline,
+	deleteAirline,
+	deleteAllAirlines,
+} from '../../redux/actions/airline';
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -90,6 +96,11 @@ const AirlineManagement = () => {
 	const handleEdit = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteAirline(id));
 
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllAirlines()).unwrap();
+		dispatch(fetchAirlines());
+	};
+
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airlines', file);
 		dispatch(fetchAirlines());
@@ -110,6 +121,7 @@ const AirlineManagement = () => {
 			onAdd={handleAdd}
 			onEdit={handleEdit}
 			onDelete={handleDelete}
+			onDeleteAll={handleDeleteAll}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airlines.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airlines.upload_button}

@@ -24,8 +24,14 @@ class User(BaseModel):
         }
 
     @classmethod
+    def get_all(cls):
+        return super().get_all(sort_by='email', descending=False)
+
+    @classmethod
     def create(cls, session: Session | None = None, **data):
         session = session or db.session
+        if 'email' in data and isinstance(data['email'], str):
+            data['email'] = data['email'].lower()
         existing_user = cls.get_by_email(data.get('email', ''))
         if existing_user:
             raise ModelValidationError({'email': 'must be unique'})
@@ -41,13 +47,15 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
 
         return user
 
     @classmethod
     def get_by_email(cls, _email):
-        return cls.query.filter_by(email=_email).first()
+        if not isinstance(_email, str):
+            return None
+        return cls.query.filter_by(email=_email.lower()).first()
 
     @classmethod
     def update(cls, _id, session: Session | None = None, **data):
@@ -64,7 +72,7 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return user
 
     @classmethod
@@ -85,7 +93,7 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return user
 
     @classmethod
