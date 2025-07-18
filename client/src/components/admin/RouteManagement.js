@@ -74,19 +74,11 @@ const RouteManagement = () => {
 		[FIELDS, getAirportById]
 	);
 
-	const handleAddRoute = (routeData) => {
-		return dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
-	};
+	const handleAddRoute = (routeData) => dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
+	const handleEditRoute = (routeData) => dispatch(updateRoute(adminManager.toApiFormat(routeData))).unwrap();
+	const handleDeleteRoute = (id) => dispatch(deleteRoute(id)).unwrap();
 
-	const handleEditRoute = (routeData) => {
-		return dispatch(updateRoute(adminManager.toApiFormat(routeData))).unwrap();
-	};
-
-	const handleDeleteRoute = (id) => {
-		return dispatch(deleteRoute(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllRoutes = async () => {
 		await dispatch(deleteAllRoutes()).unwrap();
 		dispatch(fetchRoutes());
 	};
@@ -101,7 +93,7 @@ const RouteManagement = () => {
 			onAdd={handleAddRoute}
 			onEdit={handleEditRoute}
 			onDelete={handleDeleteRoute}
-			onDeleteAll={handleDeleteAll}
+			onDeleteAll={handleDeleteAllRoutes}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.routes.add_button}
 			isLoading={isLoading || airportsLoading}

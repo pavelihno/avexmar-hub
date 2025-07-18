@@ -47,17 +47,9 @@ const UserManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.users.edit_button,
 	});
 
-	const handleAddUser = (data) => {
-		return dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
-	};
-
-	const handleEditUser = (data) => {
-		return dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
-	};
-
-	const handleDeleteUser = (id) => {
-		return dispatch(deleteUser(id));
-	};
+	const handleAddUser = (data) => dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
+	const handleEditUser = (data) => dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
+	const handleDeleteUser = (id) => dispatch(deleteUser(id)).unwrap();
 
 	const formattedUsers = users.map(adminManager.toUiFormat);
 

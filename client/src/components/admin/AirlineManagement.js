@@ -92,11 +92,11 @@ const AirlineManagement = () => {
 		[FIELDS, getCountryById]
 	);
 
-	const handleAdd = (data) => dispatch(createAirline(adminManager.toApiFormat(data))).unwrap();
-	const handleEdit = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
-	const handleDelete = (id) => dispatch(deleteAirline(id));
+	const handleAddAirline = (data) => dispatch(createAirline(adminManager.toApiFormat(data))).unwrap();
+	const handleEditAirline = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
+	const handleDeleteAirline = (id) => dispatch(deleteAirline(id)).unwrap();
 
-	const handleDeleteAll = async () => {
+	const handleDeleteAllAirlines = async () => {
 		await dispatch(deleteAllAirlines()).unwrap();
 		dispatch(fetchAirlines());
 	};
@@ -118,10 +118,10 @@ const AirlineManagement = () => {
 			title={UI_LABELS.ADMIN.modules.airlines.management}
 			data={formatted}
 			columns={adminManager.columns}
-			onAdd={handleAdd}
-			onEdit={handleEdit}
-			onDelete={handleDelete}
-			onDeleteAll={handleDeleteAll}
+			onAdd={handleAddAirline}
+			onEdit={handleEditAirline}
+			onDelete={handleDeleteAirline}
+			onDeleteAll={handleDeleteAllAirlines}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airlines.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airlines.upload_button}

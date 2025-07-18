@@ -69,11 +69,11 @@ const CountryManagement = () => {
 		editButtonText: UI_LABELS.ADMIN.modules.countries.edit_button,
 	});
 
-	const handleAdd = (data) => dispatch(createCountry(adminManager.toApiFormat(data))).unwrap();
-	const handleEdit = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
-	const handleDelete = (id) => dispatch(deleteCountry(id));
+	const handleAddCountry = (data) => dispatch(createCountry(adminManager.toApiFormat(data))).unwrap();
+	const handleEditCountry = (data) => dispatch(updateCountry(adminManager.toApiFormat(data))).unwrap();
+	const handleDeleteCountry = (id) => dispatch(deleteCountry(id)).unwrap();
 
-	const handleDeleteAll = async () => {
+	const handleDeleteAllCountries = async () => {
 		await dispatch(deleteAllCountries()).unwrap();
 		dispatch(fetchCountries());
 	};
@@ -95,10 +95,10 @@ const CountryManagement = () => {
 			title={UI_LABELS.ADMIN.modules.countries.management}
 			data={formatted}
 			columns={adminManager.columns}
-			onAdd={handleAdd}
-			onEdit={handleEdit}
-			onDelete={handleDelete}
-			onDeleteAll={handleDeleteAll}
+			onAdd={handleAddCountry}
+			onEdit={handleEditCountry}
+			onDelete={handleDeleteCountry}
+			onDeleteAll={handleDeleteAllCountries}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}

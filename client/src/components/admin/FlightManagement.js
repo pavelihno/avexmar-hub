@@ -306,19 +306,11 @@ const FlightManagement = () => {
 		[FIELDS, getRouteById, getAirlineById]
 	);
 
-	const handleAddFlight = (flightData) => {
-		return dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
-	};
+	const handleAddFlight = (flightData) => dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
+	const handleEditFlight = (flightData) => dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();
+	const handleDeleteFlight = (id) => dispatch(deleteFlight(id)).unwrap();
 
-	const handleEditFlight = (flightData) => {
-		return dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();
-	};
-
-	const handleDeleteFlight = (id) => {
-		return dispatch(deleteFlight(id));
-	};
-
-	const handleDeleteAll = async () => {
+	const handleDeleteAllFlights = async () => {
 		await dispatch(deleteAllFlights()).unwrap();
 		dispatch(fetchFlights());
 	};
@@ -334,7 +326,7 @@ const FlightManagement = () => {
 				onAdd={handleAddFlight}
 				onEdit={handleEditFlight}
 				onDelete={handleDeleteFlight}
-				onDeleteAll={handleDeleteAll}
+				onDeleteAll={handleDeleteAllFlights}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
 				isLoading={isLoading || routesLoading || airlinesLoading}
