@@ -119,10 +119,10 @@ const AirportManagement = () => {
 		return dispatch(deleteAirport(id));
 	};
 
-       const handleDeleteAll = async () => {
-               await dispatch(deleteAllAirports()).unwrap();
-               dispatch(fetchAirports());
-       };
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllAirports()).unwrap();
+		dispatch(fetchAirports());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airports', file);

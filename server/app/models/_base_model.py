@@ -84,7 +84,7 @@ class BaseModel(db.Model):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return instance
 
     @classmethod
@@ -109,7 +109,7 @@ class BaseModel(db.Model):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return instance
 
     @classmethod
@@ -125,7 +125,7 @@ class BaseModel(db.Model):
                 return instance
             except IntegrityError as e:
                 session.rollback()
-                raise ModelValidationError({'database': str(e)}) from e
+                raise ModelValidationError({'message': str(e)}) from e
         return None
 
     @classmethod
@@ -136,5 +136,5 @@ class BaseModel(db.Model):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return count

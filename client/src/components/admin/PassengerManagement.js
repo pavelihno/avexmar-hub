@@ -95,10 +95,10 @@ const PassengerManagement = () => {
 		return dispatch(deletePassenger(id));
 	};
 
-       const handleDeleteAll = async () => {
-               await dispatch(deleteAllPassengers()).unwrap();
-               dispatch(fetchPassengers());
-       };
+	const handleDeleteAll = async () => {
+		await dispatch(deleteAllPassengers()).unwrap();
+		dispatch(fetchPassengers());
+	};
 
 	const formattedPassengers = passengers.map(adminManager.toUiFormat);
 

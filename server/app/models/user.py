@@ -43,7 +43,7 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
 
         return user
 
@@ -68,7 +68,7 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return user
 
     @classmethod
@@ -89,7 +89,7 @@ class User(BaseModel):
             session.commit()
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({'database': str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
         return user
 
     @classmethod

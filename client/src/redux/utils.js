@@ -2,11 +2,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { serverApi } from '../api';
 
 export const getErrorData = (error) => {
-	if (error.response?.data) {
-		return error.response.data;
+	if (error.response?.data?.errors) {
+		return error.response.data.errors;
 	}
-	else if (error.response?.errors) {
-		return error.response.errors;
+	else if (error.response?.data) {
+		return error.response.data;
 	}
 
 	return { message: error.message || 'An unknown error occurred' };
