@@ -90,16 +90,21 @@ export const UI_LABELS = {
 	ADMIN: {
 		actions: 'Действия',
 		panel: 'Панель администратора',
-		filter: {
-			show: 'Показать фильтры',
-			hide: 'Скрыть фильтры',
-			all: 'Все',
-		},
-		rows: {
-			per_page: 'Записей на странице',
-			from: 'из',
-			more_than: 'более',
-		},
+                filter: {
+                        show: 'Показать фильтры',
+                        hide: 'Скрыть фильтры',
+                        all: 'Все',
+                },
+                upload: {
+                        title: 'Загрузка файла',
+                        drag: 'Перетащите файл сюда или выберите',
+                        select: 'Выбрать файл',
+                },
+                rows: {
+                        per_page: 'Записей на странице',
+                        from: 'из',
+                        more_than: 'более',
+                },
 		modules: {
 			airports: {
 				title: 'Аэропорты',
