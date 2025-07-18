@@ -76,10 +76,10 @@ const DiscountManagement = () => {
 		return dispatch(deleteDiscount(id));
 	};
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllDiscounts());
-		dispatch(fetchDiscounts());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllDiscounts()).unwrap();
+               dispatch(fetchDiscounts());
+       };
 
 	const formattedDiscounts = discounts.map(adminManager.toUiFormat);
 

@@ -125,10 +125,10 @@ const TicketManagement = () => {
 		return dispatch(deleteTicket(id));
 	};
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllTickets());
-		dispatch(fetchTickets());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllTickets()).unwrap();
+               dispatch(fetchTickets());
+       };
 
 	const formattedTickets = tickets.map(adminManager.toUiFormat);
 

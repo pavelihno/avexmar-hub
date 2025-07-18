@@ -109,10 +109,10 @@ const BookingManagement = () => {
 		return dispatch(deleteBooking(id));
 	};
 
-	const handleDeleteAll = async () => {
-		dispatch(deleteAllBookings());
-		dispatch(fetchBookings());
-	};
+       const handleDeleteAll = async () => {
+               await dispatch(deleteAllBookings()).unwrap();
+               dispatch(fetchBookings());
+       };
 
 	const formattedBookings = bookings.map(adminManager.toUiFormat);
 

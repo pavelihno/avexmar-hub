@@ -47,10 +47,13 @@ def update_user(current_user, user_id):
 
 @admin_required
 def delete_user(current_user, user_id):
-    deleted_user = User.delete(user_id)
-    if deleted_user:
-        return jsonify(deleted_user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+    try:
+        deleted_user = User.delete(user_id)
+        if deleted_user:
+            return jsonify(deleted_user.to_dict())
+        return jsonify({'message': 'User not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 def __set_user_activity(user_id, is_active):

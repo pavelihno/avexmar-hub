@@ -43,7 +43,10 @@ def update_discount(current_user, discount_id):
 
 @admin_required
 def delete_discount(current_user, discount_id):
-    deleted = Discount.delete(discount_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Discount not found'}), 404
+    try:
+        deleted = Discount.delete(discount_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Discount not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

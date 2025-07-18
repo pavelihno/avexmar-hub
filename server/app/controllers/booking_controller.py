@@ -43,7 +43,10 @@ def update_booking(current_user, booking_id):
 
 @admin_required
 def delete_booking(current_user, booking_id):
-    deleted = Booking.delete(booking_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Booking not found'}), 404
+    try:
+        deleted = Booking.delete(booking_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Booking not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400

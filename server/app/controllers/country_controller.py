@@ -44,10 +44,13 @@ def update_country(current_user, country_id):
 
 @admin_required
 def delete_country(current_user, country_id):
-    deleted = Country.delete(country_id)
-    if deleted:
-        return jsonify(deleted.to_dict())
-    return jsonify({'message': 'Country not found'}), 404
+    try:
+        deleted = Country.delete(country_id)
+        if deleted:
+            return jsonify(deleted.to_dict())
+        return jsonify({'message': 'Country not found'}), 404
+    except ModelValidationError as e:
+        return jsonify({'errors': e.errors}), 400
 
 
 @admin_required
