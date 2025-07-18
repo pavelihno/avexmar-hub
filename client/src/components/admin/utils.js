@@ -1,14 +1,14 @@
 import React from 'react';
 import {
-        TextField,
-        Select,
-        MenuItem,
-        FormControl,
-        InputLabel,
-        Checkbox,
-        FormControlLabel,
-        FormHelperText,
-        Autocomplete,
+	TextField,
+	Select,
+	MenuItem,
+	FormControl,
+	InputLabel,
+	Checkbox,
+	FormControlLabel,
+	FormHelperText,
+	Autocomplete,
 } from '@mui/material';
 
 import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
@@ -58,9 +58,7 @@ export const createFieldRenderer = (field) => {
 					value={props.value ?? ''}
 					onChange={(e) => {
 						const value = e.target.value;
-						const numValue = field.float
-							? parseFloat(value)
-							: parseInt(value, 10);
+						const numValue = field.float ? parseFloat(value) : parseInt(value, 10);
 						props.onChange(value === '' ? '' : numValue);
 					}}
 					type='number'
@@ -112,54 +110,50 @@ export const createFieldRenderer = (field) => {
 				</LocalizationProvider>
 			);
 
-                case FIELD_TYPES.SELECT:
-                        return (props) => {
-                                if (field.options && field.options.length > 100) {
-                                        const valueObj = field.options.find((o) => o.value === props.value) || null;
-                                        return (
-                                                <Autocomplete
-                                                        options={field.options}
-                                                        value={valueObj}
-                                                        onChange={(e, val) => props.onChange(val ? val.value : '')}
-                                                        filterOptions={(opts, state) =>
-                                                                opts
-                                                                        .filter((o) =>
-                                                                                o.label
-                                                                                        .toLowerCase()
-                                                                                        .includes(state.inputValue.toLowerCase())
-                                                                        )
-                                                                        .slice(0, 100)
-                                                        }
-                                                        getOptionLabel={(o) => o.label}
-                                                        renderInput={(params) => (
-                                                                <TextField
-                                                                        {...params}
-                                                                        label={field.label}
-                                                                        error={props.error}
-                                                                        helperText={props.error ? props.helperText : ''}
-                                                                />
-                                                        )}
-                                                />
-                                        );
-                                }
-                                return (
-                                        <FormControl fullWidth={props.fullWidth} error={!!props.error}>
-                                                <InputLabel>{field.label}</InputLabel>
-                                                <Select
-                                                        value={props.value || ''}
-                                                        onChange={(e) => props.onChange(e.target.value)}
-                                                        label={field.label}
-                                                >
-                                                        {field.options.map((option) => (
-                                                                <MenuItem key={option.value} value={option.value}>
-                                                                        {option.label}
-                                                                </MenuItem>
-                                                        ))}
-                                                </Select>
-                                                {props.error && <FormHelperText>{props.helperText}</FormHelperText>}
-                                        </FormControl>
-                                );
-                        };
+		case FIELD_TYPES.SELECT:
+			return (props) => {
+				if (field.options && field.options.length > 100) {
+					const valueObj = field.options.find((o) => o.value === props.value) || null;
+					return (
+						<Autocomplete
+							options={field.options}
+							value={valueObj}
+							onChange={(e, val) => props.onChange(val ? val.value : '')}
+							filterOptions={(opts, state) =>
+								opts
+									.filter((o) => o.label.toLowerCase().includes(state.inputValue.toLowerCase()))
+									.slice(0, 100)
+							}
+							getOptionLabel={(o) => o.label}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label={field.label}
+									error={props.error}
+									helperText={props.error ? props.helperText : ''}
+								/>
+							)}
+						/>
+					);
+				}
+				return (
+					<FormControl fullWidth={props.fullWidth} error={!!props.error}>
+						<InputLabel>{field.label}</InputLabel>
+						<Select
+							value={props.value || ''}
+							onChange={(e) => props.onChange(e.target.value)}
+							label={field.label}
+						>
+							{field.options.map((option) => (
+								<MenuItem key={option.value} value={option.value}>
+									{option.label}
+								</MenuItem>
+							))}
+						</Select>
+						{props.error && <FormHelperText>{props.helperText}</FormHelperText>}
+					</FormControl>
+				);
+			};
 
 		case FIELD_TYPES.BOOLEAN:
 			return (props) => (
@@ -217,9 +211,7 @@ export const createTableColumns = (fields) => {
 				field: field.key,
 				header: field.label,
 				formatter: field.formatter,
-				render: field.renderField
-					? (item) => field.renderField(item)
-					: null,
+				render: field.renderField ? (item) => field.renderField(item) : null,
 				type: field.type,
 				options: field.options,
 			};
