@@ -12,8 +12,8 @@ import {
 	TableHead,
 	TableRow,
 	Paper,
-        TableSortLabel,
-        TablePagination,
+	TableSortLabel,
+	TablePagination,
 	IconButton,
 	Dialog,
 	DialogTitle,
@@ -404,79 +404,78 @@ const AdminDataTable = ({
 									{UI_LABELS.ADMIN.actions}
 								</TableCell>
 							</TableRow>
-{showFilters && (
-                                <TableRow>
-                                    {columns.map((col, idx) => {
-                                        if (col.type === FIELD_TYPES.CUSTOM) return null;
+							{showFilters && (
+								<TableRow>
+									{columns.map((col, idx) => {
+										if (col.type === FIELD_TYPES.CUSTOM) return null;
 
-                                        let options = [];
-                                        if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
-                                            options = col.options
-                                                ? [...col.options]
-                                                : [
-                                                      { value: true, label: ENUM_LABELS.BOOLEAN.true },
-                                                      { value: false, label: ENUM_LABELS.BOOLEAN.false },
-                                                  ];
-                                            options.sort((a, b) => a.label.localeCompare(b.label));
-                                            col = {
-                                                ...col,
-                                                options: [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...options],
-                                            };
-                                        }
+										let options = [];
+										if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
+											options = col.options
+												? [...col.options]
+												: [
+														{ value: true, label: ENUM_LABELS.BOOLEAN.true },
+														{ value: false, label: ENUM_LABELS.BOOLEAN.false },
+												  ];
+											options.sort((a, b) => a.label.localeCompare(b.label));
+											col = {
+												...col,
+												options: [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...options],
+											};
+										}
 
-                                        const renderField = createFieldRenderer(col);
+										const renderField = createFieldRenderer(col);
 
-                                        return (
-                                            <TableCell key={idx} align={col.align || 'left'}>
-                                                {renderField({
-                                                    value: filters[col.field] ?? '',
-                                                    onChange: (val) => handleFilterChange(col.field, val, col.type),
-                                                    size: 'small',
-                                                    fullWidth: true,
-                                                    sx: {
-                                                        minWidth: 0,
-                                                        maxWidth: 150,
-                                                        '& .MuiInputBase-root': {
-                                                            fontSize: '0.75rem',
-                                                            height: 28,
-                                                            minHeight: 28,
-                                                            padding: '0 8px',
-                                                        },
-                                                        '& .MuiInputBase-input': {
-                                                            fontSize: '0.75rem',
-                                                            height: 20,
-                                                            padding: '4px 0',
-                                                        },
-                                                    },
-                                                    inputProps: {
-                                                        style: {
-                                                            fontSize: '0.75rem',
-                                                            padding: '4px 8px',
-                                                            height: 20,
-                                                            boxSizing: 'border-box',
-                                                        },
-                                                    },
-                                                    displayEmpty: true,
-                                                    simpleSelect: true,
-                                                    MenuProps: {
-                                                        PaperProps: {
-                                                            sx: { fontSize: '0.75rem' },
-                                                        },
-                                                    },
-                                                    MenuItemProps: {
-                                                        sx: {
-                                                            fontSize: '0.75rem',
-                                                            minHeight: 28,
-                                                            height: 28,
-                                                        },
-                                                    },
-                                                })}
-                                            </TableCell>
-                                        );
-                                    })}
-                                    <TableCell align='right' />
-                                </TableRow>
-                            )}
+										return (
+											<TableCell key={idx} align={col.align || 'left'}>
+												{renderField({
+													value: filters[col.field] ?? '',
+													onChange: (val) => handleFilterChange(col.field, val, col.type),
+													size: 'small',
+													fullWidth: true,
+													sx: {
+														minWidth: 0,
+														maxWidth: 150,
+														'& .MuiInputBase-root': {
+															fontSize: '0.75rem',
+															height: 28,
+															minHeight: 28,
+															padding: '0 8px',
+														},
+														'& .MuiInputBase-input': {
+															fontSize: '0.75rem',
+															height: 20,
+															padding: '4px 0',
+														},
+													},
+													inputProps: {
+														style: {
+															fontSize: '0.75rem',
+															padding: '4px 8px',
+															height: 20,
+															boxSizing: 'border-box',
+														},
+													},
+													displayEmpty: true,
+													simpleSelect: true,
+													MenuProps: {
+														PaperProps: {
+															sx: { fontSize: '0.75rem' },
+														},
+													},
+													MenuItemProps: {
+														sx: {
+															fontSize: '0.75rem',
+															minHeight: 28,
+															height: 28,
+														},
+													},
+												})}
+											</TableCell>
+										);
+									})}
+									<TableCell align='right' />
+								</TableRow>
 							)}
 						</TableHead>
 						<TableBody>

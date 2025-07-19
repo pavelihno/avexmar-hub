@@ -35,223 +35,196 @@ export const FIELD_TYPES = {
  * Generate field renderers based on field type
  */
 export const createFieldRenderer = (field, defaultProps = {}) => {
-        const type = field.type || FIELD_TYPES.TEXT;
+	const type = field.type || FIELD_TYPES.TEXT;
 
-        return (props = {}) => {
-                const allProps = { ...defaultProps, ...props };
+	return (props = {}) => {
+		const allProps = { ...defaultProps, ...props };
 
-                switch (type) {
-                        case FIELD_TYPES.TEXT: {
-                                const {
-                                        value = '',
-                                        onChange,
-                                        fullWidth,
-                                        error,
-                                        helperText,
-                                        inputProps,
-                                        ...rest
-                                } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                inputProps={{ ...field.inputProps, ...inputProps }}
-                                                {...rest}
-                                        />
-                                );
-                        }
+		switch (type) {
+			case FIELD_TYPES.TEXT: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, ...rest } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						{...rest}
+					/>
+				);
+			}
 
-                case FIELD_TYPES.NUMBER: {
-                        const {
-                                value = '',
-                                onChange,
-                                fullWidth,
-                                error,
-                                helperText,
-                                inputProps,
-                                ...rest
-                        } = allProps;
-                        return (
-                                <TextField
-                                        label={field.label}
-                                        value={value}
-                                        onChange={(e) => {
-                                                const val = e.target.value;
-                                                const numValue = field.float ? parseFloat(val) : parseInt(val, 10);
-                                                onChange(val === '' ? '' : numValue);
-                                        }}
-                                        type='number'
-                                        fullWidth={fullWidth}
-                                        error={error}
-                                        helperText={error ? helperText : ''}
-                                        inputProps={{ step: field.float ? 0.01 : 1, ...field.inputProps, ...inputProps }}
-                                        {...rest}
-                                />
-                        );
-                }
+			case FIELD_TYPES.NUMBER: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, ...rest } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => {
+							const val = e.target.value;
+							const numValue = field.float ? parseFloat(val) : parseInt(val, 10);
+							onChange(val === '' ? '' : numValue);
+						}}
+						type='number'
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{ step: field.float ? 0.01 : 1, ...field.inputProps, ...inputProps }}
+						{...rest}
+					/>
+				);
+			}
 
-                case FIELD_TYPES.DATE: {
-                        const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
-                        return (
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <DatePicker
-                                                label={field.label}
-                                                value={value ? new Date(value) : null}
-                                                onChange={(date) => onChange(date)}
-                                                slotProps={{
-                                                        textField: {
-                                                                fullWidth,
-                                                                error,
-                                                                helperText: error ? helperText : '',
-                                                                ...rest,
-                                                        },
-                                                }}
-                                                format={field.dateFormat || 'dd.MM.yyyy'}
-                                        />
-                                </LocalizationProvider>
-                        );
-                }
+			case FIELD_TYPES.DATE: {
+				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+				return (
+					<LocalizationProvider dateAdapter={AdapterDateFns}>
+						<DatePicker
+							label={field.label}
+							value={value ? new Date(value) : null}
+							onChange={(date) => onChange(date)}
+							slotProps={{
+								textField: {
+									fullWidth,
+									error,
+									helperText: error ? helperText : '',
+									...rest,
+								},
+							}}
+							format={field.dateFormat || 'dd.MM.yyyy'}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                case FIELD_TYPES.DATETIME: {
-                        const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
-                        return (
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <DateTimePicker
-                                                label={field.label}
-                                                value={value ? new Date(value) : null}
-                                                onChange={(dateTime) => onChange(dateTime)}
-                                                slotProps={{
-                                                        textField: {
-                                                                fullWidth,
-                                                                error,
-                                                                helperText: error ? helperText : '',
-                                                                ...rest,
-                                                        },
-                                                }}
-                                                format={field.dateTimeFormat || 'dd.MM.yyyy HH:mm'}
-                                        />
-                                </LocalizationProvider>
-                        );
-                }
+			case FIELD_TYPES.DATETIME: {
+				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+				return (
+					<LocalizationProvider dateAdapter={AdapterDateFns}>
+						<DateTimePicker
+							label={field.label}
+							value={value ? new Date(value) : null}
+							onChange={(dateTime) => onChange(dateTime)}
+							slotProps={{
+								textField: {
+									fullWidth,
+									error,
+									helperText: error ? helperText : '',
+									...rest,
+								},
+							}}
+							format={field.dateTimeFormat || 'dd.MM.yyyy HH:mm'}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                case FIELD_TYPES.SELECT: {
-                        const {
-                                value = '',
-                                onChange,
-                                fullWidth,
-                                error,
-                                helperText,
-                                options = field.options || [],
-                                MenuItemProps,
-                                simpleSelect,
-                                ...rest
-                        } = allProps;
+			case FIELD_TYPES.SELECT: {
+				const {
+					value = '',
+					onChange,
+					fullWidth,
+					error,
+					helperText,
+					options = field.options || [],
+					MenuItemProps,
+					simpleSelect,
+					...rest
+				} = allProps;
 
-                        if (!simpleSelect && options.length > 100) {
-                                const valueObj = options.find((o) => o.value === value) || null;
-                                return (
-                                        <Autocomplete
-                                                options={options}
-                                                value={valueObj}
-                                                onChange={(e, val) => onChange(val ? val.value : '')}
-                                                filterOptions={(opts, state) =>
-                                                        opts
-                                                                .filter((o) =>
-                                                                        o.label.toLowerCase().includes(state.inputValue.toLowerCase())
-                                                                )
-                                                                .slice(0, 100)
-                                                }
-                                                getOptionLabel={(o) => o.label}
-                                                renderInput={(params) => (
-                                                        <TextField
-                                                                {...params}
-                                                                label={field.label}
-                                                                error={error}
-                                                                helperText={error ? helperText : ''}
-                                                                {...rest}
-                                                        />
-                                                )}
-                                                {...rest}
-                                        />
-                                );
-                        }
+				if (!simpleSelect && options.length > 100) {
+					const valueObj = options.find((o) => o.value === value) || null;
+					return (
+						<Autocomplete
+							options={options}
+							value={valueObj}
+							onChange={(e, val) => onChange(val ? val.value : '')}
+							filterOptions={(opts, state) =>
+								opts
+									.filter((o) => o.label.toLowerCase().includes(state.inputValue.toLowerCase()))
+									.slice(0, 100)
+							}
+							getOptionLabel={(o) => o.label}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label={field.label}
+									error={error}
+									helperText={error ? helperText : ''}
+									{...rest}
+								/>
+							)}
+							{...rest}
+						/>
+					);
+				}
 
-                        if (simpleSelect) {
-                                return (
-                                        <Select
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                {...rest}
-                                        >
-                                                {options.map((option) => (
-                                                        <MenuItem key={option.value} value={option.value} {...MenuItemProps}>
-                                                                {option.label}
-                                                        </MenuItem>
-                                                ))}
-                                        </Select>
-                                );
-                        }
+				if (simpleSelect) {
+					return (
+						<Select
+							value={value}
+							onChange={(e) => onChange(e.target.value)}
+							fullWidth={fullWidth}
+							{...rest}
+						>
+							{options.map((option) => (
+								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
+									{option.label}
+								</MenuItem>
+							))}
+						</Select>
+					);
+				}
 
-                        return (
-                                <FormControl fullWidth={fullWidth} error={!!error} {...rest}>
-                                        <InputLabel>{field.label}</InputLabel>
-                                        <Select
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                label={field.label}
-                                                {...rest}
-                                        >
-                                                {options.map((option) => (
-                                                        <MenuItem key={option.value} value={option.value} {...MenuItemProps}>
-                                                                {option.label}
-                                                        </MenuItem>
-                                                ))}
-                                        </Select>
-                                        {error && <FormHelperText>{helperText}</FormHelperText>}
-                                </FormControl>
-                        );
-                }
+				return (
+					<FormControl fullWidth={fullWidth} error={!!error} {...rest}>
+						<InputLabel>{field.label}</InputLabel>
+						<Select value={value} onChange={(e) => onChange(e.target.value)} label={field.label} {...rest}>
+							{options.map((option) => (
+								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
+									{option.label}
+								</MenuItem>
+							))}
+						</Select>
+						{error && <FormHelperText>{helperText}</FormHelperText>}
+					</FormControl>
+				);
+			}
 
-                case FIELD_TYPES.BOOLEAN: {
-                        const { value = false, onChange, ...rest } = allProps;
-                        return (
-                                <FormControlLabel
-                                        control={
-                                                <Checkbox
-                                                        checked={!!value}
-                                                        onChange={(e) => onChange(e.target.checked)}
-                                                        color='primary'
-                                                />
-                                        }
-                                        label={field.label}
-                                        {...rest}
-                                />
-                        );
-                }
+			case FIELD_TYPES.BOOLEAN: {
+				const { value = false, onChange, ...rest } = allProps;
+				return (
+					<FormControlLabel
+						control={
+							<Checkbox checked={!!value} onChange={(e) => onChange(e.target.checked)} color='primary' />
+						}
+						label={field.label}
+						{...rest}
+					/>
+				);
+			}
 
-                case FIELD_TYPES.CUSTOM:
-                        return (customProps) => field.renderField({ ...allProps, ...customProps });
+			case FIELD_TYPES.CUSTOM:
+				return (customProps) => field.renderField({ ...allProps, ...customProps });
 
-                default: {
-                        const { value = '', onChange, fullWidth, inputProps, ...rest } = allProps;
-                        return (
-                                <TextField
-                                        label={field.label}
-                                        value={value}
-                                        onChange={(e) => onChange(e.target.value)}
-                                        fullWidth={fullWidth}
-                                        inputProps={{ ...field.inputProps, ...inputProps }}
-                                        {...rest}
-                                />
-                        );
-                }
-               }
-        };
+			default: {
+				const { value = '', onChange, fullWidth, inputProps, ...rest } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						{...rest}
+					/>
+				);
+			}
+		}
+	};
 };
 
 /**
