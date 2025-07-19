@@ -61,9 +61,11 @@ const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addB
 			} else if (error?.message) {
 				setErrorMessage(error.message);
 			} else if (error?.errors) {
-				setErrorMessage(Object.entries(error.errors)
-				.map(([field, msg]) => `${field}: ${msg}`)
-				.join('; '));
+				setErrorMessage(
+					Object.entries(error.errors)
+						.map(([field, msg]) => `${field}: ${msg}`)
+						.join('; ')
+				);
 			} else {
 				message = UI_LABELS.ERRORS.unknown;
 			}

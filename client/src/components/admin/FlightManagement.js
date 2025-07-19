@@ -22,6 +22,7 @@ import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlight
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
+import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
@@ -31,6 +32,7 @@ const FlightManagement = () => {
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { tariffs } = useSelector((state) => state.tariffs);
+	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
@@ -42,17 +44,25 @@ const FlightManagement = () => {
 		dispatch(fetchRoutes());
 		dispatch(fetchAirlines());
 		dispatch(fetchTariffs());
+		dispatch(fetchAirports());
 	}, [dispatch]);
 
-	const getRouteOptions = () => {
-		if (!routes || !Array.isArray(routes)) {
+	const routeOptions = useMemo(() => {
+		if (routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)) {
 			return [];
 		}
-		return routes.map((route) => ({
-			value: route.id,
-			label: `${route.origin_airport_id} -> ${route.destination_airport_id}`,
-		}));
-	};
+		return routes.map((route) => {
+			const origin = airports.find((a) => a.id === route.origin_airport_id);
+			const dest = airports.find((a) => a.id === route.destination_airport_id);
+
+			return {
+				value: route.id,
+				label: `${origin?.city_name} (${origin?.name || '…'}, ${origin?.iata_code || '…'}) → ${
+					dest?.city_name
+				} (${dest?.name || '…'}, ${dest?.iata_code || '…'})`,
+			};
+		});
+	}, [routes, airports, routesLoading, airportsLoading]);
 
 	const getRouteById = (id) => {
 		if (!routes || !Array.isArray(routes)) {
@@ -78,7 +88,6 @@ const FlightManagement = () => {
 		return airlines.find((airline) => airline.id === id);
 	};
 
-	const routeOptions = useMemo(() => getRouteOptions(), [routes]);
 	const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
 
 	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
@@ -145,21 +154,13 @@ const FlightManagement = () => {
 			apiKey: 'route_id',
 			label: FIELD_LABELS.FLIGHT.route_id,
 			type: FIELD_TYPES.SELECT,
+			fullWidth: true,
 			options: routeOptions,
 			formatter: (value) => {
 				const route = getRouteById(value);
 				return route ? `${route.origin_airport_id} -> ${route.destination_airport_id}` : value;
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
-		},
-		status: {
-			key: 'status',
-			apiKey: 'status',
-			label: FIELD_LABELS.FLIGHT.status,
-			type: FIELD_TYPES.SELECT,
-			options: getEnumOptions('FLIGHT_STATUS'),
-			formatter: (value) => ENUM_LABELS.FLIGHT_STATUS[value] || value,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.status.REQUIRED : null),
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',

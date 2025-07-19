@@ -14,8 +14,7 @@ def future_flight(route_moscow_pevek, su_airline):
         airline_id=su_airline.id,
         route_id=route_moscow_pevek.id,
         scheduled_departure=departure,
-        scheduled_arrival=arrival,
-        status=Config.FLIGHT_STATUS.scheduled
+        scheduled_arrival=arrival
     )
 
 
@@ -29,8 +28,7 @@ def past_flight(route_pevek_moscow, s7_airline):
         airline_id=s7_airline.id,
         route_id=route_pevek_moscow.id,
         scheduled_departure=departure,
-        scheduled_arrival=arrival,
-        status=Config.FLIGHT_STATUS.arrived
+        scheduled_arrival=arrival
     )
 
 
@@ -44,6 +42,5 @@ def cancelled_flight(route_moscow_pevek, su_airline):
         airline_id=su_airline.id,
         route_id=route_moscow_pevek.id,
         scheduled_departure=departure,
-        scheduled_arrival=arrival,
-        status=Config.FLIGHT_STATUS.cancelled
+        scheduled_arrival=arrival
     )
