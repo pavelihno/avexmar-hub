@@ -14,9 +14,6 @@ import {
 	Paper,
 	TableSortLabel,
 	TablePagination,
-	TextField,
-	Select,
-	MenuItem,
 	IconButton,
 	Dialog,
 	DialogTitle,
@@ -38,7 +35,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
-import { FIELD_TYPES } from './utils';
+import { FIELD_TYPES, createFieldRenderer } from './utils';
 import { isDev } from '../../redux/reducers/auth';
 
 const AdminDataTable = ({
@@ -409,115 +406,74 @@ const AdminDataTable = ({
 							</TableRow>
 							{showFilters && (
 								<TableRow>
-									{columns.map((column, index) =>
-										column.type === FIELD_TYPES.CUSTOM ? null : (
-											<TableCell key={index} align={column.align || 'left'}>
-												{column.type === FIELD_TYPES.SELECT ||
-												column.type === FIELD_TYPES.BOOLEAN ? (
-													<Select
-														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(
-																column.field,
-																e.target.value,
-																column.type
-															)
-														}
-														displayEmpty
-														size='small'
-														fullWidth
-														sx={{
+									{columns.map((col, idx) => {
+										if (col.type === FIELD_TYPES.CUSTOM) return null;
+
+										let options = [];
+										if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
+											options = col.options
+												? [...col.options]
+												: [
+														{ value: true, label: ENUM_LABELS.BOOLEAN.true },
+														{ value: false, label: ENUM_LABELS.BOOLEAN.false },
+												  ];
+											options.sort((a, b) => a.label.localeCompare(b.label));
+											col = {
+												...col,
+												options: [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...options],
+											};
+										}
+
+										const renderField = createFieldRenderer(col);
+
+										return (
+											<TableCell key={idx} align={col.align || 'left'}>
+												{renderField({
+													value: filters[col.field] ?? '',
+													onChange: (val) => handleFilterChange(col.field, val, col.type),
+													size: 'small',
+													fullWidth: true,
+													sx: {
+														minWidth: 0,
+														maxWidth: 150,
+														'& .MuiInputBase-root': {
+															fontSize: '0.75rem',
+															height: 28,
+															minHeight: 28,
+															padding: '0 8px',
+														},
+														'& .MuiInputBase-input': {
+															fontSize: '0.75rem',
+															height: 20,
+															padding: '4px 0',
+														},
+													},
+													inputProps: {
+														style: {
+															fontSize: '0.75rem',
+															padding: '4px 8px',
+															height: 20,
+															boxSizing: 'border-box',
+														},
+													},
+													displayEmpty: true,
+													simpleSelect: true,
+													MenuProps: {
+														PaperProps: {
+															sx: { fontSize: '0.75rem' },
+														},
+													},
+													MenuItemProps: {
+														sx: {
 															fontSize: '0.75rem',
 															minHeight: 28,
 															height: 28,
-															py: 0,
-														}}
-														MenuProps={{
-															PaperProps: {
-																sx: {
-																	fontSize: '0.75rem',
-																},
-															},
-														}}
-													>
-														<MenuItem
-															value=''
-															sx={{
-																fontSize: '0.75rem',
-																minHeight: 28,
-																height: 28,
-															}}
-														>
-															{UI_LABELS.ADMIN.filter.all}
-														</MenuItem>
-														{(() => {
-															const opts = [
-																...(column.options ||
-																	(column.type === FIELD_TYPES.BOOLEAN
-																		? [
-																				{
-																					value: true,
-																					label: ENUM_LABELS.BOOLEAN.true,
-																				},
-																				{
-																					value: false,
-																					label: ENUM_LABELS.BOOLEAN.false,
-																				},
-																		  ]
-																		: [])),
-															];
-															opts.sort((a, b) => a.label.localeCompare(b.label));
-															return opts.map((opt) => (
-																<MenuItem
-																	key={opt.value}
-																	value={opt.value}
-																	sx={{
-																		fontSize: '0.75rem',
-																		minHeight: 28,
-																		height: 28,
-																	}}
-																>
-																	{opt.label}
-																</MenuItem>
-															));
-														})()}
-													</Select>
-												) : (
-													<TextField
-														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(column.field, e.target.value)
-														}
-														size='small'
-														fullWidth
-														inputProps={{
-															style: {
-																fontSize: '0.75rem',
-																padding: '4px 8px',
-																height: 20,
-																boxSizing: 'border-box',
-															},
-														}}
-														sx={{
-															minWidth: 0,
-															maxWidth: 150,
-															'& .MuiInputBase-root': {
-																fontSize: '0.75rem',
-																height: 28,
-																minHeight: 28,
-																padding: '0 8px',
-															},
-															'& .MuiInputBase-input': {
-																fontSize: '0.75rem',
-																height: 20,
-																padding: '4px 0',
-															},
-														}}
-													/>
-												)}
+														},
+													},
+												})}
 											</TableCell>
-										)
-									)}
+										);
+									})}
 									<TableCell align='right' />
 								</TableRow>
 							)}

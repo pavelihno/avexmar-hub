@@ -31,13 +31,6 @@ export const ENUM_LABELS = {
 	CURRENCY: {
 		rub: 'РУБ',
 	},
-	FLIGHT_STATUS: {
-		scheduled: 'Запланирован',
-		delayed: 'Задержан',
-		departed: 'Вылетел',
-		arrived: 'Прибыл',
-		cancelled: 'Отменён',
-	},
 	SEAT_CLASS: {
 		economy: 'Эконом',
 		business: 'Бизнес',

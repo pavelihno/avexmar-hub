@@ -60,13 +60,6 @@ class Config:
     class CURRENCY(enum.Enum):
         rub = 'rub'
 
-    class FLIGHT_STATUS(enum.Enum):
-        scheduled = 'scheduled'
-        delayed = 'delayed'
-        departed = 'departed'
-        arrived = 'arrived'
-        cancelled = 'cancelled'
-
     class SEAT_CLASS(enum.Enum):
         economy = 'economy'
         business = 'business'
@@ -85,5 +78,4 @@ class Config:
     DEFAULT_USER_ROLE = USER_ROLE.standard
     DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
     DEFAULT_CURRENCY = CURRENCY.rub
-    DEFAULT_FLIGHT_STATUS = FLIGHT_STATUS.scheduled
     DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending

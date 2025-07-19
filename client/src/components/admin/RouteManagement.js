@@ -18,7 +18,7 @@ const RouteManagement = () => {
 		dispatch(fetchAirports());
 	}, [dispatch]);
 
-	const getAirportOptions = () => {
+	const airportOptions = useMemo(() => {
 		if (!airports || !Array.isArray(airports)) {
 			return [];
 		}
@@ -26,16 +26,16 @@ const RouteManagement = () => {
 			value: airport.id,
 			label: `${airport.name} (${airport.iata_code}) - ${airport.city_code}`,
 		}));
-	};
+	}, [airports]);
 
-	const getAirportById = (id) => {
-		if (!airports || !Array.isArray(airports)) {
+	const getAirportLabelById = (id) => {
+		if (!airportOptions || !Array.isArray(airportOptions)) {
 			return null;
 		}
-		return airports.find((airport) => airport.id === id);
+		const airport = airportOptions.find((airport) => airport.value === id);
+		return airport ? airport.label : null;
 	};
 
-	const airportOptions = useMemo(() => getAirportOptions(), [airports]);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -45,10 +45,7 @@ const RouteManagement = () => {
 			label: FIELD_LABELS.ROUTE.origin_airport_id,
 			type: FIELD_TYPES.SELECT,
 			options: airportOptions,
-			formatter: (value) => {
-				const airport = getAirportById(value);
-				return airport ? `${airport.iata_code}` : value;
-			},
+			formatter: (value) => getAirportLabelById(value) || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.ROUTE.origin_airport_id.REQUIRED : null),
 		},
 		destinationAirportId: {
@@ -57,10 +54,7 @@ const RouteManagement = () => {
 			label: FIELD_LABELS.ROUTE.destination_airport_id,
 			type: FIELD_TYPES.SELECT,
 			options: airportOptions,
-			formatter: (value) => {
-				const airport = getAirportById(value);
-				return airport ? `${airport.iata_code}` : value;
-			},
+			formatter: (value) => getAirportLabelById(value) || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.ROUTE.destination_airport_id.REQUIRED : null),
 		},
 	};
@@ -71,7 +65,7 @@ const RouteManagement = () => {
 				addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
 				editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
 			}),
-		[FIELDS, getAirportById]
+		[FIELDS]
 	);
 
 	const handleAddRoute = (routeData) => dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
