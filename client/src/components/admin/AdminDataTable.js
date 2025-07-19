@@ -2,30 +2,28 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
-	Box,
-	Typography,
-	Button,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-	Paper,
-	TableSortLabel,
-	TablePagination,
-	TextField,
-	Select,
-	MenuItem,
-	IconButton,
-	Dialog,
-	DialogTitle,
-	DialogContent,
-	DialogActions,
-	Snackbar,
-	Alert,
-	Backdrop,
-	CircularProgress,
+        Box,
+        Typography,
+        Button,
+        Table,
+        TableBody,
+        TableCell,
+        TableContainer,
+        TableHead,
+        TableRow,
+        Paper,
+        TableSortLabel,
+        TablePagination,
+        MenuItem,
+        IconButton,
+        Dialog,
+        DialogTitle,
+        DialogContent,
+        DialogActions,
+        Snackbar,
+        Alert,
+        Backdrop,
+        CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -38,7 +36,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
-import { FIELD_TYPES } from './utils';
+import { FIELD_TYPES, createFieldRenderer } from './utils';
 import { isDev } from '../../redux/reducers/auth';
 
 const AdminDataTable = ({
@@ -408,119 +406,40 @@ const AdminDataTable = ({
 								</TableCell>
 							</TableRow>
 							{showFilters && (
-								<TableRow>
-									{columns.map((column, index) =>
-										column.type === FIELD_TYPES.CUSTOM ? null : (
-											<TableCell key={index} align={column.align || 'left'}>
-												{column.type === FIELD_TYPES.SELECT ||
-												column.type === FIELD_TYPES.BOOLEAN ? (
-													<Select
-														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(
-																column.field,
-																e.target.value,
-																column.type
-															)
-														}
-														displayEmpty
-														size='small'
-														fullWidth
-														sx={{
-															fontSize: '0.75rem',
-															minHeight: 28,
-															height: 28,
-															py: 0,
-														}}
-														MenuProps={{
-															PaperProps: {
-																sx: {
-																	fontSize: '0.75rem',
-																},
-															},
-														}}
-													>
-														<MenuItem
-															value=''
-															sx={{
-																fontSize: '0.75rem',
-																minHeight: 28,
-																height: 28,
-															}}
-														>
-															{UI_LABELS.ADMIN.filter.all}
-														</MenuItem>
-														{(() => {
-															const opts = [
-																...(column.options ||
-																	(column.type === FIELD_TYPES.BOOLEAN
-																		? [
-																				{
-																					value: true,
-																					label: ENUM_LABELS.BOOLEAN.true,
-																				},
-																				{
-																					value: false,
-																					label: ENUM_LABELS.BOOLEAN.false,
-																				},
-																		  ]
-																		: [])),
-															];
-															opts.sort((a, b) => a.label.localeCompare(b.label));
-															return opts.map((opt) => (
-																<MenuItem
-																	key={opt.value}
-																	value={opt.value}
-																	sx={{
-																		fontSize: '0.75rem',
-																		minHeight: 28,
-																		height: 28,
-																	}}
-																>
-																	{opt.label}
-																</MenuItem>
-															));
-														})()}
-													</Select>
-												) : (
-													<TextField
-														value={filters[column.field] || ''}
-														onChange={(e) =>
-															handleFilterChange(column.field, e.target.value)
-														}
-														size='small'
-														fullWidth
-														inputProps={{
-															style: {
-																fontSize: '0.75rem',
-																padding: '4px 8px',
-																height: 20,
-																boxSizing: 'border-box',
-															},
-														}}
-														sx={{
-															minWidth: 0,
-															maxWidth: 150,
-															'& .MuiInputBase-root': {
-																fontSize: '0.75rem',
-																height: 28,
-																minHeight: 28,
-																padding: '0 8px',
-															},
-															'& .MuiInputBase-input': {
-																fontSize: '0.75rem',
-																height: 20,
-																padding: '4px 0',
-															},
-														}}
-													/>
-												)}
-											</TableCell>
-										)
-									)}
-									<TableCell align='right' />
-								</TableRow>
-							)}
+        <TableRow>
+                {columns.map((column, index) => {
+                        if (column.type === FIELD_TYPES.CUSTOM) return null;
+                        const baseField = { ...column };
+                        if (column.type === FIELD_TYPES.SELECT || column.type === FIELD_TYPES.BOOLEAN) {
+                                const opts = [
+                                        ...(column.options ||
+                                                (column.type === FIELD_TYPES.BOOLEAN
+                                                        ? [
+                                                                { value: true, label: ENUM_LABELS.BOOLEAN.true },
+                                                                { value: false, label: ENUM_LABELS.BOOLEAN.false },
+                                                        ]
+                                                        : [])),
+                                ];
+                                opts.sort((a, b) => a.label.localeCompare(b.label));
+                                baseField.options = [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...opts];
+                        }
+                        const render = createFieldRenderer(baseField, {
+                                size: 'small',
+                                sx: { fontSize: '0.75rem', minWidth: 0, maxWidth: 150 },
+                        });
+                        return (
+                                <TableCell key={index} align={column.align || 'left'}>
+                                        {render({
+                                                value: filters[column.field] ?? '',
+                                                onChange: (val) => handleFilterChange(column.field, val, column.type),
+                                                fullWidth: true,
+                                        })}
+                                </TableCell>
+                        );
+                })}
+                <TableCell align='right' />
+        </TableRow>
+                                                        )}
 						</TableHead>
 						<TableBody>
 							{paginatedData.map((item) => (
