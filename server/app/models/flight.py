@@ -21,8 +21,7 @@ class Flight(BaseModel):
             'airline_id': self.airline_id,
             'route_id': self.route_id,
             'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
-            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
-            'status': self.status.value
+            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None
         }
 
     @classmethod
