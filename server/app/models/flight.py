@@ -34,8 +34,11 @@ class Flight(BaseModel):
             'flight_number': self.flight_number,
             'airline_id': self.airline_id,
             'route_id': self.route_id,
+            'aircraft': self.aircraft,
             'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
-            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None
+            'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
+            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
+            'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
         }
 
     @classmethod
@@ -53,9 +56,7 @@ class Flight(BaseModel):
 
     @classmethod
     def create(cls, **kwargs):
-        print(kwargs)
         kwargs = cls.__process_dates(kwargs)
-        print(kwargs)
         return super().create(**kwargs)
     
     @classmethod
