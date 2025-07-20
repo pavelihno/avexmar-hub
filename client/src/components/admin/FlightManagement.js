@@ -16,7 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
-import TariffManagement from './TariffManagement';
+import FlightTariffManagement from './FlightTariffManagement';
 
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
@@ -339,7 +339,7 @@ const FlightManagement = () => {
 				error={errors}
 			/>
 
-			<TariffManagement
+			<FlightTariffManagement
 				flightId={selectedFlightId}
 				tariffDialogOpen={tariffDialogOpen}
 				onClose={handleTariffDialogClose}

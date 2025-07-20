@@ -7,6 +7,7 @@ import CountryManagement from '../components/admin/CountryManagement';
 import RouteManagement from '../components/admin/RouteManagement';
 import DiscountManagement from '../components/admin/DiscountManagement';
 import FlightManagement from '../components/admin/FlightManagement';
+import TariffManagement from '../components/admin/TariffManagement';
 import BookingManagement from '../components/admin/BookingManagement';
 import TicketManagement from '../components/admin/TicketManagement';
 import PassengerManagement from '../components/admin/PassengerManagement';
@@ -71,6 +72,15 @@ const AdminRoutes = ({ isAdmin }) => [
 		element: (
 			<ProtectedRoute
 				children={<FlightManagement />}
+				condition={isAdmin}
+			/>
+		),
+	},
+	{
+		path: '/admin/tariffs',
+		element: (
+			<ProtectedRoute
+				children={<TariffManagement />}
 				condition={isAdmin}
 			/>
 		),

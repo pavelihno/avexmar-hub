@@ -12,7 +12,7 @@ class Flight(BaseModel):
     scheduled_departure = db.Column(db.DateTime, nullable=True)
     scheduled_arrival = db.Column(db.DateTime, nullable=True)
 
-    tariffs = db.relationship('Tariff', backref=db.backref('flight', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
+    tariffs = db.relationship('FlightTariff', backref=db.backref('flight', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
