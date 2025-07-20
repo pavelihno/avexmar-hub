@@ -19,7 +19,11 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
-import { fetchTariffs, deleteTariff } from '../../redux/actions/tariff';
+import { fetchTariffs } from '../../redux/actions/tariff';
+import {
+        fetchFlightTariffs,
+        deleteFlightTariff,
+} from '../../redux/actions/flight_tariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
@@ -31,8 +35,9 @@ const FlightManagement = () => {
 	const { flights, isLoading, errors } = useSelector((state) => state.flights);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
-	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
+       const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
+       const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
+       const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
@@ -43,9 +48,10 @@ const FlightManagement = () => {
 		dispatch(fetchFlights());
 		dispatch(fetchRoutes());
 		dispatch(fetchAirlines());
-		dispatch(fetchTariffs());
-		dispatch(fetchAirports());
-	}, [dispatch]);
+               dispatch(fetchTariffs());
+               dispatch(fetchFlightTariffs());
+               dispatch(fetchAirports());
+       }, [dispatch]);
 
 	const getRouteById = (id) => {
 		if (routesLoading || !Array.isArray(routes)) {
@@ -61,12 +67,19 @@ const FlightManagement = () => {
 		return airlines.find((airline) => airline.id === id);
 	};
 
-	const getAirportById = (id) => {
-		if (airportsLoading || !Array.isArray(airports)) {
-			return null;
-		}
-		return airports.find((airport) => airport.id === id);
-	};
+        const getAirportById = (id) => {
+                if (airportsLoading || !Array.isArray(airports)) {
+                        return null;
+                }
+                return airports.find((airport) => airport.id === id);
+        };
+
+       const getTariffById = (id) => {
+               if (tariffsLoading || !Array.isArray(tariffs)) {
+                       return null;
+               }
+               return tariffs.find((tariff) => tariff.id === id);
+       };
 
 	const routeOptions = useMemo(() => {
 		if (routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)) {
@@ -122,7 +135,7 @@ const FlightManagement = () => {
 	};
 
 	const confirmDeleteTariff = () => {
-		dispatch(deleteTariff(deleteTariffDialog.tariffId));
+               dispatch(deleteFlightTariff(deleteTariffDialog.tariffId));
 		handleCloseDeleteTariffDialog();
 	};
 
@@ -188,119 +201,107 @@ const FlightManagement = () => {
 			type: FIELD_TYPES.CUSTOM,
 			label: FIELD_LABELS.FLIGHT.tariffs,
 			excludeFromForm: true,
-			renderField: (item) => {
-				const flightTariffs = tariffs.filter((tariff) => tariff.flight_id === item.id);
+                       renderField: (item) => {
+                                const flightTariffsForFlight = flightTariffs.filter((ft) => ft.flight_id === item.id);
 
-				return (
-					<Box
-						sx={{
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'flex-start',
-							minWidth: '200px',
-						}}
-					>
-						{flightTariffs.length === 0 ? (
-							<Tooltip title={UI_LABELS.ADMIN.modules.tariffs.add_button} placement='top'>
-								<IconButton
-									size='small'
-									color='primary'
-									onClick={(e) => {
-										e.stopPropagation();
-										handleAddTariff(item.id);
-									}}
-								>
-									<AddCircleIcon />
-								</IconButton>
-							</Tooltip>
-						) : (
-							<>
-								{flightTariffs.map((tariff) => (
-									<Box
-										key={tariff.id}
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											mb: 0.5,
-											backgroundColor: 'rgba(0,0,0,0.04)',
-											borderRadius: 1,
-											p: 0.5,
-											width: '100%',
-										}}
-									>
-										<Typography
-											variant='body2'
-											sx={{
-												mr: 1,
-												flexGrow: 1,
-												whiteSpace: 'nowrap',
-												overflow: 'hidden',
-												textOverflow: 'ellipsis',
-											}}
-										>
-											{`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class] || tariff.seat_class} - ${
-												tariff.price
-											} ${ENUM_LABELS.CURRENCY[tariff.currency] || tariff.currency}`}
-										</Typography>
-										<Box
-											sx={{
-												display: 'flex',
-												flexShrink: 0,
-											}}
-										>
-											<Tooltip
-												title={UI_LABELS.ADMIN.modules.tariffs.edit_button}
-												placement='top'
-											>
-												<IconButton
-													size='small'
-													color='primary'
-													onClick={(e) => {
-														e.stopPropagation();
-														handleEditTariff(item.id, tariff.id);
-													}}
-												>
-													<EditIcon fontSize='small' />
-												</IconButton>
-											</Tooltip>
-											<Tooltip
-												title={UI_LABELS.ADMIN.modules.tariffs.delete_button}
-												placement='top'
-											>
-												<IconButton
-													size='small'
-													color='error'
-													onClick={(e) => {
-														e.stopPropagation();
-														handleOpenDeleteTariffDialog(tariff.id);
-													}}
-												>
-													<DeleteIcon fontSize='small' />
-												</IconButton>
-											</Tooltip>
-										</Box>
-									</Box>
-								))}
-
-								<Tooltip title={UI_LABELS.ADMIN.modules.flights.add_tariff} placement='top'>
-									<IconButton
-										size='small'
-										color='primary'
-										onClick={(e) => {
-											e.stopPropagation();
-											handleAddTariff(item.id);
-										}}
-										sx={{ mt: 0.5 }}
-									>
-										<AddCircleIcon />
-									</IconButton>
-								</Tooltip>
-							</>
-						)}
-					</Box>
-				);
-			},
-		},
+                                return (
+                                        <Box
+                                                sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'flex-start',
+                                                        minWidth: '200px',
+                                                }}
+                                        >
+                                                {flightTariffsForFlight.length === 0 ? (
+                                                        <Tooltip title={UI_LABELS.ADMIN.modules.tariffs.add_button} placement='top'>
+                                                                <IconButton
+                                                                        size='small'
+                                                                        color='primary'
+                                                                        onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleAddTariff(item.id);
+                                                                        }}
+                                                                >
+                                                                        <AddCircleIcon />
+                                                                </IconButton>
+                                                        </Tooltip>
+                                                ) : (
+                                                        <>
+                                                                {flightTariffsForFlight.map((ft) => {
+                                                                        const baseTariff = getTariffById(ft.tariff_id) || {};
+                                                                        return (
+                                                                                <Box
+                                                                                        key={ft.id}
+                                                                                        sx={{
+                                                                                                display: 'flex',
+                                                                                                alignItems: 'center',
+                                                                                                mb: 0.5,
+                                                                                                backgroundColor: 'rgba(0,0,0,0.04)',
+                                                                                                borderRadius: 1,
+                                                                                                p: 0.5,
+                                                                                                width: '100%',
+                                                                                        }}
+                                                                                >
+                                                                                        <Typography
+                                                                                                variant='body2'
+                                                                                                sx={{
+                                                                                                        mr: 1,
+                                                                                                        flexGrow: 1,
+                                                                                                        whiteSpace: 'nowrap',
+                                                                                                        overflow: 'hidden',
+                                                                                                        textOverflow: 'ellipsis',
+                                                                                                }}
+                                                                                        >
+                                                                                                {`${ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class] || baseTariff.seat_class} - ${baseTariff.price} ${ENUM_LABELS.CURRENCY[baseTariff.currency] || baseTariff.currency}`}
+                                                                                        </Typography>
+                                                                                        <Box sx={{ display: 'flex', flexShrink: 0 }}>
+                                                                                                <Tooltip title={UI_LABELS.ADMIN.modules.tariffs.edit_button} placement='top'>
+                                                                                                        <IconButton
+                                                                                                                size='small'
+                                                                                                                color='primary'
+                                                                                                                onClick={(e) => {
+                                                                                                                        e.stopPropagation();
+                                                                                                                        handleEditTariff(item.id, ft.id);
+                                                                                                                }}
+                                                                                                        >
+                                                                                                                <EditIcon fontSize='small' />
+                                                                                                        </IconButton>
+                                                                                                </Tooltip>
+                                                                                                <Tooltip title={UI_LABELS.ADMIN.modules.tariffs.delete_button} placement='top'>
+                                                                                                        <IconButton
+                                                                                                                size='small'
+                                                                                                                color='error'
+                                                                                                                onClick={(e) => {
+                                                                                                                        e.stopPropagation();
+                                                                                                                        handleOpenDeleteTariffDialog(ft.id);
+                                                                                                                }}
+                                                                                                        >
+                                                                                                                <DeleteIcon fontSize='small' />
+                                                                                                        </IconButton>
+                                                                                                </Tooltip>
+                                                                                        </Box>
+                                                                                </Box>
+                                                                        );
+                                                                })}
+                                                                <Tooltip title={UI_LABELS.ADMIN.modules.flights.add_tariff} placement='top'>
+                                                                        <IconButton
+                                                                                size='small'
+                                                                                color='primary'
+                                                                                onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleAddTariff(item.id);
+                                                                                }}
+                                                                                sx={{ mt: 0.5 }}
+                                                                        >
+                                                                                <AddCircleIcon />
+                                                                        </IconButton>
+                                                                </Tooltip>
+                                                        </>
+                                                )}
+                                        </Box>
+                                );
+                        },
 	};
 
 	const adminManager = useMemo(
@@ -335,7 +336,7 @@ const FlightManagement = () => {
 				onDeleteAll={handleDeleteAllFlights}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-				isLoading={isLoading || routesLoading || airlinesLoading || tariffsLoading || airportsLoading}
+                               isLoading={isLoading || routesLoading || airlinesLoading || tariffsLoading || flightTariffsLoading || airportsLoading}
 				error={errors}
 			/>
 
