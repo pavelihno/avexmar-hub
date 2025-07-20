@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
+import { format } from 'date-fns';
 
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs } from '../../redux/actions/tariff';
@@ -152,22 +153,28 @@ const FlightManagement = () => {
 			type: FIELD_TYPES.TEXT,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
 		},
-		airlineId: {
-			key: 'airlineId',
-			apiKey: 'airline_id',
-			label: FIELD_LABELS.FLIGHT.airline_id,
-			type: FIELD_TYPES.SELECT,
-			options: airlineOptions,
-			formatter: (value) => {
-				const airline = getAirlineById(value);
-				return airline ? `${airline.iata_code}` : value;
-			},
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
-		},
-		routeId: {
-			key: 'routeId',
-			apiKey: 'route_id',
-			label: FIELD_LABELS.FLIGHT.route_id,
+                airlineId: {
+                        key: 'airlineId',
+                        apiKey: 'airline_id',
+                        label: FIELD_LABELS.FLIGHT.airline_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: airlineOptions,
+                        formatter: (value) => {
+                                const airline = getAirlineById(value);
+                                return airline ? `${airline.iata_code}` : value;
+                        },
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
+                },
+                aircraft: {
+                        key: 'aircraft',
+                        apiKey: 'aircraft',
+                        label: FIELD_LABELS.FLIGHT.aircraft,
+                        type: FIELD_TYPES.TEXT,
+                },
+                routeId: {
+                        key: 'routeId',
+                        apiKey: 'route_id',
+                        label: FIELD_LABELS.FLIGHT.route_id,
 			type: FIELD_TYPES.SELECT,
 			fullWidth: true,
 			options: routeOptions,
@@ -177,39 +184,47 @@ const FlightManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
 		},
-		scheduledDeparture: {
-			key: 'scheduledDeparture',
-			apiKey: 'scheduled_departure',
-			label: FIELD_LABELS.FLIGHT.scheduled_departure,
-			type: FIELD_TYPES.DATE,
-			formatter: (value) => formatDate(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
-		},
-		scheduledDepartureTime: {
-			key: 'scheduledDepartureTime',
-			apiKey: 'scheduled_departure_time',
-			label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
-			type: FIELD_TYPES.TIME,
-			excludeFromTable: true,
-			formatter: (value) => formatTime(value),
-		},
-		scheduledArrival: {
-			key: 'scheduledArrival',
-			apiKey: 'scheduled_arrival',
-			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
-			type: FIELD_TYPES.DATE,
-			excludeFromTable: true,
-			formatter: (value) => formatDate(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
-		},
-		scheduledArrivalTime: {
-			key: 'scheduledArrivalTime',
-			apiKey: 'scheduled_arrival_time',
-			label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
-			type: FIELD_TYPES.TIME,
-			excludeFromTable: true,
-			formatter: (value) => formatTime(value),
-		},
+                scheduledDeparture: {
+                        key: 'scheduledDeparture',
+                        apiKey: 'scheduled_departure',
+                        label: FIELD_LABELS.FLIGHT.scheduled_departure,
+                        type: FIELD_TYPES.DATE,
+                        toApi: (value) => (value ? format(value, 'yyyy-MM-dd') : ''),
+                        toUi: (value) => (value ? new Date(value) : null),
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
+                },
+                scheduledDepartureTime: {
+                        key: 'scheduledDepartureTime',
+                        apiKey: 'scheduled_departure_time',
+                        label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
+                        type: FIELD_TYPES.TIME,
+                        excludeFromTable: true,
+                        toApi: (value) => (value ? format(value, 'HH:mm:ss') : ''),
+                        toUi: (value) => (value ? new Date(`1970-01-01T${value}`) : null),
+                        formatter: (value) => formatTime(value),
+                },
+                scheduledArrival: {
+                        key: 'scheduledArrival',
+                        apiKey: 'scheduled_arrival',
+                        label: FIELD_LABELS.FLIGHT.scheduled_arrival,
+                        type: FIELD_TYPES.DATE,
+                        excludeFromTable: true,
+                        toApi: (value) => (value ? format(value, 'yyyy-MM-dd') : ''),
+                        toUi: (value) => (value ? new Date(value) : null),
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
+                },
+                scheduledArrivalTime: {
+                        key: 'scheduledArrivalTime',
+                        apiKey: 'scheduled_arrival_time',
+                        label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
+                        type: FIELD_TYPES.TIME,
+                        excludeFromTable: true,
+                        toApi: (value) => (value ? format(value, 'HH:mm:ss') : ''),
+                        toUi: (value) => (value ? new Date(`1970-01-01T${value}`) : null),
+                        formatter: (value) => formatTime(value),
+                },
 		tariffs: {
 			key: 'tariffs',
 			type: FIELD_TYPES.CUSTOM,

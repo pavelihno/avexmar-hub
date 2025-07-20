@@ -24,10 +24,11 @@ export const FIELD_LABELS = {
 		city_code: 'Код города',
 		country_id: 'Страна',
 	},
-	FLIGHT: {
-		flight_number: 'Номер рейса',
-		airline_id: 'Авиакомпания',
-		route_id: 'Маршрут рейса',
+        FLIGHT: {
+                flight_number: 'Номер рейса',
+                airline_id: 'Авиакомпания',
+                aircraft: 'Борт',
+                route_id: 'Маршрут рейса',
 		origin_airport_id: 'Аэропорт отправления',
 		destination_airport_id: 'Аэропорт прибытия',
 		scheduled_departure: 'Дата отправления',
