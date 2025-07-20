@@ -22,20 +22,17 @@ const rootReducer = combineReducers({
 	airports: airportReducer,
 	airlines: airlineReducer,
 	countries: countryReducer,
-        routes: routesReducer,
-        flights: flightReducer,
-        tariffs: tariffsReducer,
-        flightTariffs: flightTariffsReducer,
-        tickets: ticketsReducer,
+	routes: routesReducer,
+	flights: flightReducer,
+	tariffs: tariffsReducer,
+	flightTariffs: flightTariffsReducer,
+	tickets: ticketsReducer,
 	discounts: discountReducer,
 	bookings: bookingReducer,
 	passengers: passengerReducer,
 	users: userReducer,
 });
 
-const store = createStore(
-	rootReducer,
-	composeEnhancers(applyMiddleware(...middleware))
-);
+const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));
 
 export default store;

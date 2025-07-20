@@ -81,12 +81,15 @@ export const FIELD_LABELS = {
 		arrival_time: 'Время прибытия',
 	},
 	TARIFF: {
-		name: 'Название тарифа',
-		description: 'Описание',
-		currency: 'Валюта',
-		seats_number: 'Количество мест',
+		seat_class: 'Класс обслуживания',
+		order_number: 'Наименование тарифа',
 		price: 'Цена',
-		seat_class: 'Класс места',
+		currency: 'Валюта',
+	},
+	FLIGHT_TARIFF: {
+		flight_id: 'Рейс',
+		tariff_id: 'Тариф',
+		seats_number: 'Количество мест',
 	},
 	USER: {
 		email: 'Электронная почта',
