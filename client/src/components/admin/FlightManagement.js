@@ -316,8 +316,8 @@ const FlightManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.flights.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.flights.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
+				editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
 			}),
 		[FIELDS, getRouteById, getAirlineById]
 	);

@@ -1,19 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-	Tooltip,
-	IconButton,
-	Button,
-	Box,
-	Typography,
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogActions,
-} from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
@@ -29,13 +15,13 @@ const TariffManagement = () => {
 		dispatch(fetchTariffs());
 	}, [dispatch]);
 
-	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS', ENUM_LABELS.SEAT_CLASS), []);
-	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY', ENUM_LABELS.CURRENCY), []);
+	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
+	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
-		seat_class: {
-			key: 'seat_class',
+		seatClass: {
+			key: 'seatClass',
 			apiKey: 'seat_class',
 			label: FIELD_LABELS.TARIFF.seat_class,
 			type: FIELD_TYPES.SELECT,
@@ -43,13 +29,13 @@ const TariffManagement = () => {
 			formatter: (value) => ENUM_LABELS.SEAT_CLASS[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
 		},
-		order_number: {
-			key: 'order_number',
+		orderNumber: {
+			key: 'orderNumber',
 			apiKey: 'order_number',
 			label: FIELD_LABELS.TARIFF.order_number,
 			type: FIELD_TYPES.NUMBER,
-            excludeFromForm: true,
-            formatter: (value) => `${UI_LABELS.ADMIN.modules.tariffs.tariff} ${value}` || '',
+			excludeFromForm: true,
+			formatter: (value) => `${UI_LABELS.ADMIN.modules.tariffs.tariff} ${value}` || '',
 		},
 		price: {
 			key: 'price',
@@ -64,6 +50,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.currency,
 			type: FIELD_TYPES.SELECT,
 			options: currencyOptions,
+            defaultValue: currencyOptions[0].value,
 			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
 		},
@@ -72,10 +59,18 @@ const TariffManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.tariffs.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.tariffs.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.tariffs.add_button,
+				editButtonText: (item) => {
+					if (!item) return UI_LABELS.ADMIN.modules.tariffs.edit_button;
+					else {
+						const seatClass = ENUM_LABELS.SEAT_CLASS[item[FIELDS.seatClass.key]];
+						const orderNumber = item[FIELDS.orderNumber.key];
+
+						return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`;
+					}
+				},
 			}),
-		[FIELDS]
+		[FIELDS, tariffs]
 	);
 
 	const handleAddTariff = (tariffData) => dispatch(createTariff(adminManager.toApiFormat(tariffData))).unwrap();

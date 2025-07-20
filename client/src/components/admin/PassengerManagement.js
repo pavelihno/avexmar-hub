@@ -79,8 +79,8 @@ const PassengerManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.passengers.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.passengers.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.edit_button,
 	});
 
 	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();

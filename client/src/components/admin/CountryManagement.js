@@ -65,8 +65,8 @@ const CountryManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.countries.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.countries.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.countries.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.countries.edit_button,
 	});
 
 	const handleAddCountry = (data) => dispatch(createCountry(adminManager.toApiFormat(data))).unwrap();

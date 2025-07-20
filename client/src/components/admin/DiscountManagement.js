@@ -60,13 +60,15 @@ const DiscountManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.discounts.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.discounts.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.discounts.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.discounts.edit_button,
 	});
 
-	const handleAddDiscount = (discountData) => dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap()
-	const handleEditDiscount = (discountData) => dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap()
-	const handleDeleteDiscount = (id) => dispatch(deleteDiscount(id)).unwrap()
+	const handleAddDiscount = (discountData) =>
+		dispatch(createDiscount(adminManager.toApiFormat(discountData))).unwrap();
+	const handleEditDiscount = (discountData) =>
+		dispatch(updateDiscount(adminManager.toApiFormat(discountData))).unwrap();
+	const handleDeleteDiscount = (id) => dispatch(deleteDiscount(id)).unwrap();
 
 	const handleDeleteAllDiscounts = async () => {
 		await dispatch(deleteAllDiscounts()).unwrap();

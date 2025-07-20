@@ -165,7 +165,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				if (simpleSelect) {
 					return (
 						<Select
-							value={value}
+							value={value ? value : field.defaultValue || value}
 							onChange={(e) => onChange(e.target.value)}
 							fullWidth={fullWidth}
 							{...rest}
@@ -182,7 +182,12 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				return (
 					<FormControl fullWidth={fullWidth} error={!!error} {...rest}>
 						<InputLabel>{field.label}</InputLabel>
-						<Select value={value} onChange={(e) => onChange(e.target.value)} label={field.label} {...rest}>
+						<Select
+							value={value ? value : field.defaultValue || value}
+							onChange={(e) => onChange(e.target.value)}
+							label={field.label}
+							{...rest}
+						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
@@ -331,8 +336,8 @@ export const createAdminManager = (fields, options = {}) => {
 				onSave={onSave}
 				onClose={onClose}
 				isEditing={isEditing}
-				addButtonText={options.addButtonText}
-				editButtonText={options.editButtonText}
+				addButtonText={options.addButtonText(currentItem)}
+				editButtonText={options.editButtonText(currentItem)}
 			/>
 		),
 	};

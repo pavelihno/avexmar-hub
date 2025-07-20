@@ -109,8 +109,8 @@ const TicketManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.tickets.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.tickets.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.tickets.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.tickets.edit_button,
 	});
 
 	const handleAddTicket = (data) => dispatch(createTicket(adminManager.toApiFormat(data))).unwrap();

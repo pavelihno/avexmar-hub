@@ -66,8 +66,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const tariffManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.tariffs.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.tariffs.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.tariffs.add_button,
+				editButtonText: (item) => UI_LABELS.ADMIN.modules.tariffs.edit_button,
 			}),
 		[FIELDS]
 	);

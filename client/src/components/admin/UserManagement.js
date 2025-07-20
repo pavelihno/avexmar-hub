@@ -43,8 +43,8 @@ const UserManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.users.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.users.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.users.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.users.edit_button,
 	});
 
 	const handleAddUser = (data) => dispatch(createUser(adminManager.toApiFormat(data))).unwrap();

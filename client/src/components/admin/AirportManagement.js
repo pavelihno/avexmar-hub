@@ -103,8 +103,8 @@ const AirportManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.airports.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.airports.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.airports.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.airports.edit_button,
 	});
 
 	const handleAddAirport = (airportData) => dispatch(createAirport(adminManager.toApiFormat(airportData))).unwrap();

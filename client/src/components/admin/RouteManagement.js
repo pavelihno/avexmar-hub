@@ -36,7 +36,6 @@ const RouteManagement = () => {
 		return airport ? airport.label : null;
 	};
 
-
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
 		originAirportId: {
@@ -62,8 +61,8 @@ const RouteManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.routes.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.routes.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.routes.add_button,
+				editButtonText: (item) => UI_LABELS.ADMIN.modules.routes.edit_button,
 			}),
 		[FIELDS]
 	);
