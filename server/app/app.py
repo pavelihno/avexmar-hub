@@ -15,6 +15,7 @@ from app.controllers.airport_controller import *
 from app.controllers.route_controller import *
 from app.controllers.flight_controller import *
 from app.controllers.tariff_controller import *
+from app.controllers.flight_tariff_controller import *
 from app.controllers.discount_controller import *
 from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
@@ -113,6 +114,13 @@ def __create_app(_config_class, _db):
     app.route('/tariffs/<int:tariff_id>', methods=['GET'])(get_tariff)
     app.route('/tariffs/<int:tariff_id>', methods=['PUT'])(update_tariff)
     app.route('/tariffs/<int:tariff_id>', methods=['DELETE'])(delete_tariff)
+
+    # flight tariffs
+    app.route('/flight_tariffs', methods=['GET'])(get_flight_tariffs)
+    app.route('/flight_tariffs', methods=['POST'])(create_flight_tariff)
+    app.route('/flight_tariffs/<int:flight_tariff_id>', methods=['GET'])(get_flight_tariff)
+    app.route('/flight_tariffs/<int:flight_tariff_id>', methods=['PUT'])(update_flight_tariff)
+    app.route('/flight_tariffs/<int:flight_tariff_id>', methods=['DELETE'])(delete_flight_tariff)
 
     # discounts
     app.route('/discounts', methods=['GET'])(get_discounts)

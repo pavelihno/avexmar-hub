@@ -8,6 +8,7 @@ import countryReducer from './reducers/country';
 import routesReducer from './reducers/route';
 import flightReducer from './reducers/flight';
 import tariffsReducer from './reducers/tariff';
+import flightTariffsReducer from './reducers/flight_tariff';
 import ticketsReducer from './reducers/ticket';
 import discountReducer from './reducers/discount';
 import userReducer from './reducers/user';
@@ -21,10 +22,11 @@ const rootReducer = combineReducers({
 	airports: airportReducer,
 	airlines: airlineReducer,
 	countries: countryReducer,
-	routes: routesReducer,
-	flights: flightReducer,
-	tariffs: tariffsReducer,
-	tickets: ticketsReducer,
+        routes: routesReducer,
+        flights: flightReducer,
+        tariffs: tariffsReducer,
+        flightTariffs: flightTariffsReducer,
+        tickets: ticketsReducer,
 	discounts: discountReducer,
 	bookings: bookingReducer,
 	passengers: passengerReducer,
