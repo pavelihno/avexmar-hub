@@ -31,7 +31,7 @@ const FlightManagement = () => {
 	const { flights, isLoading, errors } = useSelector((state) => state.flights);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
-	const { tariffs } = useSelector((state) => state.tariffs);
+	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
@@ -47,31 +47,45 @@ const FlightManagement = () => {
 		dispatch(fetchAirports());
 	}, [dispatch]);
 
-	const routeOptions = useMemo(() => {
-		if (routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)) {
-			return [];
-		}
-		return routes.map((route) => {
-			const origin = airports.find((a) => a.id === route.origin_airport_id);
-			const dest = airports.find((a) => a.id === route.destination_airport_id);
-
-			return {
-				value: route.id,
-				label: `${origin?.city_name} (${origin?.name || '…'}, ${origin?.iata_code || '…'}) → ${
-					dest?.city_name
-				} (${dest?.name || '…'}, ${dest?.iata_code || '…'})`,
-			};
-		});
-	}, [routes, airports, routesLoading, airportsLoading]);
-
 	const getRouteById = (id) => {
-		if (!routes || !Array.isArray(routes)) {
+		if (routesLoading || !Array.isArray(routes)) {
 			return null;
 		}
 		return routes.find((route) => route.id === id);
 	};
 
-	const getAirlineOptions = () => {
+	const getAirlineById = (id) => {
+		if (airlinesLoading || !Array.isArray(airlines)) {
+			return null;
+		}
+		return airlines.find((airline) => airline.id === id);
+	};
+
+	const getAirportById = (id) => {
+		if (airportsLoading || !Array.isArray(airports)) {
+			return null;
+		}
+		return airports.find((airport) => airport.id === id);
+	};
+
+	const routeOptions = useMemo(() => {
+		if (routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)) {
+			return [];
+		}
+		return routes.map((route) => {
+			const origin = getAirportById(route.origin_airport_id);
+			const dest = getAirportById(route.destination_airport_id);
+
+			return {
+				value: route.id,
+				label: `${origin?.city_name} (${origin?.iata_code || '…'}) → ${dest?.city_name} (${
+					dest?.iata_code || '…'
+				})`,
+			};
+		});
+	}, [routes, airports, routesLoading, airportsLoading]);
+
+	const airlineOptions = useMemo(() => {
 		if (!airlines || !Array.isArray(airlines)) {
 			return [];
 		}
@@ -79,16 +93,7 @@ const FlightManagement = () => {
 			value: airline.id,
 			label: `${airline.name} (${airline.iata_code})`,
 		}));
-	};
-
-	const getAirlineById = (id) => {
-		if (!airlines || !Array.isArray(airlines)) {
-			return null;
-		}
-		return airlines.find((airline) => airline.id === id);
-	};
-
-	const airlineOptions = useMemo(() => getAirlineOptions(), [airlines]);
+	}, [airlines]);
 
 	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
 		open: false,
@@ -157,8 +162,8 @@ const FlightManagement = () => {
 			fullWidth: true,
 			options: routeOptions,
 			formatter: (value) => {
-				const route = getRouteById(value);
-				return route ? `${route.origin_airport_id} -> ${route.destination_airport_id}` : value;
+				const route = routeOptions.find((option) => option.value === value);
+				return route ? `${route.label}` : value;
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
 		},
@@ -330,7 +335,7 @@ const FlightManagement = () => {
 				onDeleteAll={handleDeleteAllFlights}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-				isLoading={isLoading || routesLoading || airlinesLoading}
+				isLoading={isLoading || routesLoading || airlinesLoading || tariffsLoading || airportsLoading}
 				error={errors}
 			/>
 
