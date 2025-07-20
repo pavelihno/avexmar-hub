@@ -11,8 +11,8 @@ import {
 	Autocomplete,
 } from '@mui/material';
 
-import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
-import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
 
@@ -25,6 +25,7 @@ export const FIELD_TYPES = {
 	TEXT: 'text',
 	NUMBER: 'number',
 	DATE: 'date',
+	TIME: 'time',
 	DATETIME: 'dateTime',
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
@@ -95,6 +96,31 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 								},
 							}}
 							format={field.dateFormat || 'dd.MM.yyyy'}
+						/>
+					</LocalizationProvider>
+				);
+			}
+
+			case FIELD_TYPES.TIME: {
+				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+
+				return (
+					<LocalizationProvider dateAdapter={AdapterDateFns}>
+						<TimePicker
+							label={field.label}
+							value={value ? new Date(value) : null}
+							onChange={(time) => onChange(time)}
+							ampm={false}
+							format={field.timeFormat || 'HH:mm'}
+							mask={field.timeFormat || '__:__'}
+							slotProps={{
+								textField: {
+									fullWidth,
+									error,
+									helperText: error ? helperText : '',
+									...rest,
+								},
+							}}
 						/>
 					</LocalizationProvider>
 				);
@@ -349,6 +375,16 @@ export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
 		return format(new Date(value), dateFormat);
 	} catch (error) {
 		console.error('Invalid date value:', value);
+		return value;
+	}
+};
+
+export const formatTime = (value, timeFormat = 'HH:mm') => {
+	if (!value) return '';
+	try {
+		return format(new Date(`1970-01-01T${value}`), timeFormat);
+	} catch (error) {
+		console.error('Invalid time value:', value);
 		return value;
 	}
 };

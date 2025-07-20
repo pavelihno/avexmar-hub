@@ -24,7 +24,7 @@ import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flig
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
-import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
+import { FIELD_TYPES, createAdminManager, formatDate, formatTime } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const FlightManagement = () => {
@@ -181,17 +181,34 @@ const FlightManagement = () => {
 			key: 'scheduledDeparture',
 			apiKey: 'scheduled_departure',
 			label: FIELD_LABELS.FLIGHT.scheduled_departure,
-			type: FIELD_TYPES.DATETIME,
-			formatter: (value) => formatDateTime(value),
+			type: FIELD_TYPES.DATE,
+			formatter: (value) => formatDate(value),
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
+		},
+		scheduledDepartureTime: {
+			key: 'scheduledDepartureTime',
+			apiKey: 'scheduled_departure_time',
+			label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
+			type: FIELD_TYPES.TIME,
+			excludeFromTable: true,
+			formatter: (value) => formatTime(value),
 		},
 		scheduledArrival: {
 			key: 'scheduledArrival',
 			apiKey: 'scheduled_arrival',
 			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
-			type: FIELD_TYPES.DATETIME,
-			formatter: (value) => formatDateTime(value),
+			type: FIELD_TYPES.DATE,
+			excludeFromTable: true,
+			formatter: (value) => formatDate(value),
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
+		},
+		scheduledArrivalTime: {
+			key: 'scheduledArrivalTime',
+			apiKey: 'scheduled_arrival_time',
+			label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
+			type: FIELD_TYPES.TIME,
+			excludeFromTable: true,
+			formatter: (value) => formatTime(value),
 		},
 		tariffs: {
 			key: 'tariffs',

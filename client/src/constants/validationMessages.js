@@ -114,10 +114,10 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Маршрут рейса обязателен',
 		},
 		scheduled_departure: {
-			REQUIRED: 'Время отправления обязательно',
+			REQUIRED: 'Дата отправления обязательна',
 		},
 		scheduled_arrival: {
-			REQUIRED: 'Время прибытия обязательно',
+			REQUIRED: 'Дата прибытия обязательна',
 		},
 		status: {
 			REQUIRED: 'Статус рейса обязателен',
