@@ -157,6 +157,7 @@ export const UI_LABELS = {
 			},
 			tariffs: {
 				title: 'Тарифы',
+				tariff: 'Тариф',
 				description: 'Управление тарифами рейсов',
 				management: 'Управление тарифами',
 				add_button: 'Добавить тариф',

@@ -1,69 +1,75 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Dialog, DialogContent, Typography } from '@mui/material';
+import {
+	Tooltip,
+	IconButton,
+	Button,
+	Box,
+	Typography,
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogActions,
+} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-import { createTariff, updateTariff, fetchTariff } from '../../redux/actions/tariff';
+import AdminDataTable from '../../components/admin/AdminDataTable';
+
+import { fetchTariffs, createTariff, updateTariff, deleteTariff, deleteAllTariffs } from '../../redux/actions/tariff';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
-export const TariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', tariffId }) => {
+const TariffManagement = () => {
 	const dispatch = useDispatch();
-	const { tariff, isLoading } = useSelector((state) => state.tariffs);
+	const { tariffs, isLoading, errors } = useSelector((state) => state.tariffs);
 
-	const isEditing = action === 'edit';
+	useEffect(() => {
+		dispatch(fetchTariffs());
+	}, [dispatch]);
 
-	const FIELDS = useMemo(
-		() => ({
-			id: { key: 'id', apiKey: 'id' },
-			flightId: {
-				key: 'flightId',
-				apiKey: 'flight_id',
-				excludeFromForm: true,
-			},
-			seatClass: {
-				key: 'seatClass',
-				apiKey: 'seat_class',
-				label: FIELD_LABELS.TARIFF.seat_class,
-				type: FIELD_TYPES.SELECT,
-				options: getEnumOptions('SEAT_CLASS'),
-				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
-			},
-			seatsNumber: {
-				key: 'seatsNumber',
-				apiKey: 'seats_number',
-				label: FIELD_LABELS.TARIFF.seats_number,
-				type: FIELD_TYPES.NUMBER,
-				inputProps: { min: 0, step: 1 },
-				validate: (value) =>
-					value === null || value === undefined || value === ''
-						? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
-						: null,
-			},
-			currency: {
-				key: 'currency',
-				apiKey: 'currency',
-				label: FIELD_LABELS.TARIFF.currency,
-				type: FIELD_TYPES.SELECT,
-				options: getEnumOptions('CURRENCY'),
-				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
-			},
-			price: {
-				key: 'price',
-				apiKey: 'price',
-				label: FIELD_LABELS.TARIFF.price,
-				type: FIELD_TYPES.NUMBER,
-				float: true,
-				inputProps: { min: 0, step: 0.01 },
-				validate: (value) =>
-					value === null || value === undefined || value === ''
-						? VALIDATION_MESSAGES.TARIFF.price.REQUIRED
-						: null,
-			},
-		}),
-		[]
-	);
+	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS', ENUM_LABELS.SEAT_CLASS), []);
+	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY', ENUM_LABELS.CURRENCY), []);
 
-	const tariffManager = useMemo(
+	const FIELDS = {
+		id: { key: 'id', apiKey: 'id' },
+		seat_class: {
+			key: 'seat_class',
+			apiKey: 'seat_class',
+			label: FIELD_LABELS.TARIFF.seat_class,
+			type: FIELD_TYPES.SELECT,
+			options: seatClassOptions,
+			formatter: (value) => ENUM_LABELS.SEAT_CLASS[value] || value,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
+		},
+		order_number: {
+			key: 'order_number',
+			apiKey: 'order_number',
+			label: FIELD_LABELS.TARIFF.order_number,
+			type: FIELD_TYPES.NUMBER,
+            excludeFromForm: true,
+            formatter: (value) => `${UI_LABELS.ADMIN.modules.tariffs.tariff} ${value}` || '',
+		},
+		price: {
+			key: 'price',
+			apiKey: 'price',
+			label: FIELD_LABELS.TARIFF.price,
+			type: FIELD_TYPES.NUMBER,
+			validate: (value) => (value == null ? VALIDATION_MESSAGES.TARIFF.price.REQUIRED : null),
+		},
+		currency: {
+			key: 'currency',
+			apiKey: 'currency',
+			label: FIELD_LABELS.TARIFF.currency,
+			type: FIELD_TYPES.SELECT,
+			options: currencyOptions,
+			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
+		},
+	};
+
+	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
 				addButtonText: UI_LABELS.ADMIN.modules.tariffs.add_button,
@@ -72,52 +78,31 @@ export const TariffManagement = ({ flightId, tariffDialogOpen, onClose, action =
 		[FIELDS]
 	);
 
-	const currentItem = useMemo(() => {
-		if (isEditing) return tariff ? tariffManager.toUiFormat(tariff) : null;
-		return { flightId };
-	}, [isEditing, tariff, tariffManager, flightId]);
+	const handleAddTariff = (tariffData) => dispatch(createTariff(adminManager.toApiFormat(tariffData))).unwrap();
+	const handleEditTariff = (tariffData) => dispatch(updateTariff(adminManager.toApiFormat(tariffData))).unwrap();
+	const handleDeleteTariff = (id) => dispatch(deleteTariff(id)).unwrap();
 
-	useEffect(() => {
-		if (isEditing && tariffId) {
-			dispatch(fetchTariff(tariffId));
-		}
-	}, [isEditing, tariffId, dispatch]);
-
-	const handleSaveTariff = async (tariffData) => {
-		const formattedData = tariffManager.toApiFormat({
-			...tariffData,
-			flightId,
-		});
-
-		try {
-			await dispatch(isEditing ? updateTariff(formattedData) : createTariff(formattedData)).unwrap();
-			onClose();
-		} catch (error) {
-			throw error;
-		}
+	const handleDeleteAllTariffs = async () => {
+		await dispatch(deleteAllTariffs()).unwrap();
+		dispatch(fetchTariffs());
 	};
 
-	if (isEditing && isLoading) {
-		return (
-			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
-				<DialogContent>
-					<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
-				</DialogContent>
-			</Dialog>
-		);
-	}
+	const formattedTariffs = tariffs.map(adminManager.toUiFormat);
 
 	return (
-		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
-			<DialogContent>
-				{tariffManager.renderForm({
-					isEditing,
-					currentItem,
-					onClose,
-					onSave: handleSaveTariff,
-				})}
-			</DialogContent>
-		</Dialog>
+		<AdminDataTable
+			title={UI_LABELS.ADMIN.modules.tariffs.management}
+			data={formattedTariffs}
+			columns={adminManager.columns}
+			onAdd={handleAddTariff}
+			onEdit={handleEditTariff}
+			onDelete={handleDeleteTariff}
+			onDeleteAll={handleDeleteAllTariffs}
+			renderForm={adminManager.renderForm}
+			addButtonText={UI_LABELS.ADMIN.modules.tariffs.add_button}
+			isLoading={isLoading}
+			error={errors}
+		/>
 	);
 };
 

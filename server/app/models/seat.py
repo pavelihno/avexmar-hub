@@ -10,7 +10,7 @@ class Seat(BaseModel):
     seat_number = db.Column(db.String(10), nullable=False)
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='SET NULL'), nullable=True)
-    tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id', ondelete='RESTRICT'), nullable=False)
+    tariff_id = db.Column(db.Integer, db.ForeignKey('flight_tariffs.id', ondelete='RESTRICT'), nullable=False)
 
     __table_args__ = (
         db.UniqueConstraint(
