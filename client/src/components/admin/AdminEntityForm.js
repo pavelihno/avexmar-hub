@@ -14,25 +14,25 @@ const AdminEntityForm = ({
 	editButtonText,
 	externalUpdates = {},
 }) => {
-        const initializeFormData = (data) => {
-                const result = { ...(data || {}) };
-                fields.forEach((field) => {
-                        if (result[field.name] === undefined && field.defaultValue !== undefined) {
-                                result[field.name] = field.defaultValue;
-                        }
-                });
-                return result;
-        };
+	const initializeFormData = (data) => {
+		const result = { ...(data || {}) };
+		fields.forEach((field) => {
+			if (result[field.name] === undefined && field.defaultValue !== undefined) {
+				result[field.name] = field.defaultValue;
+			}
+		});
+		return result;
+	};
 
-        const [formData, setFormData] = useState(() => initializeFormData(initialData));
+	const [formData, setFormData] = useState(() => initializeFormData(initialData));
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState({});
 
-        useEffect(() => {
-                const data = isEditing && initialData?.id ? initialData : initialData;
-                setFormData(initializeFormData(data));
-        }, [isEditing, initialData, fields]);
+	useEffect(() => {
+		const data = isEditing && initialData?.id ? initialData : initialData;
+		setFormData(initializeFormData(data));
+	}, [isEditing, initialData, fields]);
 
 	useEffect(() => {
 		if (Object.keys(externalUpdates).length > 0) {
