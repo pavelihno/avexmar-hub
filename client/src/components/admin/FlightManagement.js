@@ -399,13 +399,13 @@ const FlightManagement = () => {
 				error={errors}
 			/>
 
-			<FlightTariffManagement
-				flightId={selectedFlightId}
-				tariffDialogOpen={tariffDialogOpen}
-				onClose={handleTariffDialogClose}
-				action={tariffAction}
-				tariffId={selectedTariffId}
-			/>
+                       <FlightTariffManagement
+                               flightId={selectedFlightId}
+                               tariffDialogOpen={tariffDialogOpen}
+                               onClose={handleTariffDialogClose}
+                               action={tariffAction}
+                               flightTariffId={selectedTariffId}
+                       />
 
 			{/* Delete tariff dialog */}
 			<Dialog open={deleteTariffDialog.open} onClose={handleCloseDeleteTariffDialog}>
