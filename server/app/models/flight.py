@@ -2,8 +2,6 @@ from app.database import db
 from app.models._base_model import BaseModel
 from app.config import Config
 
-from app.utils.datetime import split_iso_datetime
-
 
 class Flight(BaseModel):
     __tablename__ = 'flights'
@@ -42,28 +40,5 @@ class Flight(BaseModel):
         }
 
     @classmethod
-    def __process_dates(cls, body):
-        if 'scheduled_departure_time' in body:
-            _, body['scheduled_departure_time'] = split_iso_datetime(body.get('scheduled_departure_time'))
-        if 'scheduled_arrival_time' in body:
-            _, body['scheduled_arrival_time'] = split_iso_datetime(body.get('scheduled_arrival_time'))
-
-        return body
-
-    @classmethod
     def get_all(cls):
         return super().get_all(sort_by='flight_number', descending=False)
-
-    @classmethod
-    def create(cls, **kwargs):
-        kwargs = cls.__process_dates(kwargs)
-        return super().create(**kwargs)
-    
-    @classmethod
-    def update(cls, flight_id, **kwargs):
-        flight = cls.get_by_id(flight_id)
-        if not flight:
-            return None
-
-        kwargs = cls.__process_dates(kwargs)
-        return super().update(flight_id, **kwargs)

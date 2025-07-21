@@ -36,6 +36,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { FIELD_TYPES, createFieldRenderer } from './utils';
+import { formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 
 const AdminDataTable = ({
@@ -254,6 +255,9 @@ const AdminDataTable = ({
 				const itemValue = item[col.field];
 				if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
 					return itemValue === value;
+				}
+				if (col.type === FIELD_TYPES.DATE) {
+					return itemValue === formatDate(value, 'yyyy-MM-dd');
 				}
 				return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
 			})

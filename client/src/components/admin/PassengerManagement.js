@@ -10,7 +10,8 @@ import {
 	deletePassenger,
 	deleteAllPassengers,
 } from '../../redux/actions/passenger';
-import { FIELD_TYPES, createAdminManager, formatDate } from './utils';
+import { FIELD_TYPES, createAdminManager } from './utils';
+import { formatDate } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const PassengerManagement = () => {

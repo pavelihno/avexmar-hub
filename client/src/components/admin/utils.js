@@ -14,9 +14,10 @@ import {
 import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { format } from 'date-fns';
 
 import AdminEntityForm from './AdminEntityForm';
+import { dateLocale } from '../../constants';
+import { DATE_FORMAT, DATETIME_FORMAT, TIME_FORMAT, TIME_MASK } from '../../constants/formats';
 
 /**
  * Field type definitions
@@ -43,7 +44,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 		switch (type) {
 			case FIELD_TYPES.TEXT: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, ...rest } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -53,13 +54,13 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						inputProps={{ ...field.inputProps, ...inputProps }}
-						{...rest}
+						sx={{ ...sx }}
 					/>
 				);
 			}
 
 			case FIELD_TYPES.NUMBER: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, ...rest } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -74,51 +75,51 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						inputProps={{ step: field.float ? 0.01 : 1, ...field.inputProps, ...inputProps }}
-						{...rest}
+						sx={{ ...sx }}
 					/>
 				);
 			}
 
 			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
 				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
 							label={field.label}
 							value={value ? new Date(value) : null}
 							onChange={(date) => onChange(date)}
+							format={field.dateFormat || DATE_FORMAT}
 							slotProps={{
 								textField: {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-									...rest,
+									sx,
 								},
 							}}
-							format={field.dateFormat || 'dd.MM.yyyy'}
 						/>
 					</LocalizationProvider>
 				);
 			}
 
 			case FIELD_TYPES.TIME: {
-				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
 
 				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<TimePicker
 							label={field.label}
 							value={value ? new Date(value) : null}
 							onChange={(time) => onChange(time)}
 							ampm={false}
-							format={field.timeFormat || 'HH:mm'}
-							mask={field.timeFormat || '__:__'}
+							format={field.timeFormat || TIME_FORMAT}
+							mask={TIME_MASK}
 							slotProps={{
 								textField: {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-									...rest,
+									sx,
 								},
 							}}
 						/>
@@ -127,22 +128,22 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATETIME: {
-				const { value, onChange, fullWidth, error, helperText, ...rest } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
 				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns}>
+					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DateTimePicker
 							label={field.label}
 							value={value ? new Date(value) : null}
 							onChange={(dateTime) => onChange(dateTime)}
+							format={field.dateTimeFormat || DATETIME_FORMAT}
 							slotProps={{
 								textField: {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-									...rest,
+									sx,
 								},
 							}}
-							format={field.dateTimeFormat || 'dd.MM.yyyy HH:mm'}
 						/>
 					</LocalizationProvider>
 				);
@@ -156,9 +157,11 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					error,
 					helperText,
 					options = field.options || [],
+					MenuProps,
 					MenuItemProps,
+					displayEmpty,
 					simpleSelect,
-					...rest
+					sx,
 				} = allProps;
 
 				if (!simpleSelect && options.length > 100) {
@@ -180,10 +183,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									label={field.label}
 									error={error}
 									helperText={error ? helperText : ''}
-									{...rest}
+									fullWidth={fullWidth}
+									sx={{ ...sx }}
 								/>
 							)}
-							{...rest}
 						/>
 					);
 				}
@@ -191,10 +194,12 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				if (simpleSelect) {
 					return (
 						<Select
-							value={value ? value : field.defaultValue || value}
+							value={value || field.defaultValue || ''}
 							onChange={(e) => onChange(e.target.value)}
 							fullWidth={fullWidth}
-							{...rest}
+							MenuProps={MenuProps}
+							displayEmpty={displayEmpty}
+							sx={{ ...sx }}
 						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
@@ -206,13 +211,15 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				}
 
 				return (
-					<FormControl fullWidth={fullWidth} error={!!error} {...rest}>
+					<FormControl fullWidth={fullWidth} error={!!error}>
 						<InputLabel>{field.label}</InputLabel>
 						<Select
-							value={value ? value : field.defaultValue || value}
+							value={value || field.defaultValue || ''}
 							onChange={(e) => onChange(e.target.value)}
 							label={field.label}
-							{...rest}
+							MenuProps={MenuProps}
+							displayEmpty={displayEmpty}
+							sx={{ ...sx }}
 						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
@@ -226,14 +233,14 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.BOOLEAN: {
-				const { value = false, onChange, ...rest } = allProps;
+				const { value = false, onChange, sx } = allProps;
 				return (
 					<FormControlLabel
 						control={
 							<Checkbox checked={!!value} onChange={(e) => onChange(e.target.checked)} color='primary' />
 						}
 						label={field.label}
-						{...rest}
+						sx={{ ...sx }}
 					/>
 				);
 			}
@@ -242,7 +249,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				return (customProps) => field.renderField({ ...allProps, ...customProps });
 
 			default: {
-				const { value = '', onChange, fullWidth, inputProps, ...rest } = allProps;
+				const { value = '', onChange, fullWidth, inputProps, sx } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -250,7 +257,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						onChange={(e) => onChange(e.target.value)}
 						fullWidth={fullWidth}
 						inputProps={{ ...field.inputProps, ...inputProps }}
-						{...rest}
+						sx={{ ...sx }}
 					/>
 				);
 			}
@@ -367,34 +374,4 @@ export const createAdminManager = (fields, options = {}) => {
 			/>
 		),
 	};
-};
-
-export const formatDate = (value, dateFormat = 'dd.MM.yyyy') => {
-	if (!value) return '';
-	try {
-		return format(new Date(value), dateFormat);
-	} catch (error) {
-		console.error('Invalid date value:', value);
-		return value;
-	}
-};
-
-export const formatTime = (value, timeFormat = 'HH:mm') => {
-	if (!value) return '';
-	try {
-		return format(new Date(`1970-01-01T${value}`), timeFormat);
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return value;
-	}
-};
-
-export const formatDateTime = (value, dateTimeFormat = 'dd.MM.yyyy HH:mm') => {
-	if (!value) return '';
-	try {
-		return format(new Date(value), dateTimeFormat);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
-		return value;
-	}
 };
