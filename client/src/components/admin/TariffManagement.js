@@ -50,7 +50,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.currency,
 			type: FIELD_TYPES.SELECT,
 			options: currencyOptions,
-            defaultValue: currencyOptions[0].value,
+			defaultValue: currencyOptions[0].value,
 			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
 		},

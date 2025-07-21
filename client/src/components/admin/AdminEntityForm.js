@@ -66,9 +66,8 @@ const AdminEntityForm = ({
 			setSuccessMessage(isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add);
 			setErrorMessage('');
 
-			if (!isEditing) {
-				setTimeout(() => onClose(), 1000);
-			}
+			setTimeout(() => onClose(), 1000);
+
 		} catch (error) {
 			let message = '';
 			if (typeof error === 'string') {

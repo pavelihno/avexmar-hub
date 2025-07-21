@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Dialog, DialogContent } from '@mui/material';
+import { Typography, Dialog, DialogContent } from '@mui/material';
 
 import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchTariffs } from '../../redux/actions/tariff';
@@ -9,10 +9,10 @@ import { FIELD_TYPES, createAdminManager } from './utils';
 
 export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
 	const dispatch = useDispatch();
-	const { tariffs } = useSelector((state) => state.tariffs);
-	const { flightTariff, isLoading } = useSelector((state) => state.flightTariffs);
+	const { tariffs, isLoading: isLoadingTariffs } = useSelector((state) => state.tariffs);
+	const { flightTariff, isLoading: isLoadingFlightTariff } = useSelector((state) => state.flightTariffs);
 
-        const [seatClass, setSeatClass] = useState('');
+	const [seatClass, setSeatClass] = useState('');
 
 	const isEditing = action === 'edit';
 
@@ -22,19 +22,20 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	}, [dispatch, tariffs]);
 
-        useEffect(() => {
-                if (isEditing && flightTariffId) {
-                        dispatch(fetchFlightTariff(flightTariffId));
-                }
-        }, [dispatch, isEditing, flightTariffId]);
+	useEffect(() => {
+		if (isEditing && flightTariffId) {
+			dispatch(fetchFlightTariff(flightTariffId));
+		}
+	}, [dispatch, isEditing, flightTariffId]);
 
-        useEffect(() => {
-                if (isEditing && flightTariff) {
-                        setSeatClass(flightTariff.seat_class);
-                } else if (!isEditing) {
-                        setSeatClass('');
-                }
-        }, [isEditing, flightTariff]);
+	useEffect(() => {
+		if (isEditing && flightTariff && tariffs) {
+			const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
+			setSeatClass(tariff.seat_class);
+		} else if (!isEditing) {
+			setSeatClass('');
+		}
+	}, [isEditing, flightTariff, tariffs]);
 
 	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
 
@@ -92,9 +93,20 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	);
 
 	const currentItem = useMemo(() => {
-		if (isEditing) return flightTariff ? tariffManager.toUiFormat(flightTariff) : null;
+		if (isEditing) {
+			if (flightTariff && tariffs) {
+				const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
+				return {
+					id: flightTariffId,
+					flightId: flightId,
+					seatClass: tariff.seat_class,
+					seatsNumber: flightTariff.seats_number,
+					flightTariffId: flightTariff.tariff_id,
+				};
+			}
+		}
 		return { flightId, seatClass: '', seatsNumber: 0, flightTariffId: '' };
-	}, [isEditing, flightTariff, tariffManager, flightId]);
+	}, [isEditing, flightTariff, tariffs, flightId]);
 
 	const handleSaveTariff = async (tariffData) => {
 		const formattedData = tariffManager.toApiFormat({
@@ -104,7 +116,6 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 
 		try {
 			await dispatch(isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)).unwrap();
-			onClose();
 		} catch (error) {
 			throw error;
 		}
@@ -116,7 +127,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	};
 
-	if (isEditing && isLoading && !flightTariff) {
+	if (isEditing && (isLoadingFlightTariff || isLoadingTariffs)) {
 		return (
 			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
 				<DialogContent>
