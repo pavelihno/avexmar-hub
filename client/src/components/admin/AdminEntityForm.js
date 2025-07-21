@@ -3,21 +3,52 @@ import { DialogTitle, DialogContent, DialogActions, Button, Grid, Alert, Fade, B
 
 import { UI_LABELS } from '../../constants';
 
-const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addButtonText, editButtonText }) => {
-	const [formData, setFormData] = useState(initialData || {});
+const AdminEntityForm = ({
+	fields,
+	initialData,
+	onSave,
+	onChange,
+	onClose,
+	isEditing,
+	addButtonText,
+	editButtonText,
+	externalUpdates = {},
+}) => {
+	const initializeFormData = (data) => {
+		const result = { ...(data || {}) };
+		fields.forEach((field) => {
+			if (result[field.name] === undefined && field.defaultValue !== undefined) {
+				result[field.name] = field.defaultValue;
+			}
+		});
+		return result;
+	};
+
+	const [formData, setFormData] = useState(() => initializeFormData(initialData));
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState({});
 
 	useEffect(() => {
-		setFormData(initialData || {});
-	}, [initialData]);
+		const data = isEditing && initialData?.id ? initialData : initialData;
+		setFormData(initializeFormData(data));
+	}, [isEditing, initialData, fields]);
+
+	useEffect(() => {
+		if (Object.keys(externalUpdates).length > 0) {
+			setFormData((prev) => ({ ...prev, ...externalUpdates }));
+		}
+	}, [externalUpdates]);
 
 	const handleChange = (field, value) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 
 		if (successMessage) {
 			setSuccessMessage('');
+		}
+
+		if (onChange) {
+			onChange(field, value);
 		}
 
 		if (validationErrors[field]) {
@@ -51,9 +82,7 @@ const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addB
 			setSuccessMessage(isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add);
 			setErrorMessage('');
 
-			if (!isEditing) {
-				setTimeout(() => onClose(), 1000);
-			}
+			setTimeout(() => onClose(), 1000);
 		} catch (error) {
 			let message = '';
 			if (typeof error === 'string') {
@@ -92,7 +121,7 @@ const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addB
 					{fields.map((field, index) => (
 						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
 							{field.renderField({
-								value: formData[field.name] || field.defaultValue || '',
+								value: formData[field.name] || '',
 								onChange: (value) => handleChange(field.name, value),
 								fullWidth: true,
 								error: !!validationErrors[field.name],

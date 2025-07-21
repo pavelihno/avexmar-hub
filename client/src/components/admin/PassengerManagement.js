@@ -10,7 +10,8 @@ import {
 	deletePassenger,
 	deleteAllPassengers,
 } from '../../redux/actions/passenger';
-import { FIELD_TYPES, createAdminManager, formatDate } from './utils';
+import { FIELD_TYPES, createAdminManager } from './utils';
+import { formatDate, validateDate } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const PassengerManagement = () => {
@@ -60,6 +61,10 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.birth_date,
 			type: FIELD_TYPES.DATE,
 			formatter: (value) => formatDate(value),
+			validate: (value) => {
+				if (value && !validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+				return null;
+			},
 		},
 		documentType: {
 			key: 'documentType',
@@ -79,8 +84,8 @@ const PassengerManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.passengers.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.passengers.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.edit_button,
 	});
 
 	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();

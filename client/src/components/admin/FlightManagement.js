@@ -20,12 +20,13 @@ import FlightTariffManagement from './FlightTariffManagement';
 
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs } from '../../redux/actions/tariff';
-import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flight_tariff';
+import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
-import { FIELD_TYPES, createAdminManager, formatDateTime } from './utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+import { FIELD_TYPES, createAdminManager } from './utils';
+import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();
@@ -145,13 +146,6 @@ const FlightManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
-		flightNumber: {
-			key: 'flightNumber',
-			apiKey: 'flight_number',
-			label: FIELD_LABELS.FLIGHT.flight_number,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
-		},
 		airlineId: {
 			key: 'airlineId',
 			apiKey: 'airline_id',
@@ -164,12 +158,18 @@ const FlightManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
 		},
+		flightNumber: {
+			key: 'flightNumber',
+			apiKey: 'flight_number',
+			label: FIELD_LABELS.FLIGHT.flight_number,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
+		},
 		routeId: {
 			key: 'routeId',
 			apiKey: 'route_id',
 			label: FIELD_LABELS.FLIGHT.route_id,
 			type: FIELD_TYPES.SELECT,
-			fullWidth: true,
 			options: routeOptions,
 			formatter: (value) => {
 				const route = routeOptions.find((option) => option.value === value);
@@ -177,21 +177,64 @@ const FlightManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
 		},
+		aircraft: {
+			key: 'aircraft',
+			apiKey: 'aircraft',
+			label: FIELD_LABELS.FLIGHT.aircraft,
+			type: FIELD_TYPES.TEXT,
+		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
 			apiKey: 'scheduled_departure',
 			label: FIELD_LABELS.FLIGHT.scheduled_departure,
-			type: FIELD_TYPES.DATETIME,
-			formatter: (value) => formatDateTime(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
+			type: FIELD_TYPES.DATE,
+			formatter: (value) => formatDate(value),
+			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED;
+				if (!validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+				return null;
+			},
+		},
+		scheduledDepartureTime: {
+			key: 'scheduledDepartureTime',
+			apiKey: 'scheduled_departure_time',
+			label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
+			type: FIELD_TYPES.TIME,
+			excludeFromTable: true,
+			toApi: (value) => formatTimeToAPI(value),
+			toUi: (value) => formatTimeToUI(value),
+			formatter: (value) => formatTime(value),
+			validate: (value) => {
+				if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
+				return null;
+			},
 		},
 		scheduledArrival: {
 			key: 'scheduledArrival',
 			apiKey: 'scheduled_arrival',
 			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
-			type: FIELD_TYPES.DATETIME,
-			formatter: (value) => formatDateTime(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
+			type: FIELD_TYPES.DATE,
+			excludeFromTable: true,
+			formatter: (value) => formatDate(value),
+			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED;
+				if (!validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+				return null;
+			},
+		},
+		scheduledArrivalTime: {
+			key: 'scheduledArrivalTime',
+			apiKey: 'scheduled_arrival_time',
+			label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
+			type: FIELD_TYPES.TIME,
+			excludeFromTable: true,
+			toApi: (value) => formatTimeToAPI(value),
+			toUi: (value) => formatTimeToUI(value),
+			formatter: (value) => formatTime(value),
+			validate: (value) => {
+				if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
+				return null;
+			},
 		},
 		tariffs: {
 			key: 'tariffs',
@@ -227,6 +270,9 @@ const FlightManagement = () => {
 							<>
 								{flightTariffsForFlight.map((ft) => {
 									const baseTariff = getTariffById(ft.tariff_id) || {};
+									const seatClass = ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class];
+									const orderNumber = baseTariff.order_number;
+
 									return (
 										<Box
 											key={ft.id}
@@ -250,12 +296,7 @@ const FlightManagement = () => {
 													textOverflow: 'ellipsis',
 												}}
 											>
-												{`${
-													ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class] ||
-													baseTariff.seat_class
-												} - ${baseTariff.price} ${
-													ENUM_LABELS.CURRENCY[baseTariff.currency] || baseTariff.currency
-												}`}
+												{`${seatClass} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`}
 											</Typography>
 											<Box sx={{ display: 'flex', flexShrink: 0 }}>
 												<Tooltip
@@ -316,8 +357,8 @@ const FlightManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.flights.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.flights.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
+				editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
 			}),
 		[FIELDS, getRouteById, getAirlineById]
 	);
@@ -361,7 +402,7 @@ const FlightManagement = () => {
 				tariffDialogOpen={tariffDialogOpen}
 				onClose={handleTariffDialogClose}
 				action={tariffAction}
-				tariffId={selectedTariffId}
+				flightTariffId={selectedTariffId}
 			/>
 
 			{/* Delete tariff dialog */}

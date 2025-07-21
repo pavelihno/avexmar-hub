@@ -6,7 +6,7 @@ import {
 	createFlightTariff,
 	updateFlightTariff,
 	deleteFlightTariff,
-} from '../actions/flight_tariff';
+} from '../actions/flightTariff';
 import { addCrudCases } from '../utils';
 
 const initialState = {

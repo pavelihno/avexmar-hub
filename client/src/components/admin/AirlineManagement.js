@@ -86,8 +86,8 @@ const AirlineManagement = () => {
 	const adminManager = useMemo(
 		() =>
 			createAdminManager(FIELDS, {
-				addButtonText: UI_LABELS.ADMIN.modules.airlines.add_button,
-				editButtonText: UI_LABELS.ADMIN.modules.airlines.edit_button,
+				addButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.add_button,
+				editButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.edit_button,
 			}),
 		[FIELDS, getCountryById]
 	);

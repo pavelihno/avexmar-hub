@@ -27,9 +27,9 @@ def create_flight_tariff(current_user):
     flight_id = body.get('flight_id')
     tariff_id = body.get('tariff_id')
 
-    if not Flight.get_by_id(flight_id):
+    if flight_id is None or Flight.get_by_id(flight_id) is None:
         return jsonify({'message': 'Flight not found'}), 404
-    if not Tariff.get_by_id(tariff_id):
+    if tariff_id is None or not Tariff.get_by_id(tariff_id):
         return jsonify({'message': 'Tariff not found'}), 404
 
     try:
@@ -45,9 +45,9 @@ def update_flight_tariff(current_user, flight_tariff_id):
     flight_id = body.get('flight_id')
     tariff_id = body.get('tariff_id')
 
-    if flight_id is not None and not Flight.get_by_id(flight_id):
+    if flight_id is None or Flight.get_by_id(flight_id) is None:
         return jsonify({'message': 'Flight not found'}), 404
-    if tariff_id is not None and not Tariff.get_by_id(tariff_id):
+    if tariff_id is None or not Tariff.get_by_id(tariff_id):
         return jsonify({'message': 'Tariff not found'}), 404
 
     try:

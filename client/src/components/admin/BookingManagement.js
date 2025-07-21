@@ -93,8 +93,8 @@ const BookingManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: UI_LABELS.ADMIN.modules.bookings.add_button,
-		editButtonText: UI_LABELS.ADMIN.modules.bookings.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.bookings.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.bookings.edit_button,
 	});
 
 	const handleAddBooking = (data) => dispatch(createBooking(adminManager.toApiFormat(data))).unwrap();

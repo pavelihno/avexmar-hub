@@ -1,4 +1,9 @@
 export const VALIDATION_MESSAGES = {
+	GENERAL: {
+		INVALID_DATE: 'Неверный формат даты',
+		INVALID_TIME: 'Неверный формат времени',
+		INVALID_DATETIME: 'Неверный формат даты и времени',
+	},
 	DISCOUNT: {
 		discount_name: {
 			REQUIRED: 'Название скидки обязательно',
@@ -114,10 +119,10 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Маршрут рейса обязателен',
 		},
 		scheduled_departure: {
-			REQUIRED: 'Время отправления обязательно',
+			REQUIRED: 'Дата отправления обязательна',
 		},
 		scheduled_arrival: {
-			REQUIRED: 'Время прибытия обязательно',
+			REQUIRED: 'Дата прибытия обязательна',
 		},
 		status: {
 			REQUIRED: 'Статус рейса обязателен',
@@ -135,6 +140,9 @@ export const VALIDATION_MESSAGES = {
 		},
 		price: {
 			REQUIRED: 'Цена обязательна',
+		},
+		tariff: {
+			REQUIRED: 'Тариф обязателен',
 		},
 	},
 };

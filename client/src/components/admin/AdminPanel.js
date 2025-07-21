@@ -1,18 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-	Box,
-	Typography,
-	Card,
-	CardContent,
-	Grid,
-	CardActionArea,
-} from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid, CardActionArea } from '@mui/material';
 import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
@@ -60,7 +53,7 @@ const AdminPanel = () => {
 		{
 			title: UI_LABELS.ADMIN.modules.tariffs.title,
 			description: UI_LABELS.ADMIN.modules.tariffs.description,
-			icon: <LocalAtmIcon sx={{ fontSize: 50 }} />,
+			icon: <MonetizationOnIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/tariffs',
 		},
 		{
@@ -121,10 +114,7 @@ const AdminPanel = () => {
 										<Typography variant='h6' sx={{ mt: 2 }}>
 											{module.title}
 										</Typography>
-										<Typography
-											variant='body2'
-											color='text.secondary'
-										>
+										<Typography variant='body2' color='text.secondary'>
 											{module.description}
 										</Typography>
 									</CardContent>
