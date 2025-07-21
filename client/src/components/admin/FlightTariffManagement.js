@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dialog, DialogContent, Typography } from '@mui/material';
 
@@ -39,25 +39,13 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 						? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
 						: null,
 			},
-			currency: {
-				key: 'currency',
-				apiKey: 'currency',
-				label: FIELD_LABELS.TARIFF.currency,
+			tariffId: {
+				key: 'tariffId',
+				apiKey: 'tariff_id',
+				label: FIELD_LABELS.TARIFF.id,
 				type: FIELD_TYPES.SELECT,
-				options: getEnumOptions('CURRENCY'),
-				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
-			},
-			price: {
-				key: 'price',
-				apiKey: 'price',
-				label: FIELD_LABELS.TARIFF.price,
-				type: FIELD_TYPES.NUMBER,
-				float: true,
-				inputProps: { min: 0, step: 0.01 },
-				validate: (value) =>
-					value === null || value === undefined || value === ''
-						? VALIDATION_MESSAGES.TARIFF.price.REQUIRED
-						: null,
+				options: getEnumOptions('TARIFF'),
+				validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.id.REQUIRED : null),
 			},
 		}),
 		[]
