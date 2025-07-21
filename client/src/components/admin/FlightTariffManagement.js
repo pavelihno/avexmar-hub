@@ -12,7 +12,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const { tariffs, isLoading: isLoadingTariffs } = useSelector((state) => state.tariffs);
 	const { flightTariff, isLoading: isLoadingFlightTariff } = useSelector((state) => state.flightTariffs);
 
-	const [seatClass, setSeatClass] = useState('');
+        const [seatClass, setSeatClass] = useState('');
+        const [formUpdates, setFormUpdates] = useState({});
 
 	const isEditing = action === 'edit';
 
@@ -28,14 +29,22 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	}, [dispatch, isEditing, flightTariffId]);
 
-	useEffect(() => {
-		if (isEditing && flightTariff && tariffs) {
-			const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
-			setSeatClass(tariff.seat_class);
-		} else if (!isEditing) {
-			setSeatClass('');
-		}
-	}, [isEditing, flightTariff, tariffs]);
+        useEffect(() => {
+                if (isEditing && flightTariff && Array.isArray(tariffs) && tariffs.length > 0) {
+                        const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
+                        if (tariff) {
+                                setSeatClass(tariff.seat_class);
+                        }
+                } else if (!isEditing) {
+                        setSeatClass('');
+                }
+        }, [isEditing, flightTariff, tariffs]);
+
+        useEffect(() => {
+                if (Object.keys(formUpdates).length > 0) {
+                        setFormUpdates({});
+                }
+        }, [formUpdates]);
 
 	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
 
@@ -92,42 +101,49 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		[FIELDS]
 	);
 
-	const currentItem = useMemo(() => {
-		if (isEditing) {
-			if (flightTariff && tariffs) {
-				const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
-				return {
-					id: flightTariffId,
-					flightId: flightId,
-					seatClass: tariff.seat_class,
-					seatsNumber: flightTariff.seats_number,
-					flightTariffId: flightTariff.tariff_id,
-				};
-			}
-		}
-		return { flightId, seatClass: '', seatsNumber: 0, flightTariffId: '' };
-	}, [isEditing, flightTariff, tariffs, flightId]);
+        const currentItem = useMemo(() => {
+                if (isEditing) {
+                        if (flightTariff && Array.isArray(tariffs) && tariffs.length > 0) {
+                                const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
+                                const originalSeatClass = tariff ? tariff.seat_class : '';
+                                return {
+                                        id: flightTariffId,
+                                        flightId: flightId,
+                                        seatClass: seatClass || originalSeatClass,
+                                        seatsNumber: flightTariff.seats_number,
+                                        flightTariffId:
+                                                seatClass && seatClass !== originalSeatClass
+                                                        ? ''
+                                                        : flightTariff.tariff_id,
+                                };
+                        }
+                }
+                return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
+        }, [isEditing, flightTariff, tariffs, flightId, seatClass]);
 
-	const handleSaveTariff = async (tariffData) => {
-		const formattedData = tariffManager.toApiFormat({
-			...tariffData,
-			flightId,
-		});
+        const handleSaveTariff = async (tariffData) => {
+                const formattedData = tariffManager.toApiFormat({
+                        ...tariffData,
+                        flightId,
+                });
 
-		try {
-			await dispatch(isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)).unwrap();
-		} catch (error) {
-			throw error;
-		}
-	};
+                try {
+                        return await dispatch(
+                                isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)
+                        ).unwrap();
+                } catch (error) {
+                        throw error;
+                }
+        };
 
-	const handleChange = (field, value) => {
-		if (field === FIELDS.seatClass.key) {
-			setSeatClass(value);
-		}
-	};
+        const handleChange = (field, value) => {
+                if (field === FIELDS.seatClass.key) {
+                        setSeatClass(value);
+                        setFormUpdates({ flightTariffId: '' });
+                }
+        };
 
-	if (isEditing && (isLoadingFlightTariff || isLoadingTariffs)) {
+        if (isEditing && (isLoadingFlightTariff || isLoadingTariffs || !seatClass)) {
 		return (
 			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
 				<DialogContent>
@@ -140,13 +156,14 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	return (
 		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
 			<DialogContent>
-				{tariffManager.renderForm({
-					isEditing,
-					currentItem,
-					onSave: handleSaveTariff,
-					onChange: handleChange,
-					onClose,
-				})}
+                                {tariffManager.renderForm({
+                                        isEditing,
+                                        currentItem,
+                                        onSave: handleSaveTariff,
+                                        onChange: handleChange,
+                                        onClose,
+                                        externalUpdates: formUpdates,
+                                })}
 			</DialogContent>
 		</Dialog>
 	);
