@@ -12,7 +12,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const { tariffs } = useSelector((state) => state.tariffs);
 	const { flightTariff, isLoading } = useSelector((state) => state.flightTariffs);
 
-	const [seatClass, setSeatClass] = useState('');
+        const [seatClass, setSeatClass] = useState('');
 
 	const isEditing = action === 'edit';
 
@@ -22,11 +22,19 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	}, [dispatch, tariffs]);
 
-	useEffect(() => {
-		if (isEditing && flightTariffId) {
-			dispatch(fetchFlightTariff(flightTariffId));
-		}
-	}, [dispatch, isEditing, flightTariffId]);
+        useEffect(() => {
+                if (isEditing && flightTariffId) {
+                        dispatch(fetchFlightTariff(flightTariffId));
+                }
+        }, [dispatch, isEditing, flightTariffId]);
+
+        useEffect(() => {
+                if (isEditing && flightTariff) {
+                        setSeatClass(flightTariff.seat_class);
+                } else if (!isEditing) {
+                        setSeatClass('');
+                }
+        }, [isEditing, flightTariff]);
 
 	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
 
