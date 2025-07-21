@@ -11,7 +11,7 @@ import {
 	deleteAllPassengers,
 } from '../../redux/actions/passenger';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import { formatDate } from '../utils';
+import { formatDate, validateDate } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const PassengerManagement = () => {
@@ -55,13 +55,17 @@ const PassengerManagement = () => {
 			options: getEnumOptions('GENDER'),
 			formatter: (value) => ENUM_LABELS.GENDER[value] || value,
 		},
-		birthDate: {
-			key: 'birthDate',
-			apiKey: 'birth_date',
-			label: FIELD_LABELS.PASSENGER.birth_date,
-			type: FIELD_TYPES.DATE,
-			formatter: (value) => formatDate(value),
-		},
+                birthDate: {
+                        key: 'birthDate',
+                        apiKey: 'birth_date',
+                        label: FIELD_LABELS.PASSENGER.birth_date,
+                        type: FIELD_TYPES.DATE,
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => {
+                                if (value && !validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                                return null;
+                        },
+                },
 		documentType: {
 			key: 'documentType',
 			apiKey: 'document_type',

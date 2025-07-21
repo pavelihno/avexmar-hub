@@ -25,7 +25,14 @@ import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI } from '../utils';
+import {
+        formatDate,
+        formatTime,
+        formatTimeToAPI,
+        formatTimeToUI,
+        validateDate,
+        validateTime,
+} from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const FlightManagement = () => {
@@ -183,43 +190,59 @@ const FlightManagement = () => {
 			label: FIELD_LABELS.FLIGHT.aircraft,
 			type: FIELD_TYPES.TEXT,
 		},
-		scheduledDeparture: {
-			key: 'scheduledDeparture',
-			apiKey: 'scheduled_departure',
-			label: FIELD_LABELS.FLIGHT.scheduled_departure,
-			type: FIELD_TYPES.DATE,
-			formatter: (value) => formatDate(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED : null),
-		},
-		scheduledDepartureTime: {
-			key: 'scheduledDepartureTime',
-			apiKey: 'scheduled_departure_time',
-			label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
-			type: FIELD_TYPES.TIME,
-			excludeFromTable: true,
-			toApi: (value) => formatTimeToAPI(value),
-			toUi: (value) => formatTimeToUI(value),
-			formatter: (value) => formatTime(value),
-		},
-		scheduledArrival: {
-			key: 'scheduledArrival',
-			apiKey: 'scheduled_arrival',
-			label: FIELD_LABELS.FLIGHT.scheduled_arrival,
-			type: FIELD_TYPES.DATE,
-			excludeFromTable: true,
-			formatter: (value) => formatDate(value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED : null),
-		},
-		scheduledArrivalTime: {
-			key: 'scheduledArrivalTime',
-			apiKey: 'scheduled_arrival_time',
-			label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
-			type: FIELD_TYPES.TIME,
-			excludeFromTable: true,
-			toApi: (value) => formatTimeToAPI(value),
-			toUi: (value) => formatTimeToUI(value),
-			formatter: (value) => formatTime(value),
-		},
+                scheduledDeparture: {
+                        key: 'scheduledDeparture',
+                        apiKey: 'scheduled_departure',
+                        label: FIELD_LABELS.FLIGHT.scheduled_departure,
+                        type: FIELD_TYPES.DATE,
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => {
+                                if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_departure.REQUIRED;
+                                if (!validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                                return null;
+                        },
+                },
+                scheduledDepartureTime: {
+                        key: 'scheduledDepartureTime',
+                        apiKey: 'scheduled_departure_time',
+                        label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
+                        type: FIELD_TYPES.TIME,
+                        excludeFromTable: true,
+                        toApi: (value) => formatTimeToAPI(value),
+                        toUi: (value) => formatTimeToUI(value),
+                        formatter: (value) => formatTime(value),
+                        validate: (value) => {
+                                if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
+                                return null;
+                        },
+                },
+                scheduledArrival: {
+                        key: 'scheduledArrival',
+                        apiKey: 'scheduled_arrival',
+                        label: FIELD_LABELS.FLIGHT.scheduled_arrival,
+                        type: FIELD_TYPES.DATE,
+                        excludeFromTable: true,
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => {
+                                if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED;
+                                if (!validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                                return null;
+                        },
+                },
+                scheduledArrivalTime: {
+                        key: 'scheduledArrivalTime',
+                        apiKey: 'scheduled_arrival_time',
+                        label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
+                        type: FIELD_TYPES.TIME,
+                        excludeFromTable: true,
+                        toApi: (value) => formatTimeToAPI(value),
+                        toUi: (value) => formatTimeToUI(value),
+                        formatter: (value) => formatTime(value),
+                        validate: (value) => {
+                                if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
+                                return null;
+                        },
+                },
 		tariffs: {
 			key: 'tariffs',
 			type: FIELD_TYPES.CUSTOM,
