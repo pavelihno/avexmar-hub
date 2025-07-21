@@ -54,4 +54,3 @@ class FlightTariff(BaseModel):
             cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
 
         return super().update(_id, session, **data)
-

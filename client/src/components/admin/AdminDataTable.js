@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -87,7 +87,7 @@ const AdminDataTable = ({
 		setOpenDialog(true);
 	};
 
-	const fileInputRef = React.useRef();
+	const fileInputRef = useRef();
 
 	const openUploadDialog = () => {
 		setUploadDialog(true);
@@ -194,10 +194,8 @@ const AdminDataTable = ({
 	};
 
 	const handleSave = (formData) => {
-		if (isEditing) {
-			return onEdit(formData);
-		}
-		return onAdd(formData);
+		if (isEditing) return onEdit(formData);
+		else return onAdd(formData);
 	};
 
 	const handleDelete = (id) => {
