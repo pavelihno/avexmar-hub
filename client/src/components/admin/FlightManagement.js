@@ -270,6 +270,9 @@ const FlightManagement = () => {
 							<>
 								{flightTariffsForFlight.map((ft) => {
 									const baseTariff = getTariffById(ft.tariff_id) || {};
+									const seatClass = ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class];
+									const orderNumber = baseTariff.order_number;
+
 									return (
 										<Box
 											key={ft.id}
@@ -293,12 +296,7 @@ const FlightManagement = () => {
 													textOverflow: 'ellipsis',
 												}}
 											>
-												{`${
-													ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class] ||
-													baseTariff.seat_class
-												} - ${baseTariff.price} ${
-													ENUM_LABELS.CURRENCY[baseTariff.currency] || baseTariff.currency
-												}`}
+												{`${seatClass} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`}
 											</Typography>
 											<Box sx={{ display: 'flex', flexShrink: 0 }}>
 												<Tooltip

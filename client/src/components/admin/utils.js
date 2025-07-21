@@ -362,18 +362,18 @@ export const createAdminManager = (fields, options = {}) => {
 		columns,
 		toApiFormat,
 		toUiFormat,
-                renderForm: ({ isEditing, currentItem, onSave, onChange, onClose, ...rest }) => (
-                        <AdminEntityForm
-                                fields={formFields}
-                                initialData={currentItem}
-                                onSave={onSave}
-                                onChange={onChange}
-                                onClose={onClose}
-                                isEditing={isEditing}
-                                addButtonText={options.addButtonText(currentItem)}
-                                editButtonText={options.editButtonText(currentItem)}
-                                {...rest}
-                        />
-                ),
+		renderForm: ({ isEditing, currentItem, onSave, onChange, onClose, externalUpdates }) => (
+			<AdminEntityForm
+				fields={formFields}
+				initialData={currentItem}
+				onSave={onSave}
+				onChange={onChange}
+				onClose={onClose}
+				externalUpdates={externalUpdates}
+				isEditing={isEditing}
+				addButtonText={options.addButtonText(currentItem)}
+				editButtonText={options.editButtonText(currentItem)}
+			/>
+		),
 	};
 };
