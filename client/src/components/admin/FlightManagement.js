@@ -182,6 +182,7 @@ const FlightManagement = () => {
 			apiKey: 'aircraft',
 			label: FIELD_LABELS.FLIGHT.aircraft,
 			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
@@ -272,6 +273,13 @@ const FlightManagement = () => {
 									const baseTariff = getTariffById(ft.tariff_id) || {};
 									const seatClass = ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class];
 									const orderNumber = baseTariff.order_number;
+									const tariffPrice = baseTariff.price;
+									const currency = ENUM_LABELS.CURRENCY[baseTariff.currency];
+									const seatsNumber = ft.seats_number;
+
+									const tariffLabel = `${seatClass} - ${
+										UI_LABELS.ADMIN.modules.tariffs.tariff
+									} ${orderNumber} - ${tariffPrice} ${currency} - ${seatsNumber} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
 
 									return (
 										<Box
@@ -283,7 +291,7 @@ const FlightManagement = () => {
 												backgroundColor: 'rgba(0,0,0,0.04)',
 												borderRadius: 1,
 												p: 0.5,
-												width: '100%',
+												width: 'auto',
 											}}
 										>
 											<Typography
@@ -296,7 +304,7 @@ const FlightManagement = () => {
 													textOverflow: 'ellipsis',
 												}}
 											>
-												{`${seatClass} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`}
+												{tariffLabel}
 											</Typography>
 											<Box sx={{ display: 'flex', flexShrink: 0 }}>
 												<Tooltip

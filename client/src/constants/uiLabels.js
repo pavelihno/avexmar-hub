@@ -158,10 +158,12 @@ export const UI_LABELS = {
 			tariffs: {
 				title: 'Тарифы',
 				tariff: 'Тариф',
+				seats: 'Мест',
 				description: 'Управление тарифами рейсов',
 				management: 'Управление тарифами',
 				add_button: 'Добавить тариф',
 				edit_button: 'Редактировать тариф',
+				delete_button: 'Удалить тариф',
 				manage_tariffs: 'Изменить тарифы',
 				confirm_delete: 'Вы уверены, что хотите удалить тариф?',
 			},

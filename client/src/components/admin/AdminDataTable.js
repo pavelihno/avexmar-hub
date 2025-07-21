@@ -383,7 +383,7 @@ const AdminDataTable = ({
 							{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
 						</Button>
 					</Box>
-					<Table stickyHeader sx={{ tableLayout: 'fixed' }}>
+					<Table stickyHeader sx={{ tableLayout: 'auto' }}>
 						<TableHead>
 							<TableRow>
 								{columns.map((column, index) => (
