@@ -269,14 +269,15 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
  * Create field configurations for AdminEntityForm
  */
 export const createFormFields = (fields) => {
-	return Object.values(fields)
-		.filter((field) => field.key !== 'id' && !field.excludeFromForm)
-		.map((field) => ({
-			name: field.key,
-			fullWidth: field.fullWidth || false,
-			renderField: createFieldRenderer(field),
-			validate: field.validate,
-		}));
+        return Object.values(fields)
+                .filter((field) => field.key !== 'id' && !field.excludeFromForm)
+                .map((field) => ({
+                        name: field.key,
+                        fullWidth: field.fullWidth || false,
+                        defaultValue: field.defaultValue,
+                        renderField: createFieldRenderer(field),
+                        validate: field.validate,
+                }));
 };
 
 /**
