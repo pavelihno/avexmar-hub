@@ -1,12 +1,12 @@
 export const VALIDATION_MESSAGES = {
-        GENERAL: {
-                INVALID_DATE: 'Неверный формат даты',
-                INVALID_TIME: 'Неверный формат времени',
-                INVALID_DATETIME: 'Неверный формат даты и времени',
-        },
-        DISCOUNT: {
-                discount_name: {
-                        REQUIRED: 'Название скидки обязательно',
+	GENERAL: {
+		INVALID_DATE: 'Неверный формат даты',
+		INVALID_TIME: 'Неверный формат времени',
+		INVALID_DATETIME: 'Неверный формат даты и времени',
+	},
+	DISCOUNT: {
+		discount_name: {
+			REQUIRED: 'Название скидки обязательно',
 		},
 		discount_type: {
 			REQUIRED: 'Тип скидки обязателен',

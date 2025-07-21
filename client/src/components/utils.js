@@ -42,53 +42,44 @@ export const formatTimeToAPI = (value) => {
 };
 
 export const formatTimeToUI = (value) => {
-        if (!value) return '';
-        try {
-                return new Date(`1970-01-01T${value}`);
-        } catch (error) {
-                console.error('Invalid time value (UI):', value);
-                return value;
-        }
+	if (!value) return '';
+	try {
+		return new Date(`1970-01-01T${value}`);
+	} catch (error) {
+		console.error('Invalid time value (UI):', value);
+		return value;
+	}
 };
 
-export const validateDate = (value, dateFormat = DATE_FORMAT) => {
-        if (!value) return false;
-        try {
-                const date =
-                        value instanceof Date
-                                ? value
-                                : parse(value, dateFormat, new Date());
-                return isValid(date);
-        } catch (error) {
-                console.error('Invalid date value:', value);
-                return false;
-        }
+export const validateDate = (value) => {
+	if (!value) return false;
+	try {
+		const date = value instanceof Date ? value : new Date(value);
+		return isValid(date);
+	} catch (error) {
+		console.error('Invalid date value:', value);
+		return false;
+	}
 };
 
-export const validateTime = (value, timeFormat = TIME_FORMAT) => {
-        if (!value) return false;
-        try {
-                const date =
-                        value instanceof Date
-                                ? value
-                                : parse(value, timeFormat, new Date());
-                return isValid(date);
-        } catch (error) {
-                console.error('Invalid time value:', value);
-                return false;
-        }
+export const validateTime = (value) => {
+	if (!value) return false;
+	try {
+		const date = value instanceof Date ? value : new Date(value);
+		return isValid(date);
+	} catch (error) {
+		console.error('Invalid time value:', value);
+		return false;
+	}
 };
 
-export const validateDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
-        if (!value) return false;
-        try {
-                const date =
-                        value instanceof Date
-                                ? value
-                                : parse(value, dateTimeFormat, new Date());
-                return isValid(date);
-        } catch (error) {
-                console.error('Invalid datetime value:', value);
-                return false;
-        }
+export const validateDateTime = (value) => {
+	if (!value) return false;
+	try {
+		const date = value instanceof Date ? value : new Date(value);
+		return isValid(date);
+	} catch (error) {
+		console.error('Invalid datetime value:', value);
+		return false;
+	}
 };
