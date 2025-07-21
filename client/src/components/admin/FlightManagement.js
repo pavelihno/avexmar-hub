@@ -20,7 +20,7 @@ import FlightTariffManagement from './FlightTariffManagement';
 
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs } from '../../redux/actions/tariff';
-import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flight_tariff';
+import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
@@ -217,7 +217,6 @@ const FlightManagement = () => {
 			excludeFromTable: true,
 			formatter: (value) => formatDate(value),
 			validate: (value) => {
-				console.log(value);
 				if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_arrival.REQUIRED;
 				if (!validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 				return null;

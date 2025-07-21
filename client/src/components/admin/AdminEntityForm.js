@@ -3,7 +3,7 @@ import { DialogTitle, DialogContent, DialogActions, Button, Grid, Alert, Fade, B
 
 import { UI_LABELS } from '../../constants';
 
-const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addButtonText, editButtonText }) => {
+const AdminEntityForm = ({ fields, initialData, onSave, onChange, onClose, isEditing, addButtonText, editButtonText }) => {
 	const [formData, setFormData] = useState(initialData || {});
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
@@ -18,6 +18,10 @@ const AdminEntityForm = ({ fields, initialData, onSave, onClose, isEditing, addB
 
 		if (successMessage) {
 			setSuccessMessage('');
+		}
+
+		if (onChange) {
+			onChange(field, value);
 		}
 
 		if (validationErrors[field]) {

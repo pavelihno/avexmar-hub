@@ -8,7 +8,7 @@ import countryReducer from './reducers/country';
 import routesReducer from './reducers/route';
 import flightReducer from './reducers/flight';
 import tariffsReducer from './reducers/tariff';
-import flightTariffsReducer from './reducers/flight_tariff';
+import flightTariffsReducer from './reducers/flightTariff';
 import ticketsReducer from './reducers/ticket';
 import discountReducer from './reducers/discount';
 import userReducer from './reducers/user';

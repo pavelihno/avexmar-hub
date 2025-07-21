@@ -1,209 +1,155 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    FormHelperText,
-    Box,
-    Alert,
-    Fade,
-} from '@mui/material';
+import { Dialog, DialogContent } from '@mui/material';
 
-import {
-    createFlightTariff,
-    updateFlightTariff,
-    fetchFlightTariff,
-} from '../../redux/actions/flight_tariff';
+import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchTariffs } from '../../redux/actions/tariff';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
+import { FIELD_TYPES, createAdminManager } from './utils';
 
-export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', tariffId }) => {
-    const dispatch = useDispatch();
-    const { tariffs } = useSelector((state) => state.tariffs);
-    const { flightTariff, isLoading } = useSelector((state) => state.flightTariffs);
+export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
+	const dispatch = useDispatch();
+	const { tariffs } = useSelector((state) => state.tariffs);
+	const { flightTariff, isLoading } = useSelector((state) => state.flightTariffs);
 
-    const isEditing = action === 'edit';
+	const [formData, setFormData] = useState({});
 
-    const [formData, setFormData] = useState({ seatClass: '', seatsNumber: '', tariffId: '' });
-    const [errors, setErrors] = useState({});
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+	const isEditing = action === 'edit';
 
-    useEffect(() => {
-        if (!tariffs || tariffs.length === 0) {
-            dispatch(fetchTariffs());
-        }
-    }, [dispatch, tariffs]);
+	useEffect(() => {
+		if (!tariffs || tariffs.length === 0) {
+			dispatch(fetchTariffs());
+		}
+	}, [dispatch, tariffs]);
 
-    useEffect(() => {
-        if (isEditing && tariffId) {
-            dispatch(fetchFlightTariff(tariffId));
-        }
-    }, [isEditing, tariffId, dispatch]);
+	useEffect(() => {
+		if (isEditing && flightTariffId) {
+			dispatch(fetchFlightTariff(flightTariffId));
+		}
+	}, [isEditing, flightTariffId, dispatch]);
 
-    useEffect(() => {
-        if (isEditing && flightTariff && tariffs.length) {
-            const baseTariff = tariffs.find((t) => t.id === flightTariff.tariff_id) || {};
-            setFormData({
-                seatClass: baseTariff.seat_class || '',
-                seatsNumber: flightTariff.seats_number || '',
-                tariffId: flightTariff.tariff_id || '',
-            });
-        }
-    }, [isEditing, flightTariff, tariffs]);
+	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
 
-    useEffect(() => {
-        if (tariffDialogOpen && !isEditing) {
-            setFormData({ seatClass: '', seatsNumber: '', tariffId: '' });
-            setErrors({});
-            setErrorMessage('');
-            setSuccessMessage('');
-        }
-    }, [tariffDialogOpen, isEditing]);
+	const tariffOptions = useMemo(() => {
+		return tariffs
+			.filter((t) => t.seat_class === formData.seatClass)
+			.map((t) => ({
+				value: t.id,
+				label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
+					t.order_number
+				} (${t.price} ${ENUM_LABELS.CURRENCY[t.currency]})`,
+			}));
+	}, [tariffs, formData.seatClass]);
 
-    const tariffOptions = useMemo(() => {
-        return tariffs
-            .filter((t) => t.seat_class === formData.seatClass)
-            .map((t) => ({
-                value: t.id,
-                label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${t.order_number}`,
-            }));
-    }, [tariffs, formData.seatClass]);
+	const FIELDS = {
+		id: { key: 'id', apiKey: 'id' },
+		flightId: { key: 'flightId', apiKey: 'flight_id', excludeFromForm: true },
+		seatClass: {
+			key: 'seatClass',
+			apiKey: 'seat_class',
+			label: FIELD_LABELS.TARIFF.seat_class,
+			type: FIELD_TYPES.SELECT,
+			options: seatClassOptions,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
+		},
+		seatsNumber: {
+			key: 'seatsNumber',
+			apiKey: 'seats_number',
+			label: FIELD_LABELS.FLIGHT_TARIFF.seats_number,
+			type: FIELD_TYPES.NUMBER,
+			inputProps: { min: 0, step: 1 },
+			validate: (value) =>
+				value === '' || value === null || value === undefined
+					? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
+					: null,
+		},
+		flightTariffId: {
+			key: 'flightTariffId',
+			apiKey: 'tariff_id',
+			label: FIELD_LABELS.FLIGHT_TARIFF.tariff_id,
+			type: FIELD_TYPES.SELECT,
+			options: tariffOptions,
+			fullWidth: true,
+			validate: (value) => (!value ? UI_LABELS.MESSAGES.required_field : null),
+		},
+	};
 
-    const handleChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: '' }));
-        }
-        if (successMessage) setSuccessMessage('');
-    };
+	const tariffManager = useMemo(
+		() =>
+			createAdminManager(FIELDS, {
+				addButtonText: () => UI_LABELS.ADMIN.modules.tariffs.add_button,
+				editButtonText: () => UI_LABELS.ADMIN.modules.tariffs.edit_button,
+			}),
+		[FIELDS]
+	);
 
-    const validate = () => {
-        const newErrors = {};
-        if (!formData.seatClass) newErrors.seatClass = VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED;
-        if (formData.seatsNumber === '' || formData.seatsNumber === null || formData.seatsNumber === undefined) {
-            newErrors.seatsNumber = VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED;
-        }
-        if (!formData.tariffId) newErrors.tariffId = UI_LABELS.MESSAGES.required_field;
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+	const currentItem = useMemo(() => {
+		if (isEditing) return flightTariff ? tariffManager.toUiFormat(flightTariff) : null;
+		return { flightId };
+	}, [isEditing, flightTariff, tariffManager, flightId]);
 
-    const handleSubmit = async () => {
-        if (!validate()) return;
+	useEffect(() => {
+		if (isEditing && flightTariffId) {
+			dispatch(fetchFlightTariff(flightTariffId));
+		}
+	}, [isEditing, flightTariffId, dispatch]);
 
-        const payload = {
-            flight_id: flightId,
-            tariff_id: formData.tariffId,
-            seats_number: formData.seatsNumber,
-        };
-        if (isEditing) payload.id = tariffId;
+	useEffect(() => {
+		if (tariffDialogOpen) {
+			if (isEditing && flightTariff) {
+				setFormData(tariffManager.toUiFormat(flightTariff));
+			} else if (!isEditing) {
+				setFormData({
+					flightId,
+					seatClass: '',
+					seatsNumber: 0,
+					flightTariffId: '',
+				});
+			}
+		}
+	}, [tariffDialogOpen, isEditing, flightTariff, flightId, tariffManager]);
 
-        try {
-            await dispatch(isEditing ? updateFlightTariff(payload) : createFlightTariff(payload)).unwrap();
-            setSuccessMessage(isEditing ? UI_LABELS.SUCCESS.update : UI_LABELS.SUCCESS.add);
-            setErrorMessage('');
-            setTimeout(() => onClose(), 500);
-        } catch (error) {
-            let message = '';
-            if (typeof error === 'string') message = error;
-            else if (error?.message) message = error.message;
-            else if (error?.errors) {
-                message = Object.entries(error.errors)
-                    .map(([field, msg]) => `${field}: ${msg}`)
-                    .join('; ');
-            } else {
-                message = UI_LABELS.ERRORS.unknown;
-            }
-            setErrorMessage(message);
-            setSuccessMessage('');
-        }
-    };
+	const handleSaveTariff = async (tariffData) => {
+		const formattedData = tariffManager.toApiFormat({
+			...tariffData,
+			flightId,
+		});
 
-    if (isEditing && isLoading && !flightTariff) {
-        return (
-            <Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
-                <DialogContent>
-                    <Typography>{UI_LABELS.MESSAGES.loading}</Typography>
-                </DialogContent>
-            </Dialog>
-        );
-    }
+		try {
+			await dispatch(isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)).unwrap();
+			onClose();
+		} catch (error) {
+			throw error;
+		}
+	};
 
-    return (
-        <Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
-            <DialogTitle>
-                {isEditing ? UI_LABELS.ADMIN.modules.tariffs.edit_button : UI_LABELS.ADMIN.modules.tariffs.add_button}
-            </DialogTitle>
-            <Box sx={{ px: 3 }}>
-                <Fade in={!!errorMessage} timeout={300}>
-                    <div>{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}</div>
-                </Fade>
-                <Fade in={!!successMessage} timeout={300}>
-                    <div>{successMessage && <Alert severity='success'>{successMessage}</Alert>}</div>
-                </Fade>
-            </Box>
-            <DialogContent>
-                <FormControl fullWidth margin='dense' error={!!errors.seatClass}>
-                    <InputLabel>{FIELD_LABELS.TARIFF.seat_class}</InputLabel>
-                    <Select
-                        value={formData.seatClass}
-                        label={FIELD_LABELS.TARIFF.seat_class}
-                        onChange={(e) => handleChange('seatClass', e.target.value)}
-                    >
-                        {Object.entries(ENUM_LABELS.SEAT_CLASS).map(([value, label]) => (
-                            <MenuItem key={value} value={value}>
-                                {label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    {errors.seatClass && <FormHelperText>{errors.seatClass}</FormHelperText>}
-                </FormControl>
+	const handleChange = (field, value) => {
+		setFormData((prev) => ({ ...prev, [field]: value }));
+	};
 
-                <TextField
-                    margin='dense'
-                    label={FIELD_LABELS.FLIGHT_TARIFF.seats_number}
-                    type='number'
-                    fullWidth
-                    value={formData.seatsNumber}
-                    onChange={(e) => handleChange('seatsNumber', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                    inputProps={{ min: 0, step: 1 }}
-                    error={!!errors.seatsNumber}
-                    helperText={errors.seatsNumber}
-                />
+	if (isEditing && isLoading && !flightTariff) {
+		return (
+			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
+				<DialogContent>
+					<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
+				</DialogContent>
+			</Dialog>
+		);
+	}
 
-                <FormControl fullWidth margin='dense' error={!!errors.tariffId} disabled={!formData.seatClass}>
-                    <InputLabel>{FIELD_LABELS.FLIGHT_TARIFF.tariff_id}</InputLabel>
-                    <Select
-                        value={formData.tariffId}
-                        label={FIELD_LABELS.FLIGHT_TARIFF.tariff_id}
-                        onChange={(e) => handleChange('tariffId', e.target.value)}
-                    >
-                        {tariffOptions.map((opt) => (
-                            <MenuItem key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    {errors.tariffId && <FormHelperText>{errors.tariffId}</FormHelperText>}
-                </FormControl>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
-                <Button onClick={handleSubmit} variant='contained'>
-                    {UI_LABELS.BUTTONS.save}
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
+	return (
+		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
+			<DialogContent>
+				{tariffManager.renderForm({
+					isEditing,
+					currentItem,
+					onSave: handleSaveTariff,
+					onChange: handleChange,
+					onClose,
+				})}
+			</DialogContent>
+		</Dialog>
+	);
 };
 
 export default FlightTariffManagement;

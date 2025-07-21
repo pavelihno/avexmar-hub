@@ -362,11 +362,12 @@ export const createAdminManager = (fields, options = {}) => {
 		columns,
 		toApiFormat,
 		toUiFormat,
-		renderForm: ({ isEditing, currentItem, onClose, onSave }) => (
+		renderForm: ({ isEditing, currentItem, onSave, onChange, onClose }) => (
 			<AdminEntityForm
 				fields={formFields}
 				initialData={currentItem}
 				onSave={onSave}
+				onChange={onChange}
 				onClose={onClose}
 				isEditing={isEditing}
 				addButtonText={options.addButtonText(currentItem)}
