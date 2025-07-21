@@ -12,7 +12,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const { tariffs } = useSelector((state) => state.tariffs);
 	const { flightTariff, isLoading } = useSelector((state) => state.flightTariffs);
 
-	const [formData, setFormData] = useState({});
+	const [seatClass, setSeatClass] = useState('');
 
 	const isEditing = action === 'edit';
 
@@ -26,20 +26,20 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		if (isEditing && flightTariffId) {
 			dispatch(fetchFlightTariff(flightTariffId));
 		}
-	}, [isEditing, flightTariffId, dispatch]);
+	}, [dispatch, isEditing, flightTariffId]);
 
 	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
 
 	const tariffOptions = useMemo(() => {
 		return tariffs
-			.filter((t) => t.seat_class === formData.seatClass)
+			.filter((t) => t.seat_class === seatClass)
 			.map((t) => ({
 				value: t.id,
 				label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
 					t.order_number
 				} (${t.price} ${ENUM_LABELS.CURRENCY[t.currency]})`,
 			}));
-	}, [tariffs, formData.seatClass]);
+	}, [tariffs, seatClass]);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -70,7 +70,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 			type: FIELD_TYPES.SELECT,
 			options: tariffOptions,
 			fullWidth: true,
-			validate: (value) => (!value ? UI_LABELS.MESSAGES.required_field : null),
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.tariff.REQUIRED : null),
 		},
 	};
 
@@ -85,29 +85,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 
 	const currentItem = useMemo(() => {
 		if (isEditing) return flightTariff ? tariffManager.toUiFormat(flightTariff) : null;
-		return { flightId };
+		return { flightId, seatClass: '', seatsNumber: 0, flightTariffId: '' };
 	}, [isEditing, flightTariff, tariffManager, flightId]);
-
-	useEffect(() => {
-		if (isEditing && flightTariffId) {
-			dispatch(fetchFlightTariff(flightTariffId));
-		}
-	}, [isEditing, flightTariffId, dispatch]);
-
-	useEffect(() => {
-		if (tariffDialogOpen) {
-			if (isEditing && flightTariff) {
-				setFormData(tariffManager.toUiFormat(flightTariff));
-			} else if (!isEditing) {
-				setFormData({
-					flightId,
-					seatClass: '',
-					seatsNumber: 0,
-					flightTariffId: '',
-				});
-			}
-		}
-	}, [tariffDialogOpen, isEditing, flightTariff, flightId, tariffManager]);
 
 	const handleSaveTariff = async (tariffData) => {
 		const formattedData = tariffManager.toApiFormat({
@@ -124,7 +103,9 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	};
 
 	const handleChange = (field, value) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
+		if (field === FIELDS.seatClass.key) {
+			setSeatClass(value);
+		}
 	};
 
 	if (isEditing && isLoading && !flightTariff) {

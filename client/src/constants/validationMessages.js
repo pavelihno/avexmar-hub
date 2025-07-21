@@ -141,6 +141,9 @@ export const VALIDATION_MESSAGES = {
 		price: {
 			REQUIRED: 'Цена обязательна',
 		},
+		tariff: {
+			REQUIRED: 'Тариф обязателен',
+		},
 	},
 };
 
