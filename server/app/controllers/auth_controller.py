@@ -5,7 +5,7 @@ from app.utils.jwt import signJWT
 from app.utils.email import send_email
 from app.middlewares.auth_middleware import login_required
 from app.config import Config
-from app.models._base_model import ModelValidationError
+
 from app.models.password_reset_token import PasswordResetToken
 from app.database import db
 
@@ -21,19 +21,15 @@ def register():
     if existing_user:
         return jsonify({'message': 'User already exists'}), 400
 
-    try:
-        new_user = User.create(**{
-            'email': email,
-            'password': password,
-            'role': Config.DEFAULT_USER_ROLE,
-            'is_active': True
-        })
-        if new_user:
-            token = signJWT(new_user.email)
-            return jsonify({'token': token, 'user': new_user.to_dict()}), 201
-
-    except ModelValidationError as e:
-        return jsonify({'errors': e.errors}), 400
+    new_user = User.create(**{
+        'email': email,
+        'password': password,
+        'role': Config.DEFAULT_USER_ROLE,
+        'is_active': True
+    })
+    if new_user:
+        token = signJWT(new_user.email)
+        return jsonify({'token': token, 'user': new_user.to_dict()}), 201
 
 
 def login():
@@ -81,17 +77,13 @@ def reset_password():
     if not token:
         return jsonify({'message': 'Invalid or expired token'}), 400
 
-    try:
-        user = User.change_password(token.user_id, password)
-        token.used = True
-        db.session.commit()
-        if user:
-            token_jwt = signJWT(user.email)
-            return jsonify({'token': token_jwt, 'user': user.to_dict()}), 200
-        return jsonify({'message': 'User not found'}), 404
-    except ModelValidationError as e:
-        db.session.rollback()
-        return jsonify({'errors': e.errors}), 400
+    user = User.change_password(token.user_id, password)
+    token.used = True
+    db.session.commit()
+    if user:
+        token_jwt = signJWT(user.email)
+        return jsonify({'token': token_jwt, 'user': user.to_dict()}), 200
+    return jsonify({'message': 'User not found'}), 404
 
 
 @login_required

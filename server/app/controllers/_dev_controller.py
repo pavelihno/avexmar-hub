@@ -15,7 +15,7 @@ from app.models.booking import Booking
 from app.models.payment import Payment
 from app.models.user import User
 from app.models.ticket import Ticket
-from app.models._base_model import ModelValidationError
+
 
 MODEL_MAP = {
     'airports': Airport,
@@ -41,9 +41,6 @@ def clear_table(current_user, table_name: str):
     if not model:
         return jsonify({'message': 'Invalid table name'}), 404
 
-    try:
-        deleted = model.delete_all()
-    except ModelValidationError as e:
-        return jsonify({'errors': e.errors}), 400
+    deleted = model.delete_all()
 
     return jsonify({'deleted': deleted})
