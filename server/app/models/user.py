@@ -60,9 +60,7 @@ class User(BaseModel):
     @classmethod
     def update(cls, _id, session: Session | None = None, **data):
         session = session or db.session
-        user = cls.get_by_id(_id)
-        if not user:
-            return None
+        user = cls.get_or_404(_id, session)
 
         for key, value in data.items():
             if key in ['role', 'is_active']:
@@ -85,9 +83,7 @@ class User(BaseModel):
     @classmethod
     def change_password(cls, _id, _password, session: Session | None = None):
         session = session or db.session
-        user = cls.get_by_id(_id)
-        if not user:
-            return None
+        user = cls.get_or_404(_id, session)
         user.password = cls.__encode_password(_password)
         try:
             session.commit()

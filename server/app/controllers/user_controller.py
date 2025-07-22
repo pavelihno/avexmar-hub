@@ -27,10 +27,8 @@ def get_users(current_user):
 
 @admin_required
 def get_user(current_user, user_id):
-    user = User.get_by_id(user_id)
-    if user:
-        return jsonify(user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+    user = User.get_or_404(user_id)
+    return jsonify(user.to_dict())
 
 
 @admin_required
