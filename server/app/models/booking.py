@@ -34,8 +34,6 @@ class Booking(BaseModel):
             'status': self.status.value,
             'email_address': self.email_address,
             'phone_number': self.phone_number,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
             'currency': self.currency.value,
             'base_price': self.base_price,
             'final_price': self.final_price
