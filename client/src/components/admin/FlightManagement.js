@@ -40,7 +40,7 @@ const FlightManagement = () => {
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
 	const [selectedFlightId, setSelectedFlightId] = useState(null);
-	const [selectedTariffId, setSelectedTariffId] = useState(null);
+	const [selectedFlightTariffId, setSelectedFlightTariffId] = useState(null);
 
 	useEffect(() => {
 		dispatch(fetchFlights());
@@ -106,41 +106,41 @@ const FlightManagement = () => {
 		}));
 	}, [airlines]);
 
-	const [deleteTariffDialog, setDeleteTariffDialog] = useState({
+	const [deleteFlightTariffDialog, setDeleteFlightTariffDialog] = useState({
 		open: false,
-		tariffId: null,
+		flightTariffId: null,
 	});
 
-	const handleAddTariff = (flightId) => {
+	const handleAddFlightTariff = (flightId) => {
 		setTariffAction('add');
 		setSelectedFlightId(flightId);
 		setTariffDialogOpen(true);
 	};
 
-	const handleEditTariff = (flightId, tariffId) => {
+	const handleEditFlightTariff = (flightId, flightTariffId) => {
 		setTariffAction('edit');
 		setSelectedFlightId(flightId);
-		setSelectedTariffId(tariffId);
+		setSelectedFlightTariffId(flightTariffId);
 		setTariffDialogOpen(true);
 	};
 
-	const handleOpenDeleteTariffDialog = (tariffId) => {
-		setDeleteTariffDialog({ open: true, tariffId });
+	const handleOpenDeleteFlightTariffDialog = (flightTariffId) => {
+		setDeleteFlightTariffDialog({ open: true, flightTariffId });
 	};
 
-	const handleCloseDeleteTariffDialog = () => {
-		setDeleteTariffDialog({ open: false, tariffId: null });
+	const handleCloseDeleteFlightTariffDialog = () => {
+		setDeleteFlightTariffDialog({ open: false, flightTariffId: null });
 	};
 
-	const confirmDeleteTariff = () => {
-		dispatch(deleteFlightTariff(deleteTariffDialog.tariffId));
-		handleCloseDeleteTariffDialog();
+	const confirmDeleteFlightTariff = () => {
+		dispatch(deleteFlightTariff(deleteFlightTariffDialog.flightTariffId));
+		handleCloseDeleteFlightTariffDialog();
 	};
 
 	const handleTariffDialogClose = () => {
 		setSelectedFlightId(null);
+		setSelectedFlightTariffId(null);
 		setTariffAction(null);
-		setSelectedTariffId(null);
 		setTariffDialogOpen(false);
 	};
 
@@ -153,8 +153,8 @@ const FlightManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: airlineOptions,
 			formatter: (value) => {
-				const airline = getAirlineById(value);
-				return airline ? `${airline.iata_code}` : value;
+				const airline = airlineOptions.find((option) => option.value === value);
+				return airline ? `${airline.label}` : value;
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
 		},
@@ -182,6 +182,7 @@ const FlightManagement = () => {
 			apiKey: 'aircraft',
 			label: FIELD_LABELS.FLIGHT.aircraft,
 			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
@@ -260,7 +261,7 @@ const FlightManagement = () => {
 									color='primary'
 									onClick={(e) => {
 										e.stopPropagation();
-										handleAddTariff(item.id);
+										handleAddFlightTariff(item.id);
 									}}
 								>
 									<AddCircleIcon />
@@ -272,6 +273,13 @@ const FlightManagement = () => {
 									const baseTariff = getTariffById(ft.tariff_id) || {};
 									const seatClass = ENUM_LABELS.SEAT_CLASS[baseTariff.seat_class];
 									const orderNumber = baseTariff.order_number;
+									const tariffPrice = baseTariff.price;
+									const currency = ENUM_LABELS.CURRENCY[baseTariff.currency];
+									const seatsNumber = ft.seats_number;
+
+									const tariffLabel = `${seatClass} - ${
+										UI_LABELS.ADMIN.modules.tariffs.tariff
+									} ${orderNumber} - ${tariffPrice} ${currency} - ${seatsNumber} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
 
 									return (
 										<Box
@@ -283,7 +291,7 @@ const FlightManagement = () => {
 												backgroundColor: 'rgba(0,0,0,0.04)',
 												borderRadius: 1,
 												p: 0.5,
-												width: '100%',
+												width: 'auto',
 											}}
 										>
 											<Typography
@@ -296,7 +304,7 @@ const FlightManagement = () => {
 													textOverflow: 'ellipsis',
 												}}
 											>
-												{`${seatClass} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`}
+												{tariffLabel}
 											</Typography>
 											<Box sx={{ display: 'flex', flexShrink: 0 }}>
 												<Tooltip
@@ -308,7 +316,7 @@ const FlightManagement = () => {
 														color='primary'
 														onClick={(e) => {
 															e.stopPropagation();
-															handleEditTariff(item.id, ft.id);
+															handleEditFlightTariff(item.id, ft.id);
 														}}
 													>
 														<EditIcon fontSize='small' />
@@ -323,7 +331,7 @@ const FlightManagement = () => {
 														color='error'
 														onClick={(e) => {
 															e.stopPropagation();
-															handleOpenDeleteTariffDialog(ft.id);
+															handleOpenDeleteFlightTariffDialog(ft.id);
 														}}
 													>
 														<DeleteIcon fontSize='small' />
@@ -339,7 +347,7 @@ const FlightManagement = () => {
 										color='primary'
 										onClick={(e) => {
 											e.stopPropagation();
-											handleAddTariff(item.id);
+											handleAddFlightTariff(item.id);
 										}}
 										sx={{ mt: 0.5 }}
 									>
@@ -402,11 +410,11 @@ const FlightManagement = () => {
 				tariffDialogOpen={tariffDialogOpen}
 				onClose={handleTariffDialogClose}
 				action={tariffAction}
-				flightTariffId={selectedTariffId}
+				flightTariffId={selectedFlightTariffId}
 			/>
 
 			{/* Delete tariff dialog */}
-			<Dialog open={deleteTariffDialog.open} onClose={handleCloseDeleteTariffDialog}>
+			<Dialog open={deleteFlightTariffDialog.open} onClose={handleCloseDeleteFlightTariffDialog}>
 				<DialogTitle id='delete-tariff-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
 				<DialogContent>
 					<Typography id='delete-tariff-dialog-description'>
@@ -414,10 +422,10 @@ const FlightManagement = () => {
 					</Typography>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleCloseDeleteTariffDialog} color='primary'>
+					<Button onClick={handleCloseDeleteFlightTariffDialog} color='primary'>
 						{UI_LABELS.BUTTONS.cancel}
 					</Button>
-					<Button onClick={confirmDeleteTariff} color='error' variant='contained'>
+					<Button onClick={confirmDeleteFlightTariff} color='error' variant='contained'>
 						{UI_LABELS.BUTTONS.delete}
 					</Button>
 				</DialogActions>

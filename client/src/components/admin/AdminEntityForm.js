@@ -14,25 +14,23 @@ const AdminEntityForm = ({
 	editButtonText,
 	externalUpdates = {},
 }) => {
-	const initializeFormData = (data) => {
-		const result = { ...(data || {}) };
-		fields.forEach((field) => {
-			if (result[field.name] === undefined && field.defaultValue !== undefined) {
-				result[field.name] = field.defaultValue;
+
+	const getInitialFormData = () => {
+		if (isEditing && initialData?.id) {
+			return initialData;
+		}
+		return fields.reduce((acc, field) => {
+			if (field.defaultValue !== undefined && acc[field.name] === undefined) {
+				acc[field.name] = field.defaultValue;
 			}
-		});
-		return result;
+			return acc;
+		}, {});
 	};
 
-	const [formData, setFormData] = useState(() => initializeFormData(initialData));
+	const [formData, setFormData] = useState(getInitialFormData);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState({});
-
-	useEffect(() => {
-		const data = isEditing && initialData?.id ? initialData : initialData;
-		setFormData(initializeFormData(data));
-	}, [isEditing, initialData, fields]);
 
 	useEffect(() => {
 		if (Object.keys(externalUpdates).length > 0) {
@@ -84,19 +82,18 @@ const AdminEntityForm = ({
 
 			setTimeout(() => onClose(), 1000);
 		} catch (error) {
-			let message = '';
 			if (typeof error === 'string') {
 				setErrorMessage(error);
 			} else if (error?.message) {
 				setErrorMessage(error.message);
-			} else if (error?.errors) {
+			} else if (typeof error === 'object') {
 				setErrorMessage(
-					Object.entries(error.errors)
+					Object.entries(error)
 						.map(([field, msg]) => `${field}: ${msg}`)
 						.join('; ')
 				);
 			} else {
-				message = UI_LABELS.ERRORS.unknown;
+				setErrorMessage(UI_LABELS.ERRORS.unknown);
 			}
 			setSuccessMessage('');
 		}

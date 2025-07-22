@@ -118,23 +118,17 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
 	}, [isEditing, flightTariff, tariffs, flightId, seatClass]);
 
-	const handleSaveTariff = async (tariffData) => {
+	const handleSaveTariff = (tariffData) => {
 		const formattedData = tariffManager.toApiFormat({
 			...tariffData,
 			flightId,
 		});
 
-		try {
-			return await dispatch(
-				isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)
-			).unwrap();
-		} catch (error) {
-			throw error;
-		}
+		return dispatch(isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)).unwrap();
 	};
 
 	const handleChange = (field, value) => {
-		if (field === FIELDS.seatClass.key) {
+		if (field === FIELDS.seatClass.key && value !== seatClass) {
 			setSeatClass(value);
 			setFormUpdates({ flightTariffId: '' });
 		}

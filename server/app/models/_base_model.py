@@ -16,6 +16,13 @@ class ModelValidationError(Exception):
         super().__init__(message)
 
 
+class NotFoundError(Exception):
+    """Exception raised when a requested object was not found"""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
 class BaseModel(db.Model):
     __abstract__ = True
 
@@ -62,6 +69,7 @@ class BaseModel(db.Model):
     def _check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
+        """Check if the provided data violates unique constraints"""
         errors: Dict[str, str] = {}
         for columns in cls._unique_constraints():
             if not all(col in data for col in columns):
@@ -77,10 +85,53 @@ class BaseModel(db.Model):
         return errors
 
     @classmethod
+    def _check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
+        """Ensure that all provided foreign keys reference existing rows"""
+        for column in cls.__table__.columns:
+            if column.foreign_keys and column.name in data:
+                value = data[column.name]
+                if value is None:
+                    continue
+                fk = next(iter(column.foreign_keys))
+                target_table = fk.column.table
+                target_cls = next(
+                    (
+                        mapper.class_
+                        for mapper in db.Model.registry.mappers
+                        if hasattr(mapper.class_, "__tablename__") and mapper.class_.__tablename__ == target_table.name
+                    ),
+                    None,
+                )
+                if target_cls is not None and session.get(target_cls, value) is None:
+                    raise NotFoundError(f"{target_cls.__name__} not found")
+
+    @classmethod
+    def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
+        session = session or db.session
+        instance = cls.get_by_id(_id)
+        if not instance:
+            raise NotFoundError(f"{cls.__name__} not found")
+        return instance
+
+    @classmethod
+    def delete_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
+        session = session or db.session
+        instance = cls.get_or_404(_id, session)
+        try:
+            session.delete(instance)
+            session.commit()
+            return instance
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({"message": str(e)}) from e
+
+    @classmethod
     def create(cls, session: Session | None = None, **data) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls(**data)
-        errors = cls._check_unique(session, data)
+        filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
+        cls._check_foreign_keys_exist(session, filtered_data)
+        errors = cls._check_unique(session, filtered_data)
         if errors:
             raise ModelValidationError(errors)
 
@@ -99,13 +150,13 @@ class BaseModel(db.Model):
         session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
-            return None
+            raise NotFoundError(f"{cls.__name__} not found")
 
-        filtered_data = instance.__filter_out_non_existing_fields(data)
+        filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
+        cls._check_foreign_keys_exist(session, filtered_data)
+        errors = cls._check_unique(session, filtered_data, instance.id)
         for key, value in filtered_data.items():
             setattr(instance, key, value)
-
-        errors = cls._check_unique(session, filtered_data, instance.id)
         if errors:
             session.rollback()
             raise ModelValidationError(errors)
@@ -123,15 +174,15 @@ class BaseModel(db.Model):
     ) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_by_id(_id)
-        if instance:
-            try:
-                session.delete(instance)
-                session.commit()
-                return instance
-            except IntegrityError as e:
-                session.rollback()
-                raise ModelValidationError({'message': str(e)}) from e
-        return None
+        if not instance:
+            raise NotFoundError(f"{cls.__name__} not found")
+        try:
+            session.delete(instance)
+            session.commit()
+            return instance
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'message': str(e)}) from e
 
     @classmethod
     def delete_all(cls, session: Session | None = None) -> int:

@@ -1,8 +1,7 @@
 from flask import request, jsonify, send_file
 
 from app.models.airline import Airline
-from app.models.country import Country
-from app.models._base_model import ModelValidationError
+from app.models._base_model import ModelValidationError, NotFoundError
 from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx import is_xlsx_file, create_xlsx
 
@@ -15,49 +14,46 @@ def get_airlines(current_user):
 
 @admin_required
 def get_airline(current_user, airline_id):
-    airline = Airline.get_by_id(airline_id)
-    if airline:
+    try:
+        airline = Airline.get_or_404(airline_id)
         return jsonify(airline.to_dict()), 200
-    return jsonify({'message': 'Airline not found'}), 404
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
 def create_airline(current_user):
     body = request.json
-    country_id = body.get('country_id')
-    if country_id is not None and not Country.get_by_id(country_id):
-        return jsonify({'message': 'Country not found'}), 404
     try:
         airline = Airline.create(**body)
         return jsonify(airline.to_dict()), 201
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
 def update_airline(current_user, airline_id):
     body = request.json
-    country_id = body.get('country_id')
-    if country_id is not None and not Country.get_by_id(country_id):
-        return jsonify({'message': 'Country not found'}), 404
     try:
         updated = Airline.update(airline_id, **body)
-        if updated:
-            return jsonify(updated.to_dict())
-        return jsonify({'message': 'Airline not found'}), 404
+        return jsonify(updated.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
 def delete_airline(current_user, airline_id):
     try:
-        deleted = Airline.delete(airline_id)
-        if deleted:
-            return jsonify(deleted.to_dict())
-        return jsonify({'message': 'Airline not found'}), 404
+        deleted = Airline.delete_or_404(airline_id)
+        return jsonify(deleted.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
