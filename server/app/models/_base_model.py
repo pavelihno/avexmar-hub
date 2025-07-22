@@ -108,7 +108,9 @@ class BaseModel(db.Model):
     @classmethod
     def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
-        instance = cls.get_or_404(_id, session)
+        instance = cls.get_by_id(_id)
+        if not instance:
+            raise NotFoundError(f"{cls.__name__} not found")
         return instance
 
     @classmethod
