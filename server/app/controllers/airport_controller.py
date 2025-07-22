@@ -2,7 +2,7 @@ from flask import request, jsonify, send_file
 
 from app.models.airport import Airport
 from app.middlewares.auth_middleware import admin_required
-from app.models._base_model import ModelValidationError
+from app.models._base_model import ModelValidationError, NotFoundError
 from app.utils.xlsx import is_xlsx_file, create_xlsx
 
 
@@ -14,10 +14,11 @@ def get_airports(current_user):
 
 @admin_required
 def get_airport(current_user, airport_id):
-    airport = Airport.get_by_id(airport_id)
-    if airport:
+    try:
+        airport = Airport.get_or_404(airport_id)
         return jsonify(airport.to_dict()), 200
-    return jsonify({'message': 'Airport not found'}), 404
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
@@ -28,6 +29,8 @@ def create_airport(current_user):
         return jsonify(airport.to_dict()), 201
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
@@ -35,22 +38,22 @@ def update_airport(current_user, airport_id):
     body = request.json
     try:
         updated = Airport.update(airport_id, **body)
-        if updated:
-            return jsonify(updated.to_dict())
-        return jsonify({'message': 'Airport not found'}), 404
+        return jsonify(updated.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
 def delete_airport(current_user, airport_id):
     try:
-        deleted = Airport.delete(airport_id)
-        if deleted:
-            return jsonify(deleted.to_dict())
-        return jsonify({'message': 'Airport not found'}), 404
+        deleted = Airport.delete_or_404(airport_id)
+        return jsonify(deleted.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
