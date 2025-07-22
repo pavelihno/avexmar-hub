@@ -1,4 +1,5 @@
 import datetime
+from sqlalchemy.orm import Session
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -54,8 +55,14 @@ class Passenger(BaseModel):
         return 1 <= years < 3
 
     @classmethod
-    def create(cls, **kwargs):
-        if kwargs['document_type'] in (Config.DOCUMENT_TYPE['passport'], Config.DOCUMENT_TYPE['birth_certificate']):
-            kwargs['citizenship_id'] = Country.get_by_code(Config.DEFAULT_CITIZENSHIP_CODE).id
+    def create(cls, session: Session | None = None, **kwargs):
+        session = session or db.session
+        if kwargs['document_type'] in (
+            Config.DOCUMENT_TYPE['passport'],
+            Config.DOCUMENT_TYPE['birth_certificate'],
+        ):
+            kwargs['citizenship_id'] = Country.get_by_code(
+                Config.DEFAULT_CITIZENSHIP_CODE
+            ).id
 
-        return super().create(**kwargs)
+        return super().create(session, **kwargs)

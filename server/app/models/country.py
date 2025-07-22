@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 from app.database import db
 from app.models._base_model import BaseModel
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
@@ -32,10 +34,11 @@ class Country(BaseModel):
         return super().get_all(sort_by='name', descending=False)
 
     @classmethod
-    def create(cls, **kwargs):
+    def create(cls, session: Session | None = None, **kwargs):
+        session = session or db.session
         kwargs['code_a2'] = kwargs.get('code_a2', '').upper()
         kwargs['code_a3'] = kwargs.get('code_a3', '').upper()
-        return super().create(**kwargs)
+        return super().create(session, **kwargs)
 
     @classmethod
     def get_xlsx_template(cls):
@@ -49,7 +52,8 @@ class Country(BaseModel):
         return cls.query.filter((cls.code_a2 == code) | (cls.code_a3 == code)).first()
 
     @classmethod
-    def upload_from_file(cls, file):
+    def upload_from_file(cls, file, session: Session | None = None):
+        session = session or db.session
         rows = parse_xlsx(
             file, cls.upload_fields,
             required_fields=['name', 'code_a2', 'code_a3']
@@ -59,7 +63,7 @@ class Country(BaseModel):
         for row in rows:
             if not row.get('error'):
                 try:
-                    country = cls.create(**row)
+                    country = cls.create(session, **row)
                     countries.append(country)
                 except Exception as e:
                     row['error'] = str(e)

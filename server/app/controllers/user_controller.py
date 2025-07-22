@@ -46,10 +46,8 @@ def update_user(current_user, user_id):
 @admin_required
 def delete_user(current_user, user_id):
     try:
-        deleted_user = User.delete(user_id)
-        if deleted_user:
-            return jsonify(deleted_user.to_dict())
-        return jsonify({'message': 'User not found'}), 404
+        deleted_user = User.delete_or_404(user_id)
+        return jsonify(deleted_user.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
 
