@@ -24,13 +24,9 @@ const PassengerManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
-		firstName: {
-			key: 'firstName',
-			apiKey: 'first_name',
-			label: FIELD_LABELS.PASSENGER.first_name,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
+		bookingId: {
+			key: 'bookingId',
+			apiKey: 'booking_id',
 		},
 		lastName: {
 			key: 'lastName',
@@ -40,12 +36,13 @@ const PassengerManagement = () => {
 			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
 		},
-		middleName: {
-			key: 'middleName',
-			apiKey: 'middle_name',
-			label: FIELD_LABELS.PASSENGER.middle_name,
+		firstName: {
+			key: 'firstName',
+			apiKey: 'first_name',
+			label: FIELD_LABELS.PASSENGER.first_name,
 			type: FIELD_TYPES.TEXT,
 			fullWidth: true,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
 		},
 		gender: {
 			key: 'gender',
@@ -72,14 +69,50 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.document_type,
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('DOCUMENT_TYPE'),
+			excludeFromTable: true,
 		},
 		documentNumber: {
 			key: 'documentNumber',
 			apiKey: 'document_number',
 			label: FIELD_LABELS.PASSENGER.document_number,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : null),
+		},
+		documentExpiryDate: {
+			key: 'documentExpiryDate',
+			apiKey: 'document_expiry_date',
+			label: FIELD_LABELS.PASSENGER.document_expiry_date,
+			type: FIELD_TYPES.DATE,
+			formatter: (value) => formatDate(value),
+		},
+		citizenshipId: {
+			key: 'citizenshipId',
+			apiKey: 'citizenship_id',
+			label: FIELD_LABELS.PASSENGER.citizenship_id,
+			type: FIELD_TYPES.SELECT,
+			options: {},
+			formatter: (value) => null,
+		},
+		emailAddress: {
+			key: 'emailAddress',
+			apiKey: 'email_address',
+			label: FIELD_LABELS.PASSENGER.email_address,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.email_address.REQUIRED : null),
+		},
+		phoneNumber: {
+			key: 'phoneNumber',
+			apiKey: 'phone_number',
+			label: FIELD_LABELS.PASSENGER.phone_number,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.phone_number.REQUIRED : null),
+		},
+		isContact: {
+			key: 'isContact',
+			apiKey: 'is_contact',
+			label: FIELD_LABELS.PASSENGER.is_contact,
+			type: FIELD_TYPES.BOOLEAN,
+			excludeFromTable: true,
 		},
 	};
 
