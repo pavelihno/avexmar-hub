@@ -12,7 +12,7 @@ class FlightTariff(BaseModel):
 
     @classmethod
     def __check_seat_class_unique(cls, session, flight_id, tariff_id, instance_id=None):
-        """Ensure only one tariff per flight for the same seat class."""
+        """Ensure only one tariff per flight for the same seat class"""
         tariff = Tariff.get_by_id(tariff_id)
         if not tariff:
             return

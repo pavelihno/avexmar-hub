@@ -69,6 +69,7 @@ class BaseModel(db.Model):
     def _check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
+        """Check if the provided data violates unique constraints"""
         errors: Dict[str, str] = {}
         for columns in cls._unique_constraints():
             if not all(col in data for col in columns):
@@ -85,7 +86,7 @@ class BaseModel(db.Model):
 
     @classmethod
     def _check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
-        """Ensure that all provided foreign keys reference existing rows."""
+        """Ensure that all provided foreign keys reference existing rows"""
         for column in cls.__table__.columns:
             if column.foreign_keys and column.name in data:
                 value = data[column.name]
@@ -95,9 +96,9 @@ class BaseModel(db.Model):
                 target_table = fk.column.table
                 target_cls = next(
                     (
-                        c
-                        for c in db.Model._decl_class_registry.values()
-                        if hasattr(c, "__tablename__") and c.__tablename__ == target_table.name
+                        mapper.class_
+                        for mapper in db.Model.registry.mappers
+                        if hasattr(mapper.class_, "__tablename__") and mapper.class_.__tablename__ == target_table.name
                     ),
                     None,
                 )
@@ -105,7 +106,7 @@ class BaseModel(db.Model):
                     raise NotFoundError(f"{target_cls.__name__} not found")
 
     @classmethod
-    def get_or_404(cls, _id, session: Session | None = None) -> "BaseModel":
+    def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
@@ -113,7 +114,7 @@ class BaseModel(db.Model):
         return instance
 
     @classmethod
-    def delete_or_404(cls, _id, session: Session | None = None) -> "BaseModel":
+    def delete_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
         try:
