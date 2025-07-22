@@ -1,5 +1,6 @@
 import random
 import string
+from sqlalchemy.orm import Session
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -44,10 +45,10 @@ class Booking(BaseModel):
         return super().get_all(sort_by='booking_number', descending=False)
 
     @classmethod
-    def __generate_booking_number(cls):
+    def __generate_booking_number(cls, session: Session):
         """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
-            booking.booking_number for booking in cls.query.all()}
+            booking.booking_number for booking in session.query(cls).all()}
 
         while True:
             booking_number = ''.join(
@@ -59,6 +60,7 @@ class Booking(BaseModel):
                 return booking_number
 
     @classmethod
-    def create(cls, **kwargs):
-        kwargs['booking_number'] = cls.__generate_booking_number()
-        return super().create(**kwargs)
+    def create(cls, session: Session | None = None, **kwargs):
+        session = session or db.session
+        kwargs['booking_number'] = cls.__generate_booking_number(session)
+        return super().create(session, **kwargs)

@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 from app.database import db
 from app.models._base_model import BaseModel
 from app.config import Config
@@ -25,11 +27,12 @@ class Tariff(BaseModel):
         return super().get_all(sort_by='seat_class', descending=False)
 
     @classmethod
-    def create(cls, session=None, **data):
+    def create(cls, session: Session | None = None, **data):
+        session = session or db.session
         seat_class = data.get('seat_class')
 
         if seat_class is not None:
-            query = cls.query.filter_by(seat_class=seat_class)
+            query = session.query(cls).filter_by(seat_class=seat_class)
             max_order = query.order_by(cls.order_number.desc()).first()
             next_order = (max_order.order_number + 1) if max_order else 1
             data['order_number'] = next_order
