@@ -4,7 +4,6 @@ from app.models.user import User
 from app.middlewares.auth_middleware import admin_required, login_required
 
 
-
 @admin_required
 def create_user(current_user):
     body = request.json

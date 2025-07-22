@@ -4,7 +4,6 @@ from app.models.tariff import Tariff
 from app.middlewares.auth_middleware import admin_required
 
 
-
 @admin_required
 def get_tariffs(current_user):
     tariffs = Tariff.get_all()
