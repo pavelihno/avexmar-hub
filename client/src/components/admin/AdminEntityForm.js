@@ -14,25 +14,23 @@ const AdminEntityForm = ({
 	editButtonText,
 	externalUpdates = {},
 }) => {
-	const [formData, setFormData] = useState({});
+
+	const getInitialFormData = () => {
+		if (isEditing && initialData?.id) {
+			return initialData;
+		}
+		return fields.reduce((acc, field) => {
+			if (field.defaultValue !== undefined && acc[field.name] === undefined) {
+				acc[field.name] = field.defaultValue;
+			}
+			return acc;
+		}, {});
+	};
+
+	const [formData, setFormData] = useState(getInitialFormData);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState({});
-
-	useEffect(() => {
-		if (isEditing && initialData?.id) {
-			setFormData(initialData);
-		} else if (!isEditing) {
-			setFormData(
-				fields.reduce((acc, field) => {
-					if (field.defaultValue !== undefined && acc[field.name] === undefined) {
-						acc[field.name] = field.defaultValue;
-					}
-					return acc;
-				}, {})
-			);
-		}
-	}, [isEditing, initialData, fields]);
 
 	useEffect(() => {
 		if (Object.keys(externalUpdates).length > 0) {
