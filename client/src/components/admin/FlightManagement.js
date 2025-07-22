@@ -27,6 +27,7 @@ import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+import { DEFAULT_TIME } from '../../constants/formats';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();
@@ -201,11 +202,13 @@ const FlightManagement = () => {
 			apiKey: 'scheduled_departure_time',
 			label: FIELD_LABELS.FLIGHT.scheduled_departure_time,
 			type: FIELD_TYPES.TIME,
+			defaultValue: DEFAULT_TIME,
 			excludeFromTable: true,
 			toApi: (value) => formatTimeToAPI(value),
 			toUi: (value) => formatTimeToUI(value),
 			formatter: (value) => formatTime(value),
 			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_departure_time.REQUIRED;
 				if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
 				return null;
 			},
@@ -228,11 +231,13 @@ const FlightManagement = () => {
 			apiKey: 'scheduled_arrival_time',
 			label: FIELD_LABELS.FLIGHT.scheduled_arrival_time,
 			type: FIELD_TYPES.TIME,
+			defaultValue: DEFAULT_TIME,
 			excludeFromTable: true,
 			toApi: (value) => formatTimeToAPI(value),
 			toUi: (value) => formatTimeToUI(value),
 			formatter: (value) => formatTime(value),
 			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.FLIGHT.scheduled_arrival_time.REQUIRED;
 				if (value && !validateTime(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_TIME;
 				return null;
 			},
