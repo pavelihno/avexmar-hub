@@ -51,6 +51,10 @@ export const UI_LABELS = {
 	},
 
 	ABOUT: {
+		company_name: 'АВЕКСМАР',
+		contact_email: 'contact@avexmar.com',
+		contact_phone: '+7 (123) 456-78-90',
+		contact_address: 'г. Москва, ул. Примерная, д. 1',
 		about_us: 'О нас',
 		copied: 'Скопирован',
 		contact_info: 'Контактная информация',

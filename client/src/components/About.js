@@ -34,12 +34,12 @@ const About = () => {
 	const companyDescription = UI_LABELS.ABOUT.company_description;
 
 	const contactInfo = {
-		address: process.env.REACT_APP_ADDRESS,
-		phone: process.env.REACT_APP_CONTACT_PHONE,
-		email: process.env.REACT_APP_CONTACT_EMAIL,
+		address: UI_LABELS.ABOUT.contact_address,
+		phone: UI_LABELS.ABOUT.contact_phone,
+		email: UI_LABELS.ABOUT.contact_email,
 	};
 
-	const companyName = process.env.REACT_APP_COMPANY_NAME;
+	const companyName = UI_LABELS.ABOUT.company_name;
 
 	const handleCopy = (text, type) => {
 		navigator.clipboard
