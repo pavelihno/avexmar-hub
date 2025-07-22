@@ -32,6 +32,12 @@ class Country(BaseModel):
         return super().get_all(sort_by='name', descending=False)
 
     @classmethod
+    def create(cls, **kwargs):
+        kwargs['code_a2'] = kwargs.get('code_a2', '').upper()
+        kwargs['code_a3'] = kwargs.get('code_a3', '').upper()
+        return super().create(**kwargs)
+
+    @classmethod
     def get_xlsx_template(cls):
         return generate_xlsx_template(cls.upload_fields)
 
