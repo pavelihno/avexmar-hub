@@ -28,11 +28,11 @@ const rootReducer = combineReducers({
 	tariffs: tariffsReducer,
 	flightTariffs: flightTariffsReducer,
 	tickets: ticketsReducer,
-        discounts: discountReducer,
-        bookings: bookingReducer,
-        passengers: passengerReducer,
-        bookingPassengers: bookingPassengerReducer,
-        users: userReducer,
+	discounts: discountReducer,
+	bookings: bookingReducer,
+	passengers: passengerReducer,
+	bookingPassengers: bookingPassengerReducer,
+	users: userReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));
