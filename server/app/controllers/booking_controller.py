@@ -2,7 +2,7 @@ from flask import request, jsonify
 
 from app.models.booking import Booking
 from app.middlewares.auth_middleware import admin_required
-from app.models._base_model import ModelValidationError
+from app.models._base_model import ModelValidationError, NotFoundError
 
 
 @admin_required
@@ -13,10 +13,11 @@ def get_bookings(current_user):
 
 @admin_required
 def get_booking(current_user, booking_id):
-    booking = Booking.get_by_id(booking_id)
-    if booking:
+    try:
+        booking = Booking.get_or_404(booking_id)
         return jsonify(booking.to_dict()), 200
-    return jsonify({'message': 'Booking not found'}), 404
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
@@ -27,6 +28,8 @@ def create_booking(current_user):
         return jsonify(booking.to_dict()), 201
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
@@ -34,19 +37,19 @@ def update_booking(current_user, booking_id):
     body = request.json
     try:
         updated = Booking.update(booking_id, **body)
-        if updated:
-            return jsonify(updated.to_dict())
-        return jsonify({'message': 'Booking not found'}), 404
+        return jsonify(updated.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
 
 
 @admin_required
 def delete_booking(current_user, booking_id):
     try:
-        deleted = Booking.delete(booking_id)
-        if deleted:
-            return jsonify(deleted.to_dict())
-        return jsonify({'message': 'Booking not found'}), 404
+        deleted = Booking.delete_or_404(booking_id)
+        return jsonify(deleted.to_dict())
     except ModelValidationError as e:
         return jsonify({'errors': e.errors}), 400
+    except NotFoundError as e:
+        return jsonify({'message': str(e)}), 404
