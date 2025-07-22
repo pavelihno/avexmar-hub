@@ -153,8 +153,8 @@ const FlightManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: airlineOptions,
 			formatter: (value) => {
-				const airline = getAirlineById(value);
-				return airline ? `${airline.iata_code}` : value;
+				const airline = airlineOptions.find((option) => option.value === value);
+				return airline ? `${airline.label}` : value;
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
 		},
