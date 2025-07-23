@@ -6,23 +6,29 @@ import { Box, Typography } from '@mui/material';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
-	fetchBookings,
-	createBooking,
-	updateBooking,
-	deleteBooking,
-	deleteAllBookings,
+        fetchBookings,
+        createBooking,
+        updateBooking,
+        deleteBooking,
+        deleteAllBookings,
 } from '../../redux/actions/booking';
+import { fetchBookingPassengers } from '../../redux/actions/bookingPassenger';
+import { fetchPassengers } from '../../redux/actions/passenger';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
 
 const BookingManagement = () => {
-	const dispatch = useDispatch();
-	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
+        const dispatch = useDispatch();
+        const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
+        const { bookingPassengers } = useSelector((state) => state.bookingPassengers);
+        const { passengers } = useSelector((state) => state.passengers);
 
-	useEffect(() => {
-		dispatch(fetchBookings());
-	}, [dispatch]);
+        useEffect(() => {
+                dispatch(fetchBookings());
+                dispatch(fetchBookingPassengers());
+                dispatch(fetchPassengers());
+        }, [dispatch]);
 
 	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
 
@@ -108,52 +114,55 @@ const BookingManagement = () => {
 			label: FIELD_LABELS.BOOKING.passengers,
 			type: FIELD_TYPES.CUSTOM,
 			excludeFromForm: true,
-			renderField: (item) => {
-				const passengers = []; // get the passengers for the given booking from bookingPassengers
-				return (
-					<Box
-						sx={{
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'flex-start',
-							minWidth: '200px',
-						}}
-					>
-						{passengers.map((p) => {
-							const passengerLabel = ''; // format the passenger label as needed
-							return (
-								<Box
-									key={p.id}
-									sx={{
-										display: 'flex',
-										alignItems: 'center',
-										mb: 0.5,
-										backgroundColor: 'rgba(0,0,0,0.04)',
-										borderRadius: 1,
-										p: 0.5,
-										width: 'auto',
-									}}
-								>
-									<Typography
-										variant='body2'
-										sx={{
-											mr: 1,
-											flexGrow: 1,
-											whiteSpace: 'nowrap',
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-										}}
-									>
-										{passengerLabel}
-									</Typography>
-								</Box>
-							);
-						})}
-					</Box>
-				);
-			},
-		},
-	};
+                        renderField: (item) => {
+                                const bps = bookingPassengers.filter((bp) => bp.booking_id === item.id);
+                                const linked = bps
+                                        .map((bp) => passengers.find((p) => p.id === bp.passenger_id))
+                                        .filter(Boolean);
+                                return (
+                                        <Box
+                                                sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'flex-start',
+                                                        minWidth: '200px',
+                                                }}
+                                        >
+                                                {linked.map((p) => {
+                                                        const passengerLabel = `${p.last_name} ${p.first_name}`;
+                                                        return (
+                                                                <Box
+                                                                        key={p.id}
+                                                                        sx={{
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                mb: 0.5,
+                                                                                backgroundColor: 'rgba(0,0,0,0.04)',
+                                                                                borderRadius: 1,
+                                                                                p: 0.5,
+                                                                                width: 'auto',
+                                                                        }}
+                                                                >
+                                                                        <Typography
+                                                                                variant='body2'
+                                                                                sx={{
+                                                                                        mr: 1,
+                                                                                        flexGrow: 1,
+                                                                                        whiteSpace: 'nowrap',
+                                                                                        overflow: 'hidden',
+                                                                                        textOverflow: 'ellipsis',
+                                                                                }}
+                                                                        >
+                                                                                {passengerLabel}
+                                                                        </Typography>
+                                                                </Box>
+                                                        );
+                                                })}
+                                        </Box>
+                                );
+                        },
+                },
+        };
 
 	const adminManager = createAdminManager(FIELDS, {
 		addButtonText: (item) => UI_LABELS.ADMIN.modules.bookings.add_button,

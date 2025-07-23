@@ -55,9 +55,9 @@ class Passenger(BaseModel):
         return 1 <= years < 3
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
-        session = session or db.session
-        if kwargs['document_type'] in (
+    def _prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
+        """Apply defaults and reuse existing passenger if unique data matches."""
+        if kwargs.get('document_type') in (
             Config.DOCUMENT_TYPE.passport.value,
             Config.DOCUMENT_TYPE.birth_certificate.value,
         ):
@@ -65,17 +65,45 @@ class Passenger(BaseModel):
                 Config.DEFAULT_CITIZENSHIP_CODE
             ).id
 
-        # Check for existing passenger with the same unique fields
-        existing_passenger = session.query(cls).filter_by(
-            first_name=kwargs['first_name'],
-            last_name=kwargs['last_name'],
-            birth_date=kwargs['birth_date'],
-            document_type=kwargs['document_type'],
-            document_number=kwargs['document_number']
-        ).first()
-        if existing_passenger:
-            return super().update(
-                existing_passenger.id, session, **kwargs
-            )
+        unique_fields = [
+            'first_name',
+            'last_name',
+            'birth_date',
+            'document_type',
+            'document_number',
+        ]
+
+        if all(field in kwargs for field in unique_fields):
+            existing = session.query(cls).filter_by(
+                first_name=kwargs['first_name'],
+                last_name=kwargs['last_name'],
+                birth_date=kwargs['birth_date'],
+                document_type=kwargs['document_type'],
+                document_number=kwargs['document_number'],
+            ).first()
+            if existing and (current_id is None or existing.id != current_id):
+                super().update(existing.id, session, **kwargs)
+                return existing
+
+        return None
+
+    @classmethod
+    def create(cls, session: Session | None = None, **kwargs):
+        session = session or db.session
+
+        existing = cls._prepare_for_save(session, kwargs)
+        if existing:
+            return existing
 
         return super().create(session, **kwargs)
+
+    @classmethod
+    def update(cls, _id, session: Session | None = None, **kwargs):
+        """Update passenger or reuse existing one with the same unique data."""
+        session = session or db.session
+
+        existing = cls._prepare_for_save(session, kwargs, current_id=_id)
+        if existing:
+            return existing
+
+        return super().update(_id, session, **kwargs)
