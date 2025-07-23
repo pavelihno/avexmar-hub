@@ -17,7 +17,14 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import AdminEntityForm from './AdminEntityForm';
 import { dateLocale } from '../../constants';
-import { DATE_FORMAT, DATETIME_FORMAT, TIME_FORMAT, TIME_MASK } from '../../constants/formats';
+import {
+	DATE_FORMAT,
+	DATETIME_FORMAT,
+	DEFAULT_EMAIL,
+	DEFAULT_PHONE_NUMBER,
+	TIME_FORMAT,
+	TIME_MASK,
+} from '../../constants/formats';
 
 /**
  * Field type definitions
@@ -25,6 +32,8 @@ import { DATE_FORMAT, DATETIME_FORMAT, TIME_FORMAT, TIME_MASK } from '../../cons
 export const FIELD_TYPES = {
 	TEXT: 'text',
 	NUMBER: 'number',
+	EMAIL: 'email',
+	PHONE: 'phone',
 	DATE: 'date',
 	TIME: 'time',
 	DATETIME: 'dateTime',
@@ -43,6 +52,50 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 		const allProps = { ...defaultProps, ...props };
 
 		switch (type) {
+			case FIELD_TYPES.EMAIL: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{
+							placeholder: DEFAULT_EMAIL,
+							type: 'email',
+							autoComplete: 'email',
+							...field.inputProps,
+							...inputProps,
+						}}
+						sx={{ ...sx }}
+					/>
+				);
+			}
+
+			case FIELD_TYPES.PHONE: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{
+							placeholder: DEFAULT_PHONE_NUMBER,
+							type: 'tel',
+							autoComplete: 'tel',
+							...field.inputProps,
+							...inputProps,
+						}}
+						sx={{ ...sx }}
+					/>
+				);
+			}
+
 			case FIELD_TYPES.TEXT: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
 				return (

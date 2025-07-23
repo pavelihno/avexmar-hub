@@ -14,6 +14,7 @@ import discountReducer from './reducers/discount';
 import userReducer from './reducers/user';
 import bookingReducer from './reducers/booking';
 import passengerReducer from './reducers/passenger';
+import bookingPassengerReducer from './reducers/bookingPassenger';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
 	discounts: discountReducer,
 	bookings: bookingReducer,
 	passengers: passengerReducer,
+	bookingPassengers: bookingPassengerReducer,
 	users: userReducer,
 });
 

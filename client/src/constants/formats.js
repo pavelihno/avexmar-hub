@@ -9,3 +9,6 @@ export const TIME_MASK = '__:__';
 export const DATETIME_FORMAT = 'dd.MM.yyyy HH:mm';
 
 export const DEFAULT_TIME = set(new Date(), { hours: 0, minutes: 0 });
+
+export const DEFAULT_PHONE_NUMBER = '+71234567890';
+export const DEFAULT_EMAIL = 'ivanov.ivan@example.com';

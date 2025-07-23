@@ -148,9 +148,7 @@ class BaseModel(db.Model):
         cls, _id, session: Session | None = None, **data
     ) -> Optional['BaseModel']:
         session = session or db.session
-        instance = cls.get_by_id(_id)
-        if not instance:
-            raise NotFoundError(f"{cls.__name__} not found")
+        instance = cls.get_or_404(_id, session)
 
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
         cls._check_foreign_keys_exist(session, filtered_data)
@@ -173,16 +171,7 @@ class BaseModel(db.Model):
         cls, _id, session: Session | None = None
     ) -> Optional['BaseModel']:
         session = session or db.session
-        instance = cls.get_by_id(_id)
-        if not instance:
-            raise NotFoundError(f"{cls.__name__} not found")
-        try:
-            session.delete(instance)
-            session.commit()
-            return instance
-        except IntegrityError as e:
-            session.rollback()
-            raise ModelValidationError({'message': str(e)}) from e
+        return cls.delete_or_404(_id, session)
 
     @classmethod
     def delete_all(cls, session: Session | None = None) -> int:

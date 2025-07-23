@@ -21,7 +21,7 @@ import { logout } from '../redux/actions/auth';
 import { UI_LABELS } from '../constants';
 
 const Header = () => {
-	const companyName = process.env.REACT_APP_COMPANY_NAME;
+	const companyName = UI_LABELS.ABOUT.company_name;
 
 	const dispatch = useDispatch();
 

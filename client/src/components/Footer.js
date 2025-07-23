@@ -7,9 +7,9 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { UI_LABELS } from '../constants';
 
 const Footer = () => {
-	const companyName = process.env.REACT_APP_COMPANY_NAME;
+	const companyName = UI_LABELS.ABOUT.company_name;
 	const currentYear = new Date().getFullYear();
-	const contactEmail = process.env.REACT_APP_CONTACT_EMAIL;
+	const contactEmail = UI_LABELS.ABOUT.contact_email;
 
 	return (
 		<Box

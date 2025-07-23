@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
@@ -47,7 +49,8 @@ class Airport(BaseModel):
         return generate_xlsx_template(cls.upload_fields)
 
     @classmethod
-    def upload_from_file(cls, file):
+    def upload_from_file(cls, file, session: Session | None = None):
+        session = session or db.session
         rows = parse_xlsx(
             file,
             cls.upload_fields,
@@ -71,7 +74,8 @@ class Airport(BaseModel):
                     if not country:
                         raise ValueError('Invalid country code')
 
-                    airport = cls.create(**{
+                    airport = cls.create(session,
+                                       **{
                         **row,
                         'country_id': country.id,
                     })
