@@ -58,11 +58,24 @@ class Passenger(BaseModel):
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
         if kwargs['document_type'] in (
-            Config.DOCUMENT_TYPE['passport'],
-            Config.DOCUMENT_TYPE['birth_certificate'],
+            Config.DOCUMENT_TYPE.passport.value,
+            Config.DOCUMENT_TYPE.birth_certificate.value,
         ):
             kwargs['citizenship_id'] = Country.get_by_code(
                 Config.DEFAULT_CITIZENSHIP_CODE
             ).id
+
+        # Check for existing passenger with the same unique fields
+        existing_passenger = session.query(cls).filter_by(
+            first_name=kwargs['first_name'],
+            last_name=kwargs['last_name'],
+            birth_date=kwargs['birth_date'],
+            document_type=kwargs['document_type'],
+            document_number=kwargs['document_number']
+        ).first()
+        if existing_passenger:
+            return super().update(
+                existing_passenger.id, session, **kwargs
+            )
 
         return super().create(session, **kwargs)

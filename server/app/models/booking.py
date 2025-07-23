@@ -32,6 +32,7 @@ class Booking(BaseModel):
         return {
             'id': self.id,
             'booking_number': self.booking_number,
+            'booking_date': self.created_at.date().isoformat(),
             'status': self.status.value,
             'email_address': self.email_address,
             'phone_number': self.phone_number,

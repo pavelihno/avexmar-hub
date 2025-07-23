@@ -84,23 +84,41 @@ export const validateDateTime = (value) => {
 	}
 };
 
+export const validateEmail = (value) => {
+	// RFC 5322
+	if (!value) return false;
+	const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+	return emailRegex.test(value);
+};
+
+export const validatePhoneNumber = (value) => {
+	// E.164 format: +1234567890
+	if (!value) return false;
+	const phoneRegex = /^\+[1-9]\d{9,14}$/;
+	return phoneRegex.test(value);
+};
+
 export const isDuplicateInBooking = (
-        bookingPassengers,
-        passengers,
-        bookingId,
-        firstName,
-        lastName,
-        birthDate,
-        ignoreId = null
+	allBookingPassengers,
+	passengers,
+	bookingId,
+	firstName,
+	lastName,
+	birthDate,
+	ignoreId = null
 ) => {
-        return bookingPassengers.some((bp) => {
-                if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
-                const p = passengers.find((pass) => pass.id === bp.passenger_id);
-                return (
-                        p &&
-                        p.first_name === firstName &&
-                        p.last_name === lastName &&
-                        p.birth_date === birthDate
-                );
-        });
+	const bookingPassengers = allBookingPassengers.filter((bp) => {
+		if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
+		return true;
+	});
+
+	return bookingPassengers.some((bp) => {
+		const passenger = passengers.find((pass) => pass.id === bp.passenger_id);
+		return (
+			passenger &&
+			passenger.first_name === firstName &&
+			passenger.last_name === lastName &&
+			passenger.birth_date === formatDate(birthDate, 'yyyy-MM-dd')
+		);
+	});
 };

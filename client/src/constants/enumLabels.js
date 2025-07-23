@@ -22,6 +22,10 @@ export const ENUM_LABELS = {
 		м: 'Мужской',
 		ж: 'Женский',
 	},
+	GENDER_SHORT: {
+		м: 'М',
+		ж: 'Ж',
+	},
 	DOCUMENT_TYPE: {
 		passport: 'Паспорт РФ',
 		foreign_passport: 'Паспорт иностранного гражданина',

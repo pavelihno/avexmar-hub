@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { Box, Typography } from '@mui/material';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
@@ -12,6 +14,7 @@ import {
 } from '../../redux/actions/booking';
 import { FIELD_TYPES, createAdminManager } from './utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();
@@ -21,6 +24,8 @@ const BookingManagement = () => {
 		dispatch(fetchBookings());
 	}, [dispatch]);
 
+	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
+
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
 		bookingNumber: {
@@ -28,13 +33,22 @@ const BookingManagement = () => {
 			apiKey: 'booking_number',
 			label: FIELD_LABELS.BOOKING.booking_number,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
+			excludeFromForm: true,
+		},
+		bookingDate: {
+			key: 'bookingDate',
+			apiKey: 'booking_date',
+			label: FIELD_LABELS.BOOKING.booking_date,
+			type: FIELD_TYPES.DATE,
+			excludeFromForm: true,
+			formatter: (value) => formatDate(value),
 		},
 		status: {
 			key: 'status',
 			apiKey: 'status',
 			label: FIELD_LABELS.BOOKING.status,
 			type: FIELD_TYPES.SELECT,
+			excludeFromForm: true,
 			options: getEnumOptions('BOOKING_STATUS'),
 			formatter: (value) => ENUM_LABELS.BOOKING_STATUS[value] || value,
 		},
@@ -42,37 +56,23 @@ const BookingManagement = () => {
 			key: 'emailAddress',
 			apiKey: 'email_address',
 			label: FIELD_LABELS.BOOKING.email_address,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED : null),
+			type: FIELD_TYPES.EMAIL,
+			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED;
+				if (!validateEmail(value)) return VALIDATION_MESSAGES.BOOKING.email_address.INVALID;
+				return null;
+			},
 		},
 		phoneNumber: {
 			key: 'phoneNumber',
 			apiKey: 'phone_number',
 			label: FIELD_LABELS.BOOKING.phone_number,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : null),
-		},
-		firstName: {
-			key: 'firstName',
-			apiKey: 'first_name',
-			label: FIELD_LABELS.BOOKING.first_name,
-			type: FIELD_TYPES.TEXT,
-		},
-		lastName: {
-			key: 'lastName',
-			apiKey: 'last_name',
-			label: FIELD_LABELS.BOOKING.last_name,
-			type: FIELD_TYPES.TEXT,
-		},
-		currency: {
-			key: 'currency',
-			apiKey: 'currency',
-			label: FIELD_LABELS.BOOKING.currency,
-			type: FIELD_TYPES.SELECT,
-			options: getEnumOptions('CURRENCY'),
-			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
+			type: FIELD_TYPES.PHONE,
+			validate: (value) => {
+				if (!value) return VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
+				if (!validatePhoneNumber(value)) return VALIDATION_MESSAGES.BOOKING.phone_number.INVALID;
+				return null;
+			},
 		},
 		basePrice: {
 			key: 'basePrice',
@@ -81,6 +81,7 @@ const BookingManagement = () => {
 			type: FIELD_TYPES.NUMBER,
 			float: true,
 			inputProps: { min: 0, step: 0.01 },
+			excludeFromTable: true,
 		},
 		finalPrice: {
 			key: 'finalPrice',
@@ -89,6 +90,68 @@ const BookingManagement = () => {
 			type: FIELD_TYPES.NUMBER,
 			float: true,
 			inputProps: { min: 0, step: 0.01 },
+			excludeFromTable: true,
+		},
+		currency: {
+			key: 'currency',
+			apiKey: 'currency',
+			label: FIELD_LABELS.BOOKING.currency,
+			type: FIELD_TYPES.SELECT,
+			options: currencyOptions,
+			defaultValue: currencyOptions[0].value,
+			excludeFromTable: true,
+			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
+		},
+		passengers: {
+			key: 'passengers',
+			apiKey: 'passengers',
+			label: FIELD_LABELS.BOOKING.passengers,
+			type: FIELD_TYPES.CUSTOM,
+			excludeFromForm: true,
+			renderField: (item) => {
+				const passengers = []; // get the passengers for the given booking from bookingPassengers
+				return (
+					<Box
+						sx={{
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'flex-start',
+							minWidth: '200px',
+						}}
+					>
+						{passengers.map((p) => {
+							const passengerLabel = ''; // format the passenger label as needed
+							return (
+								<Box
+									key={p.id}
+									sx={{
+										display: 'flex',
+										alignItems: 'center',
+										mb: 0.5,
+										backgroundColor: 'rgba(0,0,0,0.04)',
+										borderRadius: 1,
+										p: 0.5,
+										width: 'auto',
+									}}
+								>
+									<Typography
+										variant='body2'
+										sx={{
+											mr: 1,
+											flexGrow: 1,
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+										}}
+									>
+										{passengerLabel}
+									</Typography>
+								</Box>
+							);
+						})}
+					</Box>
+				);
+			},
 		},
 	};
 

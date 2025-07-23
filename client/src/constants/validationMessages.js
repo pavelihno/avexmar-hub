@@ -65,6 +65,9 @@ export const VALIDATION_MESSAGES = {
 		last_name: {
 			REQUIRED: 'Фамилия обязательна',
 		},
+		document_type: {
+			REQUIRED: 'Тип документа обязателен',
+		},
 		document_number: {
 			REQUIRED: 'Номер документа обязателен',
 		},
@@ -77,6 +80,9 @@ export const VALIDATION_MESSAGES = {
 		phone_number: {
 			REQUIRED: 'Телефон обязателен',
 			INVALID: 'Введите корректный номер телефона',
+		},
+		passenger: {
+			EXISTS: 'Пассажир с таким именем и датой рождения уже есть в бронировании',
 		},
 	},
 	AIRLINE: {

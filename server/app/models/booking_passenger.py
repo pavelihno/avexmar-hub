@@ -37,7 +37,7 @@ class BookingPassenger(BaseModel):
     def create(cls, session=None, **data):
         session = session or db.session
         booking_id = data.get('booking_id')
-        if booking_id is not None:
+        if booking_id is not None and data.get('is_contact'):
             cls.__check_is_contact_unique(session, booking_id)
         return super().create(session, **data)
 
@@ -46,7 +46,7 @@ class BookingPassenger(BaseModel):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
         booking_id = data.get('booking_id', instance.booking_id)
-        if booking_id is not None:
+        if booking_id is not None and data.get('is_contact'):
             cls.__check_is_contact_unique(session, booking_id, instance_id=_id)
 
         return super().update(_id, session, **data)

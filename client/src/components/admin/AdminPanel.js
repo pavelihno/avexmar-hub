@@ -69,16 +69,16 @@ const AdminPanel = () => {
 			path: '/admin/bookings',
 		},
 		{
-			title: UI_LABELS.ADMIN.modules.tickets.title,
-			description: UI_LABELS.ADMIN.modules.tickets.description,
-			icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
-			path: '/admin/tickets',
-		},
-		{
 			title: UI_LABELS.ADMIN.modules.passengers.title,
 			description: UI_LABELS.ADMIN.modules.passengers.description,
 			icon: <HailIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/passengers',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.tickets.title,
+			description: UI_LABELS.ADMIN.modules.tickets.description,
+			icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/tickets',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.users.title,

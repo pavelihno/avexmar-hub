@@ -6,12 +6,14 @@ export const FIELD_LABELS = {
 	},
 	BOOKING: {
 		booking_number: 'Номер бронирования',
-		status: 'Статус',
+		booking_date: 'Дата бронирования',
+		status: 'Статус бронирования',
 		email_address: 'Электронная почта',
 		phone_number: 'Телефон',
 		currency: 'Валюта',
 		base_price: 'Базовая цена',
 		final_price: 'Итоговая цена',
+		passengers: 'Пассажиры',
 	},
 	AIRPORT: {
 		name: 'Название аэропорта',
@@ -48,8 +50,8 @@ export const FIELD_LABELS = {
 		citizenship_id: 'Гражданство',
 	},
 	BOOKING_PASSENGER: {
-		booking_id: 'ID бронирования',
-		passenger_id: 'ID пассажира',
+		booking_id: 'Бронирование',
+		passenger_id: 'Пассажир',
 		is_contact: 'Контактное лицо',
 	},
 	TICKET: {
