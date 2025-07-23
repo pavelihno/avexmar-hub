@@ -159,52 +159,86 @@ const PassengerManagement = () => {
 		[FIELDS]
 	);
 
-	const handleAddPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { booking_id, is_contact, ...passengerData } = apiData;
-		if (
-			isDuplicateInBooking(
-				bookingPassengers,
-				passengers,
-				booking_id,
-				passengerData.first_name,
-				passengerData.last_name,
-				passengerData.birth_date
-			)
-		) {
-			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
-		}
+        const handleAddPassenger = async (data) => {
+                const apiData = adminManager.toApiFormat(data);
+                const { booking_id, is_contact, ...passengerData } = apiData;
+                if (
+                        isDuplicateInBooking(
+                                bookingPassengers,
+                                passengers,
+                                booking_id,
+                                passengerData.first_name,
+                                passengerData.last_name,
+                                passengerData.birth_date
+                        )
+                ) {
+                        throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
+                }
 
-		const newPassenger = await dispatch(createPassenger(passengerData)).unwrap();
-		return dispatch(
-			createBookingPassenger({
-				booking_id,
-				passenger_id: newPassenger.id,
-				is_contact,
-			})
-		).unwrap();
-	};
+                let existing = passengers.find(
+                        (p) =>
+                                p.first_name === passengerData.first_name &&
+                                p.last_name === passengerData.last_name &&
+                                p.birth_date === formatDate(passengerData.birth_date, 'yyyy-MM-dd') &&
+                                p.document_type === passengerData.document_type &&
+                                p.document_number === passengerData.document_number
+                );
+
+                if (!existing) {
+                        existing = await dispatch(createPassenger(passengerData)).unwrap();
+                }
+
+                return dispatch(
+                        createBookingPassenger({
+                                booking_id,
+                                passenger_id: existing.id,
+                                is_contact,
+                        })
+                ).unwrap();
+        };
 
 	const handleEditPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { id, booking_id, passenger_id, is_contact, ...passengerData } = apiData;
-		if (
-			isDuplicateInBooking(
-				bookingPassengers,
-				passengers,
-				booking_id,
-				passengerData.first_name,
-				passengerData.last_name,
-				passengerData.birth_date,
-				id
-			)
-		) {
-			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
-		}
+                const apiData = adminManager.toApiFormat(data);
+                const { id, booking_id, passenger_id, is_contact, ...passengerData } = apiData;
+                if (
+                        isDuplicateInBooking(
+                                bookingPassengers,
+                                passengers,
+                                booking_id,
+                                passengerData.first_name,
+                                passengerData.last_name,
+                                passengerData.birth_date,
+                                id
+                        )
+                ) {
+                        throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
+                }
 
-		await dispatch(updatePassenger({ id: passenger_id, ...passengerData })).unwrap();
-		return dispatch(updateBookingPassenger({ id, booking_id, passenger_id, is_contact })).unwrap();
-	};
+                let existing = passengers.find(
+                        (p) =>
+                                p.first_name === passengerData.first_name &&
+                                p.last_name === passengerData.last_name &&
+                                p.birth_date === formatDate(passengerData.birth_date, 'yyyy-MM-dd') &&
+                                p.document_type === passengerData.document_type &&
+                                p.document_number === passengerData.document_number
+                );
+
+                if (!existing) {
+                        existing = await dispatch(createPassenger(passengerData)).unwrap();
+                }
+
+                await dispatch(updateBookingPassenger({ id, booking_id, passenger_id: existing.id, is_contact })).unwrap();
+
+                if (existing.id !== passenger_id) {
+                        const stillLinked = bookingPassengers.some(
+                                (b) => b.passenger_id === passenger_id && b.id !== id
+                        );
+                        if (!stillLinked) {
+                                await dispatch(deletePassenger(passenger_id)).unwrap();
+                        }
+                }
+                return existing;
+        };
 
 	const handleDeletePassenger = async (id) => {
 		const bp = bookingPassengers.find((b) => b.id === id);
