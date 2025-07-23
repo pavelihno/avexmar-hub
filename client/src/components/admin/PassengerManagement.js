@@ -1,33 +1,70 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
-	fetchPassengers,
-	createPassenger,
-	updatePassenger,
-	deletePassenger,
-	deleteAllPassengers,
+        fetchPassengers,
+        createPassenger,
+        updatePassenger,
+        deletePassenger,
+        deleteAllPassengers,
 } from '../../redux/actions/passenger';
+import {
+        fetchBookingPassengers,
+        createBookingPassenger,
+        updateBookingPassenger,
+        deleteBookingPassenger,
+        deleteAllBookingPassengers,
+} from '../../redux/actions/bookingPassenger';
+import { fetchBookings } from '../../redux/actions/booking';
+import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_TYPES, createAdminManager } from './utils';
-import { formatDate, validateDate } from '../utils';
+import { formatDate, validateDate, isDuplicateInBooking } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const PassengerManagement = () => {
-	const dispatch = useDispatch();
-	const { passengers, isLoading, errors } = useSelector((state) => state.passengers);
+        const dispatch = useDispatch();
+        const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
+        const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
+        const { bookings } = useSelector((state) => state.bookings);
+        const { countries } = useSelector((state) => state.countries);
 
-	useEffect(() => {
-		dispatch(fetchPassengers());
-	}, [dispatch]);
+        useEffect(() => {
+                dispatch(fetchPassengers());
+                dispatch(fetchBookingPassengers());
+                dispatch(fetchBookings());
+                dispatch(fetchCountries());
+        }, [dispatch]);
 
-	const FIELDS = {
-		id: { key: 'id', apiKey: 'id' },
-		bookingId: {
-			key: 'bookingId',
-			apiKey: 'booking_id',
-		},
+        const bookingOptions = useMemo(
+                () => bookings.map((b) => ({ value: b.id, label: b.booking_number })),
+                [bookings]
+        );
+
+        const citizenshipOptions = useMemo(
+                () => countries.map((c) => ({ value: c.id, label: c.name })),
+                [countries]
+        );
+
+        const getBookingById = (id) => bookings.find((b) => b.id === id);
+        const getCountryById = (id) => countries.find((c) => c.id === id);
+
+        const FIELDS = useMemo(
+                () => ({
+                id: { key: 'id', apiKey: 'id' },
+                passengerId: { key: 'passengerId', apiKey: 'passenger_id', excludeFromForm: true, excludeFromTable: true },
+                bookingId: {
+                        key: 'bookingId',
+                        apiKey: 'booking_id',
+                        label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: bookingOptions,
+                        formatter: (value) => {
+                                const b = getBookingById(value);
+                                return b ? b.booking_number : value;
+                        },
+                },
 		lastName: {
 			key: 'lastName',
 			apiKey: 'last_name',
@@ -85,14 +122,17 @@ const PassengerManagement = () => {
 			type: FIELD_TYPES.DATE,
 			formatter: (value) => formatDate(value),
 		},
-		citizenshipId: {
-			key: 'citizenshipId',
-			apiKey: 'citizenship_id',
-			label: FIELD_LABELS.PASSENGER.citizenship_id,
-			type: FIELD_TYPES.SELECT,
-			options: {},
-			formatter: (value) => null,
-		},
+                citizenshipId: {
+                        key: 'citizenshipId',
+                        apiKey: 'citizenship_id',
+                        label: FIELD_LABELS.PASSENGER.citizenship_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: citizenshipOptions,
+                        formatter: (value) => {
+                                const c = getCountryById(value);
+                                return c ? c.name : value;
+                        },
+                },
 		emailAddress: {
 			key: 'emailAddress',
 			apiKey: 'email_address',
@@ -107,30 +147,110 @@ const PassengerManagement = () => {
 			type: FIELD_TYPES.TEXT,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.phone_number.REQUIRED : null),
 		},
-		isContact: {
-			key: 'isContact',
-			apiKey: 'is_contact',
-			label: FIELD_LABELS.PASSENGER.is_contact,
-			type: FIELD_TYPES.BOOLEAN,
-			excludeFromTable: true,
-		},
-	};
+                isContact: {
+                        key: 'isContact',
+                        apiKey: 'is_contact',
+                        label: FIELD_LABELS.PASSENGER.is_contact,
+                        type: FIELD_TYPES.BOOLEAN,
+                        excludeFromTable: true,
+                },
+        }),
+                [bookingOptions, citizenshipOptions, bookings, countries]
+        );
 
-	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.add_button,
-		editButtonText: (item) => UI_LABELS.ADMIN.modules.passengers.edit_button,
-	});
+        const adminManager = useMemo(
+                () =>
+                        createAdminManager(FIELDS, {
+                                addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
+                                editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
+                        }),
+                [FIELDS]
+        );
 
-	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
-	const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
-	const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
 
-	const handleDeleteAllPassengers = async () => {
-		await dispatch(deleteAllPassengers()).unwrap();
-		dispatch(fetchPassengers());
-	};
+        const handleAddPassenger = async (data) => {
+                const apiData = adminManager.toApiFormat(data);
+                const { booking_id, is_contact, ...passengerData } = apiData;
 
-	const formattedPassengers = passengers.map(adminManager.toUiFormat);
+                if (
+                        isDuplicateInBooking(
+                                bookingPassengers,
+                                passengers,
+                                booking_id,
+                                passengerData.first_name,
+                                passengerData.last_name,
+                                passengerData.birth_date
+                        )
+                ) {
+                        throw new Error('Passenger already exists in this booking');
+                }
+
+                const created = await dispatch(createPassenger(passengerData)).unwrap();
+                return dispatch(
+                        createBookingPassenger({
+                                booking_id,
+                                passenger_id: created.id,
+                                is_contact,
+                        })
+                ).unwrap();
+        };
+
+        const handleEditPassenger = async (data) => {
+                const apiData = adminManager.toApiFormat(data);
+                const { id, booking_id, passenger_id, is_contact, ...passengerData } = apiData;
+
+                if (
+                        isDuplicateInBooking(
+                                bookingPassengers,
+                                passengers,
+                                booking_id,
+                                passengerData.first_name,
+                                passengerData.last_name,
+                                passengerData.birth_date,
+                                id
+                        )
+                ) {
+                        throw new Error('Passenger already exists in this booking');
+                }
+
+                await dispatch(updatePassenger({ id: passenger_id, ...passengerData })).unwrap();
+                return dispatch(
+                        updateBookingPassenger({ id, booking_id, passenger_id, is_contact })
+                ).unwrap();
+        };
+
+        const handleDeletePassenger = async (id) => {
+                const bp = bookingPassengers.find((b) => b.id === id);
+                if (!bp) return Promise.resolve();
+
+                await dispatch(deleteBookingPassenger(id)).unwrap();
+
+                const stillLinked = bookingPassengers.some(
+                        (b) => b.id !== id && b.passenger_id === bp.passenger_id
+                );
+
+                if (!stillLinked) {
+                        await dispatch(deletePassenger(bp.passenger_id)).unwrap();
+                }
+        };
+
+        const handleDeleteAllPassengers = async () => {
+                await dispatch(deleteAllBookingPassengers()).unwrap();
+                await dispatch(deleteAllPassengers()).unwrap();
+                dispatch(fetchBookingPassengers());
+                dispatch(fetchPassengers());
+        };
+
+        const formattedPassengers = bookingPassengers.map((bp) => {
+                const passenger = passengers.find((p) => p.id === bp.passenger_id) || {};
+                const booking = bookings.find((b) => b.id === bp.booking_id) || {};
+                return adminManager.toUiFormat({
+                        ...bp,
+                        ...passenger,
+                        email_address: booking.email_address,
+                        phone_number: booking.phone_number,
+                });
+        });
 
 	return (
 		<AdminDataTable
@@ -143,7 +263,7 @@ const PassengerManagement = () => {
 			onDeleteAll={handleDeleteAllPassengers}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
-			isLoading={isLoading}
+                        isLoading={passengersLoading || bookingPassengersLoading}
 			error={errors}
 		/>
 	);

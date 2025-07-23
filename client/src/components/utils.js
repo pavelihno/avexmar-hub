@@ -83,3 +83,24 @@ export const validateDateTime = (value) => {
 		return false;
 	}
 };
+
+export const isDuplicateInBooking = (
+        bookingPassengers,
+        passengers,
+        bookingId,
+        firstName,
+        lastName,
+        birthDate,
+        ignoreId = null
+) => {
+        return bookingPassengers.some((bp) => {
+                if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
+                const p = passengers.find((pass) => pass.id === bp.passenger_id);
+                return (
+                        p &&
+                        p.first_name === firstName &&
+                        p.last_name === lastName &&
+                        p.birth_date === birthDate
+                );
+        });
+};
