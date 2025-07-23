@@ -56,7 +56,7 @@ class Passenger(BaseModel):
 
     @classmethod
     def _prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
-        """Apply defaults and reuse existing passenger if unique data matches."""
+        """Apply defaults and reuse existing passenger if unique data matches"""
         if kwargs.get('document_type') in (
             Config.DOCUMENT_TYPE.passport.value,
             Config.DOCUMENT_TYPE.birth_certificate.value,
