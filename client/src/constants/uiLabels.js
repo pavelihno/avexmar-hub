@@ -218,6 +218,17 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
+   HOME: {
+	search: {
+		from: 'Откуда',
+		to: 'Куда',
+		when: 'Когда',
+		return: 'Обратно',
+		passengers: '1 пассажир',
+		class: 'Эконом',
+		button: 'Найти билеты',
+	},
+   }
 };
 
 export default UI_LABELS;
