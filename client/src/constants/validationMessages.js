@@ -157,6 +157,24 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Тариф обязателен',
 		},
 	},
+	SEARCH: {
+		from: {
+			REQUIRED: 'Укажите аэропорт отправления',
+		},
+		to: {
+			REQUIRED: 'Укажите аэропорт назначения',
+			SAME_AIRPORT: 'Аэропорт отправления и назначения не могут совпадать',
+		},
+		when: {
+			REQUIRED: 'Дата отправления обязательна',
+		},
+		return: {
+			INVALID: 'Дата возвращения не может быть раньше даты отправления',
+		},
+		passengers: {
+			REQUIRED: 'Укажите пассажиров',
+		},
+	},
 };
 
 export default VALIDATION_MESSAGES;

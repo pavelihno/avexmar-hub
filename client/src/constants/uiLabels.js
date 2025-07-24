@@ -218,35 +218,33 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
-        HOME: {
-                search: {
-                        from: 'Откуда',
-                        to: 'Куда',
-                        when: 'Когда',
-                        return: 'Обратно',
-                        passengers: '1 пассажир',
-                        class: 'Эконом',
-                        seat_class_title: 'Класс обслуживания',
-                        button: 'Найти билеты',
-                        passenger_word: (count) =>
-                                count % 10 === 1 && count % 100 !== 11
-                                        ? 'пассажир'
-                                        : count % 10 >= 2 &&
-                                          count % 10 <= 4 &&
-                                          (count % 100 < 10 || count % 100 >= 20)
-                                        ? 'пассажира'
-                                        : 'пассажиров',
-                        passenger_categories: [
-                                { key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
-                                { key: 'children', label: 'Дети', desc: '2–11 лет' },
-                                { key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
-                        ],
-                        errors: {
-                                same_airport: 'Пункты отправления и назначения не могут совпадать',
-                                invalid_return: 'Дата возвращения не может быть раньше даты отправления',
-                        },
-                },
-        },
+	HOME: {
+		search: {
+			from: 'Откуда',
+			to: 'Куда',
+			when: 'Когда',
+			return: 'Обратно',
+			passengers: '1 пассажир',
+			class: 'Эконом',
+			seat_class_title: 'Класс обслуживания',
+			button: 'Найти билеты',
+			passenger_word: (count) =>
+				count % 10 === 1 && count % 100 !== 11
+					? 'пассажир'
+					: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
+					? 'пассажира'
+					: 'пассажиров',
+			passenger_categories: [
+				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
+				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
+				{ key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
+			],
+			errors: {
+				same_airport: 'Пункты отправления и назначения не могут совпадать',
+				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
+			},
+		},
+	},
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Нет результатов',

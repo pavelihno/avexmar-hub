@@ -319,7 +319,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 };
 
 /**
- * Create field configurations for AdminEntityForm
+ * Create field configurations
  */
 export const createFormFields = (fields) => {
 	return Object.values(fields)
