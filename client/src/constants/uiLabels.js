@@ -218,17 +218,34 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
-   HOME: {
-	search: {
-		from: 'Откуда',
-		to: 'Куда',
-		when: 'Когда',
-		return: 'Обратно',
-		passengers: '1 пассажир',
-		class: 'Эконом',
-		button: 'Найти билеты',
+	HOME: {
+		search: {
+			from: 'Откуда',
+			to: 'Куда',
+			when: 'Когда',
+			return: 'Обратно',
+			passengers: '1 пассажир',
+			class: 'Эконом',
+			button: 'Найти билеты',
+			passenger_categories: [
+				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
+				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
+				{ key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
+			],
+		},
 	},
-   }
+	SEARCH: {
+		results: 'Результаты поиска',
+		no_results: 'Нет результатов',
+		from_to: (from, to) => `${from} → ${to}`,
+		flights_found: (count) => `${count} рейсов найдено`,
+		flight_details: {
+			airline: 'Авиакомпания',
+			from_to: 'Отправление - Прибытие',
+			departure_arrival: 'Время отправления - Время прибытия',
+			price: 'Цена',
+		},
+	},
 };
 
 export default UI_LABELS;
