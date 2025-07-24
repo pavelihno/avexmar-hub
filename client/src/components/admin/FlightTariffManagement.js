@@ -5,7 +5,8 @@ import { Typography, Dialog, DialogContent } from '@mui/material';
 import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 
 export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
 	const dispatch = useDispatch();

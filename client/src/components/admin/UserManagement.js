@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import { fetchUsers, createUser, updateUser, deleteUser } from '../../redux/actions/user';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const UserManagement = () => {

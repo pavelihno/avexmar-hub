@@ -11,7 +11,8 @@ import {
 	deleteAllAirlines,
 } from '../../redux/actions/airline';
 import { fetchCountries } from '../../redux/actions/country';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const AirlineManagement = () => {
