@@ -3,7 +3,7 @@ import React from 'react';
 import Home from '../components/Home';
 import About from '../components/About';
 import ResetPassword from '../components/auth/ResetPassword';
-import Search from '../components/Search';
+import Search from '../components/search/Search';
 
 const PublicRoutes = () => [
 	{ path: '/', element: <Home /> },
