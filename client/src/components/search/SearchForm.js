@@ -2,16 +2,16 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-        Box,
-        Button,
-        IconButton,
-        Typography,
-        Collapse,
-        Paper,
-        RadioGroup,
-        FormControlLabel,
-        Radio,
-        TextField,
+	Box,
+	Button,
+	IconButton,
+	Typography,
+	Collapse,
+	Paper,
+	RadioGroup,
+	FormControlLabel,
+	Radio,
+	TextField,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { FIELD_TYPES, createFormFields } from '../utils';
@@ -19,6 +19,53 @@ import { FIELD_TYPES, createFormFields } from '../utils';
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 import { MAX_PASSENGERS } from '../../constants/formats';
+
+const selectProps = {
+	sx: {
+		width: 220,
+		'& .MuiInputBase-root': {
+			fontSize: '1rem',
+			height: 35,
+			minHeight: 35,
+			padding: '0 4px',
+		},
+		'& .MuiInputBase-input': {
+			fontSize: '1rem',
+			height: 35,
+			padding: '4px 0',
+		},
+	},
+	displayEmpty: true,
+	MenuProps: {
+		PaperProps: {
+			sx: { fontSize: '0.5rem' },
+		},
+	},
+	MenuItemProps: {
+		sx: {
+			fontSize: '1rem',
+			minHeight: 10,
+			height: 10,
+		},
+	},
+};
+
+const dateProps = {
+	sx: {
+		width: 170,
+		'& .MuiInputBase-root': {
+			fontSize: '1rem',
+			height: 35,
+			minHeight: 35,
+			padding: '8px 8px',
+		},
+		'& .MuiInputBase-input': {
+			fontSize: '1rem',
+			height: 35,
+			padding: '8px 8px',
+		},
+	},
+};
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
 
@@ -125,28 +172,26 @@ const SearchForm = () => {
 		navigate(`/search?${params.toString()}`);
 	};
 
-        return (
-                <Box
-                        component='form'
-                        onSubmit={handleSubmit}
-                        sx={{
-                                display: 'flex',
-                                background: '#fff',
-                                borderRadius: 3,
-                                boxShadow: 1,
-                                p: 1,
-                                width: '100%',
-                                maxWidth: 1000,
-                                alignItems: 'center',
-                        }}
-                >
-			<Box sx={{ px: 2, py: 1 }}>
+	return (
+		<Box
+			component='form'
+			onSubmit={handleSubmit}
+			sx={{
+				display: 'flex',
+				background: '#fff',
+				borderRadius: 1,
+				boxShadow: 1,
+				p: 1,
+				alignItems: 'center',
+			}}
+		>
+			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.from.renderField({
 					value: formValues.from,
 					onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
-                                        sx: { width: 220 },
 					error: !!validationErrors.from,
 					helperText: validationErrors.from,
+					...selectProps,
 				})}
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -154,42 +199,42 @@ const SearchForm = () => {
 					<SwapHorizIcon />
 				</IconButton>
 			</Box>
-			<Box sx={{ px: 2, py: 1 }}>
+			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.to.renderField({
 					value: formValues.to,
 					onChange: (val) => setFormValues((p) => ({ ...p, to: val })),
-                                        sx: { width: 220 },
 					error: !!validationErrors.to,
 					helperText: validationErrors.to,
+					...selectProps,
 				})}
 			</Box>
-			<Box sx={{ px: 2, py: 1 }}>
+			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.departDate.renderField({
 					value: formValues.departDate,
 					onChange: (val) => setFormValues((p) => ({ ...p, departDate: val })),
-                                        sx: { width: 170 },
 					error: !!validationErrors.departDate,
 					helperText: validationErrors.departDate,
 					minDate: new Date(),
+					...dateProps,
 				})}
 			</Box>
-			<Box sx={{ px: 2, py: 1 }}>
+			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.returnDate.renderField({
 					value: formValues.returnDate,
 					onChange: (val) => setFormValues((p) => ({ ...p, returnDate: val })),
-                                        sx: { width: 170 },
 					error: !!validationErrors.returnDate,
 					helperText: validationErrors.returnDate,
+					...dateProps,
 				})}
 			</Box>
-                        <Box sx={{ px: 2, py: 1, position: 'relative' }} ref={passengersRef}>
-                                <TextField
-                                        label={UI_LABELS.HOME.search.passengers}
-                                        value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
-                                        onClick={() => setShowPassengers((p) => !p)}
-                                        InputProps={{ readOnly: true }}
-                                        sx={{ width: 170, cursor: 'pointer' }}
-                                />
+			<Box sx={{ px: 0.5, py: 1, position: 'relative' }} ref={passengersRef}>
+				<TextField
+					label={UI_LABELS.HOME.search.passengers}
+					value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
+					onClick={() => setShowPassengers((p) => !p)}
+					InputProps={{ readOnly: true }}
+					sx={{ width: 170, cursor: 'pointer' }}
+				/>
 				<Collapse in={showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
 					<Paper sx={{ p: 2, minWidth: 220 }}>
 						{passengerCategories.map((row) => (
@@ -241,7 +286,7 @@ const SearchForm = () => {
 					</Paper>
 				</Collapse>
 			</Box>
-			<Box sx={{ px: 2, py: 1, display: 'flex', alignItems: 'center' }}>
+			<Box sx={{ px: 0.5, py: 1, display: 'flex', alignItems: 'center' }}>
 				<Button
 					type='submit'
 					variant='contained'
@@ -251,12 +296,12 @@ const SearchForm = () => {
 						borderRadius: 2,
 						px: 4,
 						py: 2,
-                                                boxShadow: 'none',
-                                                textTransform: 'none',
-                                                whiteSpace: 'nowrap',
-                                                '&:hover': { background: '#ff6600' },
-                                        }}
-                                >
+						boxShadow: 'none',
+						textTransform: 'none',
+						whiteSpace: 'nowrap',
+						'&:hover': { background: '#ff6600' },
+					}}
+				>
 					{UI_LABELS.HOME.search.button}
 				</Button>
 			</Box>

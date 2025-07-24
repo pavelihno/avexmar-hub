@@ -12,7 +12,7 @@ import Footer from './Footer';
 
 import { pageTransition } from '../theme/animations';
 
-const Base = ({ children }) => {
+const Base = ({ children, maxWidth = 'lg' }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ const Base = ({ children }) => {
 					bgcolor: 'background.default',
 					color: 'text.primary',
 				}}
-				maxWidth='lg'
+				maxWidth='xl'
 			>
 				<Header />
 				<motion.div
@@ -34,7 +34,7 @@ const Base = ({ children }) => {
 					exit={pageTransition.exit}
 					transition={pageTransition.transition}
 				>
-					{children}
+					<Container sx={{ maxWidth }}>{children}</Container>
 				</motion.div>
 			</Container>
 			<Footer />

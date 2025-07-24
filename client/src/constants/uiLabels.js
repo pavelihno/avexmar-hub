@@ -224,7 +224,7 @@ export const UI_LABELS = {
 			to: 'Куда',
 			when: 'Когда',
 			return: 'Обратно',
-			passengers: '1 пассажир',
+			passengers: 'Пассажиры',
 			class: 'Эконом',
 			seat_class_title: 'Класс обслуживания',
 			button: 'Найти билеты',
