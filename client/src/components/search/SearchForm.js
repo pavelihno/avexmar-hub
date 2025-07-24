@@ -14,58 +14,53 @@ import {
 	TextField,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { FIELD_TYPES, createFormFields } from '../utils';
+import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 import { MAX_PASSENGERS } from '../../constants/formats';
 
+const sharedSx = {
+	'& .MuiInputBase-root': {
+		fontSize: '0.75rem',
+		height: 40,
+		minHeight: 40,
+	},
+	'& .MuiInputBase-input': {
+		fontSize: '0.75rem',
+		height: 28,
+	},
+	'& .MuiFormHelperText-root': {
+		fontSize: '0.65rem',
+		minHeight: '1em',
+		lineHeight: '1em',
+	},
+};
+
 const selectProps = {
-        sx: {
-                width: 150,
-                '& .MuiInputBase-root': {
-                        fontSize: '0.75rem',
-                        height: 28,
-                        minHeight: 28,
-                        padding: '0 8px',
-                },
-                '& .MuiInputBase-input': {
-                        fontSize: '0.75rem',
-                        height: 20,
-                        padding: '4px 0',
-                },
-        },
-        displayEmpty: true,
-        simpleSelect: true,
-        MenuProps: {
-                PaperProps: {
-                        sx: { fontSize: '0.75rem' },
-                },
-        },
-        MenuItemProps: {
-                sx: {
-                        fontSize: '0.75rem',
-                        minHeight: 28,
-                        height: 28,
-                },
-        },
+	sx: {
+		width: 220,
+		...sharedSx,
+	},
+	MenuProps: {
+		PaperProps: {
+			sx: { fontSize: '0.5rem' },
+		},
+	},
+	MenuItemProps: {
+		sx: {
+			fontSize: '0.5rem',
+			minHeight: 28,
+			height: 28,
+		},
+	},
 };
 
 const dateProps = {
-        sx: {
-                width: 150,
-                '& .MuiInputBase-root': {
-                        fontSize: '0.75rem',
-                        height: 28,
-                        minHeight: 28,
-                        padding: '0 8px',
-                },
-                '& .MuiInputBase-input': {
-                        fontSize: '0.75rem',
-                        height: 20,
-                        padding: '4px 0',
-                },
-        },
+	sx: {
+		width: 170,
+		...sharedSx,
+	},
 };
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
@@ -83,7 +78,7 @@ const SearchForm = () => {
 
 	const passengersRef = useRef(null);
 	const airportOptions = useMemo(
-		() => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.name})` })),
+		() => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.iata_code})` })),
 		[airports]
 	);
 
@@ -95,8 +90,8 @@ const SearchForm = () => {
 		if (airportOptions.length && !formValues.from) {
 			setFormValues((prev) => ({
 				...prev,
-				from: airportOptions[0]?.value || '',
-				to: airportOptions[1]?.value || '',
+				from: '',
+				to: '',
 			}));
 		}
 	}, [airportOptions, formValues.from]);
@@ -138,8 +133,13 @@ const SearchForm = () => {
 
 	const handlePassengerChange = (key, delta) => {
 		setPassengers((prev) => {
-			const value = Math.min(MAX_PASSENGERS, Math.max(key === 'adults' ? 1 : 0, prev[key] + delta));
-			return { ...prev, [key]: value };
+			const nextValue = prev[key] + delta;
+			const min = key === 'adults' ? 1 : 0;
+			const max = MAX_PASSENGERS;
+
+			const newTotal = prev.adults + prev.children + prev.infants + delta;
+			if (nextValue < min || nextValue > max || newTotal > MAX_PASSENGERS) return prev;
+			return { ...prev, [key]: nextValue };
 		});
 	};
 
@@ -164,8 +164,8 @@ const SearchForm = () => {
 		const params = new URLSearchParams();
 		params.set('from', formValues.from);
 		params.set('to', formValues.to);
-		if (formValues.departDate) params.set('when', formValues.departDate.toISOString().split('T')[0]);
-		if (formValues.returnDate) params.set('return', formValues.returnDate.toISOString().split('T')[0]);
+		params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
+		if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
 		params.set('adults', passengers.adults);
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
@@ -183,6 +183,7 @@ const SearchForm = () => {
 				borderRadius: 1,
 				boxShadow: 1,
 				p: 1,
+				marginTop: 2,
 				alignItems: 'center',
 			}}
 		>
@@ -212,7 +213,15 @@ const SearchForm = () => {
 			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.departDate.renderField({
 					value: formValues.departDate,
-					onChange: (val) => setFormValues((p) => ({ ...p, departDate: val })),
+					onChange: (val) => {
+						setFormValues((p) => {
+							let newReturnDate = p.returnDate;
+							if (newReturnDate && val && newReturnDate < val) {
+								newReturnDate = null;
+							}
+							return { ...p, departDate: val, returnDate: newReturnDate };
+						});
+					},
 					error: !!validationErrors.departDate,
 					helperText: validationErrors.departDate,
 					minDate: new Date(),
@@ -222,9 +231,13 @@ const SearchForm = () => {
 			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.returnDate.renderField({
 					value: formValues.returnDate,
-					onChange: (val) => setFormValues((p) => ({ ...p, returnDate: val })),
+					onChange: (val) => {
+						if (formValues.departDate && val && val < formValues.departDate) return;
+						setFormValues((p) => ({ ...p, returnDate: val }));
+					},
 					error: !!validationErrors.returnDate,
 					helperText: validationErrors.returnDate,
+					minDate: formValues.departDate || new Date(),
 					...dateProps,
 				})}
 			</Box>
@@ -234,7 +247,7 @@ const SearchForm = () => {
 					value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
 					onClick={() => setShowPassengers((p) => !p)}
 					InputProps={{ readOnly: true }}
-					sx={{ width: 170, cursor: 'pointer' }}
+					sx={{ width: 200, cursor: 'pointer' }}
 				/>
 				<Collapse in={showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
 					<Paper sx={{ p: 2, minWidth: 220 }}>

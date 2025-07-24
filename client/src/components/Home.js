@@ -6,7 +6,7 @@ import SearchForm from './search/SearchForm';
 const Home = () => {
 	return (
 		<Base maxWidth='xl'>
-			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 				<SearchForm />
 			</Box>
 		</Base>
