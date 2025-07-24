@@ -8,7 +8,8 @@ import { fetchFlights } from '../../redux/actions/flight';
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchPassengers } from '../../redux/actions/passenger';
 import { fetchDiscounts } from '../../redux/actions/discount';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const TicketManagement = () => {

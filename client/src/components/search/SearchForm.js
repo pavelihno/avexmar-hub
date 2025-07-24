@@ -1,29 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-	Box,
-	Button,
-	IconButton,
-	Typography,
-	Collapse,
-	Paper,
-	Select,
-	FormControl,
-	InputLabel,
-	MenuItem,
-	FormHelperText,
-	Autocomplete,
-	TextField,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
+        Box,
+        Button,
+        IconButton,
+        Typography,
+        Collapse,
+        Paper,
+        RadioGroup,
+        FormControlLabel,
+        Radio,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { FIELD_TYPES, createFormFields } from '../utils';
 
-import { getEnumOptions, UI_LABELS, dateLocale, VALIDATION_MESSAGES } from '../../constants';
+import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
@@ -31,30 +23,33 @@ const seatClassOptions = getEnumOptions('SEAT_CLASS');
 const SearchForm = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { airports } = useSelector((state) => state.search);
+        const { airports } = useSelector((state) => state.search);
 
-	const [from, setFrom] = useState(null);
-	const [to, setTo] = useState(null);
-	const [departDate, setDepartDate] = useState(null);
-	const [returnDate, setReturnDate] = useState(null);
-	const [passengers, setPassengers] = useState({ adults: 1, children: 0, infants: 0 });
+        const [formValues, setFormValues] = useState({ from: '', to: '', departDate: null, returnDate: null });
+        const [passengers, setPassengers] = useState({ adults: 1, children: 0, infants: 0 });
 	const [seatClass, setSeatClass] = useState(seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
 
-	const passengersRef = useRef(null);
+        const passengersRef = useRef(null);
+        const airportOptions = useMemo(
+                () => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.name})` })),
+                [airports]
+        );
 
 	useEffect(() => {
 		dispatch(fetchSearchAirports());
 	}, [dispatch]);
 
-	useEffect(() => {
-		if (airports.length && !from) {
-			const opts = airports.map((a) => ({ code: a.iata_code, label: `${a.city_name} (${a.name})` }));
-			setFrom(opts[0] || null);
-			setTo(opts[1] || null);
-		}
-	}, [airports]);
+        useEffect(() => {
+                if (airportOptions.length && !formValues.from) {
+                        setFormValues((prev) => ({
+                                ...prev,
+                                from: airportOptions[0]?.value || '',
+                                to: airportOptions[1]?.value || '',
+                        }));
+                }
+        }, [airportOptions, formValues.from]);
 
 	useEffect(() => {
 		const handleClick = (e) => {
@@ -66,48 +61,61 @@ const SearchForm = () => {
 		return () => document.removeEventListener('mousedown', handleClick);
 	}, []);
 
-	const passengerCategories = UI_LABELS.HOME.search.passenger_categories;
+        const passengerCategories = UI_LABELS.HOME.search.passenger_categories;
 
-	const swapAirports = () => {
-		setFrom(to);
-		setTo(from);
-	};
+        const swapAirports = () => {
+                setFormValues((prev) => ({ ...prev, from: prev.to, to: prev.from }));
+        };
 
 	const totalPassengers = passengers.adults + passengers.children + passengers.infants;
 	const passengerWord = UI_LABELS.HOME.search.passenger_word(totalPassengers);
-	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
-	const airportOptions = airports.map((a) => ({ code: a.iata_code, label: `${a.city_name} (${a.name})` }));
+        const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
-	const handlePassengerChange = (key, delta) => {
+        const fields = useMemo(
+                () => ({
+                        from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+                        returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+                }),
+                [airportOptions]
+        );
+
+        const formFields = useMemo(() => {
+                const arr = createFormFields(fields);
+                return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
+        }, [fields]);
+
+        const handlePassengerChange = (key, delta) => {
 		setPassengers((prev) => {
 			const value = Math.min(9, Math.max(key === 'adults' ? 1 : 0, prev[key] + delta));
 			return { ...prev, [key]: value };
 		});
 	};
 
-	const validateForm = () => {
-		const errors = {};
-		if (!from) errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
-		if (!to) errors.to = VALIDATION_MESSAGES.SEARCH.to.REQUIRED;
-		if (from && to && from.code === to.code) {
-			errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
-		}
-		if (!departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-		if (returnDate && departDate && returnDate < departDate) {
-			errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-		}
-		setValidationErrors(errors);
-		return Object.keys(errors).length === 0;
-	};
+        const validateForm = () => {
+                const errors = {};
+                if (!formValues.from) errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
+                if (!formValues.to) errors.to = VALIDATION_MESSAGES.SEARCH.to.REQUIRED;
+                if (formValues.from && formValues.to && formValues.from === formValues.to) {
+                        errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
+                }
+                if (!formValues.departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
+                        errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                }
+                setValidationErrors(errors);
+                return Object.keys(errors).length === 0;
+        };
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (!validateForm()) return;
-		const params = new URLSearchParams();
-		params.set('from', from.code);
-		params.set('to', to.code);
-		if (departDate) params.set('when', departDate.toISOString().split('T')[0]);
-		if (returnDate) params.set('return', returnDate.toISOString().split('T')[0]);
+                const params = new URLSearchParams();
+                params.set('from', formValues.from);
+                params.set('to', formValues.to);
+                if (formValues.departDate) params.set('when', formValues.departDate.toISOString().split('T')[0]);
+                if (formValues.returnDate) params.set('return', formValues.returnDate.toISOString().split('T')[0]);
 		params.set('adults', passengers.adults);
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
@@ -115,126 +123,54 @@ const SearchForm = () => {
 		navigate(`/search?${params.toString()}`);
 	};
 
-	return (
-		<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-			<Box
-				component='form'
-				onSubmit={handleSubmit}
-				sx={{ display: 'flex', background: '#fff', borderRadius: 3, boxShadow: 1, p: 1 }}
-			>
-				<Box sx={{ px: 2, py: 1 }}>
-					{airportOptions.length > 100 ? (
-						<Autocomplete
-							options={airportOptions}
-							value={from}
-							onChange={(e, val) => setFrom(val)}
-							getOptionLabel={(o) => o.label}
-							sx={{ width: 160 }}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									label={UI_LABELS.HOME.search.from}
-									error={!!validationErrors.from}
-									helperText={validationErrors.from}
-								/>
-							)}
-						/>
-					) : (
-						<FormControl sx={{ width: 160 }} error={!!validationErrors.from}>
-							<InputLabel id='from-label'>{UI_LABELS.HOME.search.from}</InputLabel>
-							<Select
-								labelId='from-label'
-								value={from ? from.code : ''}
-								label={UI_LABELS.HOME.search.from}
-								onChange={(e) => setFrom(airportOptions.find((a) => a.code === e.target.value) || null)}
-								sx={{
-									'& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis' },
-									width: 160,
-								}}
-							>
-								{airportOptions.map((a) => (
-									<MenuItem key={a.code} value={a.code}>
-										{a.label}
-									</MenuItem>
-								))}
-							</Select>
-							{validationErrors.from && <FormHelperText>{validationErrors.from}</FormHelperText>}
-						</FormControl>
-					)}
-				</Box>
-				<Box sx={{ display: 'flex', alignItems: 'center' }}>
-					<IconButton aria-label='swap' onClick={swapAirports}>
-						<SwapHorizIcon />
-					</IconButton>
-				</Box>
-				<Box sx={{ px: 2, py: 1 }}>
-					{airportOptions.length > 100 ? (
-						<Autocomplete
-							options={airportOptions}
-							value={to}
-							onChange={(e, val) => setTo(val)}
-							getOptionLabel={(o) => o.label}
-							sx={{ width: 160 }}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									label={UI_LABELS.HOME.search.to}
-									error={!!validationErrors.to}
-									helperText={validationErrors.to}
-								/>
-							)}
-						/>
-					) : (
-						<FormControl sx={{ width: 160 }} error={!!validationErrors.to}>
-							<InputLabel id='to-label'>{UI_LABELS.HOME.search.to}</InputLabel>
-							<Select
-								labelId='to-label'
-								value={to ? to.code : ''}
-								label={UI_LABELS.HOME.search.to}
-								onChange={(e) => setTo(airportOptions.find((a) => a.code === e.target.value) || null)}
-								sx={{
-									'& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis' },
-									width: 160,
-								}}
-							>
-								{airportOptions.map((a) => (
-									<MenuItem key={a.code} value={a.code}>
-										{a.label}
-									</MenuItem>
-								))}
-							</Select>
-							{validationErrors.to && <FormHelperText>{validationErrors.to}</FormHelperText>}
-						</FormControl>
-					)}
-				</Box>
-				<Box sx={{ px: 2, py: 1 }}>
-					<DatePicker
-						label={UI_LABELS.HOME.search.when}
-						value={departDate}
-						onChange={(newDate) => setDepartDate(newDate)}
-						slotProps={{
-							textField: {
-								sx: { minWidth: 150 },
-								error: !!validationErrors.departDate,
-								helperText: validationErrors.departDate,
-							},
-						}}
-					/>
-				</Box>
-				<Box sx={{ px: 2, py: 1 }}>
-					<DatePicker
-						label={UI_LABELS.HOME.search.return}
-						value={returnDate}
-						onChange={(newDate) => setReturnDate(newDate)}
-						slotProps={{
-							textField: {
-								sx: { minWidth: 150 },
-								error: !!validationErrors.returnDate,
-								helperText: validationErrors.returnDate,
-							},
-						}}
-					/>
-				</Box>
+        return (
+                <Box
+                        component='form'
+                        onSubmit={handleSubmit}
+                        sx={{ display: 'flex', background: '#fff', borderRadius: 3, boxShadow: 1, p: 1 }}
+                >
+                        <Box sx={{ px: 2, py: 1 }}>
+                                {formFields.from.renderField({
+                                        value: formValues.from,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
+                                        sx: { width: 160 },
+                                        error: !!validationErrors.from,
+                                        helperText: validationErrors.from,
+                                })}
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <IconButton aria-label='swap' onClick={swapAirports}>
+                                        <SwapHorizIcon />
+                                </IconButton>
+                        </Box>
+                        <Box sx={{ px: 2, py: 1 }}>
+                                {formFields.to.renderField({
+                                        value: formValues.to,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, to: val })),
+                                        sx: { width: 160 },
+                                        error: !!validationErrors.to,
+                                        helperText: validationErrors.to,
+                                })}
+                        </Box>
+                        <Box sx={{ px: 2, py: 1 }}>
+                                {formFields.departDate.renderField({
+                                        value: formValues.departDate,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, departDate: val })),
+                                        sx: { minWidth: 150 },
+                                        error: !!validationErrors.departDate,
+                                        helperText: validationErrors.departDate,
+                                        minDate: new Date(),
+                                })}
+                        </Box>
+                        <Box sx={{ px: 2, py: 1 }}>
+                                {formFields.returnDate.renderField({
+                                        value: formValues.returnDate,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, returnDate: val })),
+                                        sx: { minWidth: 150 },
+                                        error: !!validationErrors.returnDate,
+                                        helperText: validationErrors.returnDate,
+                                })}
+                        </Box>
 				<Box sx={{ px: 2, py: 1, position: 'relative' }} ref={passengersRef}>
 					<Button variant='text' onClick={() => setShowPassengers((p) => !p)}>
 						{`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
@@ -294,10 +230,9 @@ const SearchForm = () => {
 					<Button type='submit' variant='contained' sx={{ textTransform: 'none' }}>
 						{UI_LABELS.HOME.search.button}
 					</Button>
-				</Box>
-			</Box>
-		</LocalizationProvider>
-	);
+                                </Box>
+                        </Box>
+        );
 };
 
 export default SearchForm;

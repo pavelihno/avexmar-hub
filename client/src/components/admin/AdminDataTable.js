@@ -35,7 +35,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
-import { FIELD_TYPES, createFieldRenderer } from './utils';
+import { createFieldRenderer, FIELD_TYPES } from '../utils';
 import { formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 
