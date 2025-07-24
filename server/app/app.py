@@ -26,6 +26,7 @@ from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
 from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
+from app.controllers.search_controller import *
 
 
 def __import_models():
@@ -173,6 +174,10 @@ def __create_app(_config_class, _db):
     app.route('/payments/<int:payment_id>', methods=['GET'])(get_payment)
     app.route('/payments/<int:payment_id>', methods=['PUT'])(update_payment)
     app.route('/payments/<int:payment_id>', methods=['DELETE'])(delete_payment)
+
+    # search
+    app.route('/search/airports', methods=['GET'])(search_airports)
+    app.route('/search/flights', methods=['GET'])(search_flights)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

@@ -1,34 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Box, Typography, Paper } from '@mui/material';
 import Base from '../Base';
 import { UI_LABELS } from '../../constants';
-
-const fakeFlights = [
-	{
-		id: 1,
-		airline: 'Avex Air',
-		from: 'SVO',
-		to: 'PKC',
-		departure: '2025-07-24 09:00',
-		arrival: '2025-07-24 16:00',
-		price: 12000,
-	},
-	{
-		id: 2,
-		airline: 'Avex Air',
-		from: 'SVO',
-		to: 'PKC',
-		departure: '2025-07-24 13:00',
-		arrival: '2025-07-24 20:00',
-		price: 13500,
-	},
-];
+import { fetchSearchFlights } from '../../redux/actions/search';
 
 const Search = () => {
-	const [params] = useSearchParams();
-	const from = params.get('from');
-	const to = params.get('to');
+        const dispatch = useDispatch();
+        const { flights } = useSelector((state) => state.search);
+        const [params] = useSearchParams();
+        const from = params.get('from');
+        const to = params.get('to');
+
+        useEffect(() => {
+                dispatch(fetchSearchFlights());
+        }, [dispatch]);
 
 	return (
 		<Base>
@@ -39,14 +26,20 @@ const Search = () => {
 				<Typography variant='subtitle1' gutterBottom>
 					{from && to ? UI_LABELS.SEARCH.from_to(from, to) : ''}
 				</Typography>
-				{fakeFlights.map((f) => (
-					<Paper key={f.id} sx={{ p: 2, mb: 2 }}>
-						<Typography variant='h6'>{f.airline}</Typography>
-						<Typography>{`${f.from} - ${f.to}`}</Typography>
-						<Typography>{`${f.departure} - ${f.arrival}`}</Typography>
-						<Typography>{UI_LABELS.SEARCH.flight_details.price}: {f.price}</Typography>
-					</Paper>
-				))}
+                                {flights && flights.length ? (
+                                        flights.map((f) => (
+                                                <Paper key={f.id} sx={{ p: 2, mb: 2 }}>
+                                                        <Typography variant='h6'>{f.airline || f.airline_id}</Typography>
+                                                        <Typography>{`${f.from || f.origin} - ${f.to || f.destination}`}</Typography>
+                                                        <Typography>{`${f.departure || f.scheduled_departure} - ${f.arrival || f.scheduled_arrival}`}</Typography>
+                                                        <Typography>
+                                                                {UI_LABELS.SEARCH.flight_details.price}: {f.price}
+                                                        </Typography>
+                                                </Paper>
+                                        ))
+                                ) : (
+                                        <Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+                                )}
 			</Box>
 		</Base>
 	);
