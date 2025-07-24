@@ -65,14 +65,29 @@ const dateProps = {
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
 
-const SearchForm = () => {
-	const navigate = useNavigate();
-	const dispatch = useDispatch();
-	const { airports } = useSelector((state) => state.search);
+const parseDate = (value) => {
+        if (!value) return null;
+        const d = new Date(value);
+        return isNaN(d) ? null : d;
+};
 
-	const [formValues, setFormValues] = useState({ from: '', to: '', departDate: null, returnDate: null });
-	const [passengers, setPassengers] = useState({ adults: 1, children: 0, infants: 0 });
-	const [seatClass, setSeatClass] = useState(seatClassOptions[0].value);
+const SearchForm = ({ initialParams = {} }) => {
+        const navigate = useNavigate();
+        const dispatch = useDispatch();
+        const { airports } = useSelector((state) => state.search);
+
+        const [formValues, setFormValues] = useState({
+                from: initialParams.from || '',
+                to: initialParams.to || '',
+                departDate: parseDate(initialParams.when),
+                returnDate: parseDate(initialParams.return),
+        });
+        const [passengers, setPassengers] = useState({
+                adults: parseInt(initialParams.adults, 10) || 1,
+                children: parseInt(initialParams.children, 10) || 0,
+                infants: parseInt(initialParams.infants, 10) || 0,
+        });
+        const [seatClass, setSeatClass] = useState(initialParams.class || seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
 
