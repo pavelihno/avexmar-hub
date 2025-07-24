@@ -2,15 +2,16 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-	Box,
-	Button,
-	IconButton,
-	Typography,
-	Collapse,
-	Paper,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
+        Box,
+        Button,
+        IconButton,
+        Typography,
+        Collapse,
+        Paper,
+        RadioGroup,
+        FormControlLabel,
+        Radio,
+        TextField,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { FIELD_TYPES, createFormFields } from '../utils';
@@ -124,17 +125,26 @@ const SearchForm = () => {
 		navigate(`/search?${params.toString()}`);
 	};
 
-	return (
-		<Box
-			component='form'
-			onSubmit={handleSubmit}
-			sx={{ display: 'flex', background: '#fff', borderRadius: 3, boxShadow: 1, p: 1 }}
-		>
+        return (
+                <Box
+                        component='form'
+                        onSubmit={handleSubmit}
+                        sx={{
+                                display: 'flex',
+                                background: '#fff',
+                                borderRadius: 3,
+                                boxShadow: 1,
+                                p: 1,
+                                width: '100%',
+                                maxWidth: 1000,
+                                alignItems: 'center',
+                        }}
+                >
 			<Box sx={{ px: 2, py: 1 }}>
 				{formFields.from.renderField({
 					value: formValues.from,
 					onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
-					sx: { width: 160 },
+                                        sx: { width: 220 },
 					error: !!validationErrors.from,
 					helperText: validationErrors.from,
 				})}
@@ -148,7 +158,7 @@ const SearchForm = () => {
 				{formFields.to.renderField({
 					value: formValues.to,
 					onChange: (val) => setFormValues((p) => ({ ...p, to: val })),
-					sx: { width: 160 },
+                                        sx: { width: 220 },
 					error: !!validationErrors.to,
 					helperText: validationErrors.to,
 				})}
@@ -157,7 +167,7 @@ const SearchForm = () => {
 				{formFields.departDate.renderField({
 					value: formValues.departDate,
 					onChange: (val) => setFormValues((p) => ({ ...p, departDate: val })),
-					sx: { minWidth: 150 },
+                                        sx: { width: 170 },
 					error: !!validationErrors.departDate,
 					helperText: validationErrors.departDate,
 					minDate: new Date(),
@@ -167,15 +177,19 @@ const SearchForm = () => {
 				{formFields.returnDate.renderField({
 					value: formValues.returnDate,
 					onChange: (val) => setFormValues((p) => ({ ...p, returnDate: val })),
-					sx: { minWidth: 150 },
+                                        sx: { width: 170 },
 					error: !!validationErrors.returnDate,
 					helperText: validationErrors.returnDate,
 				})}
 			</Box>
-			<Box sx={{ px: 2, py: 1, position: 'relative' }} ref={passengersRef}>
-				<Button variant='text' onClick={() => setShowPassengers((p) => !p)}>
-					{`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
-				</Button>
+                        <Box sx={{ px: 2, py: 1, position: 'relative' }} ref={passengersRef}>
+                                <TextField
+                                        label={UI_LABELS.HOME.search.passengers}
+                                        value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
+                                        onClick={() => setShowPassengers((p) => !p)}
+                                        InputProps={{ readOnly: true }}
+                                        sx={{ width: 170, cursor: 'pointer' }}
+                                />
 				<Collapse in={showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
 					<Paper sx={{ p: 2, minWidth: 220 }}>
 						{passengerCategories.map((row) => (
@@ -237,11 +251,12 @@ const SearchForm = () => {
 						borderRadius: 2,
 						px: 4,
 						py: 2,
-						boxShadow: 'none',
-						textTransform: 'none',
-						'&:hover': { background: '#ff6600' },
-					}}
-				>
+                                                boxShadow: 'none',
+                                                textTransform: 'none',
+                                                whiteSpace: 'nowrap',
+                                                '&:hover': { background: '#ff6600' },
+                                        }}
+                                >
 					{UI_LABELS.HOME.search.button}
 				</Button>
 			</Box>
