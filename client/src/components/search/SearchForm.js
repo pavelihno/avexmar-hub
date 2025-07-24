@@ -21,50 +21,51 @@ import { fetchSearchAirports } from '../../redux/actions/search';
 import { MAX_PASSENGERS } from '../../constants/formats';
 
 const selectProps = {
-	sx: {
-		width: 220,
-		'& .MuiInputBase-root': {
-			fontSize: '1rem',
-			height: 35,
-			minHeight: 35,
-			padding: '0 4px',
-		},
-		'& .MuiInputBase-input': {
-			fontSize: '1rem',
-			height: 35,
-			padding: '4px 0',
-		},
-	},
-	displayEmpty: true,
-	MenuProps: {
-		PaperProps: {
-			sx: { fontSize: '0.5rem' },
-		},
-	},
-	MenuItemProps: {
-		sx: {
-			fontSize: '1rem',
-			minHeight: 10,
-			height: 10,
-		},
-	},
+        sx: {
+                width: 150,
+                '& .MuiInputBase-root': {
+                        fontSize: '0.75rem',
+                        height: 28,
+                        minHeight: 28,
+                        padding: '0 8px',
+                },
+                '& .MuiInputBase-input': {
+                        fontSize: '0.75rem',
+                        height: 20,
+                        padding: '4px 0',
+                },
+        },
+        displayEmpty: true,
+        simpleSelect: true,
+        MenuProps: {
+                PaperProps: {
+                        sx: { fontSize: '0.75rem' },
+                },
+        },
+        MenuItemProps: {
+                sx: {
+                        fontSize: '0.75rem',
+                        minHeight: 28,
+                        height: 28,
+                },
+        },
 };
 
 const dateProps = {
-	sx: {
-		width: 170,
-		'& .MuiInputBase-root': {
-			fontSize: '1rem',
-			height: 35,
-			minHeight: 35,
-			padding: '8px 8px',
-		},
-		'& .MuiInputBase-input': {
-			fontSize: '1rem',
-			height: 35,
-			padding: '8px 8px',
-		},
-	},
+        sx: {
+                width: 150,
+                '& .MuiInputBase-root': {
+                        fontSize: '0.75rem',
+                        height: 28,
+                        minHeight: 28,
+                        padding: '0 8px',
+                },
+                '& .MuiInputBase-input': {
+                        fontSize: '0.75rem',
+                        height: 20,
+                        padding: '4px 0',
+                },
+        },
 };
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
