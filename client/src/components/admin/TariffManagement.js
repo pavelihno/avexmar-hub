@@ -55,6 +55,13 @@ const TariffManagement = () => {
 			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
 		},
+		conditions: {
+			key: 'conditions',
+			apiKey: 'conditions',
+			label: FIELD_LABELS.TARIFF.conditions,
+			type: FIELD_TYPES.TEXT_AREA,
+			fullWidth: true,
+		},
 	};
 
 	const adminManager = useMemo(
