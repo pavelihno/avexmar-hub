@@ -142,15 +142,15 @@ const SearchForm = ({ initialParams = {} }) => {
 	const passengerWord = UI_LABELS.HOME.search.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
-	const fields = useMemo(
-		() => ({
-			from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
-			to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
-			departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
-			returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
-		}),
-		[airportOptions]
-	);
+        const fields = useMemo(
+                () => ({
+                        from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+                        returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+                }),
+                [airportOptions]
+        );
 
 	const formFields = useMemo(() => {
 		const arr = createFormFields(fields);
@@ -199,12 +199,15 @@ const SearchForm = ({ initialParams = {} }) => {
 		navigate(`/search?${params.toString()}`);
 	};
 
-	return (
-		<Box
-			component='form'
-			onSubmit={handleSubmit}
-			sx={{
-				display: 'flex',
+        const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
+        const toValue = airportOptions.some((o) => o.value === formValues.to) ? formValues.to : '';
+
+        return (
+                <Box
+                        component='form'
+                        onSubmit={handleSubmit}
+                        sx={{
+                                display: 'flex',
 				background: '#fff',
 				borderRadius: 1,
 				boxShadow: 1,
@@ -213,28 +216,28 @@ const SearchForm = ({ initialParams = {} }) => {
 				alignItems: 'center',
 			}}
 		>
-			<Box sx={{ px: 0.5, py: 1 }}>
-				{formFields.from.renderField({
-					value: formValues.from,
-					onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
-					error: !!validationErrors.from,
-					helperText: validationErrors.from,
-					...selectProps,
-				})}
+                        <Box sx={{ px: 0.5, py: 1 }}>
+                                {formFields.from.renderField({
+                                        value: fromValue,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
+                                        error: !!validationErrors.from,
+                                        helperText: validationErrors.from,
+                                        ...selectProps,
+                                })}
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
 				<IconButton aria-label='swap' onClick={swapAirports}>
 					<SwapHorizIcon />
 				</IconButton>
 			</Box>
-			<Box sx={{ px: 0.5, py: 1 }}>
-				{formFields.to.renderField({
-					value: formValues.to,
-					onChange: (val) => setFormValues((p) => ({ ...p, to: val })),
-					error: !!validationErrors.to,
-					helperText: validationErrors.to,
-					...selectProps,
-				})}
+                        <Box sx={{ px: 0.5, py: 1 }}>
+                                {formFields.to.renderField({
+                                        value: toValue,
+                                        onChange: (val) => setFormValues((p) => ({ ...p, to: val })),
+                                        error: !!validationErrors.to,
+                                        helperText: validationErrors.to,
+                                        ...selectProps,
+                                })}
 			</Box>
 			<Box sx={{ px: 0.5, py: 1 }}>
 				{formFields.departDate.renderField({
