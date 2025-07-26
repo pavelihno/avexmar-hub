@@ -126,36 +126,39 @@ const components = {
 	},
 
 	// Text field styles
-	MuiTextField: {
-		styleOverrides: {
-			root: {
-				'& .MuiOutlinedInput-root': {
-					height: '48px',
-					borderRadius: '0.75rem', // radius-md
-					'& fieldset': {
-						borderColor: '#E0E0E0',
-					},
-					'&:hover fieldset': {
-						borderColor: 'rgba(0, 132, 255, 0.4)',
-					},
-					'&.Mui-focused fieldset': {
-						borderColor: '#0084FF',
-					},
-				},
-				'& .MuiInputBase-input': {
-					padding: '14px 16px',
-				},
-				'& .MuiInputLabel-root': {
-					fontFamily: 'PTRootUI, sans-serif',
-				},
-				'& .MuiInputAdornment-root': {
-					'& .MuiSvgIcon-root': {
-						fontSize: '20px',
-					},
-				},
-			},
-		},
-	},
+        MuiTextField: {
+                styleOverrides: {
+                        root: {
+                                '& .MuiOutlinedInput-root': {
+                                        height: '48px',
+                                        borderRadius: '0.75rem', // radius-md
+                                        '&.MuiInputBase-multiline': {
+                                                height: 'auto',
+                                        },
+                                        '& fieldset': {
+                                                borderColor: '#E0E0E0',
+                                        },
+                                        '&:hover fieldset': {
+                                                borderColor: 'rgba(0, 132, 255, 0.4)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                                borderColor: '#0084FF',
+                                        },
+                                },
+                                '& .MuiInputBase-input': {
+                                        padding: '14px 16px',
+                                },
+                                '& .MuiInputLabel-root': {
+                                        fontFamily: 'PTRootUI, sans-serif',
+                                },
+                                '& .MuiInputAdornment-root': {
+                                        '& .MuiSvgIcon-root': {
+                                                fontSize: '20px',
+                                        },
+                                },
+                        },
+                },
+        },
 
 	// Icon styles
 	MuiSvgIcon: {
