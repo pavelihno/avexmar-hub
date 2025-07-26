@@ -12,6 +12,7 @@ class Tariff(BaseModel):
     order_number = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
+    conditions = db.Column(db.String, nullable=True)
 
     def to_dict(self):
         return {
@@ -19,7 +20,8 @@ class Tariff(BaseModel):
             'seat_class': self.seat_class.value,
             'order_number': self.order_number,
             'currency': self.currency.value,
-            'price': self.price
+            'price': self.price,
+            'conditions': self.conditions
         }
 
     @classmethod
