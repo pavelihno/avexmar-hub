@@ -9,18 +9,32 @@ import { UI_LABELS } from '../../constants';
 import { fetchSearchFlights } from '../../redux/actions/search';
 
 const Search = () => {
-	const dispatch = useDispatch();
-	const { flights } = useSelector((state) => state.search);
-	const [params] = useSearchParams();
-	const paramObj = Object.fromEntries(params.entries());
-	const paramStr = params.toString();
-	const from = params.get('from');
-	const to = params.get('to');
-	const hasReturn = params.get('return');
+        const dispatch = useDispatch();
+        const { flights } = useSelector((state) => state.search);
+        const [params] = useSearchParams();
+        const paramObj = Object.fromEntries(params.entries());
+        const paramStr = params.toString();
+        const from = params.get('from');
+        const to = params.get('to');
+        const depart = params.get('when');
+        const returnDate = params.get('return');
+        const hasReturn = returnDate;
 
-	useEffect(() => {
-		dispatch(fetchSearchFlights(paramObj));
-	}, [dispatch, paramStr]);
+        useEffect(() => {
+                dispatch(fetchSearchFlights(paramObj));
+        }, [dispatch, paramStr]);
+
+        useEffect(() => {
+                document.title = UI_LABELS.SEARCH.from_to(
+                        from || '',
+                        to || '',
+                        depart,
+                        returnDate || depart
+                );
+                return () => {
+                        document.title = 'Avexmar Hub';
+                };
+        }, [from, to, depart, returnDate]);
 
 	const grouped = [];
 	if (hasReturn) {
