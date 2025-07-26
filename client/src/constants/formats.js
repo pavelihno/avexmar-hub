@@ -7,6 +7,7 @@ export const DATE_FORMAT = 'dd.MM.yyyy';
 export const TIME_FORMAT = 'HH:mm';
 export const TIME_MASK = '__:__';
 export const DATETIME_FORMAT = 'dd.MM.yyyy HH:mm';
+export const DATE_WEEKDAY_FORMAT = 'd MMM EEE';
 
 export const DEFAULT_TIME = set(new Date(), { hours: 0, minutes: 0 });
 

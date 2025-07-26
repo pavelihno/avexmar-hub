@@ -27,6 +27,7 @@ import { dateLocale } from '../constants';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
+	TEXT_AREA: 'text_area',
 	NUMBER: 'number',
 	EMAIL: 'email',
 	PHONE: 'phone',
@@ -99,6 +100,24 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						sx={{ ...sx }}
+					/>
+				);
+			}
+
+			case FIELD_TYPES.TEXT_AREA: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						multiline
+						rows={field.rows || 10}
 						inputProps={{ ...field.inputProps, ...inputProps }}
 						sx={{ ...sx }}
 					/>
@@ -324,10 +343,10 @@ export const createFormFields = (fields) => {
 		}));
 };
 
-export const formatDate = (value, dateFormat = DATE_FORMAT) => {
+export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale) => {
 	if (!value) return '';
 	try {
-		return format(new Date(value), dateFormat);
+		return format(new Date(value), dateFormat, { locale });
 	} catch (error) {
 		console.error('Invalid date value:', value);
 		return value;

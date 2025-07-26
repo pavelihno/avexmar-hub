@@ -1,3 +1,5 @@
+import { formatDate } from "../components/utils";
+
 export const UI_LABELS = {
 	BUTTONS: {
 		save: 'Сохранить',
@@ -244,17 +246,21 @@ export const UI_LABELS = {
 				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
 			},
 		},
+		schedule: {
+			title: 'Расписание рейсов',
+		},
 	},
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Нет результатов',
-		from_to: (from, to) => `${from} → ${to}`,
-		flights_found: (count) => `${count} рейсов найдено`,
+		from_to: (from, to, date_from, date_to) => `${from} → ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`,
 		flight_details: {
+			select_flight: 'Выбрать рейс',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
+
 		},
 	},
 };

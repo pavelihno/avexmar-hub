@@ -9,49 +9,47 @@ import { UI_LABELS } from '../../constants';
 import { fetchSearchFlights } from '../../redux/actions/search';
 
 const Search = () => {
-        const dispatch = useDispatch();
-        const { flights } = useSelector((state) => state.search);
-        const [params] = useSearchParams();
-        const paramObj = Object.fromEntries(params.entries());
-        const paramStr = params.toString();
-        const from = params.get('from');
-        const to = params.get('to');
-        const hasReturn = params.get('return');
+	const dispatch = useDispatch();
+	const { flights } = useSelector((state) => state.search);
+	const [params] = useSearchParams();
+	const paramObj = Object.fromEntries(params.entries());
+	const paramStr = params.toString();
+	const from = params.get('from');
+	const to = params.get('to');
+	const hasReturn = params.get('return');
 
-        useEffect(() => {
-                dispatch(fetchSearchFlights(paramObj));
-        }, [dispatch, paramStr]);
+	useEffect(() => {
+		dispatch(fetchSearchFlights(paramObj));
+	}, [dispatch, paramStr]);
 
-        const grouped = [];
-        if (hasReturn) {
-                for (let i = 0; i < flights.length; i += 2) {
-                        grouped.push({ outbound: flights[i], returnFlight: flights[i + 1] });
-                }
-        } else {
-                for (const f of flights) grouped.push({ outbound: f });
-        }
+	const grouped = [];
+	if (hasReturn) {
+		for (let i = 0; i < flights.length; i += 2) {
+			grouped.push({ outbound: flights[i], returnFlight: flights[i + 1] });
+		}
+	} else {
+		for (const f of flights) grouped.push({ outbound: f });
+	}
 
-        return (
-                <Base>
-                        <Box sx={{ p: 3 }}>
-                                <SearchForm initialParams={paramObj} />
-
-                                <Typography variant='h5' gutterBottom sx={{ mt: 3 }}>
-                                        {UI_LABELS.SEARCH.results}
-                                </Typography>
-                                <Typography variant='subtitle1' gutterBottom>
-                                        {from && to ? UI_LABELS.SEARCH.from_to(from, to) : ''}
-                                </Typography>
-                                {grouped && grouped.length ? (
-                                        grouped.map((g, idx) => (
-                                                <SearchResultCard key={idx} outbound={g.outbound} returnFlight={g.returnFlight} />
-                                        ))
-                                ) : (
-                                        <Typography>{UI_LABELS.SEARCH.no_results}</Typography>
-                                )}
-                        </Box>
-                </Base>
-        );
+	return (
+		<Base maxWidth='xl'>
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				<SearchForm initialParams={paramObj} />
+			</Box>
+			<Box sx={{ p: 3 }}>
+				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 3 }}>
+					{UI_LABELS.SEARCH.results}
+				</Typography>
+				{grouped && grouped.length ? (
+					grouped.map((g, idx) => (
+						<SearchResultCard key={idx} outbound={g.outbound} returnFlight={g.returnFlight} />
+					))
+				) : (
+					<Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+				)}
+			</Box>
+		</Base>
+	);
 };
 
 export default Search;

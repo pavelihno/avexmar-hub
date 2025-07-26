@@ -35,6 +35,9 @@ export const ENUM_LABELS = {
 	CURRENCY: {
 		rub: 'РУБ',
 	},
+	CURRENCY_SYMBOL: {
+		rub: '₽',
+	},
 	SEAT_CLASS: {
 		economy: 'Эконом',
 		business: 'Бизнес',

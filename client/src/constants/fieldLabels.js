@@ -95,6 +95,7 @@ export const FIELD_LABELS = {
 		order_number: 'Наименование тарифа',
 		price: 'Цена',
 		currency: 'Валюта',
+		conditions: 'Условия применения тарифа',
 	},
 	FLIGHT_TARIFF: {
 		flight_id: 'Рейс',
