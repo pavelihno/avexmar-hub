@@ -5,7 +5,8 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import { fetchRoutes, createRoute, updateRoute, deleteRoute, deleteAllRoutes } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const RouteManagement = () => {

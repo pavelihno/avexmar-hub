@@ -153,8 +153,26 @@ export const VALIDATION_MESSAGES = {
 		price: {
 			REQUIRED: 'Цена обязательна',
 		},
-		tariff: {
-			REQUIRED: 'Тариф обязателен',
+		conditions: {
+			REQUIRED: 'Условия применения тарифа обязательны',
+		},
+	},
+	SEARCH: {
+		from: {
+			REQUIRED: 'Укажите аэропорт отправления',
+		},
+		to: {
+			REQUIRED: 'Укажите аэропорт назначения',
+			SAME_AIRPORT: 'Аэропорты не должны совпадать',
+		},
+		when: {
+			REQUIRED: 'Укажите дату отправления',
+		},
+		return: {
+			INVALID: 'Дата возвращения не может быть раньше даты отправления',
+		},
+		passengers: {
+			REQUIRED: 'Укажите пассажиров',
 		},
 	},
 };

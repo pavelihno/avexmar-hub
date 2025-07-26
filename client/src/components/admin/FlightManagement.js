@@ -24,7 +24,8 @@ import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flig
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { DEFAULT_TIME } from '../../constants/formats';

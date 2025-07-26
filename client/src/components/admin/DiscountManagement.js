@@ -10,7 +10,8 @@ import {
 	deleteDiscount,
 	deleteAllDiscounts,
 } from '../../redux/actions/discount';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const DiscountManagement = () => {

@@ -14,7 +14,8 @@ import {
 } from '../../redux/actions/booking';
 import { fetchBookingPassengers } from '../../redux/actions/bookingPassenger';
 import { fetchPassengers } from '../../redux/actions/passenger';
-import { FIELD_TYPES, createAdminManager } from './utils';
+import { createAdminManager } from './utils';
+import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
 

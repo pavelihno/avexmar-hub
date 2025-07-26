@@ -63,7 +63,6 @@ const Header = () => {
 				py: 2,
 				borderBottom: 1,
 				borderColor: 'divider',
-				mb: 3,
 			}}
 		>
 			<Box

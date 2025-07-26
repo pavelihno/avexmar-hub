@@ -1,16 +1,20 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-
-import Box from '@mui/material/Box';
-
+import { Box, Typography } from '@mui/material';
 import Base from './Base';
+import SearchForm from './search/SearchForm';
+import { UI_LABELS } from '../constants';
 
 const Home = () => {
-	const dispatch = useDispatch();
-
 	return (
-		<Base>
-			<Box sx={{ p: 3 }} />
+		<Base maxWidth='xl'>
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				<SearchForm />
+			</Box>
+			<Box sx={{ mt: 5 }}>
+				<Typography variant='h4' component='h1'>
+					{UI_LABELS.HOME.schedule.title}
+				</Typography>
+			</Box>
 		</Base>
 	);
 };

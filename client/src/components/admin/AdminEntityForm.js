@@ -14,7 +14,6 @@ const AdminEntityForm = ({
 	editButtonText,
 	externalUpdates = {},
 }) => {
-
 	const getInitialFormData = () => {
 		if (isEditing && initialData?.id) {
 			return initialData;
