@@ -1,6 +1,5 @@
 from flask import jsonify, request
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
 
 from app.database import db
 from app.models.route import Route

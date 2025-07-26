@@ -59,14 +59,14 @@ const Segment = ({ flight, isOutbound }) => {
 				<Typography variant='subtitle2' sx={{ fontWeight: 600, mr: 1 }}>
 					{airline ? airline.name || airline.id : ''}
 				</Typography>
-                                <IconButton
-                                        size='small'
-                                        onClick={() => {
-                                                navigator.clipboard.writeText(window.location.href);
-                                        }}
-                                >
-                                        <ShareIcon fontSize='small' sx={{ ml: 0.5 }} />
-                                </IconButton>
+				<IconButton
+					size='small'
+					onClick={() => {
+						navigator.clipboard.writeText(window.location.href);
+					}}
+				>
+					<ShareIcon fontSize='small' sx={{ ml: 0.5 }} />
+				</IconButton>
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 				<Box>
@@ -80,11 +80,11 @@ const Segment = ({ flight, isOutbound }) => {
 						{originAirport ? originAirport.name : originAirport?.id}
 					</Typography>
 				</Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
-                                        <Box sx={{ borderBottom: '1px dashed', width: 20 }} />
-                                        <FlightIcon sx={{ transform: `rotate(${isOutbound ? 90 : -90}deg)` }} />
-                                        <Box sx={{ borderBottom: '1px dashed', width: 20 }} />
-                                </Box>
+				<Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
+					<Box sx={{ borderBottom: '1px dashed', width: 50 }} />
+					<FlightIcon sx={{ transform: `rotate(${isOutbound ? 90 : -90}deg)` }} />
+					<Box sx={{ borderBottom: '1px dashed', width: 50 }} />
+				</Box>
 				<Box>
 					<Typography variant='h6' className='mono-nums'>
 						{formatTime(flight.scheduled_arrival_time)}
@@ -104,11 +104,12 @@ const Segment = ({ flight, isOutbound }) => {
 const SearchResultCard = ({ outbound, returnFlight }) => {
 	const currency = outbound.currency || returnFlight?.currency;
 	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-	const totalPrice = outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
+	const totalPrice =
+		outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
 
-        return (
-                <Card sx={{ display: 'flex', p: 2, mb: 2 }}>
-                        <Box
+	return (
+		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
+			<Box
 				sx={{
 					width: 160,
 					textAlign: 'center',
@@ -124,29 +125,29 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 				</Typography>
 				<Button
 					variant='contained'
-                                        sx={{
-                                                background: '#ff7f2a',
-                                                color: '#fff',
-                                                borderRadius: 2,
-                                                boxShadow: 'none',
-                                                textTransform: 'none',
-                                                '&:hover': { background: '#ff6600' },
-                                        }}
-                                        onClick={() => {
-                                                const url = `/cart?flight=${outbound.id}${returnFlight ? `&return=${returnFlight.id}` : ''}`;
-                                                window.open(url, '_blank');
-                                        }}
-                                >
-                                        {UI_LABELS.SEARCH.flight_details.select_flight}
-                                </Button>
-                        </Box>
-                        <Box sx={{ flexGrow: 1, pl: 2 }}>
-                                <Segment flight={outbound} isOutbound />
-                                {returnFlight && <Divider sx={{ my: 1 }} />}
-                                {returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
-                        </Box>
-                </Card>
-        );
+					sx={{
+						background: '#ff7f2a',
+						color: '#fff',
+						borderRadius: 2,
+						boxShadow: 'none',
+						textTransform: 'none',
+						'&:hover': { background: '#ff6600' },
+					}}
+					onClick={() => {
+						const url = `/cart?flight=${outbound.id}${returnFlight ? `&return=${returnFlight.id}` : ''}`;
+						window.open(url, '_blank');
+					}}
+				>
+					{UI_LABELS.SEARCH.flight_details.select_flight}
+				</Button>
+			</Box>
+			<Box sx={{ flexGrow: 1, pl: 2 }}>
+				<Segment flight={outbound} isOutbound />
+				{returnFlight && <Divider sx={{ my: 1 }} />}
+				{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
+			</Box>
+		</Card>
+	);
 };
 
 export default SearchResultCard;

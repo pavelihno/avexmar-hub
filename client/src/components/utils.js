@@ -117,7 +117,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						multiline
-						rows={field.rows || 10}
+						rows={field.rows || 5}
 						inputProps={{ ...field.inputProps, ...inputProps }}
 						sx={{ ...sx }}
 					/>

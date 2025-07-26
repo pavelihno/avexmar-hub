@@ -1,6 +1,7 @@
-import { formatDate } from "../components/utils";
+import { formatDate } from '../components/utils';
 
 export const UI_LABELS = {
+	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
 	BUTTONS: {
 		save: 'Сохранить',
 		save_changes: 'Сохранить изменения',
@@ -253,14 +254,16 @@ export const UI_LABELS = {
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Нет результатов',
-		from_to: (from, to, date_from, date_to) => `${from} → ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`,
+		from_to: (from, to, date_from, date_to) => {
+			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
+			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+		},
 		flight_details: {
 			select_flight: 'Выбрать рейс',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
-
 		},
 	},
 };

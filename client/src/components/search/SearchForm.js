@@ -101,46 +101,36 @@ const SearchForm = ({ initialParams = {} }) => {
 		dispatch(fetchSearchAirports());
 	}, [dispatch]);
 
-        useEffect(() => {
-                if (!airportOptions.length) return;
+	useEffect(() => {
+		if (!airportOptions.length) return;
 
-                const isFromValid = airportOptions.some((o) => o.value === formValues.from);
-                const isToValid = airportOptions.some((o) => o.value === formValues.to);
+		const isFromValid = airportOptions.some((o) => o.value === formValues.from);
+		const isToValid = airportOptions.some((o) => o.value === formValues.to);
 
-                if (!isFromValid || !isToValid) {
-                        console.warn(
-                                `Out of range airport value provided. Available values are ${airportOptions
-                                        .map((o) => o.value)
-                                        .join(', ')}`
-                        );
-                        setFormValues((prev) => ({
-                                ...prev,
-                                from: isFromValid ? prev.from : '',
-                                to: isToValid ? prev.to : '',
-                        }));
-                }
-        }, [airportOptions]);
+		if (!isFromValid || !isToValid) {
+			setFormValues((prev) => ({
+				...prev,
+				from: isFromValid ? prev.from : '',
+				to: isToValid ? prev.to : '',
+			}));
+		}
+	}, [airportOptions]);
 
-        useEffect(() => {
-                const handleClick = (e) => {
-                        if (passengersRef.current && !passengersRef.current.contains(e.target)) {
-                                setShowPassengers(false);
-                        }
-                };
-                document.addEventListener('mousedown', handleClick);
-                return () => document.removeEventListener('mousedown', handleClick);
-        }, []);
+	useEffect(() => {
+		const handleClick = (e) => {
+			if (passengersRef.current && !passengersRef.current.contains(e.target)) {
+				setShowPassengers(false);
+			}
+		};
+		document.addEventListener('mousedown', handleClick);
+		return () => document.removeEventListener('mousedown', handleClick);
+	}, []);
 
-        useEffect(() => {
-                if (!seatClassOptions.find((o) => o.value === seatClass)) {
-                        console.warn(
-                                `Out of range seat class value provided. Available values are ${seatClassOptions
-                                        .map((o) => o.value)
-                                        .join(', ')}`
-                        );
-                        setSeatClass(seatClassOptions[0].value);
-                }
-        }, [seatClassOptions, seatClass]);
+	useEffect(() => {
+		if (!seatClassOptions.find((o) => o.value === seatClass)) {
+			setSeatClass(seatClassOptions[0].value);
+		}
+	}, [seatClassOptions, seatClass]);
 
 	const passengerCategories = UI_LABELS.HOME.search.passenger_categories;
 
