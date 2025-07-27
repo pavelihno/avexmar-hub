@@ -7,6 +7,7 @@
     "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.18.0",
     "@mui/x-date-pickers": "^7.29.4",
+    "@mui/x-date-pickers-pro": "^7.29.4",
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
     "date-fns": "^2.30.0",

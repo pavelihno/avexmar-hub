@@ -27,18 +27,18 @@ import {
 import { dateLocale } from '../constants';
 
 export const FIELD_TYPES = {
-        TEXT: 'text',
-        TEXT_AREA: 'text_area',
-        NUMBER: 'number',
-        EMAIL: 'email',
-        PHONE: 'phone',
-        DATE: 'date',
-        TIME: 'time',
-        DATETIME: 'dateTime',
-        DATERANGE: 'dateRange',
-        SELECT: 'select',
-        BOOLEAN: 'boolean',
-        CUSTOM: 'custom',
+	TEXT: 'text',
+	TEXT_AREA: 'text_area',
+	NUMBER: 'number',
+	EMAIL: 'email',
+	PHONE: 'phone',
+	DATE: 'date',
+	TIME: 'time',
+	DATETIME: 'dateTime',
+	DATERANGE: 'dateRange',
+	SELECT: 'select',
+	BOOLEAN: 'boolean',
+	CUSTOM: 'custom',
 };
 
 export const createFieldRenderer = (field, defaultProps = {}) => {
@@ -195,11 +195,11 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				);
 			}
 
-                        case FIELD_TYPES.DATETIME: {
-                                const { value, onChange, fullWidth, error, helperText, sx } = allProps;
-                                return (
-                                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-                                                <DateTimePicker
+			case FIELD_TYPES.DATETIME: {
+				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
+				return (
+					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
+						<DateTimePicker
 							label={field.label}
 							value={value ? new Date(value) : null}
 							onChange={(dateTime) => onChange(dateTime)}
@@ -212,32 +212,32 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									sx,
 								},
 							}}
-                                                />
-                                        </LocalizationProvider>
-                                );
-                        }
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                        case FIELD_TYPES.DATERANGE: {
-                                const { value = [null, null], onChange, fullWidth, error, helperText, sx, minDate } = allProps;
-                                return (
-                                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-                                                <DateRangePicker
-                                                        value={value}
-                                                        onChange={(range) => onChange(range)}
-                                                        minDate={minDate}
-                                                        format={field.dateFormat || DATE_FORMAT}
-                                                        slotProps={{
-                                                                textField: {
-                                                                        fullWidth,
-                                                                        error,
-                                                                        helperText: error ? helperText : '',
-                                                                        sx,
-                                                                },
-                                                        }}
-                                                />
-                                        </LocalizationProvider>
-                                );
-                        }
+			case FIELD_TYPES.DATERANGE: {
+				const { value = [null, null], onChange, fullWidth, error, helperText, sx, minDate } = allProps;
+				return (
+					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
+						<DateRangePicker
+							value={value}
+							onChange={(range) => onChange(range)}
+							minDate={minDate}
+							format={field.dateFormat || DATE_FORMAT}
+							slotProps={{
+								textField: {
+									fullWidth,
+									error,
+									helperText: error ? helperText : '',
+									sx,
+								},
+							}}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
 			case FIELD_TYPES.SELECT: {
 				const {
