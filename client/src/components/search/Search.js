@@ -16,29 +16,46 @@ const Search = () => {
 	const paramStr = params.toString();
 	const from = params.get('from');
 	const to = params.get('to');
-	const depart = params.get('when');
-	const returnDate = params.get('return');
-	const hasReturn = returnDate;
+        const depart = params.get('when');
+        const returnDate = params.get('return');
+        const departFrom = params.get('when_from');
+        const departTo = params.get('when_to');
+        const returnFrom = params.get('return_from');
+        const returnTo = params.get('return_to');
+        const isFlexible = departFrom || departTo || returnFrom || returnTo;
+        const hasReturn = returnDate || returnFrom || returnTo;
 
 	useEffect(() => {
 		dispatch(fetchSearchFlights(paramObj));
 	}, [dispatch, paramStr]);
 
-	useEffect(() => {
-		document.title = UI_LABELS.SEARCH.from_to(from || '', to || '', depart, returnDate || '');
-		return () => {
-			document.title = UI_LABELS.APP_TITLE;
-		};
-	}, [from, to, depart, returnDate]);
+        useEffect(() => {
+                const titleFrom = departFrom || depart || '';
+                const titleTo = returnTo || returnDate || '';
+                document.title = UI_LABELS.SEARCH.from_to(from || '', to || '', titleFrom, titleTo);
+                return () => {
+                        document.title = UI_LABELS.APP_TITLE;
+                };
+        }, [from, to, depart, returnDate, departFrom, returnTo]);
 
-	const grouped = [];
-	if (hasReturn) {
-		for (let i = 0; i < flights.length; i += 2) {
-			grouped.push({ outbound: flights[i], returnFlight: flights[i + 1] });
-		}
-	} else {
-		for (const f of flights) grouped.push({ outbound: f });
-	}
+        const grouped = [];
+        if (isFlexible) {
+                const outbounds = flights.filter((f) => f.direction !== 'return');
+                const returns = flights.filter((f) => f.direction === 'return');
+                for (const out of outbounds) {
+                        if (returns.length) {
+                                for (const r of returns) grouped.push({ outbound: out, returnFlight: r });
+                        } else {
+                                grouped.push({ outbound: out });
+                        }
+                }
+        } else if (hasReturn) {
+                for (let i = 0; i < flights.length; i += 2) {
+                        grouped.push({ outbound: flights[i], returnFlight: flights[i + 1] });
+                }
+        } else {
+                for (const f of flights) grouped.push({ outbound: f });
+        }
 
 	return (
 		<Base maxWidth='xl'>

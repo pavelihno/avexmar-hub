@@ -13,3 +13,17 @@ def test_search_flights(client, future_flight, economy_flight_tariff, economy_ta
     assert any(f['id'] == future_flight.id for f in data)
     found = next(f for f in data if f['id'] == future_flight.id)
     assert found['price'] == economy_tariff.price
+
+
+def test_search_flights_range(client, future_flight, economy_flight_tariff):
+    start = (future_flight.scheduled_departure - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    end = (future_flight.scheduled_departure + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    resp = client.get('/search/flights', query_string={
+        'from': 'SVO',
+        'to': 'PWE',
+        'when_from': start,
+        'when_to': end,
+    })
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert any(f['id'] == future_flight.id for f in data)

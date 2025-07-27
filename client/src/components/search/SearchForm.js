@@ -76,12 +76,22 @@ const SearchForm = ({ initialParams = {} }) => {
 	const dispatch = useDispatch();
 	const { airports } = useSelector((state) => state.search);
 
-	const [formValues, setFormValues] = useState({
-		from: initialParams.from || '',
-		to: initialParams.to || '',
-		departDate: parseDate(initialParams.when),
-		returnDate: parseDate(initialParams.return),
-	});
+        const [dateMode, setDateMode] = useState(
+                initialParams.when_from || initialParams.when_to || initialParams.return_from || initialParams.return_to
+                        ? 'flex'
+                        : 'exact'
+        );
+
+        const [formValues, setFormValues] = useState({
+                from: initialParams.from || '',
+                to: initialParams.to || '',
+                departDate: parseDate(initialParams.when),
+                returnDate: parseDate(initialParams.return),
+                departFrom: parseDate(initialParams.when_from),
+                departTo: parseDate(initialParams.when_to),
+                returnFrom: parseDate(initialParams.return_from),
+                returnTo: parseDate(initialParams.return_to),
+        });
 	const [passengers, setPassengers] = useState({
 		adults: parseInt(initialParams.adults, 10) || 1,
 		children: parseInt(initialParams.children, 10) || 0,
@@ -142,15 +152,19 @@ const SearchForm = ({ initialParams = {} }) => {
 	const passengerWord = UI_LABELS.HOME.search.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
-	const fields = useMemo(
-		() => ({
-			from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
-			to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
-			departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
-			returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
-		}),
-		[airportOptions]
-	);
+        const fields = useMemo(
+                () => ({
+                        from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
+                        departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+                        returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+                        departFrom: { key: 'departFrom', label: `${UI_LABELS.HOME.search.when} c`, type: FIELD_TYPES.DATE },
+                        departTo: { key: 'departTo', label: `${UI_LABELS.HOME.search.when} до`, type: FIELD_TYPES.DATE },
+                        returnFrom: { key: 'returnFrom', label: `${UI_LABELS.HOME.search.return} c`, type: FIELD_TYPES.DATE },
+                        returnTo: { key: 'returnTo', label: `${UI_LABELS.HOME.search.return} до`, type: FIELD_TYPES.DATE },
+                }),
+                [airportOptions]
+        );
 
 	const formFields = useMemo(() => {
 		const arr = createFormFields(fields);
@@ -176,28 +190,48 @@ const SearchForm = ({ initialParams = {} }) => {
 		if (formValues.from && formValues.to && formValues.from === formValues.to) {
 			errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
 		}
-		if (!formValues.departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-		if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
-			errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-		}
+                if (dateMode === 'exact') {
+                        if (!formValues.departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
+                                errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                        }
+                } else {
+                        if (!formValues.departFrom) errors.departFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        if (!formValues.departTo) errors.departTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        if (formValues.departFrom && formValues.departTo && formValues.departTo < formValues.departFrom) {
+                                errors.departTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                        }
+                        if (formValues.returnFrom && formValues.returnTo && formValues.returnTo < formValues.returnFrom) {
+                                errors.returnTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                        }
+                }
 		setValidationErrors(errors);
 		return Object.keys(errors).length === 0;
 	};
 
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		if (!validateForm()) return;
-		const params = new URLSearchParams();
-		params.set('from', formValues.from);
-		params.set('to', formValues.to);
-		params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
-		if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
-		params.set('adults', passengers.adults);
-		params.set('children', passengers.children);
-		params.set('infants', passengers.infants);
-		params.set('class', seatClass);
-		navigate(`/search?${params.toString()}`);
-	};
+        const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!validateForm()) return;
+                const params = new URLSearchParams();
+                params.set('from', formValues.from);
+                params.set('to', formValues.to);
+                if (dateMode === 'exact') {
+                        params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
+                        if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
+                } else {
+                        params.set('when_from', formatDate(formValues.departFrom, 'yyyy-MM-dd'));
+                        params.set('when_to', formatDate(formValues.departTo, 'yyyy-MM-dd'));
+                        if (formValues.returnFrom && formValues.returnTo) {
+                                params.set('return_from', formatDate(formValues.returnFrom, 'yyyy-MM-dd'));
+                                params.set('return_to', formatDate(formValues.returnTo, 'yyyy-MM-dd'));
+                        }
+                }
+                params.set('adults', passengers.adults);
+                params.set('children', passengers.children);
+                params.set('infants', passengers.infants);
+                params.set('class', seatClass);
+                navigate(`/search?${params.toString()}`);
+        };
 
 	const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
 	const toValue = airportOptions.some((o) => o.value === formValues.to) ? formValues.to : '';
@@ -239,37 +273,90 @@ const SearchForm = ({ initialParams = {} }) => {
 					...selectProps,
 				})}
 			</Box>
-			<Box sx={{ px: 0.5, py: 1 }}>
-				{formFields.departDate.renderField({
-					value: formValues.departDate,
-					onChange: (val) => {
-						setFormValues((p) => {
-							let newReturnDate = p.returnDate;
-							if (newReturnDate && val && newReturnDate < val) {
-								newReturnDate = null;
-							}
-							return { ...p, departDate: val, returnDate: newReturnDate };
-						});
-					},
-					error: !!validationErrors.departDate,
-					helperText: validationErrors.departDate,
-					minDate: new Date(),
-					...dateProps,
-				})}
-			</Box>
-			<Box sx={{ px: 0.5, py: 1 }}>
-				{formFields.returnDate.renderField({
-					value: formValues.returnDate,
-					onChange: (val) => {
-						if (formValues.departDate && val && val < formValues.departDate) return;
-						setFormValues((p) => ({ ...p, returnDate: val }));
-					},
-					error: !!validationErrors.returnDate,
-					helperText: validationErrors.returnDate,
-					minDate: formValues.departDate || new Date(),
-					...dateProps,
-				})}
-			</Box>
+                        <Box sx={{ px: 0.5, py: 1 }}>
+                                <RadioGroup row value={dateMode} onChange={(e) => setDateMode(e.target.value)}>
+                                        <FormControlLabel value='exact' control={<Radio size='small' />} label={UI_LABELS.HOME.search.date_modes.exact} />
+                                        <FormControlLabel value='flex' control={<Radio size='small' />} label={UI_LABELS.HOME.search.date_modes.flexible} />
+                                </RadioGroup>
+                        </Box>
+                        {dateMode === 'exact' ? (
+                                <>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.departDate.renderField({
+                                                        value: formValues.departDate,
+                                                        onChange: (val) => {
+                                                                setFormValues((p) => {
+                                                                        let newReturnDate = p.returnDate;
+                                                                        if (newReturnDate && val && newReturnDate < val) {
+                                                                                newReturnDate = null;
+                                                                        }
+                                                                        return { ...p, departDate: val, returnDate: newReturnDate };
+                                                                });
+                                                        },
+                                                        error: !!validationErrors.departDate,
+                                                        helperText: validationErrors.departDate,
+                                                        minDate: new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.returnDate.renderField({
+                                                        value: formValues.returnDate,
+                                                        onChange: (val) => {
+                                                                if (formValues.departDate && val && val < formValues.departDate) return;
+                                                                setFormValues((p) => ({ ...p, returnDate: val }));
+                                                        },
+                                                        error: !!validationErrors.returnDate,
+                                                        helperText: validationErrors.returnDate,
+                                                        minDate: formValues.departDate || new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                </>
+                        ) : (
+                                <>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.departFrom.renderField({
+                                                        value: formValues.departFrom,
+                                                        onChange: (val) => setFormValues((p) => ({ ...p, departFrom: val })),
+                                                        error: !!validationErrors.departFrom,
+                                                        helperText: validationErrors.departFrom,
+                                                        minDate: new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.departTo.renderField({
+                                                        value: formValues.departTo,
+                                                        onChange: (val) => setFormValues((p) => ({ ...p, departTo: val })),
+                                                        error: !!validationErrors.departTo,
+                                                        helperText: validationErrors.departTo,
+                                                        minDate: formValues.departFrom || new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.returnFrom.renderField({
+                                                        value: formValues.returnFrom,
+                                                        onChange: (val) => setFormValues((p) => ({ ...p, returnFrom: val })),
+                                                        error: !!validationErrors.returnFrom,
+                                                        helperText: validationErrors.returnFrom,
+                                                        minDate: formValues.departTo || formValues.departFrom || new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                        <Box sx={{ px: 0.5, py: 1 }}>
+                                                {formFields.returnTo.renderField({
+                                                        value: formValues.returnTo,
+                                                        onChange: (val) => setFormValues((p) => ({ ...p, returnTo: val })),
+                                                        error: !!validationErrors.returnTo,
+                                                        helperText: validationErrors.returnTo,
+                                                        minDate: formValues.returnFrom || formValues.departTo || formValues.departFrom || new Date(),
+                                                        ...dateProps,
+                                                })}
+                                        </Box>
+                                </>
+                        )}
 			<Box sx={{ px: 0.5, py: 1, position: 'relative' }} ref={passengersRef}>
 				<TextField
 					label={UI_LABELS.HOME.search.passengers}
@@ -329,25 +416,40 @@ const SearchForm = ({ initialParams = {} }) => {
 					</Paper>
 				</Collapse>
 			</Box>
-			<Box sx={{ px: 0.5, py: 1, display: 'flex', alignItems: 'center' }}>
-				<Button
-					type='submit'
-					variant='contained'
-					sx={{
-						background: '#ff7f2a',
-						color: '#fff',
-						borderRadius: 2,
-						px: 4,
-						py: 2,
-						boxShadow: 'none',
-						textTransform: 'none',
-						whiteSpace: 'nowrap',
-						'&:hover': { background: '#ff6600' },
-					}}
-				>
-					{UI_LABELS.HOME.search.button}
-				</Button>
-			</Box>
+                        <Box sx={{ px: 0.5, py: 1, display: 'flex', alignItems: 'center' }}>
+                                <Button
+                                        type='submit'
+                                        variant='contained'
+                                        sx={{
+                                                background: '#ff7f2a',
+                                                color: '#fff',
+                                                borderRadius: 2,
+                                                px: 4,
+                                                py: 2,
+                                                boxShadow: 'none',
+                                                textTransform: 'none',
+                                                whiteSpace: 'nowrap',
+                                                '&:hover': { background: '#ff6600' },
+                                        }}
+                                >
+                                        {UI_LABELS.HOME.search.button}
+                                </Button>
+                                {formValues.from && formValues.to && (
+                                        <Button
+                                                variant='outlined'
+                                                size='small'
+                                                sx={{ ml: 1, whiteSpace: 'nowrap' }}
+                                                onClick={() => {
+                                                        const params = new URLSearchParams();
+                                                        params.set('from', formValues.from);
+                                                        params.set('to', formValues.to);
+                                                        navigate(`/schedule?${params.toString()}`);
+                                                }}
+                                        >
+                                                {UI_LABELS.HOME.search.schedule_button}
+                                        </Button>
+                                )}
+                        </Box>
 		</Box>
 	);
 };
