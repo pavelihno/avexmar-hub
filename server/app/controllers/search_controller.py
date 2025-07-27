@@ -6,12 +6,25 @@ from app.models.route import Route
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 
+from sqlalchemy import or_
 from app.models.airport import Airport
 from app.models.flight import Flight
 
 
 def search_airports():
-    airports = Airport.get_all()
+    airports = (
+        db.session.query(Airport)
+        .join(
+            Route,
+            or_(
+                Airport.id == Route.origin_airport_id,
+                Airport.id == Route.destination_airport_id,
+            ),
+        )
+        .distinct()
+        .order_by(Airport.name.asc())
+        .all()
+    )
     return jsonify([airport.to_dict() for airport in airports])
 
 
