@@ -23,12 +23,9 @@ import { MAX_PASSENGERS } from '../../constants/formats';
 const sharedSx = {
 	'& .MuiInputBase-root': {
 		fontSize: '0.75rem',
-		height: 40,
-		minHeight: 40,
 	},
 	'& .MuiInputBase-input': {
 		fontSize: '0.75rem',
-		height: 28,
 	},
 	'& .MuiFormHelperText-root': {
 		fontSize: '0.65rem',
@@ -44,12 +41,12 @@ const selectProps = {
 	},
 	MenuProps: {
 		PaperProps: {
-			sx: { fontSize: '0.5rem' },
+			sx: { fontSize: '0.75rem' },
 		},
 	},
 	MenuItemProps: {
 		sx: {
-			fontSize: '0.5rem',
+			fontSize: '0.75rem',
 			minHeight: 28,
 			height: 28,
 		},
@@ -74,33 +71,33 @@ const parseDate = (value) => {
 const STORAGE_KEY = 'lastSearchParams';
 
 const SearchForm = ({ initialParams = {} }) => {
-        const navigate = useNavigate();
-        const dispatch = useDispatch();
-        const { airports } = useSelector((state) => state.search);
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const { airports } = useSelector((state) => state.search);
 
-        const storedParams = useMemo(() => {
-                if (Object.keys(initialParams).length) return {};
-                try {
-                        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-                } catch (e) {
-                        return {};
-                }
-        }, [initialParams]);
+	const storedParams = useMemo(() => {
+		if (Object.keys(initialParams).length) return {};
+		try {
+			return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+		} catch (e) {
+			return {};
+		}
+	}, [initialParams]);
 
-        const combinedParams = { ...storedParams, ...initialParams };
+	const combinedParams = { ...storedParams, ...initialParams };
 
-        const [formValues, setFormValues] = useState({
-                from: combinedParams.from || '',
-                to: combinedParams.to || '',
-                departDate: parseDate(combinedParams.when),
-                returnDate: parseDate(combinedParams.return),
-        });
-        const [passengers, setPassengers] = useState({
-                adults: parseInt(combinedParams.adults, 10) || 1,
-                children: parseInt(combinedParams.children, 10) || 0,
-                infants: parseInt(combinedParams.infants, 10) || 0,
-        });
-        const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
+	const [formValues, setFormValues] = useState({
+		from: combinedParams.from || '',
+		to: combinedParams.to || '',
+		departDate: parseDate(combinedParams.when),
+		returnDate: parseDate(combinedParams.return),
+	});
+	const [passengers, setPassengers] = useState({
+		adults: parseInt(combinedParams.adults, 10) || 1,
+		children: parseInt(combinedParams.children, 10) || 0,
+		infants: parseInt(combinedParams.infants, 10) || 0,
+	});
+	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
 
@@ -197,37 +194,37 @@ const SearchForm = ({ initialParams = {} }) => {
 		return Object.keys(errors).length === 0;
 	};
 
-        const handleSubmit = (e) => {
-                e.preventDefault();
-                if (!validateForm()) return;
-                const params = new URLSearchParams();
-                params.set('from', formValues.from);
-                params.set('to', formValues.to);
-                params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
-                if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
-                params.set('adults', passengers.adults);
-                params.set('children', passengers.children);
-                params.set('infants', passengers.infants);
-                params.set('class', seatClass);
-                try {
-                        localStorage.setItem(
-                                STORAGE_KEY,
-                                JSON.stringify({
-                                        from: formValues.from,
-                                        to: formValues.to,
-                                        when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
-                                        return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
-                                        adults: passengers.adults,
-                                        children: passengers.children,
-                                        infants: passengers.infants,
-                                        class: seatClass,
-                                })
-                        );
-                } catch (e) {
-                        console.error('Failed to save search params', e);
-                }
-                navigate(`/search?${params.toString()}`);
-        };
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		if (!validateForm()) return;
+		const params = new URLSearchParams();
+		params.set('from', formValues.from);
+		params.set('to', formValues.to);
+		params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
+		if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
+		params.set('adults', passengers.adults);
+		params.set('children', passengers.children);
+		params.set('infants', passengers.infants);
+		params.set('class', seatClass);
+		try {
+			localStorage.setItem(
+				STORAGE_KEY,
+				JSON.stringify({
+					from: formValues.from,
+					to: formValues.to,
+					when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
+					return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
+					adults: passengers.adults,
+					children: passengers.children,
+					infants: passengers.infants,
+					class: seatClass,
+				})
+			);
+		} catch (e) {
+			console.error('Failed to save search params', e);
+		}
+		navigate(`/search?${params.toString()}`);
+	};
 
 	const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
 	const toValue = airportOptions.some((o) => o.value === formValues.to) ? formValues.to : '';
