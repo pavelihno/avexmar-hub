@@ -229,7 +229,12 @@ export const UI_LABELS = {
 			return: 'Обратно',
 			passengers: 'Пассажиры',
 			class: 'Эконом',
-			seat_class_title: 'Класс обслуживания',
+                        seat_class_title: 'Класс обслуживания',
+                        date_modes: {
+                                exact: 'Точные даты',
+                                flexible: 'Гибкие даты',
+                        },
+                        schedule_button: 'Расписание',
 			button: 'Найти билеты',
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
