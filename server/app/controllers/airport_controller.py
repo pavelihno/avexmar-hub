@@ -5,14 +5,12 @@ from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx import is_xlsx_file, create_xlsx
 
 
-@admin_required
-def get_airports(current_user):
+def get_airports():
     airports = Airport.get_all()
     return jsonify([airport.to_dict() for airport in airports])
 
 
-@admin_required
-def get_airport(current_user, airport_id):
+def get_airport(airport_id):
     airport = Airport.get_or_404(airport_id)
     return jsonify(airport.to_dict()), 200
 
