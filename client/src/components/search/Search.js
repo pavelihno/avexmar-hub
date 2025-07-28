@@ -32,7 +32,7 @@ const Search = () => {
 	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
 		const titleTo = returnTo || returnDate || '';
-		document.title = UI_LABELS.SEARCH.from_to(from || '', to || '', titleFrom, titleTo);
+		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo);
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};

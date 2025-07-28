@@ -24,7 +24,7 @@ const Schedule = () => {
 			if (!p.when_from) {
 				const today = new Date();
 				const end = new Date();
-				end.setDate(today.getDate() + 30);
+				end.setDate(today.getDate() + 365);
 				p.when_from = formatDate(today, 'yyyy-MM-dd');
 				p.when_to = formatDate(end, 'yyyy-MM-dd');
 			}
@@ -33,11 +33,11 @@ const Schedule = () => {
 	}, [dispatch, paramStr, from, to]);
 
 	useEffect(() => {
-		document.title = UI_LABELS.HOME.schedule.title;
+		document.title = UI_LABELS.SCHEDULE.from_to(from || '', to || '');
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};
-	}, []);
+	}, [from, to]);
 
 	return (
 		<Base maxWidth='xl'>
@@ -46,12 +46,12 @@ const Schedule = () => {
 			</Box>
 			<Box sx={{ p: 3 }}>
 				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 3 }}>
-					{UI_LABELS.HOME.schedule.title}
+					{UI_LABELS.SCHEDULE.title}
 				</Typography>
 				{flights && flights.length ? (
 					flights.map((f) => <SearchResultCard key={f.id} outbound={f} />)
 				) : (
-					<Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+					<Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
 				)}
 			</Box>
 		</Base>

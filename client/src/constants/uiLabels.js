@@ -227,14 +227,19 @@ export const UI_LABELS = {
 			to: 'Куда',
 			when: 'Когда',
 			return: 'Обратно',
+			when_from: 'Когда от',
+			when_to: 'Когда до',
+			return_from: 'Обратно от',
+			return_to: 'Обратно до',
 			passengers: 'Пассажиры',
 			class: 'Эконом',
-                        seat_class_title: 'Класс обслуживания',
-                        date_modes: {
-                                exact: 'Точные даты',
-                                flexible: 'Гибкие даты',
-                        },
-                        schedule_button: 'Расписание',
+			seat_class_title: 'Класс обслуживания',
+			show_schedule: 'Показать расписание',
+			date_modes: {
+				exact: 'Точные даты',
+				flexible: 'Гибкие даты',
+			},
+			schedule_button: 'Расписание',
 			button: 'Найти билеты',
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
@@ -252,14 +257,19 @@ export const UI_LABELS = {
 				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
 			},
 		},
-		schedule: {
-			title: 'Расписание рейсов',
+	},
+	SCHEDULE: {
+		title: 'Расписание рейсов',
+		results: 'Результаты поиска',
+		no_results: 'Нет результатов',
+		from_to: (from, to) => {
+			return `${from} → ${to}`;
 		},
 	},
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Нет результатов',
-		from_to: (from, to, date_from, date_to) => {
+		from_to_date: (from, to, date_from, date_to) => {
 			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
