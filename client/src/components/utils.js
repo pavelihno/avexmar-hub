@@ -11,7 +11,6 @@ import {
 	Autocomplete,
 } from '@mui/material';
 import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { DateRangePicker } from '@mui/x-date-pickers-pro';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -34,11 +33,10 @@ export const FIELD_TYPES = {
 	PHONE: 'phone',
 	DATE: 'date',
 	TIME: 'time',
-	DATETIME: 'dateTime',
-	DATERANGE: 'dateRange',
-	SELECT: 'select',
-	BOOLEAN: 'boolean',
-	CUSTOM: 'custom',
+        DATETIME: 'dateTime',
+        SELECT: 'select',
+        BOOLEAN: 'boolean',
+        CUSTOM: 'custom',
 };
 
 export const createFieldRenderer = (field, defaultProps = {}) => {
@@ -148,7 +146,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, sx, minDate } = allProps;
+                                const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
@@ -157,21 +155,22 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							onChange={(date) => onChange(date)}
 							minDate={minDate}
 							format={field.dateFormat || DATE_FORMAT}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-								},
-							}}
+                                                        slotProps={{
+                                                                textField: {
+                                                                        fullWidth,
+                                                                        error,
+                                                                        helperText: error ? helperText : '',
+                                                                        sx,
+                                                                        ...textFieldProps,
+                                                                },
+                                                        }}
 						/>
 					</LocalizationProvider>
 				);
 			}
 
-			case FIELD_TYPES.TIME: {
-				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
+                        case FIELD_TYPES.TIME: {
+                                const { value, onChange, fullWidth, error, helperText, sx, textFieldProps } = allProps;
 
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
@@ -182,21 +181,22 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							ampm={false}
 							format={field.timeFormat || TIME_FORMAT}
 							mask={TIME_MASK}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-								},
-							}}
+                                                        slotProps={{
+                                                                textField: {
+                                                                        fullWidth,
+                                                                        error,
+                                                                        helperText: error ? helperText : '',
+                                                                        sx,
+                                                                        ...textFieldProps,
+                                                                },
+                                                        }}
 						/>
 					</LocalizationProvider>
 				);
 			}
 
-			case FIELD_TYPES.DATETIME: {
-				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
+                        case FIELD_TYPES.DATETIME: {
+                                const { value, onChange, fullWidth, error, helperText, sx, textFieldProps } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DateTimePicker
@@ -204,40 +204,20 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							value={value ? new Date(value) : null}
 							onChange={(dateTime) => onChange(dateTime)}
 							format={field.dateTimeFormat || DATETIME_FORMAT}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-								},
-							}}
+                                                        slotProps={{
+                                                                textField: {
+                                                                        fullWidth,
+                                                                        error,
+                                                                        helperText: error ? helperText : '',
+                                                                        sx,
+                                                                        ...textFieldProps,
+                                                                },
+                                                        }}
 						/>
 					</LocalizationProvider>
 				);
 			}
 
-			case FIELD_TYPES.DATERANGE: {
-				const { value = [null, null], onChange, fullWidth, error, helperText, sx, minDate } = allProps;
-				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-						<DateRangePicker
-							value={value}
-							onChange={(range) => onChange(range)}
-							minDate={minDate}
-							format={field.dateFormat || DATE_FORMAT}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-								},
-							}}
-						/>
-					</LocalizationProvider>
-				);
-			}
 
 			case FIELD_TYPES.SELECT: {
 				const {

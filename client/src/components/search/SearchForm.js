@@ -56,10 +56,17 @@ const selectProps = {
 };
 
 const dateProps = {
-	sx: {
-		width: 170,
-		...sharedSx,
-	},
+        sx: {
+                width: 170,
+                ...sharedSx,
+        },
+};
+
+const smallDateProps = {
+        sx: {
+                width: 130,
+                ...sharedSx,
+        },
 };
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
@@ -69,8 +76,6 @@ const parseDate = (value) => {
 	const d = new Date(value);
 	return isNaN(d) ? null : d;
 };
-
-const parseDateRange = (fromVal, toVal) => [parseDate(fromVal), parseDate(toVal)];
 
 const STORAGE_KEY = 'lastSearchParams';
 
@@ -96,14 +101,16 @@ const SearchForm = ({ initialParams = {} }) => {
 
 	const combinedParams = { ...storedParams, ...initialParams };
 
-	const [formValues, setFormValues] = useState({
-		from: combinedParams.from || '',
-		to: combinedParams.to || '',
-		departDate: parseDate(combinedParams.when),
-		returnDate: parseDate(combinedParams.return),
-		departRange: parseDateRange(combinedParams.when_from, combinedParams.when_to),
-		returnRange: parseDateRange(combinedParams.return_from, combinedParams.return_to),
-	});
+        const [formValues, setFormValues] = useState({
+                from: combinedParams.from || '',
+                to: combinedParams.to || '',
+                departDate: parseDate(combinedParams.when),
+                returnDate: parseDate(combinedParams.return),
+                departFrom: parseDate(combinedParams.when_from),
+                departTo: parseDate(combinedParams.when_to),
+                returnFrom: parseDate(combinedParams.return_from),
+                returnTo: parseDate(combinedParams.return_to),
+        });
 
 	const [passengers, setPassengers] = useState({
 		adults: parseInt(combinedParams.adults, 10) || 1,
@@ -114,7 +121,10 @@ const SearchForm = ({ initialParams = {} }) => {
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
 
-	const passengersRef = useRef(null);
+        const passengersRef = useRef(null);
+        const departToRef = useRef(null);
+        const returnFromRef = useRef(null);
+        const returnToRef = useRef(null);
 	const airportOptions = useMemo(
 		() => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.iata_code})` })),
 		[airports]
@@ -171,11 +181,13 @@ const SearchForm = ({ initialParams = {} }) => {
 			to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
 			departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
 			returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
-			departRange: { key: 'departRange', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATERANGE },
-			returnRange: { key: 'returnRange', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATERANGE },
-		}),
-		[airportOptions]
-	);
+                        departFrom: { key: 'departFrom', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+                        departTo: { key: 'departTo', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+                        returnFrom: { key: 'returnFrom', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+                        returnTo: { key: 'returnTo', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+                }),
+                [airportOptions]
+        );
 
 	const formFields = useMemo(() => {
 		const arr = createFormFields(fields);
@@ -206,24 +218,23 @@ const SearchForm = ({ initialParams = {} }) => {
 			if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
 				errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
 			}
-		} else {
-			const [dFrom, dTo] = formValues.departRange;
-			const [rFrom, rTo] = formValues.returnRange;
-			if (!dFrom) errors.departRange = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-			if (!dTo) errors.departRange = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-			if (dFrom && dTo && dTo < dFrom) {
-				errors.departRange = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-			}
-			if (rFrom || rTo) {
-				if (!(rFrom && rTo)) {
-					errors.returnRange = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-				} else {
-					if (rTo < rFrom || (dTo && rFrom < dTo)) {
-						errors.returnRange = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-					}
-				}
-			}
-		}
+                } else {
+                        const { departFrom, departTo, returnFrom, returnTo } = formValues;
+                        if (!departFrom) errors.departFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        if (!departTo) errors.departTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        if (departFrom && departTo && departTo < departFrom) {
+                                errors.departTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                        }
+                        if (returnFrom || returnTo) {
+                                if (!(returnFrom && returnTo)) {
+                                        if (!returnFrom) errors.returnFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                                        if (!returnTo) errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                                } else if (returnTo < returnFrom || (departTo && returnFrom < departTo)) {
+                                        errors.returnFrom = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                                        errors.returnTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                                }
+                        }
+                }
 		setValidationErrors(errors);
 		return Object.keys(errors).length === 0;
 	};
@@ -237,16 +248,15 @@ const SearchForm = ({ initialParams = {} }) => {
 		if (dateMode === 'exact') {
 			params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
 			if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
-		} else {
-			const [dFrom, dTo] = formValues.departRange;
-			const [rFrom, rTo] = formValues.returnRange;
-			params.set('when_from', formatDate(dFrom, 'yyyy-MM-dd'));
-			params.set('when_to', formatDate(dTo, 'yyyy-MM-dd'));
-			if (rFrom && rTo) {
-				params.set('return_from', formatDate(rFrom, 'yyyy-MM-dd'));
-				params.set('return_to', formatDate(rTo, 'yyyy-MM-dd'));
-			}
-		}
+                } else {
+                        const { departFrom, departTo, returnFrom, returnTo } = formValues;
+                        params.set('when_from', formatDate(departFrom, 'yyyy-MM-dd'));
+                        params.set('when_to', formatDate(departTo, 'yyyy-MM-dd'));
+                        if (returnFrom && returnTo) {
+                                params.set('return_from', formatDate(returnFrom, 'yyyy-MM-dd'));
+                                params.set('return_to', formatDate(returnTo, 'yyyy-MM-dd'));
+                        }
+                }
 		params.set('adults', passengers.adults);
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
@@ -259,10 +269,10 @@ const SearchForm = ({ initialParams = {} }) => {
 					to: formValues.to,
 					when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
 					return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
-					when_from: formatDate(formValues.departRange[0], 'yyyy-MM-dd'),
-					when_to: formatDate(formValues.departRange[1], 'yyyy-MM-dd'),
-					return_from: formatDate(formValues.returnRange[0], 'yyyy-MM-dd'),
-					return_to: formatDate(formValues.returnRange[1], 'yyyy-MM-dd'),
+                                        when_from: formatDate(formValues.departFrom, 'yyyy-MM-dd'),
+                                        when_to: formatDate(formValues.departTo, 'yyyy-MM-dd'),
+                                        return_from: formatDate(formValues.returnFrom, 'yyyy-MM-dd'),
+                                        return_to: formatDate(formValues.returnTo, 'yyyy-MM-dd'),
 					adults: passengers.adults,
 					children: passengers.children,
 					infants: passengers.infants,
@@ -377,30 +387,70 @@ const SearchForm = ({ initialParams = {} }) => {
 							})}
 						</Box>
 					</Box>
-				) : (
-					<Box sx={{ display: 'flex' }}>
-						<Box sx={{ px: 0.5 }}>
-							{formFields.departRange.renderField({
-								value: formValues.departRange,
-								onChange: (val) => setFormValues((p) => ({ ...p, departRange: val })),
-								error: !!validationErrors.departRange,
-								helperText: validationErrors.departRange,
-								minDate: new Date(),
-								...dateProps,
-							})}
-						</Box>
-						<Box sx={{ px: 0.5 }}>
-							{formFields.returnRange.renderField({
-								value: formValues.returnRange,
-								onChange: (val) => setFormValues((p) => ({ ...p, returnRange: val })),
-								error: !!validationErrors.returnRange,
-								helperText: validationErrors.returnRange,
-								minDate: formValues.departRange[1] || formValues.departRange[0] || new Date(),
-								...dateProps,
-							})}
-						</Box>
-					</Box>
-				)}
+                                ) : (
+                                        <Box sx={{ display: 'flex' }}>
+                                                <Box sx={{ px: 0.5 }}>
+                                                        {formFields.departFrom.renderField({
+                                                                value: formValues.departFrom,
+                                                                onChange: (val) => {
+                                                                        setFormValues((p) => {
+                                                                                let newDepartTo = p.departTo;
+                                                                                if (newDepartTo && val && newDepartTo < val) newDepartTo = null;
+                                                                                return { ...p, departFrom: val, departTo: newDepartTo };
+                                                                        });
+                                                                        if (departToRef.current) departToRef.current.focus();
+                                                                },
+                                                                error: !!validationErrors.departFrom,
+                                                                helperText: validationErrors.departFrom,
+                                                                minDate: new Date(),
+                                                                textFieldProps: { inputRef: departToRef },
+                                                                ...smallDateProps,
+                                                        })}
+                                                </Box>
+                                                <Box sx={{ px: 0.5 }}>
+                                                        {formFields.departTo.renderField({
+                                                                value: formValues.departTo,
+                                                                onChange: (val) => {
+                                                                        setFormValues((p) => ({ ...p, departTo: val }));
+                                                                        if (returnFromRef.current) returnFromRef.current.focus();
+                                                                },
+                                                                error: !!validationErrors.departTo,
+                                                                helperText: validationErrors.departTo,
+                                                                minDate: formValues.departFrom || new Date(),
+                                                                textFieldProps: { inputRef: returnFromRef },
+                                                                ...smallDateProps,
+                                                        })}
+                                                </Box>
+                                                <Box sx={{ px: 0.5 }}>
+                                                        {formFields.returnFrom.renderField({
+                                                                value: formValues.returnFrom,
+                                                                onChange: (val) => {
+                                                                        setFormValues((p) => {
+                                                                                let newReturnTo = p.returnTo;
+                                                                                if (newReturnTo && val && newReturnTo < val) newReturnTo = null;
+                                                                                return { ...p, returnFrom: val, returnTo: newReturnTo };
+                                                                        });
+                                                                        if (returnToRef.current) returnToRef.current.focus();
+                                                                },
+                                                                error: !!validationErrors.returnFrom,
+                                                                helperText: validationErrors.returnFrom,
+                                                                minDate: formValues.departTo || formValues.departFrom || new Date(),
+                                                                textFieldProps: { inputRef: returnToRef },
+                                                                ...smallDateProps,
+                                                        })}
+                                                </Box>
+                                                <Box sx={{ px: 0.5 }}>
+                                                        {formFields.returnTo.renderField({
+                                                                value: formValues.returnTo,
+                                                                onChange: (val) => setFormValues((p) => ({ ...p, returnTo: val })),
+                                                                error: !!validationErrors.returnTo,
+                                                                helperText: validationErrors.returnTo,
+                                                                minDate: formValues.returnFrom || formValues.departTo || formValues.departFrom || new Date(),
+                                                                ...smallDateProps,
+                                                        })}
+                                                </Box>
+                                        </Box>
+                                )}
 			</Box>
 			<Box sx={{ px: 0.5, py: 1, position: 'relative' }} ref={passengersRef}>
 				<TextField
