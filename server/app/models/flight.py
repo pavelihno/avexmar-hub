@@ -1,7 +1,8 @@
-from app.database import db
-from app.models._base_model import BaseModel, ModelValidationError
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
+
+from app.database import db
+from app.models._base_model import BaseModel, ModelValidationError
 
 
 class Flight(BaseModel):

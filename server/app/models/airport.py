@@ -85,8 +85,6 @@ class Airport(BaseModel):
                     tz = None
                     if tz_name:
                         tz = Timezone.query.filter_by(name=tz_name).first()
-                        if not tz:
-                            tz = Timezone.create(session, name=tz_name)
 
                     airport = cls.create(
                         session,

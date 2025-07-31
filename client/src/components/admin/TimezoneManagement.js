@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
+import { downloadTemplate, uploadFile } from '../../api';
 import { fetchTimezones, createTimezone, updateTimezone, deleteTimezone } from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -31,9 +32,24 @@ const TimezoneManagement = () => {
 		editButtonText: () => UI_LABELS.ADMIN.modules.timezones.edit_button,
 	});
 
-	const handleAdd = (data) => dispatch(createTimezone(adminManager.toApiFormat(data))).unwrap();
-	const handleEdit = (data) => dispatch(updateTimezone(adminManager.toApiFormat(data))).unwrap();
-	const handleDelete = (id) => dispatch(deleteTimezone(id)).unwrap();
+	const handleAddTimezone = (data) => dispatch(createTimezone(adminManager.toApiFormat(data))).unwrap();
+	const handleEditTimezone = (data) => dispatch(updateTimezone(adminManager.toApiFormat(data))).unwrap();
+	const handleDeleteTimezone = (id) => dispatch(deleteTimezone(id)).unwrap();
+
+	const handleDeleteAllTimezones = async () => {
+			await dispatch(deleteAllTimezones()).unwrap();
+			dispatch(fetchTimezones());
+		};
+
+	const handleUpload = async (file) => {
+		const res = await uploadFile('timezones', file);
+		dispatch(fetchTimezones());
+		return res;
+	};
+
+	const handleGetTemplate = async () => {
+		await downloadTemplate('timezones', 'timezones_template.xlsx');
+	};
 
 	const formatted = timezones.map(adminManager.toUiFormat);
 
@@ -42,11 +58,16 @@ const TimezoneManagement = () => {
 			title={UI_LABELS.ADMIN.modules.timezones.management}
 			data={formatted}
 			columns={adminManager.columns}
-			onAdd={handleAdd}
-			onEdit={handleEdit}
-			onDelete={handleDelete}
+			onAdd={handleAddTimezone}
+			onEdit={handleEditTimezone}
+			onDelete={handleDeleteTimezone}
+			onDeleteAll={handleDeleteAllTimezones}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.timezones.add_button}
+			uploadButtonText={UI_LABELS.ADMIN.modules.timezones.upload_button}
+			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.timezones.upload_template_button}
+			getUploadTemplate={handleGetTemplate}
+			onUpload={handleUpload}
 			isLoading={isLoading}
 			error={errors}
 		/>

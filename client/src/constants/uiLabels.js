@@ -146,6 +146,8 @@ export const UI_LABELS = {
 				management: 'Управление часовыми поясами',
 				add_button: 'Добавить часовой пояс',
 				edit_button: 'Редактировать часовой пояс',
+				upload_button: 'Загрузить часовые пояса',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			routes: {
 				title: 'Маршруты',
