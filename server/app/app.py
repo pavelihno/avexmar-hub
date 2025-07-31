@@ -105,6 +105,8 @@ def __create_app(_config_class, _db):
     app.route('/timezones/<int:timezone_id>', methods=['GET'])(get_timezone)
     app.route('/timezones/<int:timezone_id>', methods=['PUT'])(update_timezone)
     app.route('/timezones/<int:timezone_id>', methods=['DELETE'])(delete_timezone)
+    app.route('/timezones/upload', methods=['POST'])(upload_timezone)
+    app.route('/timezones/template', methods=['GET'])(get_timezone_template)
 
     # routes
     app.route('/routes', methods=['GET'])(get_routes)
