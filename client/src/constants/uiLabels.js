@@ -131,16 +131,23 @@ export const UI_LABELS = {
 				upload_button: 'Загрузить авиакомпании',
 				upload_template_button: 'Скачать шаблон загрузки',
 			},
-			countries: {
-				title: 'Страны',
-				description: 'Управление странами',
-				management: 'Управление странами',
-				add_button: 'Добавить страну',
-				edit_button: 'Редактировать страну',
-				upload_button: 'Загрузить страны',
-				upload_template_button: 'Скачать шаблон загрузки',
-			},
-			routes: {
+                        countries: {
+                                title: 'Страны',
+                                description: 'Управление странами',
+                                management: 'Управление странами',
+                                add_button: 'Добавить страну',
+                                edit_button: 'Редактировать страну',
+                                upload_button: 'Загрузить страны',
+                                upload_template_button: 'Скачать шаблон загрузки',
+                        },
+                        timezones: {
+                                title: 'Часовые пояса',
+                                description: 'Управление часовыми поясами',
+                                management: 'Управление часовыми поясами',
+                                add_button: 'Добавить часовой пояс',
+                                edit_button: 'Редактировать часовой пояс',
+                        },
+                        routes: {
 				title: 'Маршруты',
 				description: 'Управление маршрутами',
 				management: 'Управление маршрутами',
@@ -273,14 +280,22 @@ export const UI_LABELS = {
 			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
-		flight_details: {
-			select_flight: 'Выбрать рейс',
-			airline: 'Авиакомпания',
-			from_to: 'Отправление - Прибытие',
-			departure_arrival: 'Время отправления - Время прибытия',
-			price: 'Цена',
-		},
-	},
+                flight_details: {
+                        select_flight: 'Выбрать рейс',
+                        airline: 'Авиакомпания',
+                        from_to: 'Отправление - Прибытие',
+                        departure_arrival: 'Время отправления - Время прибытия',
+                        price: 'Цена',
+                },
+                sort: {
+                        label: 'Сортировка',
+                        price: 'По цене',
+                        arrival: 'По времени прибытия',
+                        departure: 'По времени отправления',
+                        duration: 'По времени в пути',
+                },
+                nearby_dates: 'Ближайшие даты',
+        },
 };
 
 export default UI_LABELS;

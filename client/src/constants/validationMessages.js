@@ -44,24 +44,29 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Аэропорт прибытия обязателен',
 		},
 	},
-	USER: {
-		email: {
-			REQUIRED: 'Email обязателен',
-			INVALID: 'Введите корректный email',
-		},
-		password: {
-			REQUIRED: 'Пароль обязателен',
-			MIN_LENGTH: 'Пароль должен содержать минимум 6 символов',
-		},
-		password2: {
-			REQUIRED: 'Подтверждение пароля обязательно',
-			MATCH: 'Пароли не совпадают',
-		},
-	},
-	PASSENGER: {
-		first_name: {
-			REQUIRED: 'Имя обязательно',
-		},
+        USER: {
+                email: {
+                        REQUIRED: 'Email обязателен',
+                        INVALID: 'Введите корректный email',
+                },
+                password: {
+                        REQUIRED: 'Пароль обязателен',
+                        MIN_LENGTH: 'Пароль должен содержать минимум 6 символов',
+                },
+                password2: {
+                        REQUIRED: 'Подтверждение пароля обязательно',
+                        MATCH: 'Пароли не совпадают',
+                },
+        },
+        TIMEZONE: {
+                name: {
+                        REQUIRED: 'Часовой пояс обязателен',
+                },
+        },
+        PASSENGER: {
+                first_name: {
+                        REQUIRED: 'Имя обязательно',
+                },
 		last_name: {
 			REQUIRED: 'Фамилия обязательна',
 		},
