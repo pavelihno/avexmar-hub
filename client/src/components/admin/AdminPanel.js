@@ -21,20 +21,20 @@ import { UI_LABELS } from '../../constants';
 
 const AdminPanel = () => {
 	const adminModules = [
-                {
-                        title: UI_LABELS.ADMIN.modules.countries.title,
-                        description: UI_LABELS.ADMIN.modules.countries.description,
-                        icon: <PublicIcon sx={{ fontSize: 50 }} />,
-                        path: '/admin/countries',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.timezones.title,
-                        description: UI_LABELS.ADMIN.modules.timezones.description,
-                        icon: <AccessTimeIcon sx={{ fontSize: 50 }} />,
-                        path: '/admin/timezones',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.airports.title,
+		{
+			title: UI_LABELS.ADMIN.modules.countries.title,
+			description: UI_LABELS.ADMIN.modules.countries.description,
+			icon: <PublicIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/countries',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.timezones.title,
+			description: UI_LABELS.ADMIN.modules.timezones.description,
+			icon: <AccessTimeIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/timezones',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.airports.title,
 			description: UI_LABELS.ADMIN.modules.airports.description,
 			icon: <AirportIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/airports',

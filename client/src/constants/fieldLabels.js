@@ -15,16 +15,16 @@ export const FIELD_LABELS = {
 		final_price: 'Итоговая цена',
 		passengers: 'Пассажиры',
 	},
-        AIRPORT: {
-                name: 'Название аэропорта',
-                iata_code: 'Код IATA',
-                icao_code: 'Код ICAO',
-                city_name: 'Город',
-                city_name_en: 'Город (EN)',
-                city_code: 'Код города',
-                country_id: 'Страна',
-                timezone_id: 'Часовой пояс',
-        },
+	AIRPORT: {
+		name: 'Название аэропорта',
+		iata_code: 'Код IATA',
+		icao_code: 'Код ICAO',
+		city_name: 'Город',
+		city_name_en: 'Город (EN)',
+		city_code: 'Код города',
+		country_id: 'Страна',
+		timezone_id: 'Часовой пояс',
+	},
 	FLIGHT: {
 		flight_number: 'Номер рейса',
 		airline_id: 'Авиакомпания',
@@ -103,15 +103,15 @@ export const FIELD_LABELS = {
 		tariff_id: 'Тариф',
 		seats_number: 'Количество мест',
 	},
-        USER: {
-                email: 'Электронная почта',
-                password: 'Пароль',
-                role: 'Роль пользователя',
-                is_active: 'Активен',
-        },
-        TIMEZONE: {
-                name: 'Часовой пояс',
-        },
+	USER: {
+		email: 'Электронная почта',
+		password: 'Пароль',
+		role: 'Роль пользователя',
+		is_active: 'Активен',
+	},
+	TIMEZONE: {
+		name: 'Часовой пояс',
+	},
 };
 
 export default FIELD_LABELS;
