@@ -1,5 +1,7 @@
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
 
 
 class Flight(BaseModel):
@@ -25,6 +27,54 @@ class Flight(BaseModel):
         ),
     )
 
+    def get_duration_minutes(self):
+        """Return flight duration in minutes.
+
+        If related airports provide a ``timezone`` relationship, its ``name`` is used
+        for
+        timezone-aware calculation. Otherwise the duration is calculated as a
+        naive difference between scheduled arrival and departure times.
+        """
+        if not (self.scheduled_departure and self.scheduled_arrival):
+            return None
+
+        depart_dt = datetime.combine(
+            self.scheduled_departure,
+            self.scheduled_departure_time or time()
+        )
+        arrive_dt = datetime.combine(
+            self.scheduled_arrival,
+            self.scheduled_arrival_time or time()
+        )
+
+        origin_tz = None
+        dest_tz = None
+
+        route = getattr(self, 'route', None)
+        if route is not None:
+            origin = getattr(route, 'origin_airport', None)
+            dest = getattr(route, 'destination_airport', None)
+            origin_tz = (
+                origin.timezone.name if getattr(origin, 'timezone', None) else None
+            )
+            dest_tz = (
+                dest.timezone.name if getattr(dest, 'timezone', None) else None
+            )
+
+        if origin_tz:
+            try:
+                depart_dt = depart_dt.replace(tzinfo=ZoneInfo(origin_tz))
+            except Exception:
+                pass
+        if dest_tz:
+            try:
+                arrive_dt = arrive_dt.replace(tzinfo=ZoneInfo(dest_tz))
+            except Exception:
+                pass
+
+        delta = arrive_dt - depart_dt
+        return int(delta.total_seconds() // 60)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -36,6 +86,7 @@ class Flight(BaseModel):
             'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
             'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
             'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
+            'duration': self.get_duration_minutes(),
         }
 
     @classmethod

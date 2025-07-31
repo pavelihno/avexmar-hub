@@ -4,6 +4,7 @@ import AdminPanel from '../components/admin/AdminPanel';
 import AirportManagement from '../components/admin/AirportManagement';
 import AirlineManagement from '../components/admin/AirlineManagement';
 import CountryManagement from '../components/admin/CountryManagement';
+import TimezoneManagement from '../components/admin/TimezoneManagement';
 import RouteManagement from '../components/admin/RouteManagement';
 import DiscountManagement from '../components/admin/DiscountManagement';
 import FlightManagement from '../components/admin/FlightManagement';
@@ -48,9 +49,18 @@ const AdminRoutes = ({ isAdmin }) => [
 				condition={isAdmin}
 			/>
 		),
-	},
-	{
-		path: '/admin/routes',
+        },
+        {
+                path: '/admin/timezones',
+                element: (
+                        <ProtectedRoute
+                                children={<TimezoneManagement />}
+                                condition={isAdmin}
+                        />
+                ),
+        },
+        {
+                path: '/admin/routes',
 		element: (
 			<ProtectedRoute
 				children={<RouteManagement />}
