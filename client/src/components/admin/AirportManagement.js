@@ -12,6 +12,7 @@ import {
 	deleteAllAirports,
 } from '../../redux/actions/airport';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchTimezones } from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -20,10 +21,12 @@ const AirportManagement = () => {
 	const dispatch = useDispatch();
 	const { airports, isLoading, errors } = useSelector((state) => state.airports);
 	const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
+	const { timezones, isLoading: tzLoading } = useSelector((state) => state.timezones);
 
 	useEffect(() => {
 		dispatch(fetchAirports());
 		dispatch(fetchCountries());
+		dispatch(fetchTimezones());
 	}, [dispatch]);
 
 	const countryOptions = useMemo(() => {
@@ -31,9 +34,19 @@ const AirportManagement = () => {
 		return countries.map((c) => ({ value: c.id, label: c.name }));
 	}, [countries]);
 
+	const timezoneOptions = useMemo(() => {
+		if (!timezones || !Array.isArray(timezones)) return [];
+		return timezones.map((tz) => ({ value: tz.id, label: tz.name }));
+	}, [timezones]);
+
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;
 		return countries.find((c) => c.id === id);
+	};
+
+	const getTimezoneById = (id) => {
+		if (!timezones || !Array.isArray(timezones)) return null;
+		return timezones.find((t) => t.id === id);
 	};
 
 	const FIELDS = {
@@ -100,6 +113,17 @@ const AirportManagement = () => {
 				return c ? c.name : value;
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null),
+		},
+		timezoneId: {
+			key: 'timezoneId',
+			apiKey: 'timezone_id',
+			label: FIELD_LABELS.AIRPORT.timezone_id || 'Часовой пояс',
+			type: FIELD_TYPES.SELECT,
+			options: timezoneOptions,
+			formatter: (value) => {
+				const tz = getTimezoneById(value);
+				return tz ? tz.name : value;
+			},
 		},
 	};
 

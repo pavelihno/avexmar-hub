@@ -443,6 +443,25 @@ export const validatePhoneNumber = (value) => {
 	return phoneRegex.test(value);
 };
 
+export const getFlightDurationMinutes = (flight) => {
+	if (!flight) return 0;
+	try {
+		const depart = new Date(`${flight.scheduled_departure}T${flight.scheduled_departure_time || '00:00:00'}`);
+		const arrive = new Date(`${flight.scheduled_arrival}T${flight.scheduled_arrival_time || '00:00:00'}`);
+		return Math.round((arrive - depart) / 60000);
+	} catch (e) {
+		console.error('Failed to calculate duration', e);
+		return 0;
+	}
+};
+
+export const formatDuration = (minutes) => {
+	if (minutes == null) return '';
+	const hrs = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+	return `${hrs}ч ${mins}м`;
+};
+
 export const isDuplicateInBooking = (
 	allBookingPassengers,
 	passengers,

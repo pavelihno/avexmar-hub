@@ -23,6 +23,7 @@ export const FIELD_LABELS = {
 		city_name_en: 'Город (EN)',
 		city_code: 'Код города',
 		country_id: 'Страна',
+		timezone_id: 'Часовой пояс',
 	},
 	FLIGHT: {
 		flight_number: 'Номер рейса',
@@ -106,6 +107,9 @@ export const FIELD_LABELS = {
 		password: 'Пароль',
 		role: 'Роль пользователя',
 		is_active: 'Активен',
+	},
+	TIMEZONE: {
+		name: 'Часовой пояс',
 	},
 };
 

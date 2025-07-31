@@ -13,6 +13,7 @@ import HailIcon from '@mui/icons-material/Hail';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AirlinesIcon from '@mui/icons-material/Airlines';
 import PublicIcon from '@mui/icons-material/Public';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 import Base from '../Base';
 
@@ -25,6 +26,12 @@ const AdminPanel = () => {
 			description: UI_LABELS.ADMIN.modules.countries.description,
 			icon: <PublicIcon sx={{ fontSize: 50 }} />,
 			path: '/admin/countries',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.timezones.title,
+			description: UI_LABELS.ADMIN.modules.timezones.description,
+			icon: <AccessTimeIcon sx={{ fontSize: 50 }} />,
+			path: '/admin/timezones',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.airports.title,

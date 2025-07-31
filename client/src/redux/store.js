@@ -16,6 +16,7 @@ import bookingReducer from './reducers/booking';
 import passengerReducer from './reducers/passenger';
 import bookingPassengerReducer from './reducers/bookingPassenger';
 import searchReducer from './reducers/search';
+import timezoneReducer from './reducers/timezone';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -32,9 +33,10 @@ const rootReducer = combineReducers({
 	discounts: discountReducer,
 	bookings: bookingReducer,
 	passengers: passengerReducer,
-        bookingPassengers: bookingPassengerReducer,
-        users: userReducer,
-        search: searchReducer,
+	bookingPassengers: bookingPassengerReducer,
+	users: userReducer,
+	timezones: timezoneReducer,
+	search: searchReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));

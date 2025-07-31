@@ -27,6 +27,7 @@ from app.controllers.payment_controller import *
 from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
 from app.controllers.search_controller import *
+from app.controllers.timezone_controller import *
 
 
 def __import_models():
@@ -97,6 +98,15 @@ def __create_app(_config_class, _db):
     app.route('/countries/<int:country_id>', methods=['DELETE'])(delete_country)
     app.route('/countries/upload', methods=['POST'])(upload_country)
     app.route('/countries/template', methods=['GET'])(get_country_template)
+
+    # timezones
+    app.route('/timezones', methods=['GET'])(get_timezones)
+    app.route('/timezones', methods=['POST'])(create_timezone)
+    app.route('/timezones/<int:timezone_id>', methods=['GET'])(get_timezone)
+    app.route('/timezones/<int:timezone_id>', methods=['PUT'])(update_timezone)
+    app.route('/timezones/<int:timezone_id>', methods=['DELETE'])(delete_timezone)
+    app.route('/timezones/upload', methods=['POST'])(upload_timezone)
+    app.route('/timezones/template', methods=['GET'])(get_timezone_template)
 
     # routes
     app.route('/routes', methods=['GET'])(get_routes)
