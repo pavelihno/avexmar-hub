@@ -100,16 +100,10 @@ const STORAGE_KEY = 'lastSearchParams';
 const SearchForm = ({ initialParams = {} }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+
 	const { airports } = useSelector((state) => state.search);
 
-	const [dateMode, setDateMode] = useState(
-		initialParams.when_from || initialParams.when_to || initialParams.return_from || initialParams.return_to
-			? 'flex'
-			: 'exact'
-	);
-
 	const storedParams = useMemo(() => {
-		if (Object.keys(initialParams).length) return {};
 		try {
 			return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 		} catch (e) {
@@ -135,6 +129,7 @@ const SearchForm = ({ initialParams = {} }) => {
 		children: parseInt(combinedParams.children, 10) || 0,
 		infants: parseInt(combinedParams.infants, 10) || 0,
 	});
+	const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
 	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
@@ -213,6 +208,28 @@ const SearchForm = ({ initialParams = {} }) => {
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
 	}, [fields]);
 
+	const saveToLocalStorage = () => {
+		const isExact = dateMode === 'exact';
+		localStorage.setItem(
+			STORAGE_KEY,
+			JSON.stringify({
+				from: formValues.from,
+				to: formValues.to,
+				date_mode: dateMode,
+				when: isExact ? formatDate(formValues.departDate, 'yyyy-MM-dd') : null,
+				return: isExact ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
+				when_from: !isExact ? formatDate(formValues.departFrom, 'yyyy-MM-dd') : null,
+				when_to: !isExact ? formatDate(formValues.departTo, 'yyyy-MM-dd') : null,
+				return_from: !isExact ? formatDate(formValues.returnFrom, 'yyyy-MM-dd') : null,
+				return_to: !isExact ? formatDate(formValues.returnTo, 'yyyy-MM-dd') : null,
+				adults: passengers.adults,
+				children: passengers.children,
+				infants: passengers.infants,
+				class: seatClass,
+			})
+		);
+	};
+
 	const handlePassengerChange = (key, delta) => {
 		setPassengers((prev) => {
 			const nextValue = prev[key] + delta;
@@ -232,6 +249,7 @@ const SearchForm = ({ initialParams = {} }) => {
 		if (formValues.from && formValues.to && formValues.from === formValues.to) {
 			errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
 		}
+
 		if (dateMode === 'exact') {
 			if (!formValues.departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
 			if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
@@ -250,7 +268,6 @@ const SearchForm = ({ initialParams = {} }) => {
 					if (!returnTo) errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
 				} else if (returnTo < returnFrom || (departTo && returnFrom < departTo)) {
 					errors.returnFrom = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-					errors.returnTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
 				}
 			}
 		}
@@ -265,6 +282,7 @@ const SearchForm = ({ initialParams = {} }) => {
 		const params = new URLSearchParams();
 		params.set('from', formValues.from);
 		params.set('to', formValues.to);
+		params.set('date_mode', dateMode);
 		if (dateMode === 'exact') {
 			params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
 			if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
@@ -283,23 +301,7 @@ const SearchForm = ({ initialParams = {} }) => {
 		params.set('class', seatClass);
 		setTimeout(() => {
 			try {
-				localStorage.setItem(
-					STORAGE_KEY,
-					JSON.stringify({
-						from: formValues.from,
-						to: formValues.to,
-						when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
-						return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
-						when_from: formatDate(formValues.departFrom, 'yyyy-MM-dd'),
-						when_to: formatDate(formValues.departTo, 'yyyy-MM-dd'),
-						return_from: formatDate(formValues.returnFrom, 'yyyy-MM-dd'),
-						return_to: formatDate(formValues.returnTo, 'yyyy-MM-dd'),
-						adults: passengers.adults,
-						children: passengers.children,
-						infants: passengers.infants,
-						class: seatClass,
-					})
-				);
+				saveToLocalStorage();
 			} catch (e) {
 				console.error('Failed to save search params', e);
 			}
@@ -322,6 +324,11 @@ const SearchForm = ({ initialParams = {} }) => {
 		params.set('from', from);
 		params.set('to', to);
 		setTimeout(() => {
+			try {
+				saveToLocalStorage();
+			} catch (e) {
+				console.error('Failed to save search params', e);
+			}
 			navigate(`/schedule?${params.toString()}`);
 			setIsLoading(false);
 		}, 250);
@@ -433,7 +440,9 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.departDate,
 								helperText: validationErrors.departDate,
 								minDate: new Date(),
-								maxDate: formValues.returnDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+								maxDate:
+									formValues.returnDate ||
+									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								...dateProps,
 							})}
 						</Box>
@@ -467,7 +476,9 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.departFrom,
 								helperText: validationErrors.departFrom,
 								minDate: new Date(),
-								maxDate: formValues.departTo || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+								maxDate:
+									formValues.departTo ||
+									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								textFieldProps: { inputRef: departToRef },
 								...smallDateProps,
 							})}
@@ -500,7 +511,9 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.returnFrom,
 								helperText: validationErrors.returnFrom,
 								minDate: formValues.departTo || formValues.departFrom || new Date(),
-								maxDate: formValues.returnTo || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+								maxDate:
+									formValues.returnTo ||
+									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								textFieldProps: { inputRef: returnToRef },
 								...smallDateProps,
 							})}

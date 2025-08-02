@@ -6,13 +6,12 @@ import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
-import { fetchSearchFlights } from '../../redux/actions/search';
-import { serverApi } from '../../api';
+import { fetchSearchFlights, fetchNearbyDateFlights } from '../../redux/actions/search';
 import { formatDate, getFlightDurationMinutes } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
-	const { flights } = useSelector((state) => state.search);
+	const { flights, nearbyFlights } = useSelector((state) => state.search);
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
@@ -25,7 +24,7 @@ const Search = () => {
 	const departTo = params.get('when_to');
 	const returnFrom = params.get('return_from');
 	const returnTo = params.get('return_to');
-	const isFlexible = departFrom || departTo || returnFrom || returnTo;
+	const isExact = params.get('date_mode') === 'exact';
 	const hasReturn = returnDate || returnFrom || returnTo;
 
 	const [sortKey, setSortKey] = useState('price');
@@ -45,7 +44,7 @@ const Search = () => {
 	}, [from, to, depart, returnDate, departFrom, returnTo]);
 
 	useEffect(() => {
-		const fetchNearDates = async () => {
+		const fetchNearDates = () => {
 			if (!from || !to || !(depart || departFrom)) {
 				setNearDates([]);
 				return;
@@ -54,8 +53,8 @@ const Search = () => {
 			try {
 				const start = new Date(baseDate);
 				const end = new Date(baseDate);
-				start.setDate(start.getDate() - 3);
-				end.setDate(end.getDate() + 3);
+				start.setDate(start.getDate() - 30);
+				end.setDate(end.getDate() + 30);
 				const paramsRange = {
 					from,
 					to,
@@ -63,29 +62,39 @@ const Search = () => {
 					when_to: formatDate(end, 'yyyy-MM-dd'),
 					class: params.get('class'),
 				};
-				const res = await serverApi.get('/search/flights', { params: paramsRange });
-				const map = {};
-				for (const f of res.data) {
-					const d = f.scheduled_departure;
-					const price = f.price || f.min_price || 0;
-					if (!map[d] || price < map[d].price) {
-						map[d] = { price, currency: f.currency };
-					}
-				}
-				const arr = Object.entries(map)
-					.sort((a, b) => new Date(a[0]) - new Date(b[0]))
-					.map(([date, info]) => ({ date, price: info.price, currency: info.currency }));
-				setNearDates(arr);
+				dispatch(fetchNearbyDateFlights(paramsRange));
 			} catch (e) {
 				console.error(e);
 				setNearDates([]);
 			}
 		};
 		fetchNearDates();
-	}, [from, to, depart, departFrom]);
+	}, [from, to, depart, departFrom, dispatch, params]);
+
+	useEffect(() => {
+		if (!nearbyFlights.length) {
+			setNearDates([]);
+			return;
+		}
+
+		const map = {};
+		for (const f of nearbyFlights) {
+			const d = f.scheduled_departure;
+			const price = f.price || f.min_price || 0;
+			if (!map[d] || price < map[d].price) {
+				map[d] = { price, currency: f.currency };
+			}
+		}
+
+		const arr = Object.entries(map)
+			.sort((a, b) => new Date(a[0]) - new Date(b[0]))
+			.map(([date, info]) => ({ date, price: info.price, currency: info.currency }));
+
+		setNearDates(arr);
+	}, [nearbyFlights]);
 
 	const grouped = [];
-	if (isFlexible) {
+	if (!isExact) {
 		const outbounds = flights.filter((f) => f.direction !== 'return');
 		const returns = flights.filter((f) => f.direction === 'return');
 		for (const out of outbounds) {

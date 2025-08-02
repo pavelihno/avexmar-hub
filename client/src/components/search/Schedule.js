@@ -6,7 +6,7 @@ import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS } from '../../constants';
-import { fetchSearchFlights } from '../../redux/actions/search';
+import { fetchScheduleFlights } from '../../redux/actions/search';
 import { formatDate } from '../utils';
 
 const Schedule = () => {
@@ -21,14 +21,9 @@ const Schedule = () => {
 	useEffect(() => {
 		if (from && to) {
 			const p = { ...paramObj };
-			if (!p.when_from) {
-				const today = new Date();
-				const end = new Date();
-				end.setDate(today.getDate() + 365);
-				p.when_from = formatDate(today, 'yyyy-MM-dd');
-				p.when_to = formatDate(end, 'yyyy-MM-dd');
-			}
-			dispatch(fetchSearchFlights(p));
+			// Show schedule starting from today
+			p.when = formatDate(new Date(), 'yyyy-MM-dd');
+			dispatch(fetchScheduleFlights(p));
 		}
 	}, [dispatch, paramStr, from, to]);
 

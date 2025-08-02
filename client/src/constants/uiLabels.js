@@ -297,7 +297,7 @@ export const UI_LABELS = {
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {
-			select_flight: 'Выбрать рейс',
+			select_flight: 'Выбрать билет',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',

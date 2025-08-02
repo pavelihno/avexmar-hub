@@ -188,6 +188,7 @@ def __create_app(_config_class, _db):
     # search
     app.route('/search/airports', methods=['GET'])(search_airports)
     app.route('/search/flights', methods=['GET'])(search_flights)
+    app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

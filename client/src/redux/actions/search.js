@@ -19,3 +19,27 @@ export const fetchSearchFlights = createAsyncThunk('search/fetchFlights', async 
 		return rejectWithValue(getErrorData(err));
 	}
 });
+
+export const fetchNearbyDateFlights = createAsyncThunk(
+	'search/fetchNearbyDateFlights',
+	async (params, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get('/search/flights', { params });
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
+export const fetchScheduleFlights = createAsyncThunk(
+	'search/fetchScheduleFlights',
+	async (params, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get('/search/flights/schedule', { params });
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
