@@ -13,10 +13,9 @@ import {
 	Radio,
 	TextField,
 	FormControlLabel,
-	Tooltip,
+	CircularProgress,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -27,10 +26,10 @@ const selectProps = {
 	sx: {
 		width: 220,
 		'& .MuiInputBase-root': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 		},
 		'& .MuiInputBase-input': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 		},
 		'& .MuiFormHelperText-root': {
 			fontSize: '0.65rem',
@@ -40,12 +39,12 @@ const selectProps = {
 	},
 	MenuProps: {
 		PaperProps: {
-			sx: { fontSize: '0.75rem' },
+			sx: { fontSize: '0.8rem' },
 		},
 	},
 	MenuItemProps: {
 		sx: {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 			minHeight: 28,
 			height: 28,
 		},
@@ -74,11 +73,11 @@ const smallDateProps = {
 	sx: {
 		width: 130,
 		'& .MuiInputBase-input': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 			padding: '0 0 0 8px',
 		},
 		'& .MuiInputBase-root': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 		},
 		'& .MuiFormHelperText-root': {
 			fontSize: '0.65rem',
@@ -139,6 +138,7 @@ const SearchForm = ({ initialParams = {} }) => {
 	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
+	const [isLoading, setIsLoading] = useState(false);
 
 	const passengersRef = useRef(null);
 	const departToRef = useRef(null);
@@ -261,6 +261,7 @@ const SearchForm = ({ initialParams = {} }) => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (!validateForm()) return;
+		setIsLoading(true);
 		const params = new URLSearchParams();
 		params.set('from', formValues.from);
 		params.set('to', formValues.to);
@@ -280,28 +281,31 @@ const SearchForm = ({ initialParams = {} }) => {
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
 		params.set('class', seatClass);
-		try {
-			localStorage.setItem(
-				STORAGE_KEY,
-				JSON.stringify({
-					from: formValues.from,
-					to: formValues.to,
-					when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
-					return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
-					when_from: formatDate(formValues.departFrom, 'yyyy-MM-dd'),
-					when_to: formatDate(formValues.departTo, 'yyyy-MM-dd'),
-					return_from: formatDate(formValues.returnFrom, 'yyyy-MM-dd'),
-					return_to: formatDate(formValues.returnTo, 'yyyy-MM-dd'),
-					adults: passengers.adults,
-					children: passengers.children,
-					infants: passengers.infants,
-					class: seatClass,
-				})
-			);
-		} catch (e) {
-			console.error('Failed to save search params', e);
-		}
-		navigate(`/search?${params.toString()}`);
+		setTimeout(() => {
+			try {
+				localStorage.setItem(
+					STORAGE_KEY,
+					JSON.stringify({
+						from: formValues.from,
+						to: formValues.to,
+						when: formatDate(formValues.departDate, 'yyyy-MM-dd'),
+						return: formValues.returnDate ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
+						when_from: formatDate(formValues.departFrom, 'yyyy-MM-dd'),
+						when_to: formatDate(formValues.departTo, 'yyyy-MM-dd'),
+						return_from: formatDate(formValues.returnFrom, 'yyyy-MM-dd'),
+						return_to: formatDate(formValues.returnTo, 'yyyy-MM-dd'),
+						adults: passengers.adults,
+						children: passengers.children,
+						infants: passengers.infants,
+						class: seatClass,
+					})
+				);
+			} catch (e) {
+				console.error('Failed to save search params', e);
+			}
+			navigate(`/search?${params.toString()}`);
+			setIsLoading(false);
+		}, 250);
 	};
 
 	const isScheduleClickOpen = useMemo(
@@ -311,11 +315,16 @@ const SearchForm = ({ initialParams = {} }) => {
 
 	const onScheduleClick = () => {
 		if (!isScheduleClickOpen) return;
+		setIsLoading(true);
+		setValidationErrors({});
 		const { from, to } = formValues;
 		const params = new URLSearchParams();
 		params.set('from', from);
 		params.set('to', to);
-		navigate(`/schedule?${params.toString()}`);
+		setTimeout(() => {
+			navigate(`/schedule?${params.toString()}`);
+			setIsLoading(false);
+		}, 250);
 	};
 
 	const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
@@ -332,34 +341,13 @@ const SearchForm = ({ initialParams = {} }) => {
 				boxShadow: 1,
 				p: 1,
 				mt: 2,
-				gridTemplateRows: 'auto 1fr',
+				gridTemplateRows: 'auto 1fr auto',
 				gridTemplateColumns: '1fr 1fr 200px auto',
 				alignItems: 'start',
-				rowGap: 0,
+				rowGap: 1,
 				columnGap: 1,
 			}}
 		>
-			{/* Schedule button */}
-			<Box
-				sx={{
-					gridRow: 1,
-					gridColumn: '1 / 2',
-					display: 'flex',
-					justifyContent: 'center',
-				}}
-			>
-				<Tooltip title={UI_LABELS.HOME.search.show_schedule} placement='top'>
-					<IconButton
-						size='small'
-						aria-label='schedule'
-						sx={{ mt: 0.5, visibility: isScheduleClickOpen ? 'visible' : 'hidden' }}
-						onClick={onScheduleClick}
-					>
-						<CalendarMonthIcon fontSize='inherit' />
-					</IconButton>
-				</Tooltip>
-			</Box>
-
 			<Box
 				sx={{
 					gridRow: 1,
@@ -394,8 +382,6 @@ const SearchForm = ({ initialParams = {} }) => {
 					gridColumn: '1 / 2',
 					display: 'flex',
 					alignItems: 'center',
-					px: 0.5,
-					py: 1,
 					flexDirection: 'column',
 				}}
 			>
@@ -425,8 +411,6 @@ const SearchForm = ({ initialParams = {} }) => {
 				sx={{
 					gridRow: 2,
 					gridColumn: '2 / 3',
-					px: 0.5,
-					py: 1,
 					display: 'flex',
 					flexDirection: 'column',
 					alignItems: 'center',
@@ -538,8 +522,6 @@ const SearchForm = ({ initialParams = {} }) => {
 				sx={{
 					gridRow: 2,
 					gridColumn: '3 / 4',
-					px: 0.5,
-					py: 1,
 					position: 'relative',
 				}}
 				ref={passengersRef}
@@ -603,29 +585,48 @@ const SearchForm = ({ initialParams = {} }) => {
 				</Collapse>
 			</Box>
 
+			{/* Schedule button */}
+			<Box
+				sx={{
+					gridRow: 1,
+					gridColumn: '4 / 5',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}
+			>
+				<Button
+					variant='contained'
+					color='primary'
+					onClick={onScheduleClick}
+					disabled={!isScheduleClickOpen || isLoading}
+					sx={{
+						color: '#fff',
+						borderRadius: 1.5,
+						whiteSpace: 'nowrap',
+					}}
+				>
+					{UI_LABELS.HOME.search.show_schedule}
+				</Button>
+			</Box>
 			{/* Search Button */}
 			<Box
 				sx={{
 					gridRow: 2,
 					gridColumn: '4 / 5',
-					px: 0.5,
-					py: 1,
 					display: 'flex',
 					alignItems: 'center',
-					justifyContent: 'flex-end',
+					justifyContent: 'center',
 				}}
 			>
 				<Button
 					type='submit'
 					variant='contained'
+					disabled={isLoading}
 					sx={{
 						background: '#ff7f2a',
 						color: '#fff',
-						borderRadius: 2,
-						px: 4,
-						py: 2,
-						boxShadow: 'none',
-						textTransform: 'none',
+						borderRadius: 1.5,
 						whiteSpace: 'nowrap',
 						'&:hover': { background: '#ff6600' },
 					}}
@@ -633,6 +634,26 @@ const SearchForm = ({ initialParams = {} }) => {
 					{UI_LABELS.HOME.search.button}
 				</Button>
 			</Box>
+
+			{/* Loading overlay */}
+			{isLoading && (
+				<Box
+					sx={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(255, 255, 255, 0.8)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+					}}
+				>
+					<CircularProgress />
+				</Box>
+			)}
 		</Box>
 	);
 };

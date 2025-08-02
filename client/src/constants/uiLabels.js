@@ -1,57 +1,57 @@
-import { formatDate } from "../components/utils";
+import { formatDate } from '../components/utils';
 
 export const UI_LABELS = {
-  APP_TITLE: "АВЕКСМАР - Авиаперевозки",
-  BUTTONS: {
-    save: "Сохранить",
-    save_changes: "Сохранить изменения",
-    close: "Закрыть",
-    login: "Войти",
-    exit: "Выйти",
-    register: "Зарегистрироваться",
-    copy: "Копировать",
-    add: "Добавить",
-    edit: "Редактировать",
-    delete: "Удалить",
-    cancel: "Отмена",
-    back: "Назад",
-    delete_all: "Удалить все",
-    close: "Закрыть",
-    confirm: "Подтвердить",
-    send: "Отправить",
-  },
-  TITLES: {
-    login: "Вход",
-    register: "Регистрация",
-    settings: "Настройки",
-    forgot_password: "Восстановление пароля",
-  },
-  MESSAGES: {
-    confirm_action: "Подтвердите действие",
-    confirm_delete: "Вы уверены, что хотите удалить запись?",
-    confirm_delete_all: "Вы уверены, что хотите удалить все записи?",
-    loading: "Загрузка...",
-    required_field: "Это поле обязательно",
-  },
-  SUCCESS: {
-    add: "Запись успешно добавлена",
-    upload: "Файл успешно загружен",
-    update: "Запись успешно обновлена",
-    delete: "Запись успешно удалена",
-    delete_all: "Все записи успешно удалены",
-    login: "Вход выполнен успешно",
-    register: "Регистрация выполнена успешно",
-    password_reset: "Инструкция отправлена на электронную почту",
-  },
-  WARNINGS: {
-    upload: "Некоторые записи не были созданы. Подробнее в файле",
-  },
-  ERRORS: {
-    unknown: "Неизвестная ошибка",
-    copy: "Ошибка при копировании",
-    save: "Ошибка при сохранении",
-    delete: "Ошибка при удалении",
-  },
+	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
+	BUTTONS: {
+		save: 'Сохранить',
+		save_changes: 'Сохранить изменения',
+		close: 'Закрыть',
+		login: 'Войти',
+		exit: 'Выйти',
+		register: 'Зарегистрироваться',
+		copy: 'Копировать',
+		add: 'Добавить',
+		edit: 'Редактировать',
+		delete: 'Удалить',
+		cancel: 'Отмена',
+		back: 'Назад',
+		delete_all: 'Удалить все',
+		close: 'Закрыть',
+		confirm: 'Подтвердить',
+		send: 'Отправить',
+	},
+	TITLES: {
+		login: 'Вход',
+		register: 'Регистрация',
+		settings: 'Настройки',
+		forgot_password: 'Восстановление пароля',
+	},
+	MESSAGES: {
+		confirm_action: 'Подтвердите действие',
+		confirm_delete: 'Вы уверены, что хотите удалить запись?',
+		confirm_delete_all: 'Вы уверены, что хотите удалить все записи?',
+		loading: 'Загрузка...',
+		required_field: 'Это поле обязательно',
+	},
+	SUCCESS: {
+		add: 'Запись успешно добавлена',
+		upload: 'Файл успешно загружен',
+		update: 'Запись успешно обновлена',
+		delete: 'Запись успешно удалена',
+		delete_all: 'Все записи успешно удалены',
+		login: 'Вход выполнен успешно',
+		register: 'Регистрация выполнена успешно',
+		password_reset: 'Инструкция отправлена на электронную почту',
+	},
+	WARNINGS: {
+		upload: 'Некоторые записи не были созданы. Подробнее в файле',
+	},
+	ERRORS: {
+		unknown: 'Неизвестная ошибка',
+		copy: 'Ошибка при копировании',
+		save: 'Ошибка при сохранении',
+		delete: 'Ошибка при удалении',
+	},
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
 		contact_email: 'contact@avexmar.com',
@@ -266,32 +266,32 @@ export const UI_LABELS = {
 			},
 		},
 	},
-  BOOKING: {
-    passenger_form: {
-      type_labels: {
-        ADULT: "Взрослый, старше 12 лет",
-        CHILD: "Ребёнок, от 2 до 12 лет",
-        INFANT: "Малыш, до 2 лет",
-      },
-      genders: [
-        { value: "MALE", label: "Мужской" },
-        { value: "FEMALE", label: "Женский" },
-        { value: "OTHER", label: "Другой" },
-      ],
-      add_passenger: "Добавить пассажира",
-    },
-  },
+	BOOKING: {
+		passenger_form: {
+			type_labels: {
+				ADULT: 'Взрослый, старше 12 лет',
+				CHILD: 'Ребёнок, от 2 до 12 лет',
+				INFANT: 'Малыш, до 2 лет',
+			},
+			genders: [
+				{ value: 'MALE', label: 'Мужской' },
+				{ value: 'FEMALE', label: 'Женский' },
+				{ value: 'OTHER', label: 'Другой' },
+			],
+			add_passenger: 'Добавить пассажира',
+		},
+	},
 	SCHEDULE: {
 		title: 'Расписание рейсов',
 		results: 'Результаты поиска',
-		no_results: 'Нет результатов',
+		no_results: 'Рейсы не найдены',
 		from_to: (from, to) => {
 			return `${from} → ${to}`;
 		},
 	},
 	SEARCH: {
 		results: 'Результаты поиска',
-		no_results: 'Нет результатов',
+		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
