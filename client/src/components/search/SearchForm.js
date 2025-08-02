@@ -337,8 +337,6 @@ const SearchForm = ({ initialParams = {} }) => {
 			sx={{
 				display: 'grid',
 				background: '#fff',
-				borderRadius: 1,
-				boxShadow: 1,
 				p: 1,
 				mt: 2,
 				gridTemplateRows: 'auto 1fr auto',
@@ -346,6 +344,8 @@ const SearchForm = ({ initialParams = {} }) => {
 				alignItems: 'start',
 				rowGap: 1,
 				columnGap: 1,
+				borderBottom: 1,
+				borderColor: 'divider',
 			}}
 		>
 			<Box
