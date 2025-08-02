@@ -433,6 +433,7 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.departDate,
 								helperText: validationErrors.departDate,
 								minDate: new Date(),
+								maxDate: formValues.returnDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								...dateProps,
 							})}
 						</Box>
@@ -466,6 +467,7 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.departFrom,
 								helperText: validationErrors.departFrom,
 								minDate: new Date(),
+								maxDate: formValues.departTo || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								textFieldProps: { inputRef: departToRef },
 								...smallDateProps,
 							})}
@@ -498,6 +500,7 @@ const SearchForm = ({ initialParams = {} }) => {
 								error: !!validationErrors.returnFrom,
 								helperText: validationErrors.returnFrom,
 								minDate: formValues.departTo || formValues.departFrom || new Date(),
+								maxDate: formValues.returnTo || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 								textFieldProps: { inputRef: returnToRef },
 								...smallDateProps,
 							})}
