@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -19,6 +19,8 @@ class Passenger(BaseModel):
     document_number = db.Column(db.String, nullable=False)
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+
+    citizenship: Mapped[Country] = db.relationship('Country', backref=db.backref('passengers', lazy=True))
 
     __table_args__ = (
         db.UniqueConstraint(

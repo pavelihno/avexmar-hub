@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session
 
 from app.database import db
@@ -19,6 +20,10 @@ class Timezone(BaseModel):
     upload_fields = {
         'name': 'Часовой пояс',
     }
+
+    def get_tz(self):
+        """Return the timezone as a ZoneInfo object"""
+        return ZoneInfo(self.name)
 
     @classmethod
     def get_all(cls):

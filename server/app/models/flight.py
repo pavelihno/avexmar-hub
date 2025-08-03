@@ -1,8 +1,16 @@
+from typing import List
 from datetime import datetime, time
-from zoneinfo import ZoneInfo
+from sqlalchemy.orm import Mapped
+from sqlalchemy.ext.hybrid import hybrid_property
+
 
 from app.database import db
+from app.models.airline import Airline
+from app.models.airport import Airport
+from app.models.route import Route
+from app.models.timezone import Timezone
 from app.models._base_model import BaseModel, ModelValidationError
+from server.app.models.flight_tariff import FlightTariff
 
 
 class Flight(BaseModel):
@@ -19,7 +27,9 @@ class Flight(BaseModel):
     scheduled_arrival = db.Column(db.Date, nullable=False)
     scheduled_arrival_time = db.Column(db.Time, nullable=True)
 
-    tariffs = db.relationship('FlightTariff', backref=db.backref('flight', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
+    tariffs: Mapped[List[FlightTariff]] = db.relationship('FlightTariff', backref=db.backref('flight', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
+    route: Mapped[Route] = db.relationship('Route', backref=db.backref('flights', lazy=True))
+    airline: Mapped[Airline] = db.relationship('Airline', backref=db.backref('flights', lazy=True))
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -28,14 +38,15 @@ class Flight(BaseModel):
         ),
     )
 
-    def get_duration_minutes(self):
-        """Return flight duration in minutes.
+    @hybrid_property
+    def airline_flight_number(self):
+        """Return flight number prefixed with airline IATA code"""
+        airline = Airline.query.get(self.airline_id)
+        return f'{airline.iata_code}{self.flight_number}' if airline else self.flight_number
 
-        If related airports provide a ``timezone`` relationship, its ``name`` is used
-        for
-        timezone-aware calculation. Otherwise the duration is calculated as a
-        naive difference between scheduled arrival and departure times.
-        """
+    @hybrid_property
+    def flight_duration(self):
+        """Return flight duration in minutes"""
         if not (self.scheduled_departure and self.scheduled_arrival):
             return None
 
@@ -48,38 +59,30 @@ class Flight(BaseModel):
             self.scheduled_arrival_time or time()
         )
 
-        origin_tz = None
-        dest_tz = None
+        route = self.route
+        origin = route.origin_airport
+        dest = route.destination_airport
 
-        route = getattr(self, 'route', None)
-        if route is not None:
-            origin = getattr(route, 'origin_airport', None)
-            dest = getattr(route, 'destination_airport', None)
-            origin_tz = (
-                origin.timezone.name if getattr(origin, 'timezone', None) else None
-            )
-            dest_tz = (
-                dest.timezone.name if getattr(dest, 'timezone', None) else None
-            )
+        origin_tz = origin.timezone.get_tz() if origin.timezone else None
+        dest_tz = dest.timezone.get_tz() if dest.timezone else None
+        print(f"Origin TZ: {origin_tz}, Destination TZ: {dest_tz}")
 
-        if origin_tz:
-            try:
-                depart_dt = depart_dt.replace(tzinfo=ZoneInfo(origin_tz))
-            except Exception:
-                pass
-        if dest_tz:
-            try:
-                arrive_dt = arrive_dt.replace(tzinfo=ZoneInfo(dest_tz))
-            except Exception:
-                pass
+        if origin_tz is not None and dest_tz is not None:
+            depart_dt = depart_dt.astimezone(origin_tz)
+            arrive_dt = arrive_dt.astimezone(dest_tz)
 
-        delta = arrive_dt - depart_dt
-        return int(delta.total_seconds() // 60)
+            delta = arrive_dt - depart_dt
+            print(f"Flight duration: {delta} (seconds)")
+
+            return int(delta.total_seconds() // 60)
+
+        return 0
 
     def to_dict(self):
         return {
             'id': self.id,
             'flight_number': self.flight_number,
+            'airline_flight_number': self.airline_flight_number,
             'airline_id': self.airline_id,
             'route_id': self.route_id,
             'aircraft': self.aircraft,
@@ -87,7 +90,7 @@ class Flight(BaseModel):
             'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
             'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
             'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
-            'duration': self.get_duration_minutes(),
+            'duration': self.flight_duration,
         }
 
     @classmethod

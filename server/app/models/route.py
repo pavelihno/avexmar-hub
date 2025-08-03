@@ -1,5 +1,6 @@
 from app.database import db
 from app.models._base_model import BaseModel
+from app.models.airport import Airport
 
 
 class Route(BaseModel):
@@ -7,6 +8,9 @@ class Route(BaseModel):
 
     origin_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
     destination_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
+
+    origin_airport: Airport = db.relationship('Airport', foreign_keys=[origin_airport_id], backref=db.backref('origin_routes', lazy=True))
+    destination_airport: Airport = db.relationship('Airport', foreign_keys=[destination_airport_id], backref=db.backref('destination_routes', lazy=True))
 
     __table_args__ = (
         db.UniqueConstraint(

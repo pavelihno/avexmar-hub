@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.models.country import Country
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 
 
@@ -12,6 +13,8 @@ class Airline(BaseModel):
     icao_code = db.Column(db.String(3), unique=True, nullable=False)
     name = db.Column(db.String, nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
+
+    country: Mapped[Country] = db.relationship('Country', backref=db.backref('airlines', lazy=True))
 
     def to_dict(self):
         return {

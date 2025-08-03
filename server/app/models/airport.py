@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
-from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 from app.models.timezone import Timezone
+
+from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 
 
 class Airport(BaseModel):
@@ -20,7 +21,8 @@ class Airport(BaseModel):
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
     timezone_id = db.Column(db.Integer, db.ForeignKey('timezones.id', ondelete='RESTRICT'), nullable=True)
 
-    timezone = db.relationship('Timezone', backref=db.backref('airports', lazy=True))
+    country: Mapped[Country] = db.relationship('Country', backref=db.backref('airports', lazy=True))
+    timezone: Mapped[Timezone] = db.relationship('Timezone', backref=db.backref('airports', lazy=True))
 
     def to_dict(self):
         return {
