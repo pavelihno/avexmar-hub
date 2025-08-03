@@ -15,15 +15,13 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { format, parse, isValid } from 'date-fns';
-import {
-	DATE_FORMAT,
+
+import { dateLocale, DATE_FORMAT,
 	TIME_FORMAT,
 	DATETIME_FORMAT,
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
-	TIME_MASK,
-} from '../constants/formats';
-import { dateLocale } from '../constants';
+	TIME_MASK, } from '../constants';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',

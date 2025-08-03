@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-        Box,
-        Table,
-        TableBody,
-        TableCell,
-        TableContainer,
-        TableHead,
-        TableRow,
-        TableSortLabel,
-        Radio,
-        TablePagination,
+	Box,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	TableSortLabel,
+	Radio,
+	TablePagination,
 } from '@mui/material';
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT } from '../../constants';
 import { formatDate, formatTime } from '../utils';
@@ -42,10 +42,10 @@ function stableSort(array, comparator) {
 }
 
 const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => {} }) => {
-        const [order, setOrder] = useState('asc');
-        const [orderBy, setOrderBy] = useState('date');
-        const [page, setPage] = useState(0);
-        const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [order, setOrder] = useState('asc');
+	const [orderBy, setOrderBy] = useState('date');
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(10);
 
 	const rows = useMemo(
 		() =>
@@ -70,19 +70,16 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 		setOrderBy(property);
 	};
 
-	const sortedRows = useMemo(
-		() => stableSort(rows, getComparator(order, orderBy)),
-		[rows, order, orderBy]
-	);
+	const sortedRows = useMemo(() => stableSort(rows, getComparator(order, orderBy)), [rows, order, orderBy]);
 
-        const headCells = [
-                { id: 'select', label: '' },
-                { id: 'flight_number', label: FIELD_LABELS.FLIGHT.flight_number },
-                { id: 'date', label: FIELD_LABELS.FLIGHT.scheduled_departure },
-                { id: 'departure', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
-                { id: 'airline', label: FIELD_LABELS.FLIGHT.airline_id },
-                { id: 'price', label: FIELD_LABELS.TARIFF.price },
-        ];
+	const headCells = [
+		{ id: 'select', label: '' },
+		{ id: 'flight_number', label: FIELD_LABELS.FLIGHT.flight_number },
+		{ id: 'date', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+		{ id: 'departure', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
+		{ id: 'airline', label: FIELD_LABELS.FLIGHT.airline_id },
+		{ id: 'price', label: FIELD_LABELS.TARIFF.price },
+	];
 
 	return (
 		<Box>
@@ -90,71 +87,63 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 				<Table size='small'>
 					<TableHead>
 						<TableRow>
-                                                        {headCells.map((headCell) => (
-                                                                <TableCell
-                                                                        key={headCell.id}
-                                                                        sortDirection={orderBy === headCell.id ? order : false}
-                                                                        sx={{
-                                                                                fontWeight: 'bold',
-                                                                                cursor: headCell.id !== 'select' ? 'pointer' : 'default',
-                                                                        }}
-                                                                >
-                                                                        {headCell.id !== 'select' ? (
-                                                                                <TableSortLabel
-                                                                                        active={orderBy === headCell.id}
-                                                                                        direction={orderBy === headCell.id ? order : 'asc'}
-                                                                                        onClick={() => handleRequestSort(headCell.id)}
-                                                                                >
-                                                                                        {headCell.label}
-                                                                                </TableSortLabel>
-                                                                        ) : (
-                                                                                headCell.label
-                                                                        )}
-                                                                </TableCell>
-                                                        ))}
-                                                </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                                {sortedRows
-                                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                                        .map((row) => (
-                                                                <TableRow key={row.id}>
-                                                                        <TableCell padding='checkbox'>
-                                                                                <Radio
-                                                                                        checked={selectedId === row.id}
-                                                                                        onClick={() =>
-                                                                                                onSelect(
-                                                                                                        selectedId === row.id
-                                                                                                                ? null
-                                                                                                                : row.flight
-                                                                                                )
-                                                                                        }
-                                                                                />
-                                                                        </TableCell>
-                                                                        <TableCell>{row.flight_number}</TableCell>
-                                                                        <TableCell>{row.date}</TableCell>
-                                                                        <TableCell>{row.departure}</TableCell>
-                                                                        <TableCell>{row.airline}</TableCell>
-                                                                        <TableCell>{row.price}</TableCell>
-                                                                </TableRow>
-                                                        ))}
-                                        </TableBody>
-                                </Table>
-                        </TableContainer>
-                        <TablePagination
-                                rowsPerPageOptions={[5, 10, 25]}
-                                component='div'
-                                count={sortedRows.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onPageChange={(e, newPage) => setPage(newPage)}
-                                onRowsPerPageChange={(e) => {
-                                        setRowsPerPage(parseInt(e.target.value, 10));
-                                        setPage(0);
-                                }}
-                        />
-                </Box>
-        );
+							{headCells.map((headCell) => (
+								<TableCell
+									key={headCell.id}
+									sortDirection={orderBy === headCell.id ? order : false}
+									sx={{
+										fontWeight: 'bold',
+										cursor: headCell.id !== 'select' ? 'pointer' : 'default',
+									}}
+								>
+									{headCell.id !== 'select' ? (
+										<TableSortLabel
+											active={orderBy === headCell.id}
+											direction={orderBy === headCell.id ? order : 'asc'}
+											onClick={() => handleRequestSort(headCell.id)}
+										>
+											{headCell.label}
+										</TableSortLabel>
+									) : (
+										headCell.label
+									)}
+								</TableCell>
+							))}
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+							<TableRow key={row.id}>
+								<TableCell padding='checkbox'>
+									<Radio
+										checked={selectedId === row.id}
+										onClick={() => onSelect(selectedId === row.id ? null : row.flight)}
+									/>
+								</TableCell>
+								<TableCell>{row.flight_number}</TableCell>
+								<TableCell>{row.date}</TableCell>
+								<TableCell>{row.departure}</TableCell>
+								<TableCell>{row.airline}</TableCell>
+								<TableCell>{row.price}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+			<TablePagination
+				rowsPerPageOptions={[5, 10, 25]}
+				component='div'
+				count={sortedRows.length}
+				rowsPerPage={rowsPerPage}
+				page={page}
+				onPageChange={(e, newPage) => setPage(newPage)}
+				onRowsPerPageChange={(e) => {
+					setRowsPerPage(parseInt(e.target.value, 10));
+					setPage(0);
+				}}
+			/>
+		</Box>
+	);
 };
 
 export default ScheduleTable;

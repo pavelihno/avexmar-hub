@@ -289,13 +289,13 @@ export const UI_LABELS = {
 		outbound: 'Выбранное направление',
 		return: 'Обратное направление',
 		filter: 'Фильтр',
-                discuss: 'Обсудить',
-                ask_return: 'Нужен ли обратный билет?',
-                select_flights: 'Выбрать рейсы',
-                from_to: (from, to) => {
-                        return `${from} → ${to}`;
-                },
-        },
+		discuss: 'Обсудить',
+		ask_return: 'Нужен ли обратный билет?',
+		select_flights: 'Выбрать рейсы',
+		from_to: (from, to) => {
+			return `${from} → ${to}`;
+		},
+	},
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',
@@ -310,16 +310,16 @@ export const UI_LABELS = {
 			departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
 		},
-                sort: {
-                        label: 'Сортировка',
-                        price: 'По цене',
-                        arrival: 'По времени прибытия',
-                        departure: 'По времени отправления',
-                        duration: 'По времени в пути',
-                },
-                nearby_dates: 'Ближайшие даты',
-                show_more: 'Показать еще билеты',
-        },
+		sort: {
+			label: 'Сортировка',
+			price: 'По цене',
+			arrival: 'По времени прибытия',
+			departure: 'По времени отправления',
+			duration: 'По времени в пути',
+		},
+		nearby_dates: 'Ближайшие даты',
+		show_more: 'Показать еще билеты',
+	},
 };
 
 export default UI_LABELS;

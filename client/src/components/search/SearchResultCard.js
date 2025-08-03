@@ -4,12 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Card, Box, Typography, Button, Divider, IconButton } from '@mui/material';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
-import { ENUM_LABELS, UI_LABELS } from '../../constants';
+import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
 import { formatDate, formatTime, formatDuration } from '../utils';
-import { DATE_WEEKDAY_FORMAT } from '../../constants/formats';
 
 const Segment = ({ flight, isOutbound }) => {
 	if (!flight) return null;

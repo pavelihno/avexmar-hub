@@ -9,17 +9,16 @@ import {
 	Collapse,
 	Paper,
 	Switch,
-        RadioGroup,
-        Radio,
-        TextField,
-        FormControlLabel,
+	RadioGroup,
+	Radio,
+	TextField,
+	FormControlLabel,
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 
-import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
-import { MAX_PASSENGERS } from '../../constants/formats';
 
 const selectProps = {
 	sx: {
@@ -131,7 +130,7 @@ const SearchForm = ({ initialParams = {} }) => {
 	const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
 	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
 	const [showPassengers, setShowPassengers] = useState(false);
-        const [validationErrors, setValidationErrors] = useState({});
+	const [validationErrors, setValidationErrors] = useState({});
 
 	const passengersRef = useRef(null);
 	const departToRef = useRef(null);
@@ -276,7 +275,7 @@ const SearchForm = ({ initialParams = {} }) => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (!validateForm()) return;
-                const params = new URLSearchParams();
+		const params = new URLSearchParams();
 		params.set('from', formValues.from);
 		params.set('to', formValues.to);
 		params.set('date_mode', dateMode);
@@ -296,12 +295,12 @@ const SearchForm = ({ initialParams = {} }) => {
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
 		params.set('class', seatClass);
-                try {
-                        saveToLocalStorage();
-                } catch (e) {
-                        console.error('Failed to save search params', e);
-                }
-                navigate(`/search?${params.toString()}`);
+		try {
+			saveToLocalStorage();
+		} catch (e) {
+			console.error('Failed to save search params', e);
+		}
+		navigate(`/search?${params.toString()}`);
 	};
 
 	const isScheduleClickOpen = useMemo(
@@ -311,17 +310,17 @@ const SearchForm = ({ initialParams = {} }) => {
 
 	const onScheduleClick = () => {
 		if (!isScheduleClickOpen) return;
-                setValidationErrors({});
-                const { from, to } = formValues;
-                const params = new URLSearchParams();
+		setValidationErrors({});
+		const { from, to } = formValues;
+		const params = new URLSearchParams();
 		params.set('from', from);
 		params.set('to', to);
-                try {
-                        saveToLocalStorage();
-                } catch (e) {
-                        console.error('Failed to save search params', e);
-                }
-                navigate(`/schedule?${params.toString()}`);
+		try {
+			saveToLocalStorage();
+		} catch (e) {
+			console.error('Failed to save search params', e);
+		}
+		navigate(`/schedule?${params.toString()}`);
 	};
 
 	const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
@@ -601,17 +600,17 @@ const SearchForm = ({ initialParams = {} }) => {
 					justifyContent: 'center',
 				}}
 			>
-                                <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={onScheduleClick}
-                                        disabled={!isScheduleClickOpen}
-                                        sx={{
-                                                color: '#fff',
-                                                borderRadius: 1.5,
-                                                whiteSpace: 'nowrap',
-                                        }}
-                                >
+				<Button
+					variant='contained'
+					color='primary'
+					onClick={onScheduleClick}
+					disabled={!isScheduleClickOpen}
+					sx={{
+						color: '#fff',
+						borderRadius: 1.5,
+						whiteSpace: 'nowrap',
+					}}
+				>
 					{UI_LABELS.HOME.search.show_schedule}
 				</Button>
 			</Box>
@@ -625,22 +624,20 @@ const SearchForm = ({ initialParams = {} }) => {
 					justifyContent: 'center',
 				}}
 			>
-                                <Button
-                                        type='submit'
-                                        variant='contained'
-                                        sx={{
-                                                background: '#ff7f2a',
-                                                color: '#fff',
-                                                borderRadius: 1.5,
-                                                whiteSpace: 'nowrap',
-                                                '&:hover': { background: '#ff6600' },
-                                        }}
-                                >
+				<Button
+					type='submit'
+					variant='contained'
+					sx={{
+						background: '#ff7f2a',
+						color: '#fff',
+						borderRadius: 1.5,
+						whiteSpace: 'nowrap',
+						'&:hover': { background: '#ff6600' },
+					}}
+				>
 					{UI_LABELS.HOME.search.button}
 				</Button>
 			</Box>
-
-                        {/* Loading overlay removed */}
 		</Box>
 	);
 };

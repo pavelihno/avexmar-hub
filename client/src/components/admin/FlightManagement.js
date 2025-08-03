@@ -27,8 +27,7 @@ import { fetchAirports } from '../../redux/actions/airport';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
-import { DEFAULT_TIME } from '../../constants/formats';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, DEFAULT_TIME } from '../../constants';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();
