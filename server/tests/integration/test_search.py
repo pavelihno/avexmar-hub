@@ -26,3 +26,21 @@ def test_search_flights_range(client, future_flight, economy_flight_tariff):
     assert resp.status_code == 200
     data = resp.get_json()
     assert any(f['id'] == future_flight.id for f in data)
+
+
+def test_search_flights_by_number(client, future_flight, economy_flight_tariff):
+    date_str = future_flight.scheduled_departure.strftime('%Y-%m-%d')
+    resp = client.get(
+        '/search/flights',
+        query_string={
+            'from': 'SVO',
+            'to': 'PWE',
+            'when': date_str,
+            'date_mode': 'exact',
+            'flight': future_flight.flight_number,
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]['flight_number'] == future_flight.flight_number
