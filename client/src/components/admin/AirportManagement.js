@@ -19,9 +19,9 @@ import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();
-        const { airports, isLoading, errors } = useSelector((state) => state.airports);
-        const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
-        const { timezones, isLoading: tzLoading } = useSelector((state) => state.timezones);
+	const { airports, isLoading, errors } = useSelector((state) => state.airports);
+	const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
+	const { timezones, isLoading: tzLoading } = useSelector((state) => state.timezones);
 
 	useEffect(() => {
 		dispatch(fetchAirports());
@@ -168,7 +168,7 @@ const AirportManagement = () => {
 			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.airports.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
 			onUpload={handleUpload}
-                        isLoading={isLoading || countriesLoading || tzLoading}
+			isLoading={isLoading || countriesLoading || tzLoading}
 			error={errors}
 		/>
 	);

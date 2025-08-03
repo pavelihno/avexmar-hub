@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
 import {
-        fetchTimezones,
-        createTimezone,
-        updateTimezone,
-        deleteTimezone,
-        deleteAllTimezones,
+	fetchTimezones,
+	createTimezone,
+	updateTimezone,
+	deleteTimezone,
+	deleteAllTimezones,
 } from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -43,9 +43,9 @@ const TimezoneManagement = () => {
 	const handleDeleteTimezone = (id) => dispatch(deleteTimezone(id)).unwrap();
 
 	const handleDeleteAllTimezones = async () => {
-			await dispatch(deleteAllTimezones()).unwrap();
-			dispatch(fetchTimezones());
-		};
+		await dispatch(deleteAllTimezones()).unwrap();
+		dispatch(fetchTimezones());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('timezones', file);

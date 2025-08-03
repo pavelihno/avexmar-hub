@@ -49,11 +49,11 @@ const AdminDataTable = ({
 	onDeleteAll = null,
 	renderForm,
 	getUploadTemplate = () => {},
-        onUpload = () => Promise.resolve(),
-        addButtonText = null,
-        uploadButtonText = null,
-        uploadTemplateButtonText = null,
-        isLoading = false,
+	onUpload = () => Promise.resolve(),
+	addButtonText = null,
+	uploadButtonText = null,
+	uploadTemplateButtonText = null,
+	isLoading = false,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -362,209 +362,219 @@ const AdminDataTable = ({
 						{UI_LABELS.BUTTONS.delete_all}
 					</Button>
 				)}
-                               <Box sx={{ position: 'relative' }}>
-                                       <Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
-                                               <TableContainer sx={{ maxHeight: 800, mb: 2 }}>
-                                                       <Box
-                                                               sx={{
-                                                                       display: 'flex',
-                                                                       justifyContent: 'flex-end',
-                                                                       alignItems: 'center',
-                                                               }}
-                                                       >
-                                                               <Button
-                                                                       variant='contained'
-                                                                       color='action'
-                                                                       size='small'
-                                                                       startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
-                                                                       onClick={() => setShowFilters((prev) => !prev)}
-                                                                       sx={{
-                                                                               fontSize: '0.75rem',
-                                                                               fontWeight: 400,
-                                                                               minHeight: 28,
-                                                                               px: 1.5,
-                                                                               py: 0.5,
-                                                                       }}
-                                                               >
-                                                                       {showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
-                                                               </Button>
-                                                       </Box>
-                                                       <Table stickyHeader sx={{ tableLayout: 'auto' }}>
-                                               <TableHead>
-							<TableRow>
-								{columns.map((column, index) => (
-									<TableCell
-										key={index}
-										align={column.align || 'left'}
-										sx={{
-											fontWeight: 'bold',
-											cursor: 'pointer',
-										}}
-										onClick={() => handleSort(column.field)}
-									>
-										<TableSortLabel
-											active={sortConfig.field === column.field}
-											direction={sortConfig.direction}
-										>
-											{column.header}
-										</TableSortLabel>
-									</TableCell>
-								))}
-								<TableCell align='right' sx={{ fontWeight: 'bold' }}>
-									{UI_LABELS.ADMIN.actions}
-								</TableCell>
-							</TableRow>
-							{showFilters && (
-								<TableRow>
-									{columns.map((col, idx) => {
-										if (col.type === FIELD_TYPES.CUSTOM) return null;
-
-										let options = [];
-										if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
-											options = col.options
-												? [...col.options]
-												: [
-														{ value: true, label: ENUM_LABELS.BOOLEAN.true },
-														{ value: false, label: ENUM_LABELS.BOOLEAN.false },
-												  ];
-											options.sort((a, b) => a.label.localeCompare(b.label));
-											col = {
-												...col,
-												options: [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...options],
-											};
-										}
-
-										const renderField = createFieldRenderer(col);
-
-										return (
-											<TableCell key={idx} align={col.align || 'left'}>
-												{renderField({
-													value: filters[col.field] ?? '',
-													onChange: (val) => handleFilterChange(col.field, val, col.type),
-													size: 'small',
-													fullWidth: true,
-													sx: {
-														minWidth: 0,
-														maxWidth: 150,
-														'& .MuiInputBase-root': {
-															fontSize: '0.75rem',
-															height: 28,
-															minHeight: 28,
-															padding: '0 8px',
-														},
-														'& .MuiInputBase-input': {
-															fontSize: '0.75rem',
-															height: 20,
-															padding: '4px 0',
-														},
-													},
-													inputProps: {
-														style: {
-															fontSize: '0.75rem',
-															padding: '4px 8px',
-															height: 20,
-															boxSizing: 'border-box',
-														},
-													},
-													displayEmpty: true,
-													simpleSelect: true,
-													MenuProps: {
-														PaperProps: {
-															sx: { fontSize: '0.75rem' },
-														},
-													},
-													MenuItemProps: {
-														sx: {
-															fontSize: '0.75rem',
-															minHeight: 28,
-															height: 28,
-														},
-													},
-												})}
+				<Box sx={{ position: 'relative' }}>
+					<Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
+						<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
+							<Box
+								sx={{
+									display: 'flex',
+									justifyContent: 'flex-end',
+									alignItems: 'center',
+								}}
+							>
+								<Button
+									variant='contained'
+									color='action'
+									size='small'
+									startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
+									onClick={() => setShowFilters((prev) => !prev)}
+									sx={{
+										fontSize: '0.75rem',
+										fontWeight: 400,
+										minHeight: 28,
+										px: 1.5,
+										py: 0.5,
+									}}
+								>
+									{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+								</Button>
+							</Box>
+							<Table stickyHeader sx={{ tableLayout: 'auto' }}>
+								<TableHead>
+									<TableRow>
+										{columns.map((column, index) => (
+											<TableCell
+												key={index}
+												align={column.align || 'left'}
+												sx={{
+													fontWeight: 'bold',
+													cursor: 'pointer',
+												}}
+												onClick={() => handleSort(column.field)}
+											>
+												<TableSortLabel
+													active={sortConfig.field === column.field}
+													direction={sortConfig.direction}
+												>
+													{column.header}
+												</TableSortLabel>
 											</TableCell>
-										);
-									})}
-									<TableCell align='right'>
-										<Button
-											variant='contained'
-											color='action'
-											size='small'
-											startIcon={<ClearAllIcon />}
-											onClick={clearFilters}
-											sx={{
-												fontSize: '0.75rem',
-												fontWeight: 400,
-												minHeight: 28,
-												px: 1.5,
-												py: 0.5,
-											}}
-										>
-											{UI_LABELS.ADMIN.filter.clear}
-										</Button>
-									</TableCell>
-								</TableRow>
-							)}
-						</TableHead>
-						<TableBody>
-							{paginatedData.map((item) => (
-								<TableRow key={item.id}>
-									{columns.map((column, index) => (
-										<TableCell key={index} align={column.align || 'left'}>
-											{column.render
-												? column.render(item)
-												: column.formatter
-												? column.formatter(item[column.field])
-												: item[column.field]}
+										))}
+										<TableCell align='right' sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.ADMIN.actions}
 										</TableCell>
+									</TableRow>
+									{showFilters && (
+										<TableRow>
+											{columns.map((col, idx) => {
+												if (col.type === FIELD_TYPES.CUSTOM) return null;
+
+												let options = [];
+												if (
+													col.type === FIELD_TYPES.SELECT ||
+													col.type === FIELD_TYPES.BOOLEAN
+												) {
+													options = col.options
+														? [...col.options]
+														: [
+																{ value: true, label: ENUM_LABELS.BOOLEAN.true },
+																{ value: false, label: ENUM_LABELS.BOOLEAN.false },
+														  ];
+													options.sort((a, b) => a.label.localeCompare(b.label));
+													col = {
+														...col,
+														options: [
+															{ value: '', label: UI_LABELS.ADMIN.filter.all },
+															...options,
+														],
+													};
+												}
+
+												const renderField = createFieldRenderer(col);
+
+												return (
+													<TableCell key={idx} align={col.align || 'left'}>
+														{renderField({
+															value: filters[col.field] ?? '',
+															onChange: (val) =>
+																handleFilterChange(col.field, val, col.type),
+															size: 'small',
+															fullWidth: true,
+															sx: {
+																minWidth: 0,
+																maxWidth: 150,
+																'& .MuiInputBase-root': {
+																	fontSize: '0.75rem',
+																	height: 28,
+																	minHeight: 28,
+																	padding: '0 8px',
+																},
+																'& .MuiInputBase-input': {
+																	fontSize: '0.75rem',
+																	height: 20,
+																	padding: '4px 0',
+																},
+															},
+															inputProps: {
+																style: {
+																	fontSize: '0.75rem',
+																	padding: '4px 8px',
+																	height: 20,
+																	boxSizing: 'border-box',
+																},
+															},
+															displayEmpty: true,
+															simpleSelect: true,
+															MenuProps: {
+																PaperProps: {
+																	sx: { fontSize: '0.75rem' },
+																},
+															},
+															MenuItemProps: {
+																sx: {
+																	fontSize: '0.75rem',
+																	minHeight: 28,
+																	height: 28,
+																},
+															},
+														})}
+													</TableCell>
+												);
+											})}
+											<TableCell align='right'>
+												<Button
+													variant='contained'
+													color='action'
+													size='small'
+													startIcon={<ClearAllIcon />}
+													onClick={clearFilters}
+													sx={{
+														fontSize: '0.75rem',
+														fontWeight: 400,
+														minHeight: 28,
+														px: 1.5,
+														py: 0.5,
+													}}
+												>
+													{UI_LABELS.ADMIN.filter.clear}
+												</Button>
+											</TableCell>
+										</TableRow>
+									)}
+								</TableHead>
+								<TableBody>
+									{paginatedData.map((item) => (
+										<TableRow key={item.id}>
+											{columns.map((column, index) => (
+												<TableCell key={index} align={column.align || 'left'}>
+													{column.render
+														? column.render(item)
+														: column.formatter
+														? column.formatter(item[column.field])
+														: item[column.field]}
+												</TableCell>
+											))}
+											<TableCell align='right'>
+												<IconButton color='info' onClick={() => handleOpenDialog(item)}>
+													<EditIcon />
+												</IconButton>
+												<IconButton
+													color='error'
+													onClick={() => handleOpenDeleteDialog(item.id)}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</TableCell>
+										</TableRow>
 									))}
-									<TableCell align='right'>
-										<IconButton color='info' onClick={() => handleOpenDialog(item)}>
-											<EditIcon />
-										</IconButton>
-										<IconButton color='error' onClick={() => handleOpenDeleteDialog(item.id)}>
-											<DeleteIcon />
-										</IconButton>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-                                                       </Table>
-                                               </TableContainer>
-                                               <TablePagination
-                                                       component='div'
-                                                       count={sortedData.length}
-                                                       page={page}
-                                                       onPageChange={handleChangePage}
-                                                       rowsPerPage={rowsPerPage}
-                                                       onRowsPerPageChange={handleChangeRowsPerPage}
-                                                       rowsPerPageOptions={[10, 25, 50]}
-                                                       labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-                                                       labelDisplayedRows={({ from, to, count }) =>
-                                                               `${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-                                                                       count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-                                                               }`
-                                                       }
-                                               />
-                                       </Box>
-                                       {isLoading && (
-                                               <Box
-                                                       sx={{
-                                                               position: 'absolute',
-                                                               top: 0,
-                                                               left: 0,
-                                                               right: 0,
-                                                               bottom: 0,
-                                                               backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                                               display: 'flex',
-                                                               alignItems: 'center',
-                                                               justifyContent: 'center',
-                                                               zIndex: 1,
-                                                       }}
-                                               >
-                                                       <CircularProgress />
-                                               </Box>
-                                       )}
-                               </Box>
+								</TableBody>
+							</Table>
+						</TableContainer>
+						<TablePagination
+							component='div'
+							count={sortedData.length}
+							page={page}
+							onPageChange={handleChangePage}
+							rowsPerPage={rowsPerPage}
+							onRowsPerPageChange={handleChangeRowsPerPage}
+							rowsPerPageOptions={[10, 25, 50]}
+							labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
+							labelDisplayedRows={({ from, to, count }) =>
+								`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
+									count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
+								}`
+							}
+						/>
+					</Box>
+					{isLoading && (
+						<Box
+							sx={{
+								position: 'absolute',
+								top: 0,
+								left: 0,
+								right: 0,
+								bottom: 0,
+								backgroundColor: 'rgba(255, 255, 255, 0.8)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								zIndex: 1,
+							}}
+						>
+							<CircularProgress />
+						</Box>
+					)}
+				</Box>
 
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
