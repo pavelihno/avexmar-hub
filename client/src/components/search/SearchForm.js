@@ -335,8 +335,6 @@ const SearchForm = ({ initialParams = {} }) => {
 				background: '#fff',
 				p: 1,
 				mt: 2,
-				gridTemplateRows: 'auto 1fr auto',
-				gridTemplateColumns: '1fr 1fr 200px auto',
 				alignItems: 'start',
 				rowGap: 1,
 				columnGap: 1,
