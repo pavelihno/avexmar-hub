@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
-import { fetchTimezones, createTimezone, updateTimezone, deleteTimezone } from '../../redux/actions/timezone';
+import {
+        fetchTimezones,
+        createTimezone,
+        updateTimezone,
+        deleteTimezone,
+        deleteAllTimezones,
+} from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';

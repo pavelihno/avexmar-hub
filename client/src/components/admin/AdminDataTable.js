@@ -49,10 +49,11 @@ const AdminDataTable = ({
 	onDeleteAll = null,
 	renderForm,
 	getUploadTemplate = () => {},
-	onUpload = () => Promise.resolve(),
-	addButtonText = null,
-	uploadButtonText = null,
-	uploadTemplateButtonText = null,
+        onUpload = () => Promise.resolve(),
+        addButtonText = null,
+        uploadButtonText = null,
+        uploadTemplateButtonText = null,
+        isLoading = false,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -361,33 +362,35 @@ const AdminDataTable = ({
 						{UI_LABELS.BUTTONS.delete_all}
 					</Button>
 				)}
-				<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
-					<Box
-						sx={{
-							display: 'flex',
-							justifyContent: 'flex-end',
-							alignItems: 'center',
-						}}
-					>
-						<Button
-							variant='contained'
-							color='action'
-							size='small'
-							startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
-							onClick={() => setShowFilters((prev) => !prev)}
-							sx={{
-								fontSize: '0.75rem',
-								fontWeight: 400,
-								minHeight: 28,
-								px: 1.5,
-								py: 0.5,
-							}}
-						>
-							{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
-						</Button>
-					</Box>
-					<Table stickyHeader sx={{ tableLayout: 'auto' }}>
-						<TableHead>
+                               <Box sx={{ position: 'relative' }}>
+                                       <Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
+                                               <TableContainer sx={{ maxHeight: 800, mb: 2 }}>
+                                                       <Box
+                                                               sx={{
+                                                                       display: 'flex',
+                                                                       justifyContent: 'flex-end',
+                                                                       alignItems: 'center',
+                                                               }}
+                                                       >
+                                                               <Button
+                                                                       variant='contained'
+                                                                       color='action'
+                                                                       size='small'
+                                                                       startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
+                                                                       onClick={() => setShowFilters((prev) => !prev)}
+                                                                       sx={{
+                                                                               fontSize: '0.75rem',
+                                                                               fontWeight: 400,
+                                                                               minHeight: 28,
+                                                                               px: 1.5,
+                                                                               py: 0.5,
+                                                                       }}
+                                                               >
+                                                                       {showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+                                                               </Button>
+                                                       </Box>
+                                                       <Table stickyHeader sx={{ tableLayout: 'auto' }}>
+                                               <TableHead>
 							<TableRow>
 								{columns.map((column, index) => (
 									<TableCell
@@ -525,23 +528,43 @@ const AdminDataTable = ({
 								</TableRow>
 							))}
 						</TableBody>
-					</Table>
-				</TableContainer>
-				<TablePagination
-					component='div'
-					count={sortedData.length}
-					page={page}
-					onPageChange={handleChangePage}
-					rowsPerPage={rowsPerPage}
-					onRowsPerPageChange={handleChangeRowsPerPage}
-					rowsPerPageOptions={[10, 25, 50]}
-					labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-					labelDisplayedRows={({ from, to, count }) =>
-						`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-							count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-						}`
-					}
-				/>
+                                                       </Table>
+                                               </TableContainer>
+                                               <TablePagination
+                                                       component='div'
+                                                       count={sortedData.length}
+                                                       page={page}
+                                                       onPageChange={handleChangePage}
+                                                       rowsPerPage={rowsPerPage}
+                                                       onRowsPerPageChange={handleChangeRowsPerPage}
+                                                       rowsPerPageOptions={[10, 25, 50]}
+                                                       labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
+                                                       labelDisplayedRows={({ from, to, count }) =>
+                                                               `${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
+                                                                       count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
+                                                               }`
+                                                       }
+                                               />
+                                       </Box>
+                                       {isLoading && (
+                                               <Box
+                                                       sx={{
+                                                               position: 'absolute',
+                                                               top: 0,
+                                                               left: 0,
+                                                               right: 0,
+                                                               bottom: 0,
+                                                               backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                               display: 'flex',
+                                                               alignItems: 'center',
+                                                               justifyContent: 'center',
+                                                               zIndex: 1,
+                                                       }}
+                                               >
+                                                       <CircularProgress />
+                                               </Box>
+                                       )}
+                               </Box>
 
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>

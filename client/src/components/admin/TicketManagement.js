@@ -14,11 +14,11 @@ import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const TicketManagement = () => {
 	const dispatch = useDispatch();
-	const { tickets, isLoading, errors } = useSelector((state) => state.tickets);
-	const { flights } = useSelector((state) => state.flights);
-	const { bookings } = useSelector((state) => state.bookings);
-	const { passengers } = useSelector((state) => state.passengers);
-	const { discounts } = useSelector((state) => state.discounts);
+        const { tickets, isLoading, errors } = useSelector((state) => state.tickets);
+        const { flights, isLoading: flightsLoading } = useSelector((state) => state.flights);
+        const { bookings, isLoading: bookingsLoading } = useSelector((state) => state.bookings);
+        const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+        const { discounts, isLoading: discountsLoading } = useSelector((state) => state.discounts);
 
 	useEffect(() => {
 		dispatch(fetchTickets());
@@ -136,7 +136,13 @@ const TicketManagement = () => {
 			onDeleteAll={handleDeleteAllTickets}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.tickets.add_button}
-			isLoading={isLoading}
+                        isLoading={
+                                isLoading ||
+                                flightsLoading ||
+                                bookingsLoading ||
+                                passengersLoading ||
+                                discountsLoading
+                        }
 			error={errors}
 		/>
 	);
