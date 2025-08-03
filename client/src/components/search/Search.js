@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button, CircularProgress } from '@mui/material';
 import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
@@ -11,7 +11,7 @@ import { formatDate, getFlightDurationMinutes } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
-	const { flights, nearbyFlights } = useSelector((state) => state.search);
+        const { flights, nearbyFlights, isLoading } = useSelector((state) => state.search);
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
@@ -27,8 +27,9 @@ const Search = () => {
 	const isExact = params.get('date_mode') === 'exact';
 	const hasReturn = returnDate || returnFrom || returnTo;
 
-	const [sortKey, setSortKey] = useState('price');
-	const [nearDates, setNearDates] = useState([]);
+        const [sortKey, setSortKey] = useState('price');
+        const [nearDates, setNearDates] = useState([]);
+        const [visibleCount, setVisibleCount] = useState(10);
 
 	useEffect(() => {
 		dispatch(fetchSearchFlights(paramObj));
@@ -194,13 +195,25 @@ const Search = () => {
 					</Select>
 				</FormControl>
 
-				{sortedGrouped && sortedGrouped.length ? (
-					sortedGrouped.map((g, idx) => (
-						<SearchResultCard key={idx} outbound={g.outbound} returnFlight={g.returnFlight} />
-					))
-				) : (
-					<Typography>{UI_LABELS.SEARCH.no_results}</Typography>
-				)}
+                                {isLoading && flights.length === 0 ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                                <CircularProgress />
+                                        </Box>
+                                ) : sortedGrouped && sortedGrouped.length ? (
+                                        sortedGrouped.slice(0, visibleCount).map((g, idx) => (
+                                                <SearchResultCard key={idx} outbound={g.outbound} returnFlight={g.returnFlight} />
+                                        ))
+                                ) : (
+                                        <Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+                                )}
+
+                                {visibleCount < sortedGrouped.length && (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                                <Button variant='contained' onClick={() => setVisibleCount((v) => v + 10)}>
+                                                        {UI_LABELS.SEARCH.show_more}
+                                                </Button>
+                                        </Box>
+                                )}
 			</Box>
 		</Base>
 	);
