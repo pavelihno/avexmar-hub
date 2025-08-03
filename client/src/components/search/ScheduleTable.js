@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
 	Box,
 	Table,
@@ -19,7 +20,7 @@ import {
 } from '@mui/material';
 import { FIELD_LABELS, ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatDate, formatTime } from '../utils';
-import { useNavigate } from 'react-router-dom';
+import { DATE_YEAR_WEEKDAY_FORMAT } from '../../constants/formats';
 
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
@@ -63,7 +64,7 @@ const ScheduleTable = ({ flights, airlines, from, to }) => {
 				return {
 					id: f.id,
 					flight_number: f.airline_flight_number,
-					date: formatDate(f.scheduled_departure, 'dd.MM.yyyy'),
+					date: formatDate(f.scheduled_departure, DATE_YEAR_WEEKDAY_FORMAT),
 					dateRaw: f.scheduled_departure,
 					departure: formatTime(f.scheduled_departure_time),
 					airline: airline ? airline.name : f.airline_id,
