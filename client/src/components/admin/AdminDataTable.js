@@ -299,7 +299,7 @@ const AdminDataTable = ({
 	const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
 	return (
-		<Base>
+		<Base maxWidth='xl'>
 			<Box sx={{ p: 3 }}>
 				<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
 					<IconButton component={Link} to='/admin' sx={{ mr: 2 }}>
