@@ -1,9 +1,13 @@
+from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
 from app.models.timezone import Timezone
+
+if TYPE_CHECKING:
+    from app.models.route import Route
 
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 
@@ -21,8 +25,14 @@ class Airport(BaseModel):
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
     timezone_id = db.Column(db.Integer, db.ForeignKey('timezones.id', ondelete='RESTRICT'), nullable=True)
 
-    country: Mapped[Country] = db.relationship('Country', backref=db.backref('airports', lazy=True))
-    timezone: Mapped[Timezone] = db.relationship('Timezone', backref=db.backref('airports', lazy=True))
+    country: Mapped[Country] = db.relationship('Country', back_populates='airports')
+    timezone: Mapped[Timezone] = db.relationship('Timezone', back_populates='airports')
+    origin_routes: Mapped[List['Route']] = db.relationship(
+        'Route', back_populates='origin_airport', foreign_keys='Route.origin_airport_id', lazy='dynamic'
+    )
+    destination_routes: Mapped[List['Route']] = db.relationship(
+        'Route', back_populates='destination_airport', foreign_keys='Route.destination_airport_id', lazy='dynamic'
+    )
 
     def to_dict(self):
         return {

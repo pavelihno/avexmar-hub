@@ -1,6 +1,13 @@
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped
+
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models._base_model import ModelValidationError
+
+if TYPE_CHECKING:
+    from app.models.booking import Booking
+    from app.models.passenger import Passenger
 
 class BookingPassenger(BaseModel):
     __tablename__ = 'booking_passengers'
@@ -8,6 +15,9 @@ class BookingPassenger(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)
     is_contact = db.Column(db.Boolean, default=False, nullable=False)
+
+    booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_passengers')
+    passenger: Mapped['Passenger'] = db.relationship('Passenger', back_populates='booking_passengers')
 
     __table_args__ = (
         db.UniqueConstraint(

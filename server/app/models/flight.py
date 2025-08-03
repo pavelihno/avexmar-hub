@@ -1,5 +1,5 @@
-from typing import List
 from datetime import datetime, time
+from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -10,7 +10,10 @@ from app.models.airport import Airport
 from app.models.route import Route
 from app.models.timezone import Timezone
 from app.models._base_model import BaseModel, ModelValidationError
-from server.app.models.flight_tariff import FlightTariff
+from app.models.flight_tariff import FlightTariff
+
+if TYPE_CHECKING:
+    from app.models.ticket import Ticket
 
 
 class Flight(BaseModel):
@@ -27,9 +30,14 @@ class Flight(BaseModel):
     scheduled_arrival = db.Column(db.Date, nullable=False)
     scheduled_arrival_time = db.Column(db.Time, nullable=True)
 
-    tariffs: Mapped[List[FlightTariff]] = db.relationship('FlightTariff', backref=db.backref('flight', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
-    route: Mapped[Route] = db.relationship('Route', backref=db.backref('flights', lazy=True))
-    airline: Mapped[Airline] = db.relationship('Airline', backref=db.backref('flights', lazy=True))
+    tariffs: Mapped[List[FlightTariff]] = db.relationship(
+        'FlightTariff', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    route: Mapped[Route] = db.relationship('Route', back_populates='flights')
+    airline: Mapped[Airline] = db.relationship('Airline', back_populates='flights')
+    tickets: Mapped[List['Ticket']] = db.relationship(
+        'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -41,7 +49,7 @@ class Flight(BaseModel):
     @hybrid_property
     def airline_flight_number(self):
         """Return flight number prefixed with airline IATA code"""
-        airline = Airline.query.get(self.airline_id)
+        airline = self.airline
         return f'{airline.iata_code}{self.flight_number}' if airline else self.flight_number
 
     @hybrid_property
@@ -65,14 +73,12 @@ class Flight(BaseModel):
 
         origin_tz = origin.timezone.get_tz() if origin.timezone else None
         dest_tz = dest.timezone.get_tz() if dest.timezone else None
-        print(f"Origin TZ: {origin_tz}, Destination TZ: {dest_tz}")
 
         if origin_tz is not None and dest_tz is not None:
             depart_dt = depart_dt.astimezone(origin_tz)
             arrive_dt = arrive_dt.astimezone(dest_tz)
 
             delta = arrive_dt - depart_dt
-            print(f"Flight duration: {delta} (seconds)")
 
             return int(delta.total_seconds() // 60)
 

@@ -1,7 +1,14 @@
+from typing import TYPE_CHECKING
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+
+if TYPE_CHECKING:
+    from app.models.booking import Booking
+    from app.models.flight_tariff import FlightTariff
+    from app.models.ticket import Ticket
 
 
 class Seat(BaseModel):
@@ -11,6 +18,10 @@ class Seat(BaseModel):
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='SET NULL'), nullable=True)
     tariff_id = db.Column(db.Integer, db.ForeignKey('flight_tariffs.id', ondelete='RESTRICT'), nullable=False)
+
+    booking: Mapped['Booking'] = db.relationship('Booking', back_populates='seats')
+    tariff: Mapped['FlightTariff'] = db.relationship('FlightTariff', back_populates='seats')
+    ticket: Mapped['Ticket'] = db.relationship('Ticket', back_populates='seat', uselist=False)
 
     __table_args__ = (
         db.UniqueConstraint(

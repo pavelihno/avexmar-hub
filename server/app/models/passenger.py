@@ -1,10 +1,15 @@
 import datetime
+from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
 from app.config import Config
+
+if TYPE_CHECKING:
+    from app.models.booking_passenger import BookingPassenger
+    from app.models.ticket import Ticket
 
 
 class Passenger(BaseModel):
@@ -20,7 +25,13 @@ class Passenger(BaseModel):
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
 
-    citizenship: Mapped[Country] = db.relationship('Country', backref=db.backref('passengers', lazy=True))
+    citizenship: Mapped[Country] = db.relationship('Country', back_populates='passengers')
+    booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
+        'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    tickets: Mapped[List['Ticket']] = db.relationship(
+        'Ticket', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     __table_args__ = (
         db.UniqueConstraint(

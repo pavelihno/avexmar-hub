@@ -1,8 +1,12 @@
-from sqlalchemy.orm import Session
+from typing import List, TYPE_CHECKING
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.config import Config
+
+if TYPE_CHECKING:
+    from app.models.flight_tariff import FlightTariff
 
 
 class Tariff(BaseModel):
@@ -13,6 +17,10 @@ class Tariff(BaseModel):
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
     conditions = db.Column(db.String, nullable=True)
+
+    flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
+        'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         return {

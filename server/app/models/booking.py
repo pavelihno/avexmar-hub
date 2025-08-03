@@ -1,10 +1,17 @@
 import random
 import string
-from sqlalchemy.orm import Session
+from typing import List, TYPE_CHECKING
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.config import Config
+
+if TYPE_CHECKING:
+    from app.models.payment import Payment
+    from app.models.ticket import Ticket
+    from app.models.seat import Seat
+    from app.models.booking_passenger import BookingPassenger
 
 
 class Booking(BaseModel):
@@ -24,9 +31,18 @@ class Booking(BaseModel):
     final_price = db.Column(db.Float, nullable=False)
 
     # Relationships
-    payments = db.relationship('Payment', backref=db.backref('booking', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
-    tickets = db.relationship('Ticket', backref=db.backref('booking', lazy=True), lazy='dynamic', cascade='all, delete-orphan')
-    seats = db.relationship('Seat', backref=db.backref('booking', lazy=True),lazy='dynamic', cascade='save-update, merge')
+    payments: Mapped[List['Payment']] = db.relationship(
+        'Payment', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    tickets: Mapped[List['Ticket']] = db.relationship(
+        'Ticket', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    seats: Mapped[List['Seat']] = db.relationship(
+        'Seat', back_populates='booking', lazy='dynamic', cascade='save-update, merge'
+    )
+    booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
+        'BookingPassenger', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         return {

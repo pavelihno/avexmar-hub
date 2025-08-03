@@ -1,15 +1,21 @@
 from zoneinfo import ZoneInfo
-from sqlalchemy.orm import Session
+from typing import List, TYPE_CHECKING
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+
+if TYPE_CHECKING:
+    from app.models.airport import Airport
 
 
 class Timezone(BaseModel):
     __tablename__ = 'timezones'
 
     name = db.Column(db.String, nullable=False, unique=True)
+
+    airports: Mapped[List['Airport']] = db.relationship('Airport', back_populates='timezone', lazy='dynamic')
 
     def to_dict(self):
         return {
