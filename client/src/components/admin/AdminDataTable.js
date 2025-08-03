@@ -417,7 +417,9 @@ const AdminDataTable = ({
 									{showFilters && (
 										<TableRow>
 											{columns.map((col, idx) => {
-												if (col.type === FIELD_TYPES.CUSTOM) return null;
+												if (col.type === FIELD_TYPES.CUSTOM) return (
+													<TableCell key={idx} align={col.align || 'left'} />
+												);
 
 												let options = [];
 												if (
