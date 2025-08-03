@@ -281,14 +281,17 @@ export const UI_LABELS = {
 			add_passenger: 'Добавить пассажира',
 		},
 	},
-	SCHEDULE: {
-		title: 'Расписание рейсов',
-		results: 'Результаты поиска',
-		no_results: 'Рейсы не найдены',
-		from_to: (from, to) => {
-			return `${from} → ${to}`;
-		},
-	},
+        SCHEDULE: {
+                title: 'Расписание рейсов',
+                results: 'Результаты поиска',
+                no_results: 'Рейсы не найдены',
+                outbound: 'Выбранное направление',
+                return: 'Обратное направление',
+                filter: 'Фильтр',
+                from_to: (from, to) => {
+                        return `${from} → ${to}`;
+                },
+        },
 	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',
