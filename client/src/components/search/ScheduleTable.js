@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
         Box,
         Table,
@@ -11,7 +12,7 @@ import {
         Radio,
         TablePagination,
 } from '@mui/material';
-import { FIELD_LABELS, ENUM_LABELS } from '../../constants';
+import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT } from '../../constants';
 import { formatDate, formatTime } from '../utils';
 
 function descendingComparator(a, b, orderBy) {
@@ -50,21 +51,18 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 		() =>
 			flights.map((f) => {
 				const airline = airlines.find((a) => a.id === f.airline_id);
-                                return {
-                                        id: f.id,
-                                        flight: f,
-                                        flight_number: f.airline_flight_number,
-                                        date: formatDate(f.scheduled_departure, 'dd.MM.yyyy'),
-                                        dateRaw: f.scheduled_departure,
-                                        departure: formatTime(f.scheduled_departure_time),
-                                        airline: airline ? airline.name : f.airline_id,
-                                        price: f.min_price
-                                                ? `${f.min_price} ${ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''}`
-                                                : '',
-                                };
-                        }),
-                [flights, airlines]
-        );
+				return {
+					id: f.id,
+					flight_number: f.airline_flight_number,
+					date: formatDate(f.scheduled_departure, DATE_YEAR_WEEKDAY_FORMAT),
+					dateRaw: f.scheduled_departure,
+					departure: formatTime(f.scheduled_departure_time),
+					airline: airline ? airline.name : f.airline_id,
+					price: f.min_price ? `${f.min_price} ${ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''}` : '',
+				};
+			}),
+		[flights, airlines]
+	);
 
 	const handleRequestSort = (property) => {
 		const isAsc = orderBy === property && order === 'asc';

@@ -158,6 +158,7 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 						borderRadius: 2,
 						boxShadow: 'none',
 						textTransform: 'none',
+						whiteSpace: 'nowrap',
 						'&:hover': { background: '#ff6600' },
 					}}
 					onClick={() => {
