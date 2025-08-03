@@ -8,7 +8,7 @@ import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
-import { formatDate, formatTime } from '../utils';
+import { formatDate, formatTime, formatDuration } from '../utils';
 import { DATE_WEEKDAY_FORMAT } from '../../constants/formats';
 
 const Segment = ({ flight, isOutbound }) => {
@@ -55,21 +55,46 @@ const Segment = ({ flight, isOutbound }) => {
 
 	return (
 		<Box sx={{ mb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, justifyContent: 'space-between' }}>
-                                <Typography variant='subtitle2' sx={{ fontWeight: 600, mr: 1 }}>
-                                        {airline ? airline.name || airline.id : ''} {flight.flight_number}
-                                </Typography>
-                                <IconButton
-					size='small'
-					onClick={() => {
-						navigator.clipboard.writeText(window.location.href);
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
+					mb: 1,
+				}}
+			>
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'flex-start',
+						textAlign: 'left',
 					}}
 				>
-					<ShareIcon fontSize='small' sx={{ ml: 0.5 }} />
-				</IconButton>
+					<Typography variant='subtitle2' sx={{ fontWeight: 600, mb: 0.5 }}>
+						{airline?.name ?? airline?.id}
+					</Typography>
+					<Typography variant='subtitle2'>{flight.airline_flight_number}</Typography>
+				</Box>
+
+				<Box sx={{ textAlign: 'center' }}>
+					<Typography variant='subtitle2'>{formatDuration(flight.duration)}</Typography>
+				</Box>
+
+				<Box sx={{ textAlign: 'right' }}>
+					<IconButton size='small' onClick={() => navigator.clipboard.writeText(window.location.href)}>
+						<ShareIcon fontSize='small' />
+					</IconButton>
+				</Box>
 			</Box>
-			<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-				<Box>
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
+				}}
+			>
+				<Box sx={{ textAlign: 'left' }}>
 					<Typography variant='h6' className='mono-nums'>
 						{formatTime(flight.scheduled_departure_time)}
 					</Typography>
@@ -77,15 +102,17 @@ const Segment = ({ flight, isOutbound }) => {
 						{formatDate(flight.scheduled_departure, DATE_WEEKDAY_FORMAT)}
 					</Typography>
 					<Typography variant='body2' color='text.secondary'>
-						{originAirport ? originAirport.name : originAirport?.id}
+						{originAirport?.name ?? originAirport?.id}
 					</Typography>
 				</Box>
-				<Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
-					<Box sx={{ borderBottom: '1px dashed', width: 50 }} />
-					<FlightIcon sx={{ transform: `rotate(${isOutbound ? 90 : -90}deg)` }} />
-					<Box sx={{ borderBottom: '1px dashed', width: 50 }} />
+
+				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+					<Box sx={{ borderBottom: '1px dotted', width: 50 }} />
+					<FlightIcon sx={{ transform: `rotate(${isOutbound ? 90 : -90}deg)`, mx: 1 }} />
+					<Box sx={{ borderBottom: '1px dotted', width: 50 }} />
 				</Box>
-				<Box>
+
+				<Box sx={{ textAlign: 'right' }}>
 					<Typography variant='h6' className='mono-nums'>
 						{formatTime(flight.scheduled_arrival_time)}
 					</Typography>
@@ -93,7 +120,7 @@ const Segment = ({ flight, isOutbound }) => {
 						{formatDate(flight.scheduled_arrival, DATE_WEEKDAY_FORMAT)}
 					</Typography>
 					<Typography variant='body2' color='text.secondary'>
-						{destinationAirport ? destinationAirport.name : destinationAirport?.id}
+						{destinationAirport?.name ?? destinationAirport?.id}
 					</Typography>
 				</Box>
 			</Box>

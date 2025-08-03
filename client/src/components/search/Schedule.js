@@ -56,19 +56,19 @@ const Schedule = () => {
 				<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 3, mb: 1 }}>
 					{UI_LABELS.SCHEDULE.from_to(from || '', to || '')}
 				</Typography>
-                                {outboundFlights.length ? (
-                                        <ScheduleTable flights={outboundFlights} airlines={airlines} from={from} to={to} />
-                                ) : (
-                                        <Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
-                                )}
+				{outboundFlights.length ? (
+					<ScheduleTable flights={outboundFlights} airlines={airlines} from={from} to={to} />
+				) : (
+					<Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
+				)}
 				<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 4, mb: 1 }}>
 					{UI_LABELS.SCHEDULE.from_to(to || '', from || '')}
 				</Typography>
-                                {returnFlights.length ? (
-                                        <ScheduleTable flights={returnFlights} airlines={airlines} from={to} to={from} />
-                                ) : (
-                                        <Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
-                                )}
+				{returnFlights.length ? (
+					<ScheduleTable flights={returnFlights} airlines={airlines} from={to} to={from} />
+				) : (
+					<Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
+				)}
 			</Box>
 		</Base>
 	);
