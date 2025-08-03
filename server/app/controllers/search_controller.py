@@ -28,7 +28,9 @@ def search_airports():
     return jsonify([airport.to_dict() for airport in airports])
 
 
-def __query_flights(origin_code, dest_code, date_from=None, date_to=None, is_exact=True, seat_class=None, direction=None):
+def __query_flights(origin_code, dest_code, date_from=None, date_to=None,
+                    is_exact=True, seat_class=None, direction=None,
+                    flight_number=None):
     origin = aliased(Airport)
     dest = aliased(Airport)
 
@@ -43,6 +45,8 @@ def __query_flights(origin_code, dest_code, date_from=None, date_to=None, is_exa
         query = query.filter(origin.iata_code == origin_code)
     if dest_code:
         query = query.filter(dest.iata_code == dest_code)
+    if flight_number:
+        query = query.filter(Flight.flight_number == flight_number)
 
     if is_exact:
         if date_from:
@@ -104,13 +108,15 @@ def search_flights():
     return_from = params.get('return') if is_exact else params.get('return_from')
     return_to = None if is_exact else params.get('return_to')
 
+    flight_number = params.get('flight')
+
     flights = []
 
     flights += __query_flights(
         origin_code=origin_code, dest_code=dest_code,
         date_from=depart_from, date_to=depart_to,
         is_exact=is_exact, seat_class=seat_class,
-        direction='outbound'
+        direction='outbound', flight_number=flight_number
     )
 
     flights += __query_flights(

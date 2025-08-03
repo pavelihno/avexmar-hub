@@ -55,11 +55,11 @@ const Segment = ({ flight, isOutbound }) => {
 
 	return (
 		<Box sx={{ mb: 1 }}>
-			<Box sx={{ display: 'flex', alignItems: 'center', mb: 1, justifyContent: 'space-between' }}>
-				<Typography variant='subtitle2' sx={{ fontWeight: 600, mr: 1 }}>
-					{airline ? airline.name || airline.id : ''}
-				</Typography>
-				<IconButton
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, justifyContent: 'space-between' }}>
+                                <Typography variant='subtitle2' sx={{ fontWeight: 600, mr: 1 }}>
+                                        {airline ? airline.name || airline.id : ''} {flight.flight_number}
+                                </Typography>
+                                <IconButton
 					size='small'
 					onClick={() => {
 						navigator.clipboard.writeText(window.location.href);
