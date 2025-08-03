@@ -10,6 +10,8 @@ export const DATETIME_FORMAT = 'dd.MM.yyyy HH:mm';
 export const DATE_WEEKDAY_FORMAT = 'd MMM, EEEEEE';
 export const DATE_YEAR_WEEKDAY_FORMAT = 'dd.MM.yyyy, EEEEEE';
 
+export const TIME_DURATION_FORMAT = (hrs, mins) => `${hrs}ч ${mins}м`;
+
 export const DEFAULT_TIME = set(new Date(), { hours: 0, minutes: 0 });
 
 export const DEFAULT_PHONE_NUMBER = '+71234567890';

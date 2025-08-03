@@ -16,12 +16,16 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { format, parse, isValid } from 'date-fns';
 
-import { dateLocale, DATE_FORMAT,
+import {
+	dateLocale,
+	DATE_FORMAT,
 	TIME_FORMAT,
 	DATETIME_FORMAT,
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
-	TIME_MASK, } from '../constants';
+	TIME_MASK,
+	TIME_DURATION_FORMAT,
+} from '../constants';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -457,7 +461,7 @@ export const formatDuration = (minutes) => {
 	if (minutes == null) return '';
 	const hrs = Math.floor(minutes / 60);
 	const mins = minutes % 60;
-	return `${hrs}ч ${mins}м`;
+	return TIME_DURATION_FORMAT(hrs, mins);
 };
 
 export const isDuplicateInBooking = (

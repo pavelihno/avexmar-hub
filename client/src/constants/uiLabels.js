@@ -289,7 +289,7 @@ export const UI_LABELS = {
 		outbound: 'Выбранное направление',
 		return: 'Обратное направление',
 		filter: 'Фильтр',
-		discuss: 'Обсудить',
+		select: 'Выбрать',
 		ask_return: 'Нужен ли обратный билет?',
 		select_flights: 'Выбрать рейсы',
 		from_to: (from, to) => {
