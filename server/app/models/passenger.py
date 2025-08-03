@@ -25,7 +25,7 @@ class Passenger(BaseModel):
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
 
-    citizenship: Mapped[Country] = db.relationship('Country', back_populates='passengers')
+    citizenship: Mapped['Country'] = db.relationship('Country', back_populates='passengers')
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
     )

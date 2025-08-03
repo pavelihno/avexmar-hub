@@ -18,7 +18,7 @@ class FlightTariff(BaseModel):
     seats_number = db.Column(db.Integer, nullable=False)
 
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='tariffs')
-    tariff: Mapped[Tariff] = db.relationship('Tariff', back_populates='flight_tariffs')
+    tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='flight_tariffs')
     seats: Mapped[List['Seat']] = db.relationship('Seat', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan')
 
     @classmethod

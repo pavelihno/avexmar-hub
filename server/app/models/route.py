@@ -15,10 +15,10 @@ class Route(BaseModel):
     origin_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
     destination_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
 
-    origin_airport: Mapped[Airport] = db.relationship(
+    origin_airport: Mapped['Airport'] = db.relationship(
         'Airport', foreign_keys=[origin_airport_id], back_populates='origin_routes'
     )
-    destination_airport: Mapped[Airport] = db.relationship(
+    destination_airport: Mapped['Airport'] = db.relationship(
         'Airport', foreign_keys=[destination_airport_id], back_populates='destination_routes'
     )
     flights: Mapped[List['Flight']] = db.relationship('Flight', back_populates='route', lazy='dynamic', cascade='all, delete-orphan')

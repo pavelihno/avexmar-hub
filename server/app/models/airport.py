@@ -25,8 +25,8 @@ class Airport(BaseModel):
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
     timezone_id = db.Column(db.Integer, db.ForeignKey('timezones.id', ondelete='RESTRICT'), nullable=True)
 
-    country: Mapped[Country] = db.relationship('Country', back_populates='airports')
-    timezone: Mapped[Timezone] = db.relationship('Timezone', back_populates='airports')
+    country: Mapped['Country'] = db.relationship('Country', back_populates='airports')
+    timezone: Mapped['Timezone'] = db.relationship('Timezone', back_populates='airports')
     origin_routes: Mapped[List['Route']] = db.relationship(
         'Route', back_populates='origin_airport', foreign_keys='Route.origin_airport_id', lazy='dynamic'
     )

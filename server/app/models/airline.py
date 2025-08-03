@@ -19,7 +19,7 @@ class Airline(BaseModel):
     name = db.Column(db.String, nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
 
-    country: Mapped[Country] = db.relationship('Country', back_populates='airlines')
+    country: Mapped['Country'] = db.relationship('Country', back_populates='airlines')
     flights: Mapped[List['Flight']] = db.relationship('Flight', back_populates='airline', lazy='dynamic', cascade='all, delete-orphan')
 
     def to_dict(self):

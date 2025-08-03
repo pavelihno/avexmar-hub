@@ -33,8 +33,8 @@ class Flight(BaseModel):
     tariffs: Mapped[List[FlightTariff]] = db.relationship(
         'FlightTariff', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
-    route: Mapped[Route] = db.relationship('Route', back_populates='flights')
-    airline: Mapped[Airline] = db.relationship('Airline', back_populates='flights')
+    route: Mapped['Route'] = db.relationship('Route', back_populates='flights')
+    airline: Mapped['Airline'] = db.relationship('Airline', back_populates='flights')
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
