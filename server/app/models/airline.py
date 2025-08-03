@@ -1,9 +1,14 @@
+from typing import List, TYPE_CHECKING
+
 from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+
+if TYPE_CHECKING:
+    from app.models.flight import Flight
 
 
 class Airline(BaseModel):
@@ -14,7 +19,8 @@ class Airline(BaseModel):
     name = db.Column(db.String, nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
 
-    country: Mapped[Country] = db.relationship('Country', backref=db.backref('airlines', lazy=True))
+    country: Mapped[Country] = db.relationship('Country', back_populates='airlines')
+    flights: Mapped[List['Flight']] = db.relationship('Flight', back_populates='airline', lazy='dynamic', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
