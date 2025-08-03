@@ -99,6 +99,7 @@ export const UI_LABELS = {
 		filter: {
 			show: 'Показать фильтры',
 			hide: 'Скрыть фильтры',
+			clear: 'Очистить',
 			all: 'Все',
 		},
 		upload: {

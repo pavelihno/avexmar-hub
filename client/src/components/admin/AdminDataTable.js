@@ -10,9 +10,8 @@ import {
 	TableCell,
 	TableContainer,
 	TableHead,
-	TableRow,
-	Paper,
 	TableSortLabel,
+	TableRow,
 	TablePagination,
 	IconButton,
 	Dialog,
@@ -32,6 +31,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
@@ -262,6 +262,11 @@ const AdminDataTable = ({
 		);
 	};
 
+	const clearFilters = () => {
+		setFilters({});
+		setPage(0);
+	};
+
 	const applySorting = (items) => {
 		if (!sortConfig.field) return items;
 		const column = columns.find((c) => c.field === sortConfig.field);
@@ -476,7 +481,24 @@ const AdminDataTable = ({
 											</TableCell>
 										);
 									})}
-									<TableCell align='right' />
+									<TableCell align='right'>
+										<Button
+											variant='contained'
+											color='action'
+											size='small'
+											startIcon={<ClearAllIcon />}
+											onClick={clearFilters}
+											sx={{
+												fontSize: '0.75rem',
+												fontWeight: 400,
+												minHeight: 28,
+												px: 1.5,
+												py: 0.5,
+											}}
+										>
+											{UI_LABELS.ADMIN.filter.clear}
+										</Button>
+									</TableCell>
 								</TableRow>
 							)}
 						</TableHead>
