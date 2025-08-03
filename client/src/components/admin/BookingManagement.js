@@ -21,9 +21,9 @@ import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();
-	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
-	const { bookingPassengers } = useSelector((state) => state.bookingPassengers);
-	const { passengers } = useSelector((state) => state.passengers);
+        const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
+        const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
+        const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
 
 	useEffect(() => {
 		dispatch(fetchBookings());
@@ -190,7 +190,7 @@ const BookingManagement = () => {
 			onDeleteAll={handleDeleteAllBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
-			isLoading={isLoading}
+                        isLoading={isLoading || bookingPassengersLoading || passengersLoading}
 			error={errors}
 		/>
 	);
