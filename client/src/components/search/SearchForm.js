@@ -53,11 +53,11 @@ const dateProps = {
 	sx: {
 		width: 170,
 		'& .MuiInputBase-input': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 			padding: '0 0 0 8px',
 		},
 		'& .MuiInputBase-root': {
-			fontSize: '0.75rem',
+			fontSize: '0.8rem',
 		},
 		'& .MuiFormHelperText-root': {
 			fontSize: '0.65rem',
@@ -564,7 +564,10 @@ const SearchForm = ({ initialParams = {} }) => {
 									<Typography>{passengers[row.key]}</Typography>
 									<IconButton
 										onClick={() => handlePassengerChange(row.key, 1)}
-										disabled={passengers[row.key] >= 9}
+										disabled={
+											passengers.adults + passengers.children + passengers.infants >=
+											MAX_PASSENGERS
+										}
 									>
 										+
 									</IconButton>

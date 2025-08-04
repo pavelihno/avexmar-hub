@@ -144,7 +144,7 @@ const Search = () => {
 	const sortedGrouped = sortGroups(grouped);
 
 	return (
-		<Base maxWidth='xl'>
+		<Base>
 			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 				<SearchForm initialParams={paramObj} />
 			</Box>

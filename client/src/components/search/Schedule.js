@@ -41,49 +41,79 @@ const Schedule = () => {
 		dispatch(fetchAirlines());
 	}, [dispatch]);
 
-	const outboundFlights = useMemo(() => flights.filter((f) => f.direction === 'outbound'), [flights]);
+	const getAirlineById = (id) => {
+		return airlines.find((a) => a.id === id);
+	};
 
+	const outboundFlights = useMemo(() => flights.filter((f) => f.direction === 'outbound'), [flights]);
 	const returnFlights = useMemo(() => flights.filter((f) => f.direction === 'return'), [flights]);
 
 	const [selectedOutbound, setSelectedOutbound] = useState(null);
 	const [selectedReturn, setSelectedReturn] = useState(null);
 
-	const filteredReturnFlights = useMemo(() => {
-		if (!selectedOutbound) return returnFlights;
-		return returnFlights.filter(
-			(f) => new Date(f.scheduled_departure) >= new Date(selectedOutbound.scheduled_departure)
-		);
-	}, [returnFlights, selectedOutbound]);
-
 	useEffect(() => {
-		if (selectedReturn && !filteredReturnFlights.some((f) => f.id === selectedReturn.id)) {
+		if (selectedReturn && !returnFlights.some((f) => f.id === selectedReturn.id)) {
 			setSelectedReturn(null);
 		}
-	}, [filteredReturnFlights, selectedReturn]);
+	}, [returnFlights, selectedReturn]);
 
 	const handleSelectFlights = () => {
-		if (!selectedOutbound) return;
-		if (
-			selectedReturn &&
-			new Date(selectedReturn.scheduled_departure) < new Date(selectedOutbound.scheduled_departure)
-		) {
-			alert(UI_LABELS.HOME.search.errors.invalid_return);
-			return;
+		// Ensure at least one flight is selected
+		if (!selectedOutbound && !selectedReturn) return;
+
+		let _outbound = null;
+		let _return = null;
+		let fromLocation = from;
+		let toLocation = to;
+
+		// Determine which flight has the earlier date
+		if (selectedOutbound && selectedReturn) {
+			const outboundDate = new Date(selectedOutbound.scheduledDepartureDate);
+			const returnDate = new Date(selectedReturn.scheduledDepartureDate);
+
+			if (outboundDate <= returnDate) {
+				// Current selection is correct
+				_outbound = selectedOutbound;
+				_return = selectedReturn;
+			} else {
+				// Swap based on dates
+				_outbound = selectedReturn;
+				_return = selectedOutbound;
+				fromLocation = to;
+				toLocation = from;
+			}
+		} else if (selectedOutbound) {
+			// Only outbound is selected
+			_outbound = selectedOutbound;
+		} else if (selectedReturn) {
+			// Only return is selected
+			_outbound = selectedReturn;
+			fromLocation = to;
+			toLocation = from;
 		}
+
 		const params = new URLSearchParams();
-		params.set('from', from);
-		params.set('to', to);
-		params.set('when', selectedOutbound.scheduled_departure);
+		params.set('from', fromLocation);
+		params.set('to', toLocation);
 		params.set('date_mode', 'exact');
-		params.set('flight', selectedOutbound.airline_flight_number);
-		if (selectedReturn) params.set('return', selectedReturn.scheduled_departure);
+
+		params.set('when', _outbound.scheduledDepartureDate);
+		params.set('outbound_airline', getAirlineById(_outbound.airlineId).iata_code);
+		params.set('outbound_flight', _outbound.flightNumber);
+
+		if (_return) {
+			params.set('return', _return.scheduledDepartureDate);
+			params.set('return_airline', getAirlineById(_return.airlineId).iata_code);
+			params.set('return_flight', _return.flightNumber);
+		}
+
 		navigate(`/search?${params.toString()}`);
 	};
 
 	const isLoading = (flightsLoading && flights.length === 0) || (airlinesLoading && airlines.length === 0);
 
 	return (
-		<Base maxWidth='xl'>
+		<Base>
 			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 				<SearchForm initialParams={paramObj} />
 			</Box>
@@ -92,7 +122,12 @@ const Schedule = () => {
 					{UI_LABELS.SCHEDULE.title}
 				</Typography>
 				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-					<Button variant='contained' disabled={!selectedOutbound} onClick={handleSelectFlights}>
+					<Button
+						variant='contained'
+						color='grey'
+						disabled={!selectedOutbound && !selectedReturn}
+						onClick={handleSelectFlights}
+					>
 						{UI_LABELS.SCHEDULE.select_flights}
 					</Button>
 				</Box>
@@ -122,9 +157,9 @@ const Schedule = () => {
 						<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 4, mb: 1 }}>
 							{UI_LABELS.SCHEDULE.from_to(to || '', from || '')}
 						</Typography>
-						{filteredReturnFlights.length ? (
+						{returnFlights.length ? (
 							<ScheduleTable
-								flights={filteredReturnFlights}
+								flights={returnFlights}
 								airlines={airlines}
 								selectedId={selectedReturn?.id || null}
 								onSelect={(f) =>

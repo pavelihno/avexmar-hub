@@ -295,6 +295,7 @@ export const UI_LABELS = {
 		from_to: (from, to) => {
 			return `${from} → ${to}`;
 		},
+		price_from: 'от',
 	},
 	SEARCH: {
 		results: 'Результаты поиска',

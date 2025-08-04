@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
 	Box,
 	Table,
@@ -12,7 +11,7 @@ import {
 	Radio,
 	TablePagination,
 } from '@mui/material';
-import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT } from '../../constants';
+import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
 import { formatDate, formatTime } from '../utils';
 
 function descendingComparator(a, b, orderBy) {
@@ -43,7 +42,7 @@ function stableSort(array, comparator) {
 
 const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => {} }) => {
 	const [order, setOrder] = useState('asc');
-	const [orderBy, setOrderBy] = useState('date');
+	const [orderBy, setOrderBy] = useState('scheduledDepartureDateFormatted');
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -53,12 +52,14 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 				const airline = airlines.find((a) => a.id === f.airline_id);
 				return {
 					id: f.id,
-					flight_number: f.airline_flight_number,
-					date: formatDate(f.scheduled_departure, DATE_YEAR_WEEKDAY_FORMAT),
-					dateRaw: f.scheduled_departure,
-					departure: formatTime(f.scheduled_departure_time),
+					flightNumber: f.flight_number,
+					airlineFlightNumber: f.airline_flight_number,
+					scheduledDepartureDate: f.scheduled_departure,
+					scheduledDepartureDateFormatted: formatDate(f.scheduled_departure, DATE_YEAR_WEEKDAY_FORMAT),
+					scheduledDepartureTimeFormatted: formatTime(f.scheduled_departure_time),
+					airlineId: f.airline_id,
 					airline: airline ? airline.name : f.airline_id,
-					price: f.min_price ? `${f.min_price} ${ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''}` : '',
+					price: f.min_price ? `${UI_LABELS.SCHEDULE.price_from.toLowerCase()} ${f.min_price} ${ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''}` : '',
 				};
 			}),
 		[flights, airlines]
@@ -73,12 +74,12 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 	const sortedRows = useMemo(() => stableSort(rows, getComparator(order, orderBy)), [rows, order, orderBy]);
 
 	const headCells = [
-		{ id: 'select', label: '' },
-		{ id: 'flight_number', label: FIELD_LABELS.FLIGHT.flight_number },
-		{ id: 'date', label: FIELD_LABELS.FLIGHT.scheduled_departure },
-		{ id: 'departure', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
+		{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
+		{ id: 'scheduledDepartureDateFormatted', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+		{ id: 'scheduledDepartureTimeFormatted', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
 		{ id: 'airline', label: FIELD_LABELS.FLIGHT.airline_id },
 		{ id: 'price', label: FIELD_LABELS.TARIFF.price },
+		{ id: 'select', label: UI_LABELS.SCHEDULE.select },
 	];
 
 	return (
@@ -114,17 +115,14 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 					<TableBody>
 						{sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
 							<TableRow key={row.id}>
-								<TableCell padding='checkbox'>
-									<Radio
-										checked={selectedId === row.id}
-										onClick={() => onSelect(selectedId === row.id ? null : row.flight)}
-									/>
-								</TableCell>
-								<TableCell>{row.flight_number}</TableCell>
-								<TableCell>{row.date}</TableCell>
-								<TableCell>{row.departure}</TableCell>
+								<TableCell>{row.airlineFlightNumber}</TableCell>
+								<TableCell>{row.scheduledDepartureDateFormatted}</TableCell>
+								<TableCell>{row.scheduledDepartureTimeFormatted}</TableCell>
 								<TableCell>{row.airline}</TableCell>
 								<TableCell>{row.price}</TableCell>
+								<TableCell padding='checkbox'>
+									<Radio checked={selectedId === row.id} onClick={() => onSelect(row)} />
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
