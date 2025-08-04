@@ -296,7 +296,6 @@ export const UI_LABELS = {
 		from_to: (from, to) => {
 			return `${from} → ${to}`;
 		},
-		price_from: 'от',
 	},
 	SEARCH: {
 		results: 'Результаты поиска',
@@ -311,6 +310,7 @@ export const UI_LABELS = {
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
+			price_from: 'От',
 		},
 		sort: {
 			label: 'Сортировка',

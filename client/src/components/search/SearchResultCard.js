@@ -68,29 +68,29 @@ const SegmentSkeleton = () => {
 };
 
 const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
-        if (!flight) return null;
+	if (!flight) return null;
 
-        const airline = useMemo(() => {
-                return airlines.find((a) => a.id === flight.airline_id) || null;
-        }, [airlines, flight.airline_id]);
+	const airline = useMemo(() => {
+		return airlines.find((a) => a.id === flight.airline_id) || null;
+	}, [airlines, flight.airline_id]);
 
-        const route = useMemo(() => {
-                return routes.find((r) => r.id === flight.route_id) || null;
-        }, [routes, flight.route_id]);
+	const route = useMemo(() => {
+		return routes.find((r) => r.id === flight.route_id) || null;
+	}, [routes, flight.route_id]);
 
-        const originAirport = useMemo(() => {
-                if (route) {
-                        return airports.find((a) => a.id === route.origin_airport_id) || null;
-                }
-                return null;
-        }, [airports, route]);
+	const originAirport = useMemo(() => {
+		if (route) {
+			return airports.find((a) => a.id === route.origin_airport_id) || null;
+		}
+		return null;
+	}, [airports, route]);
 
-        const destinationAirport = useMemo(() => {
-                if (route) {
-                        return airports.find((a) => a.id === route.destination_airport_id) || null;
-                }
-                return null;
-        }, [airports, route]);
+	const destinationAirport = useMemo(() => {
+		if (route) {
+			return airports.find((a) => a.id === route.destination_airport_id) || null;
+		}
+		return null;
+	}, [airports, route]);
 
 	return (
 		<Box sx={{ mb: 1 }}>
@@ -168,18 +168,23 @@ const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 };
 
 const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, isLoading }) => {
-        const theme = useTheme();
-        const currency = outbound?.currency || returnFlight?.currency;
-        const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-        const totalPrice = isLoading
-                ? 0
-                : outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
+	const theme = useTheme();
+	const currency = isLoading ? '' : outbound?.currency || returnFlight?.currency;
+	const currencySymbol = isLoading ? '' : currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
+	const totalPrice = isLoading ? 0 : outbound.price + (returnFlight?.price || 0);
+	const totalMinPrice = isLoading ? 0 : outbound.min_price + (returnFlight?.min_price || 0);
+
+	const priceText = isLoading
+		? ''
+		: totalPrice
+		? `${totalPrice} ${currencySymbol}`
+		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${totalMinPrice} ${currencySymbol}`;
 
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
 			<Box
 				sx={{
-					width: 160,
+					width: 180,
 					textAlign: 'center',
 					pr: 2,
 					borderRight: `1px solid ${theme.palette.grey[100]}`,
@@ -189,10 +194,10 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 				}}
 			>
 				{isLoading ? (
-					<Skeleton variant='rectangular' width={120} height={32} sx={{ mb: 1, mx: 'auto' }} />
+					<Skeleton variant='rectangular' width={150} height={32} sx={{ mb: 1, mx: 'auto' }} />
 				) : (
-					<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1 }}>
-						{`${totalPrice !== 0 ? totalPrice : '--'} ${currencySymbol}`}
+					<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1, whiteSpace: 'nowrap' }}>
+						{priceText}
 					</Typography>
 				)}
 				<Button
@@ -222,28 +227,22 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 					</>
 				) : (
 					<>
-                                                <Segment
-                                                        flight={outbound}
-                                                        isOutbound
-                                                        airlines={airlines}
-                                                        airports={airports}
-                                                        routes={routes}
-                                                />
-                                                {returnFlight && <Divider sx={{ my: 1 }} />}
-                                                {returnFlight && (
-                                                        <Segment
-                                                                flight={returnFlight}
-                                                                isOutbound={false}
-                                                                airlines={airlines}
-                                                                airports={airports}
-                                                                routes={routes}
-                                                        />
-                                                )}
-                                        </>
-                                )}
-                        </Box>
-                </Card>
-        );
+						<Segment flight={outbound} isOutbound airlines={airlines} airports={airports} routes={routes} />
+						{returnFlight && <Divider sx={{ my: 1 }} />}
+						{returnFlight && (
+							<Segment
+								flight={returnFlight}
+								isOutbound={false}
+								airlines={airlines}
+								airports={airports}
+								routes={routes}
+							/>
+						)}
+					</>
+				)}
+			</Box>
+		</Card>
+	);
 };
 
 export default SearchResultCard;

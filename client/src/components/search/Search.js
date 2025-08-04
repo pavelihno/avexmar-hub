@@ -13,12 +13,12 @@ import { fetchRoutes } from '../../redux/actions/route';
 import { formatDate, getFlightDurationMinutes } from '../utils';
 
 const Search = () => {
-        const dispatch = useDispatch();
-        const { flights, nearbyFlights, isLoading } = useSelector((state) => state.search);
-        const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
-        const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
-        const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-        const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
+	const dispatch = useDispatch();
+	const { flights, nearbyFlights, isLoading } = useSelector((state) => state.search);
+	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
+	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
+	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
+	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
@@ -34,19 +34,19 @@ const Search = () => {
 	const isExact = params.get('date_mode') === 'exact';
 	const hasReturn = returnDate || returnFrom || returnTo;
 
-        const [sortKey, setSortKey] = useState('price');
-        const [nearDates, setNearDates] = useState([]);
-        const [visibleCount, setVisibleCount] = useState(10);
+	const [sortKey, setSortKey] = useState('price');
+	const [nearDates, setNearDates] = useState([]);
+	const [visibleCount, setVisibleCount] = useState(10);
 
-        useEffect(() => {
-                dispatch(fetchAirports());
-                dispatch(fetchAirlines());
-                dispatch(fetchRoutes());
-        }, [dispatch]);
+	useEffect(() => {
+		dispatch(fetchAirports());
+		dispatch(fetchAirlines());
+		dispatch(fetchRoutes());
+	}, [dispatch]);
 
-        useEffect(() => {
-                dispatch(fetchSearchFlights(paramObj));
-        }, [dispatch, paramStr]);
+	useEffect(() => {
+		dispatch(fetchSearchFlights(paramObj));
+	}, [dispatch, paramStr]);
 
 	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
@@ -213,22 +213,22 @@ const Search = () => {
 						<CircularProgress />
 					</Box>
 				) : sortedGrouped && sortedGrouped.length ? (
-                                        sortedGrouped
-                                                .slice(0, visibleCount)
-                                                .map((g, idx) => (
-                                                        <SearchResultCard
-                                                                key={idx}
-                                                                outbound={g.outbound}
-                                                                returnFlight={g.returnFlight}
-                                                                airlines={airlines}
-                                                                airports={airports}
-                                                                routes={routes}
-                                                                isLoading={detailsLoading}
-                                                        />
-                                                ))
-                                ) : (
-                                        <Typography>{UI_LABELS.SEARCH.no_results}</Typography>
-                                )}
+					sortedGrouped
+						.slice(0, visibleCount)
+						.map((g, idx) => (
+							<SearchResultCard
+								key={idx}
+								outbound={g.outbound}
+								returnFlight={g.returnFlight}
+								airlines={airlines}
+								airports={airports}
+								routes={routes}
+								isLoading={detailsLoading}
+							/>
+						))
+				) : (
+					<Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+				)}
 
 				{visibleCount < sortedGrouped.length && (
 					<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
