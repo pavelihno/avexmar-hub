@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button, CircularProgress } from '@mui/material';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
@@ -166,47 +168,99 @@ const Search = () => {
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
-				{nearDates.length > 0 && (
-					<Box sx={{ display: 'flex', overflowX: 'auto', mb: 2 }}>
-						<Typography variant='body2' sx={{ mr: 1, flexShrink: 0 }}>
-							{UI_LABELS.SEARCH.nearby_dates}:
-						</Typography>
-						{nearDates.map((d) => (
-							<Button
-								key={d.date}
-								size='small'
-								variant='outlined'
-								sx={{ mr: 1, flexShrink: 0 }}
-								onClick={() => {
-									const newParams = new URLSearchParams(paramObj);
-									newParams.set('when', d.date);
-									newParams.delete('when_from');
-									newParams.delete('when_to');
-									navigate(`/search?${newParams.toString()}`);
+				<Box
+					sx={{
+						display: 'flex',
+						mb: 2,
+						alignItems: 'center',
+						justifyContent: 'space-between',
+						gap: 2,
+					}}
+				>
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'center',
+							flex: 1,
+							minWidth: 0,
+						}}
+					>
+						{nearDates.length > 0 && (
+							<Box
+								sx={{
+									display: 'flex',
+									alignItems: 'center',
+									width: '100%',
+									overflow: 'hidden',
 								}}
 							>
-								{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-									ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-								}`}
-							</Button>
-						))}
+								<Box
+									sx={{
+										display: 'flex',
+										alignItems: 'center',
+										mr: 2,
+										flexShrink: 0,
+										'& > svg': { mr: 1 },
+									}}
+								>
+									<CalendarMonthIcon color='action' />
+									<Typography variant='subtitle1'>{UI_LABELS.SEARCH.nearby_dates}:</Typography>
+								</Box>
+								<Box
+									sx={{
+										display: 'flex',
+										gap: 1,
+										flexWrap: 'nowrap',
+										overflowX: 'auto',
+										pb: 1,
+										flex: 1,
+										minWidth: 0,
+									}}
+								>
+									{nearDates.map((d) => (
+										<Button
+											key={d.date}
+											size='small'
+											variant='outlined'
+											sx={{
+												flexShrink: 0,
+												minWidth: 'auto',
+												borderRadius: 1,
+												px: 1.5,
+											}}
+											onClick={() => {
+												const newParams = new URLSearchParams(paramObj);
+												newParams.set('when', d.date);
+												newParams.delete('when_from');
+												newParams.delete('when_to');
+												navigate(`/search?${newParams.toString()}`);
+											}}
+										>
+											{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
+												ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
+											}`}
+										</Button>
+									))}
+								</Box>
+							</Box>
+						)}
 					</Box>
-				)}
 
-				<FormControl size='small' sx={{ mb: 2, minWidth: 200 }}>
-					<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
-					<Select
-						labelId='sort-label'
-						value={sortKey}
-						label={UI_LABELS.SEARCH.sort.label}
-						onChange={(e) => setSortKey(e.target.value)}
-					>
-						<MenuItem value='price'>{UI_LABELS.SEARCH.sort.price}</MenuItem>
-						<MenuItem value='arrival'>{UI_LABELS.SEARCH.sort.arrival}</MenuItem>
-						<MenuItem value='departure'>{UI_LABELS.SEARCH.sort.departure}</MenuItem>
-						<MenuItem value='duration'>{UI_LABELS.SEARCH.sort.duration}</MenuItem>
-					</Select>
-				</FormControl>
+					<FormControl size='small' sx={{ width: 200, flexShrink: 0 }}>
+						<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
+						<Select
+							labelId='sort-label'
+							value={sortKey}
+							label={UI_LABELS.SEARCH.sort.label}
+							onChange={(e) => setSortKey(e.target.value)}
+						>
+							<MenuItem value='price'>{UI_LABELS.SEARCH.sort.price}</MenuItem>
+							<MenuItem value='arrival'>{UI_LABELS.SEARCH.sort.arrival}</MenuItem>
+							<MenuItem value='departure'>{UI_LABELS.SEARCH.sort.departure}</MenuItem>
+							<MenuItem value='duration'>{UI_LABELS.SEARCH.sort.duration}</MenuItem>
+						</Select>
+					</FormControl>
+				</Box>
 
 				{isLoading && flights.length === 0 ? (
 					<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
