@@ -38,6 +38,7 @@ import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { createFieldRenderer, FIELD_TYPES } from '../utils';
 import { formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
+import { useTheme, alpha } from '@mui/material/styles';
 
 const AdminDataTable = ({
 	title,
@@ -76,8 +77,9 @@ const AdminDataTable = ({
 		direction: 'asc',
 	});
 	const [filters, setFilters] = useState({});
-	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+        const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(10);
+        const theme = useTheme();
 
 	const [uploadDialog, setUploadDialog] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -558,24 +560,24 @@ const AdminDataTable = ({
 							}
 						/>
 					</Box>
-					{isLoading && (
-						<Box
-							sx={{
-								position: 'absolute',
-								top: 0,
-								left: 0,
-								right: 0,
-								bottom: 0,
-								backgroundColor: 'rgba(255, 255, 255, 0.8)',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								zIndex: 1,
-							}}
-						>
-							<CircularProgress />
-						</Box>
-					)}
+                                        {isLoading && (
+                                                <Box
+                                                        sx={{
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                left: 0,
+                                                                right: 0,
+                                                                bottom: 0,
+                                                                backgroundColor: alpha(theme.palette.white, 0.8),
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                zIndex: 1,
+                                                        }}
+                                                >
+                                                        <CircularProgress />
+                                                </Box>
+                                        )}
 				</Box>
 
 				{/* Add/edit dialog */}
@@ -658,7 +660,7 @@ const AdminDataTable = ({
 					</DialogActions>
 				</Dialog>
 
-				<Backdrop open={uploading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                                <Backdrop open={uploading} sx={{ color: theme.palette.white, zIndex: (theme) => theme.zIndex.drawer + 1 }}>
 					<CircularProgress color='inherit' />
 				</Backdrop>
 				<Snackbar
