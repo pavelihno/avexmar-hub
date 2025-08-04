@@ -132,10 +132,10 @@ const Search = () => {
 		dispatch(fetchNearbyDateFlights(requestParams));
 	};
 
-        useEffect(() => {
-                fetchNearbyDates(depart, 'outbound');
-                fetchNearbyDates(returnDate, 'return');
-        }, [dispatch, isExact, from, to, depart, returnDate]);
+	useEffect(() => {
+		fetchNearbyDates(depart, 'outbound');
+		fetchNearbyDates(returnDate, 'return');
+	}, [dispatch, isExact, from, to, depart, returnDate]);
 
 	const grouped = [];
 	if (hasReturn) {

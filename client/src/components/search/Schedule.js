@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
+
 import Base from '../Base';
 import SearchForm from './SearchForm';
 import ScheduleTable from './ScheduleTable';
@@ -46,8 +48,8 @@ const Schedule = () => {
 		return airlines.find((a) => a.id === id);
 	};
 
-        const outboundFlights = flights.filter((f) => f.direction === 'outbound');
-        const returnFlights = flights.filter((f) => f.direction === 'return');
+	const outboundFlights = flights.filter((f) => f.direction === 'outbound');
+	const returnFlights = flights.filter((f) => f.direction === 'return');
 
 	const [selectedOutbound, setSelectedOutbound] = useState(null);
 	const [selectedReturn, setSelectedReturn] = useState(null);

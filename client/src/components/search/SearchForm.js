@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
 import {
 	Box,
 	Button,
@@ -16,8 +17,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 
+import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
@@ -101,16 +102,16 @@ const SearchForm = ({ initialParams = {} }) => {
 	const dispatch = useDispatch();
 	const theme = useTheme();
 
-        const { airports } = useSelector((state) => state.search);
+	const { airports } = useSelector((state) => state.search);
 
-        let storedParams = {};
-        try {
-                storedParams = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        } catch (e) {
-                storedParams = {};
-        }
+	let storedParams = {};
+	try {
+		storedParams = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+	} catch (e) {
+		storedParams = {};
+	}
 
-        const combinedParams = { ...storedParams, ...initialParams };
+	const combinedParams = { ...storedParams, ...initialParams };
 
 	const [formValues, setFormValues] = useState({
 		from: combinedParams.from || '',
@@ -142,11 +143,11 @@ const SearchForm = ({ initialParams = {} }) => {
 		[airports]
 	);
 
-        // Update on specific parameter changes
-        useEffect(() => {
-                if (initialParams.from || initialParams.to || initialParams.when || initialParams.return) {
-                        setFormValues((prev) => ({
-                                ...prev,
+	// Update on specific parameter changes
+	useEffect(() => {
+		if (initialParams.from || initialParams.to || initialParams.when || initialParams.return) {
+			setFormValues((prev) => ({
+				...prev,
 				from: initialParams.from || prev.from,
 				to: initialParams.to || prev.to,
 				departDate: initialParams.when ? parseDate(initialParams.when) : prev.departDate,
@@ -200,20 +201,20 @@ const SearchForm = ({ initialParams = {} }) => {
 	const passengerWord = UI_LABELS.HOME.search.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
-        const formFields = useMemo(() => {
-                const fields = {
-                        from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
-                        to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
-                        departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
-                        returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
-                        departFrom: { key: 'departFrom', label: UI_LABELS.HOME.search.when_from, type: FIELD_TYPES.DATE },
-                        departTo: { key: 'departTo', label: UI_LABELS.HOME.search.when_to, type: FIELD_TYPES.DATE },
-                        returnFrom: { key: 'returnFrom', label: UI_LABELS.HOME.search.return_from, type: FIELD_TYPES.DATE },
-                        returnTo: { key: 'returnTo', label: UI_LABELS.HOME.search.return_to, type: FIELD_TYPES.DATE },
-                };
-                const arr = createFormFields(fields);
-                return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-        }, [airportOptions]);
+	const formFields = useMemo(() => {
+		const fields = {
+			from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
+			to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
+			departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
+			returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
+			departFrom: { key: 'departFrom', label: UI_LABELS.HOME.search.when_from, type: FIELD_TYPES.DATE },
+			departTo: { key: 'departTo', label: UI_LABELS.HOME.search.when_to, type: FIELD_TYPES.DATE },
+			returnFrom: { key: 'returnFrom', label: UI_LABELS.HOME.search.return_from, type: FIELD_TYPES.DATE },
+			returnTo: { key: 'returnTo', label: UI_LABELS.HOME.search.return_to, type: FIELD_TYPES.DATE },
+		};
+		const arr = createFormFields(fields);
+		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
+	}, [airportOptions]);
 
 	const saveToLocalStorage = () => {
 		const isExact = dateMode === 'exact';

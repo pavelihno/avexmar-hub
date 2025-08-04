@@ -4,6 +4,7 @@ import { Card, Box, Typography, Button, Divider, IconButton, Skeleton } from '@m
 import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
+
 import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
 import { formatDate, formatTime, formatDuration, formatNumber } from '../utils';
 
@@ -70,17 +71,13 @@ const SegmentSkeleton = () => {
 const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 	if (!flight) return null;
 
-        const airline = airlines.find((a) => a.id === flight.airline_id) || null;
+	const airline = airlines.find((a) => a.id === flight.airline_id) || null;
 
-        const route = routes.find((r) => r.id === flight.route_id) || null;
+	const route = routes.find((r) => r.id === flight.route_id) || null;
 
-        const originAirport = route
-                ? airports.find((a) => a.id === route.origin_airport_id) || null
-                : null;
+	const originAirport = route ? airports.find((a) => a.id === route.origin_airport_id) || null : null;
 
-        const destinationAirport = route
-                ? airports.find((a) => a.id === route.destination_airport_id) || null
-                : null;
+	const destinationAirport = route ? airports.find((a) => a.id === route.destination_airport_id) || null : null;
 
 	return (
 		<Box sx={{ mb: 1 }}>

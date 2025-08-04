@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+
 import {
 	Box,
 	Table,
@@ -11,6 +12,7 @@ import {
 	Radio,
 	TablePagination,
 } from '@mui/material';
+
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
 import { formatDate, formatNumber, formatTime } from '../utils';
 
@@ -46,33 +48,33 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
-        const handleRequestSort = (property) => {
-                const isAsc = orderBy === property && order === 'asc';
-                setOrder(isAsc ? 'desc' : 'asc');
-                setOrderBy(property);
-        };
+	const handleRequestSort = (property) => {
+		const isAsc = orderBy === property && order === 'asc';
+		setOrder(isAsc ? 'desc' : 'asc');
+		setOrderBy(property);
+	};
 
-        const sortedRows = useMemo(() => {
-                const rows = flights.map((f) => {
-                        const airline = airlines.find((a) => a.id === f.airline_id);
-                        return {
-                                id: f.id,
-                                flightNumber: f.flight_number,
-                                airlineFlightNumber: f.airline_flight_number,
-                                scheduledDepartureDate: new Date(f.scheduled_departure),
-                                scheduledDepartureTime: f.scheduled_departure_time,
-                                airlineId: f.airline_id,
-                                airline: airline ? airline.name : f.airline_id,
-                                price: f.min_price
-                                        ? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(f.min_price)} ${
-                                                        ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''
-                                                }`
-                                        : '',
-                        };
-                });
+	const sortedRows = useMemo(() => {
+		const rows = flights.map((f) => {
+			const airline = airlines.find((a) => a.id === f.airline_id);
+			return {
+				id: f.id,
+				flightNumber: f.flight_number,
+				airlineFlightNumber: f.airline_flight_number,
+				scheduledDepartureDate: new Date(f.scheduled_departure),
+				scheduledDepartureTime: f.scheduled_departure_time,
+				airlineId: f.airline_id,
+				airline: airline ? airline.name : f.airline_id,
+				price: f.min_price
+					? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(f.min_price)} ${
+							ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''
+					  }`
+					: '',
+			};
+		});
 
-                return stableSort(rows, getComparator(order, orderBy));
-        }, [flights, airlines, order, orderBy]);
+		return stableSort(rows, getComparator(order, orderBy));
+	}, [flights, airlines, order, orderBy]);
 
 	const headCells = [
 		{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
