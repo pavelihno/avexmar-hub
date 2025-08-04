@@ -1,14 +1,10 @@
-import React, { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
 
 import { Card, Box, Typography, Button, Divider, IconButton, Skeleton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
 import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
-import { fetchAirports } from '../../redux/actions/airport';
-import { fetchAirlines } from '../../redux/actions/airline';
-import { fetchRoutes } from '../../redux/actions/route';
 import { formatDate, formatTime, formatDuration } from '../utils';
 
 const SegmentSkeleton = () => {
@@ -71,47 +67,30 @@ const SegmentSkeleton = () => {
 	);
 };
 
-const Segment = ({ flight, isOutbound }) => {
-	if (!flight) return null;
+const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
+        if (!flight) return null;
 
-	const dispatch = useDispatch();
-	const { airlines, isLoading: airlinesLoading } = useSelector((s) => s.airlines);
-	const { airports, isLoading: airportsLoading } = useSelector((s) => s.airports);
-	const { routes, isLoading: routesLoading } = useSelector((s) => s.routes);
+        const airline = useMemo(() => {
+                return airlines.find((a) => a.id === flight.airline_id) || null;
+        }, [airlines, flight.airline_id]);
 
-	useEffect(() => {
-		dispatch(fetchAirports());
-		dispatch(fetchAirlines());
-		dispatch(fetchRoutes());
-	}, [dispatch]);
+        const route = useMemo(() => {
+                return routes.find((r) => r.id === flight.route_id) || null;
+        }, [routes, flight.route_id]);
 
-	const airline = useMemo(() => {
-		if (!airlinesLoading) {
-			return airlines.find((a) => a.id === flight.airline_id) || null;
-		}
-		return null;
-	}, [airlines, airlinesLoading, flight.airline_id]);
+        const originAirport = useMemo(() => {
+                if (route) {
+                        return airports.find((a) => a.id === route.origin_airport_id) || null;
+                }
+                return null;
+        }, [airports, route]);
 
-	const route = useMemo(() => {
-		if (!routesLoading) {
-			return routes.find((r) => r.id === flight.route_id) || null;
-		}
-		return null;
-	}, [routes, routesLoading, flight.route_id]);
-
-	const originAirport = useMemo(() => {
-		if (!airportsLoading && route) {
-			return airports.find((a) => a.id === route.origin_airport_id) || null;
-		}
-		return null;
-	}, [airports, airportsLoading, route]);
-
-	const destinationAirport = useMemo(() => {
-		if (!airportsLoading && route) {
-			return airports.find((a) => a.id === route.destination_airport_id) || null;
-		}
-		return null;
-	}, [airports, airportsLoading, route]);
+        const destinationAirport = useMemo(() => {
+                if (route) {
+                        return airports.find((a) => a.id === route.destination_airport_id) || null;
+                }
+                return null;
+        }, [airports, route]);
 
 	return (
 		<Box sx={{ mb: 1 }}>
@@ -188,18 +167,13 @@ const Segment = ({ flight, isOutbound }) => {
 	);
 };
 
-const SearchResultCard = ({ outbound, returnFlight }) => {
-	const theme = useTheme();
-	const { isLoading: airlinesLoading } = useSelector((s) => s.airlines);
-	const { isLoading: airportsLoading } = useSelector((s) => s.airports);
-	const { isLoading: routesLoading } = useSelector((s) => s.routes);
-
-	const isLoading = airlinesLoading || airportsLoading || routesLoading;
-	const currency = outbound?.currency || returnFlight?.currency;
-	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-	const totalPrice = isLoading
-		? 0
-		: outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
+const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, isLoading }) => {
+        const theme = useTheme();
+        const currency = outbound?.currency || returnFlight?.currency;
+        const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
+        const totalPrice = isLoading
+                ? 0
+                : outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
 
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
@@ -248,14 +222,28 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 					</>
 				) : (
 					<>
-						<Segment flight={outbound} isOutbound />
-						{returnFlight && <Divider sx={{ my: 1 }} />}
-						{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
-					</>
-				)}
-			</Box>
-		</Card>
-	);
+                                                <Segment
+                                                        flight={outbound}
+                                                        isOutbound
+                                                        airlines={airlines}
+                                                        airports={airports}
+                                                        routes={routes}
+                                                />
+                                                {returnFlight && <Divider sx={{ my: 1 }} />}
+                                                {returnFlight && (
+                                                        <Segment
+                                                                flight={returnFlight}
+                                                                isOutbound={false}
+                                                                airlines={airlines}
+                                                                airports={airports}
+                                                                routes={routes}
+                                                        />
+                                                )}
+                                        </>
+                                )}
+                        </Box>
+                </Card>
+        );
 };
 
 export default SearchResultCard;
