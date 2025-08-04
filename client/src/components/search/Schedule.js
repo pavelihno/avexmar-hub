@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
@@ -46,8 +46,8 @@ const Schedule = () => {
 		return airlines.find((a) => a.id === id);
 	};
 
-	const outboundFlights = useMemo(() => flights.filter((f) => f.direction === 'outbound'), [flights]);
-	const returnFlights = useMemo(() => flights.filter((f) => f.direction === 'return'), [flights]);
+        const outboundFlights = flights.filter((f) => f.direction === 'outbound');
+        const returnFlights = flights.filter((f) => f.direction === 'return');
 
 	const [selectedOutbound, setSelectedOutbound] = useState(null);
 	const [selectedReturn, setSelectedReturn] = useState(null);
