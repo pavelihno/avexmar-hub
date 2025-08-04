@@ -34,7 +34,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
-import { UI_LABELS, ENUM_LABELS } from '../../constants';
+import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { createFieldRenderer, FIELD_TYPES } from '../utils';
 import { formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
@@ -249,7 +249,7 @@ const AdminDataTable = ({
 					return itemValue === value;
 				}
 				if (col.type === FIELD_TYPES.DATE) {
-					return itemValue === formatDate(value, 'yyyy-MM-dd');
+					return itemValue === formatDate(value, DATE_API_FORMAT);
 				}
 				return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
 			})

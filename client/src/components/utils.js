@@ -27,6 +27,7 @@ import {
 	TIME_MASK,
 	TIME_DURATION_FORMAT,
 	DEFAULT_NUMBER_FORMAT,
+	DATE_API_FORMAT,
 } from '../constants';
 
 export const FIELD_TYPES = {
@@ -496,7 +497,7 @@ export const isDuplicateInBooking = (
 			passenger &&
 			passenger.first_name === firstName &&
 			passenger.last_name === lastName &&
-			passenger.birth_date === formatDate(birthDate, 'yyyy-MM-dd')
+			passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
 		);
 	});
 };

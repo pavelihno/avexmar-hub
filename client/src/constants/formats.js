@@ -5,6 +5,7 @@ import numeral from 'numeral';
 export const dateLocale = ru;
 
 export const DATE_FORMAT = 'dd.MM.yyyy';
+export const DATE_API_FORMAT = 'yyyy-MM-dd';
 export const TIME_FORMAT = 'HH:mm';
 export const TIME_MASK = '__:__';
 export const DATETIME_FORMAT = 'dd.MM.yyyy HH:mm';

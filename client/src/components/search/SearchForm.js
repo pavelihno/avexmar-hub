@@ -18,7 +18,7 @@ import { useTheme } from '@mui/material/styles';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
 
-import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS } from '../../constants';
+import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
 const selectProps = {
@@ -215,12 +215,12 @@ const SearchForm = ({ initialParams = {} }) => {
 				from: formValues.from,
 				to: formValues.to,
 				date_mode: dateMode,
-				when: isExact ? formatDate(formValues.departDate, 'yyyy-MM-dd') : null,
-				return: isExact ? formatDate(formValues.returnDate, 'yyyy-MM-dd') : null,
-				when_from: !isExact ? formatDate(formValues.departFrom, 'yyyy-MM-dd') : null,
-				when_to: !isExact ? formatDate(formValues.departTo, 'yyyy-MM-dd') : null,
-				return_from: !isExact ? formatDate(formValues.returnFrom, 'yyyy-MM-dd') : null,
-				return_to: !isExact ? formatDate(formValues.returnTo, 'yyyy-MM-dd') : null,
+				when: isExact ? formatDate(formValues.departDate, DATE_API_FORMAT) : null,
+				return: isExact ? formatDate(formValues.returnDate, DATE_API_FORMAT) : null,
+				when_from: !isExact ? formatDate(formValues.departFrom, DATE_API_FORMAT) : null,
+				when_to: !isExact ? formatDate(formValues.departTo, DATE_API_FORMAT) : null,
+				return_from: !isExact ? formatDate(formValues.returnFrom, DATE_API_FORMAT) : null,
+				return_to: !isExact ? formatDate(formValues.returnTo, DATE_API_FORMAT) : null,
 				adults: passengers.adults,
 				children: passengers.children,
 				infants: passengers.infants,
@@ -282,15 +282,15 @@ const SearchForm = ({ initialParams = {} }) => {
 		params.set('to', formValues.to);
 		params.set('date_mode', dateMode);
 		if (dateMode === 'exact') {
-			params.set('when', formatDate(formValues.departDate, 'yyyy-MM-dd'));
-			if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, 'yyyy-MM-dd'));
+			params.set('when', formatDate(formValues.departDate, DATE_API_FORMAT));
+			if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, DATE_API_FORMAT));
 		} else {
 			const { departFrom, departTo, returnFrom, returnTo } = formValues;
-			params.set('when_from', formatDate(departFrom, 'yyyy-MM-dd'));
-			params.set('when_to', formatDate(departTo, 'yyyy-MM-dd'));
+			params.set('when_from', formatDate(departFrom, DATE_API_FORMAT));
+			params.set('when_to', formatDate(departTo, DATE_API_FORMAT));
 			if (returnFrom && returnTo) {
-				params.set('return_from', formatDate(returnFrom, 'yyyy-MM-dd'));
-				params.set('return_to', formatDate(returnTo, 'yyyy-MM-dd'));
+				params.set('return_from', formatDate(returnFrom, DATE_API_FORMAT));
+				params.set('return_to', formatDate(returnTo, DATE_API_FORMAT));
 			}
 		}
 		params.set('adults', passengers.adults);

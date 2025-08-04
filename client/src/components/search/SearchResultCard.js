@@ -176,9 +176,11 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 
 	const priceText = isLoading
 		? ''
-		: totalPrice !== 0
+		: totalPrice
 		? `${formatNumber(totalPrice)} ${currencySymbol}`
-		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(totalMinPrice)} ${currencySymbol}`;
+		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
+				totalMinPrice
+		  )} ${currencySymbol}`;
 
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>

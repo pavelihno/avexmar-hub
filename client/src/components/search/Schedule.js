@@ -5,7 +5,7 @@ import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import Base from '../Base';
 import SearchForm from './SearchForm';
 import ScheduleTable from './ScheduleTable';
-import { UI_LABELS } from '../../constants';
+import { DATE_API_FORMAT, UI_LABELS } from '../../constants';
 import { fetchScheduleFlights } from '../../redux/actions/search';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { formatDate } from '../utils';
@@ -25,7 +25,7 @@ const Schedule = () => {
 		if (from && to) {
 			const p = { ...paramObj };
 			// Show schedule starting from today
-			p.when = formatDate(new Date(), 'yyyy-MM-dd');
+			p.when = formatDate(new Date(), DATE_API_FORMAT);
 			dispatch(fetchScheduleFlights(p));
 		}
 	}, [dispatch, paramStr, from, to]);
@@ -68,8 +68,8 @@ const Schedule = () => {
 
 		// Determine which flight has the earlier date
 		if (selectedOutbound && selectedReturn) {
-			const outboundDate = new Date(selectedOutbound.scheduledDepartureDate);
-			const returnDate = new Date(selectedReturn.scheduledDepartureDate);
+			const outboundDate = selectedOutbound.scheduledDepartureDate;
+			const returnDate = selectedReturn.scheduledDepartureDate;
 
 			if (outboundDate <= returnDate) {
 				// Current selection is correct
@@ -97,12 +97,12 @@ const Schedule = () => {
 		params.set('to', toLocation);
 		params.set('date_mode', 'exact');
 
-		params.set('when', _outbound.scheduledDepartureDate);
+		params.set('when', formatDate(_outbound.scheduledDepartureDate, DATE_API_FORMAT));
 		params.set('outbound_airline', getAirlineById(_outbound.airlineId).iata_code);
 		params.set('outbound_flight', _outbound.flightNumber);
 
 		if (_return) {
-			params.set('return', _return.scheduledDepartureDate);
+			params.set('return', formatDate(_return.scheduledDepartureDate, DATE_API_FORMAT));
 			params.set('return_airline', getAirlineById(_return.airlineId).iata_code);
 			params.set('return_flight', _return.flightNumber);
 		}
@@ -123,8 +123,7 @@ const Schedule = () => {
 				</Typography>
 				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
 					<Button
-						variant='contained'
-						color='grey'
+						variant='outlined'
 						disabled={!selectedOutbound && !selectedReturn}
 						onClick={handleSelectFlights}
 					>

@@ -22,7 +22,14 @@ import { fetchCountries } from '../../redux/actions/country';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { formatDate, validateDate, isDuplicateInBooking } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+import {
+	DATE_API_FORMAT,
+	ENUM_LABELS,
+	FIELD_LABELS,
+	UI_LABELS,
+	VALIDATION_MESSAGES,
+	getEnumOptions,
+} from '../../constants';
 
 const PassengerManagement = () => {
 	const dispatch = useDispatch();
@@ -183,7 +190,7 @@ const PassengerManagement = () => {
 			(p) =>
 				p.first_name === passengerData.first_name &&
 				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, 'yyyy-MM-dd') &&
+				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
 				p.document_type === passengerData.document_type &&
 				p.document_number === passengerData.document_number
 		);
@@ -222,7 +229,7 @@ const PassengerManagement = () => {
 			(p) =>
 				p.first_name === passengerData.first_name &&
 				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, 'yyyy-MM-dd') &&
+				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
 				p.document_type === passengerData.document_type &&
 				p.document_number === passengerData.document_number
 		);

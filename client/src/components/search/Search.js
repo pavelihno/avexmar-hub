@@ -5,7 +5,7 @@ import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button, Cir
 import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
-import { UI_LABELS, ENUM_LABELS } from '../../constants';
+import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchFlights, fetchNearbyDateFlights } from '../../redux/actions/search';
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
@@ -72,8 +72,8 @@ const Search = () => {
 				const paramsRange = {
 					from,
 					to,
-					when_from: formatDate(start, 'yyyy-MM-dd'),
-					when_to: formatDate(end, 'yyyy-MM-dd'),
+					when_from: formatDate(start, DATE_API_FORMAT),
+					when_to: formatDate(end, DATE_API_FORMAT),
 					class: params.get('class'),
 				};
 				dispatch(fetchNearbyDateFlights(paramsRange));

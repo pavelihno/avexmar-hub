@@ -42,7 +42,7 @@ function stableSort(array, comparator) {
 
 const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => {} }) => {
 	const [order, setOrder] = useState('asc');
-	const [orderBy, setOrderBy] = useState('scheduledDepartureDateFormatted');
+	const [orderBy, setOrderBy] = useState('scheduledDepartureDate');
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -54,9 +54,8 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 					id: f.id,
 					flightNumber: f.flight_number,
 					airlineFlightNumber: f.airline_flight_number,
-					scheduledDepartureDate: f.scheduled_departure,
-					scheduledDepartureDateFormatted: formatDate(f.scheduled_departure, DATE_YEAR_WEEKDAY_FORMAT),
-					scheduledDepartureTimeFormatted: formatTime(f.scheduled_departure_time),
+					scheduledDepartureDate: new Date(f.scheduled_departure),
+					scheduledDepartureTime: f.scheduled_departure_time,
 					airlineId: f.airline_id,
 					airline: airline ? airline.name : f.airline_id,
 					price: f.min_price
@@ -79,8 +78,8 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 
 	const headCells = [
 		{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
-		{ id: 'scheduledDepartureDateFormatted', label: FIELD_LABELS.FLIGHT.scheduled_departure },
-		{ id: 'scheduledDepartureTimeFormatted', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
+		{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+		{ id: 'scheduledDepartureTime', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
 		{ id: 'airline', label: FIELD_LABELS.FLIGHT.airline_id },
 		{ id: 'price', label: FIELD_LABELS.TARIFF.price },
 		{ id: 'select', label: UI_LABELS.SCHEDULE.select },
@@ -120,8 +119,10 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 						{sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>{row.airlineFlightNumber}</TableCell>
-								<TableCell>{row.scheduledDepartureDateFormatted}</TableCell>
-								<TableCell>{row.scheduledDepartureTimeFormatted}</TableCell>
+								<TableCell>
+									{formatDate(row.scheduledDepartureDate, DATE_YEAR_WEEKDAY_FORMAT)}
+								</TableCell>
+								<TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>
 								<TableCell>{row.airline}</TableCell>
 								<TableCell>{row.price}</TableCell>
 								<TableCell padding='checkbox'>
