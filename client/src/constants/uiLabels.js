@@ -24,7 +24,7 @@ export const UI_LABELS = {
 			displayed_rows: ({ from, to, count }) => {
 				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
-		}
+		},
 	},
 	TITLES: {
 		login: 'Вход',
@@ -312,18 +312,18 @@ export const UI_LABELS = {
 			price: 'Цена',
 			price_from: 'От',
 		},
-                sort: {
-                        label: 'Сортировка',
-                        price: 'По цене',
-                        arrival_time: 'По времени прибытия',
-                        arrival_date: 'По дате прибытия',
-                        departure_time: 'По времени отправления',
-                        departure_date: 'По дате отправления',
-                        duration: 'По времени в пути',
-                },
-                nearby_dates: 'Ближайшие даты',
-                show_more: 'Показать еще билеты',
-        },
+		sort: {
+			label: 'Сортировка',
+			price: 'Цена',
+			arrival_time: 'Время прибытия',
+			arrival_date: 'Дата прибытия',
+			departure_time: 'Время отправления',
+			departure_date: 'Дата отправления',
+			duration: 'Время в пути',
+		},
+		nearby_dates: 'Ближайшие даты',
+		show_more: 'Показать еще билеты',
+	},
 };
 
 export default UI_LABELS;

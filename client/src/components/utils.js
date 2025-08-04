@@ -401,6 +401,20 @@ export const formatTimeToUI = (value) => {
 	}
 };
 
+export const parseTime = (value) => {
+	if (!value) return '';
+	try {
+		const date = new Date(`1970-01-01T${value}`);
+		if (isNaN(date.getTime())) {
+			throw new Error('Invalid time format');
+		}
+		return date.getTime();
+	} catch (error) {
+		console.error('Invalid time value:', value);
+		return value;
+	}
+};
+
 export const validateDate = (value) => {
 	if (!value) return false;
 	try {
