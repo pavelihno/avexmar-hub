@@ -217,6 +217,7 @@ const Search = () => {
 							display: 'flex',
 							alignItems: 'center',
 							mb: 3,
+							columnGap: 2,
 						}}
 					>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -226,48 +227,7 @@ const Search = () => {
 							</Typography>
 						</Box>
 						{nearDatesOutbound.length > 0 && (
-							<Box
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									flexWrap: 'nowrap',
-									overflowX: 'auto',
-									columnGap: 1,
-									width: '100%',
-								}}
-							>
-								{nearDatesOutbound.map((d) => (
-									<Button
-										key={d.date}
-										size='small'
-										variant='outlined'
-										sx={{
-											flexShrink: 0,
-											minWidth: 'auto',
-											borderRadius: 1,
-											px: 1.5,
-										}}
-										onClick={() => {
-											const newParams = new URLSearchParams(paramObj);
-											newParams.set('when', d.date);
-											newParams.delete('when_from');
-											newParams.delete('when_to');
-											navigate(`/search?${newParams.toString()}`);
-										}}
-									>
-										{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-											ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-										}`}
-									</Button>
-								))}
-							</Box>
-						)}
-						{nearDatesReturn.length > 0 && (
-							<>
-								<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-									<ArrowForwardIcon color='action' />
-								</Box>
+							<Box>
 								<Box
 									sx={{
 										display: 'flex',
@@ -279,7 +239,7 @@ const Search = () => {
 										width: '100%',
 									}}
 								>
-									{nearDatesReturn.map((d) => (
+									{nearDatesOutbound.map((d) => (
 										<Button
 											key={d.date}
 											size='small'
@@ -292,9 +252,9 @@ const Search = () => {
 											}}
 											onClick={() => {
 												const newParams = new URLSearchParams(paramObj);
-												newParams.set('return', d.date);
-												newParams.delete('return_from');
-												newParams.delete('return_to');
+												newParams.set('when', d.date);
+												newParams.delete('when_from');
+												newParams.delete('when_to');
 												navigate(`/search?${newParams.toString()}`);
 											}}
 										>
@@ -303,6 +263,52 @@ const Search = () => {
 											}`}
 										</Button>
 									))}
+								</Box>
+							</Box>
+						)}
+						{nearDatesReturn.length > 0 && (
+							<>
+								<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+									<ArrowForwardIcon color='action' />
+								</Box>
+
+								<Box>
+									<Box
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											flexWrap: 'nowrap',
+											overflowX: 'auto',
+											columnGap: 1,
+											width: '100%',
+										}}
+									>
+										{nearDatesReturn.map((d) => (
+											<Button
+												key={d.date}
+												size='small'
+												variant='outlined'
+												sx={{
+													flexShrink: 0,
+													minWidth: 'auto',
+													borderRadius: 1,
+													px: 1.5,
+												}}
+												onClick={() => {
+													const newParams = new URLSearchParams(paramObj);
+													newParams.set('return', d.date);
+													newParams.delete('return_from');
+													newParams.delete('return_to');
+													navigate(`/search?${newParams.toString()}`);
+												}}
+											>
+												{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
+													ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
+												}`}
+											</Button>
+										))}
+									</Box>
 								</Box>
 							</>
 						)}
