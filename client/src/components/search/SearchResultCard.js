@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { Card, Box, Typography, Button, Divider, IconButton, Skeleton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -70,27 +70,17 @@ const SegmentSkeleton = () => {
 const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 	if (!flight) return null;
 
-	const airline = useMemo(() => {
-		return airlines.find((a) => a.id === flight.airline_id) || null;
-	}, [airlines, flight.airline_id]);
+        const airline = airlines.find((a) => a.id === flight.airline_id) || null;
 
-	const route = useMemo(() => {
-		return routes.find((r) => r.id === flight.route_id) || null;
-	}, [routes, flight.route_id]);
+        const route = routes.find((r) => r.id === flight.route_id) || null;
 
-	const originAirport = useMemo(() => {
-		if (route) {
-			return airports.find((a) => a.id === route.origin_airport_id) || null;
-		}
-		return null;
-	}, [airports, route]);
+        const originAirport = route
+                ? airports.find((a) => a.id === route.origin_airport_id) || null
+                : null;
 
-	const destinationAirport = useMemo(() => {
-		if (route) {
-			return airports.find((a) => a.id === route.destination_airport_id) || null;
-		}
-		return null;
-	}, [airports, route]);
+        const destinationAirport = route
+                ? airports.find((a) => a.id === route.destination_airport_id) || null
+                : null;
 
 	return (
 		<Box sx={{ mb: 1 }}>
