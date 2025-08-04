@@ -105,42 +105,56 @@ const Search = () => {
 			.sort((a, b) => new Date(a.date) - new Date(b.date));
 	};
 
-	const fetchNearbyDates = (date, direction, setDates) => {
-		if (!isExact || !from || !to || !date) {
-			setDates([]);
-			return;
-		}
+        const fetchNearbyDates = (date, direction) => {
+                const setDates = direction === 'return' ? setNearDatesReturn : setNearDatesOutbound;
+                if (!isExact || !from || !to || !date) {
+                        setDates([]);
+                        return;
+                }
 
-		const selectedDate = new Date(date);
-		const start = new Date(selectedDate);
-		const end = new Date(selectedDate);
+                const selectedDate = new Date(date);
+                const start = new Date(selectedDate);
+                const end = new Date(selectedDate);
 
-		start.setDate(start.getDate() - 30);
-		end.setDate(end.getDate() + 30);
+                start.setDate(start.getDate() - 30);
+                end.setDate(end.getDate() + 30);
 
-		const requestParams = {
-			...paramObj,
-			date_mode: 'flex',
-			when_from: formatDate(start, DATE_API_FORMAT),
-			when_to: formatDate(end, DATE_API_FORMAT),
-			return_from: formatDate(start, DATE_API_FORMAT),
-			return_to: formatDate(end, DATE_API_FORMAT),
+                if (direction === 'outbound' && returnDate) {
+                        const retDate = new Date(returnDate);
+                        if (end > retDate) end.setTime(retDate.getTime());
+                }
+                if (direction === 'return') {
+                        const depDate = new Date(depart);
+                        if (!isNaN(depDate) && start < depDate) start.setTime(depDate.getTime());
+                }
 
-		};
+                const requestParams = { ...paramObj, date_mode: 'flex' };
+                if (direction === 'outbound') {
+                        requestParams.when_from = formatDate(start, DATE_API_FORMAT);
+                        requestParams.when_to = formatDate(end, DATE_API_FORMAT);
+                        delete requestParams.when;
+                        delete requestParams.return;
+                        delete requestParams.return_from;
+                        delete requestParams.return_to;
+                } else {
+                        requestParams.when_from = depart;
+                        requestParams.when_to = depart;
+                        requestParams.return_from = formatDate(start, DATE_API_FORMAT);
+                        requestParams.return_to = formatDate(end, DATE_API_FORMAT);
+                        delete requestParams.when;
+                        delete requestParams.return;
+                }
 
-		delete requestParams.when;
-		delete requestParams.return;
+                dispatch(fetchNearbyDateFlights(requestParams));
+        };
 
-		dispatch(fetchNearbyDateFlights(requestParams));
-	};
+        useEffect(() => {
+                fetchNearbyDates(depart, 'outbound');
+        }, [dispatch, isExact, from, to, depart, returnDate]);
 
-	useEffect(() => {
-		fetchNearbyDates(depart, 'outbound', setNearDatesOutbound);
-	}, [dispatch, isExact, from, to, depart, params]);
-
-	useEffect(() => {
-		fetchNearbyDates(returnDate, 'return', setNearDatesReturn);
-	}, [dispatch, isExact, from, to, returnDate, params]);
+        useEffect(() => {
+                fetchNearbyDates(returnDate, 'return');
+        }, [dispatch, isExact, from, to, depart, returnDate]);
 
 	const grouped = [];
 	if (!isExact) {
