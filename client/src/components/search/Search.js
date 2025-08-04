@@ -10,7 +10,7 @@ import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
-import { fetchSearchFlights } from '../../redux/actions/search';
+import { fetchNearbyDateFlights, fetchSearchFlights } from '../../redux/actions/search';
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
@@ -19,12 +19,17 @@ import { serverApi } from '../../api';
 
 const Search = () => {
 	const dispatch = useDispatch();
-	const { flights, isLoading } = useSelector((state) => state.search);
+	const navigate = useNavigate();
+
+	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
+	const { nearbyFlights, isLoading: nearbyFlightsLoading } = useSelector((state) => state.search);
+	const isLoading = flightsLoading || nearbyFlightsLoading;
+
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
-	const navigate = useNavigate();
+
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
 	const paramStr = params.toString();
@@ -56,6 +61,16 @@ const Search = () => {
 	}, [dispatch, paramStr]);
 
 	useEffect(() => {
+		if (nearbyFlights.length > 0) {
+			if (nearbyFlights[0].direction === 'return') {
+				setNearDatesReturn(buildNearDates(nearbyFlights, returnDate));
+			} else {
+				setNearDatesOutbound(buildNearDates(nearbyFlights, depart));
+			}
+		}
+	}, [nearbyFlights, depart, returnDate]);
+
+	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
 		const titleTo = returnTo || returnDate || '';
 		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo);
@@ -64,7 +79,7 @@ const Search = () => {
 		};
 	}, [from, to, depart, returnDate, departFrom, returnTo]);
 
-	const buildNearDates = (flights) => {
+	const buildNearDates = (flights, selectedDate) => {
 		const map = {};
 		for (const f of flights) {
 			const d = f.scheduled_departure;
@@ -73,66 +88,59 @@ const Search = () => {
 				map[d] = { price, currency: f.currency };
 			}
 		}
-		return Object.entries(map)
-			.sort((a, b) => new Date(a[0]) - new Date(b[0]))
-			.map(([date, info]) => ({ date, price: info.price, currency: info.currency }));
+
+		const sortedDates = Object.entries(map)
+			.filter(([date]) => date !== selectedDate)
+			.map(([date, info]) => ({
+				date,
+				price: info.price,
+				currency: info.currency,
+				diff: Math.abs(new Date(date) - new Date(selectedDate)),
+			}))
+			.sort((a, b) => a.diff - b.diff);
+
+		return sortedDates
+			.slice(0, 3)
+			.map(({ date, price, currency }) => ({ date, price, currency }))
+			.sort((a, b) => new Date(a.date) - new Date(b.date));
+	};
+
+	const fetchNearbyDates = (date, direction, setDates) => {
+		if (!isExact || !from || !to || !date) {
+			setDates([]);
+			return;
+		}
+
+		const selectedDate = new Date(date);
+		const start = new Date(selectedDate);
+		const end = new Date(selectedDate);
+
+		start.setDate(start.getDate() - 30);
+		end.setDate(end.getDate() + 30);
+
+		const requestParams = {
+			...paramObj,
+			date_mode: 'flex',
+			when_from: formatDate(start, DATE_API_FORMAT),
+			when_to: formatDate(end, DATE_API_FORMAT),
+			return_from: formatDate(start, DATE_API_FORMAT),
+			return_to: formatDate(end, DATE_API_FORMAT),
+
+		};
+
+		delete requestParams.when;
+		delete requestParams.return;
+
+		dispatch(fetchNearbyDateFlights(requestParams));
 	};
 
 	useEffect(() => {
-		const fetchNearDates = async () => {
-			if (!isExact || !from || !to || !depart) {
-				setNearDatesOutbound([]);
-				return;
-			}
-			try {
-				const start = new Date(depart);
-				const end = new Date(depart);
-				start.setDate(start.getDate() - 30);
-				end.setDate(end.getDate() + 30);
-				const paramsRange = {
-					from,
-					to,
-					when_from: formatDate(start, DATE_API_FORMAT),
-					when_to: formatDate(end, DATE_API_FORMAT),
-					class: params.get('class'),
-				};
-				const res = await serverApi.get('/search/flights', { params: paramsRange });
-				setNearDatesOutbound(buildNearDates(res.data));
-			} catch (e) {
-				console.error(e);
-				setNearDatesOutbound([]);
-			}
-		};
-		fetchNearDates();
-	}, [isExact, from, to, depart, params]);
+		fetchNearbyDates(depart, 'outbound', setNearDatesOutbound);
+	}, [dispatch, isExact, from, to, depart, params]);
 
 	useEffect(() => {
-		const fetchReturnNearDates = async () => {
-			if (!isExact || !from || !to || !returnDate) {
-				setNearDatesReturn([]);
-				return;
-			}
-			try {
-				const start = new Date(returnDate);
-				const end = new Date(returnDate);
-				start.setDate(start.getDate() - 30);
-				end.setDate(end.getDate() + 30);
-				const paramsRange = {
-					from: to,
-					to: from,
-					when_from: formatDate(start, DATE_API_FORMAT),
-					when_to: formatDate(end, DATE_API_FORMAT),
-					class: params.get('class'),
-				};
-				const res = await serverApi.get('/search/flights', { params: paramsRange });
-				setNearDatesReturn(buildNearDates(res.data));
-			} catch (e) {
-				console.error(e);
-				setNearDatesReturn([]);
-			}
-		};
-		fetchReturnNearDates();
-	}, [isExact, from, to, returnDate, params]);
+		fetchNearbyDates(returnDate, 'return', setNearDatesReturn);
+	}, [dispatch, isExact, from, to, returnDate, params]);
 
 	const grouped = [];
 	if (!isExact) {
@@ -167,16 +175,31 @@ const Search = () => {
 				case 'price':
 					res = getTotalPrice(a) - getTotalPrice(b);
 					break;
-				case 'departure_date':
-					res = new Date(a.outbound.scheduled_departure) - new Date(b.outbound.scheduled_departure);
+				case 'departure_date': {
+					const dateA = new Date(a.outbound.scheduled_departure);
+					const dateB = new Date(b.outbound.scheduled_departure);
+					res = dateA - dateB;
+					if (res === 0) {
+						res =
+							parseTime(a.outbound.scheduled_departure_time) -
+							parseTime(b.outbound.scheduled_departure_time);
+					}
 					break;
+				}
 				case 'departure_time':
 					res =
 						parseTime(a.outbound.scheduled_departure_time) - parseTime(b.outbound.scheduled_departure_time);
 					break;
-				case 'arrival_date':
-					res = new Date(a.outbound.scheduled_arrival) - new Date(b.outbound.scheduled_arrival);
+				case 'arrival_date': {
+					const dateA = new Date(a.outbound.scheduled_arrival);
+					const dateB = new Date(b.outbound.scheduled_arrival);
+					res = dateA - dateB;
+					if (res === 0) {
+						res =
+							parseTime(a.outbound.scheduled_arrival_time) - parseTime(b.outbound.scheduled_arrival_time);
+					}
 					break;
+				}
 				case 'arrival_time':
 					res = parseTime(a.outbound.scheduled_arrival_time) - parseTime(b.outbound.scheduled_arrival_time);
 					break;
@@ -329,21 +352,21 @@ const Search = () => {
 									{UI_LABELS.SEARCH.sort.price}{' '}
 									{sortKey === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
 								</MenuItem>
-								<MenuItem value='arrival_time' onClick={() => handleSort('arrival_time')}>
-									{UI_LABELS.SEARCH.sort.arrival_time}{' '}
-									{sortKey === 'arrival_time' && (sortOrder === 'asc' ? '↑' : '↓')}
-								</MenuItem>
-								<MenuItem value='arrival_date' onClick={() => handleSort('arrival_date')}>
-									{UI_LABELS.SEARCH.sort.arrival_date}{' '}
-									{sortKey === 'arrival_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+								<MenuItem value='departure_date' onClick={() => handleSort('departure_date')}>
+									{UI_LABELS.SEARCH.sort.departure_date}{' '}
+									{sortKey === 'departure_date' && (sortOrder === 'asc' ? '↑' : '↓')}
 								</MenuItem>
 								<MenuItem value='departure_time' onClick={() => handleSort('departure_time')}>
 									{UI_LABELS.SEARCH.sort.departure_time}{' '}
 									{sortKey === 'departure_time' && (sortOrder === 'asc' ? '↑' : '↓')}
 								</MenuItem>
-								<MenuItem value='departure_date' onClick={() => handleSort('departure_date')}>
-									{UI_LABELS.SEARCH.sort.departure_date}{' '}
-									{sortKey === 'departure_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+								<MenuItem value='arrival_date' onClick={() => handleSort('arrival_date')}>
+									{UI_LABELS.SEARCH.sort.arrival_date}{' '}
+									{sortKey === 'arrival_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+								</MenuItem>
+								<MenuItem value='arrival_time' onClick={() => handleSort('arrival_time')}>
+									{UI_LABELS.SEARCH.sort.arrival_time}{' '}
+									{sortKey === 'arrival_time' && (sortOrder === 'asc' ? '↑' : '↓')}
 								</MenuItem>
 								<MenuItem value='duration' onClick={() => handleSort('duration')}>
 									{UI_LABELS.SEARCH.sort.duration}{' '}
