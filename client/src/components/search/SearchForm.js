@@ -113,35 +113,55 @@ const SearchForm = ({ initialParams = {} }) => {
 
 	const combinedParams = { ...storedParams, ...initialParams };
 
-	const [formValues, setFormValues] = useState({
-		from: combinedParams.from || '',
-		to: combinedParams.to || '',
-		departDate: parseDate(combinedParams.when),
-		returnDate: parseDate(combinedParams.return),
-		departFrom: parseDate(combinedParams.when_from),
-		departTo: parseDate(combinedParams.when_to),
-		returnFrom: parseDate(combinedParams.return_from),
-		returnTo: parseDate(combinedParams.return_to),
-	});
+        const [formValues, setFormValues] = useState({
+                from: combinedParams.from || '',
+                to: combinedParams.to || '',
+                departDate: parseDate(combinedParams.when),
+                returnDate: parseDate(combinedParams.return),
+                departFrom: parseDate(combinedParams.when_from),
+                departTo: parseDate(combinedParams.when_to),
+                returnFrom: parseDate(combinedParams.return_from),
+                returnTo: parseDate(combinedParams.return_to),
+        });
 
-	const [passengers, setPassengers] = useState({
-		adults: parseInt(combinedParams.adults, 10) || 1,
-		children: parseInt(combinedParams.children, 10) || 0,
-		infants: parseInt(combinedParams.infants, 10) || 0,
-	});
-	const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
-	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
-	const [showPassengers, setShowPassengers] = useState(false);
-	const [validationErrors, setValidationErrors] = useState({});
+        const [passengers, setPassengers] = useState({
+                adults: parseInt(combinedParams.adults, 10) || 1,
+                children: parseInt(combinedParams.children, 10) || 0,
+                infants: parseInt(combinedParams.infants, 10) || 0,
+        });
+        const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
+        const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
+        const [showPassengers, setShowPassengers] = useState(false);
+        const [validationErrors, setValidationErrors] = useState({});
 
 	const passengersRef = useRef(null);
 	const departToRef = useRef(null);
 	const returnFromRef = useRef(null);
 	const returnToRef = useRef(null);
-	const airportOptions = useMemo(
-		() => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.iata_code})` })),
-		[airports]
-	);
+        const airportOptions = useMemo(
+                () => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.iata_code})` })),
+                [airports]
+        );
+
+        useEffect(() => {
+                setFormValues({
+                        from: combinedParams.from || '',
+                        to: combinedParams.to || '',
+                        departDate: parseDate(combinedParams.when),
+                        returnDate: parseDate(combinedParams.return),
+                        departFrom: parseDate(combinedParams.when_from),
+                        departTo: parseDate(combinedParams.when_to),
+                        returnFrom: parseDate(combinedParams.return_from),
+                        returnTo: parseDate(combinedParams.return_to),
+                });
+                setPassengers({
+                        adults: parseInt(combinedParams.adults, 10) || 1,
+                        children: parseInt(combinedParams.children, 10) || 0,
+                        infants: parseInt(combinedParams.infants, 10) || 0,
+                });
+                setDateMode(combinedParams.date_mode || 'exact');
+                setSeatClass(combinedParams.class || seatClassOptions[0].value);
+        }, [combinedParams, seatClassOptions]);
 
 	useEffect(() => {
 		dispatch(fetchSearchAirports());
