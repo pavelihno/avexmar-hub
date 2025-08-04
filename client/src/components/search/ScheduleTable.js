@@ -59,7 +59,11 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 					scheduledDepartureTimeFormatted: formatTime(f.scheduled_departure_time),
 					airlineId: f.airline_id,
 					airline: airline ? airline.name : f.airline_id,
-					price: f.min_price ? `${UI_LABELS.SCHEDULE.price_from.toLowerCase()} ${f.min_price} ${ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''}` : '',
+					price: f.min_price
+						? `${UI_LABELS.SCHEDULE.price_from.toLowerCase()} ${f.min_price} ${
+								ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''
+						  }`
+						: '',
 				};
 			}),
 		[flights, airlines]

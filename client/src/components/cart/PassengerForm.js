@@ -66,10 +66,10 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 		validate();
 	}, [data.type, data.birthDate]);
 
-        const theme = useTheme();
+	const theme = useTheme();
 
-        return (
-                <Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
+	return (
+		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
 			<Box
 				sx={{
 					display: 'flex',

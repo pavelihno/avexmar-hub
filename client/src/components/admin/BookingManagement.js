@@ -24,9 +24,9 @@ const BookingManagement = () => {
 	const dispatch = useDispatch();
 	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
 	const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
-        const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
 
-        const theme = useTheme();
+	const theme = useTheme();
 
 	useEffect(() => {
 		dispatch(fetchBookings());
@@ -139,7 +139,7 @@ const BookingManagement = () => {
 										display: 'flex',
 										alignItems: 'center',
 										mb: 0.5,
-                                                                                backgroundColor: alpha(theme.palette.black, 0.04),
+										backgroundColor: alpha(theme.palette.black, 0.04),
 										borderRadius: 1,
 										p: 0.5,
 										width: 'auto',

@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-        Box,
-        Button,
-        IconButton,
-        Typography,
-        Collapse,
-        Paper,
-        Switch,
-        RadioGroup,
-        Radio,
-        TextField,
-        FormControlLabel,
+	Box,
+	Button,
+	IconButton,
+	Typography,
+	Collapse,
+	Paper,
+	Switch,
+	RadioGroup,
+	Radio,
+	TextField,
+	FormControlLabel,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -97,9 +97,9 @@ const parseDate = (value) => {
 const STORAGE_KEY = 'lastSearchParams';
 
 const SearchForm = ({ initialParams = {} }) => {
-        const navigate = useNavigate();
-        const dispatch = useDispatch();
-        const theme = useTheme();
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const theme = useTheme();
 
 	const { airports } = useSelector((state) => state.search);
 
@@ -332,17 +332,17 @@ const SearchForm = ({ initialParams = {} }) => {
 		<Box
 			component='form'
 			onSubmit={handleSubmit}
-                        sx={{
-                                display: 'grid',
-                                backgroundColor: theme.palette.background.paper,
-                                p: 1,
-                                mt: 2,
-                                alignItems: 'start',
-                                rowGap: 1,
-                                columnGap: 1,
-                                borderBottom: 1,
-                                borderColor: 'divider',
-                        }}
+			sx={{
+				display: 'grid',
+				backgroundColor: theme.palette.background.paper,
+				p: 1,
+				mt: 2,
+				alignItems: 'start',
+				rowGap: 1,
+				columnGap: 1,
+				borderBottom: 1,
+				borderColor: 'divider',
+			}}
 		>
 			<Box
 				sx={{
@@ -603,16 +603,16 @@ const SearchForm = ({ initialParams = {} }) => {
 					justifyContent: 'center',
 				}}
 			>
-                                <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={onScheduleClick}
-                                        disabled={!isScheduleClickOpen}
-                                        sx={{
-                                                borderRadius: 1.5,
-                                                whiteSpace: 'nowrap',
-                                        }}
-                                >
+				<Button
+					variant='contained'
+					color='primary'
+					onClick={onScheduleClick}
+					disabled={!isScheduleClickOpen}
+					sx={{
+						borderRadius: 1.5,
+						whiteSpace: 'nowrap',
+					}}
+				>
 					{UI_LABELS.HOME.search.show_schedule}
 				</Button>
 			</Box>
@@ -626,15 +626,15 @@ const SearchForm = ({ initialParams = {} }) => {
 					justifyContent: 'center',
 				}}
 			>
-                                <Button
-                                        type='submit'
-                                        variant='contained'
-                                        color='orange'
-                                        sx={{
-                                                borderRadius: 1.5,
-                                                whiteSpace: 'nowrap',
-                                        }}
-                                >
+				<Button
+					type='submit'
+					variant='contained'
+					color='orange'
+					sx={{
+						borderRadius: 1.5,
+						whiteSpace: 'nowrap',
+					}}
+				>
 					{UI_LABELS.HOME.search.button}
 				</Button>
 			</Box>

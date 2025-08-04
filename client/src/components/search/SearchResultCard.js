@@ -129,8 +129,8 @@ const Segment = ({ flight, isOutbound }) => {
 };
 
 const SearchResultCard = ({ outbound, returnFlight }) => {
-        const theme = useTheme();
-        const currency = outbound.currency || returnFlight?.currency;
+	const theme = useTheme();
+	const currency = outbound.currency || returnFlight?.currency;
 	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
 	const totalPrice =
 		outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
@@ -138,29 +138,29 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
 			<Box
-                                sx={{
-                                        width: 160,
-                                        textAlign: 'center',
-                                        pr: 2,
-                                        borderRight: `1px solid ${theme.palette.grey[100]}`,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                }}
+				sx={{
+					width: 160,
+					textAlign: 'center',
+					pr: 2,
+					borderRight: `1px solid ${theme.palette.grey[100]}`,
+					display: 'flex',
+					flexDirection: 'column',
+					justifyContent: 'center',
+				}}
 			>
 				<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1 }}>
 					{`${totalPrice !== 0 ? totalPrice : '--'} ${currencySymbol}`}
 				</Typography>
-                                <Button
-                                        variant='contained'
-                                        color='orange'
-                                        sx={{
-                                                borderRadius: 2,
-                                                boxShadow: 'none',
-                                                textTransform: 'none',
-                                                whiteSpace: 'nowrap',
-                                        }}
-                                        onClick={() => {
+				<Button
+					variant='contained'
+					color='orange'
+					sx={{
+						borderRadius: 2,
+						boxShadow: 'none',
+						textTransform: 'none',
+						whiteSpace: 'nowrap',
+					}}
+					onClick={() => {
 						const url = `/cart?flight=${outbound.id}${returnFlight ? `&return=${returnFlight.id}` : ''}`;
 						window.open(url, '_blank');
 					}}
