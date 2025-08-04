@@ -15,7 +15,6 @@ import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
 import { formatDate, formatNumber, getFlightDurationMinutes, parseTime } from '../utils';
-import { serverApi } from '../../api';
 
 const Search = () => {
 	const dispatch = useDispatch();
@@ -61,13 +60,11 @@ const Search = () => {
 	}, [dispatch, paramStr]);
 
 	useEffect(() => {
-		if (nearbyFlights.length > 0) {
-			if (nearbyFlights[0].direction === 'return') {
-				setNearDatesReturn(buildNearDates(nearbyFlights, returnDate));
-			} else {
-				setNearDatesOutbound(buildNearDates(nearbyFlights, depart));
-			}
-		}
+		const _outboundFlights = nearbyFlights.filter((f) => f.direction === 'outbound');
+		const _returnFlights = nearbyFlights.filter((f) => f.direction === 'return');
+
+		setNearDatesOutbound(buildNearDates(_outboundFlights, depart));
+		setNearDatesReturn(buildNearDates(_returnFlights, returnDate));
 	}, [nearbyFlights, depart, returnDate]);
 
 	useEffect(() => {
@@ -105,73 +102,68 @@ const Search = () => {
 			.sort((a, b) => new Date(a.date) - new Date(b.date));
 	};
 
-        const fetchNearbyDates = (date, direction) => {
-                const setDates = direction === 'return' ? setNearDatesReturn : setNearDatesOutbound;
-                if (!isExact || !from || !to || !date) {
-                        setDates([]);
-                        return;
-                }
+	const fetchNearbyDates = (date, direction) => {
+		const setDates = direction === 'return' ? setNearDatesReturn : setNearDatesOutbound;
 
-                const selectedDate = new Date(date);
-                const start = new Date(selectedDate);
-                const end = new Date(selectedDate);
+		if (!isExact || !from || !to || !date) {
+			setDates([]);
+			return;
+		}
 
-                start.setDate(start.getDate() - 30);
-                end.setDate(end.getDate() + 30);
+		const selectedDate = new Date(date);
+		const start = new Date(selectedDate);
+		const end = new Date(selectedDate);
 
-                if (direction === 'outbound' && returnDate) {
-                        const retDate = new Date(returnDate);
-                        if (end > retDate) end.setTime(retDate.getTime());
-                }
-                if (direction === 'return') {
-                        const depDate = new Date(depart);
-                        if (!isNaN(depDate) && start < depDate) start.setTime(depDate.getTime());
-                }
+		start.setDate(start.getDate() - 30);
+		end.setDate(end.getDate() + 30);
 
-                const requestParams = { ...paramObj, date_mode: 'flex' };
-                if (direction === 'outbound') {
-                        requestParams.when_from = formatDate(start, DATE_API_FORMAT);
-                        requestParams.when_to = formatDate(end, DATE_API_FORMAT);
-                        delete requestParams.when;
-                        delete requestParams.return;
-                        delete requestParams.return_from;
-                        delete requestParams.return_to;
-                } else {
-                        requestParams.when_from = depart;
-                        requestParams.when_to = depart;
-                        requestParams.return_from = formatDate(start, DATE_API_FORMAT);
-                        requestParams.return_to = formatDate(end, DATE_API_FORMAT);
-                        delete requestParams.when;
-                        delete requestParams.return;
-                }
+		const requestParams = {
+			...paramObj,
+			date_mode: 'flex',
+			when_from: formatDate(start, DATE_API_FORMAT),
+			when_to: formatDate(end, DATE_API_FORMAT),
+			return_from: formatDate(start, DATE_API_FORMAT),
+			return_to: formatDate(end, DATE_API_FORMAT),
+		};
 
-                dispatch(fetchNearbyDateFlights(requestParams));
-        };
+		delete requestParams.when;
+		delete requestParams.return;
 
-        useEffect(() => {
-                fetchNearbyDates(depart, 'outbound');
-        }, [dispatch, isExact, from, to, depart, returnDate]);
+		dispatch(fetchNearbyDateFlights(requestParams));
+	};
 
-        useEffect(() => {
-                fetchNearbyDates(returnDate, 'return');
-        }, [dispatch, isExact, from, to, depart, returnDate]);
+	useEffect(() => {
+		fetchNearbyDates(depart, 'outbound');
+	}, [dispatch, isExact, from, to, depart, returnDate]);
+
+	useEffect(() => {
+		fetchNearbyDates(returnDate, 'return');
+	}, [dispatch, isExact, from, to, depart, returnDate]);
 
 	const grouped = [];
-	if (!isExact) {
+	if (hasReturn) {
 		const outbounds = flights.filter((f) => f.direction !== 'return');
 		const returns = flights.filter((f) => f.direction === 'return');
+
+		// Create all valid combinations of outbound and return flights
 		for (const out of outbounds) {
-			if (returns.length) {
-				for (const r of returns) grouped.push({ outbound: out, returnFlight: r });
-			} else {
-				grouped.push({ outbound: out });
+			const outboundArrival = new Date(out.scheduled_arrival);
+			const validReturns = returns.filter((r) => {
+				const returnDeparture = new Date(r.scheduled_departure);
+				// Ensure return is after outbound arrival
+				return returnDeparture > outboundArrival;
+			});
+
+			// Only create groups for outbound flights that have at least one valid return flight
+			if (validReturns.length > 0) {
+				// Create a group for each valid combination
+				for (const ret of validReturns) {
+					grouped.push({ outbound: out, returnFlight: ret });
+				}
 			}
 		}
-	} else if (hasReturn) {
-		for (let i = 0; i < flights.length; i += 2) {
-			grouped.push({ outbound: flights[i], returnFlight: flights[i + 1] });
-		}
 	} else {
+		// One-way flights
 		for (const f of flights) grouped.push({ outbound: f });
 	}
 
@@ -259,11 +251,11 @@ const Search = () => {
 					>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}>
 							<CalendarMonthIcon color='action' sx={{ mr: 1 }} />
-							<Typography variant='subtitle1' sx={{ whiteSpace: 'nowrap' }}>
-								{UI_LABELS.SEARCH.nearby_dates}:
+							<Typography variant='subtitle1' sx={{}}>
+								{UI_LABELS.SEARCH.nearby_dates.title}:
 							</Typography>
 						</Box>
-						{nearDatesOutbound.length > 0 && (
+						{nearDatesOutbound.length > 0 ? (
 							<Box>
 								<Box
 									sx={{
@@ -302,51 +294,83 @@ const Search = () => {
 									))}
 								</Box>
 							</Box>
+						) : (
+							<Button
+								size='small'
+								variant='outlined'
+								disabled
+								sx={{
+									flexShrink: 0,
+									minWidth: 'auto',
+									borderRadius: 1,
+									px: 1.5,
+									cursor: 'default',
+								}}
+							>
+								{UI_LABELS.SEARCH.nearby_dates.no_outbound}
+							</Button>
 						)}
-						{nearDatesReturn.length > 0 && (
+						{hasReturn && (
 							<>
 								<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 									<ArrowForwardIcon color='action' />
 								</Box>
 
-								<Box>
-									<Box
+								{nearDatesReturn.length > 0 ? (
+									<Box>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'center',
+												flexWrap: 'nowrap',
+												overflowX: 'auto',
+												columnGap: 1,
+												width: '100%',
+											}}
+										>
+											{nearDatesReturn.map((d) => (
+												<Button
+													key={d.date}
+													size='small'
+													variant='outlined'
+													sx={{
+														flexShrink: 0,
+														minWidth: 'auto',
+														borderRadius: 1,
+														px: 1.5,
+													}}
+													onClick={() => {
+														const newParams = new URLSearchParams(paramObj);
+														newParams.set('return', d.date);
+														newParams.delete('return_from');
+														newParams.delete('return_to');
+														navigate(`/search?${newParams.toString()}`);
+													}}
+												>
+													{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
+														ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
+													}`}
+												</Button>
+											))}
+										</Box>
+									</Box>
+								) : (
+									<Button
+										size='small'
+										variant='outlined'
+										disabled
 										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											flexWrap: 'nowrap',
-											overflowX: 'auto',
-											columnGap: 1,
-											width: '100%',
+											flexShrink: 0,
+											minWidth: 'auto',
+											borderRadius: 1,
+											px: 1.5,
+											cursor: 'default',
 										}}
 									>
-										{nearDatesReturn.map((d) => (
-											<Button
-												key={d.date}
-												size='small'
-												variant='outlined'
-												sx={{
-													flexShrink: 0,
-													minWidth: 'auto',
-													borderRadius: 1,
-													px: 1.5,
-												}}
-												onClick={() => {
-													const newParams = new URLSearchParams(paramObj);
-													newParams.set('return', d.date);
-													newParams.delete('return_from');
-													newParams.delete('return_to');
-													navigate(`/search?${newParams.toString()}`);
-												}}
-											>
-												{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-													ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-												}`}
-											</Button>
-										))}
-									</Box>
-								</Box>
+										{UI_LABELS.SEARCH.nearby_dates.no_return}
+									</Button>
+								)}
 							</>
 						)}
 					</Box>

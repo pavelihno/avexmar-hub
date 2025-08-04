@@ -321,7 +321,11 @@ export const UI_LABELS = {
 			departure_date: 'Дата отправления',
 			duration: 'Время в пути',
 		},
-		nearby_dates: 'Ближайшие даты',
+		nearby_dates: {
+			title: 'Ближайшие даты',
+			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
+			no_return: 'Нет ближайших рейсов в обратном направлении',
+		},
 		show_more: 'Показать еще билеты',
 	},
 };
