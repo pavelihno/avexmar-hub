@@ -19,6 +19,12 @@ export const UI_LABELS = {
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',
+		pagination: {
+			rows_per_page: 'Записей на странице',
+			displayed_rows: ({ from, to, count }) => {
+				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+			},
+		}
 	},
 	TITLES: {
 		login: 'Вход',
@@ -106,11 +112,6 @@ export const UI_LABELS = {
 			title: 'Загрузка файла',
 			drag: 'Перетащите файл сюда или выберите',
 			select: 'Выбрать файл',
-		},
-		rows: {
-			per_page: 'Записей на странице',
-			from: 'из',
-			more_than: 'более',
 		},
 		modules: {
 			airports: {

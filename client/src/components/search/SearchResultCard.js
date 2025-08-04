@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Card, Box, Typography, Button, Divider, IconButton } from '@mui/material';
+import { Card, Box, Typography, Button, Divider, IconButton, Skeleton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
@@ -10,6 +10,66 @@ import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
 import { formatDate, formatTime, formatDuration } from '../utils';
+
+const SegmentSkeleton = () => {
+	return (
+		<Box sx={{ mb: 1 }}>
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
+					mb: 1,
+				}}
+			>
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'flex-start',
+						textAlign: 'left',
+					}}
+				>
+					<Skeleton width={120} height={24} sx={{ mb: 0.5 }} />
+					<Skeleton width={80} height={24} />
+				</Box>
+
+				<Box sx={{ textAlign: 'center' }}>
+					<Skeleton width={60} height={24} />
+				</Box>
+
+				<Box sx={{ textAlign: 'right' }}>
+					<Skeleton width={40} height={40} variant='circular' />
+				</Box>
+			</Box>
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
+				}}
+			>
+				<Box sx={{ textAlign: 'left' }}>
+					<Skeleton width={80} height={32} sx={{ mb: 0.5 }} />
+					<Skeleton width={100} height={20} sx={{ mb: 0.5 }} />
+					<Skeleton width={140} height={20} />
+				</Box>
+
+				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+					<Box sx={{ borderBottom: '1px dotted', width: 50 }} />
+					<Skeleton width={24} height={24} sx={{ mx: 1 }} />
+					<Box sx={{ borderBottom: '1px dotted', width: 50 }} />
+				</Box>
+
+				<Box sx={{ textAlign: 'right' }}>
+					<Skeleton width={80} height={32} sx={{ mb: 0.5 }} />
+					<Skeleton width={100} height={20} sx={{ mb: 0.5 }} />
+					<Skeleton width={140} height={20} />
+				</Box>
+			</Box>
+		</Box>
+	);
+};
 
 const Segment = ({ flight, isOutbound }) => {
 	if (!flight) return null;
@@ -130,10 +190,16 @@ const Segment = ({ flight, isOutbound }) => {
 
 const SearchResultCard = ({ outbound, returnFlight }) => {
 	const theme = useTheme();
-	const currency = outbound.currency || returnFlight?.currency;
+	const { isLoading: airlinesLoading } = useSelector((s) => s.airlines);
+	const { isLoading: airportsLoading } = useSelector((s) => s.airports);
+	const { isLoading: routesLoading } = useSelector((s) => s.routes);
+
+	const isLoading = airlinesLoading || airportsLoading || routesLoading;
+	const currency = outbound?.currency || returnFlight?.currency;
 	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-	const totalPrice =
-		outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
+	const totalPrice = isLoading
+		? 0
+		: outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
 
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
@@ -148,12 +214,17 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 					justifyContent: 'center',
 				}}
 			>
-				<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1 }}>
-					{`${totalPrice !== 0 ? totalPrice : '--'} ${currencySymbol}`}
-				</Typography>
+				{isLoading ? (
+					<Skeleton variant='rectangular' width={120} height={32} sx={{ mb: 1, mx: 'auto' }} />
+				) : (
+					<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1 }}>
+						{`${totalPrice !== 0 ? totalPrice : '--'} ${currencySymbol}`}
+					</Typography>
+				)}
 				<Button
 					variant='contained'
 					color='orange'
+					disabled={isLoading}
 					sx={{
 						borderRadius: 2,
 						boxShadow: 'none',
@@ -169,9 +240,19 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 				</Button>
 			</Box>
 			<Box sx={{ flexGrow: 1, pl: 2 }}>
-				<Segment flight={outbound} isOutbound />
-				{returnFlight && <Divider sx={{ my: 1 }} />}
-				{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
+				{isLoading ? (
+					<>
+						<SegmentSkeleton />
+						{returnFlight && <Divider sx={{ my: 1 }} />}
+						{returnFlight && <SegmentSkeleton />}
+					</>
+				) : (
+					<>
+						<Segment flight={outbound} isOutbound />
+						{returnFlight && <Divider sx={{ my: 1 }} />}
+						{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
+					</>
+				)}
 			</Box>
 		</Card>
 	);

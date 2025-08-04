@@ -133,16 +133,18 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 				</Table>
 			</TableContainer>
 			<TablePagination
-				rowsPerPageOptions={[5, 10, 25]}
 				component='div'
 				count={sortedRows.length}
-				rowsPerPage={rowsPerPage}
 				page={page}
 				onPageChange={(e, newPage) => setPage(newPage)}
+				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={(e) => {
 					setRowsPerPage(parseInt(e.target.value, 10));
 					setPage(0);
 				}}
+				rowsPerPageOptions={[5, 10, 25]}
+				labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
+				labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
 			/>
 		</Box>
 	);

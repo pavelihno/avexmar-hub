@@ -187,15 +187,6 @@ const AdminDataTable = ({
 		setPage(0);
 	};
 
-	const handleChangePage = (event, newPage) => {
-		setPage(newPage);
-	};
-
-	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0);
-	};
-
 	const handleSave = (formData) => {
 		if (isEditing) return onEdit(formData);
 		else return onAdd(formData);
@@ -547,16 +538,15 @@ const AdminDataTable = ({
 							component='div'
 							count={sortedData.length}
 							page={page}
-							onPageChange={handleChangePage}
+							onPageChange={(e, newPage) => setPage(newPage)}
 							rowsPerPage={rowsPerPage}
-							onRowsPerPageChange={handleChangeRowsPerPage}
+							onRowsPerPageChange={(e) => {
+								setRowsPerPage(parseInt(e.target.value, 10));
+								setPage(0);
+							}}
 							rowsPerPageOptions={[10, 25, 50]}
-							labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-							labelDisplayedRows={({ from, to, count }) =>
-								`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-									count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-								}`
-							}
+							labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
+							labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
 						/>
 					</Box>
 					{isLoading && (
