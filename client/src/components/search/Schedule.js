@@ -13,6 +13,7 @@ import { formatDate } from '../utils';
 const Schedule = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
 	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const [params] = useSearchParams();

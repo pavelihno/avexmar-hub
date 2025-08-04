@@ -143,6 +143,7 @@ const SearchForm = ({ initialParams = {} }) => {
 		[airports]
 	);
 
+	// Initialize form
 	useEffect(() => {
 		setFormValues({
 			from: combinedParams.from || '',
@@ -154,6 +155,19 @@ const SearchForm = ({ initialParams = {} }) => {
 			returnFrom: parseDate(combinedParams.return_from),
 			returnTo: parseDate(combinedParams.return_to),
 		});
+	}, []);
+
+	// Update on specific parameter changes
+	useEffect(() => {
+		if (initialParams.from || initialParams.to || initialParams.when || initialParams.return) {
+			setFormValues((prev) => ({
+				...prev,
+				from: initialParams.from || prev.from,
+				to: initialParams.to || prev.to,
+				departDate: initialParams.when ? parseDate(initialParams.when) : prev.departDate,
+				returnDate: initialParams.return ? parseDate(initialParams.return) : prev.returnDate,
+			}));
+		}
 	}, [initialParams]);
 
 	useEffect(() => {
