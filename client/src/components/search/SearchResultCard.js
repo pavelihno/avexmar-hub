@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Card, Box, Typography, Button, Divider, IconButton } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
 import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
@@ -128,7 +129,8 @@ const Segment = ({ flight, isOutbound }) => {
 };
 
 const SearchResultCard = ({ outbound, returnFlight }) => {
-	const currency = outbound.currency || returnFlight?.currency;
+        const theme = useTheme();
+        const currency = outbound.currency || returnFlight?.currency;
 	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
 	const totalPrice =
 		outbound.price + (returnFlight?.price || 0) || outbound.min_price || returnFlight?.min_price || 0;
@@ -136,31 +138,29 @@ const SearchResultCard = ({ outbound, returnFlight }) => {
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
 			<Box
-				sx={{
-					width: 160,
-					textAlign: 'center',
-					pr: 2,
-					borderRight: '1px solid #eee',
-					display: 'flex',
-					flexDirection: 'column',
-					justifyContent: 'center',
-				}}
+                                sx={{
+                                        width: 160,
+                                        textAlign: 'center',
+                                        pr: 2,
+                                        borderRight: `1px solid ${theme.palette.grey[100]}`,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                }}
 			>
 				<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1 }}>
 					{`${totalPrice !== 0 ? totalPrice : '--'} ${currencySymbol}`}
 				</Typography>
-				<Button
-					variant='contained'
-					sx={{
-						background: '#ff7f2a',
-						color: '#fff',
-						borderRadius: 2,
-						boxShadow: 'none',
-						textTransform: 'none',
-						whiteSpace: 'nowrap',
-						'&:hover': { background: '#ff6600' },
-					}}
-					onClick={() => {
+                                <Button
+                                        variant='contained'
+                                        color='orange'
+                                        sx={{
+                                                borderRadius: 2,
+                                                boxShadow: 'none',
+                                                textTransform: 'none',
+                                                whiteSpace: 'nowrap',
+                                        }}
+                                        onClick={() => {
 						const url = `/cart?flight=${outbound.id}${returnFlight ? `&return=${returnFlight.id}` : ''}`;
 						window.open(url, '_blank');
 					}}

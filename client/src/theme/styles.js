@@ -1,5 +1,7 @@
+import palette from './palette';
+
 export const authIconContainer = {
-	bgcolor: '#f0f2ff',
+        bgcolor: palette.background.lightBlue,
 	borderRadius: '50%',
 	p: 2,
 	display: 'flex',
@@ -8,12 +10,12 @@ export const authIconContainer = {
 };
 
 export const authIcon = {
-	fontSize: 40,
-	color: '#6c63ff',
+        fontSize: 40,
+        color: palette.indigo.light,
 };
 
 export const authLink = {
-	color: '#6c63ff',
-	textDecoration: 'none',
-	cursor: 'pointer',
+        color: palette.indigo.light,
+        textDecoration: 'none',
+        cursor: 'pointer',
 };

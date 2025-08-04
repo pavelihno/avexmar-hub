@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Grid, TextField, Select, MenuItem, FormControl, InputLabel, Typography, IconButton } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -65,8 +66,10 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 		validate();
 	}, [data.type, data.birthDate]);
 
-	return (
-		<Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 2, mb: 3 }}>
+        const theme = useTheme();
+
+        return (
+                <Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
 			<Box
 				sx={{
 					display: 'flex',

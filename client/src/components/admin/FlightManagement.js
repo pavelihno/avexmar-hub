@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-	Tooltip,
-	IconButton,
-	Button,
-	Box,
-	Typography,
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogActions,
+        Tooltip,
+        IconButton,
+        Button,
+        Box,
+        Typography,
+        Dialog,
+        DialogContent,
+        DialogTitle,
+        DialogActions,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,8 +36,10 @@ const FlightManagement = () => {
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
-	const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
+        const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
+        const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
+
+        const theme = useTheme();
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
@@ -293,7 +296,7 @@ const FlightManagement = () => {
 												display: 'flex',
 												alignItems: 'center',
 												mb: 0.5,
-												backgroundColor: 'rgba(0,0,0,0.04)',
+                                                                                                backgroundColor: alpha(theme.palette.black, 0.04),
 												borderRadius: 1,
 												p: 0.5,
 												width: 'auto',

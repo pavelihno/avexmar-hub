@@ -1,3 +1,6 @@
+import { alpha } from '@mui/material/styles';
+import palette from './palette';
+
 const components = {
 	MuiCssBaseline: {
 		styleOverrides: `
@@ -48,8 +51,8 @@ const components = {
           padding: 0;
           font-family: 'PTRootUI', sans-serif;
           font-weight: 400;
-          color: #525665;
-          background-color: #FFFFFF;
+          color: ${palette.text.primary};
+          background-color: ${palette.background.default};
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
@@ -93,32 +96,32 @@ const components = {
 				},
 			},
 			containedPrimary: {
-				backgroundColor: '#0084FF', // blue
-				'&:hover': {
-					backgroundColor: '#0066CC', // blue
-				},
-			},
-			containedSecondary: {
-				backgroundColor: '#7D71FF', // violet
-				'&:hover': {
-					backgroundColor: '#5F55CC', // darker violet
-				},
-			},
-			outlinedPrimary: {
-				borderColor: '#0084FF', // blue
-				'&:hover': {
-					backgroundColor: 'rgba(0, 132, 255, 0.08)',
-				},
-			},
-		},
-	},
+                                backgroundColor: palette.primary.main,
+                                '&:hover': {
+                                        backgroundColor: palette.primary.dark,
+                                },
+                        },
+                        containedSecondary: {
+                                backgroundColor: palette.secondary.main,
+                                '&:hover': {
+                                        backgroundColor: palette.secondary.dark,
+                                },
+                        },
+                        outlinedPrimary: {
+                                borderColor: palette.primary.main,
+                                '&:hover': {
+                                        backgroundColor: palette.action.hover,
+                                },
+                        },
+                },
+        },
 
 	// Card styles
 	MuiCard: {
 		styleOverrides: {
 			root: {
 				borderRadius: '0.75rem', // --radius-md
-				boxShadow: '0 2px 6px rgba(0,0,0,.08)', // shadow-elev1
+                                boxShadow: `0 2px 6px ${alpha(palette.black, 0.08)}`, // shadow-elev1
 				padding: '16px',
 				transition: '150ms ease-in-out',
 			},
@@ -136,14 +139,14 @@ const components = {
 						height: 'auto',
 					},
 					'& fieldset': {
-						borderColor: '#E0E0E0',
-					},
-					'&:hover fieldset': {
-						borderColor: 'rgba(0, 132, 255, 0.4)',
-					},
-					'&.Mui-focused fieldset': {
-						borderColor: '#0084FF',
-					},
+                                                borderColor: palette.grey[300],
+                                        },
+                                        '&:hover fieldset': {
+                                                borderColor: palette.action.focus,
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                                borderColor: palette.primary.main,
+                                        },
 				},
 				'& .MuiInputBase-input': {
 					padding: '14px 16px',
@@ -165,9 +168,9 @@ const components = {
 		styleOverrides: {
 			root: {
 				strokeWidth: 1.5,
-				'&.active': {
-					color: '#0084FF', // blue
-				},
+                                        '&.active': {
+                                                color: palette.primary.main,
+                                        },
 			},
 		},
 	},
@@ -177,8 +180,8 @@ const components = {
 		styleOverrides: {
 			root: {
 				'&.section-bg': {
-					backgroundColor: '#F3F4F8', // gray-100
-					borderRadius: '0.75rem', // radius-md
+                                        backgroundColor: palette.background.section, // gray-100
+                                        borderRadius: '0.75rem', // radius-md
 				},
 			},
 		},
