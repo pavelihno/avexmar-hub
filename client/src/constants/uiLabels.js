@@ -312,16 +312,18 @@ export const UI_LABELS = {
 			price: 'Цена',
 			price_from: 'От',
 		},
-		sort: {
-			label: 'Сортировка',
-			price: 'По цене',
-			arrival: 'По времени прибытия',
-			departure: 'По времени отправления',
-			duration: 'По времени в пути',
-		},
-		nearby_dates: 'Ближайшие даты',
-		show_more: 'Показать еще билеты',
-	},
+                sort: {
+                        label: 'Сортировка',
+                        price: 'По цене',
+                        arrival_time: 'По времени прибытия',
+                        arrival_date: 'По дате прибытия',
+                        departure_time: 'По времени отправления',
+                        departure_date: 'По дате отправления',
+                        duration: 'По времени в пути',
+                },
+                nearby_dates: 'Ближайшие даты',
+                show_more: 'Показать еще билеты',
+        },
 };
 
 export default UI_LABELS;
