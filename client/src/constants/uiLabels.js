@@ -251,18 +251,25 @@ export const UI_LABELS = {
 			title: 'Расписание рейсов',
 		},
 	},
-	SEARCH: {
-		results: 'Результаты поиска',
-		no_results: 'Нет результатов',
-		from_to: (from, to, date_from, date_to) => {
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
-			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
-		},
-		flight_details: {
-			select_flight: 'Выбрать рейс',
-			airline: 'Авиакомпания',
-			from_to: 'Отправление - Прибытие',
-			departure_arrival: 'Время отправления - Время прибытия',
+        SEARCH: {
+                results: 'Результаты поиска',
+                no_results: 'Нет результатов',
+                from_to: (from, to, date_from, date_to) => {
+                        if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
+                        else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+                },
+                sort: {
+                        price: 'Цена',
+                        depart_time: 'Время отправления',
+                        depart_date: 'Дата отправления',
+                        arrive_time: 'Время прибытия',
+                        arrive_date: 'Дата прибытия',
+                },
+                flight_details: {
+                        select_flight: 'Выбрать рейс',
+                        airline: 'Авиакомпания',
+                        from_to: 'Отправление - Прибытие',
+                        departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
 		},
 	},
