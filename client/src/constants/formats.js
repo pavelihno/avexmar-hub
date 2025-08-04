@@ -1,5 +1,6 @@
 import { set } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import numeral from 'numeral';
 
 export const dateLocale = ru;
 
@@ -13,6 +14,17 @@ export const DATE_YEAR_WEEKDAY_FORMAT = 'dd.MM.yyyy, EEEEEE';
 export const TIME_DURATION_FORMAT = (hrs, mins) => `${hrs}ч ${mins}м`;
 
 export const DEFAULT_TIME = set(new Date(), { hours: 0, minutes: 0 });
+
+numeral.register('locale', 'ru', {
+	delimiters: {
+		thousands: '\u00A0',
+		decimal: ',',
+	},
+});
+
+numeral.locale('ru');
+
+export const DEFAULT_NUMBER_FORMAT = '0,0[.]00';
 
 export const DEFAULT_PHONE_NUMBER = '+71234567890';
 export const DEFAULT_EMAIL = 'ivanov.ivan@example.com';

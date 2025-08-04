@@ -11,7 +11,7 @@ import {
 	deleteAllDiscounts,
 } from '../../redux/actions/discount';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const DiscountManagement = () => {
@@ -52,7 +52,7 @@ const DiscountManagement = () => {
 				max: 100,
 				step: 0.01,
 			},
-			formatter: (value) => (value !== null && value !== undefined ? `${value}%` : ''),
+			formatter: (value) => (value !== null && value !== undefined ? `${formatNumber(value)}%` : ''),
 			validate: (value) =>
 				value === null || value === undefined || value === ''
 					? VALIDATION_MESSAGES.DISCOUNT.percentage_value.REQUIRED

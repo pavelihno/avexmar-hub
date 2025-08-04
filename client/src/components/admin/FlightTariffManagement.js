@@ -6,7 +6,7 @@ import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../..
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 
 export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
 	const dispatch = useDispatch();
@@ -56,7 +56,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 				value: t.id,
 				label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
 					t.order_number
-				} (${t.price} ${ENUM_LABELS.CURRENCY[t.currency]})`,
+				} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
 			}));
 	}, [tariffs, seatClass]);
 

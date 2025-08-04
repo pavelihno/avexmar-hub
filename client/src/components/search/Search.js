@@ -10,7 +10,7 @@ import { fetchSearchFlights, fetchNearbyDateFlights } from '../../redux/actions/
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
-import { formatDate, getFlightDurationMinutes } from '../utils';
+import { formatDate, formatNumber, getFlightDurationMinutes } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
@@ -185,7 +185,7 @@ const Search = () => {
 									navigate(`/search?${newParams.toString()}`);
 								}}
 							>
-								{`${formatDate(d.date, 'dd.MM')} - ${d.price} ${
+								{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
 									ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
 								}`}
 							</Button>

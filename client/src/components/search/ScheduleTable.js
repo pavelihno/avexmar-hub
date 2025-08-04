@@ -12,7 +12,7 @@ import {
 	TablePagination,
 } from '@mui/material';
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
-import { formatDate, formatTime } from '../utils';
+import { formatDate, formatNumber, formatTime } from '../utils';
 
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
@@ -60,7 +60,7 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 					airlineId: f.airline_id,
 					airline: airline ? airline.name : f.airline_id,
 					price: f.min_price
-						? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${f.min_price} ${
+						? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(f.min_price)} ${
 								ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''
 						  }`
 						: '',

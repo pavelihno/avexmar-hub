@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
 import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
-import { formatDate, formatTime, formatDuration } from '../utils';
+import { formatDate, formatTime, formatDuration, formatNumber } from '../utils';
 
 const SegmentSkeleton = () => {
 	return (
@@ -176,9 +176,9 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 
 	const priceText = isLoading
 		? ''
-		: totalPrice
-		? `${totalPrice} ${currencySymbol}`
-		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${totalMinPrice} ${currencySymbol}`;
+		: totalPrice !== 0
+		? `${formatNumber(totalPrice)} ${currencySymbol}`
+		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(totalMinPrice)} ${currencySymbol}`;
 
 	return (
 		<Card sx={{ display: 'flex', p: 2, mb: 2 }}>

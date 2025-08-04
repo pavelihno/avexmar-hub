@@ -26,7 +26,7 @@ import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, DEFAULT_TIME } from '../../constants';
 
@@ -287,7 +287,7 @@ const FlightManagement = () => {
 
 									const tariffLabel = `${seatClass} - ${
 										UI_LABELS.ADMIN.modules.tariffs.tariff
-									} ${orderNumber} - ${tariffPrice} ${currency} - ${seatsNumber} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
+									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${formatNumber(seatsNumber)} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
 
 									return (
 										<Box

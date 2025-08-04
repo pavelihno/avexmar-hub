@@ -15,6 +15,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { format, parse, isValid } from 'date-fns';
+import numeral from 'numeral';
 
 import {
 	dateLocale,
@@ -25,6 +26,7 @@ import {
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
 	TIME_DURATION_FORMAT,
+	DEFAULT_NUMBER_FORMAT,
 } from '../constants';
 
 export const FIELD_TYPES = {
@@ -462,6 +464,16 @@ export const formatDuration = (minutes) => {
 	const hrs = Math.floor(minutes / 60);
 	const mins = minutes % 60;
 	return TIME_DURATION_FORMAT(hrs, mins);
+};
+
+export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
+	if (value == null || isNaN(value)) return '';
+	try {
+		return numeral(value).format(formatString);
+	} catch (error) {
+		console.error('Invalid number value:', value);
+		return value;
+	}
 };
 
 export const isDuplicateInBooking = (

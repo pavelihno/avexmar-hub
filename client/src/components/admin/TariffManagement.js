@@ -5,7 +5,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import { fetchTariffs, createTariff, updateTariff, deleteTariff, deleteAllTariffs } from '../../redux/actions/tariff';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const TariffManagement = () => {
@@ -44,6 +44,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.price,
 			type: FIELD_TYPES.NUMBER,
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.TARIFF.price.REQUIRED : null),
+			formatter: (value) => (value != null ? `${formatNumber(value)}` : ''),
 		},
 		currency: {
 			key: 'currency',
