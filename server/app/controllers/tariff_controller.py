@@ -31,4 +31,4 @@ def update_tariff(current_user, tariff_id):
 @admin_required
 def delete_tariff(current_user, tariff_id):
     deleted = Tariff.delete_or_404(tariff_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)

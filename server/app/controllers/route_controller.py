@@ -32,4 +32,4 @@ def update_route(current_user, route_id):
 @admin_required
 def delete_route(current_user, route_id):
     deleted = Route.delete_or_404(route_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)

@@ -33,4 +33,4 @@ def update_passenger(current_user, passenger_id):
 @admin_required
 def delete_passenger(current_user, passenger_id):
     deleted = Passenger.delete_or_404(passenger_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
