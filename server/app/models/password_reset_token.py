@@ -31,7 +31,10 @@ class PasswordResetToken(BaseModel):
 
     @classmethod
     def verify_token(cls, token):
-        instance = cls.query.filter_by(token=token, used=False).first()
+        instance = cls.query.filter(
+            cls.token == token,
+            cls.used.is_(False)
+        ).one_or_none()
         if not instance:
             return None
 

@@ -42,7 +42,7 @@ class Tariff(BaseModel):
         seat_class = data.get('seat_class')
 
         if seat_class is not None:
-            query = session.query(cls).filter_by(seat_class=seat_class)
+            query = session.query(cls).filter(cls.seat_class == seat_class)
             max_order = query.order_by(cls.order_number.desc()).first()
             next_order = (max_order.order_number + 1) if max_order else 1
             data['order_number'] = next_order

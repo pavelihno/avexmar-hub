@@ -87,13 +87,13 @@ class Passenger(BaseModel):
         ]
 
         if all(field in kwargs for field in unique_fields):
-            existing = session.query(cls).filter_by(
-                first_name=kwargs['first_name'],
-                last_name=kwargs['last_name'],
-                birth_date=kwargs['birth_date'],
-                document_type=kwargs['document_type'],
-                document_number=kwargs['document_number'],
-            ).first()
+            existing = session.query(cls).filter(
+                cls.first_name == kwargs['first_name'],
+                cls.last_name == kwargs['last_name'],
+                cls.birth_date == kwargs['birth_date'],
+                cls.document_type == kwargs['document_type'],
+                cls.document_number == kwargs['document_number'],
+            ).one_or_none()
             if existing and (current_id is None or existing.id != current_id):
                 super().update(existing.id, session, **kwargs)
                 return existing

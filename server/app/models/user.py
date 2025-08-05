@@ -63,7 +63,7 @@ class User(BaseModel):
     def get_by_email(cls, _email):
         if not isinstance(_email, str):
             return None
-        return cls.query.filter_by(email=_email.lower()).first()
+        return cls.query.filter(cls.email == _email.lower()).one_or_none()
 
     @classmethod
     def update(cls, _id, session: Session | None = None, **data):

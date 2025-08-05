@@ -37,10 +37,13 @@ class BookingPassenger(BaseModel):
     @classmethod
     def __check_is_contact_unique(cls, session, booking_id, instance_id=None):
         """Ensure only one contact passenger per booking"""
-        query = session.query(cls).filter_by(booking_id=booking_id, is_contact=True)
+        query = session.query(cls).filter(
+            cls.booking_id == booking_id,
+            cls.is_contact.is_(True)
+        )
         if instance_id is not None:
             query = query.filter(cls.id != instance_id)
-        if query.first() is not None:
+        if query.one_or_none() is not None:
             raise ModelValidationError({'is_contact': 'only one contact passenger per booking allowed'})
 
     @classmethod

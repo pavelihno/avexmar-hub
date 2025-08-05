@@ -104,7 +104,7 @@ class Airport(BaseModel):
                     tz_name = row.get('time_zone')
                     tz = None
                     if tz_name:
-                        tz = Timezone.query.filter_by(name=tz_name).first()
+                        tz = Timezone.query.filter(Timezone.name == tz_name).one_or_none()
 
                     airport = cls.create(
                         session,
