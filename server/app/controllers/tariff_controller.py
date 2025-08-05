@@ -4,14 +4,12 @@ from app.models.tariff import Tariff
 from app.middlewares.auth_middleware import admin_required
 
 
-@admin_required
-def get_tariffs(current_user):
+def get_tariffs():
     tariffs = Tariff.get_all()
     return jsonify([t.to_dict() for t in tariffs])
 
 
-@admin_required
-def get_tariff(current_user, tariff_id):
+def get_tariff(tariff_id):
     tariff = Tariff.get_or_404(tariff_id)
     return jsonify(tariff.to_dict()), 200
 

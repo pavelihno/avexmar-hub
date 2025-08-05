@@ -1,8 +1,13 @@
 import secrets
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class PasswordResetToken(BaseModel):
@@ -13,7 +18,7 @@ class PasswordResetToken(BaseModel):
     expires_at = db.Column(db.DateTime, nullable=False)
     used = db.Column(db.Boolean, default=False, nullable=False)
 
-    user = db.relationship('User')
+    user: Mapped['User'] = db.relationship('User', back_populates='reset_tokens')
 
     @classmethod
     def create_token(cls, user, expires_in_hours=1):

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -12,6 +12,7 @@ import {
 	deleteAllAirports,
 } from '../../redux/actions/airport';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchTimezones } from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
@@ -20,20 +21,28 @@ const AirportManagement = () => {
 	const dispatch = useDispatch();
 	const { airports, isLoading, errors } = useSelector((state) => state.airports);
 	const { countries, isLoading: countriesLoading } = useSelector((state) => state.countries);
+	const { timezones, isLoading: tzLoading } = useSelector((state) => state.timezones);
 
 	useEffect(() => {
 		dispatch(fetchAirports());
 		dispatch(fetchCountries());
+		dispatch(fetchTimezones());
 	}, [dispatch]);
 
-	const countryOptions = useMemo(() => {
-		if (!countries || !Array.isArray(countries)) return [];
-		return countries.map((c) => ({ value: c.id, label: c.name }));
-	}, [countries]);
+	const countryOptions =
+		!countries || !Array.isArray(countries) ? [] : countries.map((c) => ({ value: c.id, label: c.name }));
+
+	const timezoneOptions =
+		!timezones || !Array.isArray(timezones) ? [] : timezones.map((tz) => ({ value: tz.id, label: tz.name }));
 
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;
 		return countries.find((c) => c.id === id);
+	};
+
+	const getTimezoneById = (id) => {
+		if (!timezones || !Array.isArray(timezones)) return null;
+		return timezones.find((t) => t.id === id);
 	};
 
 	const FIELDS = {
@@ -101,6 +110,17 @@ const AirportManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRPORT.country_id.REQUIRED : null),
 		},
+		timezoneId: {
+			key: 'timezoneId',
+			apiKey: 'timezone_id',
+			label: FIELD_LABELS.AIRPORT.timezone_id || 'Часовой пояс',
+			type: FIELD_TYPES.SELECT,
+			options: timezoneOptions,
+			formatter: (value) => {
+				const tz = getTimezoneById(value);
+				return tz ? tz.name : value;
+			},
+		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
@@ -144,7 +164,7 @@ const AirportManagement = () => {
 			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.airports.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
 			onUpload={handleUpload}
-			isLoading={isLoading || countriesLoading}
+			isLoading={isLoading || countriesLoading || tzLoading}
 			error={errors}
 		/>
 	);

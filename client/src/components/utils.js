@@ -15,15 +15,20 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { format, parse, isValid } from 'date-fns';
+import numeral from 'numeral';
+
 import {
+	dateLocale,
 	DATE_FORMAT,
 	TIME_FORMAT,
 	DATETIME_FORMAT,
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
-} from '../constants/formats';
-import { dateLocale } from '../constants';
+	TIME_DURATION_FORMAT,
+	DEFAULT_NUMBER_FORMAT,
+	DATE_API_FORMAT,
+} from '../constants';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -146,7 +151,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, sx, minDate } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
@@ -161,6 +166,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									error,
 									helperText: error ? helperText : '',
 									sx,
+									...textFieldProps,
 								},
 							}}
 						/>
@@ -169,7 +175,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TIME: {
-				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps } = allProps;
 
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
@@ -186,6 +192,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									error,
 									helperText: error ? helperText : '',
 									sx,
+									...textFieldProps,
 								},
 							}}
 						/>
@@ -194,7 +201,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATETIME: {
-				const { value, onChange, fullWidth, error, helperText, sx } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DateTimePicker
@@ -208,6 +215,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									error,
 									helperText: error ? helperText : '',
 									sx,
+									...textFieldProps,
 								},
 							}}
 						/>
@@ -393,6 +401,20 @@ export const formatTimeToUI = (value) => {
 	}
 };
 
+export const parseTime = (value) => {
+	if (!value) return '';
+	try {
+		const date = new Date(`1970-01-01T${value}`);
+		if (isNaN(date.getTime())) {
+			throw new Error('Invalid time format');
+		}
+		return date.getTime();
+	} catch (error) {
+		console.error('Invalid time value:', value);
+		return value;
+	}
+};
+
 export const validateDate = (value) => {
 	if (!value) return false;
 	try {
@@ -440,6 +462,35 @@ export const validatePhoneNumber = (value) => {
 	return phoneRegex.test(value);
 };
 
+export const getFlightDurationMinutes = (flight) => {
+	if (!flight) return 0;
+	try {
+		const depart = new Date(`${flight.scheduled_departure}T${flight.scheduled_departure_time || '00:00:00'}`);
+		const arrive = new Date(`${flight.scheduled_arrival}T${flight.scheduled_arrival_time || '00:00:00'}`);
+		return Math.round((arrive - depart) / 60000);
+	} catch (e) {
+		console.error('Failed to calculate duration', e);
+		return 0;
+	}
+};
+
+export const formatDuration = (minutes) => {
+	if (minutes == null) return '';
+	const hrs = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+	return TIME_DURATION_FORMAT(hrs, mins);
+};
+
+export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
+	if (value == null || isNaN(value)) return '';
+	try {
+		return numeral(value).format(formatString);
+	} catch (error) {
+		console.error('Invalid number value:', value);
+		return value;
+	}
+};
+
 export const isDuplicateInBooking = (
 	allBookingPassengers,
 	passengers,
@@ -460,7 +511,7 @@ export const isDuplicateInBooking = (
 			passenger &&
 			passenger.first_name === firstName &&
 			passenger.last_name === lastName &&
-			passenger.birth_date === formatDate(birthDate, 'yyyy-MM-dd')
+			passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
 		);
 	});
 };

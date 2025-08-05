@@ -1,6 +1,13 @@
+from typing import List, TYPE_CHECKING
+from sqlalchemy.orm import Mapped
+
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.tariff import Tariff
+
+if TYPE_CHECKING:
+    from app.models.flight import Flight
+    from app.models.seat import Seat
 
 
 class FlightTariff(BaseModel):
@@ -9,6 +16,10 @@ class FlightTariff(BaseModel):
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id', ondelete='CASCADE'), nullable=False)
     tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id', ondelete='CASCADE'), nullable=False)
     seats_number = db.Column(db.Integer, nullable=False)
+
+    flight: Mapped['Flight'] = db.relationship('Flight', back_populates='tariffs')
+    tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='flight_tariffs')
+    seats: Mapped[List['Seat']] = db.relationship('Seat', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan')
 
     @classmethod
     def __check_seat_class_unique(cls, session, flight_id, tariff_id, instance_id=None):

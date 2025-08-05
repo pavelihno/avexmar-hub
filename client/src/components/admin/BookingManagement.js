@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Box, Typography } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
@@ -22,8 +23,10 @@ import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
 const BookingManagement = () => {
 	const dispatch = useDispatch();
 	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
-	const { bookingPassengers } = useSelector((state) => state.bookingPassengers);
-	const { passengers } = useSelector((state) => state.passengers);
+	const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
+	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+
+	const theme = useTheme();
 
 	useEffect(() => {
 		dispatch(fetchBookings());
@@ -31,7 +34,7 @@ const BookingManagement = () => {
 		dispatch(fetchPassengers());
 	}, [dispatch]);
 
-	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
+	const currencyOptions = getEnumOptions('CURRENCY');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -136,7 +139,7 @@ const BookingManagement = () => {
 										display: 'flex',
 										alignItems: 'center',
 										mb: 0.5,
-										backgroundColor: 'rgba(0,0,0,0.04)',
+										backgroundColor: alpha(theme.palette.black, 0.04),
 										borderRadius: 1,
 										p: 0.5,
 										width: 'auto',
@@ -190,7 +193,7 @@ const BookingManagement = () => {
 			onDeleteAll={handleDeleteAllBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
-			isLoading={isLoading}
+			isLoading={isLoading || bookingPassengersLoading || passengersLoading}
 			error={errors}
 		/>
 	);

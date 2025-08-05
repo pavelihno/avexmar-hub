@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -15,10 +15,10 @@ import { FIELD_LABELS, UI_LABELS } from '../../constants';
 const TicketManagement = () => {
 	const dispatch = useDispatch();
 	const { tickets, isLoading, errors } = useSelector((state) => state.tickets);
-	const { flights } = useSelector((state) => state.flights);
-	const { bookings } = useSelector((state) => state.bookings);
-	const { passengers } = useSelector((state) => state.passengers);
-	const { discounts } = useSelector((state) => state.discounts);
+	const { flights, isLoading: flightsLoading } = useSelector((state) => state.flights);
+	const { bookings, isLoading: bookingsLoading } = useSelector((state) => state.bookings);
+	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+	const { discounts, isLoading: discountsLoading } = useSelector((state) => state.discounts);
 
 	useEffect(() => {
 		dispatch(fetchTickets());
@@ -28,41 +28,22 @@ const TicketManagement = () => {
 		dispatch(fetchDiscounts());
 	}, [dispatch]);
 
-	const flightOptions = useMemo(
-		() =>
-			flights.map((f) => ({
-				value: f.id,
-				label: f.id,
-			})),
-		[flights]
-	);
+	const flightOptions = flights.map((f) => ({ value: f.id, label: f.id }));
 
-	const bookingOptions = useMemo(
-		() =>
-			bookings.map((b) => ({
-				value: b.id,
-				label: b.booking_number,
-			})),
-		[bookings]
-	);
+	const bookingOptions = bookings.map((b) => ({
+		value: b.id,
+		label: b.booking_number,
+	}));
 
-	const passengerOptions = useMemo(
-		() =>
-			passengers.map((p) => ({
-				value: p.id,
-				label: `${p.first_name} ${p.last_name}`,
-			})),
-		[passengers]
-	);
+	const passengerOptions = passengers.map((p) => ({
+		value: p.id,
+		label: `${p.first_name} ${p.last_name}`,
+	}));
 
-	const discountOptions = useMemo(
-		() =>
-			discounts.map((d) => ({
-				value: d.id,
-				label: d.discount_name,
-			})),
-		[discounts]
-	);
+	const discountOptions = discounts.map((d) => ({
+		value: d.id,
+		label: d.discount_name,
+	}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -136,7 +117,7 @@ const TicketManagement = () => {
 			onDeleteAll={handleDeleteAllTickets}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.tickets.add_button}
-			isLoading={isLoading}
+			isLoading={isLoading || flightsLoading || bookingsLoading || passengersLoading || discountsLoading}
 			error={errors}
 		/>
 	);

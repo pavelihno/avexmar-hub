@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Typography, Dialog, DialogContent } from '@mui/material';
 
@@ -6,7 +6,7 @@ import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../..
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 
 export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
 	const dispatch = useDispatch();
@@ -47,18 +47,16 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	}, [formUpdates]);
 
-	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
+	const seatClassOptions = getEnumOptions('SEAT_CLASS');
 
-	const tariffOptions = useMemo(() => {
-		return tariffs
-			.filter((t) => t.seat_class === seatClass)
-			.map((t) => ({
-				value: t.id,
-				label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
-					t.order_number
-				} (${t.price} ${ENUM_LABELS.CURRENCY[t.currency]})`,
-			}));
-	}, [tariffs, seatClass]);
+	const tariffOptions = tariffs
+		.filter((t) => t.seat_class === seatClass)
+		.map((t) => ({
+			value: t.id,
+			label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
+				t.order_number
+			} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
+		}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -93,16 +91,12 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		},
 	};
 
-	const tariffManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: () => UI_LABELS.ADMIN.modules.tariffs.add_button,
-				editButtonText: () => UI_LABELS.ADMIN.modules.tariffs.edit_button,
-			}),
-		[FIELDS]
-	);
+	const tariffManager = createAdminManager(FIELDS, {
+		addButtonText: () => UI_LABELS.ADMIN.modules.tariffs.add_button,
+		editButtonText: () => UI_LABELS.ADMIN.modules.tariffs.edit_button,
+	});
 
-	const currentItem = useMemo(() => {
+	const currentItem = (() => {
 		if (isEditing) {
 			if (flightTariff && Array.isArray(tariffs) && tariffs.length > 0) {
 				const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
@@ -117,7 +111,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 			}
 		}
 		return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
-	}, [isEditing, flightTariff, tariffs, flightId, seatClass]);
+	})();
 
 	const handleSaveTariff = (tariffData) => {
 		const formattedData = tariffManager.toApiFormat({

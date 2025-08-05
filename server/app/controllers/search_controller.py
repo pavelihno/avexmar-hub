@@ -2,20 +2,39 @@ from flask import jsonify, request
 from sqlalchemy.orm import aliased
 
 from app.database import db
+from app.models.airline import Airline
 from app.models.route import Route
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 
+from sqlalchemy import or_
 from app.models.airport import Airport
 from app.models.flight import Flight
 
 
 def search_airports():
-    airports = Airport.get_all()
+    airports = (
+        db.session.query(Airport)
+        .join(
+            Route,
+            or_(
+                Airport.id == Route.origin_airport_id,
+                Airport.id == Route.destination_airport_id,
+            ),
+        )
+        .distinct()
+        .order_by(Airport.name.asc())
+        .all()
+    )
     return jsonify([airport.to_dict() for airport in airports])
 
 
-def _query_flights(origin_code, dest_code, date_str, seat_class=None):
+def __query_flights(
+    origin_code, dest_code, date_from=None, date_to=None,
+    airline_iata_code=None, flight_number=None,
+    is_exact=True, seat_class=None,
+    direction=None
+):
     origin = aliased(Airport)
     dest = aliased(Airport)
 
@@ -30,8 +49,28 @@ def _query_flights(origin_code, dest_code, date_str, seat_class=None):
         query = query.filter(origin.iata_code == origin_code)
     if dest_code:
         query = query.filter(dest.iata_code == dest_code)
-    if date_str:
-        query = query.filter(Flight.scheduled_departure == date_str)
+    if airline_iata_code and flight_number:
+        query = query.join(Airline, Flight.airline_id == Airline.id)
+        query = query.filter(
+            Airline.iata_code == airline_iata_code, Flight.flight_number == flight_number
+        )
+
+    if is_exact:
+        if date_from:
+            query = query.filter(Flight.scheduled_departure == date_from)
+        else:
+            # No date provided, return no results
+            query = query.filter(True == False)
+    else:
+        if date_from and date_to:
+            query = query.filter(
+                Flight.scheduled_departure.between(date_from, date_to)
+            )
+        elif date_from:
+            query = query.filter(Flight.scheduled_departure >= date_from)
+        else:
+            # No date provided, return no results
+            query = query.filter(True == False)
 
     flights = query.all()
     results = []
@@ -42,31 +81,115 @@ def _query_flights(origin_code, dest_code, date_str, seat_class=None):
             .join(Tariff, FlightTariff.tariff_id == Tariff.id)
             .filter(FlightTariff.flight_id == flight.id)
         )
-        if seat_class:
-            tariff_query = tariff_query.filter(Tariff.seat_class == seat_class)
         tariffs = tariff_query.all()
         if tariffs:
+            f_dict['tariffs'] = [{
+                'seat_class': t.seat_class.value,
+                'price': t.price,
+                'currency': t.currency.value,
+            } for _, t in tariffs]
+
             if seat_class:
-                _, t = tariffs[0]
-                f_dict['price'] = t.price
-                f_dict['currency'] = t.currency.value
+                seat_class_tariffs = [t for t in f_dict['tariffs'] if t['seat_class'] == seat_class]
+                if seat_class_tariffs:
+                    f_dict['price'] = seat_class_tariffs[0]['price']
+                    f_dict['currency'] = seat_class_tariffs[0]['currency']
+                else:
+                    # Skip flight if the requested seat class is not available
+                    continue
             else:
-                min_tariff = min((t for _, t in tariffs), key=lambda x: x.price)
-                f_dict['min_price'] = min_tariff.price
-                f_dict['currency'] = min_tariff.currency.value
+                min_tariff = min(
+                    (t for t in f_dict['tariffs']),
+                    key=lambda x: x['price'],
+                )
+                f_dict['min_price'] = min_tariff['price']
+                f_dict['currency'] = min_tariff['currency']
+        else:
+            # Skip flight if no tariffs are available
+            continue
+
+        if direction:
+            f_dict['direction'] = direction
         results.append(f_dict)
     return results
 
 
-def search_flights():
+def search_flights(is_nearby=False):
     params = request.args
+
+    origin_code = params.get('from')
+    dest_code = params.get('to')
+    is_exact = params.get('date_mode') == 'exact'
+    seat_class = params.get('class')
+    passengers_num = int(params.get('adults', 0)) + \
+        int(params.get('children', 0)) + int(params.get('infants', 0))
+
+    depart_from = params.get('when') if is_exact else params.get('when_from')
+    depart_to = None if is_exact else params.get('when_to')
+
+    return_from = params.get(
+        'return') if is_exact else params.get('return_from')
+    return_to = None if is_exact else params.get('return_to')
+
+    outbound_airline_iata_code = params.get('outbound_airline')
+    outbound_flight_number = params.get('outbound_flight')
+
+    return_airline_iata_code = params.get('return_airline')
+    return_flight_number = params.get('return_flight')
+
+    outbound_flights = __query_flights(
+        origin_code=origin_code, dest_code=dest_code,
+        date_from=depart_from, date_to=depart_to,
+        is_exact=is_exact, seat_class=seat_class,
+        airline_iata_code=outbound_airline_iata_code, flight_number=outbound_flight_number,
+        direction='outbound'
+    )
+
+    has_return = return_from is not None
+
+    return_flights = __query_flights(
+        origin_code=dest_code, dest_code=origin_code,
+        date_from=return_from, date_to=return_to,
+        is_exact=is_exact, seat_class=seat_class,
+        airline_iata_code=return_airline_iata_code, flight_number=return_flight_number,
+        direction='return'
+    ) if has_return else []
+
+    is_outbound_found = bool(outbound_flights)
+    is_return_found = bool(return_flights)
+
+    if not is_nearby:
+        if not is_outbound_found:
+            return jsonify([])
+        elif has_return and not is_return_found:
+            return jsonify([])
+
+    return jsonify(outbound_flights + return_flights)
+
+def search_nearby_flights():
+    return search_flights(is_nearby=True)
+
+
+def schedule_flights():
+    params = request.args
+
     origin_code = params.get('from')
     dest_code = params.get('to')
     depart_date = params.get('when')
-    return_date = params.get('return')
-    seat_class = params.get('class')
 
-    flights = _query_flights(origin_code, dest_code, depart_date, seat_class)
-    if return_date:
-        flights += _query_flights(dest_code, origin_code, return_date, seat_class)
+    flights = []
+
+    flights += __query_flights(
+        origin_code=origin_code, dest_code=dest_code,
+        date_from=depart_date,
+        is_exact=False,
+        direction='outbound'
+    )
+    flights += __query_flights(
+        origin_code=dest_code, dest_code=origin_code,
+        date_from=depart_date,
+        is_exact=False,
+        direction='return'
+    )
+
     return jsonify(flights)

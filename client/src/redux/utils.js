@@ -4,8 +4,7 @@ import { serverApi } from '../api';
 export const getErrorData = (error) => {
 	if (error.response?.data?.errors) {
 		return error.response.data.errors;
-	}
-	else if (error.response?.data) {
+	} else if (error.response?.data) {
 		return error.response.data;
 	}
 
@@ -76,13 +75,13 @@ export const createCrudActions = (endpoint) => {
 
 	// Delete all
 	const removeAll = createAsyncThunk(`${endpoint}/deleteAll`, async (_, { rejectWithValue }) => {
-        try {
-            const res = await serverApi.delete(`/dev/clear/${endpoint}`);
-            return res.data;
-        } catch (err) {
-            return rejectWithValue(getErrorData(err));
-        }
-    });
+		try {
+			const res = await serverApi.delete(`/dev/clear/${endpoint}`);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	});
 
 	return {
 		fetchAll,
@@ -144,4 +143,3 @@ export const addCrudCases = (builder, actions, pluralKey, singleKey) => {
 		})
 		.addCase(remove.rejected, handleRejected);
 };
-

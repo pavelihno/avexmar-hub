@@ -10,3 +10,4 @@ from tests.fixtures.booking import *
 from tests.fixtures.seat import *
 from tests.fixtures.flight_tariff import *
 from tests.fixtures.user import *
+from tests.fixtures.timezone import *

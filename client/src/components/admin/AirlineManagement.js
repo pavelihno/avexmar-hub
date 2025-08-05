@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
@@ -25,10 +25,8 @@ const AirlineManagement = () => {
 		dispatch(fetchCountries());
 	}, [dispatch]);
 
-	const countryOptions = useMemo(() => {
-		if (!countries || !Array.isArray(countries)) return [];
-		return countries.map((c) => ({ value: c.id, label: c.name }));
-	}, [countries]);
+	const countryOptions =
+		!countries || !Array.isArray(countries) ? [] : countries.map((c) => ({ value: c.id, label: c.name }));
 
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;
@@ -84,14 +82,10 @@ const AirlineManagement = () => {
 		},
 	};
 
-	const adminManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.add_button,
-				editButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.edit_button,
-			}),
-		[FIELDS, getCountryById]
-	);
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.edit_button,
+	});
 
 	const handleAddAirline = (data) => dispatch(createAirline(adminManager.toApiFormat(data))).unwrap();
 	const handleEditAirline = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();

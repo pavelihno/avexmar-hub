@@ -23,6 +23,7 @@ export const FIELD_LABELS = {
 		city_name_en: 'Город (EN)',
 		city_code: 'Код города',
 		country_id: 'Страна',
+		timezone_id: 'Часовой пояс',
 	},
 	FLIGHT: {
 		flight_number: 'Номер рейса',
@@ -35,13 +36,13 @@ export const FIELD_LABELS = {
 		scheduled_departure_time: 'Время отправления',
 		scheduled_arrival: 'Дата прибытия',
 		scheduled_arrival_time: 'Время прибытия',
+		duration: 'Длительность полета',
 		status: 'Статус рейса',
 		tariffs: 'Тарифы',
 	},
 	PASSENGER: {
 		first_name: 'Имя',
 		last_name: 'Фамилия',
-		middle_name: 'Отчество',
 		gender: 'Пол',
 		birth_date: 'Дата рождения',
 		document_type: 'Тип документа',
@@ -107,6 +108,9 @@ export const FIELD_LABELS = {
 		password: 'Пароль',
 		role: 'Роль пользователя',
 		is_active: 'Активен',
+	},
+	TIMEZONE: {
+		name: 'Часовой пояс',
 	},
 };
 

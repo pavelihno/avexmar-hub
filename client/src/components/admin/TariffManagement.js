@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import { fetchTariffs, createTariff, updateTariff, deleteTariff, deleteAllTariffs } from '../../redux/actions/tariff';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const TariffManagement = () => {
@@ -16,8 +16,8 @@ const TariffManagement = () => {
 		dispatch(fetchTariffs());
 	}, [dispatch]);
 
-	const seatClassOptions = useMemo(() => getEnumOptions('SEAT_CLASS'), []);
-	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
+	const seatClassOptions = getEnumOptions('SEAT_CLASS');
+	const currencyOptions = getEnumOptions('CURRENCY');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -44,6 +44,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.price,
 			type: FIELD_TYPES.NUMBER,
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.TARIFF.price.REQUIRED : null),
+			formatter: (value) => (value != null ? `${formatNumber(value)}` : ''),
 		},
 		currency: {
 			key: 'currency',
@@ -64,22 +65,18 @@ const TariffManagement = () => {
 		},
 	};
 
-	const adminManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: (item) => UI_LABELS.ADMIN.modules.tariffs.add_button,
-				editButtonText: (item) => {
-					if (!item) return UI_LABELS.ADMIN.modules.tariffs.edit_button;
-					else {
-						const seatClass = ENUM_LABELS.SEAT_CLASS[item[FIELDS.seatClass.key]];
-						const orderNumber = item[FIELDS.orderNumber.key];
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.tariffs.add_button,
+		editButtonText: (item) => {
+			if (!item) return UI_LABELS.ADMIN.modules.tariffs.edit_button;
+			else {
+				const seatClass = ENUM_LABELS.SEAT_CLASS[item[FIELDS.seatClass.key]];
+				const orderNumber = item[FIELDS.orderNumber.key];
 
-						return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`;
-					}
-				},
-			}),
-		[FIELDS, tariffs]
-	);
+				return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`;
+			}
+		},
+	});
 
 	const handleAddTariff = (tariffData) => dispatch(createTariff(adminManager.toApiFormat(tariffData))).unwrap();
 	const handleEditTariff = (tariffData) => dispatch(updateTariff(adminManager.toApiFormat(tariffData))).unwrap();

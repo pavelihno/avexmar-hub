@@ -4,6 +4,7 @@ export const VALIDATION_MESSAGES = {
 		INVALID_TIME: 'Неверный формат времени',
 		INVALID_DATETIME: 'Неверный формат даты и времени',
 	},
+
 	DISCOUNT: {
 		discount_name: {
 			REQUIRED: 'Название скидки обязательно',
@@ -15,6 +16,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Процент скидки обязателен',
 		},
 	},
+
 	AIRPORT: {
 		name: {
 			REQUIRED: 'Название аэропорта обязательно',
@@ -36,6 +38,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Страна обязательна',
 		},
 	},
+
 	ROUTE: {
 		origin_airport_id: {
 			REQUIRED: 'Аэропорт отправления обязателен',
@@ -44,6 +47,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Аэропорт прибытия обязателен',
 		},
 	},
+
 	USER: {
 		email: {
 			REQUIRED: 'Email обязателен',
@@ -58,12 +62,25 @@ export const VALIDATION_MESSAGES = {
 			MATCH: 'Пароли не совпадают',
 		},
 	},
+
+	TIMEZONE: {
+		name: {
+			REQUIRED: 'Часовой пояс обязателен',
+		},
+	},
+
 	PASSENGER: {
 		first_name: {
 			REQUIRED: 'Имя обязательно',
 		},
 		last_name: {
 			REQUIRED: 'Фамилия обязательна',
+		},
+		birth_date: {
+			REQUIRED: 'Укажите дату рождения',
+			ADULT: 'Пассажир должен быть старше 12 лет',
+			CHILD: 'Возраст ребёнка 2–12 лет',
+			INFANT: 'Возраст малыша должен быть менее 2 лет',
 		},
 		document_type: {
 			REQUIRED: 'Тип документа обязателен',
@@ -72,6 +89,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Номер документа обязателен',
 		},
 	},
+
 	BOOKING: {
 		email_address: {
 			REQUIRED: 'Email обязателен',
@@ -85,6 +103,7 @@ export const VALIDATION_MESSAGES = {
 			EXISTS: 'Пассажир с таким именем и датой рождения уже есть в бронировании',
 		},
 	},
+
 	AIRLINE: {
 		iata_code: {
 			REQUIRED: 'Код IATA обязателен',
@@ -101,6 +120,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Страна обязательна',
 		},
 	},
+
 	COUNTRY: {
 		name: {
 			REQUIRED: 'Название обязательно',
@@ -114,6 +134,7 @@ export const VALIDATION_MESSAGES = {
 			LENGTH: 'Код A3 должен содержать 3 символа',
 		},
 	},
+
 	FLIGHT: {
 		flight_number: {
 			REQUIRED: 'Номер рейса обязателен',
@@ -140,6 +161,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Статус рейса обязателен',
 		},
 	},
+
 	TARIFF: {
 		seat_class: {
 			REQUIRED: 'Класс места обязателен',
@@ -157,6 +179,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Условия применения тарифа обязательны',
 		},
 	},
+
 	SEARCH: {
 		from: {
 			REQUIRED: 'Укажите аэропорт отправления',

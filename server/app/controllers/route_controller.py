@@ -5,14 +5,12 @@ from app.models.airport import Airport
 from app.middlewares.auth_middleware import admin_required
 
 
-@admin_required
-def get_routes(current_user):
+def get_routes():
     routes = Route.get_all()
     return jsonify([r.to_dict() for r in routes])
 
 
-@admin_required
-def get_route(current_user, route_id):
+def get_route(route_id):
     route = Route.get_or_404(route_id)
     return jsonify(route.to_dict()), 200
 

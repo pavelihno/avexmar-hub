@@ -1,8 +1,14 @@
-from sqlalchemy.orm import Session
+from typing import List, TYPE_CHECKING
+from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+
+if TYPE_CHECKING:
+    from app.models.airline import Airline
+    from app.models.airport import Airport
+    from app.models.passenger import Passenger
 
 
 class Country(BaseModel):
@@ -12,6 +18,10 @@ class Country(BaseModel):
     name_en = db.Column(db.String, nullable=True)
     code_a2 = db.Column(db.String(2), nullable=False, unique=True)
     code_a3 = db.Column(db.String(3), nullable=False, unique=True)
+
+    airlines: Mapped[List['Airline']] = db.relationship('Airline', back_populates='country', lazy='dynamic')
+    airports: Mapped[List['Airport']] = db.relationship('Airport', back_populates='country', lazy='dynamic')
+    passengers: Mapped[List['Passenger']] = db.relationship('Passenger', back_populates='citizenship', lazy='dynamic')
 
     def to_dict(self):
         return {

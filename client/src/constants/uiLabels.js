@@ -19,6 +19,12 @@ export const UI_LABELS = {
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',
+		pagination: {
+			rows_per_page: 'Записей на странице',
+			displayed_rows: ({ from, to, count }) => {
+				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+			},
+		},
 	},
 	TITLES: {
 		login: 'Вход',
@@ -52,7 +58,6 @@ export const UI_LABELS = {
 		save: 'Ошибка при сохранении',
 		delete: 'Ошибка при удалении',
 	},
-
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
 		contact_email: 'contact@avexmar.com',
@@ -100,17 +105,13 @@ export const UI_LABELS = {
 		filter: {
 			show: 'Показать фильтры',
 			hide: 'Скрыть фильтры',
+			clear: 'Очистить',
 			all: 'Все',
 		},
 		upload: {
 			title: 'Загрузка файла',
 			drag: 'Перетащите файл сюда или выберите',
 			select: 'Выбрать файл',
-		},
-		rows: {
-			per_page: 'Записей на странице',
-			from: 'из',
-			more_than: 'более',
 		},
 		modules: {
 			airports: {
@@ -138,6 +139,15 @@ export const UI_LABELS = {
 				add_button: 'Добавить страну',
 				edit_button: 'Редактировать страну',
 				upload_button: 'Загрузить страны',
+				upload_template_button: 'Скачать шаблон загрузки',
+			},
+			timezones: {
+				title: 'Часовые пояса',
+				description: 'Управление часовыми поясами',
+				management: 'Управление часовыми поясами',
+				add_button: 'Добавить часовой пояс',
+				edit_button: 'Редактировать часовой пояс',
+				upload_button: 'Загрузить часовые пояса',
 				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			routes: {
@@ -221,15 +231,55 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
-	HOME: {
-		search: {
+	HOME: {},
+	BOOKING: {
+		passenger_form: {
+			type_labels: {
+				ADULT: 'Взрослый, старше 12 лет',
+				CHILD: 'Ребёнок, от 2 до 12 лет',
+				INFANT: 'Малыш, до 2 лет',
+			},
+			genders: [
+				{ value: 'MALE', label: 'Мужской' },
+				{ value: 'FEMALE', label: 'Женский' },
+				{ value: 'OTHER', label: 'Другой' },
+			],
+			add_passenger: 'Добавить пассажира',
+		},
+	},
+	SCHEDULE: {
+		title: 'Расписание рейсов',
+		results: 'Результаты поиска',
+		no_results: 'Рейсы не найдены',
+		outbound: 'Выбранное направление',
+		return: 'Обратное направление',
+		filter: 'Фильтр',
+		select: 'Выбрать',
+		ask_return: 'Нужен ли обратный билет?',
+		select_flights: 'Выбрать рейсы',
+		from_to: (from, to) => {
+			return `${from} → ${to}`;
+		},
+	},
+	SEARCH: {
+		form: {
 			from: 'Откуда',
 			to: 'Куда',
 			when: 'Когда',
 			return: 'Обратно',
+			when_from: 'Когда от',
+			when_to: 'Когда до',
+			return_from: 'Обратно от',
+			return_to: 'Обратно до',
 			passengers: 'Пассажиры',
 			class: 'Эконом',
 			seat_class_title: 'Класс обслуживания',
+			show_schedule: 'Показать расписание',
+			date_modes: {
+				exact: 'Точные даты',
+				flexible: 'Гибкие даты',
+			},
+			schedule_button: 'Расписание',
 			button: 'Найти билеты',
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
@@ -247,24 +297,37 @@ export const UI_LABELS = {
 				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
 			},
 		},
-		schedule: {
-			title: 'Расписание рейсов',
-		},
-	},
-	SEARCH: {
 		results: 'Результаты поиска',
-		no_results: 'Нет результатов',
-		from_to: (from, to, date_from, date_to) => {
+		no_results: 'Рейсы не найдены',
+		from_to_date: (from, to, date_from, date_to) => {
 			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {
-			select_flight: 'Выбрать рейс',
+			select_ticket: 'Выбрать билет',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
+			total_price: 'Общая стоимость',
 			price: 'Цена',
+			price_from: 'От',
+			price_per_passenger: 'За 1 пассажира',
 		},
+		sort: {
+			label: 'Сортировка',
+			price: 'Цена',
+			arrival_time: 'Время прибытия',
+			arrival_date: 'Дата прибытия',
+			departure_time: 'Время отправления',
+			departure_date: 'Дата отправления',
+			duration: 'Время в пути',
+		},
+		nearby_dates: {
+			title: 'Ближайшие даты',
+			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
+			no_return: 'Нет ближайших рейсов в обратном направлении',
+		},
+		show_more: 'Показать еще билеты',
 	},
 };
 

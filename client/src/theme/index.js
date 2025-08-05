@@ -21,7 +21,7 @@ const theme = createTheme({
 		easing: {
 			easeInOut: 'ease-in-out',
 		},
-	}
+	},
 });
 
 export default theme;

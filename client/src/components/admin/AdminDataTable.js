@@ -10,9 +10,8 @@ import {
 	TableCell,
 	TableContainer,
 	TableHead,
-	TableRow,
-	Paper,
 	TableSortLabel,
+	TableRow,
 	TablePagination,
 	IconButton,
 	Dialog,
@@ -32,12 +31,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
-import { UI_LABELS, ENUM_LABELS } from '../../constants';
+import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { createFieldRenderer, FIELD_TYPES } from '../utils';
 import { formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
+import { useTheme, alpha } from '@mui/material/styles';
 
 const AdminDataTable = ({
 	title,
@@ -53,6 +54,7 @@ const AdminDataTable = ({
 	addButtonText = null,
 	uploadButtonText = null,
 	uploadTemplateButtonText = null,
+	isLoading = false,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [deleteDialog, setDeleteDialog] = useState({
@@ -77,6 +79,7 @@ const AdminDataTable = ({
 	const [filters, setFilters] = useState({});
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const theme = useTheme();
 
 	const [uploadDialog, setUploadDialog] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -184,15 +187,6 @@ const AdminDataTable = ({
 		setPage(0);
 	};
 
-	const handleChangePage = (event, newPage) => {
-		setPage(newPage);
-	};
-
-	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0);
-	};
-
 	const handleSave = (formData) => {
 		if (isEditing) return onEdit(formData);
 		else return onAdd(formData);
@@ -255,11 +249,16 @@ const AdminDataTable = ({
 					return itemValue === value;
 				}
 				if (col.type === FIELD_TYPES.DATE) {
-					return itemValue === formatDate(value, 'yyyy-MM-dd');
+					return itemValue === formatDate(value, DATE_API_FORMAT);
 				}
 				return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
 			})
 		);
+	};
+
+	const clearFilters = () => {
+		setFilters({});
+		setPage(0);
 	};
 
 	const applySorting = (items) => {
@@ -294,7 +293,7 @@ const AdminDataTable = ({
 	const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
 	return (
-		<Base>
+		<Base maxWidth='xl'>
 			<Box sx={{ p: 3 }}>
 				<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
 					<IconButton component={Link} to='/admin' sx={{ mr: 2 }}>
@@ -356,170 +355,219 @@ const AdminDataTable = ({
 						{UI_LABELS.BUTTONS.delete_all}
 					</Button>
 				)}
-				<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
-					<Box
-						sx={{
-							display: 'flex',
-							justifyContent: 'flex-end',
-							alignItems: 'center',
-						}}
-					>
-						<Button
-							variant='contained'
-							color='action'
-							size='small'
-							startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
-							onClick={() => setShowFilters((prev) => !prev)}
+				<Box sx={{ position: 'relative' }}>
+					<Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
+						<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
+							<Box
+								sx={{
+									display: 'flex',
+									justifyContent: 'flex-end',
+									alignItems: 'center',
+								}}
+							>
+								<Button
+									variant='contained'
+									color='action'
+									size='small'
+									startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
+									onClick={() => setShowFilters((prev) => !prev)}
+									sx={{
+										fontSize: '0.75rem',
+										fontWeight: 400,
+										minHeight: 28,
+										px: 1.5,
+										py: 0.5,
+									}}
+								>
+									{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+								</Button>
+							</Box>
+							<Table stickyHeader sx={{ tableLayout: 'auto' }}>
+								<TableHead>
+									<TableRow>
+										{columns.map((column, index) => (
+											<TableCell
+												key={index}
+												align={column.align || 'left'}
+												sx={{
+													fontWeight: 'bold',
+													cursor: 'pointer',
+												}}
+												onClick={() => handleSort(column.field)}
+											>
+												<TableSortLabel
+													active={sortConfig.field === column.field}
+													direction={sortConfig.direction}
+												>
+													{column.header}
+												</TableSortLabel>
+											</TableCell>
+										))}
+										<TableCell align='right' sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.ADMIN.actions}
+										</TableCell>
+									</TableRow>
+									{showFilters && (
+										<TableRow>
+											{columns.map((col, idx) => {
+												if (col.type === FIELD_TYPES.CUSTOM)
+													return <TableCell key={idx} align={col.align || 'left'} />;
+
+												let options = [];
+												if (
+													col.type === FIELD_TYPES.SELECT ||
+													col.type === FIELD_TYPES.BOOLEAN
+												) {
+													options = col.options
+														? [...col.options]
+														: [
+																{ value: true, label: ENUM_LABELS.BOOLEAN.true },
+																{ value: false, label: ENUM_LABELS.BOOLEAN.false },
+														  ];
+													options.sort((a, b) => a.label.localeCompare(b.label));
+													col = {
+														...col,
+														options: [
+															{ value: '', label: UI_LABELS.ADMIN.filter.all },
+															...options,
+														],
+													};
+												}
+
+												const renderField = createFieldRenderer(col);
+
+												return (
+													<TableCell key={idx} align={col.align || 'left'}>
+														{renderField({
+															value: filters[col.field] ?? '',
+															onChange: (val) =>
+																handleFilterChange(col.field, val, col.type),
+															size: 'small',
+															fullWidth: true,
+															sx: {
+																minWidth: 0,
+																maxWidth: 150,
+																'& .MuiInputBase-root': {
+																	fontSize: '0.75rem',
+																	height: 28,
+																	minHeight: 28,
+																	padding: '0 8px',
+																},
+																'& .MuiInputBase-input': {
+																	fontSize: '0.75rem',
+																	height: 20,
+																	padding: '4px 0',
+																},
+															},
+															inputProps: {
+																style: {
+																	fontSize: '0.75rem',
+																	padding: '4px 8px',
+																	height: 20,
+																	boxSizing: 'border-box',
+																},
+															},
+															displayEmpty: true,
+															simpleSelect: true,
+															MenuProps: {
+																PaperProps: {
+																	sx: { fontSize: '0.75rem' },
+																},
+															},
+															MenuItemProps: {
+																sx: {
+																	fontSize: '0.75rem',
+																	minHeight: 28,
+																	height: 28,
+																},
+															},
+														})}
+													</TableCell>
+												);
+											})}
+											<TableCell align='right'>
+												<Button
+													variant='contained'
+													color='action'
+													size='small'
+													startIcon={<ClearAllIcon />}
+													onClick={clearFilters}
+													sx={{
+														fontSize: '0.75rem',
+														fontWeight: 400,
+														minHeight: 28,
+														px: 1.5,
+														py: 0.5,
+													}}
+												>
+													{UI_LABELS.ADMIN.filter.clear}
+												</Button>
+											</TableCell>
+										</TableRow>
+									)}
+								</TableHead>
+								<TableBody>
+									{paginatedData.map((item) => (
+										<TableRow key={item.id}>
+											{columns.map((column, index) => (
+												<TableCell key={index} align={column.align || 'left'}>
+													{column.render
+														? column.render(item)
+														: column.formatter
+														? column.formatter(item[column.field])
+														: item[column.field]}
+												</TableCell>
+											))}
+											<TableCell align='right'>
+												<IconButton color='info' onClick={() => handleOpenDialog(item)}>
+													<EditIcon />
+												</IconButton>
+												<IconButton
+													color='error'
+													onClick={() => handleOpenDeleteDialog(item.id)}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+						<TablePagination
+							component='div'
+							count={sortedData.length}
+							page={page}
+							onPageChange={(e, newPage) => setPage(newPage)}
+							rowsPerPage={rowsPerPage}
+							onRowsPerPageChange={(e) => {
+								setRowsPerPage(parseInt(e.target.value, 10));
+								setPage(0);
+							}}
+							rowsPerPageOptions={[10, 25, 50]}
+							labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
+							labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
+						/>
+					</Box>
+					{isLoading && (
+						<Box
 							sx={{
-								fontSize: '0.75rem',
-								fontWeight: 400,
-								minHeight: 28,
-								px: 1.5,
-								py: 0.5,
+								position: 'absolute',
+								top: 0,
+								left: 0,
+								right: 0,
+								bottom: 0,
+								backgroundColor: alpha(theme.palette.white, 0.8),
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								zIndex: 1,
 							}}
 						>
-							{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
-						</Button>
-					</Box>
-					<Table stickyHeader sx={{ tableLayout: 'auto' }}>
-						<TableHead>
-							<TableRow>
-								{columns.map((column, index) => (
-									<TableCell
-										key={index}
-										align={column.align || 'left'}
-										sx={{
-											fontWeight: 'bold',
-											cursor: 'pointer',
-										}}
-										onClick={() => handleSort(column.field)}
-									>
-										<TableSortLabel
-											active={sortConfig.field === column.field}
-											direction={sortConfig.direction}
-										>
-											{column.header}
-										</TableSortLabel>
-									</TableCell>
-								))}
-								<TableCell align='right' sx={{ fontWeight: 'bold' }}>
-									{UI_LABELS.ADMIN.actions}
-								</TableCell>
-							</TableRow>
-							{showFilters && (
-								<TableRow>
-									{columns.map((col, idx) => {
-										if (col.type === FIELD_TYPES.CUSTOM) return null;
-
-										let options = [];
-										if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
-											options = col.options
-												? [...col.options]
-												: [
-														{ value: true, label: ENUM_LABELS.BOOLEAN.true },
-														{ value: false, label: ENUM_LABELS.BOOLEAN.false },
-												  ];
-											options.sort((a, b) => a.label.localeCompare(b.label));
-											col = {
-												...col,
-												options: [{ value: '', label: UI_LABELS.ADMIN.filter.all }, ...options],
-											};
-										}
-
-										const renderField = createFieldRenderer(col);
-
-										return (
-											<TableCell key={idx} align={col.align || 'left'}>
-												{renderField({
-													value: filters[col.field] ?? '',
-													onChange: (val) => handleFilterChange(col.field, val, col.type),
-													size: 'small',
-													fullWidth: true,
-													sx: {
-														minWidth: 0,
-														maxWidth: 150,
-														'& .MuiInputBase-root': {
-															fontSize: '0.75rem',
-															height: 28,
-															minHeight: 28,
-															padding: '0 8px',
-														},
-														'& .MuiInputBase-input': {
-															fontSize: '0.75rem',
-															height: 20,
-															padding: '4px 0',
-														},
-													},
-													inputProps: {
-														style: {
-															fontSize: '0.75rem',
-															padding: '4px 8px',
-															height: 20,
-															boxSizing: 'border-box',
-														},
-													},
-													displayEmpty: true,
-													simpleSelect: true,
-													MenuProps: {
-														PaperProps: {
-															sx: { fontSize: '0.75rem' },
-														},
-													},
-													MenuItemProps: {
-														sx: {
-															fontSize: '0.75rem',
-															minHeight: 28,
-															height: 28,
-														},
-													},
-												})}
-											</TableCell>
-										);
-									})}
-									<TableCell align='right' />
-								</TableRow>
-							)}
-						</TableHead>
-						<TableBody>
-							{paginatedData.map((item) => (
-								<TableRow key={item.id}>
-									{columns.map((column, index) => (
-										<TableCell key={index} align={column.align || 'left'}>
-											{column.render
-												? column.render(item)
-												: column.formatter
-												? column.formatter(item[column.field])
-												: item[column.field]}
-										</TableCell>
-									))}
-									<TableCell align='right'>
-										<IconButton color='info' onClick={() => handleOpenDialog(item)}>
-											<EditIcon />
-										</IconButton>
-										<IconButton color='error' onClick={() => handleOpenDeleteDialog(item.id)}>
-											<DeleteIcon />
-										</IconButton>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</TableContainer>
-				<TablePagination
-					component='div'
-					count={sortedData.length}
-					page={page}
-					onPageChange={handleChangePage}
-					rowsPerPage={rowsPerPage}
-					onRowsPerPageChange={handleChangeRowsPerPage}
-					rowsPerPageOptions={[10, 25, 50]}
-					labelRowsPerPage={UI_LABELS.ADMIN.rows.per_page}
-					labelDisplayedRows={({ from, to, count }) =>
-						`${from}-${to} ${UI_LABELS.ADMIN.rows.from} ${
-							count !== -1 ? count : `${UI_LABELS.ADMIN.rows.more_than} ${to}`
-						}`
-					}
-				/>
+							<CircularProgress />
+						</Box>
+					)}
+				</Box>
 
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
@@ -601,7 +649,10 @@ const AdminDataTable = ({
 					</DialogActions>
 				</Dialog>
 
-				<Backdrop open={uploading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+				<Backdrop
+					open={uploading}
+					sx={{ color: theme.palette.white, zIndex: (theme) => theme.zIndex.drawer + 1 }}
+				>
 					<CircularProgress color='inherit' />
 				</Backdrop>
 				<Snackbar

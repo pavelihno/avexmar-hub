@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Tooltip,
@@ -11,6 +11,7 @@ import {
 	DialogTitle,
 	DialogActions,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -25,10 +26,9 @@ import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchAirports } from '../../redux/actions/airport';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
-import { DEFAULT_TIME } from '../../constants/formats';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, DEFAULT_TIME } from '../../constants';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();
@@ -38,6 +38,8 @@ const FlightManagement = () => {
 	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
 	const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
+
+	const theme = useTheme();
 
 	const [tariffDialogOpen, setTariffDialogOpen] = useState(false);
 	const [tariffAction, setTariffAction] = useState(null);
@@ -81,32 +83,28 @@ const FlightManagement = () => {
 		return tariffs.find((tariff) => tariff.id === id);
 	};
 
-	const routeOptions = useMemo(() => {
-		if (routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)) {
-			return [];
-		}
-		return routes.map((route) => {
-			const origin = getAirportById(route.origin_airport_id);
-			const dest = getAirportById(route.destination_airport_id);
+	const routeOptions =
+		routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)
+			? []
+			: routes.map((route) => {
+					const origin = getAirportById(route.origin_airport_id);
+					const dest = getAirportById(route.destination_airport_id);
 
-			return {
-				value: route.id,
-				label: `${origin?.city_name} (${origin?.iata_code || '…'}) → ${dest?.city_name} (${
-					dest?.iata_code || '…'
-				})`,
-			};
-		});
-	}, [routes, airports, routesLoading, airportsLoading]);
+					return {
+						value: route.id,
+						label: `${origin?.city_name} (${origin?.iata_code || '…'}) → ${dest?.city_name} (${
+							dest?.iata_code || '…'
+						})`,
+					};
+			  });
 
-	const airlineOptions = useMemo(() => {
-		if (!airlines || !Array.isArray(airlines)) {
-			return [];
-		}
-		return airlines.map((airline) => ({
-			value: airline.id,
-			label: `${airline.name} (${airline.iata_code})`,
-		}));
-	}, [airlines]);
+	const airlineOptions =
+		!airlines || !Array.isArray(airlines)
+			? []
+			: airlines.map((airline) => ({
+					value: airline.id,
+					label: `${airline.name} (${airline.iata_code})`,
+			  }));
 
 	const [deleteFlightTariffDialog, setDeleteFlightTariffDialog] = useState({
 		open: false,
@@ -285,7 +283,9 @@ const FlightManagement = () => {
 
 									const tariffLabel = `${seatClass} - ${
 										UI_LABELS.ADMIN.modules.tariffs.tariff
-									} ${orderNumber} - ${tariffPrice} ${currency} - ${seatsNumber} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
+									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${formatNumber(
+										seatsNumber
+									)} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
 
 									return (
 										<Box
@@ -294,7 +294,7 @@ const FlightManagement = () => {
 												display: 'flex',
 												alignItems: 'center',
 												mb: 0.5,
-												backgroundColor: 'rgba(0,0,0,0.04)',
+												backgroundColor: alpha(theme.palette.black, 0.04),
 												borderRadius: 1,
 												p: 0.5,
 												width: 'auto',
@@ -368,14 +368,10 @@ const FlightManagement = () => {
 		},
 	};
 
-	const adminManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
-				editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
-			}),
-		[FIELDS, getRouteById, getAirlineById]
-	);
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
+	});
 
 	const handleAddFlight = (flightData) => dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
 	const handleEditFlight = (flightData) => dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();

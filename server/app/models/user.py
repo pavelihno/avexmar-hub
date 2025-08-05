@@ -1,10 +1,14 @@
+from typing import List, TYPE_CHECKING
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Mapped
 from app.config import Config
+
+if TYPE_CHECKING:
+    from app.models.password_reset_token import PasswordResetToken
 
 
 class User(BaseModel):
@@ -14,6 +18,10 @@ class User(BaseModel):
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.Enum(Config.USER_ROLE), nullable=False, default=Config.DEFAULT_USER_ROLE)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+
+    reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
+        'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         return {

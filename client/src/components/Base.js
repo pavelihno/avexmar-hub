@@ -34,7 +34,7 @@ const Base = ({ children, maxWidth = 'lg' }) => {
 					exit={pageTransition.exit}
 					transition={pageTransition.transition}
 				>
-					<Container sx={{ maxWidth }}>{children}</Container>
+					<Container maxWidth={maxWidth}>{children}</Container>
 				</motion.div>
 			</Container>
 			<Footer />
