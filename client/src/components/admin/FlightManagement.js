@@ -19,6 +19,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
+import { downloadTemplate, uploadFile } from '../../api';
+
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
@@ -46,14 +48,14 @@ const FlightManagement = () => {
 	const [selectedFlightId, setSelectedFlightId] = useState(null);
 	const [selectedFlightTariffId, setSelectedFlightTariffId] = useState(null);
 
-	useEffect(() => {
-		dispatch(fetchFlights());
-		dispatch(fetchRoutes());
-		dispatch(fetchAirlines());
-		dispatch(fetchTariffs());
-		dispatch(fetchFlightTariffs());
-		dispatch(fetchAirports());
-	}, [dispatch]);
+        useEffect(() => {
+                dispatch(fetchFlights());
+                dispatch(fetchRoutes());
+                dispatch(fetchAirlines());
+                dispatch(fetchTariffs());
+                dispatch(fetchFlightTariffs());
+                dispatch(fetchAirports());
+        }, [dispatch]);
 
 	const getRouteById = (id) => {
 		if (routesLoading || !Array.isArray(routes)) {
@@ -137,12 +139,23 @@ const FlightManagement = () => {
 		handleCloseDeleteFlightTariffDialog();
 	};
 
-	const handleTariffDialogClose = () => {
-		setSelectedFlightId(null);
-		setSelectedFlightTariffId(null);
-		setTariffAction(null);
-		setTariffDialogOpen(false);
-	};
+        const handleTariffDialogClose = () => {
+                setSelectedFlightId(null);
+                setSelectedFlightTariffId(null);
+                setTariffAction(null);
+                setTariffDialogOpen(false);
+        };
+
+        const handleUpload = async (file) => {
+                const res = await uploadFile('flights', file);
+                dispatch(fetchFlights());
+                dispatch(fetchFlightTariffs());
+                return res;
+        };
+
+        const handleGetTemplate = async () => {
+                await downloadTemplate('flights', 'flights_template.xlsx');
+        };
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -386,26 +399,30 @@ const FlightManagement = () => {
 
 	return (
 		<>
-			<AdminDataTable
-				title={UI_LABELS.ADMIN.modules.flights.management}
-				data={formattedFlights}
-				columns={adminManager.columns}
-				onAdd={handleAddFlight}
-				onEdit={handleEditFlight}
-				onDelete={handleDeleteFlight}
-				onDeleteAll={handleDeleteAllFlights}
-				renderForm={adminManager.renderForm}
-				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
-				isLoading={
-					isLoading ||
-					routesLoading ||
-					airlinesLoading ||
-					tariffsLoading ||
-					flightTariffsLoading ||
-					airportsLoading
-				}
-				error={errors}
-			/>
+                        <AdminDataTable
+                                title={UI_LABELS.ADMIN.modules.flights.management}
+                                data={formattedFlights}
+                                columns={adminManager.columns}
+                                onAdd={handleAddFlight}
+                                onEdit={handleEditFlight}
+                                onDelete={handleDeleteFlight}
+                                onDeleteAll={handleDeleteAllFlights}
+                                renderForm={adminManager.renderForm}
+                                addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
+                                uploadButtonText={UI_LABELS.ADMIN.modules.flights.upload_button}
+                                uploadTemplateButtonText={UI_LABELS.ADMIN.modules.flights.upload_template_button}
+                                getUploadTemplate={handleGetTemplate}
+                                onUpload={handleUpload}
+                                isLoading={
+                                        isLoading ||
+                                        routesLoading ||
+                                        airlinesLoading ||
+                                        tariffsLoading ||
+                                        flightTariffsLoading ||
+                                        airportsLoading
+                                }
+                                error={errors}
+                        />
 
 			<FlightTariffManagement
 				flightId={selectedFlightId}

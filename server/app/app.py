@@ -121,6 +121,8 @@ def __create_app(_config_class, _db):
     app.route('/flights/<int:flight_id>', methods=['GET'])(get_flight)
     app.route('/flights/<int:flight_id>', methods=['PUT'])(update_flight)
     app.route('/flights/<int:flight_id>', methods=['DELETE'])(delete_flight)
+    app.route('/flights/upload', methods=['POST'])(upload_flight)
+    app.route('/flights/template', methods=['GET'])(get_flight_template)
 
     # tariffs
     app.route('/tariffs', methods=['GET'])(get_tariffs)
