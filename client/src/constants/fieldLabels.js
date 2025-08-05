@@ -28,7 +28,7 @@ export const FIELD_LABELS = {
 	FLIGHT: {
 		flight_number: 'Номер рейса',
 		airline_id: 'Авиакомпания',
-		aircraft: 'Воздушное судно',
+		aircraft_id: 'Воздушное судно',
 		route_id: 'Маршрут рейса',
 		origin_airport_id: 'Аэропорт отправления',
 		destination_airport_id: 'Аэропорт прибытия',
@@ -78,6 +78,9 @@ export const FIELD_LABELS = {
 		icao_code: 'Код ICAO',
 		name: 'Название авиакомпании',
 		country_id: 'Страна',
+	},
+	AIRCRAFT: {
+		type: 'Тип воздушного судна',
 	},
 	COUNTRY: {
 		name: 'Название',

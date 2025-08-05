@@ -131,20 +131,29 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 			case FIELD_TYPES.NUMBER: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
+
+				const step = field.inputProps?.step ?? (field.float ? 0.01 : 1);
+				const min = field.inputProps?.min ?? 0;
+				const max = field.inputProps?.max ?? Infinity;
+
 				return (
 					<TextField
-						label={field.label}
-						value={value}
-						onChange={(e) => {
-							const val = e.target.value;
-							const numValue = field.float ? parseFloat(val) : parseInt(val, 10);
-							onChange(val === '' ? '' : numValue);
-						}}
 						type='number'
+						label={field.label}
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
-						inputProps={{ step: field.float ? 0.01 : 1, ...field.inputProps, ...inputProps }}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						onBlur={(e) => {
+							const num = e.target.valueAsNumber;
+							if (!isNaN(num)) {
+								const clamped = Math.min(Math.max(min, num), max);
+								const rounded = Math.round(clamped / step) * step;
+								onChange(rounded);
+							}
+						}}
+						inputProps={{ min, step, ...field.inputProps, ...inputProps }}
 						sx={{ ...sx }}
 					/>
 				);
@@ -238,6 +247,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					sx,
 				} = allProps;
 
+				const resolvedValue = value !== undefined && value !== null ? value : field.defaultValue;
+				const isValidValue = options.some((o) => o.value === resolvedValue);
+				const safeValue = isValidValue ? resolvedValue : '';
+
 				if (!simpleSelect && options.length > 100) {
 					const valueObj = options.find((o) => o.value === value) || null;
 					return (
@@ -268,7 +281,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				if (simpleSelect) {
 					return (
 						<Select
-							value={value || field.defaultValue || ''}
+							value={safeValue}
 							onChange={(e) => onChange(e.target.value)}
 							fullWidth={fullWidth}
 							MenuProps={MenuProps}
@@ -288,7 +301,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<FormControl fullWidth={fullWidth} error={!!error}>
 						<InputLabel>{field.label}</InputLabel>
 						<Select
-							value={value || field.defaultValue || ''}
+							value={safeValue}
 							onChange={(e) => onChange(e.target.value)}
 							label={field.label}
 							MenuProps={MenuProps}

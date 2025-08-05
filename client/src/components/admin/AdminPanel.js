@@ -9,6 +9,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
+import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 import HailIcon from '@mui/icons-material/Hail';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AirlinesIcon from '@mui/icons-material/Airlines';
@@ -19,78 +20,86 @@ import Base from '../Base';
 
 import { UI_LABELS } from '../../constants';
 
+const iconSX = { fontSize: 50 };
+
 const AdminPanel = () => {
 	const adminModules = [
 		{
 			title: UI_LABELS.ADMIN.modules.countries.title,
 			description: UI_LABELS.ADMIN.modules.countries.description,
-			icon: <PublicIcon sx={{ fontSize: 50 }} />,
+			icon: <PublicIcon sx={iconSX} />,
 			path: '/admin/countries',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.timezones.title,
 			description: UI_LABELS.ADMIN.modules.timezones.description,
-			icon: <AccessTimeFilledIcon sx={{ fontSize: 50 }} />,
+			icon: <AccessTimeFilledIcon sx={iconSX} />,
 			path: '/admin/timezones',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.airports.title,
 			description: UI_LABELS.ADMIN.modules.airports.description,
-			icon: <AirportIcon sx={{ fontSize: 50 }} />,
+			icon: <AirportIcon sx={iconSX} />,
 			path: '/admin/airports',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.aircrafts.title,
+			description: UI_LABELS.ADMIN.modules.aircrafts.description,
+			icon: <ConnectingAirportsIcon sx={iconSX} />,
+			path: '/admin/aircrafts',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.airlines.title,
 			description: UI_LABELS.ADMIN.modules.airlines.description,
-			icon: <AirlinesIcon sx={{ fontSize: 50 }} />,
+			icon: <AirlinesIcon sx={iconSX} />,
 			path: '/admin/airlines',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.routes.title,
 			description: UI_LABELS.ADMIN.modules.routes.description,
-			icon: <RouteIcon sx={{ fontSize: 50 }} />,
+			icon: <RouteIcon sx={iconSX} />,
 			path: '/admin/routes',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.discounts.title,
 			description: UI_LABELS.ADMIN.modules.discounts.description,
-			icon: <DiscountIcon sx={{ fontSize: 50 }} />,
+			icon: <DiscountIcon sx={iconSX} />,
 			path: '/admin/discounts',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.tariffs.title,
 			description: UI_LABELS.ADMIN.modules.tariffs.description,
-			icon: <MonetizationOnIcon sx={{ fontSize: 50 }} />,
+			icon: <MonetizationOnIcon sx={iconSX} />,
 			path: '/admin/tariffs',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.flights.title,
 			description: UI_LABELS.ADMIN.modules.flights.description,
-			icon: <FlightTakeoffIcon sx={{ fontSize: 50 }} />,
+			icon: <FlightTakeoffIcon sx={iconSX} />,
 			path: '/admin/flights',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.bookings.title,
 			description: UI_LABELS.ADMIN.modules.bookings.description,
-			icon: <BookOnlineIcon sx={{ fontSize: 50 }} />,
+			icon: <BookOnlineIcon sx={iconSX} />,
 			path: '/admin/bookings',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.passengers.title,
 			description: UI_LABELS.ADMIN.modules.passengers.description,
-			icon: <HailIcon sx={{ fontSize: 50 }} />,
+			icon: <HailIcon sx={iconSX} />,
 			path: '/admin/passengers',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.tickets.title,
 			description: UI_LABELS.ADMIN.modules.tickets.description,
-			icon: <AirplaneTicketIcon sx={{ fontSize: 50 }} />,
+			icon: <AirplaneTicketIcon sx={iconSX} />,
 			path: '/admin/tickets',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.users.title,
 			description: UI_LABELS.ADMIN.modules.users.description,
-			icon: <ManageAccountsIcon sx={{ fontSize: 50 }} />,
+			icon: <ManageAccountsIcon sx={iconSX} />,
 			path: '/admin/users',
 		},
 	];

@@ -6,7 +6,7 @@ def test_password_reset_flow(client, standard_user):
     resp = client.post('/forgot_password', json={'email': standard_user.email})
     assert resp.status_code == 200
 
-    token = PasswordResetToken.query.filter_by(user_id=standard_user.id).first()
+    token = PasswordResetToken.query.filter(user_id=standard_user.id).first()
     assert token is not None
 
     resp = client.post('/reset_password', json={'token': token.token, 'password': 'newpass'})
@@ -29,7 +29,7 @@ def test_password_reset_flow(client, standard_user):
 def test_password_reset_expired_token(client, standard_user):
     resp = client.post('/forgot_password', json={'email': standard_user.email})
     assert resp.status_code == 200
-    token = PasswordResetToken.query.filter_by(user_id=standard_user.id).first()
+    token = PasswordResetToken.query.filter(user_id=standard_user.id).first()
     assert token is not None
 
     token.expires_at = token.expires_at.replace(year=2000)

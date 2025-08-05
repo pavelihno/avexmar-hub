@@ -97,7 +97,7 @@ const parseDate = (value) => {
 
 const STORAGE_KEY = 'lastSearchParams';
 
-const SearchForm = ({ initialParams = {} }) => {
+const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const theme = useTheme();
@@ -105,10 +105,12 @@ const SearchForm = ({ initialParams = {} }) => {
 	const { airports } = useSelector((state) => state.search);
 
 	let storedParams = {};
-	try {
-		storedParams = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-	} catch (e) {
-		storedParams = {};
+	if (loadLocalStorage) {
+		try {
+			storedParams = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+		} catch (e) {
+			storedParams = {};
+		}
 	}
 
 	const combinedParams = { ...storedParams, ...initialParams };
@@ -123,7 +125,6 @@ const SearchForm = ({ initialParams = {} }) => {
 		returnFrom: parseDate(combinedParams.return_from),
 		returnTo: parseDate(combinedParams.return_to),
 	});
-
 	const [passengers, setPassengers] = useState({
 		adults: parseInt(combinedParams.adults, 10) || 1,
 		children: parseInt(combinedParams.children, 10) || 0,
@@ -143,15 +144,30 @@ const SearchForm = ({ initialParams = {} }) => {
 		[airports]
 	);
 
-	// Update on specific parameter changes
+	// Update on direction or date changes
 	useEffect(() => {
-		if (initialParams.from || initialParams.to || initialParams.when || initialParams.return) {
+		if (
+			initialParams.from ||
+			initialParams.to ||
+			initialParams.date_mode ||
+			initialParams.when ||
+			initialParams.return ||
+			initialParams.when_from ||
+			initialParams.when_to ||
+			initialParams.return_from ||
+			initialParams.return_to
+		) {
 			setFormValues((prev) => ({
 				...prev,
 				from: initialParams.from || prev.from,
 				to: initialParams.to || prev.to,
+				dateMode: initialParams.date_mode || prev.dateMode,
 				departDate: initialParams.when ? parseDate(initialParams.when) : prev.departDate,
 				returnDate: initialParams.return ? parseDate(initialParams.return) : prev.returnDate,
+				departFrom: initialParams.when_from ? parseDate(initialParams.when_from) : prev.departFrom,
+				departTo: initialParams.when_to ? parseDate(initialParams.when_to) : prev.departTo,
+				returnFrom: initialParams.return_from ? parseDate(initialParams.return_from) : prev.returnFrom,
+				returnTo: initialParams.return_to ? parseDate(initialParams.return_to) : prev.returnTo,
 			}));
 		}
 	}, [initialParams]);

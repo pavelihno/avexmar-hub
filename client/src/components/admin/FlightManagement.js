@@ -19,7 +19,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
+import { downloadTemplate, uploadFile } from '../../api';
+
 import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
+import { fetchAircrafts } from '../../redux/actions/aircraft';
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchRoutes } from '../../redux/actions/route';
@@ -35,6 +38,7 @@ const FlightManagement = () => {
 	const { flights, isLoading, errors } = useSelector((state) => state.flights);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
+	const { aircrafts, isLoading: aircraftsLoading } = useSelector((state) => state.aircrafts);
 	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
 	const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
@@ -50,24 +54,11 @@ const FlightManagement = () => {
 		dispatch(fetchFlights());
 		dispatch(fetchRoutes());
 		dispatch(fetchAirlines());
+		dispatch(fetchAircrafts());
 		dispatch(fetchTariffs());
 		dispatch(fetchFlightTariffs());
 		dispatch(fetchAirports());
 	}, [dispatch]);
-
-	const getRouteById = (id) => {
-		if (routesLoading || !Array.isArray(routes)) {
-			return null;
-		}
-		return routes.find((route) => route.id === id);
-	};
-
-	const getAirlineById = (id) => {
-		if (airlinesLoading || !Array.isArray(airlines)) {
-			return null;
-		}
-		return airlines.find((airline) => airline.id === id);
-	};
 
 	const getAirportById = (id) => {
 		if (airportsLoading || !Array.isArray(airports)) {
@@ -104,6 +95,14 @@ const FlightManagement = () => {
 			: airlines.map((airline) => ({
 					value: airline.id,
 					label: `${airline.name} (${airline.iata_code})`,
+			  }));
+
+	const aircraftOptions =
+		aircraftsLoading || !Array.isArray(aircrafts)
+			? []
+			: aircrafts.map((aircraft) => ({
+					value: aircraft.id,
+					label: aircraft.type,
 			  }));
 
 	const [deleteFlightTariffDialog, setDeleteFlightTariffDialog] = useState({
@@ -144,6 +143,17 @@ const FlightManagement = () => {
 		setTariffDialogOpen(false);
 	};
 
+	const handleUpload = async (file) => {
+		const res = await uploadFile('flights', file);
+		dispatch(fetchFlights());
+		dispatch(fetchFlightTariffs());
+		return res;
+	};
+
+	const handleGetTemplate = async () => {
+		await downloadTemplate('flights', 'flights_template.xlsx');
+	};
+
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
 		airlineId: {
@@ -177,12 +187,17 @@ const FlightManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.route_id.REQUIRED : null),
 		},
-		aircraft: {
-			key: 'aircraft',
-			apiKey: 'aircraft',
-			label: FIELD_LABELS.FLIGHT.aircraft,
-			type: FIELD_TYPES.TEXT,
-			excludeFromTable: true,
+		aircraftId: {
+			key: 'aircraftId',
+			apiKey: 'aircraft_id',
+			label: FIELD_LABELS.FLIGHT.aircraft_id,
+			type: FIELD_TYPES.SELECT,
+			options: aircraftOptions,
+			formatter: (value) => {
+				const aircraft = aircrafts?.find((a) => a.id === value);
+				return aircraft ? aircraft.type : value;
+			},
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.aircraft_id.REQUIRED : null),
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
@@ -322,6 +337,7 @@ const FlightManagement = () => {
 														color='primary'
 														onClick={(e) => {
 															e.stopPropagation();
+															e.currentTarget.blur();
 															handleEditFlightTariff(item.id, ft.id);
 														}}
 													>
@@ -337,6 +353,7 @@ const FlightManagement = () => {
 														color='error'
 														onClick={(e) => {
 															e.stopPropagation();
+															e.currentTarget.blur();
 															handleOpenDeleteFlightTariffDialog(ft.id);
 														}}
 													>
@@ -353,6 +370,7 @@ const FlightManagement = () => {
 										color='primary'
 										onClick={(e) => {
 											e.stopPropagation();
+											e.currentTarget.blur();
 											handleAddFlightTariff(item.id);
 										}}
 										sx={{ mt: 0.5 }}
@@ -396,10 +414,15 @@ const FlightManagement = () => {
 				onDeleteAll={handleDeleteAllFlights}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
+				uploadButtonText={UI_LABELS.ADMIN.modules.flights.upload_button}
+				uploadTemplateButtonText={UI_LABELS.ADMIN.modules.flights.upload_template_button}
+				getUploadTemplate={handleGetTemplate}
+				onUpload={handleUpload}
 				isLoading={
 					isLoading ||
 					routesLoading ||
 					airlinesLoading ||
+					aircraftsLoading ||
 					tariffsLoading ||
 					flightTariffsLoading ||
 					airportsLoading

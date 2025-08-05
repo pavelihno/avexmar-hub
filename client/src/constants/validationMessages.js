@@ -121,6 +121,12 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	AIRCRAFT: {
+		type: {
+			REQUIRED: 'Тип воздушного судна обязателен',
+		},
+	},
+
 	COUNTRY: {
 		name: {
 			REQUIRED: 'Название обязательно',
@@ -160,6 +166,9 @@ export const VALIDATION_MESSAGES = {
 		status: {
 			REQUIRED: 'Статус рейса обязателен',
 		},
+		aircraft_id: {
+			REQUIRED: 'Воздушное судно обязательно',
+		},
 	},
 
 	TARIFF: {
@@ -178,6 +187,9 @@ export const VALIDATION_MESSAGES = {
 		conditions: {
 			REQUIRED: 'Условия применения тарифа обязательны',
 		},
+		tariff: {
+			REQUIRED: 'Тариф обязателен',
+		},
 	},
 
 	SEARCH: {
@@ -185,7 +197,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Укажите аэропорт отправления',
 		},
 		to: {
-			REQUIRED: 'Укажите аэропорт назначения',
+			REQUIRED: 'Укажите аэропорт прибытия',
 			SAME_AIRPORT: 'Аэропорты не должны совпадать',
 		},
 		when: {

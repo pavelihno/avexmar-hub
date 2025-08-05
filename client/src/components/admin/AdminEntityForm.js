@@ -117,7 +117,7 @@ const AdminEntityForm = ({
 					{fields.map((field, index) => (
 						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
 							{field.renderField({
-								value: formData[field.name] || '',
+								value: formData[field.name] ?? '',
 								onChange: (value) => handleChange(field.name, value),
 								fullWidth: true,
 								error: !!validationErrors[field.name],

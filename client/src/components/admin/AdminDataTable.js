@@ -307,7 +307,10 @@ const AdminDataTable = ({
 						variant='contained'
 						color='primary'
 						startIcon={<AddIcon />}
-						onClick={() => handleOpenDialog()}
+						onClick={(e) => {
+							e.currentTarget.blur();
+							handleOpenDialog();
+						}}
 					>
 						{addButtonText}
 					</Button>
@@ -519,7 +522,13 @@ const AdminDataTable = ({
 												</TableCell>
 											))}
 											<TableCell align='right'>
-												<IconButton color='info' onClick={() => handleOpenDialog(item)}>
+												<IconButton
+													color='info'
+													onClick={(e) => {
+														e.currentTarget.blur();
+														handleOpenDialog(item);
+													}}
+												>
 													<EditIcon />
 												</IconButton>
 												<IconButton
