@@ -166,6 +166,9 @@ export const VALIDATION_MESSAGES = {
 		status: {
 			REQUIRED: 'Статус рейса обязателен',
 		},
+		aircraft_id: {
+			REQUIRED: 'Воздушное судно обязательно',
+		},
 	},
 
 	TARIFF: {
@@ -183,6 +186,9 @@ export const VALIDATION_MESSAGES = {
 		},
 		conditions: {
 			REQUIRED: 'Условия применения тарифа обязательны',
+		},
+		tariff: {
+			REQUIRED: 'Тариф обязателен',
 		},
 	},
 

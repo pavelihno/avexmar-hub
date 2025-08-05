@@ -28,7 +28,7 @@ export const FIELD_LABELS = {
 	FLIGHT: {
 		flight_number: 'Номер рейса',
 		airline_id: 'Авиакомпания',
-		aircraft: 'Воздушное судно',
+		aircraft_id: 'Воздушное судно',
 		route_id: 'Маршрут рейса',
 		origin_airport_id: 'Аэропорт отправления',
 		destination_airport_id: 'Аэропорт прибытия',

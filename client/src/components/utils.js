@@ -131,16 +131,17 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 			case FIELD_TYPES.NUMBER: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx } = allProps;
+
 				return (
 					<TextField
+						type='number'
 						label={field.label}
 						value={value}
 						onChange={(e) => {
 							const val = e.target.value;
 							const numValue = field.float ? parseFloat(val) : parseInt(val, 10);
-							onChange(val === '' ? '' : numValue);
+							onChange(numValue);
 						}}
-						type='number'
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
