@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Box, Typography } from '@mui/material';
@@ -34,7 +34,7 @@ const BookingManagement = () => {
 		dispatch(fetchPassengers());
 	}, [dispatch]);
 
-	const currencyOptions = useMemo(() => getEnumOptions('CURRENCY'), []);
+        const currencyOptions = getEnumOptions('CURRENCY');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -28,41 +28,22 @@ const TicketManagement = () => {
 		dispatch(fetchDiscounts());
 	}, [dispatch]);
 
-	const flightOptions = useMemo(
-		() =>
-			flights.map((f) => ({
-				value: f.id,
-				label: f.id,
-			})),
-		[flights]
-	);
+        const flightOptions = flights.map((f) => ({ value: f.id, label: f.id }));
 
-	const bookingOptions = useMemo(
-		() =>
-			bookings.map((b) => ({
-				value: b.id,
-				label: b.booking_number,
-			})),
-		[bookings]
-	);
+        const bookingOptions = bookings.map((b) => ({
+                value: b.id,
+                label: b.booking_number,
+        }));
 
-	const passengerOptions = useMemo(
-		() =>
-			passengers.map((p) => ({
-				value: p.id,
-				label: `${p.first_name} ${p.last_name}`,
-			})),
-		[passengers]
-	);
+        const passengerOptions = passengers.map((p) => ({
+                value: p.id,
+                label: `${p.first_name} ${p.last_name}`,
+        }));
 
-	const discountOptions = useMemo(
-		() =>
-			discounts.map((d) => ({
-				value: d.id,
-				label: d.discount_name,
-			})),
-		[discounts]
-	);
+        const discountOptions = discounts.map((d) => ({
+                value: d.id,
+                label: d.discount_name,
+        }));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
