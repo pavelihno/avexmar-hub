@@ -79,15 +79,21 @@ const Search = () => {
 	}, [from, to, depart, returnDate, departFrom, returnTo]);
 
 	const buildNearDates = (flights, selectedDate) => {
-		const map = {};
-		for (const f of flights) {
-			const d = f.scheduled_departure;
-			const price = f.price || f.min_price || 0;
-			if (!map[d] || price < map[d].price) {
-				map[d] = { price, currency: f.currency };
-			}
-		}
+		// Group flights by date and find lowest price for each
+		const map = flights.reduce((acc, flight) => {
+			const date = flight.scheduled_departure;
+			const price = flight.price || flight.min_price || 0;
 
+			if (!acc[date] || price < acc[date].price) {
+				acc[date] = {
+					price,
+					currency: flight.currency,
+				};
+			}
+			return acc;
+		}, {});
+
+		// Get nearby dates, excluding selected date
 		const sortedDates = Object.entries(map)
 			.filter(([date]) => date !== selectedDate)
 			.map(([date, info]) => ({
@@ -98,6 +104,7 @@ const Search = () => {
 			}))
 			.sort((a, b) => a.diff - b.diff);
 
+		// Return top 3 closest dates, sorted chronologically
 		return sortedDates
 			.slice(0, 3)
 			.map(({ date, price, currency }) => ({ date, price, currency }))
@@ -140,7 +147,7 @@ const Search = () => {
 	useEffect(() => {
 		fetchNearbyDates(depart, 'outbound');
 		if (hasReturn) fetchNearbyDates(returnDate, 'return');
-	}, [dispatch, isExact, from, to, depart, returnDate, hasReturn]);
+	}, [params]);
 
 	const grouped = [];
 	if (hasReturn) {
@@ -242,7 +249,7 @@ const Search = () => {
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
-				{(nearDatesOutbound.length > 0 || nearDatesReturn.length > 0) && (
+				{(isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0)) && (
 					<Box
 						sx={{
 							display: 'flex',

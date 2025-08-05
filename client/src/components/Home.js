@@ -7,7 +7,7 @@ const Home = () => {
 	return (
 		<Base maxWidth='xl'>
 			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-				<SearchForm />
+				<SearchForm loadLocalStorage={true} />
 			</Box>
 		</Base>
 	);
