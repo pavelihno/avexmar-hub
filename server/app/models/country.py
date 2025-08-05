@@ -74,7 +74,13 @@ class Country(BaseModel):
         for row in rows:
             if not row.get('error'):
                 try:
-                    country = cls.create(session, **row)
+                    country = cls.create(
+                        session, 
+                        name=str(row.get('name')),
+                        name_en=str(row.get('name_en')),
+                        code_a2=str(row.get('code_a2')),
+                        code_a3=str(row.get('code_a3'))
+                    )
                     countries.append(country)
                 except Exception as e:
                     row['error'] = str(e)

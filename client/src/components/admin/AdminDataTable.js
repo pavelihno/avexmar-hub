@@ -35,8 +35,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
-import { createFieldRenderer, FIELD_TYPES } from '../utils';
-import { formatDate } from '../utils';
+import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 import { useTheme, alpha } from '@mui/material/styles';
 
@@ -161,6 +160,9 @@ const AdminDataTable = ({
 	};
 
 	const handleSort = (field) => {
+		const column = columns.find((c) => c.field === field);
+		if (!column || column.type === FIELD_TYPES.CUSTOM) return;
+
 		setSortConfig((prev) => {
 			if (prev.field === field) {
 				return {
@@ -264,24 +266,43 @@ const AdminDataTable = ({
 	const applySorting = (items) => {
 		if (!sortConfig.field) return items;
 		const column = columns.find((c) => c.field === sortConfig.field);
+		if (!column || column.type === FIELD_TYPES.CUSTOM) return items;
 
 		const getSortValue = (item) => {
 			const raw = item[sortConfig.field];
-			if (!column) return raw;
-			if (column.formatter) return column.formatter(raw);
-			if (column.type === FIELD_TYPES.SELECT) {
-				const opt = column.options?.find((o) => o.value === raw);
-				return opt ? opt.label : raw;
+			switch (column.type) {
+				case FIELD_TYPES.DATE:
+				case FIELD_TYPES.DATETIME:
+					return raw ? new Date(raw).getTime() : 0;
+				case FIELD_TYPES.TIME:
+					return raw ? parseTime(raw) : 0;
+				case FIELD_TYPES.NUMBER:
+					return raw === undefined || raw === null ? 0 : Number(raw);
+				case FIELD_TYPES.BOOLEAN:
+					return raw ? 1 : 0;
+				case FIELD_TYPES.SELECT: {
+					const opt = column.options?.find((o) => o.value === raw);
+					const label = opt ? opt.label : column.formatter ? column.formatter(raw) : raw;
+					return label ? String(label).toLowerCase() : '';
+				}
+				case FIELD_TYPES.TEXT:
+				case FIELD_TYPES.TEXT_AREA:
+				case FIELD_TYPES.EMAIL:
+				case FIELD_TYPES.PHONE:
+					return raw ? String(raw).toLowerCase() : '';
+				default:
+					return raw;
 			}
-			if (column.type === FIELD_TYPES.BOOLEAN) {
-				return raw ? ENUM_LABELS.BOOLEAN.true : ENUM_LABELS.BOOLEAN.false;
-			}
-			return raw;
 		};
 
 		return [...items].sort((a, b) => {
 			const aVal = getSortValue(a);
 			const bVal = getSortValue(b);
+
+			if (typeof aVal === 'string' && typeof bVal === 'string') {
+				const comparison = aVal.localeCompare(bVal);
+				return sortConfig.direction === 'asc' ? comparison : -comparison;
+			}
 			if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
 			if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
 			return 0;
@@ -394,16 +415,22 @@ const AdminDataTable = ({
 												align={column.align || 'left'}
 												sx={{
 													fontWeight: 'bold',
-													cursor: 'pointer',
+													cursor: column.type === FIELD_TYPES.CUSTOM ? 'default' : 'pointer',
 												}}
-												onClick={() => handleSort(column.field)}
+												{...(column.type !== FIELD_TYPES.CUSTOM
+													? { onClick: () => handleSort(column.field) }
+													: {})}
 											>
-												<TableSortLabel
-													active={sortConfig.field === column.field}
-													direction={sortConfig.direction}
-												>
-													{column.header}
-												</TableSortLabel>
+												{column.type !== FIELD_TYPES.CUSTOM ? (
+													<TableSortLabel
+														active={sortConfig.field === column.field}
+														direction={sortConfig.direction}
+													>
+														{column.header}
+													</TableSortLabel>
+												) : (
+													column.header
+												)}
 											</TableCell>
 										))}
 										<TableCell align='right' sx={{ fontWeight: 'bold' }}>

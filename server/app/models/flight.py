@@ -42,6 +42,13 @@ class Flight(BaseModel):
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
 
+    __table_args__ = (
+        db.UniqueConstraint(
+            'flight_number', 'airline_id', 'route_id', 'scheduled_departure',
+            name='uix_flight_number_airline_route_departure'
+        ),
+    )
+
     upload_fields = {
         'airline_code': 'Код авиакомпании',
         'flight_number': 'Номер рейса',
@@ -59,6 +66,16 @@ class Flight(BaseModel):
         'seats_number': 'Количество мест',
         'tariff_number': 'Номер тарифа',
     }
+
+    upload_date_fields = [
+        'scheduled_departure',
+        'scheduled_arrival',
+    ]
+
+    upload_time_fields = [
+        'scheduled_departure_time',
+        'scheduled_arrival_time',
+    ]
 
     MAX_TARIFFS = 3
 
@@ -86,10 +103,10 @@ class Flight(BaseModel):
                 'origin_airport_code',
                 'destination_airport_code',
                 'scheduled_departure',
-                'scheduled_departure_time',
                 'scheduled_arrival',
-                'scheduled_arrival_time',
             ],
+            date_fields=cls.upload_date_fields,
+            time_fields=cls.upload_time_fields,
         )
 
         flights = []
@@ -125,16 +142,12 @@ class Flight(BaseModel):
                     aircraft_id = None
                     aircraft_type = row.get('aircraft')
                     if aircraft_type:
-                        aircraft_obj = Aircraft.query.filter(
-                            Aircraft.type == aircraft_type
-                        ).one_or_none()
-                        if not aircraft_obj:
-                            raise ValueError('Invalid aircraft type')
-                        aircraft_id = aircraft_obj.id
+                        aircraft = Aircraft.query.filter_by(type=aircraft_type).one_or_none()
+                        aircraft_id = aircraft.id if aircraft else None
 
                     flight = cls.create(
                         session,
-                        flight_number=row.get('flight_number'),
+                        flight_number=str(row.get('flight_number')),
                         airline_id=airline.id,
                         route_id=route.id,
                         aircraft_id=aircraft_id,
@@ -177,13 +190,6 @@ class Flight(BaseModel):
                 error_rows.append(row)
 
         return flights, error_rows
-
-    __table_args__ = (
-        db.UniqueConstraint(
-            'flight_number', 'airline_id', 'route_id', 'scheduled_departure',
-            name='uix_flight_number_airline_route_departure'
-        ),
-    )
 
     @hybrid_property
     def airline_flight_number(self):

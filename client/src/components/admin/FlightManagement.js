@@ -197,7 +197,6 @@ const FlightManagement = () => {
 				const aircraft = aircrafts?.find((a) => a.id === value);
 				return aircraft ? aircraft.type : value;
 			},
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.aircraft_id.REQUIRED : null),
 		},
 		scheduledDeparture: {
 			key: 'scheduledDeparture',
