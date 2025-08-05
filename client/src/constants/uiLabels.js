@@ -292,10 +292,6 @@ export const UI_LABELS = {
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
 				{ key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
 			],
-			errors: {
-				same_airport: 'Пункты отправления и назначения не могут совпадать',
-				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
-			},
 		},
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',

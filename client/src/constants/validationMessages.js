@@ -185,7 +185,7 @@ export const VALIDATION_MESSAGES = {
 			REQUIRED: 'Укажите аэропорт отправления',
 		},
 		to: {
-			REQUIRED: 'Укажите аэропорт назначения',
+			REQUIRED: 'Укажите аэропорт прибытия',
 			SAME_AIRPORT: 'Аэропорты не должны совпадать',
 		},
 		when: {
