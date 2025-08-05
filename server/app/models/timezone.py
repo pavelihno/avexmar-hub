@@ -54,7 +54,10 @@ class Timezone(BaseModel):
         for row in rows:
             if not row.get('error'):
                 try:
-                    tz = cls.create(session, **row)
+                    tz = cls.create(
+                        session, 
+                        name=str(row.get('name')),
+                    )
                     timezones.append(tz)
                 except Exception as e:
                     row['error'] = str(e)

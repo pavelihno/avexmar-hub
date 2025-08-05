@@ -75,11 +75,13 @@ class Airline(BaseModel):
                     if not country:
                         raise ValueError('Invalid country code')
 
-                    airline = cls.create(session,
-                                       **{
-                       **row,
-                       'country_id': country.id,
-                    })
+                    airline = cls.create(
+                        session,
+                        iata_code=str(row.get('iata_code')),
+                        icao_code=str(row.get('icao_code')),
+                        name=str(row.get('name')),
+                        country_id=country.id
+                    )
                     airlines.append(airline)
                 except Exception as e:
                     row['error'] = str(e)

@@ -108,11 +108,13 @@ class Airport(BaseModel):
 
                     airport = cls.create(
                         session,
-                        **{
-                            **row,
-                            'country_id': country.id,
-                            'timezone_id': tz.id if tz else None,
-                        }
+                        city_name=str(row.get('city_name')),
+                        city_name_en=str(row.get('city_name_en')),
+                        iata_code=str(row.get('iata_code')),
+                        icao_code=str(row.get('icao_code')),
+                        city_code=str(row.get('city_code')),
+                        country_id=country.id,
+                        timezone_id=tz.id if tz else None,
                     )
                     airports.append(airport)
                 except Exception as e:
