@@ -135,12 +135,20 @@ class Flight(BaseModel):
                     if isinstance(arr_time, datetime):
                         arr_time = arr_time.time()
 
+                    aircraft_id = None
+                    aircraft_type = row.get('aircraft')
+                    if aircraft_type:
+                        aircraft_obj = Aircraft.query.filter_by(type=aircraft_type).first()
+                        if not aircraft_obj:
+                            raise ValueError('Invalid aircraft type')
+                        aircraft_id = aircraft_obj.id
+
                     flight = cls.create(
                         session,
                         flight_number=row.get('flight_number'),
                         airline_id=airline.id,
                         route_id=route.id,
-                        aircraft=row.get('aircraft'),
+                        aircraft_id=aircraft_id,
                         scheduled_departure=dep_date,
                         scheduled_departure_time=dep_time,
                         scheduled_arrival=arr_date,
