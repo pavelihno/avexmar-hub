@@ -31,4 +31,4 @@ def update_aircraft(current_user, aircraft_id):
 @admin_required
 def delete_aircraft(current_user, aircraft_id):
     aircraft = Aircraft.delete(aircraft_id)
-    return jsonify(aircraft.to_dict())
+    return jsonify(aircraft)

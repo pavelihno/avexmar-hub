@@ -34,7 +34,7 @@ def update_country(current_user, country_id):
 @admin_required
 def delete_country(current_user, country_id):
     deleted = Country.delete_or_404(country_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
 
 
 @admin_required

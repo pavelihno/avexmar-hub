@@ -32,7 +32,7 @@ def update_airport(current_user, airport_id):
 @admin_required
 def delete_airport(current_user, airport_id):
     deleted = Airport.delete_or_404(airport_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
 
 
 @admin_required

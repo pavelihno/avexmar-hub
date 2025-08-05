@@ -33,7 +33,7 @@ def update_timezone(current_user, timezone_id):
 @admin_required
 def delete_timezone(current_user, timezone_id):
     deleted = Timezone.delete_or_404(timezone_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
 
 
 @admin_required

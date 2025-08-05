@@ -35,4 +35,4 @@ def update_seat(current_user, seat_id):
 @admin_required
 def delete_seat(current_user, seat_id):
     deleted = Seat.delete_or_404(seat_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
