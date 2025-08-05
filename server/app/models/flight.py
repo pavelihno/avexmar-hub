@@ -9,6 +9,7 @@ from app.models.airline import Airline
 from app.models.airport import Airport
 from app.models.route import Route
 from app.models.timezone import Timezone
+from app.models.aircraft import Aircraft
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
@@ -24,7 +25,7 @@ class Flight(BaseModel):
     flight_number = db.Column(db.String, nullable=False)
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)
     airline_id = db.Column(db.Integer, db.ForeignKey('airlines.id', ondelete='RESTRICT'), nullable=False)
-    aircraft = db.Column(db.String, nullable=True)
+    aircraft_id = db.Column(db.Integer, db.ForeignKey('aircrafts.id', ondelete='RESTRICT'), nullable=True)
 
     scheduled_departure = db.Column(db.Date, nullable=False)
     scheduled_departure_time = db.Column(db.Time, nullable=True)
@@ -37,6 +38,7 @@ class Flight(BaseModel):
     )
     route: Mapped['Route'] = db.relationship('Route', back_populates='flights')
     airline: Mapped['Airline'] = db.relationship('Airline', back_populates='flights')
+    aircraft: Mapped['Aircraft'] = db.relationship('Aircraft', back_populates='flights')
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
@@ -230,7 +232,8 @@ class Flight(BaseModel):
             'airline_flight_number': self.airline_flight_number,
             'airline_id': self.airline_id,
             'route_id': self.route_id,
-            'aircraft': self.aircraft,
+            'aircraft_id': self.aircraft_id,
+            'aircraft_type': self.aircraft.type if self.aircraft else None,
             'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
             'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
             'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,

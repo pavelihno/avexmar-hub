@@ -4,6 +4,7 @@ import { thunk } from 'redux-thunk';
 import authReducer from './reducers/auth';
 import airportReducer from './reducers/airport';
 import airlineReducer from './reducers/airline';
+import aircraftReducer from './reducers/aircraft';
 import countryReducer from './reducers/country';
 import routesReducer from './reducers/route';
 import flightReducer from './reducers/flight';
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
 	auth: authReducer,
 	airports: airportReducer,
 	airlines: airlineReducer,
+	aircrafts: aircraftReducer,
 	countries: countryReducer,
 	routes: routesReducer,
 	flights: flightReducer,

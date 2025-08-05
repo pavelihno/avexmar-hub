@@ -13,6 +13,7 @@ from app.controllers._dev_controller import *
 from app.controllers.auth_controller import *
 from app.controllers.user_controller import *
 from app.controllers.airport_controller import *
+from app.controllers.aircraft_controller import *
 from app.controllers.route_controller import *
 from app.controllers.flight_controller import *
 from app.controllers.tariff_controller import *
@@ -80,6 +81,13 @@ def __create_app(_config_class, _db):
     app.route('/airports/<int:airport_id>', methods=['DELETE'])(delete_airport)
     app.route('/airports/upload', methods=['POST'])(upload_airport)
     app.route('/airports/template', methods=['GET'])(get_airport_template)
+
+    # aircrafts
+    app.route('/aircrafts', methods=['GET'])(get_aircrafts)
+    app.route('/aircrafts', methods=['POST'])(create_aircraft)
+    app.route('/aircrafts/<int:aircraft_id>', methods=['GET'])(get_aircraft)
+    app.route('/aircrafts/<int:aircraft_id>', methods=['PUT'])(update_aircraft)
+    app.route('/aircrafts/<int:aircraft_id>', methods=['DELETE'])(delete_aircraft)
 
     # airlines
     app.route('/airlines', methods=['GET'])(get_airlines)

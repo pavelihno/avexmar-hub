@@ -3,6 +3,7 @@ import React from 'react';
 import AdminPanel from '../components/admin/AdminPanel';
 import AirportManagement from '../components/admin/AirportManagement';
 import AirlineManagement from '../components/admin/AirlineManagement';
+import AircraftManagement from '../components/admin/AircraftManagement';
 import CountryManagement from '../components/admin/CountryManagement';
 import TimezoneManagement from '../components/admin/TimezoneManagement';
 import RouteManagement from '../components/admin/RouteManagement';
@@ -19,114 +20,59 @@ import ProtectedRoute from './ProtectedRoute';
 const AdminRoutes = ({ isAdmin }) => [
 	{
 		path: '/admin',
-		element: (
-			<ProtectedRoute children={<AdminPanel />} condition={isAdmin} />
-		),
+		element: <ProtectedRoute children={<AdminPanel />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/airports',
-		element: (
-			<ProtectedRoute
-				children={<AirportManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<AirportManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/airlines',
-		element: (
-			<ProtectedRoute
-				children={<AirlineManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<AirlineManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/aircrafts',
+		element: <ProtectedRoute children={<AircraftManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/countries',
-		element: (
-			<ProtectedRoute
-				children={<CountryManagement />}
-				condition={isAdmin}
-			/>
-		),
-        },
-        {
-                path: '/admin/timezones',
-                element: (
-                        <ProtectedRoute
-                                children={<TimezoneManagement />}
-                                condition={isAdmin}
-                        />
-                ),
-        },
-        {
-                path: '/admin/routes',
-		element: (
-			<ProtectedRoute
-				children={<RouteManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<CountryManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/timezones',
+		element: <ProtectedRoute children={<TimezoneManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/routes',
+		element: <ProtectedRoute children={<RouteManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/discounts',
-		element: (
-			<ProtectedRoute
-				children={<DiscountManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<DiscountManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/flights',
-		element: (
-			<ProtectedRoute
-				children={<FlightManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<FlightManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/tariffs',
-		element: (
-			<ProtectedRoute
-				children={<TariffManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<TariffManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/bookings',
-		element: (
-			<ProtectedRoute
-				children={<BookingManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<BookingManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/tickets',
-		element: (
-			<ProtectedRoute
-				children={<TicketManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/passengers',
-		element: (
-			<ProtectedRoute
-				children={<PassengerManagement />}
-				condition={isAdmin}
-			/>
-		),
+		element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/users',
-		element: (
-			<ProtectedRoute children={<UserManagement />} condition={isAdmin} />
-		),
+		element: <ProtectedRoute children={<UserManagement />} condition={isAdmin} />,
 	},
 ];
 

@@ -79,6 +79,9 @@ export const FIELD_LABELS = {
 		name: 'Название авиакомпании',
 		country_id: 'Страна',
 	},
+	AIRCRAFT: {
+		type: 'Тип воздушного судна',
+	},
 	COUNTRY: {
 		name: 'Название',
 		name_en: 'Название (EN)',

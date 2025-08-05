@@ -121,6 +121,12 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	AIRCRAFT: {
+		type: {
+			REQUIRED: 'Тип воздушного судна обязателен',
+		},
+	},
+
 	COUNTRY: {
 		name: {
 			REQUIRED: 'Название обязательно',
