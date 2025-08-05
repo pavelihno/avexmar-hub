@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -45,16 +45,78 @@ const PassengerManagement = () => {
 		dispatch(fetchCountries());
 	}, [dispatch]);
 
-	const bookingOptions = useMemo(
-		() => bookings.map((b) => ({ value: b.id, label: `${b.booking_number} - ${formatDate(b.booking_date)}` })),
-		[bookings]
-	);
-	const citizenshipOptions = useMemo(() => countries.map((c) => ({ value: c.id, label: c.name })), [countries]);
+        const bookingOptions = bookings.map((b) => ({
+                value: b.id,
+                label: `${b.booking_number} - ${formatDate(b.booking_date)}`,
+        }));
+        const citizenshipOptions = countries.map((c) => ({ value: c.id, label: c.name }));
 
 	const getCountryById = (id) => countries.find((c) => c.id === id);
 
-	const FIELDS = useMemo(
-		() => ({
+        const FIELDS = {
+                id: { key: 'id', apiKey: 'id' },
+                passengerId: { key: 'passengerId', apiKey: 'passenger_id', excludeFromForm: true, excludeFromTable: true },
+                bookingId: {
+                        key: 'bookingId',
+                        apiKey: 'booking_id',
+                        label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
+                        type: FIELD_TYPES.SELECT,
+                        fullWidth: true,
+                        options: bookingOptions,
+                        formatter: (value) => {
+                                const booking = bookingOptions.find((b) => b.value === value);
+                                return booking ? booking.label : value;
+                        },
+                },
+                lastName: {
+                        key: 'lastName',
+                        apiKey: 'last_name',
+                        label: FIELD_LABELS.PASSENGER.last_name,
+                        type: FIELD_TYPES.TEXT,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
+                },
+                firstName: {
+                        key: 'firstName',
+                        apiKey: 'first_name',
+                        label: FIELD_LABELS.PASSENGER.first_name,
+                        type: FIELD_TYPES.TEXT,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
+                },
+                gender: {
+                        key: 'gender',
+                        apiKey: 'gender',
+                        label: FIELD_LABELS.PASSENGER.gender,
+                        type: FIELD_TYPES.SELECT,
+                        options: getEnumOptions('GENDER'),
+                        formatter: (value) => ENUM_LABELS.GENDER_SHORT[value] || value,
+                },
+                birthDate: {
+                        key: 'birthDate',
+                        apiKey: 'birth_date',
+                        label: FIELD_LABELS.PASSENGER.birth_date,
+                        type: FIELD_TYPES.DATE,
+                        formatter: (value) => formatDate(value),
+                        validate: (value) => {
+                                if (value && !validateDate(value)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                                return null;
+                        },
+                },
+                documentType: {
+                        key: 'documentType',
+                        apiKey: 'document_type',
+                        label: FIELD_LABELS.PASSENGER.document_type,
+                        type: FIELD_TYPES.SELECT,
+                        options: getEnumOptions('DOCUMENT_TYPE'),
+                        excludeFromTable: true,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : null),
+                },
+                documentNumber: {
+                        key: 'documentNumber',
+                        apiKey: 'document_number',
+                        label: FIELD_LABELS.PASSENGER.document_number,
+                        type: FIELD_TYPES.TEXT,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : null),
+                },
 			id: { key: 'id', apiKey: 'id' },
 			passengerId: { key: 'passengerId', apiKey: 'passenger_id', excludeFromForm: true, excludeFromTable: true },
 			bookingId: {
@@ -156,19 +218,14 @@ const PassengerManagement = () => {
 				label: FIELD_LABELS.BOOKING_PASSENGER.is_contact,
 				type: FIELD_TYPES.BOOLEAN,
 				excludeFromTable: true,
-			},
-		}),
-		[bookingOptions, citizenshipOptions, bookings, countries]
-	);
+                        },
+                },
+        };
 
-	const adminManager = useMemo(
-		() =>
-			createAdminManager(FIELDS, {
-				addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
-				editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
-			}),
-		[FIELDS]
-	);
+        const adminManager = createAdminManager(FIELDS, {
+                addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
+                editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
+        });
 
 	const handleAddPassenger = async (data) => {
 		const apiData = adminManager.toApiFormat(data);

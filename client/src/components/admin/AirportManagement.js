@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -29,15 +29,15 @@ const AirportManagement = () => {
 		dispatch(fetchTimezones());
 	}, [dispatch]);
 
-	const countryOptions = useMemo(() => {
-		if (!countries || !Array.isArray(countries)) return [];
-		return countries.map((c) => ({ value: c.id, label: c.name }));
-	}, [countries]);
+        const countryOptions =
+                !countries || !Array.isArray(countries)
+                        ? []
+                        : countries.map((c) => ({ value: c.id, label: c.name }));
 
-	const timezoneOptions = useMemo(() => {
-		if (!timezones || !Array.isArray(timezones)) return [];
-		return timezones.map((tz) => ({ value: tz.id, label: tz.name }));
-	}, [timezones]);
+        const timezoneOptions =
+                !timezones || !Array.isArray(timezones)
+                        ? []
+                        : timezones.map((tz) => ({ value: tz.id, label: tz.name }));
 
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;
