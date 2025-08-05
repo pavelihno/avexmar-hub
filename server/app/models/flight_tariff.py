@@ -29,7 +29,7 @@ class FlightTariff(BaseModel):
         query = query.filter(cls.flight_id == flight_id, Tariff.seat_class == tariff.seat_class)
         if instance_id is not None:
             query = query.filter(cls.id != instance_id)
-        if query.first() is not None:
+        if query.one_or_none() is not None:
             raise ModelValidationError({'seat_class': 'flight tariff for this class already exists'})
 
     def to_dict(self):

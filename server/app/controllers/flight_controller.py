@@ -32,7 +32,7 @@ def update_flight(current_user, flight_id):
 @admin_required
 def delete_flight(current_user, flight_id):
     deleted = Flight.delete_or_404(flight_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)
 
 
 @admin_required
@@ -57,7 +57,10 @@ def upload_flight(current_user):
 
     flights, error_rows = Flight.upload_from_file(file)
     if error_rows:
-        error_xlsx = create_xlsx(Flight.get_upload_fields(), error_rows)
+        error_xlsx = create_xlsx(
+            Flight.get_upload_fields(), error_rows,
+            Flight.upload_date_fields, Flight.upload_time_fields
+        )
         error_xlsx.seek(0)
         return send_file(
             error_xlsx,

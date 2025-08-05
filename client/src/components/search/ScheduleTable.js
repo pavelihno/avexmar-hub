@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
-import { formatDate, formatNumber, formatTime } from '../utils';
+import { formatDate, formatNumber, formatTime, parseTime } from '../utils';
 
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
@@ -62,14 +62,11 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 				flightNumber: f.flight_number,
 				airlineFlightNumber: f.airline_flight_number,
 				scheduledDepartureDate: new Date(f.scheduled_departure),
-				scheduledDepartureTime: f.scheduled_departure_time,
-				airlineId: f.airline_id,
-				airline: airline ? airline.name : f.airline_id,
-				price: f.min_price
-					? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(f.min_price)} ${
-							ENUM_LABELS.CURRENCY_SYMBOL[f.currency] || ''
-					  }`
-					: '',
+				scheduledDepartureTime: parseTime(f.scheduled_departure_time),
+				airlineId: airline.id,
+				airline: airline.name,
+				price: f.min_price,
+				currency: f.currency,
 			};
 		});
 
@@ -124,7 +121,9 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 								</TableCell>
 								<TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>
 								<TableCell>{row.airline}</TableCell>
-								<TableCell>{row.price}</TableCell>
+								<TableCell>{`${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
+									row.price
+								)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}</TableCell>
 								<TableCell padding='checkbox'>
 									<Radio checked={selectedId === row.id} onClick={() => onSelect(row)} />
 								</TableCell>

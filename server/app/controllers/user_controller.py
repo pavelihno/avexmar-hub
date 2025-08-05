@@ -39,7 +39,7 @@ def update_user(current_user, user_id):
 @admin_required
 def delete_user(current_user, user_id):
     deleted_user = User.delete_or_404(user_id)
-    return jsonify(deleted_user.to_dict())
+    return jsonify(deleted_user)
 
 
 def __set_user_activity(user_id, is_active):

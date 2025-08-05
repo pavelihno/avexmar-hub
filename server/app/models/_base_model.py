@@ -79,7 +79,7 @@ class BaseModel(db.Model):
                 query = query.filter(getattr(cls, col) == data[col])
             if instance_id is not None:
                 query = query.filter(cls.id != instance_id)
-            if query.first() is not None:
+            if query.one_or_none() is not None:
                 for col in columns:
                     errors[col] = 'must be unique'
         return errors
@@ -114,17 +114,19 @@ class BaseModel(db.Model):
         return instance
 
     @classmethod
-    def delete_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
+    def delete_or_404(cls, _id, session: Session | None = None) -> Optional[Dict]:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
         if hasattr(instance, 'prepare_for_deletion'):
             instance.prepare_for_deletion()
 
+        instance_dict = instance.to_dict() if hasattr(instance, 'to_dict') else None
+
         try:
             session.delete(instance)
             session.commit()
-            return instance
+            return instance_dict
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({"message": str(e)}) from e
@@ -173,7 +175,7 @@ class BaseModel(db.Model):
     @classmethod
     def delete(
         cls, _id, session: Session | None = None
-    ) -> Optional['BaseModel']:
+    ) -> Optional[Dict]:
         session = session or db.session
         return cls.delete_or_404(_id, session)
 

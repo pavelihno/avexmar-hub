@@ -59,6 +59,10 @@ class Airport(BaseModel):
         'time_zone': 'Часовой пояс'
     }
 
+    upload_text_fields = [
+        'name', 'city_name', 'city_name_en', 'iata_code', 'icao_code', 'city_code', 'country_code', 'time_zone'
+    ]
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by='name', descending=False)
@@ -73,7 +77,7 @@ class Airport(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields)
+        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):
@@ -104,15 +108,17 @@ class Airport(BaseModel):
                     tz_name = row.get('time_zone')
                     tz = None
                     if tz_name:
-                        tz = Timezone.query.filter_by(name=tz_name).first()
+                        tz = Timezone.query.filter(Timezone.name == tz_name).one_or_none()
 
                     airport = cls.create(
                         session,
-                        **{
-                            **row,
-                            'country_id': country.id,
-                            'timezone_id': tz.id if tz else None,
-                        }
+                        city_name=str(row.get('city_name')),
+                        city_name_en=str(row.get('city_name_en')),
+                        iata_code=str(row.get('iata_code')),
+                        icao_code=str(row.get('icao_code')),
+                        city_code=str(row.get('city_code')),
+                        country_id=country.id,
+                        timezone_id=tz.id if tz else None,
                     )
                     airports.append(airport)
                 except Exception as e:

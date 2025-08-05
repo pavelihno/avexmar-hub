@@ -34,4 +34,4 @@ def update_payment(current_user, payment_id):
 @admin_required
 def delete_payment(current_user, payment_id):
     deleted = Payment.delete_or_404(payment_id)
-    return jsonify(deleted.to_dict())
+    return jsonify(deleted)

@@ -30,6 +30,11 @@ class Seat(BaseModel):
         ),
     )
 
+    @hybrid_property
+    def is_booked(self):
+        """Return True if the seat is associated with a booking"""
+        return self.booking_id is not None
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -38,11 +43,6 @@ class Seat(BaseModel):
             'tariff_id': self.tariff_id,
             'is_booked': self.is_booked
         }
-
-    @hybrid_property
-    def is_booked(self):
-        """Return True if the seat is associated with a booking"""
-        return self.booking_id is not None
 
     @classmethod
     def get_all(cls):

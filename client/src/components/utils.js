@@ -367,7 +367,19 @@ export const createFormFields = (fields) => {
 export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale) => {
 	if (!value) return '';
 	try {
-		return format(new Date(value), dateFormat, { locale });
+		if (typeof value === 'string') {
+			return format(new Date(value), dateFormat, { locale });
+		} else if (value instanceof Date) {
+			return format(value, dateFormat, { locale });
+		} else if (typeof value === 'number') {
+			const date = new Date(value);
+			if (isNaN(date.getDate())) {
+				throw new Error('Invalid date value');
+			}
+			return format(date, dateFormat, { locale });
+		} else {
+			throw new Error('Unsupported date value type');
+		}
 	} catch (error) {
 		console.error('Invalid date value:', value);
 		return value;
@@ -377,7 +389,19 @@ export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale)
 export const formatTime = (value, timeFormat = TIME_FORMAT) => {
 	if (!value) return '';
 	try {
-		return format(new Date(`1970-01-01T${value}`), timeFormat);
+		if (typeof value === 'string') {
+			return format(new Date(`1970-01-01T${value}`), timeFormat);
+		} else if (value instanceof Date) {
+			return format(value, timeFormat);
+		} else if (typeof value === 'number') {
+			const date = new Date(value);
+			if (isNaN(date.getTime())) {
+				throw new Error('Invalid time value');
+			}
+			return format(date, timeFormat);
+		} else {
+			throw new Error('Unsupported time value type');
+		}
 	} catch (error) {
 		console.error('Invalid time value:', value);
 		return value;
