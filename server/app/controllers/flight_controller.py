@@ -1,9 +1,8 @@
-from flask import request, jsonify
+from flask import request, jsonify, send_file
 
 from app.models.flight import Flight
-from app.models.route import Route
-from app.models.airline import Airline
 from app.middlewares.auth_middleware import admin_required
+from app.utils.xlsx import create_xlsx, is_xlsx_file
 
 
 def get_flights():
@@ -34,3 +33,37 @@ def update_flight(current_user, flight_id):
 def delete_flight(current_user, flight_id):
     deleted = Flight.delete_or_404(flight_id)
     return jsonify(deleted.to_dict())
+
+
+@admin_required
+def get_flight_template(current_user):
+    xlsx = Flight.get_xlsx_template()
+    xlsx.seek(0)
+    return send_file(
+        xlsx,
+        as_attachment=True,
+        download_name='flights_template.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+
+
+@admin_required
+def upload_flight(current_user):
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'message': 'No file provided'}), 400
+    if not is_xlsx_file(file):
+        return jsonify({'message': 'Invalid file type'}), 400
+
+    flights, error_rows = Flight.upload_from_file(file)
+    if error_rows:
+        error_xlsx = create_xlsx(Flight.get_upload_fields(), error_rows)
+        error_xlsx.seek(0)
+        return send_file(
+            error_xlsx,
+            as_attachment=True,
+            download_name='upload_errors.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ), 201
+
+    return jsonify({'message': 'Flights created successfully'}), 201

@@ -1,6 +1,6 @@
-from datetime import datetime, time
+from datetime import datetime, time, date
 from typing import List, TYPE_CHECKING
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, Session
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
@@ -11,6 +11,8 @@ from app.models.route import Route
 from app.models.timezone import Timezone
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
+from app.models.tariff import Tariff
+from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
@@ -38,6 +40,143 @@ class Flight(BaseModel):
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
+
+    upload_fields = {
+        'airline_code': 'Код авиакомпании',
+        'flight_number': 'Номер рейса',
+        'origin_airport_code': 'Код аэропорта отправления',
+        'destination_airport_code': 'Код аэропорта прибытия',
+        'aircraft': 'Воздушное судно',
+        'scheduled_departure': 'Дата отправления',
+        'scheduled_departure_time': 'Время отправления',
+        'scheduled_arrival': 'Дата прибытия',
+        'scheduled_arrival_time': 'Время прибытия',
+    }
+
+    tariff_upload_fields = {
+        'seat_class': 'Класс обслуживания',
+        'seats_number': 'Количество мест',
+        'tariff_number': 'Номер тарифа',
+    }
+
+    MAX_TARIFFS = 3
+
+    @classmethod
+    def get_upload_fields(cls):
+        fields = {**cls.upload_fields}
+        for i in range(1, cls.MAX_TARIFFS + 1):
+            for key, label in cls.tariff_upload_fields.items():
+                fields[f"{key}_{i}"] = f"{label} {i}"
+        return fields
+
+    @classmethod
+    def get_xlsx_template(cls):
+        return generate_xlsx_template(cls.get_upload_fields())
+
+    @classmethod
+    def upload_from_file(cls, file, session: Session | None = None):
+        session = session or db.session
+        rows = parse_xlsx(
+            file,
+            cls.get_upload_fields(),
+            required_fields=[
+                'airline_code',
+                'flight_number',
+                'origin_airport_code',
+                'destination_airport_code',
+                'scheduled_departure',
+                'scheduled_departure_time',
+                'scheduled_arrival',
+                'scheduled_arrival_time',
+            ],
+        )
+
+        flights = []
+        error_rows = []
+
+        for row in rows:
+            if not row.get('error'):
+                try:
+                    airline = Airline.query.filter_by(iata_code=row.get('airline_code')).first()
+                    if not airline:
+                        raise ValueError('Invalid airline code')
+
+                    origin = Airport.query.filter_by(iata_code=row.get('origin_airport_code')).first()
+                    if not origin:
+                        raise ValueError('Invalid origin airport code')
+
+                    destination = Airport.query.filter_by(iata_code=row.get('destination_airport_code')).first()
+                    if not destination:
+                        raise ValueError('Invalid destination airport code')
+
+                    route = Route.query.filter_by(
+                        origin_airport_id=origin.id,
+                        destination_airport_id=destination.id,
+                    ).first()
+                    if not route:
+                        route = Route.create(
+                            session,
+                            origin_airport_id=origin.id,
+                            destination_airport_id=destination.id,
+                        )
+
+                    dep_date = row.get('scheduled_departure')
+                    if isinstance(dep_date, datetime):
+                        dep_date = dep_date.date()
+                    arr_date = row.get('scheduled_arrival')
+                    if isinstance(arr_date, datetime):
+                        arr_date = arr_date.date()
+                    dep_time = row.get('scheduled_departure_time')
+                    if isinstance(dep_time, datetime):
+                        dep_time = dep_time.time()
+                    arr_time = row.get('scheduled_arrival_time')
+                    if isinstance(arr_time, datetime):
+                        arr_time = arr_time.time()
+
+                    flight = cls.create(
+                        session,
+                        flight_number=row.get('flight_number'),
+                        airline_id=airline.id,
+                        route_id=route.id,
+                        aircraft=row.get('aircraft'),
+                        scheduled_departure=dep_date,
+                        scheduled_departure_time=dep_time,
+                        scheduled_arrival=arr_date,
+                        scheduled_arrival_time=arr_time,
+                    )
+
+                    used_classes = set()
+                    for i in range(1, cls.MAX_TARIFFS + 1):
+                        seat_class = row.get(f'seat_class_{i}')
+                        seats = row.get(f'seats_number_{i}')
+                        tariff_number = row.get(f'tariff_number_{i}')
+                        if not (seat_class or seats or tariff_number):
+                            continue
+                        if not (seat_class and seats and tariff_number):
+                            raise ValueError(f'Incomplete tariff data in group {i}')
+                        if seat_class in used_classes:
+                            raise ValueError('Duplicate service class')
+                        used_classes.add(seat_class)
+                        tariff = Tariff.query.filter_by(
+                            seat_class=seat_class, order_number=int(tariff_number)
+                        ).first()
+                        if not tariff:
+                            raise ValueError('Invalid tariff number or class')
+                        FlightTariff.create(
+                            session,
+                            flight_id=flight.id,
+                            tariff_id=tariff.id,
+                            seats_number=int(seats),
+                        )
+
+                    flights.append(flight)
+                except Exception as e:
+                    row['error'] = str(e)
+
+            if row.get('error'):
+                error_rows.append(row)
+
+        return flights, error_rows
 
     __table_args__ = (
         db.UniqueConstraint(
