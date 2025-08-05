@@ -114,7 +114,7 @@ def __query_flights(
     return results
 
 
-def search_flights():
+def search_flights(is_nearby=False):
     params = request.args
 
     origin_code = params.get('from')
@@ -158,12 +158,16 @@ def search_flights():
     is_outbound_found = bool(outbound_flights)
     is_return_found = bool(return_flights)
 
-    if not is_outbound_found:
-        return jsonify([])
-    elif has_return and not is_return_found:
-        return jsonify([])
+    if not is_nearby:
+        if not is_outbound_found:
+            return jsonify([])
+        elif has_return and not is_return_found:
+            return jsonify([])
 
     return jsonify(outbound_flights + return_flights)
+
+def search_nearby_flights():
+    return search_flights(is_nearby=True)
 
 
 def schedule_flights():

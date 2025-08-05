@@ -10,7 +10,7 @@ import Base from '../Base';
 import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
-import { fetchNearbyDateFlights, fetchSearchFlights } from '../../redux/actions/search';
+import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlights } from '../../redux/actions/search';
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
@@ -21,8 +21,9 @@ const Search = () => {
 	const navigate = useNavigate();
 
 	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
-	const { nearbyFlights, isLoading: nearbyFlightsLoading } = useSelector((state) => state.search);
-	const isLoading = flightsLoading || nearbyFlightsLoading;
+	const { nearbyOutboundFlights, nearbyOutboundLoading } = useSelector((state) => state.search);
+	const { nearbyReturnFlights, nearbyReturnLoading } = useSelector((state) => state.search);
+	const isLoading = flightsLoading || nearbyOutboundLoading || nearbyReturnLoading;
 
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
@@ -41,12 +42,10 @@ const Search = () => {
 	const returnFrom = params.get('return_from');
 	const returnTo = params.get('return_to');
 	const isExact = params.get('date_mode') === 'exact';
-	const hasReturn = returnDate || returnFrom || returnTo;
+	const hasReturn = !!(returnDate || returnFrom || returnTo);
 
 	const [sortKey, setSortKey] = useState('departure_date');
 	const [sortOrder, setSortOrder] = useState('asc');
-	const [nearDatesOutbound, setNearDatesOutbound] = useState([]);
-	const [nearDatesReturn, setNearDatesReturn] = useState([]);
 	const [visibleCount, setVisibleCount] = useState(10);
 
 	useEffect(() => {
@@ -59,13 +58,16 @@ const Search = () => {
 		dispatch(fetchSearchFlights(paramObj));
 	}, [dispatch, paramStr]);
 
-	useEffect(() => {
-		const _outboundFlights = nearbyFlights.filter((f) => f.direction === 'outbound');
-		const _returnFlights = nearbyFlights.filter((f) => f.direction === 'return');
+	const [nearDatesOutbound, setNearDatesOutbound] = useState([]);
+	const [nearDatesReturn, setNearDatesReturn] = useState([]);
 
-		setNearDatesOutbound(buildNearDates(_outboundFlights, depart));
-		setNearDatesReturn(buildNearDates(_returnFlights, returnDate));
-	}, [nearbyFlights, depart, returnDate]);
+	useEffect(() => {
+		setNearDatesOutbound(buildNearDates(nearbyOutboundFlights, depart));
+	}, [nearbyOutboundFlights, depart]);
+
+	useEffect(() => {
+		setNearDatesReturn(buildNearDates(nearbyReturnFlights, returnDate));
+	}, [nearbyReturnFlights, returnDate]);
 
 	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
@@ -103,10 +105,9 @@ const Search = () => {
 	};
 
 	const fetchNearbyDates = (date, direction) => {
-		const setDates = direction === 'return' ? setNearDatesReturn : setNearDatesOutbound;
+		const fetchAction = direction === 'return' ? fetchNearbyReturnFlights : fetchNearbyOutboundFlights;
 
 		if (!isExact || !from || !to || !date) {
-			setDates([]);
 			return;
 		}
 
@@ -120,22 +121,26 @@ const Search = () => {
 		const requestParams = {
 			...paramObj,
 			date_mode: 'flex',
-			when_from: formatDate(start, DATE_API_FORMAT),
-			when_to: formatDate(end, DATE_API_FORMAT),
-			return_from: formatDate(start, DATE_API_FORMAT),
-			return_to: formatDate(end, DATE_API_FORMAT),
 		};
+
+		if (direction === 'return') {
+			requestParams.return_from = formatDate(start, DATE_API_FORMAT);
+			requestParams.return_to = formatDate(end, DATE_API_FORMAT);
+		} else {
+			requestParams.when_from = formatDate(start, DATE_API_FORMAT);
+			requestParams.when_to = formatDate(end, DATE_API_FORMAT);
+		}
 
 		delete requestParams.when;
 		delete requestParams.return;
 
-		dispatch(fetchNearbyDateFlights(requestParams));
+		dispatch(fetchAction(requestParams));
 	};
 
 	useEffect(() => {
 		fetchNearbyDates(depart, 'outbound');
-		fetchNearbyDates(returnDate, 'return');
-	}, [dispatch, isExact, from, to, depart, returnDate]);
+		if (hasReturn) fetchNearbyDates(returnDate, 'return');
+	}, [dispatch, isExact, from, to, depart, returnDate, hasReturn]);
 
 	const grouped = [];
 	if (hasReturn) {
@@ -226,6 +231,14 @@ const Search = () => {
 			setSortOrder('asc');
 		}
 	};
+
+	console.log('Render check:', {
+		hasReturn: hasReturn,
+		outboundLength: nearDatesOutbound.length,
+		returnLength: nearDatesReturn.length,
+		outbound: nearDatesOutbound,
+		return: nearDatesReturn,
+	});
 
 	return (
 		<Base>

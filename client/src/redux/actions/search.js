@@ -20,11 +20,23 @@ export const fetchSearchFlights = createAsyncThunk('search/fetchFlights', async 
 	}
 });
 
-export const fetchNearbyDateFlights = createAsyncThunk(
-	'search/fetchNearbyDateFlights',
+export const fetchNearbyOutboundFlights = createAsyncThunk(
+	'search/fetchNearbyOutboundFlights',
 	async (params, { rejectWithValue }) => {
 		try {
-			const res = await serverApi.get('/search/flights', { params });
+			const res = await serverApi.get('/search/flights/nearby', { params });
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
+export const fetchNearbyReturnFlights = createAsyncThunk(
+	'search/fetchNearbyReturnFlights',
+	async (params, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get('/search/flights/nearby', { params });
 			return res.data;
 		} catch (err) {
 			return rejectWithValue(getErrorData(err));
