@@ -64,6 +64,14 @@ class Airport(BaseModel):
         return super().get_all(sort_by='name', descending=False)
 
     @classmethod
+    def get_by_code(cls, code):
+        """Get airport by IATA code"""
+        if not code:
+            return None
+        code = code.upper()
+        return cls.query.filter(cls.iata_code == code).one_or_none()
+
+    @classmethod
     def get_xlsx_template(cls):
         return generate_xlsx_template(cls.upload_fields)
 

@@ -117,6 +117,10 @@ class BaseModel(db.Model):
     def delete_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
+
+        if hasattr(instance, 'prepare_for_deletion'):
+            instance.prepare_for_deletion()
+
         try:
             session.delete(instance)
             session.commit()

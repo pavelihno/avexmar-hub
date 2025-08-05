@@ -59,7 +59,8 @@ class Country(BaseModel):
         """Get country by A2 or A3 code"""
         if not code:
             return None
-        return cls.query.filter((cls.code_a2 == code) | (cls.code_a3 == code)).first()
+        code = code.upper()
+        return cls.query.filter((cls.code_a2 == code) | (cls.code_a3 == code)).one_or_none()
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):

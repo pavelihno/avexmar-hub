@@ -41,6 +41,14 @@ class Airline(BaseModel):
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by='name', descending=False)
+    
+    @classmethod
+    def get_by_code(cls, code):
+        """Get airline by IATA code"""
+        if not code:
+            return None
+        code = code.upper()
+        return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
     def get_xlsx_template(cls):

@@ -1,4 +1,3 @@
-from datetime import datetime, time, date
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, Session
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -8,12 +7,12 @@ from app.database import db
 from app.models.airline import Airline
 from app.models.airport import Airport
 from app.models.route import Route
-from app.models.timezone import Timezone
 from app.models.aircraft import Aircraft
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+from app.utils.datetime import get_datetime, parse_date, parse_time
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
@@ -99,15 +98,15 @@ class Flight(BaseModel):
         for row in rows:
             if not row.get('error'):
                 try:
-                    airline = Airline.query.filter_by(iata_code=row.get('airline_code')).first()
+                    airline = Airline.get_by_code(row.get('airline_code'))
                     if not airline:
                         raise ValueError('Invalid airline code')
 
-                    origin = Airport.query.filter_by(iata_code=row.get('origin_airport_code')).first()
+                    origin = Airport.get_by_code(row.get('origin_airport_code'))
                     if not origin:
                         raise ValueError('Invalid origin airport code')
 
-                    destination = Airport.query.filter_by(iata_code=row.get('destination_airport_code')).first()
+                    destination = Airport.get_by_code(row.get('destination_airport_code'))
                     if not destination:
                         raise ValueError('Invalid destination airport code')
 
@@ -116,24 +115,12 @@ class Flight(BaseModel):
                         destination_airport_id=destination.id,
                     ).first()
                     if not route:
-                        route = Route.create(
-                            session,
-                            origin_airport_id=origin.id,
-                            destination_airport_id=destination.id,
-                        )
+                        raise ValueError('Route does not exist')
 
-                    dep_date = row.get('scheduled_departure')
-                    if isinstance(dep_date, datetime):
-                        dep_date = dep_date.date()
-                    arr_date = row.get('scheduled_arrival')
-                    if isinstance(arr_date, datetime):
-                        arr_date = arr_date.date()
-                    dep_time = row.get('scheduled_departure_time')
-                    if isinstance(dep_time, datetime):
-                        dep_time = dep_time.time()
-                    arr_time = row.get('scheduled_arrival_time')
-                    if isinstance(arr_time, datetime):
-                        arr_time = arr_time.time()
+                    dep_date = parse_date(row.get('scheduled_departure'))
+                    dep_time = parse_time(row.get('scheduled_departure_time'))
+                    arr_date = parse_date(row.get('scheduled_arrival'))
+                    arr_time = parse_time(row.get('scheduled_arrival_time'))
 
                     aircraft_id = None
                     aircraft_type = row.get('aircraft')
@@ -207,14 +194,8 @@ class Flight(BaseModel):
         if not (self.scheduled_departure and self.scheduled_arrival):
             return None
 
-        depart_dt = datetime.combine(
-            self.scheduled_departure,
-            self.scheduled_departure_time or time()
-        )
-        arrive_dt = datetime.combine(
-            self.scheduled_arrival,
-            self.scheduled_arrival_time or time()
-        )
+        depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
+        arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
 
         route = self.route
         origin = route.origin_airport
