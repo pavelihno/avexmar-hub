@@ -302,16 +302,19 @@ const AdminDataTable = ({
 					<Typography variant='h4'>{title}</Typography>
 				</Box>
 
-				{addButtonText && (
-					<Button
-						variant='contained'
-						color='primary'
-						startIcon={<AddIcon />}
-						onClick={() => handleOpenDialog()}
-					>
-						{addButtonText}
-					</Button>
-				)}
+                                {addButtonText && (
+                                        <Button
+                                                variant='contained'
+                                                color='primary'
+                                                startIcon={<AddIcon />}
+                                                onClick={(e) => {
+                                                        e.currentTarget.blur();
+                                                        handleOpenDialog();
+                                                }}
+                                        >
+                                                {addButtonText}
+                                        </Button>
+                                )}
 
 				{uploadButtonText && uploadTemplateButtonText && (
 					<>
@@ -519,9 +522,15 @@ const AdminDataTable = ({
 												</TableCell>
 											))}
 											<TableCell align='right'>
-												<IconButton color='info' onClick={() => handleOpenDialog(item)}>
-													<EditIcon />
-												</IconButton>
+                                                                                                <IconButton
+                                                                                                        color='info'
+                                                                                                        onClick={(e) => {
+                                                                                                                e.currentTarget.blur();
+                                                                                                                handleOpenDialog(item);
+                                                                                                        }}
+                                                                                                >
+                                                                                                        <EditIcon />
+                                                                                                </IconButton>
 												<IconButton
 													color='error'
 													onClick={() => handleOpenDeleteDialog(item.id)}
