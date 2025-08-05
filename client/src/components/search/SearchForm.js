@@ -191,26 +191,26 @@ const SearchForm = ({ initialParams = {} }) => {
 		}
 	}, [seatClassOptions, seatClass]);
 
-	const passengerCategories = UI_LABELS.HOME.search.passenger_categories;
+	const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
 	const swapAirports = () => {
 		setFormValues((prev) => ({ ...prev, from: prev.to, to: prev.from }));
 	};
 
 	const totalPassengers = passengers.adults + passengers.children + passengers.infants;
-	const passengerWord = UI_LABELS.HOME.search.passenger_word(totalPassengers);
+	const passengerWord = UI_LABELS.SEARCH.form.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
 	const formFields = useMemo(() => {
 		const fields = {
-			from: { key: 'from', label: UI_LABELS.HOME.search.from, type: FIELD_TYPES.SELECT, options: airportOptions },
-			to: { key: 'to', label: UI_LABELS.HOME.search.to, type: FIELD_TYPES.SELECT, options: airportOptions },
-			departDate: { key: 'departDate', label: UI_LABELS.HOME.search.when, type: FIELD_TYPES.DATE },
-			returnDate: { key: 'returnDate', label: UI_LABELS.HOME.search.return, type: FIELD_TYPES.DATE },
-			departFrom: { key: 'departFrom', label: UI_LABELS.HOME.search.when_from, type: FIELD_TYPES.DATE },
-			departTo: { key: 'departTo', label: UI_LABELS.HOME.search.when_to, type: FIELD_TYPES.DATE },
-			returnFrom: { key: 'returnFrom', label: UI_LABELS.HOME.search.return_from, type: FIELD_TYPES.DATE },
-			returnTo: { key: 'returnTo', label: UI_LABELS.HOME.search.return_to, type: FIELD_TYPES.DATE },
+			from: { key: 'from', label: UI_LABELS.SEARCH.form.from, type: FIELD_TYPES.SELECT, options: airportOptions },
+			to: { key: 'to', label: UI_LABELS.SEARCH.form.to, type: FIELD_TYPES.SELECT, options: airportOptions },
+			departDate: { key: 'departDate', label: UI_LABELS.SEARCH.form.when, type: FIELD_TYPES.DATE },
+			returnDate: { key: 'returnDate', label: UI_LABELS.SEARCH.form.return, type: FIELD_TYPES.DATE },
+			departFrom: { key: 'departFrom', label: UI_LABELS.SEARCH.form.when_from, type: FIELD_TYPES.DATE },
+			departTo: { key: 'departTo', label: UI_LABELS.SEARCH.form.when_to, type: FIELD_TYPES.DATE },
+			returnFrom: { key: 'returnFrom', label: UI_LABELS.SEARCH.form.return_from, type: FIELD_TYPES.DATE },
+			returnTo: { key: 'returnTo', label: UI_LABELS.SEARCH.form.return_to, type: FIELD_TYPES.DATE },
 		};
 		const arr = createFormFields(fields);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
@@ -363,7 +363,7 @@ const SearchForm = ({ initialParams = {} }) => {
 				}}
 			>
 				<Typography variant='body2' sx={{ mr: 1 }}>
-					{UI_LABELS.HOME.search.date_modes.exact}
+					{UI_LABELS.SEARCH.form.date_modes.exact}
 				</Typography>
 				<Switch
 					size='small'
@@ -372,7 +372,7 @@ const SearchForm = ({ initialParams = {} }) => {
 					sx={{ mx: 1 }}
 				/>
 				<Typography variant='body2' sx={{ ml: 1 }}>
-					{UI_LABELS.HOME.search.date_modes.flexible}
+					{UI_LABELS.SEARCH.form.date_modes.flexible}
 				</Typography>
 			</Box>
 
@@ -541,7 +541,7 @@ const SearchForm = ({ initialParams = {} }) => {
 				ref={passengersRef}
 			>
 				<TextField
-					label={UI_LABELS.HOME.search.passengers}
+					label={UI_LABELS.SEARCH.form.passengers}
 					value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
 					onClick={() => setShowPassengers((p) => !p)}
 					InputProps={{ readOnly: true }}
@@ -586,7 +586,7 @@ const SearchForm = ({ initialParams = {} }) => {
 							</Box>
 						))}
 						<Box sx={{ mt: 2 }}>
-							<Typography gutterBottom>{UI_LABELS.HOME.search.seat_class_title}</Typography>
+							<Typography gutterBottom>{UI_LABELS.SEARCH.form.seat_class_title}</Typography>
 							<RadioGroup value={seatClass} onChange={(e) => setSeatClass(e.target.value)}>
 								{seatClassOptions.map((o) => (
 									<FormControlLabel
@@ -622,7 +622,7 @@ const SearchForm = ({ initialParams = {} }) => {
 						whiteSpace: 'nowrap',
 					}}
 				>
-					{UI_LABELS.HOME.search.show_schedule}
+					{UI_LABELS.SEARCH.form.show_schedule}
 				</Button>
 			</Box>
 			{/* Search Button */}
@@ -644,7 +644,7 @@ const SearchForm = ({ initialParams = {} }) => {
 						whiteSpace: 'nowrap',
 					}}
 				>
-					{UI_LABELS.HOME.search.button}
+					{UI_LABELS.SEARCH.form.button}
 				</Button>
 			</Box>
 		</Box>

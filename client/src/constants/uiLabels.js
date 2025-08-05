@@ -231,8 +231,38 @@ export const UI_LABELS = {
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 	},
-	HOME: {
-		search: {
+	HOME: {},
+	BOOKING: {
+		passenger_form: {
+			type_labels: {
+				ADULT: 'Взрослый, старше 12 лет',
+				CHILD: 'Ребёнок, от 2 до 12 лет',
+				INFANT: 'Малыш, до 2 лет',
+			},
+			genders: [
+				{ value: 'MALE', label: 'Мужской' },
+				{ value: 'FEMALE', label: 'Женский' },
+				{ value: 'OTHER', label: 'Другой' },
+			],
+			add_passenger: 'Добавить пассажира',
+		},
+	},
+	SCHEDULE: {
+		title: 'Расписание рейсов',
+		results: 'Результаты поиска',
+		no_results: 'Рейсы не найдены',
+		outbound: 'Выбранное направление',
+		return: 'Обратное направление',
+		filter: 'Фильтр',
+		select: 'Выбрать',
+		ask_return: 'Нужен ли обратный билет?',
+		select_flights: 'Выбрать рейсы',
+		from_to: (from, to) => {
+			return `${from} → ${to}`;
+		},
+	},
+	SEARCH: {
+		form: {
 			from: 'Откуда',
 			to: 'Куда',
 			when: 'Когда',
@@ -267,37 +297,6 @@ export const UI_LABELS = {
 				invalid_return: 'Дата возвращения не может быть раньше даты отправления',
 			},
 		},
-	},
-	BOOKING: {
-		passenger_form: {
-			type_labels: {
-				ADULT: 'Взрослый, старше 12 лет',
-				CHILD: 'Ребёнок, от 2 до 12 лет',
-				INFANT: 'Малыш, до 2 лет',
-			},
-			genders: [
-				{ value: 'MALE', label: 'Мужской' },
-				{ value: 'FEMALE', label: 'Женский' },
-				{ value: 'OTHER', label: 'Другой' },
-			],
-			add_passenger: 'Добавить пассажира',
-		},
-	},
-	SCHEDULE: {
-		title: 'Расписание рейсов',
-		results: 'Результаты поиска',
-		no_results: 'Рейсы не найдены',
-		outbound: 'Выбранное направление',
-		return: 'Обратное направление',
-		filter: 'Фильтр',
-		select: 'Выбрать',
-		ask_return: 'Нужен ли обратный билет?',
-		select_flights: 'Выбрать рейсы',
-		from_to: (from, to) => {
-			return `${from} → ${to}`;
-		},
-	},
-	SEARCH: {
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
@@ -305,10 +304,11 @@ export const UI_LABELS = {
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {
-			select_flight: 'Выбрать билет',
+			select_ticket: 'Выбрать билет',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
+			total_price: 'Общая стоимость',
 			price: 'Цена',
 			price_from: 'От',
 			price_per_passenger: 'За 1 пассажира',

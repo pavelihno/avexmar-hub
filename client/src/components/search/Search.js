@@ -232,14 +232,6 @@ const Search = () => {
 		}
 	};
 
-	console.log('Render check:', {
-		hasReturn: hasReturn,
-		outboundLength: nearDatesOutbound.length,
-		returnLength: nearDatesReturn.length,
-		outbound: nearDatesOutbound,
-		return: nearDatesReturn,
-	});
-
 	return (
 		<Base>
 			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
