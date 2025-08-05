@@ -28,22 +28,22 @@ const TicketManagement = () => {
 		dispatch(fetchDiscounts());
 	}, [dispatch]);
 
-        const flightOptions = flights.map((f) => ({ value: f.id, label: f.id }));
+	const flightOptions = flights.map((f) => ({ value: f.id, label: f.id }));
 
-        const bookingOptions = bookings.map((b) => ({
-                value: b.id,
-                label: b.booking_number,
-        }));
+	const bookingOptions = bookings.map((b) => ({
+		value: b.id,
+		label: b.booking_number,
+	}));
 
-        const passengerOptions = passengers.map((p) => ({
-                value: p.id,
-                label: `${p.first_name} ${p.last_name}`,
-        }));
+	const passengerOptions = passengers.map((p) => ({
+		value: p.id,
+		label: `${p.first_name} ${p.last_name}`,
+	}));
 
-        const discountOptions = discounts.map((d) => ({
-                value: d.id,
-                label: d.discount_name,
-        }));
+	const discountOptions = discounts.map((d) => ({
+		value: d.id,
+		label: d.discount_name,
+	}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },

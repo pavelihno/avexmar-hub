@@ -29,15 +29,11 @@ const AirportManagement = () => {
 		dispatch(fetchTimezones());
 	}, [dispatch]);
 
-        const countryOptions =
-                !countries || !Array.isArray(countries)
-                        ? []
-                        : countries.map((c) => ({ value: c.id, label: c.name }));
+	const countryOptions =
+		!countries || !Array.isArray(countries) ? [] : countries.map((c) => ({ value: c.id, label: c.name }));
 
-        const timezoneOptions =
-                !timezones || !Array.isArray(timezones)
-                        ? []
-                        : timezones.map((tz) => ({ value: tz.id, label: tz.name }));
+	const timezoneOptions =
+		!timezones || !Array.isArray(timezones) ? [] : timezones.map((tz) => ({ value: tz.id, label: tz.name }));
 
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;

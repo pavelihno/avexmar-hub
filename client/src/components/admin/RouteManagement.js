@@ -19,13 +19,13 @@ const RouteManagement = () => {
 		dispatch(fetchAirports());
 	}, [dispatch]);
 
-        const airportOptions =
-                !airports || !Array.isArray(airports)
-                        ? []
-                        : airports.map((airport) => ({
-                                value: airport.id,
-                                label: `${airport.name} (${airport.iata_code}) - ${airport.city_code}`,
-                        }));
+	const airportOptions =
+		!airports || !Array.isArray(airports)
+			? []
+			: airports.map((airport) => ({
+					value: airport.id,
+					label: `${airport.name} (${airport.iata_code}) - ${airport.city_code}`,
+			  }));
 
 	const getAirportLabelById = (id) => {
 		if (!airportOptions || !Array.isArray(airportOptions)) {
@@ -57,10 +57,10 @@ const RouteManagement = () => {
 		},
 	};
 
-        const adminManager = createAdminManager(FIELDS, {
-                addButtonText: (item) => UI_LABELS.ADMIN.modules.routes.add_button,
-                editButtonText: (item) => UI_LABELS.ADMIN.modules.routes.edit_button,
-        });
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.routes.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.routes.edit_button,
+	});
 
 	const handleAddRoute = (routeData) => dispatch(createRoute(adminManager.toApiFormat(routeData))).unwrap();
 	const handleEditRoute = (routeData) => dispatch(updateRoute(adminManager.toApiFormat(routeData))).unwrap();

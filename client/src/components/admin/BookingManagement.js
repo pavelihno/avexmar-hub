@@ -34,7 +34,7 @@ const BookingManagement = () => {
 		dispatch(fetchPassengers());
 	}, [dispatch]);
 
-        const currencyOptions = getEnumOptions('CURRENCY');
+	const currencyOptions = getEnumOptions('CURRENCY');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },

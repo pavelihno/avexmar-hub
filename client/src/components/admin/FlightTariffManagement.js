@@ -47,14 +47,16 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		}
 	}, [formUpdates]);
 
-        const seatClassOptions = getEnumOptions('SEAT_CLASS');
+	const seatClassOptions = getEnumOptions('SEAT_CLASS');
 
-        const tariffOptions = tariffs
-                .filter((t) => t.seat_class === seatClass)
-                .map((t) => ({
-                        value: t.id,
-                        label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${t.order_number} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
-                }));
+	const tariffOptions = tariffs
+		.filter((t) => t.seat_class === seatClass)
+		.map((t) => ({
+			value: t.id,
+			label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
+				t.order_number
+			} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
+		}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -89,27 +91,27 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 		},
 	};
 
-        const tariffManager = createAdminManager(FIELDS, {
-                addButtonText: () => UI_LABELS.ADMIN.modules.tariffs.add_button,
-                editButtonText: () => UI_LABELS.ADMIN.modules.tariffs.edit_button,
-        });
+	const tariffManager = createAdminManager(FIELDS, {
+		addButtonText: () => UI_LABELS.ADMIN.modules.tariffs.add_button,
+		editButtonText: () => UI_LABELS.ADMIN.modules.tariffs.edit_button,
+	});
 
-        const currentItem = (() => {
-                if (isEditing) {
-                        if (flightTariff && Array.isArray(tariffs) && tariffs.length > 0) {
-                                const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
-                                const originalSeatClass = tariff ? tariff.seat_class : '';
-                                return {
-                                        id: flightTariffId,
-                                        flightId: flightId,
-                                        seatClass: seatClass || originalSeatClass,
-                                        seatsNumber: flightTariff.seats_number,
-                                        flightTariffId: seatClass && seatClass !== originalSeatClass ? '' : flightTariff.tariff_id,
-                                };
-                        }
-                }
-                return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
-        })();
+	const currentItem = (() => {
+		if (isEditing) {
+			if (flightTariff && Array.isArray(tariffs) && tariffs.length > 0) {
+				const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
+				const originalSeatClass = tariff ? tariff.seat_class : '';
+				return {
+					id: flightTariffId,
+					flightId: flightId,
+					seatClass: seatClass || originalSeatClass,
+					seatsNumber: flightTariff.seats_number,
+					flightTariffId: seatClass && seatClass !== originalSeatClass ? '' : flightTariff.tariff_id,
+				};
+			}
+		}
+		return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
+	})();
 
 	const handleSaveTariff = (tariffData) => {
 		const formattedData = tariffManager.toApiFormat({

@@ -83,30 +83,28 @@ const FlightManagement = () => {
 		return tariffs.find((tariff) => tariff.id === id);
 	};
 
-        const routeOptions =
-                routesLoading ||
-                airportsLoading ||
-                !Array.isArray(routes) ||
-                !Array.isArray(airports)
-                        ? []
-                        : routes.map((route) => {
-                                const origin = getAirportById(route.origin_airport_id);
-                                const dest = getAirportById(route.destination_airport_id);
+	const routeOptions =
+		routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)
+			? []
+			: routes.map((route) => {
+					const origin = getAirportById(route.origin_airport_id);
+					const dest = getAirportById(route.destination_airport_id);
 
-                                return {
-                                        value: route.id,
-                                        label: `${origin?.city_name} (${origin?.iata_code || '…'}) → ${dest?.city_name} (${dest?.iata_code || '…'})`,
-                                };
-                        });
+					return {
+						value: route.id,
+						label: `${origin?.city_name} (${origin?.iata_code || '…'}) → ${dest?.city_name} (${
+							dest?.iata_code || '…'
+						})`,
+					};
+			  });
 
-        const airlineOptions =
-                !airlines || !Array.isArray(airlines)
-                        ? []
-                        : airlines.map((airline) => ({
-                                value: airline.id,
-                                label: `${airline.name} (${airline.iata_code})`,
-                        }));
-
+	const airlineOptions =
+		!airlines || !Array.isArray(airlines)
+			? []
+			: airlines.map((airline) => ({
+					value: airline.id,
+					label: `${airline.name} (${airline.iata_code})`,
+			  }));
 
 	const [deleteFlightTariffDialog, setDeleteFlightTariffDialog] = useState({
 		open: false,
@@ -285,7 +283,9 @@ const FlightManagement = () => {
 
 									const tariffLabel = `${seatClass} - ${
 										UI_LABELS.ADMIN.modules.tariffs.tariff
-									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${formatNumber(seatsNumber)} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
+									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${formatNumber(
+										seatsNumber
+									)} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
 
 									return (
 										<Box
@@ -368,10 +368,10 @@ const FlightManagement = () => {
 		},
 	};
 
-        const adminManager = createAdminManager(FIELDS, {
-                addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
-                editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
-        });
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.flights.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.flights.edit_button,
+	});
 
 	const handleAddFlight = (flightData) => dispatch(createFlight(adminManager.toApiFormat(flightData))).unwrap();
 	const handleEditFlight = (flightData) => dispatch(updateFlight(adminManager.toApiFormat(flightData))).unwrap();

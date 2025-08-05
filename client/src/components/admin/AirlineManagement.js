@@ -25,10 +25,8 @@ const AirlineManagement = () => {
 		dispatch(fetchCountries());
 	}, [dispatch]);
 
-        const countryOptions =
-                !countries || !Array.isArray(countries)
-                        ? []
-                        : countries.map((c) => ({ value: c.id, label: c.name }));
+	const countryOptions =
+		!countries || !Array.isArray(countries) ? [] : countries.map((c) => ({ value: c.id, label: c.name }));
 
 	const getCountryById = (id) => {
 		if (!countries || !Array.isArray(countries)) return null;
@@ -84,10 +82,10 @@ const AirlineManagement = () => {
 		},
 	};
 
-        const adminManager = createAdminManager(FIELDS, {
-                addButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.add_button,
-                editButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.edit_button,
-        });
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.add_button,
+		editButtonText: (item) => UI_LABELS.ADMIN.modules.airlines.edit_button,
+	});
 
 	const handleAddAirline = (data) => dispatch(createAirline(adminManager.toApiFormat(data))).unwrap();
 	const handleEditAirline = (data) => dispatch(updateAirline(adminManager.toApiFormat(data))).unwrap();
