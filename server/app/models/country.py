@@ -39,6 +39,8 @@ class Country(BaseModel):
         'code_a3': 'Код A3'
     }
 
+    upload_text_fields = ['name', 'name_en', 'code_a2', 'code_a3']
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by='name', descending=False)
@@ -52,7 +54,7 @@ class Country(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields)
+        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
     def get_by_code(cls, code):

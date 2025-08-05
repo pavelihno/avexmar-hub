@@ -38,6 +38,8 @@ class Airline(BaseModel):
         'country_code': 'Код страны'
     }
 
+    upload_text_fields = ['name', 'iata_code', 'icao_code', 'country_code']
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by='name', descending=False)
@@ -52,7 +54,7 @@ class Airline(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields)
+        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):

@@ -59,6 +59,10 @@ class Airport(BaseModel):
         'time_zone': 'Часовой пояс'
     }
 
+    upload_text_fields = [
+        'name', 'city_name', 'city_name_en', 'iata_code', 'icao_code', 'city_code', 'country_code', 'time_zone'
+    ]
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by='name', descending=False)
@@ -73,7 +77,7 @@ class Airport(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields)
+        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):

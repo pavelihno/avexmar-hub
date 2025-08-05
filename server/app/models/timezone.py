@@ -27,6 +27,8 @@ class Timezone(BaseModel):
         'name': 'Часовой пояс',
     }
 
+    upload_text_fields = ['name']
+
     def get_tz(self):
         """Return the timezone as a ZoneInfo object"""
         return ZoneInfo(self.name)
@@ -37,7 +39,7 @@ class Timezone(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields)
+        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):

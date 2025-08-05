@@ -4,7 +4,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, DEFAULT_FONT, Border, Side
 from openpyxl.utils import get_column_letter
 
-from app.utils.datetime import format_date, format_time, parse_date, parse_time
+from app.utils.datetime import WRITE_DATE_FORMAT, WRITE_TIME_FORMAT, format_date, format_time, parse_date, parse_time
 
 
 def get_xlsx_styles():
@@ -67,7 +67,7 @@ def create_xlsx(fields: dict, data: list, date_fields: list = [], time_fields: l
     return output
 
 
-def generate_xlsx_template(fields: dict) -> BytesIO:
+def generate_xlsx_template(fields: dict, date_fields: list = [], time_fields: list = [], numeric_fields: list = [], text_fields: list = []) -> BytesIO:
     """
     Generate an XLSX template with headers from fields
     """
@@ -77,22 +77,35 @@ def generate_xlsx_template(fields: dict) -> BytesIO:
     # Default font size
     DEFAULT_FONT.size = 12
 
-    ws.append(list(fields.values()))
+    # Write headers
+    headers = list(fields.values())
+    ws.append(headers)
 
-    # Header styles
+    # Apply header styles
     font, border = get_xlsx_styles()
     for cell in ws[1]:
         cell.font = font
         cell.border = border
 
-    # Adjust column widths based on header length
-    for idx, header in enumerate(fields.values(), start=1):
-        ws.column_dimensions[get_column_letter(idx)].width = len(str(header)) + 4
+    # Set column widths and types
+    for idx, key in enumerate(fields.keys(), start=1):
+        col_letter = get_column_letter(idx)
+        # Width
+        ws.column_dimensions[col_letter].width = len(str(fields[key])) + 4
+        # Data type formatting
+        for cell in ws[col_letter]:
+            if key in date_fields:
+                cell.number_format = WRITE_DATE_FORMAT
+            elif key in time_fields:
+                cell.number_format = WRITE_TIME_FORMAT
+            elif key in numeric_fields:
+                cell.number_format = '0.00'
+            elif key in text_fields:
+                cell.number_format = '@'
 
     output = BytesIO()
     wb.save(output)
     output.seek(0)
-
     return output
 
 

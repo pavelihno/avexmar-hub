@@ -109,6 +109,15 @@ class Flight(BaseModel):
         'scheduled_arrival_time',
     ]
 
+    upload_text_fields = [
+        'airline_code',
+        'flight_number',
+        'origin_airport_code',
+        'destination_airport_code',
+        'aircraft',
+        'seat_class',
+    ]
+
     MAX_TARIFFS = 3
 
     @classmethod
@@ -121,7 +130,11 @@ class Flight(BaseModel):
 
     @classmethod
     def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.get_upload_fields())
+        return generate_xlsx_template(
+            cls.get_upload_fields(), date_fields=cls.upload_date_fields,
+            time_fields=cls.upload_time_fields,
+            text_fields=cls.upload_text_fields
+        )
 
     @classmethod
     def upload_from_file(cls, file, session: Session | None = None):
