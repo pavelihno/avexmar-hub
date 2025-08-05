@@ -49,6 +49,38 @@ class Flight(BaseModel):
         ),
     )
 
+    @hybrid_property
+    def airline_flight_number(self):
+        """Return flight number prefixed with airline IATA code"""
+        airline = self.airline
+        return f'{airline.iata_code}{self.flight_number}' if airline else self.flight_number
+
+    @hybrid_property
+    def flight_duration(self):
+        """Return flight duration in minutes"""
+        if not (self.scheduled_departure and self.scheduled_arrival):
+            return None
+
+        depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
+        arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
+
+        route = self.route
+        origin = route.origin_airport
+        dest = route.destination_airport
+
+        origin_tz = origin.timezone.get_tz() if origin.timezone else None
+        dest_tz = dest.timezone.get_tz() if dest.timezone else None
+
+        if origin_tz is not None and dest_tz is not None:
+            depart_dt = depart_dt.astimezone(origin_tz)
+            arrive_dt = arrive_dt.astimezone(dest_tz)
+
+            delta = arrive_dt - depart_dt
+
+            return int(delta.total_seconds() // 60)
+
+        return 0
+
     upload_fields = {
         'airline_code': 'Код авиакомпании',
         'flight_number': 'Номер рейса',
@@ -134,11 +166,6 @@ class Flight(BaseModel):
                     if not route:
                         raise ValueError('Route does not exist')
 
-                    dep_date = parse_date(row.get('scheduled_departure'))
-                    dep_time = parse_time(row.get('scheduled_departure_time'))
-                    arr_date = parse_date(row.get('scheduled_arrival'))
-                    arr_time = parse_time(row.get('scheduled_arrival_time'))
-
                     aircraft_id = None
                     aircraft_type = row.get('aircraft')
                     if aircraft_type:
@@ -151,10 +178,10 @@ class Flight(BaseModel):
                         airline_id=airline.id,
                         route_id=route.id,
                         aircraft_id=aircraft_id,
-                        scheduled_departure=dep_date,
-                        scheduled_departure_time=dep_time,
-                        scheduled_arrival=arr_date,
-                        scheduled_arrival_time=arr_time,
+                        scheduled_departure=parse_date(row.get('scheduled_departure')),
+                        scheduled_departure_time=parse_time(row.get('scheduled_departure_time')),
+                        scheduled_arrival=parse_date(row.get('scheduled_arrival')),
+                        scheduled_arrival_time=parse_time(row.get('scheduled_arrival_time')),
                     )
 
                     used_classes = set()
@@ -190,38 +217,6 @@ class Flight(BaseModel):
                 error_rows.append(row)
 
         return flights, error_rows
-
-    @hybrid_property
-    def airline_flight_number(self):
-        """Return flight number prefixed with airline IATA code"""
-        airline = self.airline
-        return f'{airline.iata_code}{self.flight_number}' if airline else self.flight_number
-
-    @hybrid_property
-    def flight_duration(self):
-        """Return flight duration in minutes"""
-        if not (self.scheduled_departure and self.scheduled_arrival):
-            return None
-
-        depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
-        arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
-
-        route = self.route
-        origin = route.origin_airport
-        dest = route.destination_airport
-
-        origin_tz = origin.timezone.get_tz() if origin.timezone else None
-        dest_tz = dest.timezone.get_tz() if dest.timezone else None
-
-        if origin_tz is not None and dest_tz is not None:
-            depart_dt = depart_dt.astimezone(origin_tz)
-            arrive_dt = arrive_dt.astimezone(dest_tz)
-
-            delta = arrive_dt - depart_dt
-
-            return int(delta.total_seconds() // 60)
-
-        return 0
 
     def to_dict(self):
         return {
