@@ -225,19 +225,24 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.SELECT: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					options = field.options || [],
-					MenuProps,
-					MenuItemProps,
-					displayEmpty,
-					simpleSelect,
-					sx,
-				} = allProps;
+                                const {
+                                        value = '',
+                                        onChange,
+                                        fullWidth,
+                                        error,
+                                        helperText,
+                                        options = field.options || [],
+                                        MenuProps,
+                                        MenuItemProps,
+                                        displayEmpty,
+                                        simpleSelect,
+                                        sx,
+                                } = allProps;
+
+                                const resolvedValue =
+                                        value !== undefined && value !== null ? value : field.defaultValue;
+                                const isValidValue = options.some((o) => o.value === resolvedValue);
+                                const safeValue = isValidValue ? resolvedValue : '';
 
 				if (!simpleSelect && options.length > 100) {
 					const valueObj = options.find((o) => o.value === value) || null;
@@ -269,13 +274,13 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				if (simpleSelect) {
 					return (
 						<Select
-							value={value || field.defaultValue || ''}
-							onChange={(e) => onChange(e.target.value)}
-							fullWidth={fullWidth}
-							MenuProps={MenuProps}
-							displayEmpty={displayEmpty}
-							sx={{ ...sx }}
-						>
+                                                        value={safeValue}
+                                                        onChange={(e) => onChange(e.target.value)}
+                                                        fullWidth={fullWidth}
+                                                        MenuProps={MenuProps}
+                                                        displayEmpty={displayEmpty}
+                                                        sx={{ ...sx }}
+                                                >
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
@@ -289,13 +294,13 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<FormControl fullWidth={fullWidth} error={!!error}>
 						<InputLabel>{field.label}</InputLabel>
 						<Select
-							value={value || field.defaultValue || ''}
-							onChange={(e) => onChange(e.target.value)}
-							label={field.label}
-							MenuProps={MenuProps}
-							displayEmpty={displayEmpty}
-							sx={{ ...sx }}
-						>
+                                                        value={safeValue}
+                                                        onChange={(e) => onChange(e.target.value)}
+                                                        label={field.label}
+                                                        MenuProps={MenuProps}
+                                                        displayEmpty={displayEmpty}
+                                                        sx={{ ...sx }}
+                                                >
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}

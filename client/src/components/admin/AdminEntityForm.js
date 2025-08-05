@@ -116,17 +116,17 @@ const AdminEntityForm = ({
 				<Grid container spacing={2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
 						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
-							{field.renderField({
-								value: formData[field.name] || '',
-								onChange: (value) => handleChange(field.name, value),
-								fullWidth: true,
-								error: !!validationErrors[field.name],
-								helperText: validationErrors[field.name],
-							})}
-						</Grid>
-					))}
-				</Grid>
-			</DialogContent>
+                                                    {field.renderField({
+                                                            value: formData[field.name] ?? '',
+                                                            onChange: (value) => handleChange(field.name, value),
+                                                            fullWidth: true,
+                                                            error: !!validationErrors[field.name],
+                                                            helperText: validationErrors[field.name],
+                                                    })}
+                                           </Grid>
+                                   ))}
+                           </Grid>
+                   </DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
 				<Button onClick={handleSubmit} variant='contained' disabled={!!successMessage}>
