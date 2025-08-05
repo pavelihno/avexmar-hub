@@ -81,21 +81,33 @@ def __query_flights(
             .join(Tariff, FlightTariff.tariff_id == Tariff.id)
             .filter(FlightTariff.flight_id == flight.id)
         )
-        if seat_class:
-            tariff_query = tariff_query.filter(Tariff.seat_class == seat_class)
         tariffs = tariff_query.all()
         if tariffs:
+            f_dict['tariffs'] = [{
+                'seat_class': t.seat_class.value,
+                'price': t.price,
+                'currency': t.currency.value,
+            } for _, t in tariffs]
+
             if seat_class:
-                _, t = tariffs[0]
-                f_dict['price'] = t.price
-                f_dict['currency'] = t.currency.value
+                seat_class_tariffs = [t for t in f_dict['tariffs'] if t['seat_class'] == seat_class]
+                if seat_class_tariffs:
+                    f_dict['price'] = seat_class_tariffs[0]['price']
+                    f_dict['currency'] = seat_class_tariffs[0]['currency']
+                else:
+                    # Skip flight if the requested seat class is not available
+                    continue
             else:
                 min_tariff = min(
-                    (t for _, t in tariffs),
-                    key=lambda x: x.price
+                    (t for t in f_dict['tariffs']),
+                    key=lambda x: x['price'],
                 )
-                f_dict['min_price'] = min_tariff.price
-                f_dict['currency'] = min_tariff.currency.value
+                f_dict['min_price'] = min_tariff['price']
+                f_dict['currency'] = min_tariff['currency']
+        else:
+            # Skip flight if no tariffs are available
+            continue
+
         if direction:
             f_dict['direction'] = direction
         results.append(f_dict)

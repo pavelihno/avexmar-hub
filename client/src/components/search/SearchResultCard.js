@@ -185,9 +185,14 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 				{isLoading ? (
 					<Skeleton variant='rectangular' width={150} height={32} sx={{ mb: 1, mx: 'auto' }} />
 				) : (
-					<Typography variant='h5' sx={{ fontWeight: 'bold', mb: 1, whiteSpace: 'nowrap' }}>
+					<>
+					<Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
 						{priceText}
 					</Typography>
+					<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
+						{UI_LABELS.SEARCH.flight_details.price_per_passenger.toLowerCase()}
+					</Typography>
+					</>
 				)}
 				<Button
 					variant='contained'

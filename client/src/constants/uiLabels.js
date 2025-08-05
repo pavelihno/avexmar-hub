@@ -311,6 +311,7 @@ export const UI_LABELS = {
 			departure_arrival: 'Время отправления - Время прибытия',
 			price: 'Цена',
 			price_from: 'От',
+			price_per_passenger: 'За 1 пассажира',
 		},
 		sort: {
 			label: 'Сортировка',
