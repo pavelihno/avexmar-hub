@@ -335,11 +335,11 @@ const FlightManagement = () => {
 													<IconButton
 														size='small'
 														color='primary'
-                                                                                                                  onClick={(e) => {
-                                                                                                                         e.stopPropagation();
-                                                                                                                         e.currentTarget.blur();
-                                                                                                                         handleEditFlightTariff(item.id, ft.id);
-                                                                                                                  }}
+														onClick={(e) => {
+															e.stopPropagation();
+															e.currentTarget.blur();
+															handleEditFlightTariff(item.id, ft.id);
+														}}
 													>
 														<EditIcon fontSize='small' />
 													</IconButton>
@@ -351,11 +351,11 @@ const FlightManagement = () => {
 													<IconButton
 														size='small'
 														color='error'
-                                                                                                                  onClick={(e) => {
-                                                                                                                         e.stopPropagation();
-                                                                                                                         e.currentTarget.blur();
-                                                                                                                         handleOpenDeleteFlightTariffDialog(ft.id);
-                                                                                                                  }}
+														onClick={(e) => {
+															e.stopPropagation();
+															e.currentTarget.blur();
+															handleOpenDeleteFlightTariffDialog(ft.id);
+														}}
 													>
 														<DeleteIcon fontSize='small' />
 													</IconButton>
@@ -368,11 +368,11 @@ const FlightManagement = () => {
 									<IconButton
 										size='small'
 										color='primary'
-                                                                                  onClick={(e) => {
-                                                                                          e.stopPropagation();
-                                                                                          e.currentTarget.blur();
-                                                                                          handleAddFlightTariff(item.id);
-                                                                                  }}
+										onClick={(e) => {
+											e.stopPropagation();
+											e.currentTarget.blur();
+											handleAddFlightTariff(item.id);
+										}}
 										sx={{ mt: 0.5 }}
 									>
 										<AddCircleIcon />
