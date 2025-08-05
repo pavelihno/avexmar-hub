@@ -127,10 +127,10 @@ class Flight(BaseModel):
                     if not destination:
                         raise ValueError('Invalid destination airport code')
 
-                    route = Route.query.filter_by(
-                        origin_airport_id=origin.id,
-                        destination_airport_id=destination.id,
-                    ).first()
+                    route = Route.query.filter(
+                        Route.origin_airport_id == origin.id,
+                        Route.destination_airport_id == destination.id,
+                    ).one_or_none()
                     if not route:
                         raise ValueError('Route does not exist')
 
@@ -169,9 +169,10 @@ class Flight(BaseModel):
                         if seat_class in used_classes:
                             raise ValueError('Duplicate service class')
                         used_classes.add(seat_class)
-                        tariff = Tariff.query.filter_by(
-                            seat_class=seat_class, order_number=int(tariff_number)
-                        ).first()
+                        tariff = Tariff.query.filter(
+                            Tariff.seat_class == seat_class,
+                            Tariff.order_number == int(tariff_number)
+                        ).one_or_none()
                         if not tariff:
                             raise ValueError('Invalid tariff number or class')
                         FlightTariff.create(
@@ -254,14 +255,14 @@ class Flight(BaseModel):
                 cls.airline_id == airline_id,
                 cls.route_id == route_id,
                 cls.scheduled_departure == scheduled_departure
-            ).first()
+            ).one_or_none()
         else:
-            existing_flight = query.filter_by(
-                flight_number=flight_number,
-                airline_id=airline_id,
-                route_id=route_id,
-                scheduled_departure=scheduled_departure
-            ).first()
+            existing_flight = query.filter(
+                cls.flight_number == flight_number,
+                cls.airline_id == airline_id,
+                cls.route_id == route_id,
+                cls.scheduled_departure == scheduled_departure
+            ).one_or_none()
         if existing_flight:
             print(existing_flight.to_dict())
             raise ModelValidationError(

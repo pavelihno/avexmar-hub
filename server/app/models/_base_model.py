@@ -79,7 +79,7 @@ class BaseModel(db.Model):
                 query = query.filter(getattr(cls, col) == data[col])
             if instance_id is not None:
                 query = query.filter(cls.id != instance_id)
-            if query.first() is not None:
+            if query.one_or_none() is not None:
                 for col in columns:
                     errors[col] = 'must be unique'
         return errors
