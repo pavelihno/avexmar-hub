@@ -25,6 +25,7 @@ class Flight(BaseModel):
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)
     airline_id = db.Column(db.Integer, db.ForeignKey('airlines.id', ondelete='RESTRICT'), nullable=False)
     aircraft_id = db.Column(db.Integer, db.ForeignKey('aircrafts.id', ondelete='RESTRICT'), nullable=True)
+    note = db.Column(db.String, nullable=True)
 
     scheduled_departure = db.Column(db.Date, nullable=False)
     scheduled_departure_time = db.Column(db.Time, nullable=True)
@@ -91,7 +92,7 @@ class Flight(BaseModel):
             'origin_airport_code': 'Код аэропорта отправления',
             'destination_airport_code': 'Код аэропорта прибытия',
             'aircraft': 'Воздушное судно',
-            'notes': 'Примечания',
+            'note': 'Примечание',
             'scheduled_departure': 'Дата отправления',
             'scheduled_departure_time': 'Время отправления',
             'scheduled_arrival': 'Дата прибытия',
@@ -140,7 +141,7 @@ class Flight(BaseModel):
             'origin_airport_code',
             'destination_airport_code',
             'aircraft',
-            'notes',
+            'note',
             *[f'{key}_{i}' for i in range(1, cls.MAX_TARIFFS + 1) for key in ['seat_class']]
         ]
 
@@ -207,6 +208,7 @@ class Flight(BaseModel):
                         airline_id=airline.id,
                         route_id=route.id,
                         aircraft_id=aircraft_id,
+                        note=row.get('note'),
                         scheduled_departure=parse_date(row.get('scheduled_departure')),
                         scheduled_departure_time=parse_time(row.get('scheduled_departure_time')),
                         scheduled_arrival=parse_date(row.get('scheduled_arrival')),
@@ -252,7 +254,7 @@ class Flight(BaseModel):
             'id': self.id,
             'flight_number': self.flight_number,
             'airline_flight_number': self.airline_flight_number,
-            'notes': self.notes,
+            'note': self.note,
             'airline_id': self.airline_id,
             'route_id': self.route_id,
             'aircraft_id': self.aircraft_id,

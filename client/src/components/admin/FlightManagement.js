@@ -168,18 +168,26 @@ const FlightManagement = () => {
 			},
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.airline_id.REQUIRED : null),
 		},
-		flightNumber: {
-			key: 'flightNumber',
-			apiKey: 'flight_number',
-			label: FIELD_LABELS.FLIGHT.flight_number,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
-		},
-		routeId: {
-			key: 'routeId',
-			apiKey: 'route_id',
-			label: FIELD_LABELS.FLIGHT.route_id,
-			type: FIELD_TYPES.SELECT,
+                flightNumber: {
+                        key: 'flightNumber',
+                        apiKey: 'flight_number',
+                        label: FIELD_LABELS.FLIGHT.flight_number,
+                        type: FIELD_TYPES.TEXT,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.FLIGHT.flight_number.REQUIRED : null),
+                },
+                note: {
+                        key: 'note',
+                        apiKey: 'note',
+                        label: FIELD_LABELS.FLIGHT.note,
+                        type: FIELD_TYPES.TEXT_AREA,
+                        fullWidth: true,
+                        excludeFromTable: true,
+                },
+                routeId: {
+                        key: 'routeId',
+                        apiKey: 'route_id',
+                        label: FIELD_LABELS.FLIGHT.route_id,
+                        type: FIELD_TYPES.SELECT,
 			options: routeOptions,
 			formatter: (value) => {
 				const route = routeOptions.find((option) => option.value === value);
