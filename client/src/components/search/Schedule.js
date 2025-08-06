@@ -34,7 +34,7 @@ const Schedule = () => {
 	}, [dispatch, paramStr, from, to]);
 
 	useEffect(() => {
-		document.title = UI_LABELS.SCHEDULE.from_to(from || '', to || '');
+		document.title = UI_LABELS.SCHEDULE.from_to(from || '', to || '') || UI_LABELS.APP_TITLE;
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};
@@ -121,10 +121,10 @@ const Schedule = () => {
 				<SearchForm initialParams={paramObj} />
 			</Box>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 3 }}>
+				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2, }}>
 					{UI_LABELS.SCHEDULE.title}
 				</Typography>
-				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end', }}>
 					<Button
 						variant='outlined'
 						disabled={!selectedOutbound && !selectedReturn}

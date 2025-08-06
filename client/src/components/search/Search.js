@@ -72,7 +72,7 @@ const Search = () => {
 	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
 		const titleTo = returnTo || returnDate || '';
-		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo);
+		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo) || UI_LABELS.APP_TITLE;
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};
@@ -245,7 +245,7 @@ const Search = () => {
 				<SearchForm initialParams={paramObj} />
 			</Box>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 3 }}>
+				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2 }}>
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
