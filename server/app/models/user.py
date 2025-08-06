@@ -33,7 +33,7 @@ class User(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='email', descending=False)
+        return super().get_all(sort_by=['email'], descending=False)
 
     @classmethod
     def create(cls, session: Session | None = None, **data):

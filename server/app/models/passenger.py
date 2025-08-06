@@ -55,7 +55,7 @@ class Passenger(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='last_name', descending=False)
+        return super().get_all(sort_by=['last_name'], descending=False)
 
     def is_infant(self, date=datetime.date.today()):
         """Check if the passenger is an infant (under 1 year old)"""

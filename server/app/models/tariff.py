@@ -34,7 +34,7 @@ class Tariff(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='seat_class', descending=False)
+        return super().get_all(sort_by=['seat_class'], descending=False)
 
     @classmethod
     def create(cls, session: Session | None = None, **data):

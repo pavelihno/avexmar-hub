@@ -249,7 +249,7 @@ class Flight(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='flight_number', descending=False)
+        return super().get_all(sort_by=['scheduled_departure', 'scheduled_departure_time'], descending=False)
 
     @classmethod
     def _check_flight_uniqueness(cls, session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=None):

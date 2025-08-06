@@ -42,7 +42,7 @@ class Airline(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='name', descending=False)
+        return super().get_all(sort_by=['name'], descending=False)
     
     @classmethod
     def get_by_code(cls, code):

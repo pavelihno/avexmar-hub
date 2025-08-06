@@ -59,7 +59,7 @@ class Booking(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='booking_number', descending=False)
+        return super().get_all(sort_by=['booking_number'], descending=False)
 
     @classmethod
     def __generate_booking_number(cls, session: Session):
