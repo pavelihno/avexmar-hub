@@ -30,26 +30,25 @@ const TariffManagement = () => {
 			formatter: (value) => ENUM_LABELS.SEAT_CLASS[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
 		},
-                orderNumber: {
-                        key: 'orderNumber',
-                        apiKey: 'order_number',
-                        label: FIELD_LABELS.TARIFF.order_number,
-                        type: FIELD_TYPES.NUMBER,
-                        excludeFromForm: true,
-                        formatter: (value) => `${UI_LABELS.ADMIN.modules.tariffs.tariff} ${value}` || '',
-                },
-                title: {
-                        key: 'title',
-                        apiKey: 'title',
-                        label: FIELD_LABELS.TARIFF.title,
-                        type: FIELD_TYPES.TEXT,
-                        validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.title.REQUIRED : null),
-                },
-                price: {
-                        key: 'price',
-                        apiKey: 'price',
-                        label: FIELD_LABELS.TARIFF.price,
-                        type: FIELD_TYPES.NUMBER,
+		orderNumber: {
+			key: 'orderNumber',
+			apiKey: 'order_number',
+			label: FIELD_LABELS.TARIFF.order_number,
+			type: FIELD_TYPES.NUMBER,
+			excludeFromForm: true,
+		},
+		title: {
+			key: 'title',
+			apiKey: 'title',
+			label: FIELD_LABELS.TARIFF.title,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.title.REQUIRED : null),
+		},
+		price: {
+			key: 'price',
+			apiKey: 'price',
+			label: FIELD_LABELS.TARIFF.price,
+			type: FIELD_TYPES.NUMBER,
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.TARIFF.price.REQUIRED : null),
 			formatter: (value) => (value != null ? `${formatNumber(value)}` : ''),
 		},
@@ -79,8 +78,9 @@ const TariffManagement = () => {
 			else {
 				const seatClass = ENUM_LABELS.SEAT_CLASS[item[FIELDS.seatClass.key]];
 				const orderNumber = item[FIELDS.orderNumber.key];
+				const title = item[FIELDS.title.key];
 
-				return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`;
+				return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber} — ${title}`;
 			}
 		},
 	});

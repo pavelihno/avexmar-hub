@@ -92,7 +92,7 @@ class Flight(BaseModel):
             'origin_airport_code': 'Код аэропорта отправления',
             'destination_airport_code': 'Код аэропорта прибытия',
             'aircraft': 'Воздушное судно',
-            'note': 'Примечание',
+            'note': 'Примечания',
             'scheduled_departure': 'Дата отправления',
             'scheduled_departure_time': 'Время отправления',
             'scheduled_arrival': 'Дата прибытия',

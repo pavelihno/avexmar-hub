@@ -87,6 +87,9 @@ def __query_flights(
                 'seat_class': t.seat_class.value,
                 'price': t.price,
                 'currency': t.currency.value,
+                'conditions': t.conditions,
+                # TODO: Implement seats available logic after Seat model is ready
+                'seats_available': 0,
             } for _, t in tariffs]
 
             if seat_class:
@@ -127,8 +130,7 @@ def search_flights(is_nearby=False):
     depart_from = params.get('when') if is_exact else params.get('when_from')
     depart_to = None if is_exact else params.get('when_to')
 
-    return_from = params.get(
-        'return') if is_exact else params.get('return_from')
+    return_from = params.get('return') if is_exact else params.get('return_from')
     return_to = None if is_exact else params.get('return_to')
 
     outbound_airline_iata_code = params.get('outbound_airline')
