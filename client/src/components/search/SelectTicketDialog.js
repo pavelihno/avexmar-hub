@@ -8,15 +8,18 @@ import {
 	DialogActions,
 	Button,
 	Box,
+	Tooltip,
 	Typography,
 	Card,
 	CardActionArea,
 	IconButton,
 	Divider,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
-import { UI_LABELS, ENUM_LABELS, MAX_PASSENGERS } from '../../constants';
-import { formatTime, formatDate, formatNumber } from '../utils';
+import { UI_LABELS, ENUM_LABELS, MAX_PASSENGERS, DATE_FORMAT } from '../../constants';
+import { formatTime, formatDate, formatNumber, handlePassengerChange, disabledPassengerChange } from '../utils';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
@@ -69,43 +72,45 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 				{origin.name || origin.id} → {dest.name || dest.id}
 			</Typography>
 			<Typography variant='body2' color='text.secondary'>
-				{formatDate(flight.scheduled_departure, 'dd.MM.yyyy')} {formatTime(flight.scheduled_departure_time)} -{' '}
-				{formatDate(flight.scheduled_arrival, 'dd.MM.yyyy')} {formatTime(flight.scheduled_arrival_time)}
+				{`${formatDate(flight.scheduled_departure)} ${formatTime(flight.scheduled_departure_time)}`} -{' '}
+				{`${formatDate(flight.scheduled_arrival)} ${formatTime(flight.scheduled_arrival_time)}`}
 			</Typography>
 		</Box>
 	);
 };
 
-const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, airports, routes }) => {
+const SelectTicketDialog = ({
+	initialParams = {},
+	open,
+	onClose,
+	outbound,
+	returnFlight,
+	airlines,
+	airports,
+	routes,
+	discounts,
+}) => {
 	const navigate = useNavigate();
-	const [params] = useSearchParams();
 
 	const tariffOptions = useMemo(() => buildTariffOptions(outbound, returnFlight), [outbound, returnFlight]);
 
-	const initialSeatClass = params.get('class') || tariffOptions[0]?.seat_class || '';
-	const [seatClass, setSeatClass] = useState(initialSeatClass);
+	const [seatClass, setSeatClass] = useState(initialParams.class || tariffOptions[0]?.seat_class);
 
 	const [passengers, setPassengers] = useState({
-		adults: parseInt(params.get('adults') || '1', 10),
-		children: parseInt(params.get('children') || '0', 10),
-		infants: parseInt(params.get('infants') || '0', 10),
+		adults: parseInt(initialParams.adults) || 1,
+		children: parseInt(initialParams.children) || 0,
+		infants: parseInt(initialParams.infants) || 0,
+		infants_seat: parseInt(initialParams.infants_seat) || 0,
 	});
 
-	const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+	const totalPassengers = passengers.adults + passengers.children + passengers.infants + passengers.infants_seat;
 
 	const selectedTariff = tariffOptions.find((t) => t.seat_class === seatClass) || tariffOptions[0];
 	const currencySymbol = selectedTariff ? ENUM_LABELS.CURRENCY_SYMBOL[selectedTariff.currency] || '' : '';
 	const totalPrice = selectedTariff ? selectedTariff.price * totalPassengers : 0;
 
-	const handlePassengerChange = (key, delta) => {
-		setPassengers((prev) => {
-			const nextVal = prev[key] + delta;
-			const newTotal = prev.adults + prev.children + prev.infants + delta;
-			const min = key === 'adults' ? 1 : 0;
-			if (nextVal < min || newTotal < 1 || newTotal > MAX_PASSENGERS) return prev;
-			return { ...prev, [key]: nextVal };
-		});
-	};
+	const hasAvailableSeats =
+		selectedTariff && selectedTariff.seats_left !== undefined && selectedTariff.seats_left >= totalPassengers;
 
 	const handleConfirm = () => {
 		const query = new URLSearchParams();
@@ -115,6 +120,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 		query.set('adults', passengers.adults);
 		query.set('children', passengers.children);
 		query.set('infants', passengers.infants);
+		query.set('infants_seat', passengers.infants_seat);
 		navigate(`/cart?${query.toString()}`);
 	};
 
@@ -144,7 +150,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
 								</Typography>
 								<Typography variant='caption' color='text.secondary'>
-									Мест: {t.seats_left ?? '-'}
+									{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_available ?? '-'}`}
 								</Typography>
 							</CardActionArea>
 						</Card>
@@ -162,17 +168,17 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								</Typography>
 							</Box>
 							<IconButton
-								onClick={() => handlePassengerChange(row.key, -1)}
-								disabled={passengers[row.key] <= (row.key === 'adults' ? 1 : 0)}
+								onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
+								disabled={disabledPassengerChange(passengers, row.key, -1)}
 							>
-								-
+								<RemoveIcon />
 							</IconButton>
 							<Typography sx={{ width: 20, textAlign: 'center' }}>{passengers[row.key]}</Typography>
 							<IconButton
-								onClick={() => handlePassengerChange(row.key, 1)}
-								disabled={totalPassengers >= MAX_PASSENGERS}
+								onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
+								disabled={disabledPassengerChange(passengers, row.key, 1)}
 							>
-								+
+								<AddIcon />
 							</IconButton>
 						</Card>
 					))}
@@ -184,9 +190,18 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>{UI_LABELS.BUTTONS.close}</Button>
-				<Button variant='contained' color='orange' onClick={handleConfirm}>
-					{UI_LABELS.SEARCH.flight_details.select_ticket}
-				</Button>
+				<Tooltip title={!hasAvailableSeats ? UI_LABELS.SEARCH.flight_details.seats_unavailable : ''}>
+					<span>
+						<Button
+							variant='contained'
+							color='orange'
+							onClick={handleConfirm}
+							disabled={!hasAvailableSeats}
+						>
+							{UI_LABELS.SEARCH.flight_details.select_ticket}
+						</Button>
+					</span>
+				</Tooltip>
 			</DialogActions>
 		</Dialog>
 	);

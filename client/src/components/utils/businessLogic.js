@@ -1,3 +1,5 @@
+import { MAX_PASSENGERS } from '../../constants';
+
 export const getFlightDurationMinutes = (flight) => {
 	if (!flight) return 0;
 	try {
@@ -8,6 +10,76 @@ export const getFlightDurationMinutes = (flight) => {
 		console.error('Failed to calculate duration', e);
 		return 0;
 	}
+};
+
+export const getTotalTicketPrice = (
+	outboundFlight,
+	returnFlight = null,
+	passengers = {},
+	tariffs = [],
+	discounts = []
+) => {
+	// Consider extra fees/taxes
+	return 0;
+};
+
+export const getTotalPassengers = (passengers) => {
+	return Object.values(passengers).reduce((total, count) => {
+		return total + count;
+	}, 0);
+};
+
+export const getTotalSeats = (passengers) => {
+	return Object.entries(passengers).reduce((total, [key, count]) => {
+		if (key === 'infants') return total;
+		return total + count;
+	}, 0);
+};
+
+export const handlePassengerChange = (setPassengers, key, delta) => {
+	setPassengers((prev) => {
+		if (disabledPassengerChange(prev, key, delta)) {
+			return prev;
+		}
+		return {
+			...prev,
+			[key]: prev[key] + delta,
+		};
+	});
+};
+
+export const disabledPassengerChange = (passengers, key, delta) => {
+	const nextValue = passengers[key] + delta;
+	const minValue = key === 'adults' ? 1 : 0;
+
+	// 1) no negatives (and at least one adult)
+	if (nextValue < minValue) {
+		return true;
+	}
+
+	// 2) overall max passengers
+	const newTotal = getTotalPassengers(passengers) + delta;
+	if (newTotal > MAX_PASSENGERS) {
+		return true;
+	}
+
+	// 3) infants without seat must never exceed adult count
+	if (key === 'infants') {
+		// when adding an infant
+		if (delta === 1 && nextValue > passengers.adults) {
+			return true;
+		}
+	}
+
+	// prevent removing an adult if that would leave more infants than adults
+	if (key === 'adults' && delta === -1) {
+		const nextAdults = nextValue;
+		if (passengers.infants > nextAdults) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 export const isDuplicateInBooking = (

@@ -14,6 +14,7 @@ import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlight
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
+import { fetchDiscounts } from '../../redux/actions/discount';
 import { formatDate, formatNumber, getFlightDurationMinutes, parseTime } from '../utils';
 
 const Search = () => {
@@ -28,7 +29,8 @@ const Search = () => {
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
+	const { discounts, isLoading: discountsLoading } = useSelector((state) => state.discounts);
+	const detailsLoading = airlinesLoading || airportsLoading || routesLoading || discountsLoading;
 
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
@@ -52,6 +54,7 @@ const Search = () => {
 		dispatch(fetchAirports());
 		dispatch(fetchAirlines());
 		dispatch(fetchRoutes());
+		dispatch(fetchDiscounts());
 	}, [dispatch]);
 
 	useEffect(() => {
@@ -249,7 +252,7 @@ const Search = () => {
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
-				{(isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0)) && (
+				{isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0) && (
 					<Box
 						sx={{
 							display: 'flex',
@@ -433,12 +436,14 @@ const Search = () => {
 						.slice(0, visibleCount)
 						.map((g, idx) => (
 							<SearchResultCard
+								initialParams={paramObj}
 								key={idx}
 								outbound={g.outbound}
 								returnFlight={g.returnFlight}
 								airlines={airlines}
 								airports={airports}
 								routes={routes}
+								discounts={discounts}
 								isLoading={detailsLoading}
 							/>
 						))

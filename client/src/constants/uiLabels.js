@@ -306,7 +306,8 @@ export const UI_LABELS = {
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
-				{ key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
+				{ key: 'infants', label: 'Младенцы без места', desc: 'до 2 лет' },
+				{ key: 'infants_seat', label: 'Младенцы с местом', desc: 'до 2 лет' },
 			],
 		},
 		results: 'Результаты поиска',
@@ -325,6 +326,8 @@ export const UI_LABELS = {
 			price: 'Цена',
 			price_from: 'От',
 			price_per_passenger: 'За 1 пассажира',
+			seats_available: 'Свободных мест',
+			seats_unavailable: 'Недостаточно свободных мест',
 		},
 		sort: {
 			label: 'Сортировка',
