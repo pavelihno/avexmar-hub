@@ -34,7 +34,7 @@ const Schedule = () => {
 	}, [dispatch, paramStr, from, to]);
 
 	useEffect(() => {
-		document.title = UI_LABELS.SCHEDULE.from_to(from || '', to || '');
+		document.title = UI_LABELS.SCHEDULE.from_to(from || '', to || '') || UI_LABELS.APP_TITLE;
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};

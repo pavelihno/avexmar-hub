@@ -72,7 +72,7 @@ const Search = () => {
 	useEffect(() => {
 		const titleFrom = departFrom || depart || '';
 		const titleTo = returnTo || returnDate || '';
-		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo);
+		document.title = UI_LABELS.SEARCH.from_to_date(from || '', to || '', titleFrom, titleTo) || UI_LABELS.APP_TITLE;
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};

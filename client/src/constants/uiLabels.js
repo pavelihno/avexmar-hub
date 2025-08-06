@@ -267,6 +267,7 @@ export const UI_LABELS = {
 		ask_return: 'Нужен ли обратный билет?',
 		select_flights: 'Выбрать рейсы',
 		from_to: (from, to) => {
+			if (!from || !to) return '';
 			return `${from} → ${to}`;
 		},
 	},
@@ -305,6 +306,7 @@ export const UI_LABELS = {
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
+			if (!from || !to) return '';
 			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
