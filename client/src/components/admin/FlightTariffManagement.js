@@ -78,6 +78,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 			label: FIELD_LABELS.FLIGHT_TARIFF.seats_number,
 			type: FIELD_TYPES.NUMBER,
 			inputProps: { min: 0, step: 1 },
+			defaultValue: 0,
 			validate: (value) =>
 				value === '' || value === null || value === undefined
 					? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
