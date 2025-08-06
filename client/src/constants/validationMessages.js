@@ -171,26 +171,29 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-	TARIFF: {
-		seat_class: {
-			REQUIRED: 'Класс места обязателен',
-		},
-		seats_number: {
-			REQUIRED: 'Количество мест обязательно',
-		},
-		currency: {
-			REQUIRED: 'Валюта обязательна',
-		},
-		price: {
-			REQUIRED: 'Цена обязательна',
-		},
-		conditions: {
-			REQUIRED: 'Условия применения тарифа обязательны',
-		},
-		tariff: {
-			REQUIRED: 'Тариф обязателен',
-		},
-	},
+        TARIFF: {
+                seat_class: {
+                        REQUIRED: 'Класс места обязателен',
+                },
+                seats_number: {
+                        REQUIRED: 'Количество мест обязательно',
+                },
+                currency: {
+                        REQUIRED: 'Валюта обязательна',
+                },
+                price: {
+                        REQUIRED: 'Цена обязательна',
+                },
+                title: {
+                        REQUIRED: 'Наименование тарифа обязательно',
+                },
+                conditions: {
+                        REQUIRED: 'Условия применения тарифа обязательны',
+                },
+                tariff: {
+                        REQUIRED: 'Тариф обязателен',
+                },
+        },
 
 	SEARCH: {
 		from: {

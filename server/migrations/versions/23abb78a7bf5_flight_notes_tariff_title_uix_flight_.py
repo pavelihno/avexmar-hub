@@ -22,8 +22,7 @@ def upgrade():
         batch_op.create_unique_constraint('uix_flight_tariff_flight_tariff', ['flight_id', 'tariff_id'])
 
     with op.batch_alter_table('flights', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('note' \
-        's', sa.String(), nullable=True))
+        batch_op.add_column(sa.Column('note', sa.String(), nullable=True))
 
     with op.batch_alter_table('tariffs', schema=None) as batch_op:
         batch_op.add_column(sa.Column('title', sa.String(), nullable=False, server_default=''))
@@ -37,7 +36,7 @@ def downgrade():
         batch_op.drop_column('title')
 
     with op.batch_alter_table('flights', schema=None) as batch_op:
-        batch_op.drop_column('notes')
+        batch_op.drop_column('note')
 
     with op.batch_alter_table('flight_tariffs', schema=None) as batch_op:
         batch_op.drop_constraint('uix_flight_tariff_flight_tariff', type_='unique')
