@@ -270,6 +270,12 @@ export const UI_LABELS = {
 			if (!from || !to) return '';
 			return `${from} → ${to}`;
 		},
+		pagination: {
+			rows_per_page: 'Рейсов на странице',
+			displayed_rows: ({ from, to, count }) => {
+				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+			},
+		},
 	},
 	SEARCH: {
 		form: {

@@ -245,7 +245,7 @@ const Search = () => {
 				<SearchForm initialParams={paramObj} />
 			</Box>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 3 }}>
+				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2 }}>
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 

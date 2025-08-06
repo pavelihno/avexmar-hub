@@ -143,8 +143,8 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 					setPage(0);
 				}}
 				rowsPerPageOptions={[5, 10, 25]}
-				labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
-				labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
+				labelRowsPerPage={UI_LABELS.SCHEDULE.pagination.rows_per_page}
+				labelDisplayedRows={UI_LABELS.SCHEDULE.pagination.displayed_rows}
 			/>
 		</Box>
 	);

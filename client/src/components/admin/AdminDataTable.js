@@ -406,7 +406,7 @@ const AdminDataTable = ({
 									{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
 								</Button>
 							</Box>
-							<Table stickyHeader sx={{ tableLayout: 'auto' }}>
+							<Table size='small' stickyHeader sx={{ tableLayout: 'auto' }}>
 								<TableHead>
 									<TableRow>
 										{columns.map((column, index) => (
@@ -580,7 +580,7 @@ const AdminDataTable = ({
 								setRowsPerPage(parseInt(e.target.value, 10));
 								setPage(0);
 							}}
-							rowsPerPageOptions={[10, 25, 50]}
+							rowsPerPageOptions={[10, 25, 50, 100]}
 							labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
 							labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
 						/>
