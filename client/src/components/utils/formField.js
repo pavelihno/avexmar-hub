@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	TextField,
 	Select,
@@ -14,9 +13,6 @@ import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pi
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
-import { format, parse, isValid } from 'date-fns';
-import numeral from 'numeral';
-
 import {
 	dateLocale,
 	DATE_FORMAT,
@@ -25,10 +21,7 @@ import {
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
-	TIME_DURATION_FORMAT,
-	DEFAULT_NUMBER_FORMAT,
-	DATE_API_FORMAT,
-} from '../constants';
+} from '../../constants';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -362,193 +355,4 @@ export const createFormFields = (fields) => {
 			renderField: createFieldRenderer(field),
 			validate: field.validate,
 		}));
-};
-
-export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale) => {
-	if (!value) return '';
-	try {
-		if (typeof value === 'string') {
-			return format(new Date(value), dateFormat, { locale });
-		} else if (value instanceof Date) {
-			return format(value, dateFormat, { locale });
-		} else if (typeof value === 'number') {
-			const date = new Date(value);
-			if (isNaN(date.getDate())) {
-				throw new Error('Invalid date value');
-			}
-			return format(date, dateFormat, { locale });
-		} else {
-			throw new Error('Unsupported date value type');
-		}
-	} catch (error) {
-		console.error('Invalid date value:', value);
-		return value;
-	}
-};
-
-export const formatTime = (value, timeFormat = TIME_FORMAT) => {
-	if (!value) return '';
-	try {
-		if (typeof value === 'string') {
-			return format(new Date(`1970-01-01T${value}`), timeFormat);
-		} else if (value instanceof Date) {
-			return format(value, timeFormat);
-		} else if (typeof value === 'number') {
-			const date = new Date(value);
-			if (isNaN(date.getTime())) {
-				throw new Error('Invalid time value');
-			}
-			return format(date, timeFormat);
-		} else {
-			throw new Error('Unsupported time value type');
-		}
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return value;
-	}
-};
-
-export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
-	if (!value) return '';
-	try {
-		return format(new Date(value), dateTimeFormat);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
-		return value;
-	}
-};
-
-export const formatTimeToAPI = (value) => {
-	if (!value) return '';
-	try {
-		return format(value, 'HH:mm:ss');
-	} catch (error) {
-		console.error('Invalid time value (API):', value);
-		return value;
-	}
-};
-
-export const formatTimeToUI = (value) => {
-	if (!value) return '';
-	try {
-		return new Date(`1970-01-01T${value}`);
-	} catch (error) {
-		console.error('Invalid time value (UI):', value);
-		return value;
-	}
-};
-
-export const parseTime = (value) => {
-	if (!value) return '';
-	try {
-		const date = new Date(`1970-01-01T${value}`);
-		if (isNaN(date.getTime())) {
-			throw new Error('Invalid time format');
-		}
-		return date.getTime();
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return value;
-	}
-};
-
-export const validateDate = (value) => {
-	if (!value) return false;
-	try {
-		const date = value instanceof Date ? value : new Date(value);
-		return isValid(date);
-	} catch (error) {
-		console.error('Invalid date value:', value);
-		return false;
-	}
-};
-
-export const validateTime = (value) => {
-	if (!value) return false;
-	try {
-		const date = value instanceof Date ? value : new Date(value);
-		return isValid(date);
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return false;
-	}
-};
-
-export const validateDateTime = (value) => {
-	if (!value) return false;
-	try {
-		const date = value instanceof Date ? value : new Date(value);
-		return isValid(date);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
-		return false;
-	}
-};
-
-export const validateEmail = (value) => {
-	// RFC 5322
-	if (!value) return false;
-	const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-	return emailRegex.test(value);
-};
-
-export const validatePhoneNumber = (value) => {
-	// E.164 format: +1234567890
-	if (!value) return false;
-	const phoneRegex = /^\+[1-9]\d{9,14}$/;
-	return phoneRegex.test(value);
-};
-
-export const getFlightDurationMinutes = (flight) => {
-	if (!flight) return 0;
-	try {
-		const depart = new Date(`${flight.scheduled_departure}T${flight.scheduled_departure_time || '00:00:00'}`);
-		const arrive = new Date(`${flight.scheduled_arrival}T${flight.scheduled_arrival_time || '00:00:00'}`);
-		return Math.round((arrive - depart) / 60000);
-	} catch (e) {
-		console.error('Failed to calculate duration', e);
-		return 0;
-	}
-};
-
-export const formatDuration = (minutes) => {
-	if (minutes == null) return '';
-	const hrs = Math.floor(minutes / 60);
-	const mins = minutes % 60;
-	return TIME_DURATION_FORMAT(hrs, mins);
-};
-
-export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
-	if (value == null || isNaN(value)) return '';
-	try {
-		return numeral(value).format(formatString);
-	} catch (error) {
-		console.error('Invalid number value:', value);
-		return value;
-	}
-};
-
-export const isDuplicateInBooking = (
-	allBookingPassengers,
-	passengers,
-	bookingId,
-	firstName,
-	lastName,
-	birthDate,
-	ignoreId = null
-) => {
-	const bookingPassengers = allBookingPassengers.filter((bp) => {
-		if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
-		return true;
-	});
-
-	return bookingPassengers.some((bp) => {
-		const passenger = passengers.find((pass) => pass.id === bp.passenger_id);
-		return (
-			passenger &&
-			passenger.first_name === firstName &&
-			passenger.last_name === lastName &&
-			passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
-		);
-	});
 };
