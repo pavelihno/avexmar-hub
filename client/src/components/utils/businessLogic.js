@@ -30,10 +30,19 @@ export const getTotalPassengers = (passengers) => {
 };
 
 export const getTotalSeats = (passengers) => {
-	return Object.entries(passengers).reduce((total, [key, count]) => {
-		if (key === 'infants') return total;
-		return total + count;
-	}, 0);
+        return Object.entries(passengers).reduce((total, [key, count]) => {
+                if (key === 'infants') return total;
+                return total + count;
+        }, 0);
+};
+
+export const calculateOccupiedSeats = (passengers = {}) => {
+        return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants_seat || 0);
+};
+
+export const hasAvailableSeats = (tariff, totalSeats) => {
+        if (!tariff || tariff.seats_left === undefined) return true;
+        return tariff.seats_left >= totalSeats;
 };
 
 export const handlePassengerChange = (setPassengers, key, delta) => {

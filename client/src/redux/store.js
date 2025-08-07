@@ -12,12 +12,14 @@ import tariffsReducer from './reducers/tariff';
 import flightTariffsReducer from './reducers/flightTariff';
 import ticketsReducer from './reducers/ticket';
 import discountReducer from './reducers/discount';
+import feeReducer from './reducers/fee';
 import userReducer from './reducers/user';
 import bookingReducer from './reducers/booking';
 import passengerReducer from './reducers/passenger';
 import bookingPassengerReducer from './reducers/bookingPassenger';
 import searchReducer from './reducers/search';
 import timezoneReducer from './reducers/timezone';
+import priceReducer from './reducers/price';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -32,13 +34,15 @@ const rootReducer = combineReducers({
 	tariffs: tariffsReducer,
 	flightTariffs: flightTariffsReducer,
 	tickets: ticketsReducer,
-	discounts: discountReducer,
-	bookings: bookingReducer,
+        discounts: discountReducer,
+        fees: feeReducer,
+        bookings: bookingReducer,
 	passengers: passengerReducer,
 	bookingPassengers: bookingPassengerReducer,
 	users: userReducer,
 	timezones: timezoneReducer,
-	search: searchReducer,
+        search: searchReducer,
+        price: priceReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));
