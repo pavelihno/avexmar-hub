@@ -32,16 +32,15 @@ const Search = () => {
 
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
-	const paramStr = params.toString();
-	const from = params.get('from');
-	const to = params.get('to');
-	const depart = params.get('when');
-	const returnDate = params.get('return');
-	const departFrom = params.get('when_from');
-	const departTo = params.get('when_to');
-	const returnFrom = params.get('return_from');
-	const returnTo = params.get('return_to');
-	const isExact = params.get('date_mode') === 'exact';
+	const from = paramObj.from;
+	const to = paramObj.to;
+	const depart = paramObj.when;
+	const returnDate = paramObj.return;
+	const departFrom = paramObj.when_from;
+	const departTo = paramObj.when_to;
+	const returnFrom = paramObj.return_from;
+	const returnTo = paramObj.return_to;
+	const isExact = paramObj.date_mode === 'exact';
 	const hasReturn = !!(returnDate || returnFrom || returnTo);
 
 	const [sortKey, setSortKey] = useState('departure_date');
@@ -56,7 +55,7 @@ const Search = () => {
 
 	useEffect(() => {
 		dispatch(fetchSearchFlights(paramObj));
-	}, [dispatch, paramStr]);
+	}, [dispatch, params]);
 
 	const [nearDatesOutbound, setNearDatesOutbound] = useState([]);
 	const [nearDatesReturn, setNearDatesReturn] = useState([]);
@@ -76,7 +75,7 @@ const Search = () => {
 		return () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};
-	}, [from, to, depart, returnDate, departFrom, returnTo]);
+	}, [params]);
 
 	const buildNearDates = (flights, selectedDate) => {
 		// Group flights by date and find lowest price for each
@@ -433,7 +432,6 @@ const Search = () => {
 						.slice(0, visibleCount)
 						.map((g, idx) => (
 							<SearchResultCard
-								initialParams={paramObj}
 								key={idx}
 								outbound={g.outbound}
 								returnFlight={g.returnFlight}

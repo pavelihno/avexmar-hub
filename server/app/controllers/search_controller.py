@@ -32,7 +32,7 @@ def search_airports():
 def __query_flights(
     origin_code, dest_code, date_from=None, date_to=None,
     airline_iata_code=None, flight_number=None,
-    is_exact=True, seat_class=None,
+    is_exact=True, seat_class=None, seats_number=0,
     direction=None
 ):
     origin = aliased(Airport)
@@ -93,14 +93,14 @@ def __query_flights(
                 'seats_left': ft.seats_number,
             } for ft, t in tariffs]
 
-            if seat_class:
-                seat_class_tariffs = [t for t in f_dict['tariffs'] if t['seat_class'] == seat_class]
+            if seat_class and seats_number > 0:
+                seat_class_tariffs = [t for t in f_dict['tariffs'] if (t['seat_class'] == seat_class and t['seats_left'] >= seats_number)]
                 if seat_class_tariffs:
                     min_tariff = min(seat_class_tariffs, key=lambda x: x['price'])
                     f_dict['price'] = min_tariff['price']
                     f_dict['currency'] = min_tariff['currency']
                 else:
-                    # Skip flight if the requested seat class is not available
+                    # Skip flight if the requested number of seats of the requested class is not available
                     continue
             else:
                 min_tariff = min((t for t in f_dict['tariffs']), key=lambda x: x['price'])
@@ -109,6 +109,8 @@ def __query_flights(
         else:
             # Skip flight if no tariffs are available
             continue
+
+        f_dict['tariffs'] = sorted(f_dict['tariffs'], key=lambda x: x['price'])
 
         if direction:
             f_dict['direction'] = direction
@@ -123,6 +125,7 @@ def search_flights(is_nearby=False):
     dest_code = params.get('to')
     is_exact = params.get('date_mode') == 'exact'
     seat_class = params.get('class')
+    seats_number = int(params.get('adults', 0)) + int(params.get('children', 0)) + int(params.get('infants_seat', 0))
 
     depart_from = params.get('when') if is_exact else params.get('when_from')
     depart_to = None if is_exact else params.get('when_to')
