@@ -116,10 +116,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	const totalSeats = getTotalSeats(passengers);
 
 	const dispatch = useDispatch();
-	const { current: priceDetails, isLoading: priceLoading, errors: priceErrors } = useSelector((state) => state.price);
-	const errorMessage =
-		priceErrors?.message ||
-		(typeof priceErrors === 'string' ? priceErrors : priceErrors ? JSON.stringify(priceErrors) : '');
+	const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
 
 	useEffect(() => {
 		if (!tariffId) return;
@@ -279,56 +276,58 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 
 						<Divider orientation='vertical' flexItem sx={{ mx: 1 }} />
 
-						<Box>
-							<>
-								{priceErrors && <Alert severity='error'>{errorMessage}</Alert>}
-								{(priceDetails?.directions || []).map((dir) => {
-									const dirLabel =
-										dir.direction === 'outbound'
-											? UI_LABELS.SCHEDULE.outbound
-											: UI_LABELS.SCHEDULE.return;
-									return (
-										<Box key={dir.direction} sx={{ mb: 1 }}>
-											<Typography sx={{ fontWeight: 600 }}>
-												{`${dirLabel} - ${dir.tariff.title}`}
-											</Typography>
-											{dir.passengers.map((b) => {
-												const label =
-													passengerCategories.find((c) => c.key === b.category)?.label ||
-													b.category;
-												return (
-													<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
-														<Typography>{`${label} ${b.count}x`}</Typography>
-														<Typography variant='body2'>
-															{formatNumber(b.final_price)} {currencySymbol}
+						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+							{(priceDetails?.directions || []).map((dir) => {
+								const route = routes.find((r) => r.id === dir.route_id) || {};
+								const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
+								const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
+
+								return (
+									<Box key={dir.direction} sx={{ mb: 1 }}>
+										<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+											{`${origin.city_name} → ${dest.city_name}`}
+										</Typography>
+										{dir.passengers.map((b) => {
+											const label =
+												passengerCategories.find((c) => c.key === b.category)?.label ||
+												b.category;
+											return (
+												<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
+													<Typography>{`${label} ${b.count}`}</Typography>
+													<Typography variant='body2'>
+														{formatNumber(b.final_price)} {currencySymbol}
+													</Typography>
+													{b.discount > 0 && (
+														<Typography variant='caption' color='text.secondary'>
+															{`${
+																UI_LABELS.SEARCH.flight_details.discount
+															} ${formatNumber(b.discount)} ${currencySymbol}`}
 														</Typography>
-														{b.discount > 0 && (
-															<Typography variant='caption' color='text.secondary'>
-																{`${
-																	UI_LABELS.SEARCH.flight_details.discount
-																} ${formatNumber(b.discount)} ${currencySymbol}`}
-															</Typography>
-														)}
-													</Box>
-												);
-											})}
-										</Box>
-									);
-								})}
-								<Divider sx={{ my: 1 }} />
-								<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
-								{(priceDetails?.fees || []).map((f) => (
-									<Typography key={f.name} variant='body2'>
-										{`${f.name}: ${formatNumber(f.total)} ${currencySymbol}`}
-									</Typography>
-								))}
-								<Divider sx={{ my: 1 }} />
-								<Typography sx={{ fontWeight: 700 }}>
-									{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(
-										priceDetails?.total
-									)} ${currencySymbol}`}
+													)}
+													{b.discount_name && (
+														<Typography variant='caption' color='text.secondary'>
+															{`${b.discount_name}`}
+														</Typography>
+													)}
+												</Box>
+											);
+										})}
+									</Box>
+								);
+							})}
+							<Divider sx={{ my: 1 }} />
+							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
+							{(priceDetails?.fees || []).map((f) => (
+								<Typography key={f.name} variant='body2'>
+									{`${f.name}: ${formatNumber(f.total)} ${currencySymbol}`}
 								</Typography>
-							</>
+							))}
+							<Divider sx={{ my: 1 }} />
+							<Typography sx={{ fontWeight: 700 }}>
+								{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(
+									priceDetails?.total
+								)} ${currencySymbol}`}
+							</Typography>
 						</Box>
 					</Box>
 				</DialogContent>
@@ -340,7 +339,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								variant='contained'
 								color='orange'
 								onClick={handleConfirm}
-								disabled={!hasSeats || priceLoading || !!priceErrors}
+								disabled={!hasSeats || priceLoading}
 							>
 								{UI_LABELS.SEARCH.flight_details.book_ticket}
 							</Button>
