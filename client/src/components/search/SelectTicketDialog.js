@@ -30,27 +30,36 @@ import { getTotalSeats, hasAvailableSeats } from '../utils/businessLogic';
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
 const buildTariffOptions = (outbound, returnFlight) => {
-	const outboundTariffs = outbound?.tariffs || [];
-	if (!returnFlight) return outboundTariffs.map((t) => ({ ...t }));
-	const returnTariffs = returnFlight.tariffs || [];
-	const map = {};
-	outboundTariffs.forEach((t) => {
-		map[t.id] = { ...t };
-	});
-	const options = [];
-	returnTariffs.forEach((t) => {
-		if (map[t.id]) {
-			options.push({
-				...map[t.id],
-				price: map[t.id].price + t.price,
-				seats_left:
-					map[t.id].seats_left !== undefined && t.seats_left !== undefined
-						? Math.min(map[t.id].seats_left, t.seats_left)
-						: t.seats_left ?? map[t.id].seats_left,
-			});
-		}
-	});
-	return options;
+        const filterBySeats = (tariffs) =>
+                tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
+
+        const outboundTariffs = filterBySeats(outbound?.tariffs || []);
+
+        if (!returnFlight) {
+                return outboundTariffs.map((t) => ({ ...t }));
+        }
+
+        const returnTariffs = filterBySeats(returnFlight.tariffs || []);
+        const map = {};
+        outboundTariffs.forEach((t) => {
+                map[t.id] = { ...t };
+        });
+
+        const options = [];
+        returnTariffs.forEach((t) => {
+                if (map[t.id]) {
+                        options.push({
+                                ...map[t.id],
+                                price: map[t.id].price + t.price,
+                                seats_left:
+                                        map[t.id].seats_left !== undefined && t.seats_left !== undefined
+                                                ? Math.min(map[t.id].seats_left, t.seats_left)
+                                                : t.seats_left ?? map[t.id].seats_left,
+                        });
+                }
+        });
+
+        return filterBySeats(options);
 };
 
 const FlightInfo = ({ flight, airlines, airports, routes }) => {
@@ -288,29 +297,26 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 											{`${origin.city_name} → ${dest.city_name}`}
 										</Typography>
 										{dir.passengers.map((b) => {
-											const label =
-												passengerCategories.find((c) => c.key === b.category)?.label ||
-												b.category;
-											return (
-												<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
-													<Typography>{`${label} ${b.count}`}</Typography>
-													<Typography variant='body2'>
-														{formatNumber(b.final_price)} {currencySymbol}
-													</Typography>
-													{b.discount > 0 && (
-														<Typography variant='caption' color='text.secondary'>
-															{`${
-																UI_LABELS.SEARCH.flight_details.discount
-															} ${formatNumber(b.discount)} ${currencySymbol}`}
-														</Typography>
-													)}
-													{b.discount_name && (
-														<Typography variant='caption' color='text.secondary'>
-															{`${b.discount_name}`}
-														</Typography>
-													)}
-												</Box>
-											);
+							const label =
+								passengerCategories.find((c) => c.key === b.category)?.label ||
+								b.category;
+							return (
+								<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
+									<Typography>{`${label} x${b.count}`}</Typography>
+									<Typography variant='body2'>
+										{`${UI_LABELS.SEARCH.flight_details.price}: ${formatNumber(b.base_price)} ${currencySymbol}`}
+									</Typography>
+									{b.discount > 0 && (
+										<Typography variant='body2' color='text.secondary'>
+											{`-${formatNumber(b.discount)} ${currencySymbol}`}
+											{b.discount_name ? ` (${b.discount_name})` : ''}
+										</Typography>
+									)}
+									<Typography variant='body2' sx={{ fontWeight: 600 }}>
+										{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(b.final_price)} ${currencySymbol}`}
+									</Typography>
+								</Box>
+							);
 										})}
 									</Box>
 								);
