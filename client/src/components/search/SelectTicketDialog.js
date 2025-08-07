@@ -157,22 +157,24 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 
 	return (
 		<>
-			<Dialog open={open} onClose={onClose} maxWidth='md'>
+                        <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
 				<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_ticket}</DialogTitle>
 				<DialogContent dividers>
 					<Box sx={{ display: 'flex', gap: 1 }}>
 						<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
-							<Box sx={{ display: 'flex', gap: 1 }}>
-								<FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
-								{returnFlight && (
-									<FlightInfo
-										flight={returnFlight}
-										airlines={airlines}
-										airports={airports}
-										routes={routes}
-									/>
-								)}
-							</Box>
+                                                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                                                                <FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
+                                                                {returnFlight ? (
+                                                                        <FlightInfo
+                                                                                flight={returnFlight}
+                                                                                airlines={airlines}
+                                                                                airports={airports}
+                                                                                routes={routes}
+                                                                        />
+                                                                ) : (
+                                                                        <Box />
+                                                                )}
+                                                        </Box>
 
 							<Box sx={{ display: 'flex', gap: 1 }}>
 								{tariffOptions.map((t) => {
@@ -280,10 +282,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 							</Box>
 						</Box>
 
-						<Divider orientation='vertical' flexItem sx={{ mx: 0.5 }} />
+                                                <Divider orientation='vertical' flexItem sx={{ mx: 0.5 }} />
 
-						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
-							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
+                                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
+                                                        <Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
 							{(priceDetails?.directions || []).map((dir) => {
 								const route = routes.find((r) => r.id === dir.route_id) || {};
 								const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
@@ -319,10 +321,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								);
 							})}
 
-							<Divider sx={{ my: 0.5 }} />
+                                                        <Divider sx={{ my: 0.5 }} />
 
-							<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
-								<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
+                                                                <Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
 								{(priceDetails?.fees || []).map((f) => (
 									<Box sx={{ mb: 1 }}>
 										<Typography sx={{ textDecoration: 'underline' }}>{`${f.name}`}</Typography>
