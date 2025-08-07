@@ -110,6 +110,8 @@ def __query_flights(
             # Skip flight if no tariffs are available
             continue
 
+        f_dict['tariffs'] = sorted(f_dict['tariffs'], key=lambda x: x['price'])
+
         if direction:
             f_dict['direction'] = direction
         results.append(f_dict)
