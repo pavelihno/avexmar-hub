@@ -338,6 +338,7 @@ export const UI_LABELS = {
 			seats_unavailable: 'Недостаточно свободных мест',
 			fees: 'Сборы',
 			discount: 'Скидка',
+			tariff_conditions: 'Условия применения тарифа',
 		},
 		sort: {
 			label: 'Сортировка',
