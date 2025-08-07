@@ -12,31 +12,11 @@ export const getFlightDurationMinutes = (flight) => {
 	}
 };
 
-export const getTotalTicketPrice = (
-	outboundFlight,
-	returnFlight = null,
-	passengers = {},
-	tariffs = [],
-	discounts = []
-) => {
-	// Consider extra fees/taxes
-	return 0;
-};
-
 export const getTotalPassengers = (passengers) => {
-	return Object.values(passengers).reduce((total, count) => {
-		return total + count;
-	}, 0);
+	return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants || 0) + (passengers.infants_seat || 0);
 };
 
 export const getTotalSeats = (passengers) => {
-	return Object.entries(passengers).reduce((total, [key, count]) => {
-		if (key === 'infants') return total;
-		return total + count;
-	}, 0);
-};
-
-export const calculateOccupiedSeats = (passengers = {}) => {
 	return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants_seat || 0);
 };
 

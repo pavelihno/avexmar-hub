@@ -117,7 +117,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						multiline
 						rows={field.rows || 5}
 						inputProps={{ ...field.inputProps, ...inputProps }}
-						sx={{ ...sx }}
+						sx={{
+							'& .MuiInputBase-root': { padding: '4px' },
+							...sx,
+						}}
 					/>
 				);
 			}

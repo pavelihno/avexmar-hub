@@ -123,8 +123,6 @@ def search_flights(is_nearby=False):
     dest_code = params.get('to')
     is_exact = params.get('date_mode') == 'exact'
     seat_class = params.get('class')
-    passengers_num = int(params.get('adults', 0)) + \
-        int(params.get('children', 0)) + int(params.get('infants', 0))
 
     depart_from = params.get('when') if is_exact else params.get('when_from')
     depart_to = None if is_exact else params.get('when_to')

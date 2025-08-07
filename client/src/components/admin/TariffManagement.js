@@ -68,6 +68,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.conditions,
 			type: FIELD_TYPES.TEXT_AREA,
 			fullWidth: true,
+			excludeFromTable: true,
 		},
 	};
 

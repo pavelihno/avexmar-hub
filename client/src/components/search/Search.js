@@ -14,7 +14,6 @@ import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlight
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
-import { fetchDiscounts } from '../../redux/actions/discount';
 import { formatDate, formatNumber, getFlightDurationMinutes, parseTime } from '../utils';
 
 const Search = () => {
@@ -29,8 +28,7 @@ const Search = () => {
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
 	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-	const { discounts, isLoading: discountsLoading } = useSelector((state) => state.discounts);
-	const detailsLoading = airlinesLoading || airportsLoading || routesLoading || discountsLoading;
+	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
 
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
@@ -54,7 +52,6 @@ const Search = () => {
 		dispatch(fetchAirports());
 		dispatch(fetchAirlines());
 		dispatch(fetchRoutes());
-		dispatch(fetchDiscounts());
 	}, [dispatch]);
 
 	useEffect(() => {
@@ -443,7 +440,6 @@ const Search = () => {
 								airlines={airlines}
 								airports={airports}
 								routes={routes}
-								discounts={discounts}
 								isLoading={detailsLoading}
 							/>
 						))

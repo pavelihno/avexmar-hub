@@ -326,6 +326,7 @@ export const UI_LABELS = {
 		},
 		flight_details: {
 			select_ticket: 'Выбрать билет',
+			book_ticket: 'Оформить билет',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',

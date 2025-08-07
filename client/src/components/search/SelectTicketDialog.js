@@ -25,7 +25,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { formatTime, formatDate, formatNumber, handlePassengerChange, disabledPassengerChange } from '../utils';
 import { calculatePrice } from '../../redux/actions/price';
-import { calculateOccupiedSeats, hasAvailableSeats } from '../utils/businessLogic';
+import { getTotalSeats, hasAvailableSeats } from '../utils/businessLogic';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
@@ -63,15 +63,14 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 	return (
 		<Card sx={{ p: 1, flex: 1 }}>
 			<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-				{airline.name || airline.id}
+				{airline.name}
 			</Typography>
+			<Typography variant='subtitle2'>{flight.airline_flight_number}</Typography>
 			<Typography variant='body2'>
-				{origin.name || origin.id} → {dest.name || dest.id}
+				{origin.iata_code} → {dest.iata_code}
 			</Typography>
 			<Typography variant='caption' color='text.secondary'>
-				{`${formatDate(flight.scheduled_departure)} ${formatTime(
-					flight.scheduled_departure_time
-				)} - ${formatDate(flight.scheduled_arrival)} ${formatTime(flight.scheduled_arrival_time)}`}
+				{`${formatDate(flight.scheduled_departure)} ${formatTime(flight.scheduled_departure_time)}`}
 			</Typography>
 		</Card>
 	);
@@ -86,7 +85,6 @@ const SelectTicketDialog = ({
 	airlines,
 	airports,
 	routes,
-	discounts,
 }) => {
 	const navigate = useNavigate();
 
@@ -106,7 +104,7 @@ const SelectTicketDialog = ({
 	);
 	const currencySymbol = selectedTariff ? ENUM_LABELS.CURRENCY_SYMBOL[selectedTariff.currency] || '' : '';
 
-	const totalSeats = calculateOccupiedSeats(passengers);
+	const totalSeats = getTotalSeats(passengers);
 
 	const dispatch = useDispatch();
 	const { current: priceDetails, isLoading: priceLoading, errors: priceErrors } = useSelector((state) => state.price);
@@ -146,9 +144,9 @@ const SelectTicketDialog = ({
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
 			<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_ticket}</DialogTitle>
 			<DialogContent dividers>
-				<Box sx={{ display: 'flex', gap: 2 }}>
-					<Box sx={{ flex: 1 }}>
-						<Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+				<Box sx={{ display: 'flex', gap: 1 }}>
+					<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
+						<Box sx={{ display: 'flex', gap: 1 }}>
 							<FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
 							{returnFlight && (
 								<FlightInfo
@@ -160,75 +158,108 @@ const SelectTicketDialog = ({
 							)}
 						</Box>
 
-						<Typography gutterBottom>{UI_LABELS.SEARCH.form.seat_class_title}</Typography>
-						<Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-							{tariffOptions.map((t) => (
+						<Box sx={{ display: 'flex', gap: 1 }}>
+							{tariffOptions.map((t) => {
+								const isSelected = t.id === tariffId;
+								return (
+									<Card key={t.id} sx={{ p: 0.5 }}>
+										<Box display='flex' justifyContent='flex-end'>
+											<IconButton
+												sx={{ m: 0, p: 0.5 }}
+												size='small'
+												disabled={!t.conditions}
+												onClick={(e) => {
+													// t.conditions
+													e.stopPropagation(); /* show tooltip/modal */
+												}}
+											>
+												<Tooltip>
+													<InfoOutlinedIcon fontSize='small' />
+												</Tooltip>
+											</IconButton>
+										</Box>
+
+										<CardActionArea
+											onClick={() => setTariffId(t.id)}
+											sx={{ p: 1, bgcolor: isSelected ? 'action.selected' : 'background.paper' }}
+										>
+											<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+												{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
+											</Typography>
+											<Typography variant='body2'>{t.title}</Typography>
+											<Typography variant='body1' sx={{ fontWeight: 700 }}>
+												{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+											</Typography>
+											<Typography variant='caption' color='text.secondary'>
+												{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${
+													t.seats_left ?? '-'
+												}`}
+											</Typography>
+										</CardActionArea>
+									</Card>
+								);
+							})}
+						</Box>
+
+						<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+							{passengerCategories.map((row) => (
 								<Card
-									key={t.id}
-									variant={t.id === tariffId ? 'outlined' : 'elevation'}
-									sx={{ minWidth: 160, position: 'relative' }}
+									key={row.key}
+									sx={{
+										p: 1,
+										display: 'flex',
+										flexDirection: 'column',
+										height: '100%',
+									}}
 								>
-									<CardActionArea onClick={() => setTariffId(t.id)} sx={{ p: 1 }}>
-										<Tooltip title={t.conditions || ''}>
-											<InfoOutlinedIcon
-												fontSize='small'
-												sx={{ position: 'absolute', top: 4, right: 4 }}
-											/>
-										</Tooltip>
-										<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-											{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
+									<Box sx={{ mb: 1 }}>
+										<Typography noWrap sx={{ textDecoration: 'underline', lineHeight: 1.2 }}>
+											{row.label}
 										</Typography>
-										<Typography variant='body2'>{t.title}</Typography>
-										<Typography variant='body1' sx={{ fontWeight: 700 }}>
-											{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+										<Typography noWrap variant='body2' color='text.secondary'>
+											{row.desc}
 										</Typography>
-										<Typography variant='caption' color='text.secondary'>
-											{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${
-												t.seats_left ?? '-'
-											}`}
+									</Box>
+
+									<Box
+										sx={{
+											display: 'grid',
+											gridTemplateColumns: 'auto auto auto',
+											justifyContent: 'flex-end',
+											alignItems: 'center',
+											columnGap: 0.5,
+										}}
+									>
+										{/* Remove button */}
+										<IconButton
+											onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
+											disabled={disabledPassengerChange(passengers, row.key, -1)}
+											sx={{ p: 0 }}
+										>
+											<RemoveIcon fontSize='small' />
+										</IconButton>
+
+										<Typography sx={{ textAlign: 'center', minWidth: '24px' }}>
+											{passengers[row.key]}
 										</Typography>
-									</CardActionArea>
+
+										{/* Add button */}
+										<IconButton
+											onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
+											disabled={disabledPassengerChange(passengers, row.key, 1)}
+											sx={{ p: 0 }}
+										>
+											<AddIcon fontSize='small' />
+										</IconButton>
+									</Box>
 								</Card>
 							))}
 						</Box>
-
-						<Typography gutterBottom>{UI_LABELS.SEARCH.form.passengers}</Typography>
-						<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-							{passengerCategories.map((row) => (
-								<Box
-									key={row.key}
-									sx={{
-										display: 'flex',
-										alignItems: 'center',
-										border: 1,
-										borderColor: 'divider',
-										borderRadius: 1,
-										p: 0.5,
-									}}
-								>
-									<Typography sx={{ mr: 1 }}>{row.label}</Typography>
-									<IconButton
-										size='small'
-										onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
-										disabled={disabledPassengerChange(passengers, row.key, -1)}
-									>
-										<RemoveIcon fontSize='small' />
-									</IconButton>
-									<Typography sx={{ width: 20, textAlign: 'center' }}>
-										{passengers[row.key]}
-									</Typography>
-									<IconButton
-										size='small'
-										onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
-										disabled={disabledPassengerChange(passengers, row.key, 1)}
-									>
-										<AddIcon fontSize='small' />
-									</IconButton>
-								</Box>
-							))}
-						</Box>
 					</Box>
-					<Box sx={{ width: 250 }}>
+
+					<Divider orientation='vertical' flexItem sx={{ mx: 1 }} />
+
+					<Box>
 						{priceLoading && (
 							<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
 								<CircularProgress size={24} />
@@ -281,7 +312,7 @@ const SelectTicketDialog = ({
 							onClick={handleConfirm}
 							disabled={!hasSeats || priceLoading || !!priceErrors}
 						>
-							{UI_LABELS.SEARCH.flight_details.select_ticket}
+							{UI_LABELS.SEARCH.flight_details.book_ticket}
 						</Button>
 					</span>
 				</Tooltip>

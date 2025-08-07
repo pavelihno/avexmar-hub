@@ -222,8 +222,6 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		setFormValues((prev) => ({ ...prev, from: prev.to, to: prev.from }));
 	};
 
-	const totalSeats = getTotalSeats(passengers);
-
 	const totalPassengers = getTotalPassengers(passengers);
 	const passengerWord = UI_LABELS.SEARCH.form.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;

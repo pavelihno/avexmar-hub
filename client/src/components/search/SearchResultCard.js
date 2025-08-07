@@ -155,7 +155,7 @@ const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 	);
 };
 
-const SearchResultCard = ({ initialParams = {}, outbound, returnFlight, airlines, airports, routes, discounts, isLoading }) => {
+const SearchResultCard = ({ initialParams = {}, outbound, returnFlight, airlines, airports, routes, isLoading }) => {
 	const theme = useTheme();
 	const currency = isLoading ? '' : outbound?.currency || returnFlight?.currency;
 	const currencySymbol = isLoading ? '' : currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
@@ -251,7 +251,6 @@ const SearchResultCard = ({ initialParams = {}, outbound, returnFlight, airlines
 				airlines={airlines}
 				airports={airports}
 				routes={routes}
-				discounts={discounts}
 			/>
 		</>
 	);

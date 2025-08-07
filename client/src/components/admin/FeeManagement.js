@@ -23,15 +23,7 @@ const FeeManagement = () => {
 			apiKey: 'name',
 			label: FIELD_LABELS.FEE.name,
 			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.FEE.name.REQUIRED : null),
-		},
-		description: {
-			key: 'description',
-			apiKey: 'description',
-			label: FIELD_LABELS.FEE.description,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
 		},
 		amount: {
 			key: 'amount',
@@ -41,6 +33,14 @@ const FeeManagement = () => {
 			float: true,
 			formatter: (value) => (value != null ? formatNumber(value) : ''),
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.FEE.amount.REQUIRED : null),
+		},
+		description: {
+			key: 'description',
+			apiKey: 'description',
+			label: FIELD_LABELS.FEE.description,
+			type: FIELD_TYPES.TEXT_AREA,
+			rows: 3,
+			fullWidth: true,
 		},
 	};
 
