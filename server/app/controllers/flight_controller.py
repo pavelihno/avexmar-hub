@@ -59,7 +59,7 @@ def upload_flight(current_user):
     if error_rows:
         error_xlsx = create_xlsx(
             Flight.get_upload_fields(), error_rows,
-            Flight.upload_date_fields, Flight.upload_time_fields
+            Flight.get_upload_date_fields(), Flight.get_upload_time_fields()
         )
         error_xlsx.seek(0)
         return send_file(

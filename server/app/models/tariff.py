@@ -14,6 +14,7 @@ class Tariff(BaseModel):
 
     seat_class = db.Column(db.Enum(Config.SEAT_CLASS), nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
     conditions = db.Column(db.String, nullable=True)
@@ -27,6 +28,7 @@ class Tariff(BaseModel):
             'id': self.id,
             'seat_class': self.seat_class.value,
             'order_number': self.order_number,
+            'title': self.title,
             'currency': self.currency.value,
             'price': self.price,
             'conditions': self.conditions
@@ -34,7 +36,7 @@ class Tariff(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='seat_class', descending=False)
+        return super().get_all(sort_by=['seat_class', 'order_number'], descending=False)
 
     @classmethod
     def create(cls, session: Session | None = None, **data):

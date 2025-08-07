@@ -155,13 +155,13 @@ const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 	);
 };
 
-const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, isLoading }) => {
-        const theme = useTheme();
-        const currency = isLoading ? '' : outbound?.currency || returnFlight?.currency;
-        const currencySymbol = isLoading ? '' : currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-        const totalPrice = isLoading ? 0 : outbound.price + (returnFlight?.price || 0);
-        const totalMinPrice = isLoading ? 0 : outbound.min_price + (returnFlight?.min_price || 0);
-        const [openDialog, setOpenDialog] = useState(false);
+const SearchResultCard = ({ initialParams = {}, outbound, returnFlight, airlines, airports, routes, isLoading }) => {
+	const theme = useTheme();
+	const currency = isLoading ? '' : outbound?.currency || returnFlight?.currency;
+	const currencySymbol = isLoading ? '' : currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
+	const totalPrice = isLoading ? 0 : outbound.price + (returnFlight?.price || 0);
+	const totalMinPrice = isLoading ? 0 : outbound.min_price + (returnFlight?.min_price || 0);
+	const [openDialog, setOpenDialog] = useState(false);
 
 	const priceText = isLoading
 		? ''
@@ -172,81 +172,88 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 		  )} ${currencySymbol}`;
 
 	return (
-                <>
-                        <Card sx={{ display: 'flex', p: 2, mb: 2 }}>
-                                <Box
-                                        sx={{
-                                                width: 180,
-                                                textAlign: 'center',
-                                                pr: 2,
-                                                borderRight: `1px solid ${theme.palette.grey[100]}`,
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                justifyContent: 'center',
-                                        }}
-                                >
-                                        {isLoading ? (
-                                                <Skeleton variant='rectangular' width={150} height={40} sx={{ mb: 1, mx: 'auto' }} />
-                                        ) : (
-                                                <>
-                                                        <Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                                                                {priceText}
-                                                        </Typography>
-                                                        <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-                                                                {UI_LABELS.SEARCH.flight_details.price_per_passenger.toLowerCase()}
-                                                        </Typography>
-                                                </>
-                                        )}
-                                        <Button
-                                                variant='contained'
-                                                color='orange'
-                                                disabled={isLoading}
-                                                sx={{
-                                                        borderRadius: 2,
-                                                        boxShadow: 'none',
-                                                        textTransform: 'none',
-                                                        whiteSpace: 'nowrap',
-                                                }}
-                                                onClick={() => setOpenDialog(true)}
-                                        >
-                                                {UI_LABELS.SEARCH.flight_details.select_ticket}
-                                        </Button>
-                                </Box>
-                                <Box sx={{ flexGrow: 1, pl: 2 }}>
-                                        {isLoading ? (
-                                                <>
-                                                        <SegmentSkeleton />
-                                                        {returnFlight && <Divider sx={{ my: 1 }} />}
-                                                        {returnFlight && <SegmentSkeleton />}
-                                                </>
-                                        ) : (
-                                                <>
-                                                        <Segment flight={outbound} isOutbound airlines={airlines} airports={airports} routes={routes} />
-                                                        {returnFlight && <Divider sx={{ my: 1 }} />}
-                                                        {returnFlight && (
-                                                                <Segment
-                                                                        flight={returnFlight}
-                                                                        isOutbound={false}
-                                                                        airlines={airlines}
-                                                                        airports={airports}
-                                                                        routes={routes}
-                                                                />
-                                                        )}
-                                                </>
-                                        )}
-                                </Box>
-                        </Card>
-                        <SelectTicketDialog
-                                open={openDialog}
-                                onClose={() => setOpenDialog(false)}
-                                outbound={outbound}
-                                returnFlight={returnFlight}
-                                airlines={airlines}
-                                airports={airports}
-                                routes={routes}
-                        />
-                </>
-        );
+		<>
+			<Card sx={{ display: 'flex', p: 2, mb: 2 }}>
+				<Box
+					sx={{
+						width: 180,
+						textAlign: 'center',
+						pr: 2,
+						borderRight: `1px solid ${theme.palette.grey[100]}`,
+						display: 'flex',
+						flexDirection: 'column',
+						justifyContent: 'center',
+					}}
+				>
+					{isLoading ? (
+						<Skeleton variant='rectangular' width={150} height={40} sx={{ mb: 1, mx: 'auto' }} />
+					) : (
+						<>
+							<Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+								{priceText}
+							</Typography>
+							<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
+								{UI_LABELS.SEARCH.flight_details.price_per_passenger.toLowerCase()}
+							</Typography>
+						</>
+					)}
+					<Button
+						variant='contained'
+						color='orange'
+						disabled={isLoading}
+						sx={{
+							borderRadius: 2,
+							boxShadow: 'none',
+							textTransform: 'none',
+							whiteSpace: 'nowrap',
+						}}
+						onClick={() => setOpenDialog(true)}
+					>
+						{UI_LABELS.SEARCH.flight_details.select_ticket}
+					</Button>
+				</Box>
+				<Box sx={{ flexGrow: 1, pl: 2 }}>
+					{isLoading ? (
+						<>
+							<SegmentSkeleton />
+							{returnFlight && <Divider sx={{ my: 1 }} />}
+							{returnFlight && <SegmentSkeleton />}
+						</>
+					) : (
+						<>
+							<Segment
+								flight={outbound}
+								isOutbound
+								airlines={airlines}
+								airports={airports}
+								routes={routes}
+							/>
+							{returnFlight && <Divider sx={{ my: 1 }} />}
+							{returnFlight && (
+								<Segment
+									flight={returnFlight}
+									isOutbound={false}
+									airlines={airlines}
+									airports={airports}
+									routes={routes}
+								/>
+							)}
+						</>
+					)}
+				</Box>
+			</Card>
+			<SelectTicketDialog
+				initialParams={initialParams}
+				open={openDialog}
+				onClose={() => setOpenDialog(false)}
+				outbound={outbound}
+				returnFlight={returnFlight}
+				airlines={airlines}
+				airports={airports}
+				routes={routes}
+			/>
+		</>
+	);
 };
 
 export default SearchResultCard;

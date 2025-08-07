@@ -15,10 +15,20 @@ import {
 	TextField,
 	FormControlLabel,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import { useTheme } from '@mui/material/styles';
 
-import { FIELD_TYPES, createFormFields, formatDate } from '../utils';
+import {
+	FIELD_TYPES,
+	createFormFields,
+	disabledPassengerChange,
+	formatDate,
+	getTotalPassengers,
+	getTotalSeats,
+	handlePassengerChange,
+} from '../utils';
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
@@ -126,9 +136,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		returnTo: parseDate(combinedParams.return_to),
 	});
 	const [passengers, setPassengers] = useState({
-		adults: parseInt(combinedParams.adults, 10) || 1,
-		children: parseInt(combinedParams.children, 10) || 0,
-		infants: parseInt(combinedParams.infants, 10) || 0,
+		adults: parseInt(combinedParams.adults) || 1,
+		children: parseInt(combinedParams.children) || 0,
+		infants: parseInt(combinedParams.infants) || 0,
+		infants_seat: parseInt(combinedParams.infants_seat) || 0,
 	});
 	const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
 	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
@@ -207,13 +218,11 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		}
 	}, [seatClassOptions, seatClass]);
 
-	const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
-
 	const swapAirports = () => {
 		setFormValues((prev) => ({ ...prev, from: prev.to, to: prev.from }));
 	};
 
-	const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+	const totalPassengers = getTotalPassengers(passengers);
 	const passengerWord = UI_LABELS.SEARCH.form.passenger_word(totalPassengers);
 	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
 
@@ -249,21 +258,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				adults: passengers.adults,
 				children: passengers.children,
 				infants: passengers.infants,
+				infants_seat: passengers.infants_seat,
 				class: seatClass,
 			})
 		);
-	};
-
-	const handlePassengerChange = (key, delta) => {
-		setPassengers((prev) => {
-			const nextValue = prev[key] + delta;
-			const min = key === 'adults' ? 1 : 0;
-			const max = MAX_PASSENGERS;
-
-			const newTotal = prev.adults + prev.children + prev.infants + delta;
-			if (nextValue < min || nextValue > max || newTotal > MAX_PASSENGERS) return prev;
-			return { ...prev, [key]: nextValue };
-		});
 	};
 
 	const validateForm = () => {
@@ -321,6 +319,7 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		params.set('adults', passengers.adults);
 		params.set('children', passengers.children);
 		params.set('infants', passengers.infants);
+		params.set('infants_seat', passengers.infants_seat);
 		params.set('class', seatClass);
 		try {
 			saveToLocalStorage();
@@ -565,42 +564,46 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				/>
 				<Collapse in={showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
 					<Paper sx={{ p: 2, minWidth: 220 }}>
-						{passengerCategories.map((row) => (
+						{UI_LABELS.SEARCH.form.passenger_categories.map((row) => (
 							<Box
 								key={row.key}
 								sx={{
-									display: 'flex',
+									display: 'grid',
+									gridTemplateColumns: '1fr auto 32px auto',
 									alignItems: 'center',
-									justifyContent: 'space-between',
+									columnGap: 0.5,
 									mb: 1,
 								}}
 							>
 								<Box>
-									<Typography>{row.label}</Typography>
+									<Typography sx={{ textDecoration: 'underline' }}>{row.label}</Typography>
 									<Typography variant='body2' color='text.secondary'>
 										{row.desc}
 									</Typography>
 								</Box>
-								<Box sx={{ display: 'flex', alignItems: 'center' }}>
-									<IconButton
-										onClick={() => handlePassengerChange(row.key, -1)}
-										disabled={passengers[row.key] <= (row.key === 'adults' ? 1 : 0)}
-									>
-										–
-									</IconButton>
-									<Typography>{passengers[row.key]}</Typography>
-									<IconButton
-										onClick={() => handlePassengerChange(row.key, 1)}
-										disabled={
-											passengers.adults + passengers.children + passengers.infants >=
-											MAX_PASSENGERS
-										}
-									>
-										+
-									</IconButton>
-								</Box>
+
+								{/* Remove button */}
+								<IconButton
+									onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
+									disabled={disabledPassengerChange(passengers, row.key, -1)}
+									sx={{ p: 0 }}
+								>
+									<RemoveIcon />
+								</IconButton>
+
+								<Typography sx={{ textAlign: 'center' }}>{passengers[row.key]}</Typography>
+
+								{/* Add button */}
+								<IconButton
+									onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
+									disabled={disabledPassengerChange(passengers, row.key, 1)}
+									sx={{ p: 0 }}
+								>
+									<AddIcon />
+								</IconButton>
 							</Box>
 						))}
+
 						<Box sx={{ mt: 2 }}>
 							<Typography gutterBottom>{UI_LABELS.SEARCH.form.seat_class_title}</Typography>
 							<RadioGroup value={seatClass} onChange={(e) => setSeatClass(e.target.value)}>

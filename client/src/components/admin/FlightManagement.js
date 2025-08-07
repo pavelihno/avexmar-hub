@@ -255,6 +255,15 @@ const FlightManagement = () => {
 				return null;
 			},
 		},
+		note: {
+			key: 'note',
+			apiKey: 'note',
+			label: FIELD_LABELS.FLIGHT.note,
+			type: FIELD_TYPES.TEXT_AREA,
+			fullWidth: true,
+			excludeFromTable: true,
+			rows: 3,
+		},
 		tariffs: {
 			key: 'tariffs',
 			type: FIELD_TYPES.CUSTOM,

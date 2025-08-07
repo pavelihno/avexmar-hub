@@ -28,4 +28,4 @@ class Discount(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='discount_name', descending=False)
+        return super().get_all(sort_by=['discount_name'], descending=False)

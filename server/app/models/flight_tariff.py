@@ -21,6 +21,18 @@ class FlightTariff(BaseModel):
     tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='flight_tariffs')
     seats: Mapped[List['Seat']] = db.relationship('Seat', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan')
 
+    __table_args__ = (
+        db.UniqueConstraint('flight_id', 'tariff_id', name='uix_flight_tariff_flight_tariff'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'flight_id': self.flight_id,
+            'tariff_id': self.tariff_id,
+            'seats_number': self.seats_number
+        }
+
     @classmethod
     def __check_seat_class_unique(cls, session, flight_id, tariff_id, instance_id=None):
         """Ensure only one tariff per flight for the same seat class"""
@@ -32,21 +44,14 @@ class FlightTariff(BaseModel):
         if query.one_or_none() is not None:
             raise ModelValidationError({'seat_class': 'flight tariff for this class already exists'})
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'flight_id': self.flight_id,
-            'tariff_id': self.tariff_id,
-            'seats_number': self.seats_number
-        }
-
     @classmethod
     def create(cls, session=None, **data):
         session = session or db.session
-        flight_id = data.get('flight_id')
-        tariff_id = data.get('tariff_id')
-        if flight_id is not None and tariff_id is not None:
-            cls.__check_seat_class_unique(session, flight_id, tariff_id)
+        # Deprecated
+        # flight_id = data.get('flight_id')
+        # tariff_id = data.get('tariff_id')
+        # if flight_id is not None and tariff_id is not None:
+        #     cls.__check_seat_class_unique(session, flight_id, tariff_id)
         return super().create(session, **data)
 
     @classmethod

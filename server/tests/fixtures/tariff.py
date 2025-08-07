@@ -8,6 +8,7 @@ def economy_tariff():
     """Create and return an economy tariff"""
     return Tariff.create(
         seat_class=Config.SEAT_CLASS.economy,
+        title='Economy',
         price=15000.0,
         currency=Config.CURRENCY.rub
     )
@@ -18,6 +19,7 @@ def business_tariff():
     """Create and return a business tariff"""
     return Tariff.create(
         seat_class=Config.SEAT_CLASS.business,
+        title='Business',
         price=45000.0,
         currency=Config.CURRENCY.rub
     )

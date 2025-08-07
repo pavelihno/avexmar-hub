@@ -4,6 +4,11 @@ export const FIELD_LABELS = {
 		discount_type: 'Тип скидки',
 		percentage_value: 'Процент скидки',
 	},
+	FEE: {
+		name: 'Наименование сбора',
+		description: 'Описание',
+		amount: 'Сумма',
+	},
 	BOOKING: {
 		booking_number: 'Номер бронирования',
 		booking_date: 'Дата бронирования',
@@ -38,6 +43,7 @@ export const FIELD_LABELS = {
 		scheduled_arrival_time: 'Время прибытия',
 		duration: 'Длительность полета',
 		status: 'Статус рейса',
+		note: 'Примечания',
 		tariffs: 'Тарифы',
 	},
 	PASSENGER: {
@@ -96,7 +102,8 @@ export const FIELD_LABELS = {
 	},
 	TARIFF: {
 		seat_class: 'Класс обслуживания',
-		order_number: 'Наименование тарифа',
+		order_number: 'Номер тарифа',
+		title: 'Наименование тарифа',
 		price: 'Цена',
 		currency: 'Валюта',
 		conditions: 'Условия применения тарифа',

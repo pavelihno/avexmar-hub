@@ -6,6 +6,7 @@ import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
@@ -65,6 +66,12 @@ const AdminPanel = () => {
 			description: UI_LABELS.ADMIN.modules.discounts.description,
 			icon: <DiscountIcon sx={iconSX} />,
 			path: '/admin/discounts',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.fees.title,
+			description: UI_LABELS.ADMIN.modules.fees.description,
+			icon: <RequestQuoteIcon sx={iconSX} />,
+			path: '/admin/fees',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.tariffs.title,

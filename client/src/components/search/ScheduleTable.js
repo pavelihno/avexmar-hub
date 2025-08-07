@@ -139,7 +139,7 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 				onPageChange={(e, newPage) => setPage(newPage)}
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={(e) => {
-					setRowsPerPage(parseInt(e.target.value, 10));
+					setRowsPerPage(parseInt(e.target.value));
 					setPage(0);
 				}}
 				rowsPerPageOptions={[5, 10, 25]}

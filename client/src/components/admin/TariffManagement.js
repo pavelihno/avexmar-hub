@@ -36,7 +36,13 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.order_number,
 			type: FIELD_TYPES.NUMBER,
 			excludeFromForm: true,
-			formatter: (value) => `${UI_LABELS.ADMIN.modules.tariffs.tariff} ${value}` || '',
+		},
+		title: {
+			key: 'title',
+			apiKey: 'title',
+			label: FIELD_LABELS.TARIFF.title,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.title.REQUIRED : null),
 		},
 		price: {
 			key: 'price',
@@ -62,6 +68,7 @@ const TariffManagement = () => {
 			label: FIELD_LABELS.TARIFF.conditions,
 			type: FIELD_TYPES.TEXT_AREA,
 			fullWidth: true,
+			excludeFromTable: true,
 		},
 	};
 
@@ -72,8 +79,9 @@ const TariffManagement = () => {
 			else {
 				const seatClass = ENUM_LABELS.SEAT_CLASS[item[FIELDS.seatClass.key]];
 				const orderNumber = item[FIELDS.orderNumber.key];
+				const title = item[FIELDS.title.key];
 
-				return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber}`;
+				return `${UI_LABELS.BUTTONS.edit}: ${seatClass} — ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${orderNumber} — ${title}`;
 			}
 		},
 	});

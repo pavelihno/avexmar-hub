@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
 	Dialog,
@@ -8,49 +9,48 @@ import {
 	DialogActions,
 	Button,
 	Box,
+	Tooltip,
 	Typography,
 	Card,
 	CardActionArea,
 	IconButton,
 	Divider,
+	CircularProgress,
+	Alert,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-import { UI_LABELS, ENUM_LABELS, MAX_PASSENGERS } from '../../constants';
-import { formatTime, formatDate, formatNumber } from '../utils';
+import { UI_LABELS, ENUM_LABELS } from '../../constants';
+import { formatTime, formatDate, formatNumber, handlePassengerChange, disabledPassengerChange } from '../utils';
+import { calculatePrice } from '../../redux/actions/price';
+import { getTotalSeats, hasAvailableSeats } from '../utils/businessLogic';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
 const buildTariffOptions = (outbound, returnFlight) => {
+	const outboundTariffs = outbound?.tariffs || [];
+	if (!returnFlight) return outboundTariffs.map((t) => ({ ...t }));
+	const returnTariffs = returnFlight.tariffs || [];
 	const map = {};
-	(outbound?.tariffs || []).forEach((t) => {
-		map[t.seat_class] = {
-			price: t.price,
-			currency: t.currency,
-			seats_left: t.seats_left,
-		};
+	outboundTariffs.forEach((t) => {
+		map[t.id] = { ...t };
 	});
-	if (returnFlight) {
-		(returnFlight.tariffs || []).forEach((t) => {
-			if (map[t.seat_class]) {
-				map[t.seat_class].price += t.price;
-				if (t.seats_left !== undefined) {
-					const current = map[t.seat_class].seats_left;
-					map[t.seat_class].seats_left =
-						current !== undefined ? Math.min(current, t.seats_left) : t.seats_left;
-				}
-			} else {
-				map[t.seat_class] = {
-					price: t.price,
-					currency: t.currency,
-					seats_left: t.seats_left,
-				};
-			}
-		});
-	}
-	return Object.entries(map).map(([seat_class, info]) => ({
-		seat_class,
-		...info,
-	}));
+	const options = [];
+	returnTariffs.forEach((t) => {
+		if (map[t.id]) {
+			options.push({
+				...map[t.id],
+				price: map[t.id].price + t.price,
+				seats_left:
+					map[t.id].seats_left !== undefined && t.seats_left !== undefined
+						? Math.min(map[t.id].seats_left, t.seats_left)
+						: t.seats_left ?? map[t.id].seats_left,
+			});
+		}
+	});
+	return options;
 };
 
 const FlightInfo = ({ flight, airlines, airports, routes }) => {
@@ -61,132 +61,261 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 	const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
 
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Card sx={{ p: 1, flex: 1 }}>
 			<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-				{airline.name || airline.id}
+				{airline.name}
 			</Typography>
-			<Typography variant='body2' color='text.secondary'>
-				{origin.name || origin.id} → {dest.name || dest.id}
+			<Typography variant='subtitle2'>{flight.airline_flight_number}</Typography>
+			<Typography variant='body2'>
+				{origin.iata_code} → {dest.iata_code}
 			</Typography>
-			<Typography variant='body2' color='text.secondary'>
-				{formatDate(flight.scheduled_departure, 'dd.MM.yyyy')} {formatTime(flight.scheduled_departure_time)} -{' '}
-				{formatDate(flight.scheduled_arrival, 'dd.MM.yyyy')} {formatTime(flight.scheduled_arrival_time)}
+			<Typography variant='caption' color='text.secondary'>
+				{`${formatDate(flight.scheduled_departure)} ${formatTime(flight.scheduled_departure_time)}`}
 			</Typography>
-		</Box>
+		</Card>
 	);
 };
 
-const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, airports, routes }) => {
+const SelectTicketDialog = ({
+	initialParams = {},
+	open,
+	onClose,
+	outbound,
+	returnFlight,
+	airlines,
+	airports,
+	routes,
+}) => {
 	const navigate = useNavigate();
-	const [params] = useSearchParams();
 
 	const tariffOptions = useMemo(() => buildTariffOptions(outbound, returnFlight), [outbound, returnFlight]);
 
-	const initialSeatClass = params.get('class') || tariffOptions[0]?.seat_class || '';
-	const [seatClass, setSeatClass] = useState(initialSeatClass);
+	const [tariffId, setTariffId] = useState(initialParams.tariff || tariffOptions[0]?.id);
 
 	const [passengers, setPassengers] = useState({
-		adults: parseInt(params.get('adults') || '1', 10),
-		children: parseInt(params.get('children') || '0', 10),
-		infants: parseInt(params.get('infants') || '0', 10),
+		adults: parseInt(initialParams.adults) || 1,
+		children: parseInt(initialParams.children) || 0,
+		infants: parseInt(initialParams.infants) || 0,
+		infants_seat: parseInt(initialParams.infants_seat) || 0,
 	});
-
-	const totalPassengers = passengers.adults + passengers.children + passengers.infants;
-
-	const selectedTariff = tariffOptions.find((t) => t.seat_class === seatClass) || tariffOptions[0];
+	const selectedTariff = useMemo(
+		() => tariffOptions.find((t) => t.id === tariffId) || null,
+		[tariffOptions, tariffId]
+	);
 	const currencySymbol = selectedTariff ? ENUM_LABELS.CURRENCY_SYMBOL[selectedTariff.currency] || '' : '';
-	const totalPrice = selectedTariff ? selectedTariff.price * totalPassengers : 0;
 
-	const handlePassengerChange = (key, delta) => {
-		setPassengers((prev) => {
-			const nextVal = prev[key] + delta;
-			const newTotal = prev.adults + prev.children + prev.infants + delta;
-			const min = key === 'adults' ? 1 : 0;
-			if (nextVal < min || newTotal < 1 || newTotal > MAX_PASSENGERS) return prev;
-			return { ...prev, [key]: nextVal };
-		});
-	};
+	const totalSeats = getTotalSeats(passengers);
+
+	const dispatch = useDispatch();
+	const { current: priceDetails, isLoading: priceLoading, errors: priceErrors } = useSelector((state) => state.price);
+	const errorMessage =
+		priceErrors?.message ||
+		(typeof priceErrors === 'string' ? priceErrors : priceErrors ? JSON.stringify(priceErrors) : '');
+
+	useEffect(() => {
+		if (!tariffId) return;
+		const payload = {
+			outbound_id: outbound.id,
+			tariff_id: tariffId,
+			passengers,
+		};
+		if (returnFlight) payload.return_id = returnFlight.id;
+		dispatch(calculatePrice(payload));
+	}, [dispatch, passengers, tariffId, outbound, returnFlight]);
+
+	const hasSeats = hasAvailableSeats(selectedTariff, totalSeats);
 
 	const handleConfirm = () => {
 		const query = new URLSearchParams();
 		query.set('flight', outbound.id);
 		if (returnFlight) query.set('return', returnFlight.id);
-		if (seatClass) query.set('class', seatClass);
+		if (tariffId) {
+			query.set('tariff', tariffId);
+			if (selectedTariff) query.set('class', selectedTariff.seat_class);
+		}
 		query.set('adults', passengers.adults);
 		query.set('children', passengers.children);
 		query.set('infants', passengers.infants);
+		query.set('infants_seat', passengers.infants_seat);
 		navigate(`/cart?${query.toString()}`);
 	};
 
 	return (
-		<Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
+		<Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
 			<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_ticket}</DialogTitle>
 			<DialogContent dividers>
-				<FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
-				{returnFlight && (
-					<>
-						<FlightInfo flight={returnFlight} airlines={airlines} airports={airports} routes={routes} />
-						<Divider sx={{ mb: 2 }} />
-					</>
-				)}
+				<Box sx={{ display: 'flex', gap: 1 }}>
+					<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
+						<Box sx={{ display: 'flex', gap: 1 }}>
+							<FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
+							{returnFlight && (
+								<FlightInfo
+									flight={returnFlight}
+									airlines={airlines}
+									airports={airports}
+									routes={routes}
+								/>
+							)}
+						</Box>
 
-				<Typography gutterBottom>{UI_LABELS.SEARCH.form.seat_class_title}</Typography>
-				<Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-					{tariffOptions.map((t) => (
-						<Card
-							key={t.seat_class}
-							variant={t.seat_class === seatClass ? 'outlined' : 'elevation'}
-							sx={{ minWidth: 100 }}
-						>
-							<CardActionArea onClick={() => setSeatClass(t.seat_class)} sx={{ p: 1 }}>
-								<Typography>{ENUM_LABELS.SEAT_CLASS[t.seat_class]}</Typography>
-								<Typography>
-									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
-								</Typography>
-								<Typography variant='caption' color='text.secondary'>
-									Мест: {t.seats_left ?? '-'}
-								</Typography>
-							</CardActionArea>
-						</Card>
-					))}
-				</Box>
+						<Box sx={{ display: 'flex', gap: 1 }}>
+							{tariffOptions.map((t) => {
+								const isSelected = t.id === tariffId;
+								return (
+									<Card key={t.id} sx={{ p: 0.5 }}>
+										<Box display='flex' justifyContent='flex-end'>
+											<IconButton
+												sx={{ m: 0, p: 0.5 }}
+												size='small'
+												disabled={!t.conditions}
+												onClick={(e) => {
+													// t.conditions
+													e.stopPropagation(); /* show tooltip/modal */
+												}}
+											>
+												<Tooltip>
+													<InfoOutlinedIcon fontSize='small' />
+												</Tooltip>
+											</IconButton>
+										</Box>
 
-				<Typography gutterBottom>{UI_LABELS.SEARCH.form.passengers}</Typography>
-				<Box>
-					{passengerCategories.map((row) => (
-						<Card key={row.key} sx={{ p: 1, mb: 1, display: 'flex', alignItems: 'center' }}>
-							<Box sx={{ flexGrow: 1 }}>
-								<Typography>{row.label}</Typography>
-								<Typography variant='body2' color='text.secondary'>
-									{row.desc}
-								</Typography>
+										<CardActionArea
+											onClick={() => setTariffId(t.id)}
+											sx={{ p: 1, bgcolor: isSelected ? 'action.selected' : 'background.paper' }}
+										>
+											<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+												{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
+											</Typography>
+											<Typography variant='body2'>{t.title}</Typography>
+											<Typography variant='body1' sx={{ fontWeight: 700 }}>
+												{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+											</Typography>
+											<Typography variant='caption' color='text.secondary'>
+												{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${
+													t.seats_left ?? '-'
+												}`}
+											</Typography>
+										</CardActionArea>
+									</Card>
+								);
+							})}
+						</Box>
+
+						<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+							{passengerCategories.map((row) => (
+								<Card
+									key={row.key}
+									sx={{
+										p: 1,
+										display: 'flex',
+										flexDirection: 'column',
+										height: '100%',
+									}}
+								>
+									<Box sx={{ mb: 1 }}>
+										<Typography noWrap sx={{ textDecoration: 'underline', lineHeight: 1.2 }}>
+											{row.label}
+										</Typography>
+										<Typography noWrap variant='body2' color='text.secondary'>
+											{row.desc}
+										</Typography>
+									</Box>
+
+									<Box
+										sx={{
+											display: 'grid',
+											gridTemplateColumns: 'auto auto auto',
+											justifyContent: 'flex-end',
+											alignItems: 'center',
+											columnGap: 0.5,
+										}}
+									>
+										{/* Remove button */}
+										<IconButton
+											onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
+											disabled={disabledPassengerChange(passengers, row.key, -1)}
+											sx={{ p: 0 }}
+										>
+											<RemoveIcon fontSize='small' />
+										</IconButton>
+
+										<Typography sx={{ textAlign: 'center', minWidth: '24px' }}>
+											{passengers[row.key]}
+										</Typography>
+
+										{/* Add button */}
+										<IconButton
+											onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
+											disabled={disabledPassengerChange(passengers, row.key, 1)}
+											sx={{ p: 0 }}
+										>
+											<AddIcon fontSize='small' />
+										</IconButton>
+									</Box>
+								</Card>
+							))}
+						</Box>
+					</Box>
+
+					<Divider orientation='vertical' flexItem sx={{ mx: 1 }} />
+
+					<Box>
+						{priceLoading && (
+							<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+								<CircularProgress size={24} />
 							</Box>
-							<IconButton
-								onClick={() => handlePassengerChange(row.key, -1)}
-								disabled={passengers[row.key] <= (row.key === 'adults' ? 1 : 0)}
-							>
-								-
-							</IconButton>
-							<Typography sx={{ width: 20, textAlign: 'center' }}>{passengers[row.key]}</Typography>
-							<IconButton
-								onClick={() => handlePassengerChange(row.key, 1)}
-								disabled={totalPassengers >= MAX_PASSENGERS}
-							>
-								+
-							</IconButton>
-						</Card>
-					))}
+						)}
+						{!priceLoading && priceErrors && <Alert severity='error'>{errorMessage}</Alert>}
+						{!priceLoading && !priceErrors && priceDetails && (
+							<>
+								{priceDetails.breakdown.map((b) => {
+									const label =
+										passengerCategories.find((c) => c.key === b.category)?.label || b.category;
+									return (
+										<Box key={b.category} sx={{ mb: 1 }}>
+											<Typography>{`${label} ${b.count}x ${selectedTariff.title}`}</Typography>
+											<Typography variant='body2'>
+												{formatNumber(b.final_price)} {currencySymbol}
+											</Typography>
+											{b.discount > 0 && (
+												<Typography variant='caption' color='text.secondary'>
+													{`${UI_LABELS.SEARCH.flight_details.discount} ${formatNumber(
+														b.discount
+													)} ${currencySymbol}`}
+												</Typography>
+											)}
+										</Box>
+									);
+								})}
+								<Divider sx={{ my: 1 }} />
+								<Typography>{`${UI_LABELS.SEARCH.flight_details.fees}: ${formatNumber(
+									priceDetails.fees
+								)} ${currencySymbol}`}</Typography>
+								<Divider sx={{ my: 1 }} />
+								<Typography sx={{ fontWeight: 700 }}>
+									{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(
+										priceDetails.total
+									)} ${currencySymbol}`}
+								</Typography>
+							</>
+						)}
+					</Box>
 				</Box>
-
-				<Typography sx={{ mt: 2, textAlign: 'right' }}>
-					{UI_LABELS.SEARCH.flight_details.total_price}: {formatNumber(totalPrice)} {currencySymbol}
-				</Typography>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>{UI_LABELS.BUTTONS.close}</Button>
-				<Button variant='contained' color='orange' onClick={handleConfirm}>
-					{UI_LABELS.SEARCH.flight_details.select_ticket}
-				</Button>
+				<Tooltip title={!hasSeats ? UI_LABELS.SEARCH.flight_details.seats_unavailable : ''}>
+					<span>
+						<Button
+							variant='contained'
+							color='orange'
+							onClick={handleConfirm}
+							disabled={!hasSeats || priceLoading || !!priceErrors}
+						>
+							{UI_LABELS.SEARCH.flight_details.book_ticket}
+						</Button>
+					</span>
+				</Tooltip>
 			</DialogActions>
 		</Dialog>
 	);

@@ -171,15 +171,12 @@ export const UI_LABELS = {
 				add_button: 'Добавить скидку',
 				edit_button: 'Редактировать скидку',
 			},
-			flights: {
-				title: 'Рейсы',
-				description: 'Управление рейсами и тарифами',
-				management: 'Управление рейсами',
-				add_button: 'Добавить рейс',
-				edit_button: 'Редактировать рейс',
-				manage_tariffs: 'Изменить тарифы',
-				upload_button: 'Загрузить рейсы',
-				upload_template_button: 'Скачать шаблон загрузки',
+			fees: {
+				title: 'Сборы',
+				description: 'Управление сборами',
+				management: 'Управление сборами',
+				add_button: 'Добавить сбор',
+				edit_button: 'Редактировать сбор',
 			},
 			tariffs: {
 				title: 'Тарифы',
@@ -192,6 +189,16 @@ export const UI_LABELS = {
 				delete_button: 'Удалить тариф',
 				manage_tariffs: 'Изменить тарифы',
 				confirm_delete: 'Вы уверены, что хотите удалить тариф?',
+			},
+			flights: {
+				title: 'Рейсы',
+				description: 'Управление рейсами и тарифами',
+				management: 'Управление рейсами',
+				add_button: 'Добавить рейс',
+				edit_button: 'Редактировать рейс',
+				manage_tariffs: 'Изменить тарифы',
+				upload_button: 'Загрузить рейсы',
+				upload_template_button: 'Скачать шаблон загрузки',
 			},
 			bookings: {
 				title: 'Бронирования',
@@ -306,7 +313,8 @@ export const UI_LABELS = {
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
-				{ key: 'infants', label: 'Младенцы', desc: 'до 2 лет' },
+				{ key: 'infants', label: 'Младенцы без места', desc: 'до 2 лет' },
+				{ key: 'infants_seat', label: 'Младенцы с местом', desc: 'до 2 лет' },
 			],
 		},
 		results: 'Результаты поиска',
@@ -318,6 +326,7 @@ export const UI_LABELS = {
 		},
 		flight_details: {
 			select_ticket: 'Выбрать билет',
+			book_ticket: 'Оформить билет',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
@@ -325,6 +334,10 @@ export const UI_LABELS = {
 			price: 'Цена',
 			price_from: 'От',
 			price_per_passenger: 'За 1 пассажира',
+			seats_available: 'Свободных мест',
+			seats_unavailable: 'Недостаточно свободных мест',
+			fees: 'Сборы',
+			discount: 'Скидка',
 		},
 		sort: {
 			label: 'Сортировка',

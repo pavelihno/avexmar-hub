@@ -17,6 +17,15 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	FEE: {
+		name: {
+			REQUIRED: 'Наименование сбора обязательно',
+		},
+		amount: {
+			REQUIRED: 'Сумма обязательна',
+		},
+	},
+
 	AIRPORT: {
 		name: {
 			REQUIRED: 'Название аэропорта обязательно',
@@ -183,6 +192,9 @@ export const VALIDATION_MESSAGES = {
 		},
 		price: {
 			REQUIRED: 'Цена обязательна',
+		},
+		title: {
+			REQUIRED: 'Наименование тарифа обязательно',
 		},
 		conditions: {
 			REQUIRED: 'Условия применения тарифа обязательны',

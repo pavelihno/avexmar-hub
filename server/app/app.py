@@ -29,6 +29,8 @@ from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
 from app.controllers.search_controller import *
 from app.controllers.timezone_controller import *
+from app.controllers.price_controller import *
+from app.controllers.fee_controller import *
 
 
 def __import_models():
@@ -200,6 +202,16 @@ def __create_app(_config_class, _db):
     app.route('/search/flights', methods=['GET'])(search_flights)
     app.route('/search/flights/nearby', methods=['GET'])(search_nearby_flights)
     app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
+
+    # price
+    app.route('/price/calculate', methods=['POST'])(calculate_price)
+
+    # fees
+    app.route('/fees', methods=['GET'])(get_fees)
+    app.route('/fees', methods=['POST'])(create_fee)
+    app.route('/fees/<int:fee_id>', methods=['GET'])(get_fee)
+    app.route('/fees/<int:fee_id>', methods=['PUT'])(update_fee)
+    app.route('/fees/<int:fee_id>', methods=['DELETE'])(delete_fee)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

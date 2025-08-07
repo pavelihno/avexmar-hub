@@ -44,3 +44,17 @@ def cancelled_flight(route_moscow_pevek, su_airline):
         scheduled_departure=departure,
         scheduled_arrival=arrival
     )
+
+
+@pytest.fixture
+def return_flight(route_pevek_moscow, su_airline):
+    """Create and return a future return flight"""
+    departure = datetime.now() + timedelta(days=10)
+    arrival = departure + timedelta(hours=4)
+    return Flight.create(
+        flight_number='SU101',
+        airline_id=su_airline.id,
+        route_id=route_pevek_moscow.id,
+        scheduled_departure=departure,
+        scheduled_arrival=arrival
+    )

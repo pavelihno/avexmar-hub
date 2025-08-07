@@ -25,6 +25,7 @@ class Flight(BaseModel):
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)
     airline_id = db.Column(db.Integer, db.ForeignKey('airlines.id', ondelete='RESTRICT'), nullable=False)
     aircraft_id = db.Column(db.Integer, db.ForeignKey('aircrafts.id', ondelete='RESTRICT'), nullable=True)
+    note = db.Column(db.String, nullable=True)
 
     scheduled_departure = db.Column(db.Date, nullable=False)
     scheduled_departure_time = db.Column(db.Time, nullable=True)
@@ -81,59 +82,75 @@ class Flight(BaseModel):
 
         return 0
 
-    upload_fields = {
-        'airline_code': 'Код авиакомпании',
-        'flight_number': 'Номер рейса',
-        'origin_airport_code': 'Код аэропорта отправления',
-        'destination_airport_code': 'Код аэропорта прибытия',
-        'aircraft': 'Воздушное судно',
-        'scheduled_departure': 'Дата отправления',
-        'scheduled_departure_time': 'Время отправления',
-        'scheduled_arrival': 'Дата прибытия',
-        'scheduled_arrival_time': 'Время прибытия',
-    }
-
-    tariff_upload_fields = {
-        'seat_class': 'Класс обслуживания',
-        'seats_number': 'Количество мест',
-        'tariff_number': 'Номер тарифа',
-    }
-
-    upload_date_fields = [
-        'scheduled_departure',
-        'scheduled_arrival',
-    ]
-
-    upload_time_fields = [
-        'scheduled_departure_time',
-        'scheduled_arrival_time',
-    ]
-
-    upload_text_fields = [
-        'airline_code',
-        'flight_number',
-        'origin_airport_code',
-        'destination_airport_code',
-        'aircraft',
-        'seat_class',
-    ]
-
-    MAX_TARIFFS = 3
+    MAX_TARIFFS = 4
 
     @classmethod
     def get_upload_fields(cls):
-        fields = {**cls.upload_fields}
-        for i in range(1, cls.MAX_TARIFFS + 1):
-            for key, label in cls.tariff_upload_fields.items():
-                fields[f"{key}_{i}"] = f"{label} {i}"
+        fields = {
+            'airline_code': 'Код авиакомпании',
+            'flight_number': 'Номер рейса',
+            'origin_airport_code': 'Код аэропорта отправления',
+            'destination_airport_code': 'Код аэропорта прибытия',
+            'aircraft': 'Воздушное судно',
+            'note': 'Примечания',
+            'scheduled_departure': 'Дата отправления',
+            'scheduled_departure_time': 'Время отправления',
+            'scheduled_arrival': 'Дата прибытия',
+            'scheduled_arrival_time': 'Время прибытия',
+            **{f'{key}_{i}': f'{label} {i}' for i in range(1, cls.MAX_TARIFFS + 1) for key, label in {
+                'seat_class': 'Класс обслуживания',
+                'seats_number': 'Количество мест',
+                'tariff_number': 'Номер тарифа',
+            }.items()}
+        }
+
         return fields
+
+    @classmethod
+    def get_tariff_upload_fields(cls):
+        tariff_fields = {
+            'seat_class': 'Класс обслуживания',
+            'seats_number': 'Количество мест',
+            'tariff_number': 'Номер тарифа',
+        }
+        fields = {}
+        for i in range(1, cls.MAX_TARIFFS + 1):
+            for key, label in tariff_fields.items():
+                fields[f'{key}_{i}'] = f'{label} {i}'
+        return fields
+
+    @classmethod
+    def get_upload_date_fields(cls):
+        return [
+            'scheduled_departure',
+            'scheduled_arrival',
+        ]
+
+    @classmethod
+    def get_upload_time_fields(cls):
+        return [
+            'scheduled_departure_time',
+            'scheduled_arrival_time',
+        ]
+
+    @classmethod
+    def get_upload_text_fields(cls):
+        return [
+            'airline_code',
+            'flight_number',
+            'origin_airport_code',
+            'destination_airport_code',
+            'aircraft',
+            'note',
+            *[f'{key}_{i}' for i in range(1, cls.MAX_TARIFFS + 1) for key in ['seat_class']]
+        ]
 
     @classmethod
     def get_xlsx_template(cls):
         return generate_xlsx_template(
-            cls.get_upload_fields(), date_fields=cls.upload_date_fields,
-            time_fields=cls.upload_time_fields,
-            text_fields=cls.upload_text_fields
+            cls.get_upload_fields(), date_fields=cls.get_upload_date_fields(),
+            time_fields=cls.get_upload_time_fields(),
+            text_fields=cls.get_upload_text_fields()
         )
 
     @classmethod
@@ -150,8 +167,8 @@ class Flight(BaseModel):
                 'scheduled_departure',
                 'scheduled_arrival',
             ],
-            date_fields=cls.upload_date_fields,
-            time_fields=cls.upload_time_fields,
+            date_fields=cls.get_upload_date_fields(),
+            time_fields=cls.get_upload_time_fields(),
         )
 
         flights = []
@@ -191,13 +208,14 @@ class Flight(BaseModel):
                         airline_id=airline.id,
                         route_id=route.id,
                         aircraft_id=aircraft_id,
+                        note=row.get('note'),
                         scheduled_departure=parse_date(row.get('scheduled_departure')),
                         scheduled_departure_time=parse_time(row.get('scheduled_departure_time')),
                         scheduled_arrival=parse_date(row.get('scheduled_arrival')),
                         scheduled_arrival_time=parse_time(row.get('scheduled_arrival_time')),
                     )
 
-                    used_classes = set()
+                    used_tariffs = {}
                     for i in range(1, cls.MAX_TARIFFS + 1):
                         seat_class = row.get(f'seat_class_{i}')
                         seats = row.get(f'seats_number_{i}')
@@ -206,15 +224,15 @@ class Flight(BaseModel):
                             continue
                         if not (seat_class and seats and tariff_number):
                             raise ValueError(f'Incomplete tariff data in group {i}')
-                        if seat_class in used_classes:
-                            raise ValueError('Duplicate service class')
-                        used_classes.add(seat_class)
+                        if seat_class in used_tariffs and tariff_number in used_tariffs[seat_class]:
+                            raise ValueError('Duplicate tariff')
+                        used_tariffs.setdefault(seat_class, set()).add(tariff_number)
                         tariff = Tariff.query.filter(
                             Tariff.seat_class == seat_class,
                             Tariff.order_number == int(tariff_number)
                         ).one_or_none()
                         if not tariff:
-                            raise ValueError('Invalid tariff number or class')
+                            raise ValueError(f'Invalid tariff number or class: {seat_class}, {tariff_number}')
                         FlightTariff.create(
                             session,
                             flight_id=flight.id,
@@ -236,6 +254,7 @@ class Flight(BaseModel):
             'id': self.id,
             'flight_number': self.flight_number,
             'airline_flight_number': self.airline_flight_number,
+            'note': self.note,
             'airline_id': self.airline_id,
             'route_id': self.route_id,
             'aircraft_id': self.aircraft_id,
@@ -249,7 +268,7 @@ class Flight(BaseModel):
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by='flight_number', descending=False)
+        return super().get_all(sort_by=['scheduled_departure', 'scheduled_departure_time'], descending=True)
 
     @classmethod
     def _check_flight_uniqueness(cls, session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=None):
@@ -272,10 +291,9 @@ class Flight(BaseModel):
                 cls.scheduled_departure == scheduled_departure
             ).one_or_none()
         if existing_flight:
-            print(existing_flight.to_dict())
             raise ModelValidationError(
                 {'flight_number': 'Flight with this number already exists for the given airline and route.'})
-    
+
     @classmethod
     def create(cls, session=None, **data):
         session = session or db.session
@@ -283,7 +301,9 @@ class Flight(BaseModel):
         airline_id = data.get('airline_id')
         route_id = data.get('route_id')
         scheduled_departure = data.get('scheduled_departure')
-        cls._check_flight_uniqueness(session, flight_number, airline_id, route_id, scheduled_departure)
+        cls._check_flight_uniqueness(
+            session, flight_number, airline_id, route_id, scheduled_departure
+        )
         return super().create(session, **data)
 
     @classmethod
@@ -293,5 +313,7 @@ class Flight(BaseModel):
         airline_id = data.get('airline_id')
         route_id = data.get('route_id')
         scheduled_departure = data.get('scheduled_departure')
-        cls._check_flight_uniqueness(session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=_id)
+        cls._check_flight_uniqueness(
+            session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=_id
+        )
         return super().update(_id, session, **data)

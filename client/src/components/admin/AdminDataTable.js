@@ -577,7 +577,7 @@ const AdminDataTable = ({
 							onPageChange={(e, newPage) => setPage(newPage)}
 							rowsPerPage={rowsPerPage}
 							onRowsPerPageChange={(e) => {
-								setRowsPerPage(parseInt(e.target.value, 10));
+								setRowsPerPage(parseInt(e.target.value));
 								setPage(0);
 							}}
 							rowsPerPageOptions={[10, 25, 50, 100]}

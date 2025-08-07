@@ -249,7 +249,7 @@ const Search = () => {
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
-				{(isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0)) && (
+				{isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0) && (
 					<Box
 						sx={{
 							display: 'flex',
@@ -433,6 +433,7 @@ const Search = () => {
 						.slice(0, visibleCount)
 						.map((g, idx) => (
 							<SearchResultCard
+								initialParams={paramObj}
 								key={idx}
 								outbound={g.outbound}
 								returnFlight={g.returnFlight}

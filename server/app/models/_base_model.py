@@ -41,12 +41,22 @@ class BaseModel(db.Model):
         super().__init__(**filtered_kwargs)
 
     @classmethod
-    def get_all(cls, sort_by: str = None, descending: bool = False) -> List['BaseModel']:
+    def get_all(cls, sort_by: list = [], descending: bool = False) -> List['BaseModel']:
         query = cls.query
+
         if sort_by:
-            column = getattr(cls, sort_by, None)
-            if column is not None:
-                query = query.order_by(column.desc() if descending else column.asc())
+            mapper = inspect(cls)
+            valid_attrs = {col.key: getattr(cls, col.key) for col in mapper.columns}
+
+            order_cols = []
+            for field in sort_by:
+                col = valid_attrs.get(field)
+                if col is not None:
+                    order_cols.append(col.desc() if descending else col.asc())
+
+            if order_cols:
+                query = query.order_by(*order_cols)
+
         return query.all()
 
     @classmethod
