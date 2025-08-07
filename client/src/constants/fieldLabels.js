@@ -1,11 +1,16 @@
 export const FIELD_LABELS = {
-	DISCOUNT: {
-		discount_name: 'Название скидки',
-		discount_type: 'Тип скидки',
-		percentage_value: 'Процент скидки',
-	},
-	BOOKING: {
-		booking_number: 'Номер бронирования',
+        DISCOUNT: {
+                discount_name: 'Название скидки',
+                discount_type: 'Тип скидки',
+                percentage_value: 'Процент скидки',
+        },
+        FEE: {
+                name: 'Наименование сбора',
+                description: 'Описание',
+                amount: 'Сумма',
+        },
+        BOOKING: {
+                booking_number: 'Номер бронирования',
 		booking_date: 'Дата бронирования',
 		status: 'Статус бронирования',
 		email_address: 'Электронная почта',
