@@ -61,23 +61,23 @@ const AdminPanel = () => {
 			icon: <RouteIcon sx={iconSX} />,
 			path: '/admin/routes',
 		},
-                {
-                        title: UI_LABELS.ADMIN.modules.discounts.title,
-                        description: UI_LABELS.ADMIN.modules.discounts.description,
-                        icon: <DiscountIcon sx={iconSX} />,
-                        path: '/admin/discounts',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.fees.title,
-                        description: UI_LABELS.ADMIN.modules.fees.description,
-                        icon: <RequestQuoteIcon sx={iconSX} />,
-                        path: '/admin/fees',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.tariffs.title,
-                        description: UI_LABELS.ADMIN.modules.tariffs.description,
-                        icon: <MonetizationOnIcon sx={iconSX} />,
-                        path: '/admin/tariffs',
+		{
+			title: UI_LABELS.ADMIN.modules.discounts.title,
+			description: UI_LABELS.ADMIN.modules.discounts.description,
+			icon: <DiscountIcon sx={iconSX} />,
+			path: '/admin/discounts',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.fees.title,
+			description: UI_LABELS.ADMIN.modules.fees.description,
+			icon: <RequestQuoteIcon sx={iconSX} />,
+			path: '/admin/fees',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.tariffs.title,
+			description: UI_LABELS.ADMIN.modules.tariffs.description,
+			icon: <MonetizationOnIcon sx={iconSX} />,
+			path: '/admin/tariffs',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.flights.title,

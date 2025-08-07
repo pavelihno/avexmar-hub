@@ -5,30 +5,30 @@ export const VALIDATION_MESSAGES = {
 		INVALID_DATETIME: 'Неверный формат даты и времени',
 	},
 
-        DISCOUNT: {
-                discount_name: {
-                        REQUIRED: 'Название скидки обязательно',
-                },
-                discount_type: {
-                        REQUIRED: 'Тип скидки обязателен',
-                },
-                percentage_value: {
-                        REQUIRED: 'Процент скидки обязателен',
-                },
-        },
+	DISCOUNT: {
+		discount_name: {
+			REQUIRED: 'Название скидки обязательно',
+		},
+		discount_type: {
+			REQUIRED: 'Тип скидки обязателен',
+		},
+		percentage_value: {
+			REQUIRED: 'Процент скидки обязателен',
+		},
+	},
 
-        FEE: {
-                name: {
-                        REQUIRED: 'Наименование сбора обязательно',
-                },
-                amount: {
-                        REQUIRED: 'Сумма обязательна',
-                },
-        },
+	FEE: {
+		name: {
+			REQUIRED: 'Наименование сбора обязательно',
+		},
+		amount: {
+			REQUIRED: 'Сумма обязательна',
+		},
+	},
 
-        AIRPORT: {
-                name: {
-                        REQUIRED: 'Название аэропорта обязательно',
+	AIRPORT: {
+		name: {
+			REQUIRED: 'Название аэропорта обязательно',
 		},
 		iata_code: {
 			REQUIRED: 'Код IATA обязателен',
