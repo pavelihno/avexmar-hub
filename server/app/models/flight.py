@@ -218,18 +218,18 @@ class Flight(BaseModel):
                     used_tariffs = {}
                     for i in range(1, cls.MAX_TARIFFS + 1):
                         seat_class = row.get(f'seat_class_{i}')
-                        seats = row.get(f'seats_number_{i}')
-                        tariff_number = row.get(f'tariff_number_{i}')
-                        if not (seat_class or seats or tariff_number):
+                        seats_number = int(row.get(f'seats_number_{i}', 0) or 0)
+                        tariff_number = int(row.get(f'tariff_number_{i}', 0) or 0)
+                        if not (seat_class or seats_number or tariff_number):
                             continue
-                        if not (seat_class and seats and tariff_number):
+                        if not (seat_class and seats_number >= 0 and tariff_number > 0):
                             raise ValueError(f'Incomplete tariff data in group {i}')
                         if seat_class in used_tariffs and tariff_number in used_tariffs[seat_class]:
                             raise ValueError('Duplicate tariff')
                         used_tariffs.setdefault(seat_class, set()).add(tariff_number)
                         tariff = Tariff.query.filter(
                             Tariff.seat_class == seat_class,
-                            Tariff.order_number == int(tariff_number)
+                            Tariff.order_number == tariff_number
                         ).one_or_none()
                         if not tariff:
                             raise ValueError(f'Invalid tariff number or class: {seat_class}, {tariff_number}')
@@ -237,7 +237,7 @@ class Flight(BaseModel):
                             session,
                             flight_id=flight.id,
                             tariff_id=tariff.id,
-                            seats_number=int(seats),
+                            seats_number=seats_number,
                         )
 
                     flights.append(flight)
