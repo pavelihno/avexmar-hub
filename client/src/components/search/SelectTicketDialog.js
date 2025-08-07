@@ -15,8 +15,6 @@ import {
 	CardActionArea,
 	IconButton,
 	Divider,
-	Skeleton,
-	Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -30,36 +28,35 @@ import { getTotalSeats, hasAvailableSeats } from '../utils/businessLogic';
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
 const buildTariffOptions = (outbound, returnFlight) => {
-        const filterBySeats = (tariffs) =>
-                tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
+	const filterBySeats = (tariffs) => tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
 
-        const outboundTariffs = filterBySeats(outbound?.tariffs || []);
+	const outboundTariffs = filterBySeats(outbound?.tariffs || []);
 
-        if (!returnFlight) {
-                return outboundTariffs.map((t) => ({ ...t }));
-        }
+	if (!returnFlight) {
+		return outboundTariffs.map((t) => ({ ...t }));
+	}
 
-        const returnTariffs = filterBySeats(returnFlight.tariffs || []);
-        const map = {};
-        outboundTariffs.forEach((t) => {
-                map[t.id] = { ...t };
-        });
+	const returnTariffs = filterBySeats(returnFlight.tariffs || []);
+	const map = {};
+	outboundTariffs.forEach((t) => {
+		map[t.id] = { ...t };
+	});
 
-        const options = [];
-        returnTariffs.forEach((t) => {
-                if (map[t.id]) {
-                        options.push({
-                                ...map[t.id],
-                                price: map[t.id].price + t.price,
-                                seats_left:
-                                        map[t.id].seats_left !== undefined && t.seats_left !== undefined
-                                                ? Math.min(map[t.id].seats_left, t.seats_left)
-                                                : t.seats_left ?? map[t.id].seats_left,
-                        });
-                }
-        });
+	const options = [];
+	returnTariffs.forEach((t) => {
+		if (map[t.id]) {
+			options.push({
+				...map[t.id],
+				price: map[t.id].price + t.price,
+				seats_left:
+					map[t.id].seats_left !== undefined && t.seats_left !== undefined
+						? Math.min(map[t.id].seats_left, t.seats_left)
+						: t.seats_left ?? map[t.id].seats_left,
+			});
+		}
+	});
 
-        return filterBySeats(options);
+	return filterBySeats(options);
 };
 
 const FlightInfo = ({ flight, airlines, airports, routes }) => {
@@ -283,9 +280,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 							</Box>
 						</Box>
 
-						<Divider orientation='vertical' flexItem sx={{ mx: 1 }} />
+						<Divider orientation='vertical' flexItem sx={{ mx: 0.5 }} />
 
-						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
+							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
 							{(priceDetails?.directions || []).map((dir) => {
 								const route = routes.find((r) => r.id === dir.route_id) || {};
 								const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
@@ -293,46 +291,55 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 
 								return (
 									<Box key={dir.direction} sx={{ mb: 1 }}>
-										<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+										<Typography variant='subtitle2' sx={{ fontWeight: 500 }}>
 											{`${origin.city_name} → ${dest.city_name}`}
 										</Typography>
 										{dir.passengers.map((b) => {
-							const label =
-								passengerCategories.find((c) => c.key === b.category)?.label ||
-								b.category;
-							return (
-								<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
-									<Typography>{`${label} x${b.count}`}</Typography>
-									<Typography variant='body2'>
-										{`${UI_LABELS.SEARCH.flight_details.price}: ${formatNumber(b.base_price)} ${currencySymbol}`}
-									</Typography>
-									{b.discount > 0 && (
-										<Typography variant='body2' color='text.secondary'>
-											{`-${formatNumber(b.discount)} ${currencySymbol}`}
-											{b.discount_name ? ` (${b.discount_name})` : ''}
-										</Typography>
-									)}
-									<Typography variant='body2' sx={{ fontWeight: 600 }}>
-										{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(b.final_price)} ${currencySymbol}`}
-									</Typography>
-								</Box>
-							);
+											const label =
+												passengerCategories.find((c) => c.key === b.category)?.label ||
+												b.category;
+											return (
+												<Box key={b.category} sx={{ ml: 1, mt: 0.5 }}>
+													<Typography
+														sx={{ textDecoration: 'underline' }}
+													>{`${label} x${b.count}`}</Typography>
+													<Typography variant='body2'>
+														{`${formatNumber(b.base_price)} ${currencySymbol}`}
+													</Typography>
+													{b.discount > 0 && (
+														<Typography variant='body2' color='text.secondary'>
+															{`-${formatNumber(b.discount)} ${currencySymbol}`}
+															{b.discount_name ? ` (${b.discount_name})` : ''}
+														</Typography>
+													)}
+												</Box>
+											);
 										})}
 									</Box>
 								);
 							})}
-							<Divider sx={{ my: 1 }} />
-							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
-							{(priceDetails?.fees || []).map((f) => (
-								<Typography key={f.name} variant='body2'>
-									{`${f.name}: ${formatNumber(f.total)} ${currencySymbol}`}
-								</Typography>
-							))}
-							<Divider sx={{ my: 1 }} />
-							<Typography sx={{ fontWeight: 700 }}>
-								{`${UI_LABELS.SEARCH.flight_details.total_price}: ${formatNumber(
-									priceDetails?.total
-								)} ${currencySymbol}`}
+
+							<Divider sx={{ my: 0.5 }} />
+
+							<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
+								<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.fees}</Typography>
+								{(priceDetails?.fees || []).map((f) => (
+									<Box sx={{ mb: 1 }}>
+										<Typography sx={{ textDecoration: 'underline' }}>{`${f.name}`}</Typography>
+										<Typography variant='body2'>
+											{`${formatNumber(f.total)} ${currencySymbol}`}
+										</Typography>
+									</Box>
+								))}
+							</Box>
+
+							<Divider sx={{ my: 0.5 }} />
+
+							<Typography variant='body1' sx={{ fontWeight: 600 }}>
+								{UI_LABELS.SEARCH.flight_details.total_price}
+							</Typography>
+							<Typography variant='body2'>
+								{`${formatNumber(priceDetails?.total)} ${currencySymbol}`}
 							</Typography>
 						</Box>
 					</Box>
