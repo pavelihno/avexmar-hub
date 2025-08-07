@@ -58,9 +58,10 @@ class FlightTariff(BaseModel):
     def update(cls, _id, session=None, **data):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
-        flight_id = data.get('flight_id', instance.flight_id)
-        tariff_id = data.get('tariff_id', instance.tariff_id)
-        if flight_id is not None and tariff_id is not None:
-            cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
+        # Deprecated
+        # flight_id = data.get('flight_id', instance.flight_id)
+        # tariff_id = data.get('tariff_id', instance.tariff_id)
+        # if flight_id is not None and tariff_id is not None:
+            # cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
 
         return super().update(_id, session, **data)
