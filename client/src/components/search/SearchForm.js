@@ -26,10 +26,9 @@ import {
 	disabledPassengerChange,
 	formatDate,
 	getTotalPassengers,
-	getTotalSeats,
 	handlePassengerChange,
 } from '../utils';
-import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, MAX_PASSENGERS, DATE_API_FORMAT } from '../../constants';
+import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
 const selectProps = {

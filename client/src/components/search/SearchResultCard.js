@@ -207,7 +207,10 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 							textTransform: 'none',
 							whiteSpace: 'nowrap',
 						}}
-						onClick={() => setOpenDialog(true)}
+						onClick={(e) => {
+							e.currentTarget.blur();
+							setOpenDialog(true);
+						}}
 					>
 						{UI_LABELS.SEARCH.flight_details.select_ticket}
 					</Button>

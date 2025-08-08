@@ -1,4 +1,6 @@
 import { MAX_PASSENGERS } from '../../constants';
+import { formatDate } from '../utils';
+import { DATE_API_FORMAT } from '../../constants';
 
 export const getFlightDurationMinutes = (flight) => {
 	if (!flight) return 0;
@@ -13,10 +15,15 @@ export const getFlightDurationMinutes = (flight) => {
 };
 
 export const getTotalPassengers = (passengers) => {
-	return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants || 0) + (passengers.infants_seat || 0);
+	return (
+		(passengers.adults || 0) +
+		(passengers.children || 0) +
+		(passengers.infants || 0) +
+		(passengers.infants_seat || 0)
+	);
 };
 
-export const getTotalSeats = (passengers) => {
+export const getSeatsNumber = (passengers) => {
 	return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants_seat || 0);
 };
 
@@ -69,6 +76,17 @@ export const disabledPassengerChange = (passengers, key, delta) => {
 	}
 
 	return false;
+};
+
+export const getExistingPassenger = (passengers, passengerData) => {
+	return passengers.find(
+		(p) =>
+			p.first_name === passengerData.first_name &&
+			p.last_name === passengerData.last_name &&
+			p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
+			p.document_type === passengerData.document_type &&
+			p.document_number === passengerData.document_number
+	);
 };
 
 export const isDuplicateInBooking = (

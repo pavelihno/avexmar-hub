@@ -1,4 +1,5 @@
 from flask import jsonify, request
+from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 
 from app.database import db
@@ -6,10 +7,9 @@ from app.models.airline import Airline
 from app.models.route import Route
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
-
-from sqlalchemy import or_
 from app.models.airport import Airport
 from app.models.flight import Flight
+from app.utils.business_logic import get_seats_number
 
 
 def search_airports():
@@ -35,7 +35,7 @@ def __get_available_tariffs(flight_id):
         .join(Tariff, FlightTariff.tariff_id == Tariff.id)
         .filter(FlightTariff.flight_id == flight_id)
     )
-    return [
+    return sorted([
         {
             'id': t.id,
             'seat_class': t.seat_class.value,
@@ -46,8 +46,8 @@ def __get_available_tariffs(flight_id):
             'seats_left': ft.seats_number,
         }
         for ft, t in tariff_query
-        if (ft.seats_number is None or ft.seats_number > 0) and t.price is not None
-    ]
+        if ft.seats_number > 0 and t.price is not None
+    ], key=lambda x: x['price'])
 
 
 def __query_flights(
@@ -105,6 +105,7 @@ def __query_flights(
         f_dict = flight.to_dict()
         all_tariffs = __get_available_tariffs(flight.id)
         if not all_tariffs:
+            # No tariffs available for this flight
             continue
 
         matching_tariffs = all_tariffs
@@ -112,18 +113,22 @@ def __query_flights(
             matching_tariffs = [
                 t
                 for t in all_tariffs
-                if t['seat_class'] == seat_class
-                and (t['seats_left'] is None or t['seats_left'] >= seats_number)
+                if t['seat_class'] == seat_class and t['seats_left'] >= seats_number
             ]
             if not matching_tariffs:
+                # No matching tariffs found for the specified class and seats number
                 continue
-            min_tariff = min(matching_tariffs, key=lambda x: x['price'])
-            f_dict['price'] = min_tariff['price']
-        else:
-            min_tariff = min(all_tariffs, key=lambda x: x['price'])
 
-        f_dict['min_price'] = min_tariff['price']
-        f_dict['currency'] = min_tariff['currency']
+        if len(matching_tariffs) > 1:
+            # If multiple tariffs, find the minimum price
+            min_tariff = min(matching_tariffs, key=lambda x: x['price'])
+            f_dict['min_price'] = min_tariff['price']
+            f_dict['currency'] = min_tariff['currency']
+        else:
+            # Only one tariff available
+            tariff = matching_tariffs[0]
+            f_dict['price'] = tariff['price']
+            f_dict['currency'] = tariff['currency']
 
         if direction:
             f_dict['direction'] = direction
@@ -138,7 +143,7 @@ def search_flights(is_nearby=False):
     dest_code = params.get('to')
     is_exact = params.get('date_mode') == 'exact'
     seat_class = params.get('class')
-    seats_number = int(params.get('adults', 0)) + int(params.get('children', 0)) + int(params.get('infants_seat', 0))
+    seats_number = get_seats_number(params)
 
     depart_from = params.get('when') if is_exact else params.get('when_from')
     depart_to = None if is_exact else params.get('when_to')
@@ -155,7 +160,7 @@ def search_flights(is_nearby=False):
     outbound_flights = __query_flights(
         origin_code=origin_code, dest_code=dest_code,
         date_from=depart_from, date_to=depart_to,
-        is_exact=is_exact, seat_class=seat_class,
+        is_exact=is_exact, seat_class=seat_class, seats_number=seats_number,
         airline_iata_code=outbound_airline_iata_code, flight_number=outbound_flight_number,
         direction='outbound'
     )
@@ -165,7 +170,7 @@ def search_flights(is_nearby=False):
     return_flights = __query_flights(
         origin_code=dest_code, dest_code=origin_code,
         date_from=return_from, date_to=return_to,
-        is_exact=is_exact, seat_class=seat_class,
+        is_exact=is_exact, seat_class=seat_class, seats_number=seats_number,
         airline_iata_code=return_airline_iata_code, flight_number=return_flight_number,
         direction='return'
     ) if has_return else []
@@ -187,7 +192,7 @@ def search_nearby_flights():
 
 def search_flight_tariffs(flight_id):
     tariffs = __get_available_tariffs(flight_id)
-    return jsonify(sorted(tariffs, key=lambda x: x['price']))
+    return jsonify(tariffs)
 
 
 def schedule_flights():
