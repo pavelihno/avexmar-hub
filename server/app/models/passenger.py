@@ -17,6 +17,7 @@ class Passenger(BaseModel):
 
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
+    patronymic_name = db.Column(db.String, nullable=True)
 
     gender = db.Column(db.Enum(Config.GENDER), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)

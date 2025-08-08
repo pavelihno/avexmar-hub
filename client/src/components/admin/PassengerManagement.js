@@ -20,8 +20,7 @@ import {
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchCountries } from '../../redux/actions/country';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { formatDate, validateDate, isDuplicateInBooking } from '../utils';
+import { FIELD_TYPES, formatDate, validateDate, isDuplicateInBooking, getExistingPassenger } from '../utils';
 import {
 	DATE_API_FORMAT,
 	ENUM_LABELS,
@@ -69,7 +68,6 @@ const PassengerManagement = () => {
 			apiKey: 'booking_id',
 			label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
 			type: FIELD_TYPES.SELECT,
-			fullWidth: true,
 			options: bookingOptions,
 			formatter: (value) => {
 				const booking = bookingOptions.find((b) => b.value === value);
@@ -89,6 +87,13 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.first_name,
 			type: FIELD_TYPES.TEXT,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
+		},
+		patronymicName: {
+			key: 'patronymicName',
+			apiKey: 'patronymic_name',
+			label: FIELD_LABELS.PASSENGER.patronymic_name,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		gender: {
 			key: 'gender',
@@ -187,14 +192,7 @@ const PassengerManagement = () => {
 			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
 		}
 
-		let existing = passengers.find(
-			(p) =>
-				p.first_name === passengerData.first_name &&
-				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
-				p.document_type === passengerData.document_type &&
-				p.document_number === passengerData.document_number
-		);
+		let existing = getExistingPassenger(passengers, passengerData);
 
 		if (!existing) {
 			existing = await dispatch(createPassenger(passengerData)).unwrap();
@@ -226,14 +224,7 @@ const PassengerManagement = () => {
 			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
 		}
 
-		let existing = passengers.find(
-			(p) =>
-				p.first_name === passengerData.first_name &&
-				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
-				p.document_type === passengerData.document_type &&
-				p.document_number === passengerData.document_number
-		);
+		let existing = getExistingPassenger(passengers, passengerData);
 
 		if (!existing) {
 			existing = await dispatch(createPassenger(passengerData)).unwrap();
