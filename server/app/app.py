@@ -202,6 +202,7 @@ def __create_app(_config_class, _db):
     app.route('/search/flights', methods=['GET'])(search_flights)
     app.route('/search/flights/nearby', methods=['GET'])(search_nearby_flights)
     app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
+    app.route('/search/flights/<int:flight_id>/tariffs', methods=['GET'])(search_flight_tariffs)
 
     # price
     app.route('/price/calculate', methods=['POST'])(calculate_price)

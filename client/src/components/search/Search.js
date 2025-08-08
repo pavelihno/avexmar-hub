@@ -77,11 +77,13 @@ const Search = () => {
 		};
 	}, [params]);
 
-	const buildNearDates = (flights, selectedDate) => {
-		// Group flights by date and find lowest price for each
-		const map = flights.reduce((acc, flight) => {
-			const date = flight.scheduled_departure;
-			const price = flight.price || flight.min_price || 0;
+        const buildNearDates = (flights, selectedDate) => {
+                // Group flights by date and find lowest price for each
+                const map = flights
+                        .filter((f) => f.price != null || f.min_price != null)
+                        .reduce((acc, flight) => {
+                                const date = flight.scheduled_departure;
+                                const price = flight.price || flight.min_price || 0;
 
 			if (!acc[date] || price < acc[date].price) {
 				acc[date] = {
@@ -90,7 +92,7 @@ const Search = () => {
 				};
 			}
 			return acc;
-		}, {});
+                        }, {});
 
 		// Get nearby dates, excluding selected date
 		const sortedDates = Object.entries(map)
@@ -148,10 +150,12 @@ const Search = () => {
 		if (hasReturn) fetchNearbyDates(returnDate, 'return');
 	}, [params]);
 
-	const grouped = [];
-	if (hasReturn) {
-		const outbounds = flights.filter((f) => f.direction !== 'return');
-		const returns = flights.filter((f) => f.direction === 'return');
+        const filteredFlights = flights.filter((f) => f.price != null || f.min_price != null);
+
+        const grouped = [];
+        if (hasReturn) {
+                const outbounds = filteredFlights.filter((f) => f.direction !== 'return');
+                const returns = filteredFlights.filter((f) => f.direction === 'return');
 
 		// Create all valid combinations of outbound and return flights
 		for (const out of outbounds) {
@@ -170,10 +174,10 @@ const Search = () => {
 				}
 			}
 		}
-	} else {
-		// One-way flights
-		for (const f of flights) grouped.push({ outbound: f });
-	}
+        } else {
+                // One-way flights
+                for (const f of filteredFlights) grouped.push({ outbound: f });
+        }
 
 	const getTotalPrice = (g) => {
 		return (
