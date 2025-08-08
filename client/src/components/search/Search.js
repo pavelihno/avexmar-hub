@@ -14,7 +14,7 @@ import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlight
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
-import { formatDate, formatNumber, getFlightDurationMinutes, parseTime } from '../utils';
+import { formatDate, formatNumber, parseTime } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
@@ -221,9 +221,9 @@ const Search = () => {
 				case 'arrival_time':
 					res = parseTime(a.outbound.scheduled_arrival_time) - parseTime(b.outbound.scheduled_arrival_time);
 					break;
-				case 'duration':
-					res = getFlightDurationMinutes(a.outbound) - getFlightDurationMinutes(b.outbound);
-					break;
+                                case 'duration':
+                                        res = (a.outbound.duration ?? 0) - (b.outbound.duration ?? 0);
+                                        break;
 				default:
 					res = 0;
 			}
