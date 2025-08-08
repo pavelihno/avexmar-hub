@@ -29,11 +29,38 @@ def search_airports():
     return jsonify([airport.to_dict() for airport in airports])
 
 
+def __get_available_tariffs(flight_id):
+    tariff_query = (
+        db.session.query(FlightTariff, Tariff)
+        .join(Tariff, FlightTariff.tariff_id == Tariff.id)
+        .filter(FlightTariff.flight_id == flight_id)
+    )
+    return [
+        {
+            'id': t.id,
+            'seat_class': t.seat_class.value,
+            'title': t.title,
+            'price': t.price,
+            'currency': t.currency.value,
+            'conditions': t.conditions,
+            'seats_left': ft.seats_number,
+        }
+        for ft, t in tariff_query
+        if (ft.seats_number is None or ft.seats_number > 0) and t.price is not None
+    ]
+
+
 def __query_flights(
-    origin_code, dest_code, date_from=None, date_to=None,
-    airline_iata_code=None, flight_number=None,
-    is_exact=True, seat_class=None, seats_number=0,
-    direction=None
+    origin_code,
+    dest_code,
+    date_from=None,
+    date_to=None,
+    airline_iata_code=None,
+    flight_number=None,
+    is_exact=True,
+    seat_class=None,
+    seats_number=0,
+    direction=None,
 ):
     origin = aliased(Airport)
     dest = aliased(Airport)
@@ -76,41 +103,27 @@ def __query_flights(
     results = []
     for flight in flights:
         f_dict = flight.to_dict()
-        tariff_query = (
-            db.session.query(FlightTariff, Tariff)
-            .join(Tariff, FlightTariff.tariff_id == Tariff.id)
-            .filter(FlightTariff.flight_id == flight.id)
-        )
-        tariffs = tariff_query.all()
-        if tariffs:
-            f_dict['tariffs'] = [{
-                'id': t.id,
-                'seat_class': t.seat_class.value,
-                'title': t.title,
-                'price': t.price,
-                'currency': t.currency.value,
-                'conditions': t.conditions,
-                'seats_left': ft.seats_number,
-            } for ft, t in tariffs]
-
-            if seat_class and seats_number > 0:
-                seat_class_tariffs = [t for t in f_dict['tariffs'] if (t['seat_class'] == seat_class and t['seats_left'] >= seats_number)]
-                if seat_class_tariffs:
-                    min_tariff = min(seat_class_tariffs, key=lambda x: x['price'])
-                    f_dict['price'] = min_tariff['price']
-                    f_dict['currency'] = min_tariff['currency']
-                else:
-                    # Skip flight if the requested number of seats of the requested class is not available
-                    continue
-            else:
-                min_tariff = min((t for t in f_dict['tariffs']), key=lambda x: x['price'])
-                f_dict['min_price'] = min_tariff['price']
-                f_dict['currency'] = min_tariff['currency']
-        else:
-            # Skip flight if no tariffs are available
+        all_tariffs = __get_available_tariffs(flight.id)
+        if not all_tariffs:
             continue
 
-        f_dict['tariffs'] = sorted(f_dict['tariffs'], key=lambda x: x['price'])
+        matching_tariffs = all_tariffs
+        if seat_class and seats_number > 0:
+            matching_tariffs = [
+                t
+                for t in all_tariffs
+                if t['seat_class'] == seat_class
+                and (t['seats_left'] is None or t['seats_left'] >= seats_number)
+            ]
+            if not matching_tariffs:
+                continue
+            min_tariff = min(matching_tariffs, key=lambda x: x['price'])
+            f_dict['price'] = min_tariff['price']
+        else:
+            min_tariff = min(all_tariffs, key=lambda x: x['price'])
+
+        f_dict['min_price'] = min_tariff['price']
+        f_dict['currency'] = min_tariff['currency']
 
         if direction:
             f_dict['direction'] = direction
@@ -170,6 +183,11 @@ def search_flights(is_nearby=False):
 
 def search_nearby_flights():
     return search_flights(is_nearby=True)
+
+
+def search_flight_tariffs(flight_id):
+    tariffs = __get_available_tariffs(flight_id)
+    return jsonify(sorted(tariffs, key=lambda x: x['price']))
 
 
 def schedule_flights():

@@ -24,39 +24,41 @@ import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { formatTime, formatDate, formatNumber, handlePassengerChange, disabledPassengerChange } from '../utils';
 import { calculatePrice } from '../../redux/actions/price';
 import { getTotalSeats, hasAvailableSeats } from '../utils/businessLogic';
+import { getDefaultTariffId } from './defaultTariff';
+import { serverApi } from '../../api';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
-const buildTariffOptions = (outbound, returnFlight) => {
-	const filterBySeats = (tariffs) => tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
+const buildTariffOptions = (outboundTariffs, returnTariffs) => {
+        const filterBySeats = (tariffs) => tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
 
-	const outboundTariffs = filterBySeats(outbound?.tariffs || []);
+        const outboundFiltered = filterBySeats(outboundTariffs).sort((a, b) => a.price - b.price);
 
-	if (!returnFlight) {
-		return outboundTariffs.map((t) => ({ ...t }));
-	}
+        if (!returnTariffs || returnTariffs.length === 0) {
+                return outboundFiltered.map((t) => ({ ...t }));
+        }
 
-	const returnTariffs = filterBySeats(returnFlight.tariffs || []);
-	const map = {};
-	outboundTariffs.forEach((t) => {
-		map[t.id] = { ...t };
-	});
+        const returnFiltered = filterBySeats(returnTariffs);
+        const map = {};
+        outboundFiltered.forEach((t) => {
+                map[t.id] = { ...t };
+        });
 
-	const options = [];
-	returnTariffs.forEach((t) => {
-		if (map[t.id]) {
-			options.push({
-				...map[t.id],
-				price: map[t.id].price + t.price,
-				seats_left:
-					map[t.id].seats_left !== undefined && t.seats_left !== undefined
-						? Math.min(map[t.id].seats_left, t.seats_left)
-						: t.seats_left ?? map[t.id].seats_left,
-			});
-		}
-	});
+        const options = [];
+        returnFiltered.forEach((t) => {
+                if (map[t.id]) {
+                        options.push({
+                                ...map[t.id],
+                                price: map[t.id].price + t.price,
+                                seats_left:
+                                        map[t.id].seats_left !== undefined && t.seats_left !== undefined
+                                                ? Math.min(map[t.id].seats_left, t.seats_left)
+                                                : t.seats_left ?? map[t.id].seats_left,
+                        });
+                }
+        });
 
-	return filterBySeats(options);
+        return filterBySeats(options).sort((a, b) => a.price - b.price);
 };
 
 const FlightInfo = ({ flight, airlines, airports, routes }) => {
@@ -87,15 +89,57 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	const [params] = useSearchParams();
 	const initialParams = Object.fromEntries(params.entries());
 
-	const tariffOptions = useMemo(() => buildTariffOptions(outbound, returnFlight), [outbound, returnFlight]);
+        const [outboundTariffs, setOutboundTariffs] = useState([]);
+        const [returnTariffs, setReturnTariffs] = useState([]);
 
-	const [tariffId, setTariffId] = useState(initialParams.tariff || tariffOptions[0]?.id);
+        useEffect(() => {
+                if (!open || !outbound) return;
+                serverApi
+                        .get(`/search/flights/${outbound.id}/tariffs`)
+                        .then((res) => setOutboundTariffs(res.data))
+                        .catch(() => setOutboundTariffs([]));
+        }, [open, outbound]);
 
-	useEffect(() => {
-		if (!tariffOptions.find((t) => t.id === tariffId)) {
-			setTariffId(tariffOptions[0]?.id);
-		}
-	}, [tariffOptions]);
+        useEffect(() => {
+                if (!open || !returnFlight) {
+                        setReturnTariffs([]);
+                        return;
+                }
+                serverApi
+                        .get(`/search/flights/${returnFlight.id}/tariffs`)
+                        .then((res) => setReturnTariffs(res.data))
+                        .catch(() => setReturnTariffs([]));
+        }, [open, returnFlight]);
+
+        const tariffOptions = useMemo(
+                () => buildTariffOptions(outboundTariffs, returnTariffs),
+                [outboundTariffs, returnTariffs]
+        );
+
+        const seatClassParam = params.get('class');
+
+        const defaultTariffId = useMemo(
+                () => getDefaultTariffId(tariffOptions, seatClassParam),
+                [tariffOptions, seatClassParam]
+        );
+
+        const [tariffId, setTariffId] = useState(() => {
+                const urlTariff = initialParams.tariff;
+                return tariffOptions.some((t) => t.id === urlTariff)
+                        ? urlTariff
+                        : defaultTariffId;
+        });
+
+        useEffect(() => {
+                if (!tariffOptions.some((t) => t.id === tariffId)) {
+                        const urlTariff = initialParams.tariff;
+                        setTariffId(
+                                tariffOptions.some((t) => t.id === urlTariff)
+                                        ? urlTariff
+                                        : defaultTariffId
+                        );
+                }
+        }, [tariffOptions, tariffId, initialParams.tariff, defaultTariffId]);
 
 	const [passengers, setPassengers] = useState({
 		adults: 1,
