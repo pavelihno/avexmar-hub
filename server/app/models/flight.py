@@ -65,6 +65,9 @@ class Flight(BaseModel):
         depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
         arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
 
+        if depart_dt is None or arrive_dt is None:
+            return None
+
         route = self.route
         origin = route.origin_airport
         dest = route.destination_airport
@@ -72,15 +75,13 @@ class Flight(BaseModel):
         origin_tz = origin.timezone.get_tz() if origin.timezone else None
         dest_tz = dest.timezone.get_tz() if dest.timezone else None
 
-        if origin_tz is not None and dest_tz is not None:
-            depart_dt = depart_dt.astimezone(origin_tz)
-            arrive_dt = arrive_dt.astimezone(dest_tz)
+        if origin_tz:
+            depart_dt = depart_dt.replace(tzinfo=origin_tz)
+        if dest_tz:
+            arrive_dt = arrive_dt.replace(tzinfo=dest_tz)
 
-            delta = arrive_dt - depart_dt
-
-            return int(delta.total_seconds() // 60)
-
-        return 0
+        delta = arrive_dt - depart_dt
+        return int(delta.total_seconds() // 60)
 
     MAX_TARIFFS = 4
 
