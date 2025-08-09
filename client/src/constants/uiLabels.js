@@ -249,38 +249,39 @@ export const UI_LABELS = {
 		passwords_dont_match: 'Пароли не совпадают',
 	},
 	HOME: {},
-	BOOKING: {
-		progress_steps: ['Passengers', 'Confirmation', 'Payment', 'Completion'],
-		step_placeholders: {
-			confirmation: 'Confirmation step',
-			payment: 'Payment step',
-			completion: 'Completion step',
-		},
-		buyer_form: {
-			title: 'Покупатель',
-			consent: 'Даю согласие на обработку персональных данных',
-			summary: {
-				total_for: (count) => `Итого за ${count} пассажира(ов)`,
-				tickets: 'Билеты',
-				service_fee: 'Сервисный сбор',
-				discount: 'Скидка',
-				total: 'Итого',
-			},
-		},
-		passenger_form: {
-			type_labels: {
-				ADULT: 'Взрослый, старше 12 лет',
-				CHILD: 'Ребёнок, от 2 до 12 лет',
-				INFANT: 'Малыш, до 2 лет',
-			},
-			genders: [
-				{ value: 'MALE', label: 'Мужской' },
-				{ value: 'FEMALE', label: 'Женский' },
-				{ value: 'OTHER', label: 'Другой' },
-			],
-			add_passenger: 'Добавить пассажира',
-		},
-	},
+        BOOKING: {
+                progress_steps: ['Пассажиры', 'Подтверждение', 'Оплата', 'Завершение'],
+                step_placeholders: {
+                        confirmation: 'Шаг подтверждения',
+                        payment: 'Шаг оплаты',
+                        completion: 'Шаг завершения',
+                },
+                buyer_form: {
+                        title: 'Покупатель',
+                        consent: 'Даю согласие на обработку персональных данных и соглашаюсь с',
+                        privacy_policy: 'политикой обработки персональных данных',
+                        summary: {
+                                total_for: (count) => `Итого за ${count} ${UI_LABELS.SEARCH.form.passenger_word(count)}`,
+                                tickets: 'Билеты',
+                                service_fee: 'Сервисный сбор',
+                                discount: 'Скидка',
+                                total: 'Итого',
+                        },
+                },
+                passenger_form: {
+                        type_labels: {
+                                ADULT: 'Взрослый, старше 12 лет',
+                                CHILD: 'Ребёнок, от 2 до 12 лет',
+                                INFANT: 'Малыш, до 2 лет',
+                        },
+                        genders: [
+                                { value: 'MALE', label: 'Мужской' },
+                                { value: 'FEMALE', label: 'Женский' },
+                                { value: 'OTHER', label: 'Другой' },
+                        ],
+                        add_passenger: 'Добавить пассажира',
+                },
+        },
 	SCHEDULE: {
 		title: 'Расписание рейсов',
 		results: 'Результаты поиска',

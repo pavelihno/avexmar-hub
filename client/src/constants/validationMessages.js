@@ -99,19 +99,22 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-	BOOKING: {
-		email_address: {
-			REQUIRED: 'Email обязателен',
-			INVALID: 'Введите корректный email',
-		},
-		phone_number: {
-			REQUIRED: 'Телефон обязателен',
-			INVALID: 'Введите корректный номер телефона',
-		},
-		passenger: {
-			EXISTS: 'Пассажир с таким именем и датой рождения уже есть в бронировании',
-		},
-	},
+        BOOKING: {
+                email_address: {
+                        REQUIRED: 'Email обязателен',
+                        INVALID: 'Введите корректный email',
+                },
+                phone_number: {
+                        REQUIRED: 'Телефон обязателен',
+                        INVALID: 'Введите корректный номер телефона',
+                },
+                passenger: {
+                        EXISTS: 'Пассажир с таким именем и датой рождения уже есть в бронировании',
+                },
+                consent: {
+                        REQUIRED: 'Необходимо согласие на обработку персональных данных',
+                },
+        },
 
 	AIRLINE: {
 		iata_code: {
