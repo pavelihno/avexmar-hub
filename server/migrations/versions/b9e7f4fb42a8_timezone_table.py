@@ -27,8 +27,10 @@ def upgrade():
         sa.UniqueConstraint('name')
     )
     with op.batch_alter_table('airports', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('timezone_id', sa.Integer(), nullable=True))
-        batch_op.create_foreign_key(None, 'timezones', ['timezone_id'], ['id'], ondelete='RESTRICT')
+        batch_op.add_column(
+            sa.Column('timezone_id', sa.Integer(), nullable=True))
+        batch_op.create_foreign_key(None, 'timezones', ['timezone_id'], [
+                                    'id'], ondelete='RESTRICT')
     # ### end Alembic commands ###
 
 
