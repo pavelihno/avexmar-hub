@@ -121,8 +121,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	const { outboundFlightTariffs: outboundTariffs, isLoading: outboundLoading } = useSelector((state) => state.search);
 	const { returnFlightTariffs: returnTariffs, isLoading: returnLoading } = useSelector((state) => state.search);
 
-        const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
-        const { isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
+	const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
+	const { isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 
 	useEffect(() => {
 		setPassengers({
@@ -175,16 +175,16 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 
 	const hasSeats = hasAvailableSeats(selectedTariff, seatsNumber);
 
-        const handleConfirm = async () => {
-                const payload = {
-                        outbound_id: outbound.id,
-                        tariff_id: tariffId,
-                        passengers,
-                };
-                if (returnFlight) payload.return_id = returnFlight.id;
-                const res = await dispatch(processBookingCreate(payload)).unwrap();
-                navigate(`/booking/${res.public_id}/passengers`);
-        };
+	const handleConfirm = async () => {
+		const payload = {
+			outbound_id: outbound.id,
+			tariff_id: tariffId,
+			passengers,
+		};
+		if (returnFlight) payload.return_id = returnFlight.id;
+		const res = await dispatch(processBookingCreate(payload)).unwrap();
+		navigate(`/booking/${res.public_id}/passengers`);
+	};
 
 	const [conditions, setConditions] = useState('');
 	const [showConditions, setShowConditions] = useState(false);
@@ -347,7 +347,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 														{`${label} x ${b.count}`}
 													</Typography>
 													<Typography variant='body2'>
-                                                                                                                {`${formatNumber(b.fare_price)} ${currencySymbol}`}
+														{`${formatNumber(b.fare_price)} ${currencySymbol}`}
 													</Typography>
 													{b.discount > 0 && (
 														<Typography variant='body2' color='text.secondary'>
@@ -402,12 +402,12 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 					<Button onClick={onClose}>{UI_LABELS.BUTTONS.close}</Button>
 					<Tooltip title={!hasSeats ? UI_LABELS.SEARCH.flight_details.seats_unavailable : ''}>
 						<span>
-                                                        <Button
-                                                                variant='contained'
-                                                                color='orange'
-                                                                onClick={handleConfirm}
-                                                                disabled={!hasSeats || priceLoading || bookingLoading}
-                                                        >
+							<Button
+								variant='contained'
+								color='orange'
+								onClick={handleConfirm}
+								disabled={!hasSeats || priceLoading || bookingLoading}
+							>
 								{UI_LABELS.SEARCH.flight_details.book_ticket}
 							</Button>
 						</span>

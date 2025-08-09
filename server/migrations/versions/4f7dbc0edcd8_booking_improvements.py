@@ -24,7 +24,7 @@ def upgrade():
         batch_op.add_column(
             sa.Column('status', sa.Enum('created', 'expired', 'cancelled', 'passengers_added',
                                         'payment_pending', 'payment_confirmed', 'payment_failed',
-                                        name='bookingstatus'), nullable=False, server_default='created'))
+                                        name='booking_status'), nullable=False, server_default='created'))
         batch_op.add_column(sa.Column('status_history', postgresql.JSONB(
             astext_type=sa.Text()), server_default='[]', nullable=False))
         batch_op.add_column(

@@ -1,13 +1,14 @@
 from datetime import datetime, timezone
 
+from app.config import Config
+from app.database import db
+
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
 from app.models.discount import Discount
 from app.models.flight import Flight
 from app.models.booking import Booking
-from app.config import Config
-from app.database import db
 
 
 def get_seats_number(params):
@@ -20,14 +21,22 @@ def get_seats_number(params):
 
 def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
     tariff = Tariff.get_or_404(tariff_id)
-    FlightTariff.query.filter_by(flight_id=outbound_id, tariff_id=tariff_id).first_or_404()
+    FlightTariff.query.filter_by(
+        flight_id=outbound_id, tariff_id=tariff_id
+    ).first_or_404()
     is_round_trip = bool(return_id)
     if is_round_trip:
-        FlightTariff.query.filter_by(flight_id=return_id, tariff_id=tariff_id).first_or_404()
+        FlightTariff.query.filter_by(
+            flight_id=return_id, tariff_id=tariff_id
+        ).first_or_404()
 
     discounts = Discount.get_all()
-    discount_pct = {d.discount_type.value: d.percentage_value / 100.0 for d in discounts}
-    discount_names_map = {d.discount_type.value: d.discount_name for d in discounts}
+    discount_pct = {
+        d.discount_type.value: d.percentage_value / 100.0 for d in discounts
+    }
+    discount_names_map = {
+        d.discount_type.value: d.discount_name for d in discounts
+    }
 
     legs = [('outbound', outbound_id)]
     if is_round_trip:
@@ -69,11 +78,15 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
                     pct_rt = discount_pct.get('round_trip', 0.0)
                     multiplier *= (1.0 - pct_rt)
                     if 'round_trip' in discount_names_map:
-                        applied_discounts.append(discount_names_map['round_trip'])
+                        applied_discounts.append(
+                            discount_names_map['round_trip']
+                        )
 
             total_cost = fare_total * multiplier
             discount_amount = fare_total - total_cost
-            discount_label = ', '.join(applied_discounts) if applied_discounts else None
+            discount_label = ', '.join(
+                applied_discounts
+            ) if applied_discounts else None
 
             leg_breakdown.append({
                 'category': category,
@@ -99,7 +112,9 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
     fees = []
     for fee in Fee.get_all():
         fee_total = fee.amount * total_passengers
-        fees.append({'name': fee.name, 'amount': fee.amount, 'total': fee_total})
+        fees.append(
+            {'name': fee.name, 'amount': fee.amount, 'total': fee_total}
+        )
         total_price += fee_total
 
     return {
@@ -119,7 +134,9 @@ def process_booking_create(data):
     tariff_id = data.get('tariff_id')
     passengers = data.get('passengers', {})
 
-    price = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+    price = calculate_price_details(
+        outbound_id, return_id, tariff_id, passengers
+    )
 
     history = [{
         'status': Config.BOOKING_STATUS.created.value,
@@ -137,4 +154,3 @@ def process_booking_create(data):
 
     db.session.refresh(booking)
     return booking
-

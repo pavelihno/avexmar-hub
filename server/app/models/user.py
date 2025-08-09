@@ -9,6 +9,7 @@ from app.config import Config
 
 if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
+    from app.models.passenger import Passenger
 
 
 class User(BaseModel):
@@ -21,6 +22,9 @@ class User(BaseModel):
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    passengers: Mapped[List['Passenger']] = db.relationship(
+        'Passenger', back_populates='owner_user', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     def to_dict(self):

@@ -42,9 +42,9 @@ const rootReducer = combineReducers({
 	bookingPassengers: bookingPassengerReducer,
 	users: userReducer,
 	timezones: timezoneReducer,
-        search: searchReducer,
-        price: priceReducer,
-        bookingProcess: bookingProcessReducer,
+	search: searchReducer,
+	price: priceReducer,
+	bookingProcess: bookingProcessReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));
