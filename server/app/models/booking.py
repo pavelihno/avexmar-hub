@@ -37,6 +37,7 @@ class Booking(BaseModel):
     fees = db.Column(db.Float, nullable=False, default=0.0)
     total_discounts = db.Column(db.Float, nullable=False, default=0.0)
     total_price = db.Column(db.Float, nullable=False)
+    passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
 
     # Relationships
     payments: Mapped[List['Payment']] = db.relationship(
@@ -66,6 +67,7 @@ class Booking(BaseModel):
             'total_discounts': self.total_discounts,
             'fees': self.fees,
             'total_price': self.total_price,
+            'passenger_counts': self.passenger_counts,
         }
 
     @classmethod
