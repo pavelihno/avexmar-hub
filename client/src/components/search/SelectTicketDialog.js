@@ -349,7 +349,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 														{`${label} x ${b.count}`}
 													</Typography>
 													<Typography variant='body2'>
-														{`${formatNumber(b.base_price)} ${currencySymbol}`}
+                                                                                                                {`${formatNumber(b.fare_price)} ${currencySymbol}`}
 													</Typography>
 													{b.discount > 0 && (
 														<Typography variant='body2' color='text.secondary'>
