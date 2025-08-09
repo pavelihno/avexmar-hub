@@ -4,7 +4,7 @@ import { UI_LABELS } from '../../constants';
 
 const Payment = () => (
     <Base maxWidth='lg'>
-        <BookingProgress activeStep={2} />
+        <BookingProgress activeStep='payment' />
         <div>{UI_LABELS.BOOKING.step_placeholders.payment}</div>
     </Base>
 );

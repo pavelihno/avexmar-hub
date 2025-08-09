@@ -7,49 +7,68 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { UI_LABELS } from '../../constants';
 
-const icons = {
-        1: <GroupIcon />, // Passengers
-        2: <FactCheckIcon />, // Confirmation
-        3: <PaymentIcon />, // Payment
-        4: <CheckCircleIcon />, // Completion
+const stepKeys = ['passengers', 'confirmation', 'payment', 'completion'];
+
+const iconMap = {
+	passengers: GroupIcon,
+	confirmation: FactCheckIcon,
+	payment: PaymentIcon,
+	completion: CheckCircleIcon,
 };
 
-const StepIcon = (props) => {
-        const { icon } = props;
-        return icons[icon];
+const StepIcon = ({ icon, active, completed }) => {
+	const stepKey = stepKeys[icon - 1];
+	const Icon = iconMap[stepKey];
+
+	const color = completed ? 'text.disabled' : active ? 'primary.main' : 'text.disabled';
+
+	return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
 };
 
 const BookingProgress = ({ activeStep }) => {
-        const { publicId } = useParams();
-        const navigate = useNavigate();
+	const { publicId } = useParams();
+	const navigate = useNavigate();
 
-        const steps = UI_LABELS.BOOKING.progress_steps;
-        const routes = [
-                `/booking/${publicId}/passengers`,
-                `/booking/${publicId}/confirmation`,
-                `/booking/${publicId}/payment`,
-                `/booking/${publicId}/completion`,
-        ];
+	const routes = [
+		`/booking/${publicId}/passengers`,
+		`/booking/${publicId}/confirmation`,
+		`/booking/${publicId}/payment`,
+		`/booking/${publicId}/completion`,
+	];
 
-        const handleClick = (index) => {
-                if (index < activeStep) {
-                        navigate(routes[index]);
-                }
-        };
+	const stepIndex = typeof activeStep === 'string' ? stepKeys.indexOf(activeStep) : activeStep;
 
-        return (
-                <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
-                        {steps.map((label, index) => (
-                                <Step
-                                        key={label}
-                                        onClick={() => handleClick(index)}
-                                        sx={{ cursor: index < activeStep ? 'pointer' : 'default' }}
-                                >
-                                        <StepLabel StepIconComponent={StepIcon}>{label}</StepLabel>
-                                </Step>
-                        ))}
-                </Stepper>
-        );
+	const handleClick = (index) => {
+		if (index < stepIndex) navigate(routes[index]);
+	};
+
+	return (
+		<Stepper activeStep={stepIndex} alternativeLabel sx={{ mt: 2, mb: 3 }}>
+			{stepKeys.map((key, index) => {
+				const isCompleted = index < stepIndex;
+				const isActive = index === stepIndex;
+				const isDisabled = index > stepIndex;
+
+				return (
+					<Step
+						key={key}
+						disabled={isDisabled}
+						onClick={() => handleClick(index)}
+						sx={{
+							cursor: isCompleted ? 'pointer' : 'default',
+							'& .MuiStepLabel-label': {
+								color: isActive ? 'primary.main' : isCompleted ? 'text.primary' : 'text.disabled',
+								fontWeight: isActive ? 600 : 400,
+							},
+							'& .MuiStepLabel-labelContainer': { gap: 0.1 },
+						}}
+					>
+						<StepLabel StepIconComponent={StepIcon}>{UI_LABELS.BOOKING.progress_steps[key]}</StepLabel>
+					</Step>
+				);
+			})}
+		</Stepper>
+	);
 };
 
 export default BookingProgress;

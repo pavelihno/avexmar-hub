@@ -4,7 +4,7 @@ import { UI_LABELS } from '../../constants';
 
 const Completion = () => (
 	<Base maxWidth='lg'>
-		<BookingProgress activeStep={3} />
+		<BookingProgress activeStep='completion' />
 		<div>{UI_LABELS.BOOKING.step_placeholders.completion}</div>
 	</Base>
 );

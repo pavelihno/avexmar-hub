@@ -393,7 +393,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								{UI_LABELS.SEARCH.flight_details.total_price}
 							</Typography>
 							<Typography variant='body2' sx={{ fontSize: '1.1rem' }}>
-								{`${formatNumber(priceDetails?.total)} ${currencySymbol}`}
+								{`${formatNumber(priceDetails?.total_price)} ${currencySymbol}`}
 							</Typography>
 						</Box>
 					</Box>
