@@ -110,6 +110,7 @@ def __query_flights(
 
         matching_tariffs = all_tariffs
         if seat_class and seats_number > 0:
+            # Filter tariffs by seat class and seats number
             matching_tariffs = [
                 t
                 for t in all_tariffs
@@ -119,16 +120,21 @@ def __query_flights(
                 # No matching tariffs found for the specified class and seats number
                 continue
 
-        if len(matching_tariffs) > 1:
-            # If multiple tariffs, find the minimum price
+            elif len(matching_tariffs) > 1:
+                # If multiple tariffs, find the minimum price
+                min_tariff = min(matching_tariffs, key=lambda x: x['price'])
+                f_dict['min_price'] = min_tariff['price']
+                f_dict['currency'] = min_tariff['currency']
+            else:
+                # Only one tariff available
+                tariff = matching_tariffs[0]
+                f_dict['price'] = tariff['price']
+                f_dict['currency'] = tariff['currency']
+        else:
+            # No specific class or seats number
             min_tariff = min(matching_tariffs, key=lambda x: x['price'])
             f_dict['min_price'] = min_tariff['price']
             f_dict['currency'] = min_tariff['currency']
-        else:
-            # Only one tariff available
-            tariff = matching_tariffs[0]
-            f_dict['price'] = tariff['price']
-            f_dict['currency'] = tariff['currency']
 
         if direction:
             f_dict['direction'] = direction
