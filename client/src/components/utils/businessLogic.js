@@ -2,18 +2,6 @@ import { MAX_PASSENGERS } from '../../constants';
 import { formatDate } from '../utils';
 import { DATE_API_FORMAT } from '../../constants';
 
-export const getFlightDurationMinutes = (flight) => {
-	if (!flight) return 0;
-	try {
-		const depart = new Date(`${flight.scheduled_departure}T${flight.scheduled_departure_time || '00:00:00'}`);
-		const arrive = new Date(`${flight.scheduled_arrival}T${flight.scheduled_arrival_time || '00:00:00'}`);
-		return Math.round((arrive - depart) / 60000);
-	} catch (e) {
-		console.error('Failed to calculate duration', e);
-		return 0;
-	}
-};
-
 export const getTotalPassengers = (passengers) => {
 	return (
 		(passengers.adults || 0) +

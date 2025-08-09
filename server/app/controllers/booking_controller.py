@@ -34,3 +34,15 @@ def update_booking(current_user, booking_id):
 def delete_booking(current_user, booking_id):
     deleted = Booking.delete_or_404(booking_id)
     return jsonify(deleted)
+
+
+# def process_booking_create():
+#     pass
+
+
+# def process_booking_passengers():
+#     pass
+
+
+# def process_booking_payment():
+#     pass

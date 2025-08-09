@@ -192,6 +192,7 @@ def search_flights(is_nearby=False):
 
     return jsonify(outbound_flights + return_flights)
 
+
 def search_nearby_flights():
     return search_flights(is_nearby=True)
 

@@ -221,9 +221,9 @@ const Search = () => {
 				case 'arrival_time':
 					res = parseTime(a.outbound.scheduled_arrival_time) - parseTime(b.outbound.scheduled_arrival_time);
 					break;
-                                case 'duration':
-                                        res = (a.outbound.duration ?? 0) - (b.outbound.duration ?? 0);
-                                        break;
+				case 'duration':
+					res = (a.outbound.duration ?? 0) - (b.outbound.duration ?? 0);
+					break;
 				default:
 					res = 0;
 			}

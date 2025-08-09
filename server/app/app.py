@@ -176,6 +176,11 @@ def __create_app(_config_class, _db):
     app.route('/bookings/<int:booking_id>', methods=['PUT'])(update_booking)
     app.route('/bookings/<int:booking_id>', methods=['DELETE'])(delete_booking)
 
+    # TODO
+    # app.route('/bookings/process/create', methods=['POST'])(process_booking_create)
+    # app.route('/bookings/process/passengers', methods=['POST'])(process_booking_passengers)
+    # app.route('/bookings/process/payment', methods=['POST'])(process_booking_payment)
+
     # booking passengers
     app.route('/booking_passengers', methods=['GET'])(get_booking_passengers)
     app.route('/booking_passengers', methods=['POST'])(create_booking_passenger)
