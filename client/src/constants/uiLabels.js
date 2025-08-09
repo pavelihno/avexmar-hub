@@ -15,12 +15,13 @@ export const UI_LABELS = {
 		delete: 'Удалить',
 		cancel: 'Отмена',
 		back: 'Назад',
-		delete_all: 'Удалить все',
-		close: 'Закрыть',
-		confirm: 'Подтвердить',
-		send: 'Отправить',
-		pagination: {
-			rows_per_page: 'Записей на странице',
+                delete_all: 'Удалить все',
+                close: 'Закрыть',
+                confirm: 'Подтвердить',
+                send: 'Отправить',
+                continue: 'Продолжить',
+                pagination: {
+                        rows_per_page: 'Записей на странице',
 			displayed_rows: ({ from, to, count }) => {
 				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
@@ -248,11 +249,28 @@ export const UI_LABELS = {
 		passwords_dont_match: 'Пароли не совпадают',
 	},
 	HOME: {},
-	BOOKING: {
-		passenger_form: {
-			type_labels: {
-				ADULT: 'Взрослый, старше 12 лет',
-				CHILD: 'Ребёнок, от 2 до 12 лет',
+        BOOKING: {
+                progress_steps: ['Passengers', 'Confirmation', 'Payment', 'Completion'],
+                step_placeholders: {
+                        confirmation: 'Confirmation step',
+                        payment: 'Payment step',
+                        completion: 'Completion step',
+                },
+                buyer_form: {
+                        title: 'Покупатель',
+                        consent: 'Даю согласие на обработку персональных данных',
+                        summary: {
+                                total_for: (count) => `Итого за ${count} пассажира(ов)`,
+                                tickets: 'Билеты',
+                                service_fee: 'Сервисный сбор',
+                                discount: 'Скидка',
+                                total: 'Итого',
+                        },
+                },
+                passenger_form: {
+                        type_labels: {
+                                ADULT: 'Взрослый, старше 12 лет',
+                                CHILD: 'Ребёнок, от 2 до 12 лет',
 				INFANT: 'Малыш, до 2 лет',
 			},
 			genders: [
