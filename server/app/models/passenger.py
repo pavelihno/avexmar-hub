@@ -4,13 +4,14 @@ from sqlalchemy.orm import Session, Mapped
 from sqlalchemy import Index
 
 from app.database import db
+from app.config import Config
 from app.models._base_model import BaseModel
 from app.models.country import Country
-from app.config import Config
 
 if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
     from app.models.ticket import Ticket
+    from app.models.user import User
 
 
 class Passenger(BaseModel):
@@ -28,6 +29,7 @@ class Passenger(BaseModel):
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
 
+    owner_user: Mapped['User'] = db.relationship('User', back_populates='passengers')
     citizenship: Mapped['Country'] = db.relationship('Country', back_populates='passengers')
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
