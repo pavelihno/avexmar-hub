@@ -156,4 +156,4 @@ def process_booking_create(data):
     )
 
     db.session.refresh(booking)
-    return booking
+    return booking, price

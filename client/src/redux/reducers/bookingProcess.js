@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { processBookingCreate, processBookingPassengers, fetchBookingPassengers, saveBookingPassenger } from '../actions/bookingProcess';
+import { processBookingCreate, processBookingPassengers, fetchBookingPassengers, saveBookingPassenger, fetchBookingDetails } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
@@ -14,12 +14,12 @@ const bookingProcessSlice = createSlice({
 	reducers: {},
 	extraReducers: (builder) => {
 		builder
-			.addCase(processBookingCreate.pending, handlePending)
-			.addCase(processBookingCreate.rejected, handleRejected)
-			.addCase(processBookingCreate.fulfilled, (state, action) => {
-				state.current = action.payload;
-				state.isLoading = false;
-			})
+                        .addCase(processBookingCreate.pending, handlePending)
+                        .addCase(processBookingCreate.rejected, handleRejected)
+                        .addCase(processBookingCreate.fulfilled, (state, action) => {
+                                state.current = action.payload;
+                                state.isLoading = false;
+                        })
                         .addCase(processBookingPassengers.pending, handlePending)
                         .addCase(processBookingPassengers.rejected, handleRejected)
                         .addCase(processBookingPassengers.fulfilled, (state, action) => {
@@ -31,6 +31,12 @@ const bookingProcessSlice = createSlice({
                         .addCase(fetchBookingPassengers.rejected, handleRejected)
                         .addCase(fetchBookingPassengers.fulfilled, (state, action) => {
                                 state.current = { ...state.current, passengers: action.payload };
+                                state.isLoading = false;
+                        })
+                        .addCase(fetchBookingDetails.pending, handlePending)
+                        .addCase(fetchBookingDetails.rejected, handleRejected)
+                        .addCase(fetchBookingDetails.fulfilled, (state, action) => {
+                                state.current = { ...state.current, ...action.payload };
                                 state.isLoading = false;
                         })
                         .addCase(saveBookingPassenger.pending, handlePending)
