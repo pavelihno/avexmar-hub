@@ -32,7 +32,7 @@ const getAgeError = (type, birthDate) => {
 	return '';
 };
 
-const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, onValid }) => {
+const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 	const dispatch = useDispatch();
 	const { countries } = useSelector((state) => state.countries);
 	useEffect(() => {
@@ -156,7 +156,6 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, onVali
 		setData(next);
 		if (onChange) onChange(field, value, next);
 		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
-		if (validate(next) && onValid) onValid(next);
 	};
 
 	const validate = useCallback(

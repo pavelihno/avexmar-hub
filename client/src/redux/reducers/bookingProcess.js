@@ -58,19 +58,6 @@ const bookingProcessSlice = createSlice({
 			.addCase(fetchBookingDirectionsInfo.fulfilled, (state, action) => {
 				state.current = { ...(state.current || {}), directionsInfo: action.payload };
 				state.isLoading = false;
-			})
-			.addCase(saveBookingPassenger.pending, handlePending)
-			.addCase(saveBookingPassenger.rejected, handleRejected)
-			.addCase(saveBookingPassenger.fulfilled, (state, action) => {
-				const p = action.payload;
-				if (state.current) {
-					const list = state.current.passengers || [];
-					const idx = list.findIndex((x) => x.id === p.id);
-					if (idx >= 0) list[idx] = p;
-					else list.push(p);
-					state.current.passengers = list;
-				}
-				state.isLoading = false;
 			});
 	},
 });

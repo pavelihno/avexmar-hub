@@ -21,7 +21,6 @@ import PassengerForm from './PassengerForm';
 import {
 	processBookingPassengers,
 	fetchBookingPassengers,
-	saveBookingPassenger,
 } from '../../redux/actions/bookingProcess';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import { createFormFields, FIELD_TYPES, formatNumber } from '../utils';
@@ -30,17 +29,21 @@ const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const booking = useSelector((state) => state.bookingProcess.current);
+	const { booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 
-	const passengersFromStore = booking?.passengers || [{ id: 1, type: 'ADULT' }];
-	const [passengerData, setPassengerData] = useState(passengersFromStore);
+	const existingPassengerData = booking?.passengers;
+	// Initialize as null and set only when data is available
+	const [passengerData, setPassengerData] = useState(null);
 	useEffect(() => {
-		setPassengerData(passengersFromStore);
-	}, [passengersFromStore]);
+		if (Array.isArray(existingPassengerData)) {
+			setPassengerData(existingPassengerData);
+		}
+	}, [existingPassengerData]);
 
 	useEffect(() => {
 		dispatch(fetchBookingPassengers(publicId));
 	}, [dispatch, publicId]);
+
 	const [buyer, setBuyer] = useState(
 		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
 	);
@@ -77,11 +80,9 @@ const Passengers = () => {
 	const [buyerErrors, setBuyerErrors] = useState({});
 
 	const handlePassengerChange = (id) => (field, value, data) => {
-		setPassengerData((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
-	};
-
-	const handlePassengerValid = (id) => (data) => {
-		dispatch(saveBookingPassenger({ public_id: publicId, passenger: data }));
+		setPassengerData((prev) =>
+			Array.isArray(prev) ? prev.map((p) => (p.id === id ? { ...p, ...data } : p)) : prev
+		);
 	};
 
 	const handleBuyerChange = (field, value) => {
@@ -122,38 +123,42 @@ const Passengers = () => {
 		}
 	}, [routeInfo]);
 
+	// Render passenger-related UI only after data is loaded
+	const passengersReady = !bookingLoading && Array.isArray(passengerData);
+
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='passengers' />
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
-					{passengerData.map((p) => (
-						<PassengerForm
-							key={p.id}
-							passenger={p}
-							onChange={handlePassengerChange(p.id)}
-							onValid={handlePassengerValid(p.id)}
-						/>
-					))}
+					{passengersReady &&
+						passengerData.map((p) => (
+							<PassengerForm
+								key={p.id}
+								passenger={p}
+								onChange={handlePassengerChange(p.id)}
+							/>
+						))}
 					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
 						<Typography variant='h6' sx={{ mb: 1 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}
 						</Typography>
 						<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-							{passengerData.map((p) => (
-								<Chip
-									key={p.id}
-									label={`${p.lastName || ''} ${p.firstName || ''}`}
-									size='small'
-									onClick={() =>
-										setBuyer((prev) => ({
-											...prev,
-											lastName: p.lastName || '',
-											firstName: p.firstName || '',
-										}))
-									}
-								/>
-							))}
+							{passengersReady &&
+								passengerData.map((p) => (
+									<Chip
+										key={p.id}
+										label={`${p.lastName || ''} ${p.firstName || ''}`}
+										size='small'
+										onClick={() =>
+											setBuyer((prev) => ({
+												...prev,
+												lastName: p.lastName || '',
+												firstName: p.firstName || '',
+											}))
+										}
+									/>
+								))}
 						</Box>
 						<Grid container spacing={2}>
 							{Object.values(buyerFormFields).map((field) => (
@@ -180,7 +185,9 @@ const Passengers = () => {
 					<Card>
 						<CardContent>
 							<Typography variant='h4' sx={{ mb: 2 }}>
-								{`${UI_LABELS.BOOKING.buyer_form.summary.passenger_word(passengerData.length)}`}
+								{`${UI_LABELS.BOOKING.buyer_form.summary.passenger_word(
+									passengersReady ? passengerData.length : 0
+								)}`}
 							</Typography>
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 								<Typography>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>

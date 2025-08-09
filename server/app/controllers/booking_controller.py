@@ -64,11 +64,7 @@ def process_booking_passengers():
     return jsonify({'status': 'ok'}), 200
 
 
-def process_booking_payment():
-    return jsonify({'status': 'ok'}), 200
-
-
-def get_booking_passengers(public_id):
+def get_process_booking_passengers(public_id):
     booking = Booking.get_by_public_id(public_id)
     passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
     counts = booking.passenger_counts or {}
@@ -83,19 +79,11 @@ def get_booking_passengers(public_id):
     return jsonify(passengers), 200
 
 
-def save_booking_passenger(public_id):
-    booking = Booking.get_by_public_id(public_id)
-    data = request.json.get('passenger', {})
-    passenger_id = data.get('id')
-    if passenger_id:
-        passenger = Passenger.update(passenger_id, **data)
-    else:
-        passenger = Passenger.create(**data)
-        BookingPassenger.create(booking_id=booking.id, passenger_id=passenger.id, is_contact=data.get('is_contact', False))
-    return jsonify(passenger.to_dict()), 201
+def process_booking_payment():
+    return jsonify({'status': 'ok'}), 200
 
 
-def get_booking_details(public_id):
+def get_process_booking_details(public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
     passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
@@ -112,7 +100,7 @@ def get_booking_details(public_id):
     return jsonify(result), 200
 
 
-def get_booking_access(public_id):
+def get_process_booking_access(public_id):
     booking = Booking.get_by_public_id(public_id)
     return jsonify({'pages': booking.get_accessible_pages()}), 200
 
