@@ -5,6 +5,8 @@ from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
+from datetime import datetime, timezone
+
 from app.database import db
 from app.models._base_model import BaseModel
 from app.config import Config
@@ -89,7 +91,45 @@ class Booking(BaseModel):
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
         kwargs['booking_number'] = cls.__generate_booking_number(session)
+        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS)
+        history = kwargs.get('status_history', [])
+        if not history:
+            history = [{
+                'status': status.value if hasattr(status, 'value') else str(status),
+                'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            }]
+        kwargs['status_history'] = history
         return super().create(session, **kwargs)
+
+    ALLOWED_TRANSITIONS = {
+        'created': {'passengers_added', 'cancelled', 'expired'},
+        'passengers_added': {'payment_pending', 'cancelled', 'expired'},
+        'payment_pending': {'payment_confirmed', 'payment_failed', 'cancelled', 'expired'},
+        'payment_failed': {'payment_pending', 'cancelled', 'expired'},
+        'payment_confirmed': {'completed', 'cancelled'},
+        'completed': {'cancelled'},
+        'expired': set(),
+        'cancelled': set(),
+    }
+
+    TERMINAL = {'expired', 'cancelled'}
+
+    def transition_status(self, to_status: str, session: Session | None = None):
+        session = session or db.session
+        from_status = self.status.value
+        if to_status not in self.ALLOWED_TRANSITIONS.get(from_status, set()):
+            raise ValueError(f'illegal_transition:{from_status}->{to_status}')
+
+        self.status = Config.BOOKING_STATUS[to_status]
+        history = list(self.status_history or [])
+        history.append({
+            'status': to_status,
+            'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+        })
+        self.status_history = history
+        session.add(self)
+        session.commit()
+        return self
 
     # Rewrite using Config.BOOKING_STATUS
     # ALLOWED_TRANSITIONS = {

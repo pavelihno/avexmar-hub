@@ -32,6 +32,7 @@ import {
 } from '../utils';
 import { calculatePrice } from '../../redux/actions/price';
 import { fetchOutboundFlightTariffs, fetchReturnFlightTariffs } from '../../redux/actions/search';
+import { processBookingCreate } from '../../redux/actions/bookingProcess';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
@@ -120,7 +121,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	const { outboundFlightTariffs: outboundTariffs, isLoading: outboundLoading } = useSelector((state) => state.search);
 	const { returnFlightTariffs: returnTariffs, isLoading: returnLoading } = useSelector((state) => state.search);
 
-	const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
+        const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
+        const { isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 
 	useEffect(() => {
 		setPassengers({
@@ -173,20 +175,16 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 
 	const hasSeats = hasAvailableSeats(selectedTariff, seatsNumber);
 
-	const handleConfirm = () => {
-		const query = new URLSearchParams();
-		query.set('flight', outbound.id);
-		if (returnFlight) query.set('return', returnFlight.id);
-		if (tariffId) {
-			query.set('tariff', tariffId);
-			if (selectedTariff) query.set('class', selectedTariff.seat_class);
-		}
-		query.set('adults', passengers.adults);
-		query.set('children', passengers.children);
-		query.set('infants', passengers.infants);
-		query.set('infants_seat', passengers.infants_seat);
-		navigate(`/cart?${query.toString()}`);
-	};
+        const handleConfirm = async () => {
+                const payload = {
+                        outbound_id: outbound.id,
+                        tariff_id: tariffId,
+                        passengers,
+                };
+                if (returnFlight) payload.return_id = returnFlight.id;
+                const res = await dispatch(processBookingCreate(payload)).unwrap();
+                navigate(`/booking/${res.public_id}/passengers`);
+        };
 
 	const [conditions, setConditions] = useState('');
 	const [showConditions, setShowConditions] = useState(false);
@@ -404,12 +402,12 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 					<Button onClick={onClose}>{UI_LABELS.BUTTONS.close}</Button>
 					<Tooltip title={!hasSeats ? UI_LABELS.SEARCH.flight_details.seats_unavailable : ''}>
 						<span>
-							<Button
-								variant='contained'
-								color='orange'
-								onClick={handleConfirm}
-								disabled={!hasSeats || priceLoading}
-							>
+                                                        <Button
+                                                                variant='contained'
+                                                                color='orange'
+                                                                onClick={handleConfirm}
+                                                                disabled={!hasSeats || priceLoading || bookingLoading}
+                                                        >
 								{UI_LABELS.SEARCH.flight_details.book_ticket}
 							</Button>
 						</span>

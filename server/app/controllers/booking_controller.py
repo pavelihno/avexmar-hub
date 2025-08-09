@@ -2,6 +2,7 @@ from flask import request, jsonify
 
 from app.models.booking import Booking
 from app.middlewares.auth_middleware import admin_required
+from app.utils.business_logic import process_booking_create as process_booking_create_logic
 
 
 @admin_required
@@ -36,13 +37,16 @@ def delete_booking(current_user, booking_id):
     return jsonify(deleted)
 
 
-# def process_booking_create():
-#     pass
+def process_booking_create():
+    data = request.json or {}
+    booking = process_booking_create_logic(data)
+    return jsonify({'public_id': str(booking.public_id)}), 201
 
 
-# def process_booking_passengers():
-#     pass
+def process_booking_passengers():
+    return jsonify({'status': 'ok'}), 200
 
 
-# def process_booking_payment():
-#     pass
+def process_booking_payment():
+    return jsonify({'status': 'ok'}), 200
+
