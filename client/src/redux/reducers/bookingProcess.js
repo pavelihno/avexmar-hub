@@ -20,12 +20,14 @@ const bookingProcessSlice = createSlice({
 				state.current = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(processBookingPassengers.pending, handlePending)
-			.addCase(processBookingPassengers.rejected, handleRejected)
-			.addCase(processBookingPassengers.fulfilled, (state) => {
-				state.isLoading = false;
-			});
-	},
+                        .addCase(processBookingPassengers.pending, handlePending)
+                        .addCase(processBookingPassengers.rejected, handleRejected)
+                        .addCase(processBookingPassengers.fulfilled, (state, action) => {
+                                const { passengers, buyer } = action.meta.arg || {};
+                                state.current = { ...state.current, passengers, buyer };
+                                state.isLoading = false;
+                        });
+        },
 });
 
 export default bookingProcessSlice.reducer;
