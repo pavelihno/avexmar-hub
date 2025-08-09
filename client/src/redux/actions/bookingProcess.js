@@ -61,3 +61,39 @@ export const fetchBookingDetails = createAsyncThunk(
                 }
         }
 );
+
+export const fetchBookingAccess = createAsyncThunk(
+        'bookingProcess/fetchAccess',
+        async (publicId, { rejectWithValue }) => {
+                try {
+                        const res = await serverApi.get(`/bookings/${publicId}/access`);
+                        return res.data;
+                } catch (err) {
+                        return rejectWithValue(getErrorData(err));
+                }
+        }
+);
+
+export const fetchBookingDirectionsInfo = createAsyncThunk(
+        'bookingProcess/fetchDirectionsInfo',
+        async (directions, { rejectWithValue }) => {
+                try {
+                        const info = {};
+                        await Promise.all(
+                                directions.map(async (d) => {
+                                        const flight = (await serverApi.get(`/flights/${d.flight_id}`)).data;
+                                        const route = (await serverApi.get(`/routes/${flight.route_id}`)).data;
+                                        const origin = (await serverApi.get(`/airports/${route.origin_airport_id}`)).data;
+                                        const dest = (await serverApi.get(`/airports/${route.destination_airport_id}`)).data;
+                                        info[d.direction] = {
+                                                from: origin.city || origin.iata_code,
+                                                to: dest.city || dest.iata_code,
+                                        };
+                                })
+                        );
+                        return info;
+                } catch (err) {
+                        return rejectWithValue(getErrorData(err));
+                }
+        }
+);

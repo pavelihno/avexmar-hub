@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -15,46 +15,26 @@ import {
 } from '@mui/material';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, fetchBookingDirectionsInfo } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
-import { serverApi } from '../../api';
 
 const Confirmation = () => {
     const { publicId } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const booking = useSelector((state) => state.bookingProcess.current);
-    const [directionsInfo, setDirectionsInfo] = useState({});
+    const directionsInfo = useSelector((state) => state.bookingProcess.current?.directionsInfo || {});
 
     useEffect(() => {
         dispatch(fetchBookingDetails(publicId));
     }, [dispatch, publicId]);
 
     useEffect(() => {
-        const loadInfo = async () => {
-            if (!booking?.directions) return;
-            const info = {};
-            await Promise.all(
-                booking.directions.map(async (d) => {
-                    try {
-                        const flight = (await serverApi.get(`/flights/${d.flight_id}`)).data;
-                        const route = (await serverApi.get(`/routes/${flight.route_id}`)).data;
-                        const origin = (await serverApi.get(`/airports/${route.origin_airport_id}`)).data;
-                        const dest = (await serverApi.get(`/airports/${route.destination_airport_id}`)).data;
-                        info[d.direction] = {
-                            from: origin.city || origin.iata_code,
-                            to: dest.city || dest.iata_code,
-                        };
-                    } catch (e) {
-                        // ignore fetching errors
-                    }
-                })
-            );
-            setDirectionsInfo(info);
-        };
-        loadInfo();
-    }, [booking]);
+        if (booking?.directions) {
+            dispatch(fetchBookingDirectionsInfo(booking.directions));
+        }
+    }, [dispatch, booking]);
 
     const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 

@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { processBookingCreate, processBookingPassengers, fetchBookingPassengers, saveBookingPassenger, fetchBookingDetails } from '../actions/bookingProcess';
+import { processBookingCreate, processBookingPassengers, fetchBookingPassengers, saveBookingPassenger, fetchBookingDetails, fetchBookingAccess, fetchBookingDirectionsInfo } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
-	current: null,
-	isLoading: false,
-	errors: null,
+        current: null,
+        isLoading: false,
+        errors: null,
 };
 
 const bookingProcessSlice = createSlice({
@@ -37,6 +37,18 @@ const bookingProcessSlice = createSlice({
                         .addCase(fetchBookingDetails.rejected, handleRejected)
                         .addCase(fetchBookingDetails.fulfilled, (state, action) => {
                                 state.current = { ...state.current, ...action.payload };
+                                state.isLoading = false;
+                        })
+                        .addCase(fetchBookingAccess.pending, handlePending)
+                        .addCase(fetchBookingAccess.rejected, handleRejected)
+                        .addCase(fetchBookingAccess.fulfilled, (state, action) => {
+                                state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
+                                state.isLoading = false;
+                        })
+                        .addCase(fetchBookingDirectionsInfo.pending, handlePending)
+                        .addCase(fetchBookingDirectionsInfo.rejected, handleRejected)
+                        .addCase(fetchBookingDirectionsInfo.fulfilled, (state, action) => {
+                                state.current = { ...(state.current || {}), directionsInfo: action.payload };
                                 state.isLoading = false;
                         })
                         .addCase(saveBookingPassenger.pending, handlePending)

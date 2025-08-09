@@ -1,6 +1,7 @@
 import random
 import string
 import uuid
+from uuid import UUID as UUID_cls
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -75,6 +76,10 @@ class Booking(BaseModel):
         return super().get_all(sort_by=['booking_number'], descending=False)
 
     @classmethod
+    def get_by_public_id(cls, public_id):
+        return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
+
+    @classmethod
     def __generate_booking_number(cls, session: Session):
         """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
@@ -115,6 +120,18 @@ class Booking(BaseModel):
     }
 
     TERMINAL = {'expired', 'cancelled'}
+
+    PAGE_FLOW = {
+        'created': ['passengers'],
+        'passengers_added': ['passengers', 'confirmation', 'payment'],
+        'payment_pending': ['passengers', 'confirmation', 'payment'],
+        'payment_failed': ['passengers', 'confirmation', 'payment'],
+        'payment_confirmed': ['passengers', 'confirmation', 'payment', 'completion'],
+        'completed': ['passengers', 'confirmation', 'payment', 'completion'],
+    }
+
+    def get_accessible_pages(self):
+        return self.PAGE_FLOW.get(self.status.value, [])
 
     def transition_status(self, to_status: str, session: Session | None = None):
         session = session or db.session
