@@ -1,6 +1,7 @@
 import datetime
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
+from sqlalchemy import Index
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 class Passenger(BaseModel):
     __tablename__ = 'passengers'
 
+    owner_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
     patronymic_name = db.Column(db.String, nullable=True)
@@ -35,15 +37,23 @@ class Passenger(BaseModel):
     )
 
     __table_args__ = (
-        db.UniqueConstraint(
-            'first_name', 'last_name', 'birth_date', 'document_type', 'document_number',
-            name='uix_passenger_unique'
+        Index(
+            'ux_passenger_by_owner',
+            owner_user_id,
+            first_name,
+            last_name,
+            birth_date,
+            document_type,
+            document_number,
+            unique=True,
+            postgresql_where=owner_user_id.isnot(None)
         ),
     )
 
     def to_dict(self):
         return {
             'id': self.id,
+            'owner_user_id': self.owner_user_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'gender': self.gender.value,
@@ -87,8 +97,10 @@ class Passenger(BaseModel):
             'document_number',
         ]
 
-        if all(field in kwargs for field in unique_fields):
+        owner_id = kwargs.get('owner_user_id')
+        if owner_id is not None and all(field in kwargs for field in unique_fields):
             existing = session.query(cls).filter(
+                cls.owner_user_id == owner_id,
                 cls.first_name == kwargs['first_name'],
                 cls.last_name == kwargs['last_name'],
                 cls.birth_date == kwargs['birth_date'],

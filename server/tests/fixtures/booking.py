@@ -16,8 +16,10 @@ def economy_booking():
         first_name='Customer',
         last_name='Test',
         currency=Config.CURRENCY.rub,
-        base_price=15000.0,
-        final_price=15000.0
+        fare_price=15000.0,
+        total_price=15000.0,
+        total_discounts=0.0,
+        fees=0.0
     )
 
 
@@ -33,6 +35,8 @@ def business_booking():
         first_name='VIP',
         last_name='Customer',
         currency=Config.CURRENCY.rub,
-        base_price=45000.0,
-        final_price=45000.0
+        fare_price=45000.0,
+        total_price=45000.0,
+        total_discounts=0.0,
+        fees=0.0
     )

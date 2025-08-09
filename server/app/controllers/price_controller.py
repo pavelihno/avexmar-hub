@@ -31,6 +31,8 @@ def calculate_price():
     if is_round_trip:
         legs.append(('return', return_id))
 
+    fare_total_price = 0.0
+    total_discounts = 0.0
     total_price = 0.0
     tariff_info = {
         'id': tariff.id,
@@ -46,7 +48,7 @@ def calculate_price():
             if not count:
                 continue
 
-            base_total = tariff.price * count
+            fare_total = tariff.price * count
             multiplier = 1.0
             applied_discounts = []
 
@@ -69,20 +71,21 @@ def calculate_price():
                     if 'round_trip' in discount_names_map:
                         applied_discounts.append(discount_names_map['round_trip'])
 
-            final_price = base_total * multiplier
-            discount_amount = base_total - final_price
+            total_cost = fare_total * multiplier
+            discount_amount = fare_total - total_cost
             discount_label = ', '.join(applied_discounts) if applied_discounts else None
 
             leg_breakdown.append({
                 'category': category,
                 'count': count,
-                'base_price': base_total,
+                'fare_price': fare_total,
                 'discount': discount_amount,
-                'final_price': final_price,
+                'total_price': total_cost,
                 'discount_name': discount_label,
             })
-
-            total_price += final_price
+            fare_total_price += fare_total
+            total_discounts += discount_amount
+            total_price += total_cost
 
         directions.append({
             'direction': leg_key,
@@ -105,6 +108,8 @@ def calculate_price():
         'currency': tariff.currency.value,
         'directions': directions,
         'fees': fees,
-        'total': total_price,
+        'fare_price': fare_total_price,
+        'total_discounts': total_discounts,
+        'total_price': total_price,
     }
     return jsonify(response)
