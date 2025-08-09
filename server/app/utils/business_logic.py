@@ -143,6 +143,8 @@ def process_booking_create(data):
         'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }]
 
+    passenger_counts = {k: v for k, v in passengers.items() if v}
+
     booking = Booking.create(
         currency=Config.CURRENCY[price['currency']],
         fare_price=price['fare_price'],
@@ -150,6 +152,7 @@ def process_booking_create(data):
         total_discounts=price['total_discounts'],
         total_price=price['total_price'],
         status_history=history,
+        passenger_counts=passenger_counts,
     )
 
     db.session.refresh(booking)

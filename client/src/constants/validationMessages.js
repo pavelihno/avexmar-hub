@@ -78,13 +78,13 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-	PASSENGER: {
-		first_name: {
-			REQUIRED: 'Имя обязательно',
-		},
-		last_name: {
-			REQUIRED: 'Фамилия обязательна',
-		},
+        PASSENGER: {
+                first_name: {
+                        REQUIRED: 'Имя обязательно',
+                },
+                last_name: {
+                        REQUIRED: 'Фамилия обязательна',
+                },
 		birth_date: {
 			REQUIRED: 'Укажите дату рождения',
 			ADULT: 'Пассажир должен быть старше 12 лет',
@@ -94,10 +94,14 @@ export const VALIDATION_MESSAGES = {
 		document_type: {
 			REQUIRED: 'Тип документа обязателен',
 		},
-		document_number: {
-			REQUIRED: 'Номер документа обязателен',
-		},
-	},
+                document_number: {
+                        REQUIRED: 'Номер документа обязателен',
+                },
+                name_language: {
+                        CYRILLIC: 'Используйте кириллицу',
+                        LATIN: 'Используйте латиницу',
+                },
+        },
 
         BOOKING: {
                 email_address: {

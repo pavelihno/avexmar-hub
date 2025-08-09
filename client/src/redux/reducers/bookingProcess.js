@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { processBookingCreate, processBookingPassengers } from '../actions/bookingProcess';
+import { processBookingCreate, processBookingPassengers, fetchBookingPassengers, saveBookingPassenger } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
@@ -23,8 +23,26 @@ const bookingProcessSlice = createSlice({
                         .addCase(processBookingPassengers.pending, handlePending)
                         .addCase(processBookingPassengers.rejected, handleRejected)
                         .addCase(processBookingPassengers.fulfilled, (state, action) => {
-                                const { passengers, buyer } = action.meta.arg || {};
-                                state.current = { ...state.current, passengers, buyer };
+                                const { buyer } = action.meta.arg || {};
+                                state.current = { ...state.current, buyer };
+                                state.isLoading = false;
+                        })
+                        .addCase(fetchBookingPassengers.pending, handlePending)
+                        .addCase(fetchBookingPassengers.rejected, handleRejected)
+                        .addCase(fetchBookingPassengers.fulfilled, (state, action) => {
+                                state.current = { ...state.current, passengers: action.payload };
+                                state.isLoading = false;
+                        })
+                        .addCase(saveBookingPassenger.pending, handlePending)
+                        .addCase(saveBookingPassenger.rejected, handleRejected)
+                        .addCase(saveBookingPassenger.fulfilled, (state, action) => {
+                                const p = action.payload;
+                                if (state.current) {
+                                        const list = state.current.passengers || [];
+                                        const idx = list.findIndex((x) => x.id === p.id);
+                                        if (idx >= 0) list[idx] = p; else list.push(p);
+                                        state.current.passengers = list;
+                                }
                                 state.isLoading = false;
                         });
         },
