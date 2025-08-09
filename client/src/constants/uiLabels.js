@@ -255,7 +255,7 @@ export const UI_LABELS = {
 			passengers: 'Пассажиры',
 			confirmation: 'Подтверждение',
 			payment: 'Оплата',
-			completion: 'Завершение'
+			completion: 'Завершение',
 		},
 		step_placeholders: {
 			confirmation: 'Шаг подтверждения',

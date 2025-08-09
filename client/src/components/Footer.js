@@ -30,28 +30,13 @@ const Footer = () => {
 					spacing={3}
 				>
 					<Stack>
-						<Typography
-							variant='body2'
-							color='text.secondary'
-							align='center'
-						>
-							© {currentYear}, {companyName}.{' '}
-							{UI_LABELS.ABOUT.all_rights_reserved}
+						<Typography variant='body2' color='text.secondary' align='center'>
+							© {currentYear}, {companyName}. {UI_LABELS.ABOUT.all_rights_reserved}
 						</Typography>
 					</Stack>
 
-					<Stack
-						direction={{ xs: 'column', sm: 'row' }}
-						spacing={{ xs: 2, sm: 3 }}
-						alignItems='center'
-					>
-						<Link
-							component={RouterLink}
-							to='/about'
-							color='inherit'
-							underline='hover'
-							sx={{ px: 1 }}
-						>
+					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 3 }} alignItems='center'>
+						<Link component={RouterLink} to='/about' color='inherit' underline='hover' sx={{ px: 1 }}>
 							{UI_LABELS.ABOUT.about_us}
 						</Link>
 						<Link

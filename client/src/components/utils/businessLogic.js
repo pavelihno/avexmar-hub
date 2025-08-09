@@ -78,38 +78,38 @@ export const getExistingPassenger = (passengers, passengerData) => {
 };
 
 export const isDuplicateInBooking = (
-        allBookingPassengers,
-        passengers,
-        bookingId,
-        firstName,
-        lastName,
-        birthDate,
-        ignoreId = null
+	allBookingPassengers,
+	passengers,
+	bookingId,
+	firstName,
+	lastName,
+	birthDate,
+	ignoreId = null
 ) => {
 	const bookingPassengers = allBookingPassengers.filter((bp) => {
 		if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
 		return true;
 	});
 
-        return bookingPassengers.some((bp) => {
-                const passenger = passengers.find((pass) => pass.id === bp.passenger_id);
-                return (
-                        passenger &&
-                        passenger.first_name === firstName &&
-                        passenger.last_name === lastName &&
-                        passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
-                );
-        });
+	return bookingPassengers.some((bp) => {
+		const passenger = passengers.find((pass) => pass.id === bp.passenger_id);
+		return (
+			passenger &&
+			passenger.first_name === firstName &&
+			passenger.last_name === lastName &&
+			passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
+		);
+	});
 };
 
 export const isCyrillicDocument = (documentType) => {
-        return ['passport', 'birth_certificate'].includes(documentType);
+	return ['passport', 'birth_certificate'].includes(documentType);
 };
 
 export const getDocumentFieldConfig = (documentType) => {
-        const isForeign = ['international_passport', 'foreign_passport'].includes(documentType);
-        return {
-                showExpiryDate: isForeign,
-                showCitizenship: isForeign,
-        };
+	const isForeign = ['international_passport', 'foreign_passport'].includes(documentType);
+	return {
+		showExpiryDate: isForeign,
+		showCitizenship: isForeign,
+	};
 };

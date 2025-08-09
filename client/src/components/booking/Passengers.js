@@ -2,23 +2,27 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-        Box,
-        Grid,
-        Typography,
-        Card,
-        CardContent,
-        Checkbox,
-        FormControlLabel,
-        Button,
-        FormControl,
-        FormHelperText,
-        Divider,
-        Chip,
+	Box,
+	Grid,
+	Typography,
+	Card,
+	CardContent,
+	Checkbox,
+	FormControlLabel,
+	Button,
+	FormControl,
+	FormHelperText,
+	Divider,
+	Chip,
 } from '@mui/material';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
-import { processBookingPassengers, fetchBookingPassengers, saveBookingPassenger } from '../../redux/actions/bookingProcess';
+import {
+	processBookingPassengers,
+	fetchBookingPassengers,
+	saveBookingPassenger,
+} from '../../redux/actions/bookingProcess';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import { createFormFields, FIELD_TYPES, formatNumber } from '../utils';
 
@@ -26,17 +30,17 @@ const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-        const booking = useSelector((state) => state.bookingProcess.current);
+	const booking = useSelector((state) => state.bookingProcess.current);
 
-        const passengersFromStore = booking?.passengers || [{ id: 1, type: 'ADULT' }];
-        const [passengerData, setPassengerData] = useState(passengersFromStore);
-        useEffect(() => {
-                setPassengerData(passengersFromStore);
-        }, [passengersFromStore]);
+	const passengersFromStore = booking?.passengers || [{ id: 1, type: 'ADULT' }];
+	const [passengerData, setPassengerData] = useState(passengersFromStore);
+	useEffect(() => {
+		setPassengerData(passengersFromStore);
+	}, [passengersFromStore]);
 
-        useEffect(() => {
-                dispatch(fetchBookingPassengers(publicId));
-        }, [dispatch, publicId]);
+	useEffect(() => {
+		dispatch(fetchBookingPassengers(publicId));
+	}, [dispatch, publicId]);
 	const [buyer, setBuyer] = useState(
 		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
 	);
@@ -72,13 +76,13 @@ const Passengers = () => {
 
 	const [buyerErrors, setBuyerErrors] = useState({});
 
-        const handlePassengerChange = (id) => (field, value, data) => {
-                setPassengerData((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
-        };
+	const handlePassengerChange = (id) => (field, value, data) => {
+		setPassengerData((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+	};
 
-        const handlePassengerValid = (id) => (data) => {
-                dispatch(saveBookingPassenger({ public_id: publicId, passenger: data }));
-        };
+	const handlePassengerValid = (id) => (data) => {
+		dispatch(saveBookingPassenger({ public_id: publicId, passenger: data }));
+	};
 
 	const handleBuyerChange = (field, value) => {
 		setBuyer((prev) => ({ ...prev, [field]: value }));
@@ -100,9 +104,9 @@ const Passengers = () => {
 
 	const handleContinue = async () => {
 		if (!validateBuyer()) return;
-                await dispatch(processBookingPassengers({ public_id: publicId, buyer }));
-                navigate(`/booking/${publicId}/confirmation`);
-        };
+		await dispatch(processBookingPassengers({ public_id: publicId, buyer }));
+		navigate(`/booking/${publicId}/confirmation`);
+	};
 
 	const routeInfo = UI_LABELS.SCHEDULE.from_to(booking?.from, booking?.to);
 
@@ -123,47 +127,47 @@ const Passengers = () => {
 			<BookingProgress activeStep='passengers' />
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
-                                        {passengerData.map((p) => (
-                                                <PassengerForm
-                                                        key={p.id}
-                                                        passenger={p}
-                                                        onChange={handlePassengerChange(p.id)}
-                                                        onValid={handlePassengerValid(p.id)}
-                                                />
-                                        ))}
+					{passengerData.map((p) => (
+						<PassengerForm
+							key={p.id}
+							passenger={p}
+							onChange={handlePassengerChange(p.id)}
+							onValid={handlePassengerValid(p.id)}
+						/>
+					))}
 					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
-                                                <Typography variant='h6' sx={{ mb: 1 }}>
-                                                        {UI_LABELS.BOOKING.buyer_form.title}
-                                                </Typography>
-                                                <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                                        {passengerData.map((p) => (
-                                                                <Chip
-                                                                        key={p.id}
-                                                                        label={`${p.lastName || ''} ${p.firstName || ''}`}
-                                                                        size='small'
-                                                                        onClick={() =>
-                                                                                setBuyer((prev) => ({
-                                                                                        ...prev,
-                                                                                        lastName: p.lastName || '',
-                                                                                        firstName: p.firstName || '',
-                                                                                }))
-                                                                        }
-                                                                />
-                                                        ))}
-                                                </Box>
-                                                <Grid container spacing={2}>
-                                                        {Object.values(buyerFormFields).map((field) => (
-                                                                <Grid item xs={12} sm={6} key={field.name}>
-                                                                        {field.renderField({
-                                                                                value: buyer[field.name],
-                                                                                onChange: (value) => handleBuyerChange(field.name, value),
-                                                                                fullWidth: true,
-                                                                                size: 'small',
-                                                                                error: !!buyerErrors[field.name],
-                                                                                helperText: buyerErrors[field.name],
-                                                                        })}
-                                                                </Grid>
-                                                        ))}
+						<Typography variant='h6' sx={{ mb: 1 }}>
+							{UI_LABELS.BOOKING.buyer_form.title}
+						</Typography>
+						<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+							{passengerData.map((p) => (
+								<Chip
+									key={p.id}
+									label={`${p.lastName || ''} ${p.firstName || ''}`}
+									size='small'
+									onClick={() =>
+										setBuyer((prev) => ({
+											...prev,
+											lastName: p.lastName || '',
+											firstName: p.firstName || '',
+										}))
+									}
+								/>
+							))}
+						</Box>
+						<Grid container spacing={2}>
+							{Object.values(buyerFormFields).map((field) => (
+								<Grid item xs={12} sm={6} key={field.name}>
+									{field.renderField({
+										value: buyer[field.name],
+										onChange: (value) => handleBuyerChange(field.name, value),
+										fullWidth: true,
+										size: 'small',
+										error: !!buyerErrors[field.name],
+										helperText: buyerErrors[field.name],
+									})}
+								</Grid>
+							))}
 						</Grid>
 					</Box>
 				</Grid>

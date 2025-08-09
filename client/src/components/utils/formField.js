@@ -44,93 +44,93 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 		const allProps = { ...defaultProps, ...props };
 
 		switch (type) {
-                        case FIELD_TYPES.EMAIL: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                inputProps={{
-                                                        placeholder: DEFAULT_EMAIL,
-                                                        type: 'email',
-                                                        autoComplete: 'email',
-                                                        ...field.inputProps,
-                                                        ...inputProps,
-                                                }}
-                                                size={size}
-                                                sx={{ ...sx }}
-                                        />
-                                );
-                        }
+			case FIELD_TYPES.EMAIL: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{
+							placeholder: DEFAULT_EMAIL,
+							type: 'email',
+							autoComplete: 'email',
+							...field.inputProps,
+							...inputProps,
+						}}
+						size={size}
+						sx={{ ...sx }}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.PHONE: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                inputProps={{
-                                                        placeholder: DEFAULT_PHONE_NUMBER,
-                                                        type: 'tel',
-                                                        autoComplete: 'tel',
-                                                        ...field.inputProps,
-                                                        ...inputProps,
-                                                }}
-                                                size={size}
-                                                sx={{ ...sx }}
-                                        />
-                                );
-                        }
+			case FIELD_TYPES.PHONE: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{
+							placeholder: DEFAULT_PHONE_NUMBER,
+							type: 'tel',
+							autoComplete: 'tel',
+							...field.inputProps,
+							...inputProps,
+						}}
+						size={size}
+						sx={{ ...sx }}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.TEXT: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                inputProps={{ ...field.inputProps, ...inputProps }}
-                                                size={size}
-                                                sx={{ ...sx }}
-                                        />
-                                );
-                        }
+			case FIELD_TYPES.TEXT: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						size={size}
+						sx={{ ...sx }}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.TEXT_AREA: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                multiline
-                                                rows={field.rows || 5}
-                                                inputProps={{ ...field.inputProps, ...inputProps }}
-                                                size={size}
-                                                sx={{
-                                                        '& .MuiInputBase-root': { padding: '4px' },
-                                                        ...sx,
-                                                }}
-                                        />
-                                );
-                        }
+			case FIELD_TYPES.TEXT_AREA: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						multiline
+						rows={field.rows || 5}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						size={size}
+						sx={{
+							'& .MuiInputBase-root': { padding: '4px' },
+							...sx,
+						}}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.NUMBER: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+			case FIELD_TYPES.NUMBER: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
 
 				const step = field.inputProps?.step ?? (field.float ? 0.01 : 1);
 				const min = field.inputProps?.min ?? 0;
@@ -153,15 +153,15 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 								onChange(rounded);
 							}
 						}}
-                                                inputProps={{ min, step, ...field.inputProps, ...inputProps }}
-                                                size={size}
-                                                sx={{ ...sx }}
-                                        />
-                                );
-                        }
+						inputProps={{ min, step, ...field.inputProps, ...inputProps }}
+						size={size}
+						sx={{ ...sx }}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.DATE: {
-                                const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps, size } = allProps;
+			case FIELD_TYPES.DATE: {
+				const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps, size } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
@@ -175,18 +175,18 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-                                                                        sx,
-                                                                        size,
-                                                                        ...textFieldProps,
-                                                                },
-                                                        }}
-                                                />
-                                        </LocalizationProvider>
-                                );
-                        }
+									sx,
+									size,
+									...textFieldProps,
+								},
+							}}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                        case FIELD_TYPES.TIME: {
-                                const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
+			case FIELD_TYPES.TIME: {
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
 
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
@@ -202,18 +202,18 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-                                                                        sx,
-                                                                        size,
-                                                                        ...textFieldProps,
-                                                                },
-                                                        }}
-                                                />
-                                        </LocalizationProvider>
-                                );
-                        }
+									sx,
+									size,
+									...textFieldProps,
+								},
+							}}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                        case FIELD_TYPES.DATETIME: {
-                                const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
+			case FIELD_TYPES.DATETIME: {
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DateTimePicker
@@ -226,31 +226,31 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									fullWidth,
 									error,
 									helperText: error ? helperText : '',
-                                                                        sx,
-                                                                        size,
-                                                                        ...textFieldProps,
-                                                                },
-                                                        }}
-                                                />
-                                        </LocalizationProvider>
-                                );
-                        }
+									sx,
+									size,
+									...textFieldProps,
+								},
+							}}
+						/>
+					</LocalizationProvider>
+				);
+			}
 
-                        case FIELD_TYPES.SELECT: {
-                                const {
-                                        value = '',
-                                        onChange,
-                                        fullWidth,
-                                        error,
-                                        helperText,
-                                        options = field.options || [],
-                                        MenuProps,
-                                        MenuItemProps,
-                                        displayEmpty,
-                                        simpleSelect,
-                                        sx,
-                                        size,
-                                } = allProps;
+			case FIELD_TYPES.SELECT: {
+				const {
+					value = '',
+					onChange,
+					fullWidth,
+					error,
+					helperText,
+					options = field.options || [],
+					MenuProps,
+					MenuItemProps,
+					displayEmpty,
+					simpleSelect,
+					sx,
+					size,
+				} = allProps;
 
 				const resolvedValue = value !== undefined && value !== null ? value : field.defaultValue;
 				const isValidValue = options.some((o) => o.value === resolvedValue);
@@ -275,26 +275,26 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									label={field.label}
 									error={error}
 									helperText={error ? helperText : ''}
-                                                                        fullWidth={fullWidth}
-                                                                        size={size}
-                                                                        sx={{ ...sx }}
-                                                                />
-                                                        )}
-                                                />
-                                        );
-                                }
+									fullWidth={fullWidth}
+									size={size}
+									sx={{ ...sx }}
+								/>
+							)}
+						/>
+					);
+				}
 
 				if (simpleSelect) {
 					return (
-                                                <Select
-                                                        value={safeValue}
-                                                        onChange={(e) => onChange(e.target.value)}
-                                                        fullWidth={fullWidth}
-                                                        MenuProps={MenuProps}
-                                                        displayEmpty={displayEmpty}
-                                                        size={size}
-                                                        sx={{ ...sx }}
-                                                >
+						<Select
+							value={safeValue}
+							onChange={(e) => onChange(e.target.value)}
+							fullWidth={fullWidth}
+							MenuProps={MenuProps}
+							displayEmpty={displayEmpty}
+							size={size}
+							sx={{ ...sx }}
+						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
@@ -304,18 +304,18 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					);
 				}
 
-                                return (
-                                        <FormControl fullWidth={fullWidth} error={!!error} size={size}>
-                                                <InputLabel>{field.label}</InputLabel>
-                                                <Select
-                                                        value={safeValue}
-                                                        onChange={(e) => onChange(e.target.value)}
-                                                        label={field.label}
-                                                        MenuProps={MenuProps}
-                                                        displayEmpty={displayEmpty}
-                                                        size={size}
-                                                        sx={{ ...sx }}
-                                                >
+				return (
+					<FormControl fullWidth={fullWidth} error={!!error} size={size}>
+						<InputLabel>{field.label}</InputLabel>
+						<Select
+							value={safeValue}
+							onChange={(e) => onChange(e.target.value)}
+							label={field.label}
+							MenuProps={MenuProps}
+							displayEmpty={displayEmpty}
+							size={size}
+							sx={{ ...sx }}
+						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
@@ -344,19 +344,19 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				return (customProps) => field.renderField({ ...allProps, ...customProps });
 
 			default: {
-                                const { value = '', onChange, fullWidth, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, inputProps, sx, size } = allProps;
 				return (
 					<TextField
 						label={field.label}
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 						fullWidth={fullWidth}
-                                                inputProps={{ ...field.inputProps, ...inputProps }}
-                                                size={size}
-                                                sx={{ ...sx }}
-                                        />
-                                );
-                        }
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						size={size}
+						sx={{ ...sx }}
+					/>
+				);
+			}
 		}
 	};
 };

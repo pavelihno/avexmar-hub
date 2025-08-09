@@ -20,10 +20,38 @@ const PublicRoutes = () => [
 	{ path: '/search', element: <Search /> },
 	{ path: '/schedule', element: <Schedule /> },
 
-        { path: '/booking/:publicId/passengers', element: <BookingRoute page='passengers'><Passengers /></BookingRoute> },
-        { path: '/booking/:publicId/confirmation', element: <BookingRoute page='confirmation'><Confirmation /></BookingRoute> },
-        { path: '/booking/:publicId/payment', element: <BookingRoute page='payment'><Payment /></BookingRoute> },
-        { path: '/booking/:publicId/completion', element: <BookingRoute page='completion'><Completion /></BookingRoute> }
+	{
+		path: '/booking/:publicId/passengers',
+		element: (
+			<BookingRoute page='passengers'>
+				<Passengers />
+			</BookingRoute>
+		),
+	},
+	{
+		path: '/booking/:publicId/confirmation',
+		element: (
+			<BookingRoute page='confirmation'>
+				<Confirmation />
+			</BookingRoute>
+		),
+	},
+	{
+		path: '/booking/:publicId/payment',
+		element: (
+			<BookingRoute page='payment'>
+				<Payment />
+			</BookingRoute>
+		),
+	},
+	{
+		path: '/booking/:publicId/completion',
+		element: (
+			<BookingRoute page='completion'>
+				<Completion />
+			</BookingRoute>
+		),
+	},
 ];
 
 export default PublicRoutes;

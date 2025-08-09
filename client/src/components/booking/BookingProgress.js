@@ -17,10 +17,10 @@ const iconMap = {
 };
 
 const StepIcon = ({ icon, active, completed }) => {
-        const stepKey = stepKeys[icon - 1];
-        const Icon = iconMap[stepKey];
-        const color = completed || active ? 'primary.main' : 'text.disabled';
-        return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
+	const stepKey = stepKeys[icon - 1];
+	const Icon = iconMap[stepKey];
+	const color = completed || active ? 'primary.main' : 'text.disabled';
+	return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
 };
 
 const BookingProgress = ({ activeStep }) => {
@@ -36,40 +36,36 @@ const BookingProgress = ({ activeStep }) => {
 
 	const stepIndex = typeof activeStep === 'string' ? stepKeys.indexOf(activeStep) : activeStep;
 
-        const handleClick = (index) => {
-                if (index <= stepIndex) navigate(routes[index]);
-        };
+	const handleClick = (index) => {
+		if (index <= stepIndex) navigate(routes[index]);
+	};
 
 	return (
 		<Stepper activeStep={stepIndex} alternativeLabel sx={{ mt: 2, mb: 3 }}>
 			{stepKeys.map((key, index) => {
 				const isCompleted = index < stepIndex;
 				const isActive = index === stepIndex;
-                                return (
-                                        <Step
-                                                key={key}
-                                                completed={isCompleted}
-                                                onClick={() => handleClick(index)}
-                                                sx={{
-                                                        cursor: index <= stepIndex ? 'pointer' : 'default',
-                                                        pointerEvents: index <= stepIndex ? 'auto' : 'none',
-                                                        '& .MuiStepLabel-label': {
-                                                                color: isActive
-                                                                        ? 'primary.main'
-                                                                        : isCompleted
-                                                                                ? 'text.primary'
-                                                                                : 'text.disabled',
-                                                                fontWeight: isActive ? 600 : 400,
-                                                        },
-                                                        '& .MuiStepLabel-labelContainer': { gap: 0.1 },
-                                                }}
-                                        >
-                                                <StepLabel StepIconComponent={StepIcon}>{UI_LABELS.BOOKING.progress_steps[key]}</StepLabel>
-                                        </Step>
-                                );
-                        })}
-                </Stepper>
-        );
+				return (
+					<Step
+						key={key}
+						completed={isCompleted}
+						onClick={() => handleClick(index)}
+						sx={{
+							cursor: index <= stepIndex ? 'pointer' : 'default',
+							pointerEvents: index <= stepIndex ? 'auto' : 'none',
+							'& .MuiStepLabel-label': {
+								color: isActive ? 'primary.main' : isCompleted ? 'text.primary' : 'text.disabled',
+								fontWeight: isActive ? 600 : 400,
+							},
+							'& .MuiStepLabel-labelContainer': { gap: 0.1 },
+						}}
+					>
+						<StepLabel StepIconComponent={StepIcon}>{UI_LABELS.BOOKING.progress_steps[key]}</StepLabel>
+					</Step>
+				);
+			})}
+		</Stepper>
+	);
 };
 
 export default BookingProgress;
