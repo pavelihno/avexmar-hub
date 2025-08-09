@@ -1,41 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button } from '@mui/material';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, fetchBookingDirectionsInfo } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
-import { serverApi } from '../../api';
 
 const Payment = () => {
     const { publicId } = useParams();
     const dispatch = useDispatch();
     const booking = useSelector((state) => state.bookingProcess.current);
-    const [routeInfo, setRouteInfo] = useState(null);
+    const directionsInfo = useSelector((state) => state.bookingProcess.current?.directionsInfo || {});
 
     useEffect(() => {
         dispatch(fetchBookingDetails(publicId));
     }, [dispatch, publicId]);
 
     useEffect(() => {
-        const loadRoute = async () => {
-            if (!booking?.directions || booking.directions.length === 0) return;
-            const d = booking.directions[0];
-            try {
-                const flight = (await serverApi.get(`/flights/${d.flight_id}`)).data;
-                const route = (await serverApi.get(`/routes/${flight.route_id}`)).data;
-                const origin = (await serverApi.get(`/airports/${route.origin_airport_id}`)).data;
-                const dest = (await serverApi.get(`/airports/${route.destination_airport_id}`)).data;
-                setRouteInfo(UI_LABELS.SCHEDULE.from_to(origin.city || origin.iata_code, dest.city || dest.iata_code));
-            } catch (e) {
-                setRouteInfo(null);
-            }
-        };
-        loadRoute();
-    }, [booking]);
+        if (booking?.directions) {
+            dispatch(fetchBookingDirectionsInfo(booking.directions));
+        }
+    }, [dispatch, booking]);
 
+    const firstDir = booking?.directions ? booking.directions[0]?.direction : null;
+    const info = firstDir ? directionsInfo[firstDir] : null;
+    const routeInfo = info ? UI_LABELS.SCHEDULE.from_to(info.from, info.to) : null;
     const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
     return (

@@ -1,6 +1,4 @@
 from flask import request, jsonify
-from uuid import UUID
-
 from app.database import db
 from app.models.booking import Booking
 from app.models.passenger import Passenger
@@ -55,7 +53,7 @@ def process_booking_passengers():
     buyer = data.get('buyer', {})
     if not public_id:
         return jsonify({'message': 'public_id_required'}), 400
-    booking = Booking.query.filter_by(public_id=UUID(public_id)).first_or_404()
+    booking = Booking.get_by_public_id(public_id)
     booking.email_address = buyer.get('email')
     booking.phone_number = buyer.get('phone')
     try:
@@ -71,7 +69,7 @@ def process_booking_payment():
 
 
 def get_booking_passengers(public_id):
-    booking = Booking.query.filter_by(public_id=UUID(public_id)).first_or_404()
+    booking = Booking.get_by_public_id(public_id)
     passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
     counts = booking.passenger_counts or {}
     categories = []
@@ -86,7 +84,7 @@ def get_booking_passengers(public_id):
 
 
 def save_booking_passenger(public_id):
-    booking = Booking.query.filter_by(public_id=UUID(public_id)).first_or_404()
+    booking = Booking.get_by_public_id(public_id)
     data = request.json.get('passenger', {})
     passenger_id = data.get('id')
     if passenger_id:
@@ -98,7 +96,7 @@ def save_booking_passenger(public_id):
 
 
 def get_booking_details(public_id):
-    booking = Booking.query.filter_by(public_id=UUID(public_id)).first_or_404()
+    booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
     passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
     counts = booking.passenger_counts or {}
@@ -112,4 +110,9 @@ def get_booking_details(public_id):
             passengers.append({'category': category})
     result['passengers'] = passengers
     return jsonify(result), 200
+
+
+def get_booking_access(public_id):
+    booking = Booking.get_by_public_id(public_id)
+    return jsonify({'pages': booking.get_accessible_pages()}), 200
 

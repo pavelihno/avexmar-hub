@@ -9,6 +9,7 @@ import Passengers from '../components/booking/Passengers';
 import Confirmation from '../components/booking/Confirmation';
 import Payment from '../components/booking/Payment';
 import Completion from '../components/booking/Completion';
+import BookingRoute from './BookingRoute';
 
 const PublicRoutes = () => [
 	{ path: '/', element: <Home /> },
@@ -19,10 +20,10 @@ const PublicRoutes = () => [
 	{ path: '/search', element: <Search /> },
 	{ path: '/schedule', element: <Schedule /> },
 
-	{ path: '/booking/:publicId/passengers', element: <Passengers /> },
-        { path: '/booking/:publicId/confirmation', element: <Confirmation /> },
-        { path: '/booking/:publicId/payment', element: <Payment /> },
-        { path: '/booking/:publicId/completion', element: <Completion /> }
+        { path: '/booking/:publicId/passengers', element: <BookingRoute page='passengers'><Passengers /></BookingRoute> },
+        { path: '/booking/:publicId/confirmation', element: <BookingRoute page='confirmation'><Confirmation /></BookingRoute> },
+        { path: '/booking/:publicId/payment', element: <BookingRoute page='payment'><Payment /></BookingRoute> },
+        { path: '/booking/:publicId/completion', element: <BookingRoute page='completion'><Completion /></BookingRoute> }
 ];
 
 export default PublicRoutes;
