@@ -23,7 +23,7 @@ class PasswordResetToken(BaseModel):
     @classmethod
     def create_token(cls, user, expires_in_hours=1):
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
+        expires_at = datetime.now() + timedelta(hours=expires_in_hours)
         instance = cls(token=token, user_id=user.id, expires_at=expires_at, used=False)
         db.session.add(instance)
         db.session.commit()
@@ -38,7 +38,7 @@ class PasswordResetToken(BaseModel):
         if not instance:
             return None
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
         expires_at = instance.expires_at
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)

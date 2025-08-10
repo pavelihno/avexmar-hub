@@ -114,7 +114,7 @@ class Booking(BaseModel):
         if not history:
             history = [{
                 'status': status.value if hasattr(status, 'value') else str(status),
-                'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+                'at': datetime.now()
             }]
         kwargs['status_history'] = history
         return super().create(session, **kwargs)
@@ -154,7 +154,7 @@ class Booking(BaseModel):
         history = list(self.status_history or [])
         history.append({
             'status': to_status,
-            'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            'at': datetime.now()
         })
         self.status_history = history
         session.add(self)
