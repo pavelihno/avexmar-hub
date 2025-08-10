@@ -9,7 +9,7 @@ export const calculatePrice = createAsyncThunk('price/calculate', async (params,
 		return { key, data: cache[key] };
 	}
 	try {
-		const res = await serverApi.post('/price/calculate', params);
+		const res = await serverApi.post('/search/calculate/price', params);
 		return { key, data: res.data };
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));

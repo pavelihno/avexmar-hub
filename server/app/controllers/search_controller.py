@@ -9,7 +9,7 @@ from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.models.airport import Airport
 from app.models.flight import Flight
-from app.utils.business_logic import get_seats_number
+from app.utils.business_logic import get_seats_number, calculate_price_details
 
 
 def search_airports():
@@ -225,3 +225,14 @@ def schedule_flights():
     )
 
     return jsonify(flights)
+
+
+def calculate_price():
+    data = request.json or {}
+    outbound_id = data.get('outbound_id')
+    return_id = data.get('return_id')
+    tariff_id = data.get('tariff_id')
+    passengers = data.get('passengers', {})
+
+    result = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+    return jsonify(result)

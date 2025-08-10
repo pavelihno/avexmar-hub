@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
 	processBookingCreate,
 	processBookingPassengers,
-	fetchBookingPassengers,
 	fetchBookingDetails,
 	fetchBookingAccess,
 	fetchBookingDirectionsInfo,
@@ -32,17 +31,6 @@ const bookingProcessSlice = createSlice({
 			.addCase(processBookingPassengers.fulfilled, (state, action) => {
 				const { buyer } = action.meta.arg || {};
 				state.current = { ...state.current, buyer };
-				state.isLoading = false;
-			})
-			.addCase(fetchBookingPassengers.pending, handlePending)
-			.addCase(fetchBookingPassengers.rejected, handleRejected)
-			.addCase(fetchBookingPassengers.fulfilled, (state, action) => {
-				const { passengers, passengers_exist } = action.payload;
-				state.current = {
-					...state.current,
-					passengers,
-					passengersExist: passengers_exist,
-				};
 				state.isLoading = false;
 			})
 			.addCase(fetchBookingDetails.pending, handlePending)

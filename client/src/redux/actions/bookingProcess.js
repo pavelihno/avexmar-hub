@@ -23,18 +23,6 @@ export const processBookingPassengers = createAsyncThunk(
 	}
 );
 
-export const fetchBookingPassengers = createAsyncThunk(
-	'bookingProcess/fetchPassengers',
-	async (publicId, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get(`/bookings/process/${publicId}/passengers`);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(getErrorData(err));
-		}
-	}
-);
-
 export const fetchBookingDetails = createAsyncThunk(
 	'bookingProcess/fetchDetails',
 	async (publicId, { rejectWithValue }) => {

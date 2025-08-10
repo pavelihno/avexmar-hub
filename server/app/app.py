@@ -29,7 +29,6 @@ from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
 from app.controllers.search_controller import *
 from app.controllers.timezone_controller import *
-from app.controllers.price_controller import *
 from app.controllers.fee_controller import *
 
 
@@ -155,6 +154,13 @@ def __create_app(_config_class, _db):
     app.route('/discounts/<int:discount_id>', methods=['PUT'])(update_discount)
     app.route('/discounts/<int:discount_id>', methods=['DELETE'])(delete_discount)
 
+    # fees
+    app.route('/fees', methods=['GET'])(get_fees)
+    app.route('/fees', methods=['POST'])(create_fee)
+    app.route('/fees/<int:fee_id>', methods=['GET'])(get_fee)
+    app.route('/fees/<int:fee_id>', methods=['PUT'])(update_fee)
+    app.route('/fees/<int:fee_id>', methods=['DELETE'])(delete_fee)
+
     # seats
     app.route('/seats', methods=['GET'])(get_seats)
     app.route('/seats', methods=['POST'])(create_seat)
@@ -175,13 +181,6 @@ def __create_app(_config_class, _db):
     app.route('/bookings/<int:booking_id>', methods=['GET'])(get_booking)
     app.route('/bookings/<int:booking_id>', methods=['PUT'])(update_booking)
     app.route('/bookings/<int:booking_id>', methods=['DELETE'])(delete_booking)
-
-    app.route('/bookings/process/<public_id>/access', methods=['GET'])(get_process_booking_access)
-    app.route('/bookings/process/create', methods=['POST'])(process_booking_create)
-    app.route('/bookings/process/<public_id>/passengers', methods=['GET'])(get_process_booking_passengers)
-    app.route('/bookings/process/passengers', methods=['POST'])(process_booking_passengers)
-    app.route('/bookings/process/payment', methods=['POST'])(process_booking_payment)
-    app.route('/bookings/process/<public_id>/details', methods=['GET'])(get_process_booking_details)
 
     # booking passengers
     app.route('/booking_passengers', methods=['GET'])(get_booking_passengers)
@@ -210,16 +209,14 @@ def __create_app(_config_class, _db):
     app.route('/search/flights/nearby', methods=['GET'])(search_nearby_flights)
     app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
     app.route('/search/flights/<int:flight_id>/tariffs', methods=['GET'])(search_flight_tariffs)
+    app.route('/search/calculate/price', methods=['POST'])(calculate_price)
 
-    # price
-    app.route('/price/calculate', methods=['POST'])(calculate_price)
-
-    # fees
-    app.route('/fees', methods=['GET'])(get_fees)
-    app.route('/fees', methods=['POST'])(create_fee)
-    app.route('/fees/<int:fee_id>', methods=['GET'])(get_fee)
-    app.route('/fees/<int:fee_id>', methods=['PUT'])(update_fee)
-    app.route('/fees/<int:fee_id>', methods=['DELETE'])(delete_fee)
+    # booking process
+    app.route('/bookings/process/<public_id>/access', methods=['GET'])(get_process_booking_access)
+    app.route('/bookings/process/create', methods=['POST'])(process_booking_create)
+    app.route('/bookings/process/passengers', methods=['POST'])(process_booking_passengers)
+    app.route('/bookings/process/payment', methods=['POST'])(process_booking_payment)
+    app.route('/bookings/process/<public_id>/details', methods=['GET'])(get_process_booking_details)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
