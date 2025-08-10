@@ -5,6 +5,7 @@ from app.models.passenger import Passenger
 from app.models.booking_passenger import BookingPassenger
 from app.middlewares.auth_middleware import admin_required
 from app.utils.business_logic import process_booking_create as process_booking_create_logic
+from app.config import Config
 
 
 @admin_required
@@ -60,23 +61,56 @@ def process_booking_passengers():
         booking.transition_status('passengers_added')
     except ValueError:
         pass
+    flight_dates = [t.flight.scheduled_departure for t in booking.tickets if t.flight]
+    check_date = min(flight_dates) if flight_dates else None
+    errors = []
+    if check_date:
+        for bp in booking.booking_passengers:
+            category = bp.category.value if bp.category else None
+            passenger = bp.passenger
+            if category == Config.PASSENGER_CATEGORY.child.value and not passenger.is_child(check_date):
+                errors.append(
+                    f"Passenger {passenger.last_name} {passenger.first_name} is not a child on flight date"
+                )
+            if category in {
+                Config.PASSENGER_CATEGORY.infant.value,
+                Config.PASSENGER_CATEGORY.infant_seat.value,
+            } and not passenger.is_infant(check_date):
+                errors.append(
+                    f"Passenger {passenger.last_name} {passenger.first_name} is not an infant on flight date"
+                )
+    if errors:
+        db.session.rollback()
+        return jsonify({'errors': errors}), 400
     db.session.commit()
     return jsonify({'status': 'ok'}), 200
 
 
 def get_process_booking_passengers(public_id):
     booking = Booking.get_by_public_id(public_id)
-    passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
-    counts = booking.passenger_counts or {}
-    categories = []
-    for key, count in counts.items():
-        categories.extend([key] * count)
-    for idx, category in enumerate(categories):
-        if idx < len(passengers):
-            passengers[idx]['category'] = category
-        else:
-            passengers.append({'category': category})
-    return jsonify(passengers), 200
+    passengers = []
+    for bp in booking.booking_passengers:
+        p = bp.passenger.to_dict()
+        p['category'] = bp.category.value if bp.category else None
+        passengers.append(p)
+    has_models = len(passengers) > 0
+    if not passengers:
+        counts = booking.passenger_counts or {}
+        key_map = {
+            'adults': Config.PASSENGER_CATEGORY.adult.value,
+            'children': Config.PASSENGER_CATEGORY.child.value,
+            'infants': Config.PASSENGER_CATEGORY.infant.value,
+            'infants_seat': Config.PASSENGER_CATEGORY.infant_seat.value,
+        }
+        for key, count in counts.items():
+            try:
+                count = int(count)
+            except (TypeError, ValueError):
+                continue
+            category = key_map.get(key, key)
+            for _ in range(count):
+                passengers.append({'category': category})
+    return jsonify({'passengers': passengers, 'passengers_from_model': has_models}), 200
 
 
 def process_booking_payment():
@@ -86,17 +120,30 @@ def process_booking_payment():
 def get_process_booking_details(public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
-    passengers = [bp.passenger.to_dict() for bp in booking.booking_passengers]
-    counts = booking.passenger_counts or {}
-    categories = []
-    for key, count in counts.items():
-        categories.extend([key] * count)
-    for idx, category in enumerate(categories):
-        if idx < len(passengers):
-            passengers[idx]['category'] = category
-        else:
-            passengers.append({'category': category})
+    passengers = []
+    for bp in booking.booking_passengers:
+        p = bp.passenger.to_dict()
+        p['category'] = bp.category.value if bp.category else None
+        passengers.append(p)
+    has_models = len(passengers) > 0
+    if not passengers:
+        counts = booking.passenger_counts or {}
+        key_map = {
+            'adults': Config.PASSENGER_CATEGORY.adult.value,
+            'children': Config.PASSENGER_CATEGORY.child.value,
+            'infants': Config.PASSENGER_CATEGORY.infant.value,
+            'infants_seat': Config.PASSENGER_CATEGORY.infant_seat.value,
+        }
+        for key, count in counts.items():
+            try:
+                count = int(count)
+            except (TypeError, ValueError):
+                continue
+            category = key_map.get(key, key)
+            for _ in range(count):
+                passengers.append({'category': category})
     result['passengers'] = passengers
+    result['passengers_from_model'] = has_models
     return jsonify(result), 200
 
 

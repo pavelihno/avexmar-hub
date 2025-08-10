@@ -61,6 +61,12 @@ class Config:
         international_passport = 'international_passport'
         birth_certificate = 'birth_certificate'
 
+    class PASSENGER_CATEGORY(enum.Enum):
+        adult = 'adult'
+        child = 'child'
+        infant = 'infant'
+        infant_seat = 'infant_seat'
+
     class CURRENCY(enum.Enum):
         rub = 'rub'
 
@@ -83,6 +89,7 @@ class Config:
     DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
     DEFAULT_CURRENCY = CURRENCY.rub
     DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
+    DEFAULT_PASSENGER_CATEGORY = PASSENGER_CATEGORY.adult
 
     # Other variables
     PNR_MASK = 'ABXXXX'
