@@ -47,16 +47,16 @@ const bookingProcessSlice = createSlice({
 			})
 			.addCase(fetchBookingDetails.pending, handlePending)
 			.addCase(fetchBookingDetails.rejected, handleRejected)
-                        .addCase(fetchBookingDetails.fulfilled, (state, action) => {
-                                const { passengers_exist, passengers, ...rest } = action.payload;
-                                state.current = {
-                                        ...state.current,
-                                        ...rest,
-                                        passengers,
-                                        passengersExist: passengers_exist,
-                                };
-                                state.isLoading = false;
-                        })
+			.addCase(fetchBookingDetails.fulfilled, (state, action) => {
+				const { passengers_exist, passengers, ...rest } = action.payload;
+				state.current = {
+					...state.current,
+					...rest,
+					passengers,
+					passengersExist: passengers_exist,
+				};
+				state.isLoading = false;
+			})
 			.addCase(fetchBookingAccess.pending, handlePending)
 			.addCase(fetchBookingAccess.rejected, handleRejected)
 			.addCase(fetchBookingAccess.fulfilled, (state, action) => {

@@ -7,10 +7,10 @@ import DescriptionIcon from '@mui/icons-material/Description';
 
 import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
-        createFormFields,
-        FIELD_TYPES,
-        isCyrillicText,
-        isLatinText,
+	createFormFields,
+	FIELD_TYPES,
+	isCyrillicText,
+	isLatinText,
 	isCyrillicDocument,
 	getDocumentFieldConfig,
 	getAgeError,
@@ -21,11 +21,7 @@ const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
-const PassengerForm = (
-        { passenger, onChange, onRemove, onSelectDocument, citizenshipOptions = [] },
-        ref
-) => {
-
+const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, citizenshipOptions = [] }, ref) => {
 	const [data, setData] = useState({
 		id: passenger?.id || '',
 		type: passenger?.type || 'adult',
@@ -40,8 +36,8 @@ const PassengerForm = (
 		citizenshipId: passenger?.citizenshipId || '',
 	});
 
-        const [errors, setErrors] = useState({});
-        const [showErrors, setShowErrors] = useState(false);
+	const [errors, setErrors] = useState({});
+	const [showErrors, setShowErrors] = useState(false);
 
 	useEffect(() => {
 		setData((prev) => ({ ...prev, ...passenger }));
@@ -138,27 +134,27 @@ const PassengerForm = (
 	const handleFieldChange = (field, value) => {
 		const next = { ...data, [field]: value };
 		setData(next);
-                if (onChange) onChange(field, value, next);
-                if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
-        };
+		if (onChange) onChange(field, value, next);
+		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
+	};
 
-        const validate = useCallback(
-                (d = data) => {
-                        const errs = {};
+	const validate = useCallback(
+		(d = data) => {
+			const errs = {};
 			Object.values(formFields).forEach((f) => {
 				if (f.validate) {
 					const err = f.validate(d[f.name]);
 					if (err) errs[f.name] = err;
 				}
 			});
-                        setErrors(errs);
-                        setShowErrors(true);
-                        return Object.keys(errs).length === 0;
-                },
-                [formFields, data]
-        );
+			setErrors(errs);
+			setShowErrors(true);
+			return Object.keys(errs).length === 0;
+		},
+		[formFields, data]
+	);
 
-        useImperativeHandle(ref, () => ({ validate }));
+	useImperativeHandle(ref, () => ({ validate }));
 
 	useEffect(() => {
 		if (formFields.citizenshipId && !data.citizenshipId && citizenshipOptions.length) {
@@ -168,23 +164,23 @@ const PassengerForm = (
 
 	const theme = useTheme();
 
-        const nameFields = ['lastName', 'firstName'];
-        const docConfig = getDocumentFieldConfig(data.documentType);
-        const docFieldNames = ['documentType', 'documentNumber'];
-        if (docConfig.showExpiryDate) docFieldNames.push('documentExpiryDate');
-        if (docConfig.showCitizenship) docFieldNames.push('citizenshipId');
-        const docGridSize = 12 / docFieldNames.length;
+	const docConfig = getDocumentFieldConfig(data.documentType);
 
-        return (
-                <Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
-			<Box
-				sx={{
-					display: 'flex',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					mb: 2,
-				}}
-			>
+	const nameFields = [
+		'lastName',
+		'firstName',
+		formFields.patronymicName && 'patronymicName',
+		'gender',
+		'birthDate',
+		'documentType',
+		'documentNumber',
+		docConfig.showExpiryDate && 'documentExpiryDate',
+		docConfig.showCitizenship && 'citizenshipId',
+	].filter(Boolean);
+
+	return (
+		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
+			<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
 				<Typography variant='h6'>{typeLabels[data.type]}</Typography>
 				<Box>
 					{onSelectDocument && (
@@ -199,70 +195,23 @@ const PassengerForm = (
 					)}
 				</Box>
 			</Box>
-                        <Grid container spacing={2}>
-                                {nameFields.map((fieldName) => (
-                                        <Grid item xs={12} sm={6} key={fieldName}>
-                                                {formFields[fieldName].renderField({
-                                                        value: data[fieldName],
-                                                        onChange: (value) => handleFieldChange(fieldName, value),
-                                                        fullWidth: true,
-                                                        size: 'small',
-                                                        error: showErrors && !!errors[fieldName],
-                                                        helperText: showErrors ? errors[fieldName] : '',
-                                                })}
-                                        </Grid>
-                                ))}
-                                {formFields.patronymicName && (
-                                        <Grid item xs={12} sm={6}>
-                                                {formFields.patronymicName.renderField({
-                                                        value: data.patronymicName,
-                                                        onChange: (value) => handleFieldChange('patronymicName', value),
-                                                        fullWidth: true,
-                                                        size: 'small',
-                                                        error: showErrors && !!errors.patronymicName,
-                                                        helperText: showErrors ? errors.patronymicName : '',
-                                                })}
-                                        </Grid>
-                                )}
-                                {['gender', 'birthDate'].map((fieldName) => (
-                                        <Grid item xs={12} sm={6} key={fieldName}>
-                                                {formFields[fieldName].renderField({
-                                                        value: data[fieldName],
-                                                        onChange: (value) =>
-                                                                handleFieldChange(
-                                                                        fieldName,
-                                                                        fieldName === 'birthDate' && value
-                                                                                ? value.toISOString().slice(0, 10)
-                                                                                : value
-                                                                ),
-                                                        fullWidth: true,
-                                                        size: 'small',
-                                                        error: showErrors && !!errors[fieldName],
-                                                        helperText: showErrors ? errors[fieldName] : '',
-                                                })}
-                                        </Grid>
-                                ))}
-                                {docFieldNames.map((fieldName) => (
-                                        <Grid item xs={12} sm={docGridSize} key={fieldName}>
-                                                {formFields[fieldName].renderField({
-                                                        value: data[fieldName],
-                                                        onChange: (value) =>
-                                                                handleFieldChange(
-                                                                        fieldName,
-                                                                        fieldName === 'documentExpiryDate' && value
-                                                                                ? value.toISOString().slice(0, 10)
-                                                                                : value
-                                                                ),
-                                                        fullWidth: true,
-                                                        size: 'small',
-                                                        error: showErrors && !!errors[fieldName],
-                                                        helperText: showErrors ? errors[fieldName] : '',
-                                                })}
-                                        </Grid>
-                                ))}
-                        </Grid>
-                </Box>
-        );
+
+			<Grid container spacing={2}>
+				{nameFields.map((fieldName) => (
+					<Grid item xs={12} sm={6} key={fieldName}>
+						{formFields[fieldName].renderField({
+							value: data[fieldName],
+							onChange: (value) => handleFieldChange(fieldName, value),
+							fullWidth: true,
+							size: 'small',
+							error: showErrors && !!errors[fieldName],
+							helperText: showErrors ? errors[fieldName] : '',
+						})}
+					</Grid>
+				))}
+			</Grid>
+		</Box>
+	);
 };
 
 export default forwardRef(PassengerForm);

@@ -63,17 +63,17 @@ export const disabledPassengerChange = (passengers, key, delta) => {
 		}
 	}
 
-        return false;
+	return false;
 };
 
-export const getAgeError = (type, birthDate) => {
-        if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-        const age = differenceInYears(new Date(), new Date(birthDate));
-        if (type === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.adult;
-        if (type === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.child;
-        if (['infant', 'infant_seat'].includes(type) && age >= 2)
-                return VALIDATION_MESSAGES.PASSENGER.birth_date.infant;
-        return '';
+export const getAgeError = (passengerCategory, birthDate) => {
+	if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
+	const age = differenceInYears(new Date(), new Date(birthDate));
+	if (passengerCategory === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.adult;
+	if (passengerCategory === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.child;
+	if (['infant', 'infant_seat'].includes(passengerCategory) && age >= 2)
+		return VALIDATION_MESSAGES.PASSENGER.birth_date.infant;
+	return '';
 };
 
 export const getExistingPassenger = (passengers, passengerData) => {
@@ -117,9 +117,12 @@ export const isCyrillicDocument = (documentType) => {
 };
 
 export const getDocumentFieldConfig = (documentType) => {
-	const isForeign = ['international_passport', 'foreign_passport'].includes(documentType);
-	return {
-		showExpiryDate: isForeign,
-		showCitizenship: isForeign,
-	};
+	switch (documentType) {
+		case 'foreign_passport':
+			return { showExpiryDate: true, showCitizenship: true };
+		case 'international_passport':
+			return { showExpiryDate: true };
+		default:
+			return {};
+	}
 };

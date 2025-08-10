@@ -27,8 +27,8 @@ const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-        const { current: booking, isLoading: bookingLoading, errors } = useSelector((state) => state.bookingProcess);
-        const { countries } = useSelector((state) => state.countries);
+	const { current: booking, isLoading: bookingLoading, errors } = useSelector((state) => state.bookingProcess);
+	const { countries } = useSelector((state) => state.countries);
 
 	const existingPassengerData = booking?.passengers;
 	const fromModel = booking?.passengersExist;
@@ -38,26 +38,26 @@ const Passengers = () => {
 		if (Array.isArray(existingPassengerData)) {
 			const mapped = existingPassengerData.map((p) => ({
 				...p,
-				type: p.category || p.type || 'adult',
+				category: p.category,
 			}));
 			setPassengerData(mapped);
 		}
 	}, [existingPassengerData, fromModel]);
 
-        useEffect(() => {
-                dispatch(fetchBookingDetails(publicId));
-        }, [dispatch, publicId]);
+	useEffect(() => {
+		dispatch(fetchBookingDetails(publicId));
+	}, [dispatch, publicId]);
 
-        useEffect(() => {
-                if (!countries || countries.length === 0) {
-                        dispatch(fetchCountries());
-                }
-        }, [countries, dispatch]);
+	useEffect(() => {
+		if (!countries || countries.length === 0) {
+			dispatch(fetchCountries());
+		}
+	}, [countries, dispatch]);
 
-        const citizenshipOptions = useMemo(
-                () => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-                [countries]
-        );
+	const citizenshipOptions = useMemo(
+		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
+		[countries]
+	);
 
 	const isPassengerComplete = (p) => {
 		const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
@@ -65,7 +65,7 @@ const Passengers = () => {
 		if (docConfig.showExpiryDate) required.push('documentExpiryDate');
 		if (docConfig.showCitizenship) required.push('citizenshipId');
 		if (!required.every((f) => p[f])) return false;
-		return !getAgeError(p.type, p.birthDate);
+		return !getAgeError(p.category, p.birthDate);
 	};
 
 	const [buyer, setBuyer] = useState(
@@ -76,11 +76,13 @@ const Passengers = () => {
 		const fields = {
 			lastName: {
 				key: 'lastName',
+				type: FIELD_TYPES.TEXT,
 				label: FIELD_LABELS.PASSENGER.last_name,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : ''),
 			},
 			firstName: {
 				key: 'firstName',
+				type: FIELD_TYPES.TEXT,
 				label: FIELD_LABELS.PASSENGER.first_name,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : ''),
 			},
@@ -103,11 +105,11 @@ const Passengers = () => {
 
 	const [buyerErrors, setBuyerErrors] = useState({});
 
-        const handlePassengerChange = (index) => (field, value, data) => {
-                setPassengerData((prev) =>
-                        Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
-                );
-        };
+	const handlePassengerChange = (index) => (field, value, data) => {
+		setPassengerData((prev) =>
+			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
+		);
+	};
 
 	const handleBuyerChange = (field, value) => {
 		setBuyer((prev) => ({ ...prev, [field]: value }));
@@ -127,24 +129,24 @@ const Passengers = () => {
 		return Object.keys(errs).length === 0;
 	};
 
-        const passengerRefs = useRef([]);
+	const passengerRefs = useRef([]);
 
-        const handleContinue = async () => {
-                const allValid = passengerRefs.current
-                        .filter(Boolean)
-                        .map((r) => r.validate())
-                        .every(Boolean);
-                if (!allValid) return;
-                if (!validateBuyer()) return;
-                try {
-                        await dispatch(
-                                processBookingPassengers({ public_id: publicId, buyer, passengers: passengerData })
-                        ).unwrap();
-                        navigate(`/booking/${publicId}/confirmation`);
-                } catch (e) {
-                        // errors handled via redux state
-                }
-        };
+	const handleContinue = async () => {
+		const allValid = passengerRefs.current
+			.filter(Boolean)
+			.map((r) => r.validate())
+			.every(Boolean);
+		if (!allValid) return;
+		if (!validateBuyer()) return;
+		try {
+			await dispatch(
+				processBookingPassengers({ public_id: publicId, buyer, passengers: passengerData })
+			).unwrap();
+			navigate(`/booking/${publicId}/confirmation`);
+		} catch (e) {
+			// errors handled via redux state
+		}
+	};
 
 	const routeInfo = UI_LABELS.SCHEDULE.from_to(booking?.from, booking?.to);
 
@@ -172,44 +174,41 @@ const Passengers = () => {
 							{Array.isArray(errors) ? errors.join('\n') : errors.message || errors}
 						</FormHelperText>
 					)}
-                                        {passengersReady &&
-                                                passengerData.map((p, index) => (
-                                                        <PassengerForm
-                                                                key={p.id || index}
-                                                                passenger={p}
-                                                                onChange={handlePassengerChange(index)}
-                                                                citizenshipOptions={citizenshipOptions}
-                                                                ref={(el) => (passengerRefs.current[index] = el)}
-                                                        />
-                                                ))}
-                                        <Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
-                                                <Typography variant='h6' sx={{ mb: 1 }}>
-                                                        {UI_LABELS.BOOKING.buyer_form.title}
-                                                </Typography>
-                                                {passengersReady &&
-                                                        passengerData.filter(isPassengerComplete).length > 0 && (
-                                                                <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                                                        {passengerData
-                                                                                .filter(isPassengerComplete)
-                                                                                .map((p, index) => (
-                                                                                        <Chip
-                                                                                                key={p.id || index}
-                                                                                                label={`${p.lastName || ''} ${p.firstName || ''}`}
-                                                                                                size='small'
-                                                                                                onClick={() =>
-                                                                                                        setBuyer((prev) => ({
-                                                                                                                ...prev,
-                                                                                                                lastName: p.lastName || '',
-                                                                                                                firstName: p.firstName || '',
-                                                                                                        }))
-                                                                                                }
-                                                                                        />
-                                                                                ))}
-                                                                </Box>
-                                                        )}
-                                                <Grid container spacing={2}>
-                                                        {Object.values(buyerFormFields).map((field) => (
-                                                                <Grid item xs={12} sm={6} key={field.name}>
+					{passengersReady &&
+						passengerData.map((p, index) => (
+							<PassengerForm
+								key={p.id || index}
+								passenger={p}
+								onChange={handlePassengerChange(index)}
+								citizenshipOptions={citizenshipOptions}
+								ref={(el) => (passengerRefs.current[index] = el)}
+							/>
+						))}
+					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
+						<Typography variant='h6' sx={{ mb: 1 }}>
+							{UI_LABELS.BOOKING.buyer_form.title}
+						</Typography>
+						{passengersReady && passengerData.filter(isPassengerComplete).length > 0 && (
+							<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+								{passengerData.filter(isPassengerComplete).map((p, index) => (
+									<Chip
+										key={p.id || index}
+										label={`${p.lastName || ''} ${p.firstName || ''}`}
+										size='small'
+										onClick={() =>
+											setBuyer((prev) => ({
+												...prev,
+												lastName: p.lastName || '',
+												firstName: p.firstName || '',
+											}))
+										}
+									/>
+								))}
+							</Box>
+						)}
+						<Grid container spacing={2}>
+							{Object.values(buyerFormFields).map((field) => (
+								<Grid item xs={12} sm={6} key={field.name}>
 									{field.renderField({
 										value: buyer[field.name],
 										onChange: (value) => handleBuyerChange(field.name, value),
