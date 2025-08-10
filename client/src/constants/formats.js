@@ -27,7 +27,7 @@ numeral.locale('ru');
 
 export const DEFAULT_NUMBER_FORMAT = '0,0[.]00';
 
-export const DEFAULT_PHONE_NUMBER = '+71234567890';
+export const DEFAULT_PHONE_NUMBER = '+7 (XXX) XXX-XX-XX';
 export const DEFAULT_EMAIL = 'ivanov.ivan@example.com';
 
 export const MAX_PASSENGERS = 9;

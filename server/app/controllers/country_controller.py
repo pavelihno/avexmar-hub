@@ -5,14 +5,12 @@ from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx import create_xlsx, is_xlsx_file
 
 
-@admin_required
-def get_countries(current_user):
+def get_countries():
     countries = Country.get_all()
     return jsonify([c.to_dict() for c in countries])
 
 
-@admin_required
-def get_country(current_user, country_id):
+def get_country(country_id):
     country = Country.get_or_404(country_id)
     return jsonify(country.to_dict()), 200
 

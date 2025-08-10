@@ -9,6 +9,7 @@ from app.models.fee import Fee
 from app.models.discount import Discount
 from app.models.flight import Flight
 from app.models.booking import Booking
+from app.models.booking_flight import BookingFlight
 
 
 def get_seats_number(params):
@@ -129,9 +130,11 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
 
 
 def process_booking_create(data):
-    outbound_id = data.get('outbound_id')
-    return_id = data.get('return_id')
-    tariff_id = data.get('tariff_id')
+    session = db.session
+
+    outbound_id = int(data.get('outbound_id', 0))
+    return_id = int(data.get('return_id', 0))
+    tariff_id = int(data.get('tariff_id', 0))
     raw_passengers = data.get('passengers', {})
 
     passengers = {}
@@ -152,17 +155,22 @@ def process_booking_create(data):
         'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }]
 
-    passenger_counts = passengers
-
     booking = Booking.create(
+        session,
         currency=Config.CURRENCY[price['currency']],
         fare_price=price['fare_price'],
         fees=sum(f['total'] for f in price['fees']),
         total_discounts=price['total_discounts'],
         total_price=price['total_price'],
         status_history=history,
-        passenger_counts=passenger_counts,
+        passenger_counts=passengers,
     )
 
-    db.session.refresh(booking)
+    if outbound_id:
+        BookingFlight.create(session, booking_id=booking.id, flight_id=outbound_id)
+    if return_id:
+        BookingFlight.create(session, booking_id=booking.id, flight_id=return_id)
+
+    session.refresh(booking)
+
     return booking, price

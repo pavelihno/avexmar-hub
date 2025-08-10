@@ -59,8 +59,8 @@ export const VALIDATION_MESSAGES = {
 
 	USER: {
 		email: {
-			REQUIRED: 'Email обязателен',
-			INVALID: 'Введите корректный email',
+			REQUIRED: 'Электронная почта обязательна',
+			INVALID: 'Введите корректную электронную почту',
 		},
 		password: {
 			REQUIRED: 'Пароль обязателен',
@@ -78,42 +78,45 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-        PASSENGER: {
-                first_name: {
-                        REQUIRED: 'Имя обязательно',
-                },
-                last_name: {
-                        REQUIRED: 'Фамилия обязательна',
-                },
-                birth_date: {
-                        REQUIRED: 'Укажите дату рождения',
-                        adult: 'Пассажир должен быть старше 12 лет',
-                        child: 'Возраст ребёнка 2–12 лет',
-                        infant: 'Возраст младенца должен быть менее 2 лет',
-                        infant_seat: 'Возраст младенца должен быть менее 2 лет',
-                },
-                document_type: {
-                        REQUIRED: 'Тип документа обязателен',
-                },
-                document_number: {
-                        REQUIRED: 'Номер документа обязателен',
-                },
-                document_expiry_date: {
-                        REQUIRED: 'Срок действия обязателен',
-                },
-                citizenship_id: {
-                        REQUIRED: 'Гражданство обязательно',
-                },
-                name_language: {
-                        CYRILLIC: 'Используйте кириллицу',
-                        LATIN: 'Используйте латиницу',
-                },
-        },
+	PASSENGER: {
+		first_name: {
+			REQUIRED: 'Имя обязательно',
+		},
+		last_name: {
+			REQUIRED: 'Фамилия обязательна',
+		},
+		birth_date: {
+			REQUIRED: 'Укажите дату рождения',
+			FUTURE: 'Дата рождения не может быть в будущем',
+			ADULT: 'Пассажир должен быть старше 12 лет',
+			CHILD: 'Возраст ребёнка 2–12 лет',
+			INFANT: 'Возраст младенца должен быть менее 2 лет',
+			INFANT_SEAT: 'Возраст младенца должен быть менее 2 лет',
+		},
+		document_type: {
+			REQUIRED: 'Тип документа обязателен',
+		},
+		document_number: {
+			REQUIRED: 'Номер документа обязателен',
+		},
+		document_expiry_date: {
+			REQUIRED: 'Срок действия обязателен',
+			EXPIRED: 'Срок действия документа истек',
+			AFTER_FLIGHT: 'Срок действия должен быть позже даты вылета',
+		},
+		citizenship_id: {
+			REQUIRED: 'Гражданство обязательно',
+		},
+		name_language: {
+			CYRILLIC: 'Используйте кириллицу',
+			LATIN: 'Используйте латиницу',
+		},
+	},
 
 	BOOKING: {
 		email_address: {
-			REQUIRED: 'Email обязателен',
-			INVALID: 'Введите корректный email',
+			REQUIRED: 'Электронная почта обязательна',
+			INVALID: 'Введите корректную электронную почту',
 		},
 		phone_number: {
 			REQUIRED: 'Телефон обязателен',

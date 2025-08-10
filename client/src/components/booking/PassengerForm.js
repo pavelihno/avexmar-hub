@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
-import { Box, Grid, Typography, IconButton } from '@mui/material';
+import { Box, Grid, Typography, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DescriptionIcon from '@mui/icons-material/Description';
 
 import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
@@ -14,6 +12,7 @@ import {
 	isCyrillicDocument,
 	getDocumentFieldConfig,
 	getAgeError,
+	validateDate,
 } from '../utils';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
@@ -21,7 +20,7 @@ const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
-const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) => {
+const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights = [] }, ref) => {
 	const [data, setData] = useState({
 		id: passenger?.id || '',
 		category: passenger?.category || 'adult',
@@ -38,108 +37,146 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) =>
 
 	const [errors, setErrors] = useState({});
 	const [showErrors, setShowErrors] = useState(false);
+	const [focusedField, setFocusedField] = useState(null);
 
 	useEffect(() => {
-		setData((prev) => ({ ...prev, ...passenger }));
+		if (!passenger) return;
+		const normalized = { ...passenger };
+		['lastName', 'firstName', 'patronymicName'].forEach((k) => {
+			if (normalized[k]) normalized[k] = String(normalized[k]).toUpperCase();
+		});
+		setData((prev) => ({ ...prev, ...normalized }));
 	}, [passenger]);
 
-        const requiresCyrillic = isCyrillicDocument(data.documentType);
-        const docConfig = getDocumentFieldConfig(data.documentType);
-        const { showExpiryDate, showCitizenship } = docConfig;
+	const requiresCyrillic = isCyrillicDocument(data.documentType);
+	const docConfig = getDocumentFieldConfig(data.documentType);
+	const { showExpiryDate, showCitizenship } = docConfig;
 
-        const formFields = useMemo(() => {
-                const fields = {
-                        lastName: {
-                                key: 'lastName',
-                                label: UI_LABELS.BOOKING.passenger_form.last_name(requiresCyrillic),
-                                validate: (v) => {
-                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
-                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-                                        return valid
-                                                ? ''
-                                                : requiresCyrillic
-                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-                                },
-                        },
-                        firstName: {
-                                key: 'firstName',
-                                label: UI_LABELS.BOOKING.passenger_form.first_name(requiresCyrillic),
-                                validate: (v) => {
-                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
-                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-                                        return valid
-                                                ? ''
-                                                : requiresCyrillic
-                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-                                },
-                        },
-                        patronymicName: {
-                                key: 'patronymicName',
-                                label: UI_LABELS.BOOKING.passenger_form.patronymic_name(requiresCyrillic),
-                                validate: (v) => {
-                                        if (!v) return '';
-                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-                                        return valid
-                                                ? ''
-                                                : requiresCyrillic
-                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-                                },
-                        },
-                        gender: {
-                                key: 'gender',
-                                label: FIELD_LABELS.PASSENGER.gender,
-                                type: FIELD_TYPES.SELECT,
-                                options: genderOptions,
-                        },
-                        birthDate: {
-                                key: 'birthDate',
-                                label: FIELD_LABELS.PASSENGER.birth_date,
-                                type: FIELD_TYPES.DATE,
-                                validate: (v) => getAgeError(data.type, v),
-                        },
-                        documentType: {
-                                key: 'documentType',
-                                label: FIELD_LABELS.PASSENGER.document_type,
-                                type: FIELD_TYPES.SELECT,
-                                options: docTypeOptions,
-                                validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : ''),
-                        },
-                        documentNumber: {
-                                key: 'documentNumber',
-                                label: FIELD_LABELS.PASSENGER.document_number,
-                                validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
-                        },
-                        ...(showExpiryDate && {
-                                documentExpiryDate: {
-                                        key: 'documentExpiryDate',
-                                        label: FIELD_LABELS.PASSENGER.document_expiry_date,
-                                        type: FIELD_TYPES.DATE,
-                                        validate: (v) =>
-                                                !v ? VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED : '',
-                                },
-                        }),
-                        ...(showCitizenship && {
-                                citizenshipId: {
-                                        key: 'citizenshipId',
-                                        label: FIELD_LABELS.PASSENGER.citizenship_id,
-                                        type: FIELD_TYPES.SELECT,
-                                        options: citizenshipOptions,
-                                        validate: (v) =>
-                                                !v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : '',
-                                },
-                        }),
-                };
-                const arr = createFormFields(fields);
-                return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-        }, [data.type, requiresCyrillic, showExpiryDate, showCitizenship, citizenshipOptions]);
+	const { minFlightDate, maxFlightDate } = useMemo(() => {
+		const validDates = flights
+			.map((f) => new Date(f.scheduled_departure))
+			.filter((date) => date instanceof Date && !isNaN(date));
+
+		return new Date(Math.min(...validDates)), new Date(Math.max(...validDates));
+	}, [flights]);
+
+	const formFields = useMemo(() => {
+		const fields = {
+			lastName: {
+				key: 'lastName',
+				label: UI_LABELS.BOOKING.passenger_form.last_name,
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
+					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+					return valid
+						? ''
+						: requiresCyrillic
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+				},
+			},
+			firstName: {
+				key: 'firstName',
+				label: UI_LABELS.BOOKING.passenger_form.first_name,
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
+					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+					return valid
+						? ''
+						: requiresCyrillic
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+				},
+			},
+			patronymicName: {
+				key: 'patronymicName',
+				label: UI_LABELS.BOOKING.passenger_form.patronymic_name,
+				validate: (v) => {
+					if (!v) return '';
+					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+					return valid
+						? ''
+						: requiresCyrillic
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+				},
+			},
+			gender: {
+				key: 'gender',
+				label: FIELD_LABELS.PASSENGER.gender,
+				type: FIELD_TYPES.SELECT,
+				options: genderOptions,
+			},
+			birthDate: {
+				key: 'birthDate',
+				label: FIELD_LABELS.PASSENGER.birth_date,
+				type: FIELD_TYPES.DATE,
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
+					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					const birth = new Date(v);
+					const today = new Date();
+					if (birth > today) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
+					return getAgeError(data.category, v, minFlightDate);
+				},
+			},
+			documentType: {
+				key: 'documentType',
+				label: FIELD_LABELS.PASSENGER.document_type,
+				type: FIELD_TYPES.SELECT,
+				options: docTypeOptions,
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : ''),
+			},
+			documentNumber: {
+				key: 'documentNumber',
+				label: FIELD_LABELS.PASSENGER.document_number,
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
+			},
+			...(showExpiryDate && {
+				documentExpiryDate: {
+					key: 'documentExpiryDate',
+					label: FIELD_LABELS.PASSENGER.document_expiry_date,
+					type: FIELD_TYPES.DATE,
+					validate: (v) => {
+						if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
+						if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+						const exp = new Date(v);
+						const today = new Date();
+						if (exp < today) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
+						if (maxFlightDate && exp < new Date(maxFlightDate))
+							return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
+						return '';
+					},
+				},
+			}),
+			...(showCitizenship && {
+				citizenshipId: {
+					key: 'citizenshipId',
+					label: FIELD_LABELS.PASSENGER.citizenship_id,
+					type: FIELD_TYPES.SELECT,
+					options: citizenshipOptions,
+					validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : ''),
+				},
+			}),
+		};
+		const arr = createFormFields(fields);
+		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
+	}, [
+		data.category,
+		requiresCyrillic,
+		showExpiryDate,
+		showCitizenship,
+		citizenshipOptions,
+		minFlightDate,
+		maxFlightDate,
+	]);
 
 	const handleFieldChange = (field, value) => {
-		const next = { ...data, [field]: value };
+		const isNameField = field === 'lastName' || field === 'firstName' || field === 'patronymicName';
+		const normalizedValue = isNameField && typeof value === 'string' ? value.toUpperCase() : value;
+		const next = { ...data, [field]: normalizedValue };
 		setData(next);
-		if (onChange) onChange(field, value, next);
+		if (onChange) onChange(field, normalizedValue, next);
 		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
 	};
 
@@ -161,7 +198,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) =>
 
 	useImperativeHandle(ref, () => ({ validate }));
 
-        const theme = useTheme();
+	const theme = useTheme();
 
 	const nameFields = [
 		'lastName',
@@ -182,18 +219,41 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) =>
 			</Box>
 
 			<Grid container spacing={2}>
-				{nameFields.map((fieldName) => (
-					<Grid item xs={12} sm={4} key={fieldName}>
-						{formFields[fieldName].renderField({
-							value: data[fieldName],
-							onChange: (value) => handleFieldChange(fieldName, value),
-							fullWidth: true,
-							size: 'small',
-							error: showErrors && !!errors[fieldName],
-							helperText: showErrors ? errors[fieldName] : '',
-						})}
-					</Grid>
-				))}
+				{nameFields.map((fieldName) => {
+					const isNameField =
+						fieldName === 'lastName' || fieldName === 'firstName' || fieldName === 'patronymicName';
+					const control = formFields[fieldName].renderField({
+						value: data[fieldName],
+						onChange: (value) => handleFieldChange(fieldName, value),
+						fullWidth: true,
+						size: 'small',
+						error: showErrors && !!errors[fieldName],
+						helperText: showErrors ? errors[fieldName] : '',
+					});
+
+					return (
+						<Grid item xs={12} sm={4} key={fieldName}>
+							{isNameField ? (
+								<Box
+									onFocusCapture={() => setFocusedField(fieldName)}
+									onBlurCapture={() => setFocusedField((prev) => (prev === fieldName ? null : prev))}
+								>
+									<Tooltip
+										open={focusedField === fieldName}
+										title={UI_LABELS.BOOKING.passenger_form.name_hint(requiresCyrillic)}
+										placement='top'
+										arrow
+										disableInteractive
+									>
+										<Box>{control}</Box>
+									</Tooltip>
+								</Box>
+							) : (
+								control
+							)}
+						</Grid>
+					);
+				})}
 			</Grid>
 		</Box>
 	);

@@ -14,14 +14,29 @@ import {
 	FormHelperText,
 	Divider,
 	Chip,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
 import { processBookingPassengers, fetchBookingDetails } from '../../redux/actions/bookingProcess';
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
-import { createFormFields, FIELD_TYPES, formatNumber, getDocumentFieldConfig, getAgeError } from '../utils';
+import {
+	createFormFields,
+	FIELD_TYPES,
+	formatNumber,
+	getDocumentFieldConfig,
+	getAgeError,
+	validateEmail,
+	validatePhoneNumber,
+	formatDate,
+	formatTime,
+	formatDuration,
+} from '../utils';
 
 const Passengers = () => {
 	const { publicId } = useParams();
@@ -31,7 +46,7 @@ const Passengers = () => {
 	const { countries } = useSelector((state) => state.countries);
 
 	const existingPassengerData = booking?.passengers;
-	const fromModel = booking?.passengersExist;
+	const passengersExist = booking?.passengersExist;
 	const [passengerData, setPassengerData] = useState(null);
 
 	useEffect(() => {
@@ -42,7 +57,7 @@ const Passengers = () => {
 			}));
 			setPassengerData(mapped);
 		}
-	}, [existingPassengerData, fromModel]);
+	}, [existingPassengerData, passengersExist]);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -59,21 +74,14 @@ const Passengers = () => {
 		[countries]
 	);
 
-        const isPassengerComplete = (p) => {
-                const required = [
-                        'lastName',
-                        'firstName',
-                        'gender',
-                        'birthDate',
-                        'documentType',
-                        'documentNumber',
-                ];
-                const docConfig = getDocumentFieldConfig(p.documentType);
-                if (docConfig.showExpiryDate) required.push('documentExpiryDate');
-                if (docConfig.showCitizenship) required.push('citizenshipId');
-                if (!required.every((f) => p[f])) return false;
-                return !getAgeError(p.category, p.birthDate);
-        };
+	const isPassengerComplete = (p) => {
+		const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
+		const docConfig = getDocumentFieldConfig(p.documentType);
+		if (docConfig.showExpiryDate) required.push('documentExpiryDate');
+		if (docConfig.showCitizenship) required.push('citizenshipId');
+		if (!required.every((f) => p[f])) return false;
+		return !getAgeError(p.category, p.birthDate);
+	};
 
 	const [buyer, setBuyer] = useState(
 		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
@@ -97,13 +105,19 @@ const Passengers = () => {
 				key: 'email',
 				label: FIELD_LABELS.BOOKING.email_address,
 				type: FIELD_TYPES.EMAIL,
-				validate: (v) => (!v ? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED : ''),
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED;
+					return validateEmail(v) ? '' : VALIDATION_MESSAGES.BOOKING.email_address.INVALID;
+				},
 			},
 			phone: {
 				key: 'phone',
 				label: FIELD_LABELS.BOOKING.phone_number,
 				type: FIELD_TYPES.PHONE,
-				validate: (v) => (!v ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : ''),
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
+					return validatePhoneNumber(v) ? '' : VALIDATION_MESSAGES.BOOKING.phone_number.INVALID;
+				},
 			},
 		};
 		const arr = createFormFields(fields);
@@ -136,66 +150,88 @@ const Passengers = () => {
 		return Object.keys(errs).length === 0;
 	};
 
-        const passengerRefs = useRef([]);
+	const passengerRefs = useRef([]);
 
-        const toApiPassenger = (p) => ({
-                id: p.id,
-                category: p.category,
-                first_name: p.firstName,
-                last_name: p.lastName,
-                patronymic_name: p.patronymicName,
-                gender: p.gender,
-                birth_date: p.birthDate,
-                document_type: p.documentType,
-                document_number: p.documentNumber,
-                document_expiry_date: p.documentExpiryDate,
-                citizenship_id: p.citizenshipId,
-        });
+	const toApiPassenger = (p) => ({
+		id: p.id,
+		category: p.category,
+		first_name: p.firstName,
+		last_name: p.lastName,
+		patronymic_name: p.patronymicName,
+		gender: p.gender,
+		birth_date: p.birthDate,
+		document_type: p.documentType,
+		document_number: p.documentNumber,
+		document_expiry_date: p.documentExpiryDate,
+		citizenship_id: p.citizenshipId,
+	});
 
-        const toApiBuyer = (b) => ({
-                last_name: b.lastName,
-                first_name: b.firstName,
-                email: b.email,
-                phone: b.phone,
-                consent: b.consent,
-        });
+	const toApiBuyer = (b) => ({
+		last_name: b.lastName,
+		first_name: b.firstName,
+		email: b.email,
+		phone: b.phone,
+		consent: b.consent,
+	});
 
-        const handleContinue = async () => {
-                const allValid = passengerRefs.current
-                        .filter(Boolean)
-                        .map((r) => r.validate())
-                        .every(Boolean);
-                if (!allValid) return;
-                if (!validateBuyer()) return;
-                try {
-                        const apiPassengers = (passengerData || []).map(toApiPassenger);
-                        const apiBuyer = toApiBuyer(buyer);
-                        await dispatch(
-                                processBookingPassengers({
-                                        public_id: publicId,
-                                        buyer: apiBuyer,
-                                        passengers: apiPassengers,
-                                })
-                        ).unwrap();
-                        navigate(`/booking/${publicId}/confirmation`);
-                } catch (e) {
-                        // errors handled via redux state
-                }
-        };
+	const handleContinue = async () => {
+		const passengerValid = passengerRefs.current
+			.filter(Boolean)
+			.map((r) => r.validate())
+			.every(Boolean);
+		const buyerValid = validateBuyer();
+		if (!passengerValid || !buyerValid) return;
+		try {
+			const apiPassengers = (passengerData || []).map(toApiPassenger);
+			const apiBuyer = toApiBuyer(buyer);
+			await dispatch(
+				processBookingPassengers({
+					public_id: publicId,
+					buyer: apiBuyer,
+					passengers: apiPassengers,
+				})
+			).unwrap();
+			navigate(`/booking/${publicId}/confirmation`);
+		} catch (e) {
+			// errors handled via redux state
+		}
+	};
 
-	const routeInfo = UI_LABELS.SCHEDULE.from_to(booking?.from, booking?.to);
+	const [outboundFlight = null, returnFlight = null] = (booking?.flights ?? [])
+		.slice()
+		.filter((f) => f && f.scheduled_departure)
+		.sort(
+			(a, b) =>
+				(new Date(a.scheduled_departure).getTime() || Infinity) -
+				(new Date(b.scheduled_departure).getTime() || Infinity)
+		);
+
+	const extractRouteInfo = (flight) => {
+		if (!flight || !flight.route) return {};
+		const origin = flight.route.origin_airport;
+		const destination = flight.route.destination_airport;
+		return { from: origin.iata_code, to: destination.iata_code, date: new Date(flight.scheduled_departure) };
+	};
+
+	const outboundRouteInfo = extractRouteInfo(outboundFlight);
+	const returnRouteInfo = extractRouteInfo(returnFlight);
+
+	useEffect(() => {
+		if (outboundRouteInfo) {
+			document.title = UI_LABELS.SEARCH.from_to_date(
+				outboundRouteInfo.from,
+				outboundRouteInfo.to,
+				outboundRouteInfo.date,
+				returnRouteInfo.date
+			);
+		}
+	}, [outboundRouteInfo, returnRouteInfo]);
 
 	const farePrice = booking?.fare_price || 0;
 	const serviceFee = booking?.fees || 0;
 	const discount = booking?.total_discounts || 0;
 	const totalPrice = booking?.total_price || 0;
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
-
-	useEffect(() => {
-		if (routeInfo) {
-			document.title = routeInfo;
-		}
-	}, [routeInfo]);
 
 	const passengersReady = !bookingLoading && Array.isArray(passengerData);
 
@@ -214,6 +250,7 @@ const Passengers = () => {
 							<PassengerForm
 								key={p.id || index}
 								passenger={p}
+								flights={booking.flights}
 								onChange={handlePassengerChange(index)}
 								citizenshipOptions={citizenshipOptions}
 								ref={(el) => (passengerRefs.current[index] = el)}
@@ -258,13 +295,115 @@ const Passengers = () => {
 					</Box>
 				</Grid>
 				<Grid item xs={12} md={4} sx={{ position: 'sticky', top: 16 }}>
-					{routeInfo && (
-						<Typography variant='h6' sx={{ mb: 2 }}>
-							{routeInfo}
-						</Typography>
-					)}
 					<Card>
 						<CardContent>
+							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
+								<Accordion variant='outlined' sx={{ mb: 2 }}>
+									<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+										<Box>
+											{outboundRouteInfo && (
+												<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
+													{returnRouteInfo.length > 0
+														? UI_LABELS.BOOKING.flight_details.from_to_from(
+																outboundRouteInfo.from,
+																outboundRouteInfo.to
+														  )
+														: UI_LABELS.BOOKING.flight_details.from_to(
+																outboundRouteInfo.from,
+																outboundRouteInfo.to
+														  )}
+												</Typography>
+											)}
+										</Box>
+									</AccordionSummary>
+									<AccordionDetails>
+										{booking.flights.map((f, idx) => {
+											const origin = f.route?.origin_airport || {};
+											const dest = f.route?.destination_airport || {};
+											const depDate = formatDate(f.scheduled_departure);
+											const depTime = formatTime(f.scheduled_departure_time);
+											const arrDate = formatDate(f.scheduled_arrival);
+											const arrTime = formatTime(f.scheduled_arrival_time);
+											const duration = formatDuration(f.duration);
+											const airline = f.airline?.name || '';
+											const flightNo = f.airline_flight_number || f.flight_number || '';
+											const aircraft = f.aircraft?.type;
+											return (
+												<Box
+													key={f.id || idx}
+													sx={{ mb: idx < booking.flights.length - 1 ? 2 : 0 }}
+												>
+													<Box
+														sx={{
+															display: 'flex',
+															justifyContent: 'space-between',
+															alignItems: 'center',
+															mb: 0.5,
+														}}
+													>
+														<Typography variant='subtitle2'>{airline}</Typography>
+														<Typography variant='caption' color='text.secondary'>
+															{flightNo}
+														</Typography>
+													</Box>
+													<Box
+														sx={{
+															display: 'grid',
+															gridTemplateColumns: '1fr auto 1fr',
+															gap: 1,
+															alignItems: 'center',
+														}}
+													>
+														<Box>
+															<Typography variant='h6'>{depTime}</Typography>
+															<Typography variant='caption' color='text.secondary'>
+																{depDate}
+															</Typography>
+															<Typography variant='body2'>{origin.city_name}</Typography>
+															<Typography variant='caption' color='text.secondary'>
+																{origin.iata_code}
+															</Typography>
+														</Box>
+														<Box sx={{ textAlign: 'center' }}>
+															<Typography variant='caption' color='text.secondary'>
+																{duration}
+															</Typography>
+															<Divider flexItem sx={{ my: 0.5 }} />
+														</Box>
+														<Box sx={{ textAlign: 'right' }}>
+															<Typography variant='h6'>{arrTime}</Typography>
+															<Typography variant='caption' color='text.secondary'>
+																{arrDate}
+															</Typography>
+															<Typography variant='body2'>{dest.city_name}</Typography>
+															<Typography variant='caption' color='text.secondary'>
+																{dest.iata_code}
+															</Typography>
+														</Box>
+													</Box>
+													{aircraft && (
+														<Box
+															sx={{
+																display: 'flex',
+																justifyContent: 'center',
+																mt: 0.5,
+															}}
+														>
+															{aircraft && (
+																<Typography variant='caption' color='text.secondary'>
+																	{aircraft}
+																</Typography>
+															)}
+														</Box>
+													)}
+													{idx < booking.flights.length - 1 && <Divider sx={{ mt: 1 }} />}
+												</Box>
+											);
+										})}
+									</AccordionDetails>
+								</Accordion>
+							)}
+
 							<Typography variant='h4' sx={{ mb: 2 }}>
 								{`${UI_LABELS.BOOKING.buyer_form.summary.passenger_word(
 									passengersReady ? passengerData.length : 0

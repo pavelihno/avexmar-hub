@@ -263,6 +263,17 @@ export const UI_LABELS = {
 			payment: 'Шаг оплаты',
 			completion: 'Шаг завершения',
 		},
+		flight_details: {
+			title: 'Детали рейса',
+			from_to: (from, to) => {
+				if (!from || !to) return '';
+				return `${from} → ${to}`;
+			},
+			from_to_from: (from, to) => {
+				if (!from || !to) return '';
+				return `${from} → ${to} → ${from}`;
+			},
+		},
 		buyer_form: {
 			title: 'Покупатель',
 			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
@@ -280,23 +291,21 @@ export const UI_LABELS = {
 				discount: 'Скидка',
 			},
 		},
-                passenger_form: {
-                        type_labels: {
-                                adult: 'Взрослый, старше 12 лет',
-                                child: 'Ребёнок, от 2 до 12 лет',
-                                infant: 'Младенец, до 2 лет',
-                                infant_seat: 'Младенец с местом, до 2 лет',
-                        },
-                        add_passenger: 'Добавить пассажира',
-                        last_name: (isCyrillic) =>
-                                `${FIELD_LABELS.PASSENGER.last_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
-                        first_name: (isCyrillic) =>
-                                `${FIELD_LABELS.PASSENGER.first_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
-                        patronymic_name: (isCyrillic) =>
-                                `${FIELD_LABELS.PASSENGER.patronymic_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
-                },
-        },
-        SCHEDULE: {
+		passenger_form: {
+			type_labels: {
+				adult: 'Взрослый, старше 12 лет',
+				child: 'Ребёнок, от 2 до 12 лет',
+				infant: 'Младенец, до 2 лет',
+				infant_seat: 'Младенец с местом, до 2 лет',
+			},
+			add_passenger: 'Добавить пассажира',
+			last_name: 'Фамилия',
+			first_name: 'Имя',
+			patronymic_name: 'Отчество (при наличии)',
+			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+		},
+	},
+	SCHEDULE: {
 		title: 'Расписание рейсов',
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',

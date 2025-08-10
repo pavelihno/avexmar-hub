@@ -66,13 +66,13 @@ export const disabledPassengerChange = (passengers, key, delta) => {
 	return false;
 };
 
-export const getAgeError = (passengerCategory, birthDate) => {
+export const getAgeError = (passengerCategory, birthDate, flightDate) => {
 	if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-	const age = differenceInYears(new Date(), new Date(birthDate));
-	if (passengerCategory === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.adult;
-	if (passengerCategory === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.child;
+	const age = differenceInYears(new Date(flightDate), new Date(birthDate));
+	if (passengerCategory === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.ADULT;
+	if (passengerCategory === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.CHILD;
 	if (['infant', 'infant_seat'].includes(passengerCategory) && age >= 2)
-		return VALIDATION_MESSAGES.PASSENGER.birth_date.infant;
+		return VALIDATION_MESSAGES.PASSENGER.birth_date.INFANT;
 	return '';
 };
 

@@ -44,7 +44,6 @@ def process_booking_create():
     data = request.json or {}
     booking, price = process_booking_create_logic(data)
     result = {'public_id': str(booking.public_id)}
-    result.update(price)
     return jsonify(result), 201
 
 
@@ -86,33 +85,6 @@ def process_booking_passengers():
     return jsonify({'status': 'ok'}), 200
 
 
-def get_process_booking_passengers(public_id):
-    booking = Booking.get_by_public_id(public_id)
-    passengers = []
-    for bp in booking.booking_passengers:
-        p = bp.passenger.to_dict()
-        p['category'] = bp.category.value if bp.category else None
-        passengers.append(p)
-    passengers_exist = len(passengers) > 0
-    if not passengers:
-        counts = booking.passenger_counts or {}
-        key_map = {
-            'adults': Config.PASSENGER_CATEGORY.adult.value,
-            'children': Config.PASSENGER_CATEGORY.child.value,
-            'infants': Config.PASSENGER_CATEGORY.infant.value,
-            'infants_seat': Config.PASSENGER_CATEGORY.infant_seat.value,
-        }
-        for key, count in counts.items():
-            try:
-                count = int(count)
-            except (TypeError, ValueError):
-                continue
-            category = key_map.get(key, key)
-            for _ in range(count):
-                passengers.append({'category': category})
-    return jsonify({'passengers': passengers, 'passengers_exist': passengers_exist}), 200
-
-
 def process_booking_payment():
     return jsonify({'status': 'ok'}), 200
 
@@ -121,8 +93,10 @@ def get_process_booking_details(public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
     passengers = []
+    flights = []
+
     for bp in booking.booking_passengers:
-        p = bp.passenger.to_dict()
+        p = bp.passenger.to_dict(return_children=True)
         p['category'] = bp.category.value if bp.category else None
         passengers.append(p)
     passengers_exist = len(passengers) > 0
@@ -143,8 +117,12 @@ def get_process_booking_details(public_id):
             for _ in range(count):
                 passengers.append({'category': category})
 
+    for bf in booking.booking_flights:
+        flights.append(bf.flight.to_dict(return_children=True))
+
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist
+    result['flights'] = flights
     return jsonify(result), 200
 
 
