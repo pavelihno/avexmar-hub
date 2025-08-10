@@ -152,7 +152,7 @@ def process_booking_create(data):
 
     history = [{
         'status': Config.BOOKING_STATUS.created.value,
-        'at': datetime.now()
+        'at': datetime.now().isoformat()
     }]
 
     booking = Booking.create(

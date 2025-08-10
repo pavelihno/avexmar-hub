@@ -8,6 +8,7 @@ from app.models.booking_passenger import BookingPassenger
 from app.middlewares.auth_middleware import admin_required
 from app.utils.business_logic import process_booking_create as process_booking_create_logic
 from app.config import Config
+from app.utils.datetime import parse_date
 
 
 @admin_required
@@ -62,19 +63,23 @@ def process_booking_passengers():
     booking.phone_number = buyer.get('phone')
 
     # Process passengers: create or update, keep track of processed ids
+    session = db.session
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
     processed_ids = set()
     for pdata in passengers:
         pid = pdata.get('id')
+        gender = pdata.get('gender')
+        doc_type = pdata.get('document_type')
+
         passenger_fields = {
             'first_name': pdata.get('first_name'),
             'last_name': pdata.get('last_name'),
             'patronymic_name': pdata.get('patronymic_name'),
-            'gender': Config.GENDER[pdata['gender']] if pdata.get('gender') else None,
+            'gender': Config.GENDER[gender].value if gender and Config.GENDER[gender] else None,
             'birth_date': pdata.get('birth_date'),
-            'document_type': Config.DOCUMENT_TYPE[pdata['document_type']] if pdata.get('document_type') else None,
+            'document_type': Config.DOCUMENT_TYPE[doc_type].value if doc_type and Config.DOCUMENT_TYPE[doc_type] else None,
             'document_number': pdata.get('document_number'),
-            'document_expiry_date': pdata.get('document_expiry_date'),
+            'document_expiry_date': parse_date(pdata.get('document_expiry_date')),
             'citizenship_id': pdata.get('citizenship_id'),
         }
         if pid:
@@ -94,41 +99,18 @@ def process_booking_passengers():
     # Remove passengers that are no longer present
     for bp in list(booking.booking_passengers):
         if bp.passenger_id not in processed_ids:
-            db.session.delete(bp)
+            session.delete(bp)
             if bp.passenger.booking_passengers.count() <= 1 and bp.passenger.tickets.count() == 0:
-                db.session.delete(bp.passenger)
+                session.delete(bp.passenger)
 
-    db.session.flush()
-
-    flight_dates = [bf.flight.scheduled_departure for bf in booking.booking_flights if bf.flight]
-    check_date = min(flight_dates) if flight_dates else None
-    errors = []
-    if check_date:
-        for bp in booking.booking_passengers:
-            category = bp.category.value if bp.category else None
-            passenger = bp.passenger
-            if category == Config.PASSENGER_CATEGORY.child.value and not passenger.is_child(check_date):
-                errors.append(
-                    f"Passenger {passenger.last_name} {passenger.first_name} is not a child on flight date"
-                )
-            if category in {
-                Config.PASSENGER_CATEGORY.infant.value,
-                Config.PASSENGER_CATEGORY.infant_seat.value,
-            } and not passenger.is_infant(check_date):
-                errors.append(
-                    f"Passenger {passenger.last_name} {passenger.first_name} is not an infant on flight date"
-                )
-    if errors:
-        db.session.rollback()
-        return jsonify({'errors': errors}), 400
-
-    db.session.commit()
+    session.flush()
+    session.commit()
     try:
         booking.transition_status('passengers_added')
     except ValueError:
         pass
     except DataError:
-        db.session.rollback()
+        session.rollback()
 
     return jsonify({'status': 'ok'}), 200
 

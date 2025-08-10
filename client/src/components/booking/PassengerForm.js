@@ -52,20 +52,20 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 	const docConfig = getDocumentFieldConfig(data.documentType);
 	const { showExpiryDate, showCitizenship } = docConfig;
 
-        const { minFlightDate, maxFlightDate } = useMemo(() => {
-                const validDates = flights
-                        .map((f) => new Date(f.scheduled_departure))
-                        .filter((date) => date instanceof Date && !isNaN(date));
+	const { minFlightDate, maxFlightDate } = useMemo(() => {
+		const validDates = flights
+			.map((f) => new Date(f.scheduled_departure))
+			.filter((date) => date instanceof Date && !isNaN(date));
 
-                if (validDates.length === 0) {
-                        return { minFlightDate: null, maxFlightDate: null };
-                }
+		if (validDates.length === 0) {
+			return { minFlightDate: null, maxFlightDate: null };
+		}
 
-                return {
-                        minFlightDate: new Date(Math.min(...validDates)),
-                        maxFlightDate: new Date(Math.max(...validDates)),
-                };
-        }, [flights]);
+		return {
+			minFlightDate: new Date(Math.min(...validDates)),
+			maxFlightDate: new Date(Math.max(...validDates)),
+		};
+	}, [flights]);
 
 	const formFields = useMemo(() => {
 		const fields = {
@@ -203,7 +203,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 		[formFields, data]
 	);
 
-        useImperativeHandle(ref, () => ({ validate }), [validate]);
+	useImperativeHandle(ref, () => ({ validate }), [validate]);
 
 	const theme = useTheme();
 

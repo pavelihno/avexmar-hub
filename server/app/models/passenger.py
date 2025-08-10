@@ -111,7 +111,7 @@ class Passenger(BaseModel):
             'document_number',
         ]
 
-        owner_id = kwargs.get('owner_user_id')
+        owner_id = kwargs.get('owner_user_id', None)
         if owner_id is not None and all(field in kwargs for field in unique_fields):
             existing = session.query(cls).filter(
                 cls.owner_user_id == owner_id,

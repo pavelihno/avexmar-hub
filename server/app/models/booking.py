@@ -114,7 +114,7 @@ class Booking(BaseModel):
         if not history:
             history = [{
                 'status': status.value if hasattr(status, 'value') else str(status),
-                'at': datetime.now()
+                'at': datetime.now().isoformat()
             }]
         kwargs['status_history'] = history
         return super().create(session, **kwargs)
@@ -150,11 +150,11 @@ class Booking(BaseModel):
         if to_status not in self.ALLOWED_TRANSITIONS.get(from_status, set()):
             raise ValueError(f'Illegal transition: {from_status} -> {to_status}')
 
-        self.status = Config.BOOKING_STATUS[to_status]
+        self.status = Config.BOOKING_STATUS[to_status].value
         history = list(self.status_history or [])
         history.append({
             'status': to_status,
-            'at': datetime.now()
+            'at': datetime.now().isoformat()
         })
         self.status_history = history
         session.add(self)
