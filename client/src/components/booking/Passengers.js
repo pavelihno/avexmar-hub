@@ -303,7 +303,7 @@ const Passengers = () => {
 										<Box>
 											{outboundRouteInfo && (
 												<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-													{returnRouteInfo.length > 0
+													{Object.keys(returnRouteInfo || {}).length > 0
 														? UI_LABELS.BOOKING.flight_details.from_to_from(
 																outboundRouteInfo.from,
 																outboundRouteInfo.to
