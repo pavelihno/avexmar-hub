@@ -21,7 +21,7 @@ class Payment(BaseModel):
     def to_dict(self, return_children=False):
         return {
             'id': self.id,
-            'booking': self.booking.to_dict() if return_children else {},
+            'booking': self.booking.to_dict(return_children) if return_children else {},
             'booking_id': self.booking_id,
             'payment_method': self.payment_method.value,
             'payment_status': self.payment_status.value

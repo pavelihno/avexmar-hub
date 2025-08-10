@@ -28,7 +28,7 @@ class Airline(BaseModel):
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
             'name': self.name,
-            'country': self.country.to_dict() if return_children else {},
+            'country': self.country.to_dict(return_children) if return_children else {},
             'country_id': self.country_id
         }
 

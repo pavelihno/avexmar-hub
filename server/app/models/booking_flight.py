@@ -28,8 +28,8 @@ class BookingFlight(BaseModel):
     def to_dict(self, return_children=False):
         return {
             'id': self.id,
-            'booking': self.booking.to_dict() if return_children else {},
+            'booking': self.booking.to_dict(return_children) if return_children else {},
             'booking_id': self.booking_id,
-            'flight': self.flight.to_dict() if return_children else {},
+            'flight': self.flight.to_dict(return_children) if return_children else {},
             'flight_id': self.flight_id,
         }

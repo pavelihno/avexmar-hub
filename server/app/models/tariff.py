@@ -23,7 +23,7 @@ class Tariff(BaseModel):
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'seat_class': self.seat_class.value,

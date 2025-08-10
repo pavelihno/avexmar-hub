@@ -33,15 +33,15 @@ class Ticket(BaseModel):
         return {
             'id': self.id,
             'ticket_number': self.ticket_number,
-            'flight': self.flight.to_dict() if return_children else {},
+            'flight': self.flight.to_dict(return_children) if return_children else {},
             'flight_id': self.flight_id,
-            'booking': self.booking.to_dict() if self.booking_id and return_children else {},
+            'booking': self.booking.to_dict(return_children) if self.booking_id and return_children else {},
             'booking_id': self.booking_id,
-            'passenger': self.passenger.to_dict() if self.passenger_id and return_children else {},
+            'passenger': self.passenger.to_dict(return_children) if self.passenger_id and return_children else {},
             'passenger_id': self.passenger_id,
-            'discount': self.discount.to_dict() if self.discount_id and return_children else {},
+            'discount': self.discount.to_dict(return_children) if self.discount_id and return_children else {},
             'discount_id': self.discount_id,
-            'seat': self.seat.to_dict() if self.seat_id and return_children else {},
+            'seat': self.seat.to_dict(return_children) if self.seat_id and return_children else {},
             'seat_id': self.seat_id,
         }
 

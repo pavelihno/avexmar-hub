@@ -55,7 +55,7 @@ class Passenger(BaseModel):
     def to_dict(self, return_children=False):
         return {
             'id': self.id,
-            'owner_user': self.owner_user.to_dict() if self.owner_user_id and return_children else {},
+            'owner_user': self.owner_user.to_dict(return_children) if self.owner_user_id and return_children else {},
             'owner_user_id': self.owner_user_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -64,7 +64,7 @@ class Passenger(BaseModel):
             'document_type': self.document_type.value,
             'document_number': self.document_number,
             'document_expiry_date': self.document_expiry_date.isoformat() if self.document_expiry_date else None,
-            'citizenship': self.citizenship.to_dict() if return_children else {},
+            'citizenship': self.citizenship.to_dict(return_children) if return_children else {},
             'citizenship_id': self.citizenship_id,
         }
 

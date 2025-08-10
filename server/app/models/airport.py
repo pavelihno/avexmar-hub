@@ -43,9 +43,9 @@ class Airport(BaseModel):
             'city_name': self.city_name,
             'city_name_en': self.city_name_en,
             'city_code': self.city_code,
-            'country': self.country.to_dict() if return_children else {},
+            'country': self.country.to_dict(return_children) if return_children else {},
             'country_id': self.country_id,
-            'timezone': self.timezone.to_dict() if self.timezone_id and return_children else {},
+            'timezone': self.timezone.to_dict(return_children) if self.timezone_id and return_children else {},
             'timezone_id': self.timezone_id,
         }
 

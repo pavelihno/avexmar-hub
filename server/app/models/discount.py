@@ -18,7 +18,7 @@ class Discount(BaseModel):
 
     tickets: Mapped[List['Ticket']] = db.relationship('Ticket', back_populates='discount', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'discount_name': self.discount_name,

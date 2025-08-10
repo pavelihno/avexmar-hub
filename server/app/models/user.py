@@ -27,7 +27,7 @@ class User(BaseModel):
         'Passenger', back_populates='owner_user', lazy='dynamic', cascade='all, delete-orphan'
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'email': self.email,

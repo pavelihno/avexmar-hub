@@ -60,7 +60,7 @@ class Booking(BaseModel):
         'BookingFlight', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'public_id': str(self.public_id),
@@ -74,7 +74,6 @@ class Booking(BaseModel):
             'total_discounts': self.total_discounts,
             'fees': self.fees,
             'total_price': self.total_price,
-            'passenger_counts': self.passenger_counts,
         }
 
     @classmethod
