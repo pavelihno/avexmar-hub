@@ -1,4 +1,5 @@
 import { formatDate } from '../components/utils';
+import { FIELD_LABELS } from './fieldLabels';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
@@ -279,17 +280,23 @@ export const UI_LABELS = {
 				discount: 'Скидка',
 			},
 		},
-		passenger_form: {
-			type_labels: {
-				adult: 'Взрослый, старше 12 лет',
-				child: 'Ребёнок, от 2 до 12 лет',
-				infant: 'Младенец, до 2 лет',
-				infant_seat: 'Младенец с местом, до 2 лет',
-			},
-			add_passenger: 'Добавить пассажира',
-		},
-	},
-	SCHEDULE: {
+                passenger_form: {
+                        type_labels: {
+                                adult: 'Взрослый, старше 12 лет',
+                                child: 'Ребёнок, от 2 до 12 лет',
+                                infant: 'Младенец, до 2 лет',
+                                infant_seat: 'Младенец с местом, до 2 лет',
+                        },
+                        add_passenger: 'Добавить пассажира',
+                        last_name: (isCyrillic) =>
+                                `${FIELD_LABELS.PASSENGER.last_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
+                        first_name: (isCyrillic) =>
+                                `${FIELD_LABELS.PASSENGER.first_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
+                        patronymic_name: (isCyrillic) =>
+                                `${FIELD_LABELS.PASSENGER.patronymic_name} ${isCyrillic ? '(кириллица)' : '(латиница)'}`,
+                },
+        },
+        SCHEDULE: {
 		title: 'Расписание рейсов',
 		results: 'Результаты поиска',
 		no_results: 'Рейсы не найдены',
