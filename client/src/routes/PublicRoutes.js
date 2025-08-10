@@ -21,6 +21,10 @@ const PublicRoutes = () => [
 	{ path: '/schedule', element: <Schedule /> },
 
 	{
+		path: '/booking/:publicId',
+		element: <BookingRoute />,
+	},
+	{
 		path: '/booking/:publicId/passengers',
 		element: (
 			<BookingRoute page='passengers'>

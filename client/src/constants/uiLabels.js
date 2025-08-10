@@ -281,10 +281,10 @@ export const UI_LABELS = {
 		},
 		passenger_form: {
 			type_labels: {
-                                adult: 'Взрослый, старше 12 лет',
-                                child: 'Ребёнок, от 2 до 12 лет',
-                                infant: 'Малыш, до 2 лет',
-                                infant_seat: 'Малыш с местом, до 2 лет',
+				adult: 'Взрослый, старше 12 лет',
+				child: 'Ребёнок, от 2 до 12 лет',
+				infant: 'Младенец, до 2 лет',
+				infant_seat: 'Младенец с местом, до 2 лет',
 			},
 			add_passenger: 'Добавить пассажира',
 		},

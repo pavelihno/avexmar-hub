@@ -51,7 +51,7 @@ export const FIELD_LABELS = {
 	PASSENGER: {
 		first_name: 'Имя',
 		last_name: 'Фамилия',
-		patronymic_name: 'Отчество',
+		patronymic_name: 'Отчество (при наличии)',
 		gender: 'Пол',
 		birth_date: 'Дата рождения',
 		document_type: 'Тип документа',

@@ -93,7 +93,7 @@ def get_process_booking_passengers(public_id):
         p = bp.passenger.to_dict()
         p['category'] = bp.category.value if bp.category else None
         passengers.append(p)
-    has_models = len(passengers) > 0
+    passengers_exist = len(passengers) > 0
     if not passengers:
         counts = booking.passenger_counts or {}
         key_map = {
@@ -110,7 +110,7 @@ def get_process_booking_passengers(public_id):
             category = key_map.get(key, key)
             for _ in range(count):
                 passengers.append({'category': category})
-    return jsonify({'passengers': passengers, 'passengers_from_model': has_models}), 200
+    return jsonify({'passengers': passengers, 'passengers_exist': passengers_exist}), 200
 
 
 def process_booking_payment():
@@ -125,7 +125,7 @@ def get_process_booking_details(public_id):
         p = bp.passenger.to_dict()
         p['category'] = bp.category.value if bp.category else None
         passengers.append(p)
-    has_models = len(passengers) > 0
+    passengers_exist = len(passengers) > 0
     if not passengers:
         counts = booking.passenger_counts or {}
         key_map = {
@@ -142,8 +142,9 @@ def get_process_booking_details(public_id):
             category = key_map.get(key, key)
             for _ in range(count):
                 passengers.append({'category': category})
+
     result['passengers'] = passengers
-    result['passengers_from_model'] = has_models
+    result['passengers_exist'] = passengers_exist
     return jsonify(result), 200
 
 

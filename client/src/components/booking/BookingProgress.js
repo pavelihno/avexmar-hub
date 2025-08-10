@@ -19,7 +19,16 @@ const iconMap = {
 const StepIcon = ({ icon, active, completed }) => {
 	const stepKey = stepKeys[icon - 1];
 	const Icon = iconMap[stepKey];
-	const color = completed || active ? 'primary.main' : 'text.disabled';
+
+	let color;
+	if (completed) {
+		color = 'success.main';
+	} else if (active) {
+		color = 'primary.main';
+	} else {
+		color = 'text.disabled';
+	}
+
 	return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
 };
 

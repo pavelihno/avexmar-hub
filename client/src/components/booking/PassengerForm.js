@@ -14,15 +14,14 @@ import {
 	isCyrillicText,
 	isLatinText,
 	isCyrillicDocument,
-         getDocumentFieldConfig,
-         getAgeError,
-  } from '../utils';
+	getDocumentFieldConfig,
+	getAgeError,
+} from '../utils';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
-
 
 const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 	const dispatch = useDispatch();
@@ -37,7 +36,7 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 
 	const [data, setData] = useState({
 		id: passenger?.id || '',
-                type: passenger?.type || 'adult',
+		type: passenger?.type || 'adult',
 		lastName: passenger?.lastName || '',
 		firstName: passenger?.firstName || '',
 		patronymicName: passenger?.patronymicName || '',
@@ -50,6 +49,8 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 	});
 
 	const [errors, setErrors] = useState({});
+	// Track touched fields to avoid showing errors on initial load
+	const [touched, setTouched] = useState({});
 
 	useEffect(() => {
 		setData((prev) => ({ ...prev, ...passenger }));
@@ -146,6 +147,8 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 	const handleFieldChange = (field, value) => {
 		const next = { ...data, [field]: value };
 		setData(next);
+		// Mark field as touched when user changes it
+		setTouched((prev) => ({ ...prev, [field]: true }));
 		if (onChange) onChange(field, value, next);
 		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
 	};
@@ -216,8 +219,8 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 							onChange: (value) => handleFieldChange(fieldName, value),
 							fullWidth: true,
 							size: 'small',
-							error: !!errors[fieldName],
-							helperText: errors[fieldName],
+							error: !!(touched[fieldName] && errors[fieldName]),
+							helperText: touched[fieldName] ? errors[fieldName] : '',
 						})}
 					</Grid>
 				))}
@@ -232,8 +235,8 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 								),
 							fullWidth: true,
 							size: 'small',
-							error: !!errors[fieldName],
-							helperText: errors[fieldName],
+							error: !!(touched[fieldName] && errors[fieldName]),
+							helperText: touched[fieldName] ? errors[fieldName] : '',
 						})}
 					</Grid>
 				))}
@@ -250,8 +253,8 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 								),
 							fullWidth: true,
 							size: 'small',
-							error: !!errors[fieldName],
-							helperText: errors[fieldName],
+							error: !!(touched[fieldName] && errors[fieldName]),
+							helperText: touched[fieldName] ? errors[fieldName] : '',
 						})}
 					</Grid>
 				))}

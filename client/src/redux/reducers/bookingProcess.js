@@ -3,7 +3,6 @@ import {
 	processBookingCreate,
 	processBookingPassengers,
 	fetchBookingPassengers,
-	saveBookingPassenger,
 	fetchBookingDetails,
 	fetchBookingAccess,
 	fetchBookingDirectionsInfo,
@@ -37,26 +36,26 @@ const bookingProcessSlice = createSlice({
 			})
 			.addCase(fetchBookingPassengers.pending, handlePending)
 			.addCase(fetchBookingPassengers.rejected, handleRejected)
-                        .addCase(fetchBookingPassengers.fulfilled, (state, action) => {
-                                const { passengers, passengers_from_model } = action.payload;
-                                state.current = {
-                                        ...state.current,
-                                        passengers,
-                                        passengersFromModel: passengers_from_model,
-                                };
-                                state.isLoading = false;
-                        })
-                        .addCase(fetchBookingDetails.pending, handlePending)
-                        .addCase(fetchBookingDetails.rejected, handleRejected)
-                        .addCase(fetchBookingDetails.fulfilled, (state, action) => {
-                                const { passengers_from_model, ...rest } = action.payload;
-                                state.current = {
-                                        ...state.current,
-                                        ...rest,
-                                        passengersFromModel: passengers_from_model,
-                                };
-                                state.isLoading = false;
-                        })
+			.addCase(fetchBookingPassengers.fulfilled, (state, action) => {
+				const { passengers, passengers_exist } = action.payload;
+				state.current = {
+					...state.current,
+					passengers,
+					passengersExist: passengers_exist,
+				};
+				state.isLoading = false;
+			})
+			.addCase(fetchBookingDetails.pending, handlePending)
+			.addCase(fetchBookingDetails.rejected, handleRejected)
+			.addCase(fetchBookingDetails.fulfilled, (state, action) => {
+				const { passengers_exist, ...rest } = action.payload;
+				state.current = {
+					...state.current,
+					...rest,
+					passengersExist: passengers_exist,
+				};
+				state.isLoading = false;
+			})
 			.addCase(fetchBookingAccess.pending, handlePending)
 			.addCase(fetchBookingAccess.rejected, handleRejected)
 			.addCase(fetchBookingAccess.fulfilled, (state, action) => {

@@ -18,78 +18,42 @@ import {
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
-import {
-	processBookingPassengers,
-	fetchBookingPassengers,
-} from '../../redux/actions/bookingProcess';
+import { processBookingPassengers, fetchBookingPassengers } from '../../redux/actions/bookingProcess';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
-import {
-        createFormFields,
-        FIELD_TYPES,
-        formatNumber,
-        getDocumentFieldConfig,
-        getAgeError,
-} from '../utils';
+import { createFormFields, FIELD_TYPES, formatNumber } from '../utils';
 
 const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
-        const dispatch = useDispatch();
-        const {
-                current: booking,
-                isLoading: bookingLoading,
-                errors,
-        } = useSelector((state) => state.bookingProcess);
+	const dispatch = useDispatch();
+	const { current: booking, isLoading: bookingLoading, errors } = useSelector((state) => state.bookingProcess);
 
-        const storageKey = `booking_passengers_${publicId}`;
+	const existingPassengerData = booking?.passengers;
+	const fromModel = booking?.passengersExist;
+	const [passengerData, setPassengerData] = useState(null);
 
-        const existingPassengerData = booking?.passengers;
-        const fromModel = booking?.passengersFromModel;
-        const [passengerData, setPassengerData] = useState(null);
+	useEffect(() => {
+		if (Array.isArray(existingPassengerData)) {
+			const mapped = existingPassengerData.map((p) => ({
+				...p,
+				type: p.category || p.type || 'adult',
+			}));
+			setPassengerData(mapped);
+		}
+	}, [existingPassengerData, fromModel]);
 
-        useEffect(() => {
-                if (Array.isArray(existingPassengerData)) {
-                        let parsed = [];
-                        const stored = localStorage.getItem(storageKey);
-                        if (stored) {
-                                try {
-                                        parsed = JSON.parse(stored);
-                                } catch {
-                                        parsed = [];
-                                }
-                        }
-                        const merged = existingPassengerData.map((p, idx) => {
-                                const storedP = parsed[idx] || {};
-                                const combined = { ...storedP, ...p };
-                                return { ...combined, type: p.category || storedP.type || 'adult' };
-                        });
-                        setPassengerData(merged);
-                }
-        }, [existingPassengerData, storageKey, fromModel]);
+	useEffect(() => {
+		dispatch(fetchBookingPassengers(publicId));
+	}, [dispatch, publicId]);
 
-        useEffect(() => {
-                dispatch(fetchBookingPassengers(publicId));
-        }, [dispatch, publicId]);
-
-        const isPassengerComplete = (p) => {
-                const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
-                const docConfig = getDocumentFieldConfig(p.documentType);
-                if (docConfig.showExpiryDate) required.push('documentExpiryDate');
-                if (docConfig.showCitizenship) required.push('citizenshipId');
-                if (!required.every((f) => p[f])) return false;
-                return !getAgeError(p.type, p.birthDate);
-        };
-
-        useEffect(() => {
-                if (Array.isArray(passengerData)) {
-                        if (passengerData.every(isPassengerComplete)) {
-                                const toStore = passengerData.map(({ type, category, ...rest }) => rest);
-                                localStorage.setItem(storageKey, JSON.stringify(toStore));
-                        } else {
-                                localStorage.removeItem(storageKey);
-                        }
-                }
-        }, [passengerData, storageKey]);
+	const isPassengerComplete = (p) => {
+		const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
+		const docConfig = getDocumentFieldConfig(p.documentType);
+		if (docConfig.showExpiryDate) required.push('documentExpiryDate');
+		if (docConfig.showCitizenship) required.push('citizenshipId');
+		if (!required.every((f) => p[f])) return false;
+		return !getAgeError(p.type, p.birthDate);
+	};
 
 	const [buyer, setBuyer] = useState(
 		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
@@ -150,16 +114,15 @@ const Passengers = () => {
 		return Object.keys(errs).length === 0;
 	};
 
-        const handleContinue = async () => {
-                if (!validateBuyer()) return;
-                try {
-                        await dispatch(processBookingPassengers({ public_id: publicId, buyer })).unwrap();
-                        localStorage.removeItem(storageKey);
-                        navigate(`/booking/${publicId}/confirmation`);
-                } catch (e) {
-                        // errors handled via redux state
-                }
-        };
+	const handleContinue = async () => {
+		if (!validateBuyer()) return;
+		try {
+			await dispatch(processBookingPassengers({ public_id: publicId, buyer })).unwrap();
+			navigate(`/booking/${publicId}/confirmation`);
+		} catch (e) {
+			// errors handled via redux state
+		}
+	};
 
 	const routeInfo = UI_LABELS.SCHEDULE.from_to(booking?.from, booking?.to);
 
@@ -175,36 +138,31 @@ const Passengers = () => {
 		}
 	}, [routeInfo]);
 
-	// Render passenger-related UI only after data is loaded
 	const passengersReady = !bookingLoading && Array.isArray(passengerData);
 
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='passengers' />
 			<Grid container spacing={2}>
-                                <Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
-                                        {errors && (
-                                                <FormHelperText error sx={{ mb: 2, whiteSpace: 'pre-line' }}>
-                                                        {Array.isArray(errors) ? errors.join('\n') : errors.message || errors}
-                                                </FormHelperText>
-                                        )}
-                                        {passengersReady &&
-                                                passengerData.map((p) => (
-                                                        <PassengerForm
-                                                                key={p.id}
-                                                                passenger={p}
-                                                                onChange={handlePassengerChange(p.id)}
-                                                        />
-                                                ))}
-                                        <Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
-                                                <Typography variant='h6' sx={{ mb: 1 }}>
-                                                        {UI_LABELS.BOOKING.buyer_form.title}
-                                                </Typography>
+				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
+					{errors && (
+						<FormHelperText error sx={{ mb: 2, whiteSpace: 'pre-line' }}>
+							{Array.isArray(errors) ? errors.join('\n') : errors.message || errors}
+						</FormHelperText>
+					)}
+					{passengersReady &&
+						passengerData.map((p, index) => (
+							<PassengerForm key={p.id || index} passenger={p} onChange={handlePassengerChange(p.id)} />
+						))}
+					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
+						<Typography variant='h6' sx={{ mb: 1 }}>
+							{UI_LABELS.BOOKING.buyer_form.title}
+						</Typography>
 						<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 							{passengersReady &&
-								passengerData.map((p) => (
+								passengerData.map((p, index) => (
 									<Chip
-										key={p.id}
+										key={p.id || index}
 										label={`${p.lastName || ''} ${p.firstName || ''}`}
 										size='small'
 										onClick={() =>
