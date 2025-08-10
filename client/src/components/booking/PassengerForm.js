@@ -21,10 +21,10 @@ const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
-const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, citizenshipOptions = [] }, ref) => {
+const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) => {
 	const [data, setData] = useState({
 		id: passenger?.id || '',
-		type: passenger?.type || 'adult',
+		category: passenger?.category || 'adult',
 		lastName: passenger?.lastName || '',
 		firstName: passenger?.firstName || '',
 		patronymicName: passenger?.patronymicName || '',
@@ -97,7 +97,7 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, citize
 				key: 'birthDate',
 				label: FIELD_LABELS.PASSENGER.birth_date,
 				type: FIELD_TYPES.DATE,
-				validate: (v) => getAgeError(data.type, v),
+				validate: (v) => getAgeError(data.category, v),
 			},
 			documentType: {
 				key: 'documentType',
@@ -129,7 +129,7 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, citize
 		};
 		const arr = createFormFields(fields);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [data.type, data.documentType, citizenshipOptions]);
+	}, [data.category, data.documentType, citizenshipOptions]);
 
 	const handleFieldChange = (field, value) => {
 		const next = { ...data, [field]: value };
@@ -181,24 +181,12 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument, citize
 	return (
 		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-				<Typography variant='h6'>{typeLabels[data.type]}</Typography>
-				<Box>
-					{onSelectDocument && (
-						<IconButton onClick={onSelectDocument} size='small'>
-							<DescriptionIcon />
-						</IconButton>
-					)}
-					{onRemove && (
-						<IconButton onClick={onRemove} size='small'>
-							<DeleteIcon />
-						</IconButton>
-					)}
-				</Box>
+				<Typography variant='h4'>{typeLabels[data.category]}</Typography>
 			</Box>
 
 			<Grid container spacing={2}>
 				{nameFields.map((fieldName) => (
-					<Grid item xs={12} sm={6} key={fieldName}>
+					<Grid item xs={12} sm={4} key={fieldName}>
 						{formFields[fieldName].renderField({
 							value: data[fieldName],
 							onChange: (value) => handleFieldChange(fieldName, value),

@@ -1,4 +1,4 @@
-import { Stepper, Step, StepLabel } from '@mui/material';
+import { Stepper, Step, StepLabel, Typography } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import PaymentIcon from '@mui/icons-material/Payment';
@@ -16,19 +16,9 @@ const iconMap = {
 	completion: CheckCircleIcon,
 };
 
-const StepIcon = ({ icon, active, completed }) => {
+const StepIcon = ({ icon, color }) => {
 	const stepKey = stepKeys[icon - 1];
 	const Icon = iconMap[stepKey];
-
-	let color;
-	if (completed) {
-		color = 'success.main';
-	} else if (active) {
-		color = 'primary.main';
-	} else {
-		color = 'text.disabled';
-	}
-
 	return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
 };
 
@@ -54,6 +44,16 @@ const BookingProgress = ({ activeStep }) => {
 			{stepKeys.map((key, index) => {
 				const isCompleted = index < stepIndex;
 				const isActive = index === stepIndex;
+
+				let iconColor;
+				if (isCompleted) {
+					iconColor = 'success.main';
+				} else if (isActive) {
+					iconColor = 'primary.main';
+				} else {
+					iconColor = 'text.disabled';
+				}
+
 				return (
 					<Step
 						key={key}
@@ -62,14 +62,13 @@ const BookingProgress = ({ activeStep }) => {
 						sx={{
 							cursor: index <= stepIndex ? 'pointer' : 'default',
 							pointerEvents: index <= stepIndex ? 'auto' : 'none',
-							'& .MuiStepLabel-label': {
-								color: isActive ? 'primary.main' : isCompleted ? 'text.primary' : 'text.disabled',
-								fontWeight: isActive ? 600 : 400,
-							},
-							'& .MuiStepLabel-labelContainer': { gap: 0.1 },
 						}}
 					>
-						<StepLabel StepIconComponent={StepIcon}>{UI_LABELS.BOOKING.progress_steps[key]}</StepLabel>
+						<StepLabel StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}>
+							<Typography variant='subtitle2' sx={{ color: iconColor, fontWeight: isActive ? 600 : 400 }}>
+								{UI_LABELS.BOOKING.progress_steps[key]}
+							</Typography>
+						</StepLabel>
 					</Step>
 				);
 			})}
