@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from app.models.ticket import Ticket
     from app.models.seat import Seat
     from app.models.booking_passenger import BookingPassenger
+    from app.models.booking_flight import BookingFlight
 
 
 class Booking(BaseModel):
@@ -38,6 +39,8 @@ class Booking(BaseModel):
     fees = db.Column(db.Float, nullable=False, default=0.0)
     total_discounts = db.Column(db.Float, nullable=False, default=0.0)
     total_price = db.Column(db.Float, nullable=False)
+
+    # Metadata
     passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
 
     # Relationships
@@ -52,6 +55,9 @@ class Booking(BaseModel):
     )
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    booking_flights: Mapped[List['BookingFlight']] = db.relationship(
+        'BookingFlight', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     def to_dict(self):
@@ -80,11 +86,12 @@ class Booking(BaseModel):
         return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
 
     @classmethod
-    def __generate_booking_number(cls, session: Session):
+    def generate_booking_number(cls, id, session: Session):
         """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
-            booking.booking_number for booking in session.query(cls).all()}
-
+            booking.booking_number for booking in session.query(cls).all()
+        }
+        booking_number = None
         while True:
             booking_number = ''.join(
                 random.choice(string.ascii_uppercase + string.digits)
@@ -92,12 +99,17 @@ class Booking(BaseModel):
                 for ch in Config.PNR_MASK
             )
             if booking_number not in existing_booking_numbers:
-                return booking_number
+                break
+
+        return cls.update(
+            id,
+            session=session,
+            booking_number=booking_number
+        )
 
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        kwargs['booking_number'] = cls.__generate_booking_number(session)
         status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS)
         history = kwargs.get('status_history', [])
         if not history:
@@ -137,7 +149,7 @@ class Booking(BaseModel):
         session = session or db.session
         from_status = self.status.value
         if to_status not in self.ALLOWED_TRANSITIONS.get(from_status, set()):
-            raise ValueError(f'illegal_transition:{from_status}->{to_status}')
+            raise ValueError(f'Illegal transition: {from_status} -> {to_status}')
 
         self.status = Config.BOOKING_STATUS[to_status]
         history = list(self.status_history or [])
@@ -149,64 +161,3 @@ class Booking(BaseModel):
         session.add(self)
         session.commit()
         return self
-
-    # Rewrite using Config.BOOKING_STATUS
-    # ALLOWED_TRANSITIONS = {
-    #     'created': {'passengers_added', 'cancelled', 'expired'},
-    #     'passengers_added': {'payment_pending', 'cancelled', 'expired'},
-    #     'payment_pending': {'payment_confirmed', 'payment_failed', 'cancelled', 'expired'},
-    #     'payment_failed': {'payment_pending', 'cancelled', 'expired'},
-    #     'payment_confirmed': {'completed', 'cancelled'},
-    #     'completed': {'cancelled'},
-    #     'expired': set(),
-    #     'cancelled': set(),
-    # }
-
-    # TERMINAL = {'expired', 'cancelled'}
-    # def transition_status(booking, to_status: str, *, reason=None, by='system', meta=None, expect_version=None):
-    # from app import db  # где лежит сессия
-
-    # now = datetime.now(timezone.utc)
-    # from_status = booking.status.value if hasattr(booking.status, 'value') else str(booking.status)
-
-    # # оптимистическая блокировка
-    # if expect_version is not None and booking.version != expect_version:
-    #     raise ConflictError('booking_version_conflict')
-
-    # if to_status not in ALLOWED_TRANSITIONS.get(from_status, set()):
-    #     raise ConflictError(f'illegal_transition:{from_status}->{to_status}')
-
-    # # обновить поля
-    # booking.status = Config.BOOKING_STATUS[to_status]
-    # booking.status_updated_at = now
-    # booking.version = booking.version + 1
-
-    # # TTL управление
-    # if to_status in ('created', 'passengers_added', 'payment_pending'):
-    #     booking.expires_at = calc_new_expiry(to_status, now)  # реализовать: разные TTL по этапам
-    # else:
-    #     booking.expires_at = None
-
-    # # append в JSONB историю (в приложении: читаем список и добавляем запись)
-    # history = list(booking.status_history or [])
-    # entry = {'status': to_status, 'at': now.isoformat().replace('+00:00','Z')}
-    # if by: entry['by'] = by
-    # if reason: entry['reason'] = reason
-    # if meta: entry['meta'] = meta
-    # history.append(entry)
-    # booking.status_history = history
-
-    # db.session.add(booking)
-    # db.session.commit()
-
-    # return booking
-
-    # def calc_new_expiry(stage: str, now):
-    # # пример: 20 минут на ввод пассажиров, 15 минут на оплату
-    # ttl_map = {
-    #     'created': 1200,
-    #     'passengers_added': 900,
-    #     'payment_pending': 900,
-    # }
-    # seconds = ttl_map.get(stage)
-    # return None if seconds is None else now + timedelta(seconds=seconds)

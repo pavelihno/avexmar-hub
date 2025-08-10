@@ -32,10 +32,12 @@ class BookingPassenger(BaseModel):
         ),
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
+            'booking': self.booking.to_dict() if return_children else {},
             'booking_id': self.booking_id,
+            'passenger': self.passenger.to_dict() if return_children else {},
             'passenger_id': self.passenger_id,
             'is_contact': self.is_contact,
             'category': self.category.value if self.category else None

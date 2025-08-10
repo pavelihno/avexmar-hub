@@ -35,11 +35,13 @@ class Seat(BaseModel):
         """Return True if the seat is associated with a booking"""
         return self.booking_id is not None
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'seat_number': self.seat_number,
+            'booking': self.booking.to_dict() if self.booking_id and return_children else {},
             'booking_id': self.booking_id,
+            'tariff': self.tariff.to_dict() if return_children else {},
             'tariff_id': self.tariff_id,
             'is_booked': self.is_booked
         }

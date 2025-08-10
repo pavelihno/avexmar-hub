@@ -199,3 +199,10 @@ class BaseModel(db.Model):
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e
         return count
+
+    def to_dict(self, return_children: bool = False) -> Dict[str, Optional[str]]:
+        return {
+            'id': self.id,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+        }

@@ -25,10 +25,12 @@ class FlightTariff(BaseModel):
         db.UniqueConstraint('flight_id', 'tariff_id', name='uix_flight_tariff_flight_tariff'),
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
+            'flight': self.flight.to_dict() if return_children else {},
             'flight_id': self.flight_id,
+            'tariff': self.tariff.to_dict() if return_children else {},
             'tariff_id': self.tariff_id,
             'seats_number': self.seats_number
         }

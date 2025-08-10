@@ -18,9 +18,10 @@ class Payment(BaseModel):
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='payments')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
+            'booking': self.booking.to_dict() if return_children else {},
             'booking_id': self.booking_id,
             'payment_method': self.payment_method.value,
             'payment_status': self.payment_status.value

@@ -30,9 +30,11 @@ class Route(BaseModel):
         ),
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
+            'origin_airport': self.origin_airport.to_dict() if return_children else {},
             'origin_airport_id': self.origin_airport_id,
-            'destination_airport_id': self.destination_airport_id
+            'destination_airport': self.destination_airport.to_dict() if return_children else {},
+            'destination_airport_id': self.destination_airport_id,
         }

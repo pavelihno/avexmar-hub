@@ -16,6 +16,7 @@ from app.utils.datetime import get_datetime, parse_date, parse_time
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
+    from app.models.booking_flight import BookingFlight
 
 
 class Flight(BaseModel):
@@ -41,6 +42,9 @@ class Flight(BaseModel):
     aircraft: Mapped['Aircraft'] = db.relationship('Aircraft', back_populates='flights')
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    booking_flights: Mapped[List['BookingFlight']] = db.relationship(
+        'BookingFlight', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     __table_args__ = (
@@ -82,6 +86,25 @@ class Flight(BaseModel):
 
         delta = arrive_dt - depart_dt
         return int(delta.total_seconds() // 60)
+
+    def to_dict(self, return_children=False):
+        return {
+            'id': self.id,
+            'flight_number': self.flight_number,
+            'airline_flight_number': self.airline_flight_number,
+            'airline': self.airline.to_dict() if return_children else {},
+            'airline_id': self.airline_id,
+            'route': self.route.to_dict() if return_children else {},
+            'route_id': self.route_id,
+            'note': self.note,
+            'aircraft': self.aircraft.to_dict() if self.aircraft_id and return_children else {},
+            'aircraft_id': self.aircraft_id,
+            'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
+            'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
+            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
+            'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
+            'duration': self.flight_duration,
+        }
 
     MAX_TARIFFS = 4
 
@@ -249,23 +272,6 @@ class Flight(BaseModel):
                 error_rows.append(row)
 
         return flights, error_rows
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'flight_number': self.flight_number,
-            'airline_flight_number': self.airline_flight_number,
-            'note': self.note,
-            'airline_id': self.airline_id,
-            'route_id': self.route_id,
-            'aircraft_id': self.aircraft_id,
-            'aircraft_type': self.aircraft.type if self.aircraft else None,
-            'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
-            'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
-            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
-            'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
-            'duration': self.flight_duration,
-        }
 
     @classmethod
     def get_all(cls):

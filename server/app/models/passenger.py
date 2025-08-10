@@ -52,9 +52,10 @@ class Passenger(BaseModel):
         ),
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
+            'owner_user': self.owner_user.to_dict() if self.owner_user_id and return_children else {},
             'owner_user_id': self.owner_user_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -63,7 +64,8 @@ class Passenger(BaseModel):
             'document_type': self.document_type.value,
             'document_number': self.document_number,
             'document_expiry_date': self.document_expiry_date.isoformat() if self.document_expiry_date else None,
-            'citizenship_id': self.citizenship_id
+            'citizenship': self.citizenship.to_dict() if return_children else {},
+            'citizenship_id': self.citizenship_id,
         }
 
     @classmethod
@@ -80,9 +82,19 @@ class Passenger(BaseModel):
         years = date.year - self.birth_date.year - ((date.month, date.day) < (self.birth_date.month, self.birth_date.day))
         return 1 <= years < 3
 
+    @staticmethod
+    def __normalize_names(kwargs: dict) -> dict:
+        for key in ('first_name', 'last_name', 'patronymic_name'):
+            if key in kwargs and kwargs[key] is not None:
+                kwargs[key] = str(kwargs[key]).upper()
+        return kwargs
+
     @classmethod
-    def _prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
+    def __prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
         """Apply defaults and reuse existing passenger if unique data matches"""
+        # Ensure names are stored in uppercase
+        kwargs = cls.__normalize_names(kwargs)
+
         if kwargs.get('document_type') in (
             Config.DOCUMENT_TYPE.passport.value,
             Config.DOCUMENT_TYPE.birth_certificate.value,
@@ -119,10 +131,12 @@ class Passenger(BaseModel):
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
 
-        existing = cls._prepare_for_save(session, kwargs)
+        existing = cls.__prepare_for_save(session, kwargs)
         if existing:
             return existing
 
+        # Ensure names are uppercase on direct create as well
+        kwargs = cls.__normalize_names(kwargs)
         return super().create(session, **kwargs)
 
     @classmethod
@@ -130,8 +144,10 @@ class Passenger(BaseModel):
         """Update passenger or reuse existing one with the same unique data."""
         session = session or db.session
 
-        existing = cls._prepare_for_save(session, kwargs, current_id=_id)
+        existing = cls.__prepare_for_save(session, kwargs, current_id=_id)
         if existing:
             return existing
 
+        # Ensure names are uppercase on update
+        kwargs = cls.__normalize_names(kwargs)
         return super().update(_id, session, **kwargs)
