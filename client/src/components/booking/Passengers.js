@@ -59,14 +59,21 @@ const Passengers = () => {
 		[countries]
 	);
 
-	const isPassengerComplete = (p) => {
-		const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
-		const docConfig = getDocumentFieldConfig(p.documentType);
-		if (docConfig.showExpiryDate) required.push('documentExpiryDate');
-		if (docConfig.showCitizenship) required.push('citizenshipId');
-		if (!required.every((f) => p[f])) return false;
-		return !getAgeError(p.category, p.birthDate);
-	};
+        const isPassengerComplete = (p) => {
+                const required = [
+                        'lastName',
+                        'firstName',
+                        'gender',
+                        'birthDate',
+                        'documentType',
+                        'documentNumber',
+                ];
+                const docConfig = getDocumentFieldConfig(p.documentType);
+                if (docConfig.showExpiryDate) required.push('documentExpiryDate');
+                if (docConfig.showCitizenship) required.push('citizenshipId');
+                if (!required.every((f) => p[f])) return false;
+                return !getAgeError(p.category, p.birthDate);
+        };
 
 	const [buyer, setBuyer] = useState(
 		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
@@ -129,24 +136,52 @@ const Passengers = () => {
 		return Object.keys(errs).length === 0;
 	};
 
-	const passengerRefs = useRef([]);
+        const passengerRefs = useRef([]);
 
-	const handleContinue = async () => {
-		const allValid = passengerRefs.current
-			.filter(Boolean)
-			.map((r) => r.validate())
-			.every(Boolean);
-		if (!allValid) return;
-		if (!validateBuyer()) return;
-		try {
-			await dispatch(
-				processBookingPassengers({ public_id: publicId, buyer, passengers: passengerData })
-			).unwrap();
-			navigate(`/booking/${publicId}/confirmation`);
-		} catch (e) {
-			// errors handled via redux state
-		}
-	};
+        const toApiPassenger = (p) => ({
+                id: p.id,
+                category: p.category,
+                first_name: p.firstName,
+                last_name: p.lastName,
+                patronymic_name: p.patronymicName,
+                gender: p.gender,
+                birth_date: p.birthDate,
+                document_type: p.documentType,
+                document_number: p.documentNumber,
+                document_expiry_date: p.documentExpiryDate,
+                citizenship_id: p.citizenshipId,
+        });
+
+        const toApiBuyer = (b) => ({
+                last_name: b.lastName,
+                first_name: b.firstName,
+                email: b.email,
+                phone: b.phone,
+                consent: b.consent,
+        });
+
+        const handleContinue = async () => {
+                const allValid = passengerRefs.current
+                        .filter(Boolean)
+                        .map((r) => r.validate())
+                        .every(Boolean);
+                if (!allValid) return;
+                if (!validateBuyer()) return;
+                try {
+                        const apiPassengers = (passengerData || []).map(toApiPassenger);
+                        const apiBuyer = toApiBuyer(buyer);
+                        await dispatch(
+                                processBookingPassengers({
+                                        public_id: publicId,
+                                        buyer: apiBuyer,
+                                        passengers: apiPassengers,
+                                })
+                        ).unwrap();
+                        navigate(`/booking/${publicId}/confirmation`);
+                } catch (e) {
+                        // errors handled via redux state
+                }
+        };
 
 	const routeInfo = UI_LABELS.SCHEDULE.from_to(booking?.from, booking?.to);
 

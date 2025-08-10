@@ -78,31 +78,37 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-	PASSENGER: {
-		first_name: {
-			REQUIRED: 'Имя обязательно',
-		},
-		last_name: {
-			REQUIRED: 'Фамилия обязательна',
-		},
-		birth_date: {
-			REQUIRED: 'Укажите дату рождения',
-			adult: 'Пассажир должен быть старше 12 лет',
-			child: 'Возраст ребёнка 2–12 лет',
-			infant: 'Возраст младенца должен быть менее 2 лет',
-			infant_seat: 'Возраст младенца должен быть менее 2 лет',
-		},
-		document_type: {
-			REQUIRED: 'Тип документа обязателен',
-		},
-		document_number: {
-			REQUIRED: 'Номер документа обязателен',
-		},
-		name_language: {
-			CYRILLIC: 'Используйте кириллицу',
-			LATIN: 'Используйте латиницу',
-		},
-	},
+        PASSENGER: {
+                first_name: {
+                        REQUIRED: 'Имя обязательно',
+                },
+                last_name: {
+                        REQUIRED: 'Фамилия обязательна',
+                },
+                birth_date: {
+                        REQUIRED: 'Укажите дату рождения',
+                        adult: 'Пассажир должен быть старше 12 лет',
+                        child: 'Возраст ребёнка 2–12 лет',
+                        infant: 'Возраст младенца должен быть менее 2 лет',
+                        infant_seat: 'Возраст младенца должен быть менее 2 лет',
+                },
+                document_type: {
+                        REQUIRED: 'Тип документа обязателен',
+                },
+                document_number: {
+                        REQUIRED: 'Номер документа обязателен',
+                },
+                document_expiry_date: {
+                        REQUIRED: 'Срок действия обязателен',
+                },
+                citizenship_id: {
+                        REQUIRED: 'Гражданство обязательно',
+                },
+                name_language: {
+                        CYRILLIC: 'Используйте кириллицу',
+                        LATIN: 'Используйте латиницу',
+                },
+        },
 
 	BOOKING: {
 		email_address: {

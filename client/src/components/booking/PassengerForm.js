@@ -43,93 +43,98 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) =>
 		setData((prev) => ({ ...prev, ...passenger }));
 	}, [passenger]);
 
-	const formFields = useMemo(() => {
-		const requiresCyrillic = isCyrillicDocument(data.documentType);
-		const { showExpiryDate, showCitizenship } = getDocumentFieldConfig(data.documentType);
+        const requiresCyrillic = isCyrillicDocument(data.documentType);
+        const docConfig = getDocumentFieldConfig(data.documentType);
+        const { showExpiryDate, showCitizenship } = docConfig;
 
-		const fields = {
-			lastName: {
-				key: 'lastName',
-				label: FIELD_LABELS.PASSENGER.last_name,
-				validate: (v) => {
-					if (!v) return VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
-					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-					return valid
-						? ''
-						: requiresCyrillic
-						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-				},
-			},
-			firstName: {
-				key: 'firstName',
-				label: FIELD_LABELS.PASSENGER.first_name,
-				validate: (v) => {
-					if (!v) return VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
-					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-					return valid
-						? ''
-						: requiresCyrillic
-						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-				},
-			},
-			patronymicName: {
-				key: 'patronymicName',
-				label: FIELD_LABELS.PASSENGER.patronymic_name,
-				validate: (v) => {
-					if (!v) return '';
-					const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
-					return valid
-						? ''
-						: requiresCyrillic
-						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
-				},
-			},
-			gender: {
-				key: 'gender',
-				label: FIELD_LABELS.PASSENGER.gender,
-				type: FIELD_TYPES.SELECT,
-				options: genderOptions,
-			},
-			birthDate: {
-				key: 'birthDate',
-				label: FIELD_LABELS.PASSENGER.birth_date,
-				type: FIELD_TYPES.DATE,
-				validate: (v) => getAgeError(data.category, v),
-			},
-			documentType: {
-				key: 'documentType',
-				label: FIELD_LABELS.PASSENGER.document_type,
-				type: FIELD_TYPES.SELECT,
-				options: docTypeOptions,
-				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : ''),
-			},
-			documentNumber: {
-				key: 'documentNumber',
-				label: FIELD_LABELS.PASSENGER.document_number,
-				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
-			},
-			...(showExpiryDate && {
-				documentExpiryDate: {
-					key: 'documentExpiryDate',
-					label: FIELD_LABELS.PASSENGER.document_expiry_date,
-					type: FIELD_TYPES.DATE,
-				},
-			}),
-			...(showCitizenship && {
-				citizenshipId: {
-					key: 'citizenshipId',
-					label: FIELD_LABELS.PASSENGER.citizenship_id,
-					type: FIELD_TYPES.SELECT,
-					options: citizenshipOptions,
-				},
-			}),
-		};
-		const arr = createFormFields(fields);
-		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [data.category, data.documentType, citizenshipOptions]);
+        const formFields = useMemo(() => {
+                const fields = {
+                        lastName: {
+                                key: 'lastName',
+                                label: UI_LABELS.BOOKING.passenger_form.last_name(requiresCyrillic),
+                                validate: (v) => {
+                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
+                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+                                        return valid
+                                                ? ''
+                                                : requiresCyrillic
+                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+                                },
+                        },
+                        firstName: {
+                                key: 'firstName',
+                                label: UI_LABELS.BOOKING.passenger_form.first_name(requiresCyrillic),
+                                validate: (v) => {
+                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
+                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+                                        return valid
+                                                ? ''
+                                                : requiresCyrillic
+                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+                                },
+                        },
+                        patronymicName: {
+                                key: 'patronymicName',
+                                label: UI_LABELS.BOOKING.passenger_form.patronymic_name(requiresCyrillic),
+                                validate: (v) => {
+                                        if (!v) return '';
+                                        const valid = requiresCyrillic ? isCyrillicText(v) : isLatinText(v);
+                                        return valid
+                                                ? ''
+                                                : requiresCyrillic
+                                                ? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+                                                : VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+                                },
+                        },
+                        gender: {
+                                key: 'gender',
+                                label: FIELD_LABELS.PASSENGER.gender,
+                                type: FIELD_TYPES.SELECT,
+                                options: genderOptions,
+                        },
+                        birthDate: {
+                                key: 'birthDate',
+                                label: FIELD_LABELS.PASSENGER.birth_date,
+                                type: FIELD_TYPES.DATE,
+                                validate: (v) => getAgeError(data.type, v),
+                        },
+                        documentType: {
+                                key: 'documentType',
+                                label: FIELD_LABELS.PASSENGER.document_type,
+                                type: FIELD_TYPES.SELECT,
+                                options: docTypeOptions,
+                                validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : ''),
+                        },
+                        documentNumber: {
+                                key: 'documentNumber',
+                                label: FIELD_LABELS.PASSENGER.document_number,
+                                validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
+                        },
+                        ...(showExpiryDate && {
+                                documentExpiryDate: {
+                                        key: 'documentExpiryDate',
+                                        label: FIELD_LABELS.PASSENGER.document_expiry_date,
+                                        type: FIELD_TYPES.DATE,
+                                        validate: (v) =>
+                                                !v ? VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED : '',
+                                },
+                        }),
+                        ...(showCitizenship && {
+                                citizenshipId: {
+                                        key: 'citizenshipId',
+                                        label: FIELD_LABELS.PASSENGER.citizenship_id,
+                                        type: FIELD_TYPES.SELECT,
+                                        options: citizenshipOptions,
+                                        validate: (v) =>
+                                                !v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : '',
+                                },
+                        }),
+                };
+                const arr = createFormFields(fields);
+                return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
+        }, [data.type, requiresCyrillic, showExpiryDate, showCitizenship, citizenshipOptions]);
 
 	const handleFieldChange = (field, value) => {
 		const next = { ...data, [field]: value };
@@ -156,15 +161,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [] }, ref) =>
 
 	useImperativeHandle(ref, () => ({ validate }));
 
-	useEffect(() => {
-		if (formFields.citizenshipId && !data.citizenshipId && citizenshipOptions.length) {
-			setData((prev) => ({ ...prev, citizenshipId: citizenshipOptions[0].value }));
-		}
-	}, [formFields.citizenshipId, citizenshipOptions, data.citizenshipId]);
-
-	const theme = useTheme();
-
-	const docConfig = getDocumentFieldConfig(data.documentType);
+        const theme = useTheme();
 
 	const nameFields = [
 		'lastName',
