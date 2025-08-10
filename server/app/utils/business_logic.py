@@ -132,7 +132,16 @@ def process_booking_create(data):
     outbound_id = data.get('outbound_id')
     return_id = data.get('return_id')
     tariff_id = data.get('tariff_id')
-    passengers = data.get('passengers', {})
+    raw_passengers = data.get('passengers', {})
+
+    passengers = {}
+    for key, value in (raw_passengers or {}).items():
+        try:
+            count = int(value)
+        except (TypeError, ValueError):
+            continue
+        if count > 0:
+            passengers[key] = count
 
     price = calculate_price_details(
         outbound_id, return_id, tariff_id, passengers
@@ -143,7 +152,7 @@ def process_booking_create(data):
         'at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }]
 
-    passenger_counts = {k: v for k, v in passengers.items() if v}
+    passenger_counts = passengers
 
     booking = Booking.create(
         currency=Config.CURRENCY[price['currency']],

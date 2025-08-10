@@ -1,6 +1,6 @@
-import { MAX_PASSENGERS } from '../../constants';
+import { MAX_PASSENGERS, DATE_API_FORMAT, VALIDATION_MESSAGES } from '../../constants';
+import { differenceInYears } from 'date-fns';
 import { formatDate } from '../utils';
-import { DATE_API_FORMAT } from '../../constants';
 
 export const getTotalPassengers = (passengers) => {
 	return (
@@ -63,7 +63,17 @@ export const disabledPassengerChange = (passengers, key, delta) => {
 		}
 	}
 
-	return false;
+        return false;
+};
+
+export const getAgeError = (type, birthDate) => {
+        if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
+        const age = differenceInYears(new Date(), new Date(birthDate));
+        if (type === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.adult;
+        if (type === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.child;
+        if (['infant', 'infant_seat'].includes(type) && age >= 2)
+                return VALIDATION_MESSAGES.PASSENGER.birth_date.infant;
+        return '';
 };
 
 export const getExistingPassenger = (passengers, passengerData) => {

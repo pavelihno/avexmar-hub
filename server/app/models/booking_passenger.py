@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models._base_model import ModelValidationError
+from app.config import Config
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -15,6 +16,11 @@ class BookingPassenger(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)
     is_contact = db.Column(db.Boolean, default=False, nullable=False)
+    category = db.Column(
+        db.Enum(Config.PASSENGER_CATEGORY),
+        default=Config.DEFAULT_PASSENGER_CATEGORY,
+        nullable=False,
+    )
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_passengers')
     passenger: Mapped['Passenger'] = db.relationship('Passenger', back_populates='booking_passengers')
@@ -31,7 +37,8 @@ class BookingPassenger(BaseModel):
             'id': self.id,
             'booking_id': self.booking_id,
             'passenger_id': self.passenger_id,
-            'is_contact': self.is_contact
+            'is_contact': self.is_contact,
+            'category': self.category.value if self.category else None
         }
 
     @classmethod

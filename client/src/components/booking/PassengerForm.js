@@ -5,7 +5,6 @@ import { Box, Grid, Typography, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { differenceInYears } from 'date-fns';
 
 import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { fetchCountries } from '../../redux/actions/country';
@@ -15,22 +14,15 @@ import {
 	isCyrillicText,
 	isLatinText,
 	isCyrillicDocument,
-	getDocumentFieldConfig,
-} from '../utils';
+         getDocumentFieldConfig,
+         getAgeError,
+  } from '../utils';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
-const getAgeError = (type, birthDate) => {
-	if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-	const age = differenceInYears(new Date(), new Date(birthDate));
-	if (type === 'ADULT' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.ADULT;
-	if (type === 'CHILD' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.CHILD;
-	if (type === 'INFANT' && age >= 2) return VALIDATION_MESSAGES.PASSENGER.birth_date.INFANT;
-	return '';
-};
 
 const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 	const dispatch = useDispatch();
@@ -45,7 +37,7 @@ const PassengerForm = ({ passenger, onChange, onRemove, onSelectDocument }) => {
 
 	const [data, setData] = useState({
 		id: passenger?.id || '',
-		type: passenger?.type || 'ADULT',
+                type: passenger?.type || 'adult',
 		lastName: passenger?.lastName || '',
 		firstName: passenger?.firstName || '',
 		patronymicName: passenger?.patronymicName || '',

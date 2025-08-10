@@ -26,15 +26,21 @@ export const ENUM_LABELS = {
 		м: 'М',
 		ж: 'Ж',
 	},
-	DOCUMENT_TYPE: {
-		passport: 'Паспорт РФ',
-		foreign_passport: 'Паспорт иностранного гражданина',
-		international_passport: 'Загранпаспорт',
-		birth_certificate: 'Свидетельство о рождении',
-	},
-	CURRENCY: {
-		rub: 'РУБ',
-	},
+        DOCUMENT_TYPE: {
+                passport: 'Паспорт РФ',
+                foreign_passport: 'Паспорт иностранного гражданина',
+                international_passport: 'Загранпаспорт',
+                birth_certificate: 'Свидетельство о рождении',
+        },
+        PASSENGER_CATEGORY: {
+                adult: 'Взрослый',
+                child: 'Ребёнок',
+                infant: 'Малыш',
+                infant_seat: 'Малыш с местом',
+        },
+        CURRENCY: {
+                rub: 'РУБ',
+        },
 	CURRENCY_SYMBOL: {
 		rub: '₽',
 	},
