@@ -1,4 +1,6 @@
 from flask import request, jsonify
+from sqlalchemy.exc import DataError
+
 from app.database import db
 from app.models.booking import Booking
 from app.models.passenger import Passenger
@@ -51,16 +53,54 @@ def process_booking_passengers():
     data = request.json or {}
     public_id = data.get('public_id')
     buyer = data.get('buyer', {})
+    passengers = data.get('passengers') or []
     if not public_id:
         return jsonify({'message': 'public_id_required'}), 400
+
     booking = Booking.get_by_public_id(public_id)
     booking.email_address = buyer.get('email')
     booking.phone_number = buyer.get('phone')
-    try:
-        booking.transition_status('passengers_added')
-    except ValueError:
-        pass
-    flight_dates = [t.flight.scheduled_departure for t in booking.tickets if t.flight]
+
+    # Process passengers: create or update, keep track of processed ids
+    existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
+    processed_ids = set()
+    for pdata in passengers:
+        pid = pdata.get('id')
+        passenger_fields = {
+            'first_name': pdata.get('first_name'),
+            'last_name': pdata.get('last_name'),
+            'patronymic_name': pdata.get('patronymic_name'),
+            'gender': Config.GENDER[pdata['gender']] if pdata.get('gender') else None,
+            'birth_date': pdata.get('birth_date'),
+            'document_type': Config.DOCUMENT_TYPE[pdata['document_type']] if pdata.get('document_type') else None,
+            'document_number': pdata.get('document_number'),
+            'document_expiry_date': pdata.get('document_expiry_date'),
+            'citizenship_id': pdata.get('citizenship_id'),
+        }
+        if pid:
+            passenger = Passenger.update(pid, **passenger_fields)
+        else:
+            passenger = Passenger.create(**passenger_fields)
+
+        processed_ids.add(passenger.id)
+        category = pdata.get('category')
+        category_enum = Config.PASSENGER_CATEGORY[category] if category else None
+        bp = existing.get(passenger.id)
+        if bp:
+            BookingPassenger.update(bp.id, passenger_id=passenger.id, category=category_enum)
+        else:
+            BookingPassenger.create(booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
+
+    # Remove passengers that are no longer present
+    for bp in list(booking.booking_passengers):
+        if bp.passenger_id not in processed_ids:
+            db.session.delete(bp)
+            if bp.passenger.booking_passengers.count() <= 1 and bp.passenger.tickets.count() == 0:
+                db.session.delete(bp.passenger)
+
+    db.session.flush()
+
+    flight_dates = [bf.flight.scheduled_departure for bf in booking.booking_flights if bf.flight]
     check_date = min(flight_dates) if flight_dates else None
     errors = []
     if check_date:
@@ -81,7 +121,15 @@ def process_booking_passengers():
     if errors:
         db.session.rollback()
         return jsonify({'errors': errors}), 400
+
     db.session.commit()
+    try:
+        booking.transition_status('passengers_added')
+    except ValueError:
+        pass
+    except DataError:
+        db.session.rollback()
+
     return jsonify({'status': 'ok'}), 200
 
 
