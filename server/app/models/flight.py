@@ -302,25 +302,25 @@ class Flight(BaseModel):
                 {'flight_number': 'Flight with this number already exists for the given airline and route.'})
 
     @classmethod
-    def create(cls, session=None, **data):
+    def create(cls, session=None, **kwargs):
         session = session or db.session
-        flight_number = data.get('flight_number')
-        airline_id = data.get('airline_id')
-        route_id = data.get('route_id')
-        scheduled_departure = data.get('scheduled_departure')
+        flight_number = kwargs.get('flight_number')
+        airline_id = kwargs.get('airline_id')
+        route_id = kwargs.get('route_id')
+        scheduled_departure = kwargs.get('scheduled_departure')
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure
         )
-        return super().create(session, **data)
+        return super().create(session, **kwargs)
 
     @classmethod
-    def update(cls, _id, session=None, **data):
+    def update(cls, _id, session=None, **kwargs):
         session = session or db.session
-        flight_number = data.get('flight_number')
-        airline_id = data.get('airline_id')
-        route_id = data.get('route_id')
-        scheduled_departure = data.get('scheduled_departure')
+        flight_number = kwargs.get('flight_number')
+        airline_id = kwargs.get('airline_id')
+        route_id = kwargs.get('route_id')
+        scheduled_departure = kwargs.get('scheduled_departure')
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=_id
         )
-        return super().update(_id, session, **data)
+        return super().update(_id, session, **kwargs)

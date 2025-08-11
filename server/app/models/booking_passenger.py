@@ -15,7 +15,6 @@ class BookingPassenger(BaseModel):
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)
-    is_contact = db.Column(db.Boolean, default=False, nullable=False)
     category = db.Column(
         db.Enum(Config.PASSENGER_CATEGORY),
         default=Config.DEFAULT_PASSENGER_CATEGORY,
@@ -39,36 +38,5 @@ class BookingPassenger(BaseModel):
             'booking_id': self.booking_id,
             'passenger': self.passenger.to_dict(return_children) if return_children else {},
             'passenger_id': self.passenger_id,
-            'is_contact': self.is_contact,
             'category': self.category.value if self.category else None
         }
-
-    @classmethod
-    def __check_is_contact_unique(cls, session, booking_id, instance_id=None):
-        """Ensure only one contact passenger per booking"""
-        query = session.query(cls).filter(
-            cls.booking_id == booking_id,
-            cls.is_contact.is_(True)
-        )
-        if instance_id is not None:
-            query = query.filter(cls.id != instance_id)
-        if query.one_or_none() is not None:
-            raise ModelValidationError({'is_contact': 'only one contact passenger per booking allowed'})
-
-    @classmethod
-    def create(cls, session=None, **data):
-        session = session or db.session
-        booking_id = data.get('booking_id')
-        if booking_id is not None and data.get('is_contact'):
-            cls.__check_is_contact_unique(session, booking_id)
-        return super().create(session, **data)
-
-    @classmethod
-    def update(cls, _id, session=None, **data):
-        session = session or db.session
-        instance = cls.get_or_404(_id, session)
-        booking_id = data.get('booking_id', instance.booking_id)
-        if booking_id is not None and data.get('is_contact'):
-            cls.__check_is_contact_unique(session, booking_id, instance_id=_id)
-
-        return super().update(_id, session, **data)

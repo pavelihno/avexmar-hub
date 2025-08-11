@@ -109,15 +109,28 @@ class Booking(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS)
-        history = kwargs.get('status_history', [])
-        if not history:
-            history = [{
-                'status': status.value if hasattr(status, 'value') else str(status),
-                'at': datetime.now().isoformat()
-            }]
+        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS.value)
+        history = [{
+            'status': status,
+            'at': datetime.now().isoformat()
+        }]
         kwargs['status_history'] = history
         return super().create(session, **kwargs)
+
+    @classmethod
+    def update(cls, id, session: Session | None = None, **kwargs):
+        session = session or db.session
+        booking = cls.get_or_404(id, session)
+        old_status = booking.status.value
+        new_status = kwargs.get('status', old_status)
+        history = list(booking.status_history or [])
+        if old_status != new_status:
+            history.append({
+                'status': new_status,
+                'at': datetime.now().isoformat()
+            })
+            kwargs['status_history'] = history
+        return super().update(id, session=session, **kwargs)
 
     ALLOWED_TRANSITIONS = {
         'created': {'passengers_added', 'cancelled', 'expired'},
@@ -141,22 +154,21 @@ class Booking(BaseModel):
         'completed': ['passengers', 'confirmation', 'payment', 'completion'],
     }
 
-    def get_accessible_pages(self):
-        return self.PAGE_FLOW.get(self.status.value, [])
+    @classmethod
+    def get_accessible_pages(cls, public_id):
+        booking = cls.get_by_public_id(public_id)
+        return cls.PAGE_FLOW.get(booking.status.value, [])
 
-    def transition_status(self, to_status: str, session: Session | None = None):
+    @classmethod
+    def transition_status(cls, id, to_status: str, session: Session | None = None):
         session = session or db.session
-        from_status = self.status.value
-        if to_status not in self.ALLOWED_TRANSITIONS.get(from_status, set()):
+        booking = cls.get_or_404(id)
+        from_status = booking.status.value
+        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set()):
             raise ValueError(f'Illegal transition: {from_status} -> {to_status}')
 
-        self.status = Config.BOOKING_STATUS[to_status].value
-        history = list(self.status_history or [])
-        history.append({
-            'status': to_status,
-            'at': datetime.now().isoformat()
-        })
-        self.status_history = history
-        session.add(self)
-        session.commit()
-        return self
+        return cls.update(
+            id,
+            session=session,
+            status=to_status,
+        )
