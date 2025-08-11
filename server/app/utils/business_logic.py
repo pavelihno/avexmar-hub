@@ -1,15 +1,10 @@
 from datetime import datetime, timezone
 
-from app.config import Config
-from app.database import db
-
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
 from app.models.discount import Discount
 from app.models.flight import Flight
-from app.models.booking import Booking
-from app.models.booking_flight import BookingFlight
 
 
 def get_seats_number(params):
@@ -127,50 +122,3 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
         'total_discounts': total_discounts,
         'total_price': total_price,
     }
-
-
-def process_booking_create(data):
-    session = db.session
-
-    outbound_id = int(data.get('outbound_id', 0))
-    return_id = int(data.get('return_id', 0))
-    tariff_id = int(data.get('tariff_id', 0))
-    raw_passengers = data.get('passengers', {})
-
-    passengers = {}
-    for key, value in (raw_passengers or {}).items():
-        try:
-            count = int(value)
-        except (TypeError, ValueError):
-            continue
-        if count > 0:
-            passengers[key] = count
-
-    price = calculate_price_details(
-        outbound_id, return_id, tariff_id, passengers
-    )
-
-    history = [{
-        'status': Config.BOOKING_STATUS.created.value,
-        'at': datetime.now().isoformat()
-    }]
-
-    booking = Booking.create(
-        session,
-        currency=Config.CURRENCY[price['currency']],
-        fare_price=price['fare_price'],
-        fees=sum(f['total'] for f in price['fees']),
-        total_discounts=price['total_discounts'],
-        total_price=price['total_price'],
-        status_history=history,
-        passenger_counts=passengers,
-    )
-
-    if outbound_id:
-        BookingFlight.create(session, booking_id=booking.id, flight_id=outbound_id)
-    if return_id:
-        BookingFlight.create(session, booking_id=booking.id, flight_id=return_id)
-
-    session.refresh(booking)
-
-    return booking, price
