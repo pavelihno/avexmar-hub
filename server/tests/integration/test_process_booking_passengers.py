@@ -78,3 +78,31 @@ def test_process_booking_passengers_validates_age(client, future_flight, country
     res = client.post("/bookings/process/passengers", json=payload)
     assert res.status_code == 400
     assert any("not an infant" in e for e in res.json["errors"])
+
+
+def test_process_booking_confirm(client, future_flight, country_ru):
+    booking = _create_booking_with_flight(future_flight)
+
+    payload = {
+        "public_id": str(booking.public_id),
+        "buyer": {"email": "a@example.com", "phone": "+70000000000"},
+        "passengers": [
+            {
+                "category": "adult",
+                "first_name": "John",
+                "last_name": "Doe",
+                "gender": Config.GENDER.м.value,
+                "birth_date": "1990-01-01",
+                "document_type": Config.DOCUMENT_TYPE.passport.value,
+                "document_number": "123456",
+                "citizenship_id": country_ru.id,
+            }
+        ],
+    }
+
+    res = client.post("/bookings/process/passengers", json=payload)
+    assert res.status_code == 200
+
+    res = client.post("/bookings/process/confirm", json={"public_id": str(booking.public_id)})
+    assert res.status_code == 200
+    assert Booking.get_by_public_id(booking.public_id).status.value == "confirmed"

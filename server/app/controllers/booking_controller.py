@@ -142,6 +142,23 @@ def process_booking_passengers():
     return jsonify({'status': 'ok'}), 200
 
 
+def process_booking_confirm():
+    data = request.json or {}
+    public_id = data.get('public_id')
+    if not public_id:
+        return jsonify({'message': 'public_id_required'}), 400
+
+    session = db.session
+    booking = Booking.get_by_public_id(public_id)
+    Booking.transition_status(
+        id=booking.id,
+        session=session,
+        to_status='confirmed',
+    )
+
+    return jsonify({'status': 'ok'}), 200
+
+
 def process_booking_payment():
     return jsonify({'status': 'ok'}), 200
 

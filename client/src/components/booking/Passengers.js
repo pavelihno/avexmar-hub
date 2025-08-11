@@ -232,9 +232,9 @@ const Passengers = () => {
 					passengers: apiPassengers,
 				})
 			).unwrap();
-			await dispatch(fetchBookingDetails(publicId)).unwrap();
-			// await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/confirmation`);
+                        await dispatch(fetchBookingDetails(publicId)).unwrap();
+                        await dispatch(fetchBookingAccess(publicId)).unwrap();
+                        navigate(`/booking/${publicId}/confirmation`);
 		} catch (e) {
 			// errors handled via redux state
 		}

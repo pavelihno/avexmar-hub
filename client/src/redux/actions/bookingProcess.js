@@ -48,8 +48,8 @@ export const fetchBookingAccess = createAsyncThunk(
 );
 
 export const fetchBookingDirectionsInfo = createAsyncThunk(
-	'bookingProcess/fetchDirectionsInfo',
-	async (directions, { rejectWithValue }) => {
+        'bookingProcess/fetchDirectionsInfo',
+        async (directions, { rejectWithValue }) => {
 		try {
 			const info = {};
 			await Promise.all(
@@ -68,5 +68,17 @@ export const fetchBookingDirectionsInfo = createAsyncThunk(
 		} catch (err) {
 			return rejectWithValue(getErrorData(err));
 		}
-	}
+        }
+);
+
+export const confirmBooking = createAsyncThunk(
+        'bookingProcess/confirm',
+        async (publicId, { rejectWithValue }) => {
+                try {
+                        const res = await serverApi.post('/bookings/process/confirm', { public_id: publicId });
+                        return res.data;
+                } catch (err) {
+                        return rejectWithValue(getErrorData(err));
+                }
+        }
 );

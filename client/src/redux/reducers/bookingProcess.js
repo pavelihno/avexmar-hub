@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
-	processBookingCreate,
-	processBookingPassengers,
-	fetchBookingDetails,
-	fetchBookingAccess,
-	fetchBookingDirectionsInfo,
+        processBookingCreate,
+        processBookingPassengers,
+        fetchBookingDetails,
+        fetchBookingAccess,
+        fetchBookingDirectionsInfo,
+        confirmBooking,
 } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
@@ -51,13 +52,18 @@ const bookingProcessSlice = createSlice({
 				state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
 				state.isLoading = false;
 			})
-			.addCase(fetchBookingDirectionsInfo.pending, handlePending)
-			.addCase(fetchBookingDirectionsInfo.rejected, handleRejected)
-			.addCase(fetchBookingDirectionsInfo.fulfilled, (state, action) => {
-				state.current = { ...(state.current || {}), directionsInfo: action.payload };
-				state.isLoading = false;
-			});
-	},
+                        .addCase(fetchBookingDirectionsInfo.pending, handlePending)
+                        .addCase(fetchBookingDirectionsInfo.rejected, handleRejected)
+                        .addCase(fetchBookingDirectionsInfo.fulfilled, (state, action) => {
+                                state.current = { ...(state.current || {}), directionsInfo: action.payload };
+                                state.isLoading = false;
+                        })
+                        .addCase(confirmBooking.pending, handlePending)
+                        .addCase(confirmBooking.rejected, handleRejected)
+                        .addCase(confirmBooking.fulfilled, (state) => {
+                                state.isLoading = false;
+                        });
+        },
 });
 
 export default bookingProcessSlice.reducer;
