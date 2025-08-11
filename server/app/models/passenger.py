@@ -59,6 +59,7 @@ class Passenger(BaseModel):
             'owner_user_id': self.owner_user_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'patronymic_name': self.patronymic_name,
             'gender': self.gender.value,
             'birth_date': self.birth_date.isoformat(),
             'document_type': self.document_type.value,

@@ -30,6 +30,8 @@ class Booking(BaseModel):
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
+    buyer_last_name = db.Column(db.String, nullable=True)
+    buyer_first_name = db.Column(db.String, nullable=True)
     email_address = db.Column(db.String, nullable=True)
     phone_number = db.Column(db.String, nullable=True)
 
@@ -67,6 +69,8 @@ class Booking(BaseModel):
             'booking_number': self.booking_number,
             'booking_date': self.created_at.date().isoformat(),
             'status': self.status.value,
+            'buyer_last_name': self.buyer_last_name,
+            'buyer_first_name': self.buyer_first_name,
             'email_address': self.email_address,
             'phone_number': self.phone_number,
             'currency': self.currency.value,
@@ -134,7 +138,8 @@ class Booking(BaseModel):
 
     ALLOWED_TRANSITIONS = {
         'created': {'passengers_added', 'cancelled', 'expired'},
-        'passengers_added': {'payment_pending', 'cancelled', 'expired'},
+        'passengers_added': {'confirmed', 'cancelled', 'expired'},
+        'confirmed': {'payment_pending', 'cancelled', 'expired'},
         'payment_pending': {'payment_confirmed', 'payment_failed', 'cancelled', 'expired'},
         'payment_failed': {'payment_pending', 'cancelled', 'expired'},
         'payment_confirmed': {'completed', 'cancelled'},
@@ -147,11 +152,12 @@ class Booking(BaseModel):
 
     PAGE_FLOW = {
         'created': ['passengers'],
-        'passengers_added': ['passengers', 'confirmation', 'payment'],
-        'payment_pending': ['passengers', 'confirmation', 'payment'],
-        'payment_failed': ['passengers', 'confirmation', 'payment'],
-        'payment_confirmed': ['passengers', 'confirmation', 'payment', 'completion'],
-        'completed': ['passengers', 'confirmation', 'payment', 'completion'],
+        'passengers_added': ['passengers', 'confirmation'],
+        'confirmed': ['passengers', 'confirmation', 'payment'],
+        'payment_pending': ['payment'],
+        'payment_failed': ['payment'],
+        'payment_confirmed': ['payment', 'completion'],
+        'completed': ['completion'],
     }
 
     @classmethod

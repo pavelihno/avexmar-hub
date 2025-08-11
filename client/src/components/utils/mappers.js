@@ -1,0 +1,51 @@
+export const mappingConfigs = {
+	passenger: [
+		['id', 'id'],
+		['category', 'category'],
+		['last_name', 'lastName'],
+		['first_name', 'firstName'],
+		['patronymic_name', 'patronymicName'],
+		['gender', 'gender'],
+		['birth_date', 'birthDate'],
+		['document_type', 'documentType'],
+		['document_number', 'documentNumber'],
+		['document_expiry_date', 'documentExpiryDate'],
+		['citizenship_id', 'citizenshipId'],
+	],
+	buyer: [
+		['buyer_last_name', 'buyerLastName'],
+		['buyer_first_name', 'buyerFirstName'],
+		['email_address', 'email'],
+		['phone_number', 'phone'],
+		['consent', 'consent'],
+	],
+};
+
+export const buildMaps = (pairs = []) => {
+	const clientToApi = {};
+	const apiToClient = {};
+	for (const [apiKey, clientKey] of pairs) {
+		clientToApi[clientKey] = apiKey;
+		apiToClient[apiKey] = clientKey;
+	}
+	return { clientToApi, apiToClient };
+};
+
+export function mapFromApi(src = {}, pairs = [], defaults = {}) {
+	const result = {};
+	for (const [apiKey, clientKey] of pairs) {
+		let value = src ? src[apiKey] : undefined;
+		if (value === undefined || value === null) value = defaults[clientKey] ?? '';
+		result[clientKey] = value;
+	}
+	return result;
+}
+
+export function mapToApi(src = {}, pairs = []) {
+	const out = {};
+	for (const [apiKey, clientKey] of pairs) {
+		const v = src[clientKey];
+		if (v !== undefined) out[apiKey] = v;
+	}
+	return out;
+}

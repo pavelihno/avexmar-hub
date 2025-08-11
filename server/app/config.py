@@ -38,13 +38,14 @@ class Config:
 
     class BOOKING_STATUS(enum.Enum):
         created = 'created'
-        expired = 'expired'
-        cancelled = 'cancelled'
-        completed = 'completed'
         passengers_added = 'passengers_added'
+        confirmed = 'confirmed'
         payment_pending = 'payment_pending'
         payment_confirmed = 'payment_confirmed'
         payment_failed = 'payment_failed'
+        completed = 'completed'
+        expired = 'expired'
+        cancelled = 'cancelled'
 
     class DISCOUNT_TYPE(enum.Enum):
         round_trip = 'round_trip'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
 import { Box, Grid, Typography, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -14,6 +14,7 @@ import {
 	getAgeError,
 	validateDate,
 } from '../utils';
+import { mapFromApi, mappingConfigs } from '../utils/mappers';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 
@@ -21,34 +22,29 @@ const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
 const normalizePassenger = (p = {}) => ({
-        id: p.id || '',
-        category: p.category || 'adult',
-        lastName: p.lastName || p.last_name || '',
-        firstName: p.firstName || p.first_name || '',
-        patronymicName: p.patronymicName || p.patronymic_name || '',
-        gender: p.gender || genderOptions[0]?.value || '',
-        birthDate: p.birthDate || p.birth_date || '',
-        documentType: p.documentType || p.document_type || docTypeOptions[0]?.value || '',
-        documentNumber: p.documentNumber || p.document_number || '',
-        documentExpiryDate: p.documentExpiryDate || p.document_expiry_date || '',
-        citizenshipId: p.citizenshipId || p.citizenship_id || '',
+	...mapFromApi(p, mappingConfigs.passenger, {
+		id: '',
+		category: 'adult',
+		gender: genderOptions[0]?.value || '',
+		documentType: docTypeOptions[0]?.value || '',
+	}),
 });
 
 const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights = [] }, ref) => {
-        const [data, setData] = useState(normalizePassenger(passenger));
+	const [data, setData] = useState(normalizePassenger(passenger));
 
 	const [errors, setErrors] = useState({});
 	const [showErrors, setShowErrors] = useState(false);
 	const [focusedField, setFocusedField] = useState(null);
 
-        useEffect(() => {
-                if (!passenger) return;
-                const normalized = normalizePassenger(passenger);
-                ['lastName', 'firstName', 'patronymicName'].forEach((k) => {
-                        if (normalized[k]) normalized[k] = String(normalized[k]).toUpperCase();
-                });
-                setData((prev) => ({ ...prev, ...normalized }));
-        }, [passenger]);
+	useEffect(() => {
+		if (!passenger) return;
+		const normalized = normalizePassenger(passenger);
+		['lastName', 'firstName', 'patronymicName'].forEach((k) => {
+			if (normalized[k]) normalized[k] = String(normalized[k]).toUpperCase();
+		});
+		setData((prev) => ({ ...prev, ...normalized }));
+	}, [passenger]);
 
 	const requiresCyrillic = isCyrillicDocument(data.documentType);
 	const formConfig = getPassengerFormConfig(data.documentType);
