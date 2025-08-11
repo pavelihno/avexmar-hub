@@ -51,10 +51,32 @@ const Passengers = () => {
 	} = useSelector((state) => state.bookingProcess);
 	const { countries } = useSelector((state) => state.countries);
 
-	const existingPassengerData = booking?.passengers;
-	const passengersExist = booking?.passengersExist;
-	const [passengerData, setPassengerData] = useState(null);
-	const [errors, setErrors] = useState({});
+        const existingPassengerData = booking?.passengers;
+        const passengersExist = booking?.passengersExist;
+        const [passengerData, setPassengerData] = useState(null);
+        const [errors, setErrors] = useState({});
+
+        const fromApiPassenger = (p = {}) => ({
+                id: p.id,
+                category: p.category,
+                firstName: p.first_name || '',
+                lastName: p.last_name || '',
+                patronymicName: p.patronymic_name || '',
+                gender: p.gender || '',
+                birthDate: p.birth_date || '',
+                documentType: p.document_type || '',
+                documentNumber: p.document_number || '',
+                documentExpiryDate: p.document_expiry_date || '',
+                citizenshipId: p.citizenship_id || '',
+        });
+
+        const fromApiBuyer = (b = {}) => ({
+                lastName: b.last_name || '',
+                firstName: b.first_name || '',
+                email: b.email || '',
+                phone: b.phone || '',
+                consent: b.consent ?? false,
+        });
 
 	useEffect(() => {
 		if (bookingErrors == null) return;
@@ -80,15 +102,12 @@ const Passengers = () => {
 		return [];
 	}, [errors]);
 
-	useEffect(() => {
-		if (Array.isArray(existingPassengerData)) {
-			const mapped = existingPassengerData.map((p) => ({
-				...p,
-				category: p.category,
-			}));
-			setPassengerData(mapped);
-		}
-	}, [existingPassengerData, passengersExist]);
+        useEffect(() => {
+                if (Array.isArray(existingPassengerData)) {
+                        const mapped = existingPassengerData.map(fromApiPassenger);
+                        setPassengerData(mapped);
+                }
+        }, [existingPassengerData, passengersExist]);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -110,9 +129,26 @@ const Passengers = () => {
 		return formConfig.required.every((f) => p[f]);
 	};
 
-	const [buyer, setBuyer] = useState(
-		booking?.buyer || { lastName: '', firstName: '', email: '', phone: '', consent: false }
-	);
+        const [buyer, setBuyer] = useState({
+                lastName: '',
+                firstName: '',
+                email: '',
+                phone: '',
+                consent: false,
+        });
+
+        useEffect(() => {
+                if (booking?.buyer || passengersExist) {
+                        const mapped = booking?.buyer ? fromApiBuyer(booking.buyer) : {};
+                        setBuyer({
+                                lastName: mapped.lastName || '',
+                                firstName: mapped.firstName || '',
+                                email: mapped.email || '',
+                                phone: mapped.phone || '',
+                                consent: passengersExist ? true : mapped.consent,
+                        });
+                }
+        }, [booking?.buyer, passengersExist]);
 
 	const buyerFormFields = useMemo(() => {
 		const fields = {
