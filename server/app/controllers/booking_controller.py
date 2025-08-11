@@ -28,10 +28,7 @@ def get_booking(current_user, booking_id):
 def create_booking(current_user):
     session = db.session
     body = request.json
-    status = body.pop('status', None)
     booking = Booking.create(session, **body)
-    if status and status != booking.status.value:
-        booking.transition_status(status, session=session)
     return jsonify(booking.to_dict()), 201
 
 
@@ -39,10 +36,7 @@ def create_booking(current_user):
 def update_booking(current_user, booking_id):
     session = db.session
     body = request.json
-    status = body.pop('status', None)
     updated = Booking.update(booking_id, session=session, **body)
-    if status and status != updated.status.value:
-        updated.transition_status(status, session=session)
     return jsonify(updated.to_dict())
 
 
@@ -139,20 +133,11 @@ def process_booking_passengers():
         else:
             BookingPassenger.create(session, booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
 
-    for bp in list(booking.booking_passengers):
-        if bp.passenger_id not in processed_ids:
-            session.delete(bp)
-            if bp.passenger.booking_passengers.count() <= 1 and bp.passenger.tickets.count() == 0:
-                session.delete(bp.passenger)
-
-    session.flush()
-    session.commit()
-    try:
-        booking.transition_status('passengers_added', session=session)
-    except ValueError:
-        pass
-    except DataError:
-        session.rollback()
+    Booking.transition_status(
+        id=booking.id,
+        session=session,
+        to_status='passengers_added',
+    )
 
     return jsonify({'status': 'ok'}), 200
 
@@ -199,6 +184,5 @@ def get_process_booking_details(public_id):
 
 
 def get_process_booking_access(public_id):
-    booking = Booking.get_by_public_id(public_id)
-    return jsonify({'pages': booking.get_accessible_pages()}), 200
+    return jsonify({'pages': Booking.get_accessible_pages(public_id)}), 200
 
