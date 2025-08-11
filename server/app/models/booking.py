@@ -135,6 +135,12 @@ class Booking(BaseModel):
             })
             kwargs['status_history'] = history
         return super().update(id, session=session, **kwargs)
+    
+    @classmethod
+    def update_by_public_id(cls, public_id, session: Session | None = None, **kwargs):
+        session = session or db.session
+        booking = cls.get_by_public_id(public_id)
+        return cls.update(booking.id, session=session, **kwargs)
 
     ALLOWED_TRANSITIONS = {
         'created': {'passengers_added', 'cancelled', 'expired'},

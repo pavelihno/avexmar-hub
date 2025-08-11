@@ -94,27 +94,28 @@ def process_booking_passengers():
     buyer = data.get('buyer', {})
     passengers = data.get('passengers') or []
     if not public_id:
-        return jsonify({'message': 'public_id_required'}), 400
+        return jsonify({'message': 'public_id required'}), 400
 
     session = db.session
-    booking = Booking.get_by_public_id(public_id)
-    booking.email_address = buyer.get('email')
-    booking.phone_number = buyer.get('phone')
+
+    booking = Booking.update_by_public_id(
+        public_id,
+        session=session,
+        **buyer
+    )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
     processed_ids = set()
     for pdata in passengers:
         pid = pdata.get('id')
-        gender = pdata.get('gender')
-        doc_type = pdata.get('document_type')
 
         passenger_fields = {
             'first_name': pdata.get('first_name'),
             'last_name': pdata.get('last_name'),
             'patronymic_name': pdata.get('patronymic_name'),
-            'gender': Config.GENDER[gender].value if gender and Config.GENDER[gender] else None,
+            'gender': pdata.get('gender'),
             'birth_date': pdata.get('birth_date'),
-            'document_type': Config.DOCUMENT_TYPE[doc_type].value if doc_type and Config.DOCUMENT_TYPE[doc_type] else None,
+            'document_type': pdata.get('document_type'),
             'document_number': pdata.get('document_number'),
             'document_expiry_date': parse_date(pdata.get('document_expiry_date')),
             'citizenship_id': pdata.get('citizenship_id'),
@@ -133,7 +134,7 @@ def process_booking_passengers():
         else:
             BookingPassenger.create(session, booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
 
-    Booking.transition_status(
+    booking = Booking.transition_status(
         id=booking.id,
         session=session,
         to_status='passengers_added',
@@ -146,7 +147,7 @@ def process_booking_confirm():
     data = request.json or {}
     public_id = data.get('public_id')
     if not public_id:
-        return jsonify({'message': 'public_id_required'}), 400
+        return jsonify({'message': 'public_id required'}), 400
 
     session = db.session
     booking = Booking.get_by_public_id(public_id)
@@ -197,6 +198,7 @@ def get_process_booking_details(public_id):
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist
     result['flights'] = flights
+
     return jsonify(result), 200
 
 

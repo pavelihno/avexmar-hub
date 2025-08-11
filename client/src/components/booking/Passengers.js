@@ -115,8 +115,8 @@ const Passengers = () => {
 	const [buyer, setBuyer] = useState({
 		buyerLastName: '',
 		buyerFirstName: '',
-		email: '',
-		phone: '',
+		emailAddress: '',
+		phoneNumber: '',
 		consent: false,
 	});
 
@@ -126,8 +126,8 @@ const Passengers = () => {
 			setBuyer({
 				buyerLastName: mapped.buyerLastName || '',
 				buyerFirstName: mapped.buyerFirstName || '',
-				email: mapped.email || '',
-				phone: mapped.phone || '',
+				emailAddress: mapped.emailAddress || '',
+				phoneNumber: mapped.phoneNumber || '',
 				consent: passengersExist ? true : mapped.consent,
 			});
 		}
@@ -147,8 +147,8 @@ const Passengers = () => {
 				label: FIELD_LABELS.PASSENGER.first_name,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : ''),
 			},
-			email: {
-				key: 'email',
+			emailAddress: {
+				key: 'emailAddress',
 				label: FIELD_LABELS.BOOKING.email_address,
 				type: FIELD_TYPES.EMAIL,
 				validate: (v) => {
@@ -156,8 +156,8 @@ const Passengers = () => {
 					return validateEmail(v) ? '' : VALIDATION_MESSAGES.BOOKING.email_address.INVALID;
 				},
 			},
-			phone: {
-				key: 'phone',
+			phoneNumber: {
+				key: 'phoneNumber',
 				label: FIELD_LABELS.BOOKING.phone_number,
 				type: FIELD_TYPES.PHONE,
 				validate: (v) => {
@@ -225,6 +225,7 @@ const Passengers = () => {
 		try {
 			const apiPassengers = (passengerData || []).map(toApiPassenger);
 			const apiBuyer = toApiBuyer(buyer);
+			console.log(apiBuyer);
 			await dispatch(
 				processBookingPassengers({
 					public_id: publicId,
@@ -232,9 +233,9 @@ const Passengers = () => {
 					passengers: apiPassengers,
 				})
 			).unwrap();
-                        await dispatch(fetchBookingDetails(publicId)).unwrap();
-                        await dispatch(fetchBookingAccess(publicId)).unwrap();
-                        navigate(`/booking/${publicId}/confirmation`);
+			await dispatch(fetchBookingDetails(publicId)).unwrap();
+			await dispatch(fetchBookingAccess(publicId)).unwrap();
+			navigate(`/booking/${publicId}/confirmation`);
 		} catch (e) {
 			// errors handled via redux state
 		}

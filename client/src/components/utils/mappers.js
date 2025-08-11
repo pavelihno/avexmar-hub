@@ -15,8 +15,8 @@ export const mappingConfigs = {
 	buyer: [
 		['buyer_last_name', 'buyerLastName'],
 		['buyer_first_name', 'buyerFirstName'],
-		['email_address', 'email'],
-		['phone_number', 'phone'],
+		['email_address', 'emailAddress'],
+		['phone_number', 'phoneNumber'],
 		['consent', 'consent'],
 	],
 };
