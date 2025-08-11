@@ -28,8 +28,8 @@ export const ENUM_LABELS = {
 	},
 	DOCUMENT_TYPE: {
 		passport: 'Паспорт РФ',
+		international_passport: 'Загранпаспорт РФ',
 		foreign_passport: 'Иностранный документ',
-		international_passport: 'Загранпаспорт',
 		birth_certificate: 'Свидетельство о рождении',
 	},
 	PASSENGER_CATEGORY: {

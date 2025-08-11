@@ -62,7 +62,6 @@ export const FIELD_LABELS = {
 	BOOKING_PASSENGER: {
 		booking_id: 'Бронирование',
 		passenger_id: 'Пассажир',
-		is_contact: 'Контактное лицо',
 	},
 	TICKET: {
 		ticket_number: 'Номер билета',

@@ -10,7 +10,7 @@ import {
 	isCyrillicText,
 	isLatinText,
 	isCyrillicDocument,
-	getDocumentFieldConfig,
+	getPassengerFormConfig,
 	getAgeError,
 	validateDate,
 } from '../utils';
@@ -49,8 +49,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 	}, [passenger]);
 
 	const requiresCyrillic = isCyrillicDocument(data.documentType);
-	const docConfig = getDocumentFieldConfig(data.documentType);
-	const { showExpiryDate, showCitizenship } = docConfig;
+	const formConfig = getPassengerFormConfig(data.documentType);
 
 	const { minFlightDate, maxFlightDate } = useMemo(() => {
 		const validDates = flights
@@ -68,7 +67,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 	}, [flights]);
 
 	const formFields = useMemo(() => {
-		const fields = {
+		const allFields = {
 			lastName: {
 				key: 'lastName',
 				label: UI_LABELS.BOOKING.passenger_form.last_name,
@@ -113,6 +112,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				label: FIELD_LABELS.PASSENGER.gender,
 				type: FIELD_TYPES.SELECT,
 				options: genderOptions,
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.gender.REQUIRED : ''),
 			},
 			birthDate: {
 				key: 'birthDate',
@@ -139,47 +139,38 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				label: FIELD_LABELS.PASSENGER.document_number,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
 			},
-			...(showExpiryDate && {
-				documentExpiryDate: {
-					key: 'documentExpiryDate',
-					label: FIELD_LABELS.PASSENGER.document_expiry_date,
-					type: FIELD_TYPES.DATE,
-					validate: (v) => {
-						if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
-						if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-						const exp = new Date(v);
-						const today = new Date();
-						if (exp < today) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
-						if (maxFlightDate && exp < new Date(maxFlightDate))
-							return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
-						return '';
-					},
+			documentExpiryDate: {
+				key: 'documentExpiryDate',
+				label: FIELD_LABELS.PASSENGER.document_expiry_date,
+				type: FIELD_TYPES.DATE,
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
+					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					const exp = new Date(v);
+					const today = new Date();
+					if (exp < today) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
+					if (maxFlightDate && exp < new Date(maxFlightDate))
+						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
+					return '';
 				},
-			}),
-			...(showCitizenship && {
-				citizenshipId: {
-					key: 'citizenshipId',
-					label: FIELD_LABELS.PASSENGER.citizenship_id,
-					type: FIELD_TYPES.SELECT,
-					options: citizenshipOptions,
-					validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : ''),
-				},
-			}),
+			},
+			citizenshipId: {
+				key: 'citizenshipId',
+				label: FIELD_LABELS.PASSENGER.citizenship_id,
+				type: FIELD_TYPES.SELECT,
+				options: citizenshipOptions,
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : ''),
+			},
 		};
-		const arr = createFormFields(fields);
+		const visibleList = Object.values(allFields).filter((f) =>
+			!formConfig?.show ? true : formConfig.show.includes(f.key)
+		);
+		const arr = createFormFields(visibleList);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [
-		data.category,
-		requiresCyrillic,
-		showExpiryDate,
-		showCitizenship,
-		citizenshipOptions,
-		minFlightDate,
-		maxFlightDate,
-	]);
+	}, [data.category, requiresCyrillic, citizenshipOptions, minFlightDate, maxFlightDate, formConfig.show]);
 
 	const handleFieldChange = (field, value) => {
-		const isNameField = field === 'lastName' || field === 'firstName' || field === 'patronymicName';
+		const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(field);
 		const normalizedValue = isNameField && typeof value === 'string' ? value.toUpperCase() : value;
 		const next = { ...data, [field]: normalizedValue };
 		setData(next);
@@ -207,28 +198,17 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 
 	const theme = useTheme();
 
-	const nameFields = [
-		'lastName',
-		'firstName',
-		formFields.patronymicName && 'patronymicName',
-		'gender',
-		'birthDate',
-		'documentType',
-		'documentNumber',
-		docConfig.showExpiryDate && 'documentExpiryDate',
-		docConfig.showCitizenship && 'citizenshipId',
-	].filter(Boolean);
+	const showFields = formConfig.show || [];
 
 	return (
 		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
-			<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-				<Typography variant='h4'>{typeLabels[data.category]}</Typography>
-			</Box>
+			<Typography variant='h4' sx={{ mb: 2 }}>
+				{typeLabels[data.category]}
+			</Typography>
 
 			<Grid container spacing={2}>
-				{nameFields.map((fieldName) => {
-					const isNameField =
-						fieldName === 'lastName' || fieldName === 'firstName' || fieldName === 'patronymicName';
+				{showFields.map((fieldName) => {
+					const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
 					const control = formFields[fieldName].renderField({
 						value: data[fieldName],
 						onChange: (value) => handleFieldChange(fieldName, value),

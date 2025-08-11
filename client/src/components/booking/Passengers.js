@@ -17,6 +17,8 @@ import {
 	Accordion,
 	AccordionSummary,
 	AccordionDetails,
+	Alert,
+	Stack,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
@@ -29,25 +31,54 @@ import {
 	createFormFields,
 	FIELD_TYPES,
 	formatNumber,
-	getDocumentFieldConfig,
-	getAgeError,
+	getPassengerFormConfig,
 	validateEmail,
 	validatePhoneNumber,
 	formatDate,
 	formatTime,
 	formatDuration,
+	findBookingPassengerDuplicates,
 } from '../utils';
 
 const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { current: booking, isLoading: bookingLoading, errors } = useSelector((state) => state.bookingProcess);
+	const {
+		current: booking,
+		isLoading: bookingLoading,
+		errors: bookingErrors,
+	} = useSelector((state) => state.bookingProcess);
 	const { countries } = useSelector((state) => state.countries);
 
 	const existingPassengerData = booking?.passengers;
 	const passengersExist = booking?.passengersExist;
 	const [passengerData, setPassengerData] = useState(null);
+	const [errors, setErrors] = useState({});
+
+	useEffect(() => {
+		if (bookingErrors == null) return;
+		setErrors((prev) => ({
+			...prev,
+			...(Array.isArray(bookingErrors) || typeof bookingErrors === 'string'
+				? { _global: bookingErrors }
+				: bookingErrors),
+		}));
+	}, [bookingErrors]);
+
+	const errorMessages = useMemo(() => {
+		if (!errors) return [];
+
+		if (typeof errors === 'string') return [errors];
+		if (Array.isArray(errors)) return errors.filter(Boolean);
+
+		if (typeof errors === 'object') {
+			const values = Object.values(errors).flatMap((v) => (Array.isArray(v) ? v : [v]));
+			return values.filter(Boolean).map(String);
+		}
+
+		return [];
+	}, [errors]);
 
 	useEffect(() => {
 		if (Array.isArray(existingPassengerData)) {
@@ -75,12 +106,8 @@ const Passengers = () => {
 	);
 
 	const isPassengerComplete = (p) => {
-		const required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
-		const docConfig = getDocumentFieldConfig(p.documentType);
-		if (docConfig.showExpiryDate) required.push('documentExpiryDate');
-		if (docConfig.showCitizenship) required.push('citizenshipId');
-		if (!required.every((f) => p[f])) return false;
-		return !getAgeError(p.category, p.birthDate);
+		const formConfig = getPassengerFormConfig(p.documentType);
+		return formConfig.required.every((f) => p[f]);
 	};
 
 	const [buyer, setBuyer] = useState(
@@ -175,29 +202,42 @@ const Passengers = () => {
 	});
 
 	const handleContinue = async () => {
-		const passengerValid = passengerRefs.current
+		const allPassengersValid = passengerRefs.current
 			.filter(Boolean)
 			.map((r) => r.validate())
 			.every(Boolean);
+
+		if (!allPassengersValid) return;
+
+		const hasPassengerDuplicate = findBookingPassengerDuplicates(passengerData || []).length > 0;
+		if (hasPassengerDuplicate) {
+			setErrors((prev) => ({
+				...prev,
+				duplicate: VALIDATION_MESSAGES.BOOKING.passenger.DUPLICATE,
+			}));
+			return;
+		}
+
 		const buyerValid = validateBuyer();
-		if (!passengerValid || !buyerValid) return;
-                try {
-                        const apiPassengers = (passengerData || []).map(toApiPassenger);
-                        const apiBuyer = toApiBuyer(buyer);
-                        await dispatch(
-                                processBookingPassengers({
-                                        public_id: publicId,
-                                        buyer: apiBuyer,
-                                        passengers: apiPassengers,
-                                })
-                        ).unwrap();
-                        await dispatch(fetchBookingDetails(publicId)).unwrap();
-                        await dispatch(fetchBookingAccess(publicId)).unwrap();
-                        navigate(`/booking/${publicId}/confirmation`);
-                } catch (e) {
-                        // errors handled via redux state
-                }
-        };
+		if (!buyerValid) return;
+
+		try {
+			const apiPassengers = (passengerData || []).map(toApiPassenger);
+			const apiBuyer = toApiBuyer(buyer);
+			await dispatch(
+				processBookingPassengers({
+					public_id: publicId,
+					buyer: apiBuyer,
+					passengers: apiPassengers,
+				})
+			).unwrap();
+			await dispatch(fetchBookingDetails(publicId)).unwrap();
+			// await dispatch(fetchBookingAccess(publicId)).unwrap();
+			navigate(`/booking/${publicId}/confirmation`);
+		} catch (e) {
+			// errors handled via redux state
+		}
+	};
 
 	const [outboundFlight = null, returnFlight = null] = (booking?.flights ?? [])
 		.slice()
@@ -242,10 +282,14 @@ const Passengers = () => {
 			<BookingProgress activeStep='passengers' />
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
-					{errors && (
-						<FormHelperText error sx={{ mb: 2, whiteSpace: 'pre-line' }}>
-							{Array.isArray(errors) ? errors.join('\n') : errors.message || errors}
-						</FormHelperText>
+					{errorMessages.length > 0 && (
+						<Stack spacing={1} sx={{ mb: 2 }}>
+							{errorMessages.map((msg, idx) => (
+								<Alert key={idx} severity='error'>
+									{msg}
+								</Alert>
+							))}
+						</Stack>
 					)}
 					{passengersReady &&
 						passengerData.map((p, index) => (
@@ -259,7 +303,7 @@ const Passengers = () => {
 							/>
 						))}
 					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
-						<Typography variant='h6' sx={{ mb: 1 }}>
+						<Typography variant='h4' sx={{ mb: 3 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}
 						</Typography>
 						{passengersReady && passengerData.filter(isPassengerComplete).length > 0 && (
@@ -466,7 +510,9 @@ const Passengers = () => {
 					</Card>
 					<Typography variant='body2' color='textSecondary' sx={{ mt: 1 }}>
 						{UI_LABELS.BOOKING.buyer_form.public_offer((text) => (
-							<Link to='/public_offer'>{text}</Link>
+							<Link to='/public_offer' target='_blank'>
+								{text}
+							</Link>
 						))}
 					</Typography>
 				</Grid>

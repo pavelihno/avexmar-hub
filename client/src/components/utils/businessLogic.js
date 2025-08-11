@@ -87,42 +87,53 @@ export const getExistingPassenger = (passengers, passengerData) => {
 	);
 };
 
-export const isDuplicateInBooking = (
-	allBookingPassengers,
-	passengers,
-	bookingId,
-	firstName,
-	lastName,
-	birthDate,
-	ignoreId = null
-) => {
-	const bookingPassengers = allBookingPassengers.filter((bp) => {
-		if (bp.booking_id !== bookingId || bp.id === ignoreId) return false;
-		return true;
-	});
+export const findBookingPassengerDuplicates = (passengers) => {
+	const duplicates = [];
 
-	return bookingPassengers.some((bp) => {
-		const passenger = passengers.find((pass) => pass.id === bp.passenger_id);
-		return (
-			passenger &&
-			passenger.first_name === firstName &&
-			passenger.last_name === lastName &&
-			passenger.birth_date === formatDate(birthDate, DATE_API_FORMAT)
-		);
-	});
+	for (let i = 0; i < passengers.length; i++) {
+		const p1 = passengers[i] || {};
+		for (let j = i + 1; j < passengers.length; j++) {
+			const p2 = passengers[j] || {};
+
+			const same =
+				p1.lastName === p2.lastName &&
+				p1.firstName === p2.firstName &&
+				p1.patronymicName === p2.patronymicName &&
+				p1.gender === p2.gender &&
+				formatDate(p1.birthDate) === formatDate(p2.birthDate) &&
+				p1.documentType === p2.documentType &&
+				p1.documentNumber === p2.documentNumber;
+
+			if (same) {
+				duplicates.push([i, j]);
+			}
+		}
+	}
+
+	return duplicates;
 };
 
 export const isCyrillicDocument = (documentType) => {
 	return ['passport', 'birth_certificate'].includes(documentType);
 };
 
-export const getDocumentFieldConfig = (documentType) => {
+export const getPassengerFormConfig = (documentType) => {
+	let show = ['lastName', 'firstName', 'patronymicName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
+	let required = ['lastName', 'firstName', 'gender', 'birthDate', 'documentType', 'documentNumber'];
+
 	switch (documentType) {
+		case 'passport':
+		case 'birth_certificate':
+			break;
 		case 'foreign_passport':
-			return { showExpiryDate: true, showCitizenship: true };
+			show = [...show, 'documentExpiryDate', 'citizenshipId'];
+			required = [...required, 'citizenshipId'];
+			break;
 		case 'international_passport':
-			return { showExpiryDate: true };
-		default:
-			return {};
+			show = [...show, 'documentExpiryDate'];
+			required = [...required, 'documentExpiryDate'];
+			break;
 	}
+
+	return { show, required };
 };

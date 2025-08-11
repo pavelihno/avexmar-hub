@@ -80,13 +80,16 @@ export const VALIDATION_MESSAGES = {
 
 	PASSENGER: {
 		first_name: {
-			REQUIRED: 'Имя обязательно',
+			REQUIRED: 'Введите имя',
 		},
 		last_name: {
-			REQUIRED: 'Фамилия обязательна',
+			REQUIRED: 'Введите фамилию',
+		},
+		gender: {
+			REQUIRED: 'Выберите пол',
 		},
 		birth_date: {
-			REQUIRED: 'Укажите дату рождения',
+			REQUIRED: 'Введите дату рождения',
 			FUTURE: 'Дата рождения не может быть в будущем',
 			ADULT: 'Пассажир должен быть старше 12 лет',
 			CHILD: 'Возраст ребёнка 2–12 лет',
@@ -94,10 +97,10 @@ export const VALIDATION_MESSAGES = {
 			INFANT_SEAT: 'Возраст младенца должен быть менее 2 лет',
 		},
 		document_type: {
-			REQUIRED: 'Тип документа обязателен',
+			REQUIRED: 'Выберите тип документа',
 		},
 		document_number: {
-			REQUIRED: 'Номер документа обязателен',
+			REQUIRED: 'Введите номер документа',
 		},
 		document_expiry_date: {
 			REQUIRED: 'Срок действия обязателен',
@@ -105,7 +108,7 @@ export const VALIDATION_MESSAGES = {
 			AFTER_FLIGHT: 'Срок действия должен быть позже даты вылета',
 		},
 		citizenship_id: {
-			REQUIRED: 'Гражданство обязательно',
+			REQUIRED: 'Выберите гражданство',
 		},
 		name_language: {
 			CYRILLIC: 'Используйте кириллицу',
@@ -115,15 +118,15 @@ export const VALIDATION_MESSAGES = {
 
 	BOOKING: {
 		email_address: {
-			REQUIRED: 'Электронная почта обязательна',
+			REQUIRED: 'Введите электронную почту',
 			INVALID: 'Введите корректную электронную почту',
 		},
 		phone_number: {
-			REQUIRED: 'Телефон обязателен',
+			REQUIRED: 'Введите номер телефона',
 			INVALID: 'Введите корректный номер телефона',
 		},
 		passenger: {
-			EXISTS: 'Пассажир с таким именем и датой рождения уже есть в бронировании',
+			DUPLICATE: 'Пассажиры не должны повторяться',
 		},
 		consent: {
 			REQUIRED: 'Необходимо согласие на обработку персональных данных',
