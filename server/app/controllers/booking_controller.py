@@ -3,10 +3,11 @@ from sqlalchemy.exc import DataError
 
 from app.database import db
 from app.models.booking import Booking
+from app.models.booking_flight import BookingFlight
 from app.models.passenger import Passenger
 from app.models.booking_passenger import BookingPassenger
 from app.middlewares.auth_middleware import admin_required
-from app.utils.business_logic import process_booking_create as process_booking_create_logic
+from app.utils.business_logic import calculate_price_details
 from app.config import Config
 from app.utils.datetime import parse_date
 
@@ -25,27 +26,70 @@ def get_booking(current_user, booking_id):
 
 @admin_required
 def create_booking(current_user):
+    session = db.session
     body = request.json
-    booking = Booking.create(**body)
+    status = body.pop('status', None)
+    booking = Booking.create(session, **body)
+    if status and status != booking.status.value:
+        booking.transition_status(status, session=session)
     return jsonify(booking.to_dict()), 201
 
 
 @admin_required
 def update_booking(current_user, booking_id):
+    session = db.session
     body = request.json
-    updated = Booking.update(booking_id, **body)
+    status = body.pop('status', None)
+    updated = Booking.update(booking_id, session=session, **body)
+    if status and status != updated.status.value:
+        updated.transition_status(status, session=session)
     return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_booking(current_user, booking_id):
-    deleted = Booking.delete_or_404(booking_id)
+    session = db.session
+    deleted = Booking.delete_or_404(booking_id, session=session)
     return jsonify(deleted)
 
 
 def process_booking_create():
     data = request.json or {}
-    booking, price = process_booking_create_logic(data)
+    session = db.session
+
+    outbound_id = int(data.get('outbound_id', 0))
+    return_id = int(data.get('return_id', 0))
+    tariff_id = int(data.get('tariff_id', 0))
+    raw_passengers = data.get('passengers', {})
+
+    passengers = {}
+    for key, value in (raw_passengers or {}).items():
+        try:
+            count = int(value)
+        except (TypeError, ValueError):
+            continue
+        if count > 0:
+            passengers[key] = count
+
+    price = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+
+    booking = Booking.create(
+        session,
+        currency=Config.CURRENCY[price['currency']],
+        fare_price=price['fare_price'],
+        fees=sum(f['total'] for f in price['fees']),
+        total_discounts=price['total_discounts'],
+        total_price=price['total_price'],
+        passenger_counts=passengers,
+    )
+
+    if outbound_id:
+        BookingFlight.create(session, booking_id=booking.id, flight_id=outbound_id)
+    if return_id:
+        BookingFlight.create(session, booking_id=booking.id, flight_id=return_id)
+
+    session.refresh(booking)
+
     result = {'public_id': str(booking.public_id)}
     return jsonify(result), 201
 
@@ -58,12 +102,11 @@ def process_booking_passengers():
     if not public_id:
         return jsonify({'message': 'public_id_required'}), 400
 
+    session = db.session
     booking = Booking.get_by_public_id(public_id)
     booking.email_address = buyer.get('email')
     booking.phone_number = buyer.get('phone')
 
-    # Process passengers: create or update, keep track of processed ids
-    session = db.session
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
     processed_ids = set()
     for pdata in passengers:
@@ -83,20 +126,19 @@ def process_booking_passengers():
             'citizenship_id': pdata.get('citizenship_id'),
         }
         if pid:
-            passenger = Passenger.update(pid, **passenger_fields)
+            passenger = Passenger.update(pid, session=session, **passenger_fields)
         else:
-            passenger = Passenger.create(**passenger_fields)
+            passenger = Passenger.create(session, **passenger_fields)
 
         processed_ids.add(passenger.id)
         category = pdata.get('category')
         category_enum = Config.PASSENGER_CATEGORY[category] if category else None
         bp = existing.get(passenger.id)
         if bp:
-            BookingPassenger.update(bp.id, passenger_id=passenger.id, category=category_enum)
+            BookingPassenger.update(bp.id, session=session, passenger_id=passenger.id, category=category_enum)
         else:
-            BookingPassenger.create(booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
+            BookingPassenger.create(session, booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
 
-    # Remove passengers that are no longer present
     for bp in list(booking.booking_passengers):
         if bp.passenger_id not in processed_ids:
             session.delete(bp)
@@ -106,7 +148,7 @@ def process_booking_passengers():
     session.flush()
     session.commit()
     try:
-        booking.transition_status('passengers_added')
+        booking.transition_status('passengers_added', session=session)
     except ValueError:
         pass
     except DataError:

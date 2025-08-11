@@ -22,7 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
-import { processBookingPassengers, fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { processBookingPassengers, fetchBookingDetails, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import {
@@ -181,21 +181,23 @@ const Passengers = () => {
 			.every(Boolean);
 		const buyerValid = validateBuyer();
 		if (!passengerValid || !buyerValid) return;
-		try {
-			const apiPassengers = (passengerData || []).map(toApiPassenger);
-			const apiBuyer = toApiBuyer(buyer);
-			await dispatch(
-				processBookingPassengers({
-					public_id: publicId,
-					buyer: apiBuyer,
-					passengers: apiPassengers,
-				})
-			).unwrap();
-			navigate(`/booking/${publicId}/confirmation`);
-		} catch (e) {
-			// errors handled via redux state
-		}
-	};
+                try {
+                        const apiPassengers = (passengerData || []).map(toApiPassenger);
+                        const apiBuyer = toApiBuyer(buyer);
+                        await dispatch(
+                                processBookingPassengers({
+                                        public_id: publicId,
+                                        buyer: apiBuyer,
+                                        passengers: apiPassengers,
+                                })
+                        ).unwrap();
+                        await dispatch(fetchBookingDetails(publicId)).unwrap();
+                        await dispatch(fetchBookingAccess(publicId)).unwrap();
+                        navigate(`/booking/${publicId}/confirmation`);
+                } catch (e) {
+                        // errors handled via redux state
+                }
+        };
 
 	const [outboundFlight = null, returnFlight = null] = (booking?.flights ?? [])
 		.slice()
