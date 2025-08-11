@@ -14,7 +14,8 @@ import {
 	getAgeError,
 	validateDate,
 } from '../utils';
-import { mapFromApi, mappingConfigs } from '../utils/mappers';
+// Passengers passed to this component are already in client-side camelCase.
+// No additional mapping from API format is required here.
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 
@@ -22,12 +23,17 @@ const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
 const normalizePassenger = (p = {}) => ({
-	...mapFromApi(p, mappingConfigs.passenger, {
-		id: '',
-		category: 'adult',
-		gender: genderOptions[0]?.value || '',
-		documentType: docTypeOptions[0]?.value || '',
-	}),
+        id: p.id || '',
+        category: p.category || 'adult',
+        lastName: p.lastName || '',
+        firstName: p.firstName || '',
+        patronymicName: p.patronymicName || '',
+        gender: p.gender || genderOptions[0]?.value || '',
+        birthDate: p.birthDate || '',
+        documentType: p.documentType || docTypeOptions[0]?.value || '',
+        documentNumber: p.documentNumber || '',
+        documentExpiryDate: p.documentExpiryDate || '',
+        citizenshipId: p.citizenshipId || '',
 });
 
 const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights = [] }, ref) => {

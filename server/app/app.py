@@ -215,6 +215,7 @@ def __create_app(_config_class, _db):
     app.route('/bookings/process/<public_id>/access', methods=['GET'])(get_process_booking_access)
     app.route('/bookings/process/create', methods=['POST'])(process_booking_create)
     app.route('/bookings/process/passengers', methods=['POST'])(process_booking_passengers)
+    app.route('/bookings/process/confirm', methods=['POST'])(process_booking_confirm)
     app.route('/bookings/process/payment', methods=['POST'])(process_booking_payment)
     app.route('/bookings/process/<public_id>/details', methods=['GET'])(get_process_booking_details)
 
