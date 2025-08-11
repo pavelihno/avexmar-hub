@@ -5,6 +5,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { useBookingAccess } from '../../context/BookingAccessContext';
 import { UI_LABELS } from '../../constants';
 
 const stepKeys = ['passengers', 'confirmation', 'payment', 'completion'];
@@ -23,6 +24,7 @@ const StepIcon = ({ icon, color }) => {
 };
 
 const BookingProgress = ({ activeStep }) => {
+	const { accessiblePages = [] } = useBookingAccess();
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 
@@ -35,37 +37,36 @@ const BookingProgress = ({ activeStep }) => {
 
 	const stepIndex = typeof activeStep === 'string' ? stepKeys.indexOf(activeStep) : activeStep;
 
-	const handleClick = (index) => {
-		if (index <= stepIndex) navigate(routes[index]);
-	};
-
 	return (
 		<Stepper activeStep={stepIndex} alternativeLabel sx={{ mt: 2, mb: 3 }}>
 			{stepKeys.map((key, index) => {
-				const isCompleted = index < stepIndex;
 				const isActive = index === stepIndex;
+				const isAccessible = accessiblePages.includes(key);
 
-				let iconColor;
-				if (isCompleted) {
-					iconColor = 'success.main';
-				} else if (isActive) {
-					iconColor = 'primary.main';
-				} else {
-					iconColor = 'text.disabled';
-				}
+				const iconColor = isActive ? 'primary.main' : isAccessible ? 'success.main' : 'text.disabled';
 
 				return (
 					<Step
 						key={key}
-						completed={isCompleted}
-						onClick={() => handleClick(index)}
+						completed={!isActive && isAccessible}
+						disabled={!isAccessible}
 						sx={{
-							cursor: index <= stepIndex ? 'pointer' : 'default',
-							pointerEvents: index <= stepIndex ? 'auto' : 'none',
+							pointerEvents: isAccessible ? 'auto' : 'none',
+							'& .MuiStepIcon-root': { cursor: isAccessible ? 'pointer' : 'default' },
+							'& .MuiStepLabel-label': { cursor: isAccessible ? 'pointer' : 'default' },
+							'& .MuiStepLabel-labelContainer': { cursor: isAccessible ? 'pointer' : 'default' },
 						}}
 					>
-						<StepLabel StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}>
-							<Typography variant='subtitle2' sx={{ color: iconColor, fontWeight: isActive ? 600 : 400 }}>
+						<StepLabel
+							onClick={() => {
+								if (isAccessible) navigate(routes[index]);
+							}}
+							StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}
+							sx={{
+								cursor: isAccessible ? 'pointer' : 'default',
+							}}
+						>
+							<Typography variant='subtitle1' sx={{ color: iconColor, fontWeight: isActive ? 600 : 400 }}>
 								{UI_LABELS.BOOKING.progress_steps[key]}
 							</Typography>
 						</StepLabel>

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { BookingAccessContext } from '../context/BookingAccessContext';
 import { fetchBookingAccess } from '../redux/actions/bookingProcess';
 
 const BookingRoute = ({ page, children }) => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const pages = useSelector((state) => state.bookingProcess.current?.accessiblePages);
+	const accessiblePages = useSelector((state) => state.bookingProcess.current?.accessiblePages) || [];
 	const [checked, setChecked] = useState(false);
 
 	useEffect(() => {
@@ -15,27 +17,23 @@ const BookingRoute = ({ page, children }) => {
 			.unwrap()
 			.catch(() => {
 				navigate('/', { replace: true });
-				setChecked(true);
-			});
+			})
+			.finally(() => setChecked(true));
 	}, [dispatch, publicId, navigate]);
 
 	useEffect(() => {
-		if (pages) {
-			if (!pages.includes(page)) {
-				const last = pages[pages.length - 1];
-				if (last) {
-					navigate(`/booking/${publicId}/${last}`, { replace: true });
-				} else {
-					navigate('/', { replace: true });
-				}
-			}
-			setChecked(true);
+		if (!checked) return; // дождёмся окончания первого эффекта
+		if (accessiblePages.length === 0) return;
+
+		if (!accessiblePages.includes(page)) {
+			const last = accessiblePages[accessiblePages.length - 1];
+			navigate(last ? `/booking/${publicId}/${last}` : '/', { replace: true });
 		}
-	}, [pages, page, navigate, publicId]);
+	}, [accessiblePages, page, navigate, publicId, checked]);
 
 	if (!checked) return null;
 
-	return children;
+	return <BookingAccessContext.Provider value={{ accessiblePages }}>{children}</BookingAccessContext.Provider>;
 };
 
 export default BookingRoute;
