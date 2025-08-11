@@ -118,7 +118,7 @@ def process_booking_passengers():
             'birth_date': pdata.get('birth_date'),
             'document_type': pdata.get('document_type'),
             'document_number': pdata.get('document_number'),
-            'document_expiry_date': parse_date(pdata.get('document_expiry_date')),
+            'document_expiry_date': pdata.get('document_expiry_date'),
             'citizenship_id': pdata.get('citizenship_id'),
         }
         if pid:

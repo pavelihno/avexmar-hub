@@ -98,6 +98,7 @@ class Passenger(BaseModel):
 
         if kwargs.get('document_type') in (
             Config.DOCUMENT_TYPE.passport.value,
+            Config.DOCUMENT_TYPE.international_passport.value,
             Config.DOCUMENT_TYPE.birth_certificate.value,
         ):
             kwargs['citizenship_id'] = Country.get_by_code(
