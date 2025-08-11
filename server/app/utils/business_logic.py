@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee

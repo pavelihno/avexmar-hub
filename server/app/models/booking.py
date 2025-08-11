@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.payment import Payment
     from app.models.ticket import Ticket
     from app.models.seat import Seat
+    from app.models.tariff import Tariff
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
 
@@ -36,6 +37,7 @@ class Booking(BaseModel):
     phone_number = db.Column(db.String, nullable=True)
 
     # Price details
+    tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id'), nullable=False)
     currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
     fare_price = db.Column(db.Float, nullable=False)
     fees = db.Column(db.Float, nullable=False, default=0.0)
@@ -46,6 +48,7 @@ class Booking(BaseModel):
     passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
 
     # Relationships
+    tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='bookings')
     payments: Mapped[List['Payment']] = db.relationship(
         'Payment', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
@@ -73,6 +76,8 @@ class Booking(BaseModel):
             'buyer_first_name': self.buyer_first_name,
             'email_address': self.email_address,
             'phone_number': self.phone_number,
+            'tariff_id': self.tariff_id,
+            'tariff': self.tariff.to_dict(return_children) if return_children else {}, 
             'currency': self.currency.value,
             'fare_price': self.fare_price,
             'total_discounts': self.total_discounts,

@@ -69,7 +69,8 @@ def process_booking_create():
 
     booking = Booking.create(
         session,
-        currency=Config.CURRENCY[price['currency']],
+        tariff_id=tariff_id,
+        currency=price['currency'],
         fare_price=price['fare_price'],
         fees=sum(f['total'] for f in price['fees']),
         total_discounts=price['total_discounts'],
@@ -127,12 +128,11 @@ def process_booking_passengers():
 
         processed_ids.add(passenger.id)
         category = pdata.get('category')
-        category_enum = Config.PASSENGER_CATEGORY[category] if category else None
         bp = existing.get(passenger.id)
         if bp:
-            BookingPassenger.update(bp.id, session=session, passenger_id=passenger.id, category=category_enum)
+            BookingPassenger.update(bp.id, session=session, passenger_id=passenger.id, category=category)
         else:
-            BookingPassenger.create(session, booking_id=booking.id, passenger_id=passenger.id, category=category_enum)
+            BookingPassenger.create(session, booking_id=booking.id, passenger_id=passenger.id, category=category)
 
     booking = Booking.transition_status(
         id=booking.id,
@@ -198,6 +198,8 @@ def get_process_booking_details(public_id):
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist
     result['flights'] = flights
+
+    # calculate_price_details use tariff_id, flights from booking
 
     return jsonify(result), 200
 
