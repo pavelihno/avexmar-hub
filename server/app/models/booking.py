@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from app.models.tariff import Tariff
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
+    from app.models.user import User
 
 
 class Booking(BaseModel):
@@ -46,8 +47,10 @@ class Booking(BaseModel):
 
     # Metadata
     passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
 
     # Relationships
+    user: Mapped['User'] = db.relationship('User', back_populates='bookings')
     tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='bookings')
     payments: Mapped[List['Payment']] = db.relationship(
         'Payment', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
@@ -77,7 +80,6 @@ class Booking(BaseModel):
             'email_address': self.email_address,
             'phone_number': self.phone_number,
             'tariff_id': self.tariff_id,
-            'tariff': self.tariff.to_dict(return_children) if return_children else {}, 
             'currency': self.currency.value,
             'fare_price': self.fare_price,
             'total_discounts': self.total_discounts,
@@ -172,8 +174,12 @@ class Booking(BaseModel):
     }
 
     @classmethod
-    def get_accessible_pages(cls, public_id):
+    def get_accessible_pages(cls, current_user, public_id):
         booking = cls.get_by_public_id(public_id)
+
+        if booking.user_id and booking.user_id != current_user.id:
+            return []
+
         return cls.PAGE_FLOW.get(booking.status.value, [])
 
     @classmethod

@@ -10,6 +10,7 @@ from app.middlewares.auth_middleware import admin_required
 from app.utils.business_logic import calculate_price_details
 from app.config import Config
 from app.utils.datetime import parse_date
+from app.middlewares.auth_middleware import current_user
 
 
 @admin_required
@@ -47,7 +48,8 @@ def delete_booking(current_user, booking_id):
     return jsonify(deleted)
 
 
-def process_booking_create():
+@current_user
+def process_booking_create(current_user):
     data = request.json or {}
     session = db.session
 
@@ -89,7 +91,8 @@ def process_booking_create():
     return jsonify(result), 201
 
 
-def process_booking_passengers():
+@current_user
+def process_booking_passengers(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
     buyer = data.get('buyer', {})
@@ -109,8 +112,9 @@ def process_booking_passengers():
     processed_ids = set()
     for pdata in passengers:
         pid = pdata.get('id')
+        category = pdata.get('category')
 
-        passenger_fields = {
+        passenger_fields = {k: v for k, v in {
             'first_name': pdata.get('first_name'),
             'last_name': pdata.get('last_name'),
             'patronymic_name': pdata.get('patronymic_name'),
@@ -120,14 +124,13 @@ def process_booking_passengers():
             'document_number': pdata.get('document_number'),
             'document_expiry_date': pdata.get('document_expiry_date'),
             'citizenship_id': pdata.get('citizenship_id'),
-        }
+        }.items() if v is not None and v != ''}
         if pid:
             passenger = Passenger.update(pid, session=session, **passenger_fields)
         else:
             passenger = Passenger.create(session, **passenger_fields)
 
         processed_ids.add(passenger.id)
-        category = pdata.get('category')
         bp = existing.get(passenger.id)
         if bp:
             BookingPassenger.update(bp.id, session=session, passenger_id=passenger.id, category=category)
@@ -143,7 +146,8 @@ def process_booking_passengers():
     return jsonify({'status': 'ok'}), 200
 
 
-def process_booking_confirm():
+@current_user
+def process_booking_confirm(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
     if not public_id:
@@ -160,11 +164,13 @@ def process_booking_confirm():
     return jsonify({'status': 'ok'}), 200
 
 
-def process_booking_payment():
+@current_user
+def process_booking_payment(current_user):
     return jsonify({'status': 'ok'}), 200
 
 
-def get_process_booking_details(public_id):
+@current_user
+def get_process_booking_details(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
     passengers = []
@@ -209,6 +215,7 @@ def get_process_booking_details(public_id):
     return jsonify(result), 200
 
 
-def get_process_booking_access(public_id):
-    return jsonify({'pages': Booking.get_accessible_pages(public_id)}), 200
+@current_user
+def get_process_booking_access(current_user, public_id):
+    return jsonify({'pages': Booking.get_accessible_pages(current_user, public_id)}), 200
 
