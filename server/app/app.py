@@ -25,6 +25,7 @@ from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
 from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
+from app.controllers.booking_payment_controller import *
 from app.controllers.airline_controller import *
 from app.controllers.country_controller import *
 from app.controllers.search_controller import *
@@ -216,8 +217,13 @@ def __create_app(_config_class, _db):
     app.route('/bookings/process/create', methods=['POST'])(process_booking_create)
     app.route('/bookings/process/passengers', methods=['POST'])(process_booking_passengers)
     app.route('/bookings/process/confirm', methods=['POST'])(process_booking_confirm)
-    app.route('/bookings/process/payment', methods=['POST'])(process_booking_payment)
     app.route('/bookings/process/<public_id>/details', methods=['GET'])(get_process_booking_details)
+    app.route('/bookings/process/<public_id>/completion', methods=['GET'])(get_process_booking_completion)
+
+    # booking payments
+    app.route('/booking/payment/create', methods=['POST'])(create_booking_payment)
+    app.route('/booking/payment/<public_id>', methods=['GET'])(get_booking_payment)
+    app.route('/booking/payment/webhook', methods=['POST'])(payment_webhook)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

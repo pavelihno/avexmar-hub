@@ -5,13 +5,15 @@ import {
         fetchBookingDetails,
         fetchBookingAccess,
         confirmBooking,
+        fetchCompletionDetails,
 } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
-	current: null,
-	isLoading: false,
-	errors: null,
+        current: null,
+        completion: null,
+        isLoading: false,
+        errors: null,
 };
 
 const bookingProcessSlice = createSlice({
@@ -54,6 +56,12 @@ const bookingProcessSlice = createSlice({
                         .addCase(confirmBooking.pending, handlePending)
                         .addCase(confirmBooking.rejected, handleRejected)
                         .addCase(confirmBooking.fulfilled, (state) => {
+                                state.isLoading = false;
+                        })
+                        .addCase(fetchCompletionDetails.pending, handlePending)
+                        .addCase(fetchCompletionDetails.rejected, handleRejected)
+                        .addCase(fetchCompletionDetails.fulfilled, (state, action) => {
+                                state.completion = action.payload;
                                 state.isLoading = false;
                         });
         },
