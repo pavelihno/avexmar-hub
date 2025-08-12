@@ -22,10 +22,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import {
-	fetchBookingDetails,
-	fetchBookingDirectionsInfo,
-	confirmBooking,
-	fetchBookingAccess,
+        fetchBookingDetails,
+        confirmBooking,
+        fetchBookingAccess,
 } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
 import { formatNumber, formatDate, formatTime, formatDuration } from '../utils';
@@ -34,18 +33,27 @@ const Confirmation = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const booking = useSelector((state) => state.bookingProcess.current);
-	const directionsInfo = useSelector((state) => state.bookingProcess.current?.directionsInfo) || {};
+        const booking = useSelector((state) => state.bookingProcess.current);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
 	}, [dispatch, publicId]);
 
-	useEffect(() => {
-		if (booking?.price_details?.directions) {
-			dispatch(fetchBookingDirectionsInfo(booking.price_details.directions));
-		}
-	}, [dispatch, booking]);
+        const getRouteInfo = (flight) => {
+                if (!flight?.route) return null;
+                const origin = flight.route.origin_airport || {};
+                const dest = flight.route.destination_airport || {};
+                return {
+                        from: origin.city_name || origin.iata_code,
+                        to: dest.city_name || dest.iata_code,
+                };
+        };
+
+        const outboundFlight = booking?.flights?.[0];
+        const returnFlight = booking?.flights?.[1];
+        const outboundRouteInfo = getRouteInfo(outboundFlight);
+        const returnRouteInfo = getRouteInfo(returnFlight);
+        const flightMap = { outbound: outboundFlight, return: returnFlight };
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
@@ -59,11 +67,8 @@ const Confirmation = () => {
 		}
 	};
 
-	const outboundRouteInfo = directionsInfo.outbound;
-	const returnRouteInfo = directionsInfo.return;
-
-	return (
-		<Base maxWidth='lg'>
+        return (
+                <Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
 			<Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', rowGap: 2 }}>
 				{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
@@ -212,8 +217,8 @@ const Confirmation = () => {
 				{booking && (
 					<Card>
 						<CardContent>
-							{(booking.price_details?.directions || []).map((dir, idx) => {
-								const info = directionsInfo[dir.direction] || {};
+                                                       {(booking.price_details?.directions || []).map((dir, idx) => {
+                                                                const info = getRouteInfo(flightMap[dir.direction]) || {};
 								return (
 									<Box key={dir.direction} sx={{ mb: 2 }}>
 										<Typography variant='subtitle1' sx={{ fontWeight: 500, mb: 0.5 }}>

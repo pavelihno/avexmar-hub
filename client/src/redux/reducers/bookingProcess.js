@@ -4,7 +4,6 @@ import {
         processBookingPassengers,
         fetchBookingDetails,
         fetchBookingAccess,
-        fetchBookingDirectionsInfo,
         confirmBooking,
 } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
@@ -46,16 +45,10 @@ const bookingProcessSlice = createSlice({
 				};
 				state.isLoading = false;
 			})
-			.addCase(fetchBookingAccess.pending, handlePending)
-			.addCase(fetchBookingAccess.rejected, handleRejected)
-			.addCase(fetchBookingAccess.fulfilled, (state, action) => {
-				state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
-				state.isLoading = false;
-			})
-                        .addCase(fetchBookingDirectionsInfo.pending, handlePending)
-                        .addCase(fetchBookingDirectionsInfo.rejected, handleRejected)
-                        .addCase(fetchBookingDirectionsInfo.fulfilled, (state, action) => {
-                                state.current = { ...(state.current || {}), directionsInfo: action.payload };
+                        .addCase(fetchBookingAccess.pending, handlePending)
+                        .addCase(fetchBookingAccess.rejected, handleRejected)
+                        .addCase(fetchBookingAccess.fulfilled, (state, action) => {
+                                state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
                                 state.isLoading = false;
                         })
                         .addCase(confirmBooking.pending, handlePending)

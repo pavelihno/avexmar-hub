@@ -78,6 +78,7 @@ def process_booking_create(current_user):
         total_discounts=price['total_discounts'],
         total_price=price['total_price'],
         passenger_counts=passengers,
+        user_id=current_user.id if current_user else None,
     )
 
     if outbound_id:

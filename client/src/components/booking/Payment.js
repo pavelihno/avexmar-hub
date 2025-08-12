@@ -4,30 +4,32 @@ import { useParams } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button } from '@mui/material';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails, fetchBookingDirectionsInfo } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
 
 const Payment = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
-	const booking = useSelector((state) => state.bookingProcess.current);
-	const directionsInfo = useSelector((state) => state.bookingProcess.current?.directionsInfo || {});
+        const booking = useSelector((state) => state.bookingProcess.current);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
 	}, [dispatch, publicId]);
 
-	useEffect(() => {
-		if (booking?.directions) {
-			dispatch(fetchBookingDirectionsInfo(booking.directions));
-		}
-	}, [dispatch, booking]);
+        const getRouteInfo = (flight) => {
+                if (!flight?.route) return null;
+                const origin = flight.route.origin_airport || {};
+                const dest = flight.route.destination_airport || {};
+                return UI_LABELS.SCHEDULE.from_to(
+                        origin.city_name || origin.iata_code,
+                        dest.city_name || dest.iata_code
+                );
+        };
 
-	const firstDir = booking?.directions ? booking.directions[0]?.direction : null;
-	const info = firstDir ? directionsInfo[firstDir] : null;
-	const routeInfo = info ? UI_LABELS.SCHEDULE.from_to(info.from, info.to) : null;
-	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
+        const routeInfo = getRouteInfo(booking?.flights?.[0]);
+
+        const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
 	return (
 		<Base maxWidth='lg'>
