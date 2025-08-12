@@ -24,6 +24,10 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
             flight_id=return_id, tariff_id=tariff_id
         ).first_or_404()
 
+    passengers = passengers or {}
+    categories = ['adults', 'children', 'infants', 'infants_seat']
+    passengers = {cat: int(passengers.get(cat, 0) or 0) for cat in categories}
+
     discounts = Discount.get_all()
     discount_pct = {
         d.discount_type.value: d.percentage_value / 100.0 for d in discounts
@@ -43,6 +47,9 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
         'id': tariff.id,
         'title': tariff.title,
         'seat_class': tariff.seat_class.value,
+        'price': tariff.price,
+        'currency': tariff.currency.value,
+        'conditions': tariff.conditions,
     }
     directions = []
 

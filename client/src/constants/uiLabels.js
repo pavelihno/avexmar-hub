@@ -289,10 +289,14 @@ export const UI_LABELS = {
 				tickets: 'Билеты',
 				service_fee: 'Сервисный сбор',
 				discount: 'Скидка',
-			},
-		},
-		passenger_form: {
-			type_labels: {
+                },
+        },
+        confirmation: {
+                passenger_column: 'Пассажир',
+                payment_button: 'Перейти к оплате',
+        },
+        passenger_form: {
+                type_labels: {
 				adult: 'Взрослый, старше 12 лет',
 				child: 'Ребёнок, от 2 до 12 лет',
 				infant: 'Младенец, до 2 лет',
