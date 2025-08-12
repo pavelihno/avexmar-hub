@@ -225,7 +225,6 @@ const Passengers = () => {
 		try {
 			const apiPassengers = (passengerData || []).map(toApiPassenger);
 			const apiBuyer = toApiBuyer(buyer);
-			console.log(apiBuyer);
 			await dispatch(
 				processBookingPassengers({
 					public_id: publicId,
