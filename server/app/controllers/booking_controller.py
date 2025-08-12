@@ -192,14 +192,19 @@ def get_process_booking_details(public_id):
             for _ in range(count):
                 passengers.append({'category': category})
 
-    for bf in booking.booking_flights:
-        flights.append(bf.flight.to_dict(return_children=True))
+    flights = [bf.flight.to_dict(return_children=True) for bf in booking.booking_flights]
+    flights.sort(key=lambda f: (f.get('scheduled_departure'), f.get('scheduled_departure_time') or ''))
 
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist
     result['flights'] = flights
 
-    # calculate_price_details use tariff_id, flights from booking
+    passenger_counts = dict(booking.passenger_counts or {})
+
+    outbound_id = flights[0]['id'] if len(flights) > 0 else 0
+    return_id = flights[1]['id'] if len(flights) > 1 else 0
+    price_details = calculate_price_details(outbound_id, return_id, booking.tariff_id, passenger_counts)
+    result['price_details'] = price_details
 
     return jsonify(result), 200
 
