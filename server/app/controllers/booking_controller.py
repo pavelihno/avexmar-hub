@@ -165,9 +165,17 @@ def process_booking_confirm(current_user):
     return jsonify({'status': 'ok'}), 200
 
 
+
 @current_user
-def process_booking_payment(current_user):
-    return jsonify({'status': 'ok'}), 200
+def get_process_booking_completion(current_user, public_id):
+    booking = Booking.get_by_public_id(public_id)
+    result = {
+        'booking_number': booking.booking_number,
+        'status': booking.status.value,
+        'total_price': booking.total_price,
+        'currency': booking.currency.value,
+    }
+    return jsonify(result), 200
 
 
 @current_user

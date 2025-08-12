@@ -31,6 +31,10 @@ class Config:
     MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
     MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
 
+    # Payment provider settings
+    YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
+    YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
+
     # Enum classes
     class USER_ROLE(enum.Enum):
         admin = 'admin'
@@ -77,6 +81,11 @@ class Config:
 
     class PAYMENT_STATUS(enum.Enum):
         pending = 'pending'
+        waiting_for_capture = 'waiting_for_capture'
+        succeeded = 'succeeded'
+        canceled = 'canceled'
+
+        # Legacy statuses
         paid = 'paid'
         refunded = 'refunded'
         failed = 'failed'

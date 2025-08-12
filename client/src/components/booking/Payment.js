@@ -1,21 +1,44 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Button } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Box, Card, CardContent, Typography, Button, Alert } from '@mui/material';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
+import PaymentForm from './PaymentForm';
 import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
 
 const Payment = () => {
-	const { publicId } = useParams();
-	const dispatch = useDispatch();
+        const { publicId } = useParams();
+        const dispatch = useDispatch();
+        const navigate = useNavigate();
         const booking = useSelector((state) => state.bookingProcess.current);
+        const payment = useSelector((state) => state.payment.current);
 
-	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+        useEffect(() => {
+                dispatch(fetchBookingDetails(publicId));
+                dispatch(createPayment({ public_id: publicId, return_url: window.location.href }));
+        }, [dispatch, publicId]);
+
+        const status = booking?.status;
+
+        useEffect(() => {
+                if (status === 'payment_confirmed' || status === 'completed') {
+                        navigate(`/booking/${publicId}/completion`);
+                }
+        }, [status, navigate, publicId]);
+
+        const handleSuccess = useCallback(() => {
+                dispatch(fetchBookingDetails(publicId));
+                dispatch(fetchPayment(publicId));
+        }, [dispatch, publicId]);
+
+        const handleError = useCallback(() => {
+                dispatch(fetchBookingDetails(publicId));
+                dispatch(fetchPayment(publicId));
+        }, [dispatch, publicId]);
 
         const getRouteInfo = (flight) => {
                 if (!flight?.route) return null;
@@ -42,18 +65,41 @@ const Payment = () => {
 								{routeInfo}
 							</Typography>
 						)}
-						<Typography variant='body1' sx={{ mb: 2 }}>
-							{UI_LABELS.BOOKING.buyer_form.summary.total}: {formatNumber(booking?.total_price || 0)}{' '}
-							{currencySymbol}
-						</Typography>
-						<Button variant='contained' color='orange' href='https://yoomoney.ru/' target='_blank'>
-							Оплатить через YooMoney
-						</Button>
-					</CardContent>
-				</Card>
-			</Box>
-		</Base>
-	);
+                                                <Typography variant='body1' sx={{ mb: 2 }}>
+                                                        {UI_LABELS.BOOKING.buyer_form.summary.total}: {formatNumber(booking?.total_price || 0)}{' '}
+                                                        {currencySymbol}
+                                                </Typography>
+                                                {status === 'payment_failed' && (
+                                                        <Alert severity='error' sx={{ mb: 2 }}>
+                                                                {UI_LABELS.BOOKING.payment_failed || 'Payment failed'}
+                                                        </Alert>
+                                                )}
+                                                {status !== 'payment_confirmed' && (
+                                                        <PaymentForm
+                                                                confirmationToken={payment?.confirmation_token}
+                                                                returnUrl={window.location.href}
+                                                                onSuccess={handleSuccess}
+                                                                onError={handleError}
+                                                        />
+                                                )}
+                                                {status === 'payment_failed' && (
+                                                        <Button
+                                                                variant='contained'
+                                                                color='orange'
+                                                                sx={{ mt: 2 }}
+                                                                onClick={() => {
+                                                                        dispatch(fetchBookingDetails(publicId));
+                                                                        dispatch(createPayment({ public_id: publicId, return_url: window.location.href }));
+                                                                }}
+                                                        >
+                                                                {UI_LABELS.BOOKING.retry_payment || 'Retry payment'}
+                                                        </Button>
+                                                )}
+                                        </CardContent>
+                                </Card>
+                        </Box>
+                </Base>
+        );
 };
 
 export default Payment;
