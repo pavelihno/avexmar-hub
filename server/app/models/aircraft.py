@@ -9,7 +9,7 @@ class Aircraft(BaseModel):
 
     flights = db.relationship('Flight', back_populates='aircraft', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'type': self.type,

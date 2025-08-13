@@ -1,26 +1,15 @@
 import React, { useState } from 'react';
 
-import {
-	Typography,
-	Grid,
-	Box,
-	Container,
-	Paper,
-	Link,
-	Avatar,
-	IconButton,
-	Tooltip,
-	Snackbar,
-} from '@mui/material';
-import {
-	LocationOn,
-	Phone,
-	Email,
-	ArrowForward,
-	ContentCopy,
-} from '@mui/icons-material';
+import { Typography, Grid, Box, Container, Paper, Link, Avatar, IconButton, Tooltip, Snackbar } from '@mui/material';
+import { LocationOn, Phone, Email, ArrowForward, ContentCopy } from '@mui/icons-material';
 import Base from './Base';
 import { UI_LABELS } from '../constants/uiLabels';
+
+const aboutLinks = [
+	{ href: '/privacy_policy', label: UI_LABELS.ABOUT.privacy_policy_agreement },
+	{ href: '/public_offer', label: UI_LABELS.ABOUT.public_offer },
+	{ href: '/marketing_consent', label: UI_LABELS.ABOUT.marketing_consent },
+];
 
 const About = () => {
 	const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -45,9 +34,7 @@ const About = () => {
 		navigator.clipboard
 			.writeText(text)
 			.then(() => {
-				setSnackbarMessage(
-					`${type} ${UI_LABELS.ABOUT.copied.toLowerCase()}`
-				);
+				setSnackbarMessage(`${type} ${UI_LABELS.ABOUT.copied.toLowerCase()}`);
 				setSnackbarOpen(true);
 			})
 			.catch((err) => {
@@ -124,11 +111,7 @@ const About = () => {
 									>
 										{card.title}
 									</Typography>
-									<Typography
-										variant='body2'
-										color='text.secondary'
-										sx={{ overflow: 'hidden' }}
-									>
+									<Typography variant='body2' color='text.secondary' sx={{ overflow: 'hidden' }}>
 										{card.content}
 									</Typography>
 								</Box>
@@ -155,10 +138,7 @@ const About = () => {
 							>
 								<LocationOn color='primary' sx={{ mr: 2 }} />
 								<Box sx={{ flexGrow: 1 }}>
-									<Typography
-										variant='subtitle2'
-										color='text.secondary'
-									>
+									<Typography variant='subtitle2' color='text.secondary'>
 										{UI_LABELS.ABOUT.address}
 									</Typography>
 									<Box
@@ -167,21 +147,13 @@ const About = () => {
 											alignItems: 'center',
 										}}
 									>
-										<Typography
-											variant='body2'
-											sx={{ mr: 1 }}
-										>
+										<Typography variant='body2' sx={{ mr: 1 }}>
 											{contactInfo.address}
 										</Typography>
 										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
-												onClick={() =>
-													handleCopy(
-														contactInfo.address,
-														UI_LABELS.ABOUT.address
-													)
-												}
+												onClick={() => handleCopy(contactInfo.address, UI_LABELS.ABOUT.address)}
 												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.address}`}
 											>
 												<ContentCopy fontSize='small' />
@@ -202,10 +174,7 @@ const About = () => {
 							>
 								<Phone color='primary' sx={{ mr: 2 }} />
 								<Box sx={{ flexGrow: 1 }}>
-									<Typography
-										variant='subtitle2'
-										color='text.secondary'
-									>
+									<Typography variant='subtitle2' color='text.secondary'>
 										{UI_LABELS.ABOUT.phone}
 									</Typography>
 									<Box
@@ -232,12 +201,7 @@ const About = () => {
 										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
-												onClick={() =>
-													handleCopy(
-														contactInfo.phone,
-														UI_LABELS.ABOUT.phone
-													)
-												}
+												onClick={() => handleCopy(contactInfo.phone, UI_LABELS.ABOUT.phone)}
 												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.phone}`}
 											>
 												<ContentCopy fontSize='small' />
@@ -258,10 +222,7 @@ const About = () => {
 							>
 								<Email color='primary' sx={{ mr: 2 }} />
 								<Box sx={{ flexGrow: 1 }}>
-									<Typography
-										variant='subtitle2'
-										color='text.secondary'
-									>
+									<Typography variant='subtitle2' color='text.secondary'>
 										{UI_LABELS.ABOUT.email}
 									</Typography>
 									<Box
@@ -289,11 +250,7 @@ const About = () => {
 											<IconButton
 												size='small'
 												onClick={() =>
-													handleCopy(
-														contactInfo.email,
-														UI_LABELS.ABOUT
-															.email_address
-													)
+													handleCopy(contactInfo.email, UI_LABELS.ABOUT.email_address)
 												}
 												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.email_address}`}
 											>
@@ -311,63 +268,30 @@ const About = () => {
 					<Typography variant='h4' component='h2' gutterBottom>
 						{UI_LABELS.ABOUT.legal_info}
 					</Typography>
+
 					<Paper elevation={1} sx={{ p: 2 }}>
-						<Grid container spacing={2}>
-							<Grid item xs={12} sm={6}>
-								<Box
-									component={Link}
-									href='/privacy_policy'
-									sx={{
-										display: 'flex',
-										alignItems: 'center',
-										p: 1,
-										borderRadius: 1,
-										bgcolor: 'action.hover',
-										textDecoration: 'none',
-										color: 'text.primary',
-										'&:hover': {
-											bgcolor: 'action.selected',
-										},
-									}}
-								>
-									<ArrowForward
-										fontSize='small'
-										sx={{ mr: 1 }}
-									/>
-									<Typography variant='body2'>
-										{
-											UI_LABELS.ABOUT
-												.privacy_policy_agreement
-										}
-									</Typography>
-								</Box>
-							</Grid>
-							<Grid item xs={12} sm={6}>
-								<Box
-									component={Link}
-									href='/marketing_consent'
-									sx={{
-										display: 'flex',
-										alignItems: 'center',
-										p: 1,
-										borderRadius: 1,
-										bgcolor: 'action.hover',
-										textDecoration: 'none',
-										color: 'text.primary',
-										'&:hover': {
-											bgcolor: 'action.selected',
-										},
-									}}
-								>
-									<ArrowForward
-										fontSize='small'
-										sx={{ mr: 1 }}
-									/>
-									<Typography variant='body2'>
-										{UI_LABELS.ABOUT.marketing_consent}
-									</Typography>
-								</Box>
-							</Grid>
+						<Grid container spacing={2} wrap='nowrap'>
+							{aboutLinks.map(({ href, label }) => (
+								<Grid item xs key={href}>
+									<Box
+										component={Link}
+										href={href}
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+											p: 1,
+											borderRadius: 1,
+											bgcolor: 'action.hover',
+											textDecoration: 'none',
+											color: 'text.primary',
+											'&:hover': { bgcolor: 'action.selected' },
+										}}
+									>
+										<ArrowForward fontSize='small' sx={{ mr: 1 }} />
+										<Typography variant='body2'>{label}</Typography>
+									</Box>
+								</Grid>
+							))}
 						</Grid>
 					</Paper>
 				</Box>

@@ -17,7 +17,7 @@ class Timezone(BaseModel):
 
     airports: Mapped[List['Airport']] = db.relationship('Airport', back_populates='timezone', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'name': self.name,

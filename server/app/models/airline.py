@@ -22,12 +22,13 @@ class Airline(BaseModel):
     country: Mapped['Country'] = db.relationship('Country', back_populates='airlines')
     flights: Mapped[List['Flight']] = db.relationship('Flight', back_populates='airline', lazy='dynamic', cascade='all, delete-orphan')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
             'name': self.name,
+            'country': self.country.to_dict(return_children) if return_children else {},
             'country_id': self.country_id
         }
 

@@ -16,6 +16,7 @@ from app.utils.datetime import get_datetime, parse_date, parse_time
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
+    from app.models.booking_flight import BookingFlight
 
 
 class Flight(BaseModel):
@@ -42,6 +43,9 @@ class Flight(BaseModel):
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
+    booking_flights: Mapped[List['BookingFlight']] = db.relationship(
+        'BookingFlight', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -65,6 +69,9 @@ class Flight(BaseModel):
         depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
         arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
 
+        if depart_dt is None or arrive_dt is None:
+            return None
+
         route = self.route
         origin = route.origin_airport
         dest = route.destination_airport
@@ -72,15 +79,32 @@ class Flight(BaseModel):
         origin_tz = origin.timezone.get_tz() if origin.timezone else None
         dest_tz = dest.timezone.get_tz() if dest.timezone else None
 
-        if origin_tz is not None and dest_tz is not None:
-            depart_dt = depart_dt.astimezone(origin_tz)
-            arrive_dt = arrive_dt.astimezone(dest_tz)
+        if origin_tz:
+            depart_dt = depart_dt.replace(tzinfo=origin_tz)
+        if dest_tz:
+            arrive_dt = arrive_dt.replace(tzinfo=dest_tz)
 
-            delta = arrive_dt - depart_dt
+        delta = arrive_dt - depart_dt
+        return int(delta.total_seconds() // 60)
 
-            return int(delta.total_seconds() // 60)
-
-        return 0
+    def to_dict(self, return_children=False):
+        return {
+            'id': self.id,
+            'flight_number': self.flight_number,
+            'airline_flight_number': self.airline_flight_number,
+            'airline': self.airline.to_dict(return_children) if return_children else {},
+            'airline_id': self.airline_id,
+            'route': self.route.to_dict(return_children) if return_children else {},
+            'route_id': self.route_id,
+            'note': self.note,
+            'aircraft': self.aircraft.to_dict(return_children) if self.aircraft_id and return_children else {},
+            'aircraft_id': self.aircraft_id,
+            'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
+            'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
+            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
+            'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
+            'duration': self.flight_duration,
+        }
 
     MAX_TARIFFS = 4
 
@@ -249,23 +273,6 @@ class Flight(BaseModel):
 
         return flights, error_rows
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'flight_number': self.flight_number,
-            'airline_flight_number': self.airline_flight_number,
-            'note': self.note,
-            'airline_id': self.airline_id,
-            'route_id': self.route_id,
-            'aircraft_id': self.aircraft_id,
-            'aircraft_type': self.aircraft.type if self.aircraft else None,
-            'scheduled_departure': self.scheduled_departure.isoformat() if self.scheduled_departure else None,
-            'scheduled_departure_time': self.scheduled_departure_time.isoformat() if self.scheduled_departure_time else None,
-            'scheduled_arrival': self.scheduled_arrival.isoformat() if self.scheduled_arrival else None,
-            'scheduled_arrival_time': self.scheduled_arrival_time.isoformat() if self.scheduled_arrival_time else None,
-            'duration': self.flight_duration,
-        }
-
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by=['scheduled_departure', 'scheduled_departure_time'], descending=True)
@@ -295,25 +302,25 @@ class Flight(BaseModel):
                 {'flight_number': 'Flight with this number already exists for the given airline and route.'})
 
     @classmethod
-    def create(cls, session=None, **data):
+    def create(cls, session=None, **kwargs):
         session = session or db.session
-        flight_number = data.get('flight_number')
-        airline_id = data.get('airline_id')
-        route_id = data.get('route_id')
-        scheduled_departure = data.get('scheduled_departure')
+        flight_number = kwargs.get('flight_number')
+        airline_id = kwargs.get('airline_id')
+        route_id = kwargs.get('route_id')
+        scheduled_departure = kwargs.get('scheduled_departure')
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure
         )
-        return super().create(session, **data)
+        return super().create(session, **kwargs)
 
     @classmethod
-    def update(cls, _id, session=None, **data):
+    def update(cls, _id, session=None, **kwargs):
         session = session or db.session
-        flight_number = data.get('flight_number')
-        airline_id = data.get('airline_id')
-        route_id = data.get('route_id')
-        scheduled_departure = data.get('scheduled_departure')
+        flight_number = kwargs.get('flight_number')
+        airline_id = kwargs.get('airline_id')
+        route_id = kwargs.get('route_id')
+        scheduled_departure = kwargs.get('scheduled_departure')
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=_id
         )
-        return super().update(_id, session, **data)
+        return super().update(_id, session, **kwargs)

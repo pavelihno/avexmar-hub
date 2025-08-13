@@ -37,10 +37,10 @@ const userSlice = createSlice({
 
 		builder
 			.addCase(changePassword.pending, handlePending)
+			.addCase(changePassword.rejected, handleRejected)
 			.addCase(changePassword.fulfilled, (state) => {
 				state.isLoading = false;
-			})
-			.addCase(changePassword.rejected, handleRejected);
+			});
 	},
 });
 

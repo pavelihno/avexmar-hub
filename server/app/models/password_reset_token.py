@@ -1,14 +1,11 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
 from app.models._base_model import BaseModel
-
-if TYPE_CHECKING:
-    from app.models.user import User
-
+from app.models.user import User
 
 class PasswordResetToken(BaseModel):
     __tablename__ = 'password_reset_tokens'
@@ -21,13 +18,13 @@ class PasswordResetToken(BaseModel):
     user: Mapped['User'] = db.relationship('User', back_populates='reset_tokens')
 
     @classmethod
-    def create_token(cls, user, expires_in_hours=1):
+    def create(cls, user: User, session: Session | None = None, expires_in_hours=1):
+        session = session or db.session
+        
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
-        instance = cls(token=token, user_id=user.id, expires_at=expires_at, used=False)
-        db.session.add(instance)
-        db.session.commit()
-        return instance
+        expires_at = datetime.now() + timedelta(hours=expires_in_hours)
+
+        return super().create(session=db.session, token=token, user_id=user.id, expires_at=expires_at, used=False)
 
     @classmethod
     def verify_token(cls, token):
@@ -38,7 +35,7 @@ class PasswordResetToken(BaseModel):
         if not instance:
             return None
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
         expires_at = instance.expires_at
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)

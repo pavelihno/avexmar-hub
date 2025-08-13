@@ -28,9 +28,15 @@ export const ENUM_LABELS = {
 	},
 	DOCUMENT_TYPE: {
 		passport: 'Паспорт РФ',
-		foreign_passport: 'Паспорт иностранного гражданина',
-		international_passport: 'Загранпаспорт',
+		international_passport: 'Загранпаспорт РФ',
+		foreign_passport: 'Иностранный документ',
 		birth_certificate: 'Свидетельство о рождении',
+	},
+	PASSENGER_CATEGORY: {
+		adult: 'Взрослый',
+		child: 'Ребёнок',
+		infant: 'Младенец',
+		infant_seat: 'Младенец с местом',
 	},
 	CURRENCY: {
 		rub: 'РУБ',

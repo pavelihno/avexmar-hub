@@ -1,4 +1,5 @@
 import { formatDate } from '../components/utils';
+import { FIELD_LABELS } from './fieldLabels';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
@@ -19,6 +20,7 @@ export const UI_LABELS = {
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',
+		continue: 'Продолжить',
 		pagination: {
 			rows_per_page: 'Записей на странице',
 			displayed_rows: ({ from, to, count }) => {
@@ -72,6 +74,7 @@ export const UI_LABELS = {
 		email_address: 'Адрес электронной почты',
 		legal_info: 'Правовая информация',
 		privacy_policy_agreement: 'Согласие на обработку персональных данных',
+		public_offer: 'Публичная оферта',
 		marketing_consent: 'Согласие на получение рекламной рассылки',
 		all_rights_reserved: 'Все права защищены',
 		company_description: 'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
@@ -249,18 +252,67 @@ export const UI_LABELS = {
 	},
 	HOME: {},
 	BOOKING: {
+		progress_steps: {
+			passengers: 'Пассажиры',
+			confirmation: 'Подтверждение',
+			payment: 'Оплата',
+			completion: 'Завершение',
+		},
+		step_placeholders: {
+			confirmation: 'Шаг подтверждения',
+			payment: 'Шаг оплаты',
+			completion: 'Шаг завершения',
+		},
+		flight_details: {
+			title: 'Детали рейса',
+			from_to: (from, to) => {
+				if (!from || !to) return '';
+				return `${from} → ${to}`;
+			},
+			from_to_from: (from, to) => {
+				if (!from || !to) return '';
+				return `${from} → ${to} → ${from}`;
+			},
+		},
+		buyer_form: {
+			title: 'Покупатель',
+			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
+			public_offer: (link) => <>Нажимая «Продолжить», вы соглашаетесь с {link('публичной офертой')}</>,
+			summary: {
+				total: 'Итого',
+				passenger_word: (count) =>
+					count % 10 === 1 && count % 100 !== 11
+						? `${count} пассажир`
+						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
+						? `${count} пассажира`
+						: `${count} пассажиров`,
+				tickets: 'Билеты',
+				service_fee: 'Сервисный сбор',
+				discount: 'Скидка',
+			},
+		},
+		confirmation: {
+			passenger_column: 'Пассажир',
+			payment_button: 'Перейти к оплате',
+			passenger_categories: {
+				adults: 'Взрослые',
+				children: 'Дети',
+				infants: 'Младенцы',
+				infants_seat: 'Младенцы с местом',
+			}
+		},
 		passenger_form: {
 			type_labels: {
-				ADULT: 'Взрослый, старше 12 лет',
-				CHILD: 'Ребёнок, от 2 до 12 лет',
-				INFANT: 'Малыш, до 2 лет',
+				adult: 'Взрослый, старше 12 лет',
+				child: 'Ребёнок, от 2 до 12 лет',
+				infant: 'Младенец, до 2 лет',
+				infant_seat: 'Младенец с местом, до 2 лет',
 			},
-			genders: [
-				{ value: 'MALE', label: 'Мужской' },
-				{ value: 'FEMALE', label: 'Женский' },
-				{ value: 'OTHER', label: 'Другой' },
-			],
 			add_passenger: 'Добавить пассажира',
+			last_name: 'Фамилия',
+			first_name: 'Имя',
+			patronymic_name: 'Отчество (при наличии)',
+			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
 	},
 	SCHEDULE: {

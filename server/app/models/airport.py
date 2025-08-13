@@ -34,7 +34,7 @@ class Airport(BaseModel):
         'Route', back_populates='destination_airport', foreign_keys='Route.destination_airport_id', lazy='dynamic'
     )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'iata_code': self.iata_code,
@@ -43,9 +43,10 @@ class Airport(BaseModel):
             'city_name': self.city_name,
             'city_name_en': self.city_name_en,
             'city_code': self.city_code,
+            'country': self.country.to_dict(return_children) if return_children else {},
             'country_id': self.country_id,
+            'timezone': self.timezone.to_dict(return_children) if self.timezone_id and return_children else {},
             'timezone_id': self.timezone_id,
-            'time_zone': self.timezone.name if self.timezone else None,
         }
 
     upload_fields = {
@@ -56,11 +57,11 @@ class Airport(BaseModel):
         'icao_code': 'Код ICAO',
         'city_code': 'Код города',
         'country_code': 'Код страны',
-        'time_zone': 'Часовой пояс'
+        'timezone': 'Часовой пояс'
     }
 
     upload_text_fields = [
-        'name', 'city_name', 'city_name_en', 'iata_code', 'icao_code', 'city_code', 'country_code', 'time_zone'
+        'name', 'city_name', 'city_name_en', 'iata_code', 'icao_code', 'city_code', 'country_code', 'timezone'
     ]
 
     @classmethod
@@ -105,7 +106,7 @@ class Airport(BaseModel):
                     if not country:
                         raise ValueError('Invalid country code')
 
-                    tz_name = row.get('time_zone')
+                    tz_name = row.get('timezone')
                     tz = None
                     if tz_name:
                         tz = Timezone.query.filter(Timezone.name == tz_name).one_or_none()

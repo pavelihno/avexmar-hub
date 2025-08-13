@@ -20,8 +20,7 @@ import {
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchCountries } from '../../redux/actions/country';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { formatDate, validateDate, isDuplicateInBooking } from '../utils';
+import { FIELD_TYPES, formatDate, validateDate, getExistingPassenger } from '../utils';
 import {
 	DATE_API_FORMAT,
 	ENUM_LABELS,
@@ -69,7 +68,6 @@ const PassengerManagement = () => {
 			apiKey: 'booking_id',
 			label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
 			type: FIELD_TYPES.SELECT,
-			fullWidth: true,
 			options: bookingOptions,
 			formatter: (value) => {
 				const booking = bookingOptions.find((b) => b.value === value);
@@ -89,6 +87,13 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.first_name,
 			type: FIELD_TYPES.TEXT,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED : null),
+		},
+		patronymicName: {
+			key: 'patronymicName',
+			apiKey: 'patronymic_name',
+			label: FIELD_LABELS.PASSENGER.patronymic_name,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		gender: {
 			key: 'gender',
@@ -157,13 +162,6 @@ const PassengerManagement = () => {
 			type: FIELD_TYPES.TEXT,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : null),
 		},
-		isContact: {
-			key: 'isContact',
-			apiKey: 'is_contact',
-			label: FIELD_LABELS.BOOKING_PASSENGER.is_contact,
-			type: FIELD_TYPES.BOOLEAN,
-			excludeFromTable: true,
-		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
@@ -173,28 +171,9 @@ const PassengerManagement = () => {
 
 	const handleAddPassenger = async (data) => {
 		const apiData = adminManager.toApiFormat(data);
-		const { booking_id, is_contact, ...passengerData } = apiData;
-		if (
-			isDuplicateInBooking(
-				bookingPassengers,
-				passengers,
-				booking_id,
-				passengerData.first_name,
-				passengerData.last_name,
-				passengerData.birth_date
-			)
-		) {
-			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
-		}
+		const { booking_id, ...passengerData } = apiData;
 
-		let existing = passengers.find(
-			(p) =>
-				p.first_name === passengerData.first_name &&
-				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
-				p.document_type === passengerData.document_type &&
-				p.document_number === passengerData.document_number
-		);
+		let existing = getExistingPassenger(passengers, passengerData);
 
 		if (!existing) {
 			existing = await dispatch(createPassenger(passengerData)).unwrap();
@@ -204,36 +183,15 @@ const PassengerManagement = () => {
 			createBookingPassenger({
 				booking_id,
 				passenger_id: existing.id,
-				is_contact,
 			})
 		).unwrap();
 	};
 
 	const handleEditPassenger = async (data) => {
 		const apiData = adminManager.toApiFormat(data);
-		const { id, booking_id, passenger_id, is_contact, ...passengerData } = apiData;
-		if (
-			isDuplicateInBooking(
-				bookingPassengers,
-				passengers,
-				booking_id,
-				passengerData.first_name,
-				passengerData.last_name,
-				passengerData.birth_date,
-				id
-			)
-		) {
-			throw new Error(VALIDATION_MESSAGES.BOOKING.passenger.EXISTS);
-		}
+		const { id, booking_id, passenger_id, ...passengerData } = apiData;
 
-		let existing = passengers.find(
-			(p) =>
-				p.first_name === passengerData.first_name &&
-				p.last_name === passengerData.last_name &&
-				p.birth_date === formatDate(passengerData.birth_date, DATE_API_FORMAT) &&
-				p.document_type === passengerData.document_type &&
-				p.document_number === passengerData.document_number
-		);
+		let existing = getExistingPassenger(passengers, passengerData);
 
 		if (!existing) {
 			existing = await dispatch(createPassenger(passengerData)).unwrap();
@@ -244,7 +202,6 @@ const PassengerManagement = () => {
 				id,
 				booking_id,
 				passenger_id: existing.id,
-				is_contact,
 			})
 		).unwrap();
 
@@ -285,7 +242,6 @@ const PassengerManagement = () => {
 			id: bp.id,
 			passenger_id: passenger.id,
 			booking_id: booking.id,
-			is_contact: bp.is_contact,
 			email_address: booking.email_address,
 			phone_number: booking.phone_number,
 		});

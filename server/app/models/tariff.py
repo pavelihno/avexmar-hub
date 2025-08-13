@@ -22,8 +22,9 @@ class Tariff(BaseModel):
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
     )
+    bookings = db.relationship('Booking', back_populates='tariff', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'seat_class': self.seat_class.value,
@@ -39,14 +40,14 @@ class Tariff(BaseModel):
         return super().get_all(sort_by=['seat_class', 'order_number'], descending=False)
 
     @classmethod
-    def create(cls, session: Session | None = None, **data):
+    def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        seat_class = data.get('seat_class')
+        seat_class = kwargs.get('seat_class')
 
         if seat_class is not None:
             query = session.query(cls).filter(cls.seat_class == seat_class)
             max_order = query.order_by(cls.order_number.desc()).first()
             next_order = (max_order.order_number + 1) if max_order else 1
-            data['order_number'] = next_order
+            kwargs['order_number'] = next_order
 
-        return super().create(session, **data)
+        return super().create(session, **kwargs)

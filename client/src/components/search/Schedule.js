@@ -121,10 +121,10 @@ const Schedule = () => {
 				<SearchForm initialParams={paramObj} />
 			</Box>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2, }}>
+				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2 }}>
 					{UI_LABELS.SCHEDULE.title}
 				</Typography>
-				<Box sx={{ display: 'flex', justifyContent: 'flex-end', }}>
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 					<Button
 						variant='outlined'
 						disabled={!selectedOutbound && !selectedReturn}

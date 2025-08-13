@@ -2,13 +2,14 @@ from typing import List, TYPE_CHECKING
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
-from app.models._base_model import BaseModel, ModelValidationError
-from sqlalchemy.exc import IntegrityError
+from app.models._base_model import BaseModel
 from sqlalchemy.orm import Session, Mapped
 from app.config import Config
 
 if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
+    from app.models.passenger import Passenger
+    from app.models.booking import Booking
 
 
 class User(BaseModel):
@@ -22,8 +23,14 @@ class User(BaseModel):
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
     )
+    passengers: Mapped[List['Passenger']] = db.relationship(
+        'Passenger', back_populates='owner_user', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    bookings: Mapped[List['Booking']] = db.relationship(
+        'Booking', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
+    )
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'email': self.email,
@@ -36,28 +43,16 @@ class User(BaseModel):
         return super().get_all(sort_by=['email'], descending=False)
 
     @classmethod
-    def create(cls, session: Session | None = None, **data):
+    def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        if 'email' in data and isinstance(data['email'], str):
-            data['email'] = data['email'].lower()
-        existing_user = cls.get_by_email(data.get('email', ''))
-        if existing_user:
-            raise ModelValidationError({'email': 'must be unique'})
 
-        user = cls()
-        for key, value in data.items():
+        for key, value in kwargs.items():
             if key == 'password':
-                value = cls.__encode_password(value)
-            setattr(user, key, value)
+                kwargs['password'] = cls.__encode_password(value)
+            elif key == 'email' and isinstance(value, str):
+                kwargs['email'] = value.lower()
 
-        session.add(user)
-        try:
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise ModelValidationError({'message': str(e)}) from e
-
-        return user
+        return super().create(session=session, **kwargs)
 
     @classmethod
     def get_by_email(cls, _email):
@@ -66,39 +61,27 @@ class User(BaseModel):
         return cls.query.filter(cls.email == _email.lower()).one_or_none()
 
     @classmethod
-    def update(cls, _id, session: Session | None = None, **data):
+    def update(cls, _id, session: Session | None = None, **kwargs):
         session = session or db.session
-        user = cls.get_or_404(_id, session)
 
-        for key, value in data.items():
-            if key in ['role', 'is_active']:
-                setattr(user, key, value)
-
-        try:
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise ModelValidationError({'message': str(e)}) from e
-        return user
+        kwargs = {k: v for k, v in kwargs.items() if k in ['role', 'is_active']}
+        
+        return super().update(_id, session=session, **kwargs)
 
     @classmethod
     def login(cls, _email, _password):
         user = cls.get_by_email(_email)
-        if user and cls.__is_password_correct(user.password, _password):
+        if user and user.is_active and cls.__is_password_correct(user.password, _password):
             return user
         return None
 
     @classmethod
     def change_password(cls, _id, _password, session: Session | None = None):
         session = session or db.session
-        user = cls.get_or_404(_id, session)
-        user.password = cls.__encode_password(_password)
-        try:
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise ModelValidationError({'message': str(e)}) from e
-        return user
+
+        new_password = cls.__encode_password(_password)
+
+        return super().update(_id, session=session, password=new_password)
 
     @classmethod
     def __encode_password(cls, _password):

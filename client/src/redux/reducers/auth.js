@@ -25,57 +25,56 @@ const authSlice = createSlice({
 		builder
 			// Login
 			.addCase(login.pending, handlePending)
+			.addCase(login.rejected, handleRejected)
 			.addCase(login.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(login.rejected, handleRejected)
 
 			// Register
 			.addCase(register.pending, handlePending)
+			.addCase(register.rejected, handleRejected)
 			.addCase(register.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(register.rejected, handleRejected)
 
 			// Auth verification
 			.addCase(auth.pending, handlePending)
+			.addCase(auth.rejected, handleRejected)
 			.addCase(auth.fulfilled, (state, action) => {
 				state.currentUser = action.payload;
 				state.isLoading = false;
 			})
-			.addCase(auth.rejected, handleRejected)
 
 			// Logout
 			.addCase(logout.pending, handlePending)
+			.addCase(logout.rejected, handleRejected)
 			.addCase(logout.fulfilled, (state) => {
 				state.currentUser = null;
 				state.isLoading = false;
 			})
-			.addCase(logout.rejected, handleRejected)
 
 			// Change password
-                        .addCase(changePassword.pending, handlePending)
-                        .addCase(changePassword.fulfilled, (state) => {
-                                state.isLoading = false;
-                        })
-                        .addCase(changePassword.rejected, handleRejected)
+			.addCase(changePassword.pending, handlePending)
+			.addCase(changePassword.rejected, handleRejected)
+			.addCase(changePassword.fulfilled, (state) => {
+				state.isLoading = false;
+			})
 
-                        // Reset password
-                        .addCase(resetPassword.pending, handlePending)
-                        .addCase(resetPassword.fulfilled, (state, action) => {
-                                state.currentUser = action.payload;
-                                state.isLoading = false;
-                        })
-                        .addCase(resetPassword.rejected, handleRejected);
-        },
+			// Reset password
+			.addCase(resetPassword.pending, handlePending)
+			.addCase(resetPassword.rejected, handleRejected)
+			.addCase(resetPassword.fulfilled, (state, action) => {
+				state.currentUser = action.payload;
+				state.isLoading = false;
+			});
+	},
 });
 
 export const { setCurrentUser, setErrors } = authSlice.actions;
 export const selectIsAuth = (state) => !!state.auth.currentUser;
-export const selectIsAdmin = (state) =>
-	!!state.auth.currentUser && state.auth.currentUser.role === 'admin';
+export const selectIsAdmin = (state) => !!state.auth.currentUser && state.auth.currentUser.role === 'admin';
 
 export const isDev = () => process.env.REACT_APP_APP_ENV in ('dev', 'test');
 

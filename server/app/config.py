@@ -31,6 +31,16 @@ class Config:
     MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
     MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
 
+    # Yookassa settings
+    YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
+    YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
+    YOOKASSA_USE_MOCK = os.environ.get('YOOKASSA_USE_MOCK') == 'True'
+    YOOKASSA_API_URL = (
+        os.environ.get('YOOKASSA_MOCK_URL')
+        if YOOKASSA_USE_MOCK
+        else os.environ.get('YOOKASSA_API_URL')
+    )
+
     # Enum classes
     class USER_ROLE(enum.Enum):
         admin = 'admin'
@@ -38,8 +48,13 @@ class Config:
 
     class BOOKING_STATUS(enum.Enum):
         created = 'created'
-        pending_payment = 'pending_payment'
+        passengers_added = 'passengers_added'
         confirmed = 'confirmed'
+        payment_pending = 'payment_pending'
+        payment_confirmed = 'payment_confirmed'
+        payment_failed = 'payment_failed'
+        completed = 'completed'
+        expired = 'expired'
         cancelled = 'cancelled'
 
     class DISCOUNT_TYPE(enum.Enum):
@@ -57,6 +72,12 @@ class Config:
         international_passport = 'international_passport'
         birth_certificate = 'birth_certificate'
 
+    class PASSENGER_CATEGORY(enum.Enum):
+        adult = 'adult'
+        child = 'child'
+        infant = 'infant'
+        infant_seat = 'infant_seat'
+
     class CURRENCY(enum.Enum):
         rub = 'rub'
 
@@ -66,21 +87,20 @@ class Config:
 
     class PAYMENT_STATUS(enum.Enum):
         pending = 'pending'
-        paid = 'paid'
-        refunded = 'refunded'
-        failed = 'failed'
+        waiting_for_capture = 'waiting_for_capture'
+        succeeded = 'succeeded'
+        canceled = 'canceled'
 
     class PAYMENT_METHOD(enum.Enum):
-        card = 'card'
-        cash = 'cash'
+        yookassa = 'yookassa'
 
     # Default variables
     DEFAULT_USER_ROLE = USER_ROLE.standard
     DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
     DEFAULT_CURRENCY = CURRENCY.rub
     DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
+    DEFAULT_PASSENGER_CATEGORY = PASSENGER_CATEGORY.adult
 
     # Other variables
     PNR_MASK = 'ABXXXX'
     DEFAULT_CITIZENSHIP_CODE = 'RU'
-    MAX_PASSENGERS = 9

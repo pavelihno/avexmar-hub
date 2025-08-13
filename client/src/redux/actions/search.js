@@ -55,3 +55,27 @@ export const fetchScheduleFlights = createAsyncThunk(
 		}
 	}
 );
+
+export const fetchOutboundFlightTariffs = createAsyncThunk(
+	'search/fetchOutboundFlightTariffs',
+	async (flightId, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/search/flights/${flightId}/tariffs`);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
+export const fetchReturnFlightTariffs = createAsyncThunk(
+	'search/fetchReturnFlightTariffs',
+	async (flightId, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/search/flights/${flightId}/tariffs`);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);

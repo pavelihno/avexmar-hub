@@ -23,7 +23,7 @@ class Country(BaseModel):
     airports: Mapped[List['Airport']] = db.relationship('Airport', back_populates='country', lazy='dynamic')
     passengers: Mapped[List['Passenger']] = db.relationship('Passenger', back_populates='citizenship', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'name': self.name,

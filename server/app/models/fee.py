@@ -9,7 +9,7 @@ class Fee(BaseModel):
     description = db.Column(db.String, nullable=True)
     amount = db.Column(db.Float, nullable=False)
 
-    def to_dict(self):
+    def to_dict(self, return_children=False):
         return {
             'id': self.id,
             'name': self.name,

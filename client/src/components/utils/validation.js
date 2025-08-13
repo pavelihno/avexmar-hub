@@ -46,3 +46,13 @@ export const validatePhoneNumber = (value) => {
 	const phoneRegex = /^\+[1-9]\d{9,14}$/;
 	return phoneRegex.test(value);
 };
+
+export const isCyrillicText = (value) => {
+	if (!value) return false;
+	return /^[А-ЯЁа-яё\s-]+$/.test(value);
+};
+
+export const isLatinText = (value) => {
+	if (!value) return false;
+	return /^[A-Za-z\s-]+$/.test(value);
+};

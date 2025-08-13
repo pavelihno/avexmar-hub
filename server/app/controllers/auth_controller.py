@@ -55,7 +55,7 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    token = PasswordResetToken.create_token(user, expires_in_hours=1)
+    token = PasswordResetToken.create(user, expires_in_hours=1)
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
         'Password Reset',

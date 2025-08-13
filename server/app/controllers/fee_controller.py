@@ -24,11 +24,11 @@ def create_fee(current_user):
 @admin_required
 def update_fee(current_user, fee_id):
     data = request.get_json()
-    fee = Fee.update(fee_id, **data)
-    return jsonify(fee.to_dict())
+    updated = Fee.update(fee_id, **data)
+    return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_fee(current_user, fee_id):
-    fee = Fee.delete(fee_id)
-    return jsonify(fee)
+    deleted = Fee.delete_or_404(fee_id)
+    return jsonify(deleted)

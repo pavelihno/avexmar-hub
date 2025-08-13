@@ -14,15 +14,15 @@ import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlight
 import { fetchAirports } from '../../redux/actions/airport';
 import { fetchAirlines } from '../../redux/actions/airline';
 import { fetchRoutes } from '../../redux/actions/route';
-import { formatDate, formatNumber, getFlightDurationMinutes, parseTime } from '../utils';
+import { formatDate, formatNumber, parseTime } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
 	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
-	const { nearbyOutboundFlights, nearbyOutboundLoading } = useSelector((state) => state.search);
-	const { nearbyReturnFlights, nearbyReturnLoading } = useSelector((state) => state.search);
+	const { nearbyOutboundFlights, isLoading: nearbyOutboundLoading } = useSelector((state) => state.search);
+	const { nearbyReturnFlights, isLoading: nearbyReturnLoading } = useSelector((state) => state.search);
 	const isLoading = flightsLoading || nearbyOutboundLoading || nearbyReturnLoading;
 
 	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
@@ -31,16 +31,16 @@ const Search = () => {
 	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
 
 	const [params] = useSearchParams();
-	const paramObj = Object.fromEntries(params.entries());
-	const from = paramObj.from;
-	const to = paramObj.to;
-	const depart = paramObj.when;
-	const returnDate = paramObj.return;
-	const departFrom = paramObj.when_from;
-	const departTo = paramObj.when_to;
-	const returnFrom = paramObj.return_from;
-	const returnTo = paramObj.return_to;
-	const isExact = paramObj.date_mode === 'exact';
+	const initialParams = Object.fromEntries(params.entries());
+	const from = initialParams.from;
+	const to = initialParams.to;
+	const depart = initialParams.when;
+	const returnDate = initialParams.return;
+	const departFrom = initialParams.when_from;
+	const departTo = initialParams.when_to;
+	const returnFrom = initialParams.return_from;
+	const returnTo = initialParams.return_to;
+	const isExact = initialParams.date_mode === 'exact';
 	const hasReturn = !!(returnDate || returnFrom || returnTo);
 
 	const [sortKey, setSortKey] = useState('departure_date');
@@ -54,7 +54,7 @@ const Search = () => {
 	}, [dispatch]);
 
 	useEffect(() => {
-		dispatch(fetchSearchFlights(paramObj));
+		dispatch(fetchSearchFlights(initialParams));
 	}, [dispatch, params]);
 
 	const [nearDatesOutbound, setNearDatesOutbound] = useState([]);
@@ -79,18 +79,20 @@ const Search = () => {
 
 	const buildNearDates = (flights, selectedDate) => {
 		// Group flights by date and find lowest price for each
-		const map = flights.reduce((acc, flight) => {
-			const date = flight.scheduled_departure;
-			const price = flight.price || flight.min_price || 0;
+		const map = flights
+			.filter((f) => f.price != null || f.min_price != null)
+			.reduce((acc, flight) => {
+				const date = flight.scheduled_departure;
+				const price = flight.price || flight.min_price || 0;
 
-			if (!acc[date] || price < acc[date].price) {
-				acc[date] = {
-					price,
-					currency: flight.currency,
-				};
-			}
-			return acc;
-		}, {});
+				if (!acc[date] || price < acc[date].price) {
+					acc[date] = {
+						price,
+						currency: flight.currency,
+					};
+				}
+				return acc;
+			}, {});
 
 		// Get nearby dates, excluding selected date
 		const sortedDates = Object.entries(map)
@@ -125,7 +127,7 @@ const Search = () => {
 		end.setDate(end.getDate() + 30);
 
 		const requestParams = {
-			...paramObj,
+			...initialParams,
 			date_mode: 'flex',
 		};
 
@@ -148,10 +150,12 @@ const Search = () => {
 		if (hasReturn) fetchNearbyDates(returnDate, 'return');
 	}, [params]);
 
+	const filteredFlights = flights.filter((f) => f.price != null || f.min_price != null);
+
 	const grouped = [];
 	if (hasReturn) {
-		const outbounds = flights.filter((f) => f.direction !== 'return');
-		const returns = flights.filter((f) => f.direction === 'return');
+		const outbounds = filteredFlights.filter((f) => f.direction !== 'return');
+		const returns = filteredFlights.filter((f) => f.direction === 'return');
 
 		// Create all valid combinations of outbound and return flights
 		for (const out of outbounds) {
@@ -172,7 +176,7 @@ const Search = () => {
 		}
 	} else {
 		// One-way flights
-		for (const f of flights) grouped.push({ outbound: f });
+		for (const f of filteredFlights) grouped.push({ outbound: f });
 	}
 
 	const getTotalPrice = (g) => {
@@ -218,7 +222,7 @@ const Search = () => {
 					res = parseTime(a.outbound.scheduled_arrival_time) - parseTime(b.outbound.scheduled_arrival_time);
 					break;
 				case 'duration':
-					res = getFlightDurationMinutes(a.outbound) - getFlightDurationMinutes(b.outbound);
+					res = (a.outbound.duration ?? 0) - (b.outbound.duration ?? 0);
 					break;
 				default:
 					res = 0;
@@ -241,7 +245,7 @@ const Search = () => {
 	return (
 		<Base>
 			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-				<SearchForm initialParams={paramObj} />
+				<SearchForm initialParams={initialParams} />
 			</Box>
 			<Box sx={{ p: 3 }}>
 				<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2 }}>
@@ -288,7 +292,7 @@ const Search = () => {
 												px: 1.5,
 											}}
 											onClick={() => {
-												const newParams = new URLSearchParams(paramObj);
+												const newParams = new URLSearchParams(initialParams);
 												newParams.set('when', d.date);
 												newParams.delete('when_from');
 												newParams.delete('when_to');
@@ -349,7 +353,7 @@ const Search = () => {
 														px: 1.5,
 													}}
 													onClick={() => {
-														const newParams = new URLSearchParams(paramObj);
+														const newParams = new URLSearchParams(initialParams);
 														newParams.set('return', d.date);
 														newParams.delete('return_from');
 														newParams.delete('return_to');

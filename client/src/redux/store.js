@@ -20,6 +20,8 @@ import bookingPassengerReducer from './reducers/bookingPassenger';
 import searchReducer from './reducers/search';
 import timezoneReducer from './reducers/timezone';
 import priceReducer from './reducers/price';
+import bookingProcessReducer from './reducers/bookingProcess';
+import paymentReducer from './reducers/payment';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -43,6 +45,8 @@ const rootReducer = combineReducers({
 	timezones: timezoneReducer,
 	search: searchReducer,
 	price: priceReducer,
+	bookingProcess: bookingProcessReducer,
+	payment: paymentReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));

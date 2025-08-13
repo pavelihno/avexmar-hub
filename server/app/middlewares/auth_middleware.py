@@ -8,34 +8,46 @@ from app.models.user import User
 from app.utils.jwt import verifyJWT
 
 
-def login_required(f):
+def current_user(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
+        user = None
         auth_header = request.headers.get('Authorization', '')
         token = None
         if auth_header.startswith('Bearer '):
-            token = auth_header.split('Bearer ', 1)[1]
+            token = auth_header.split('Bearer ', 1)[1].strip()
         if not token:
-            return jsonify({'message': 'Authentication required'}), 401
-        try:
-            user_data = verifyJWT(token)
-            current_user = User.get_by_email(user_data.get('email', ''))
+            pass
+        else:
+            try:
+                user_data = verifyJWT(token) or {}
+                email = user_data.get('email')
+                if email:
+                    user = User.get_by_email(email)
+            except InvalidTokenError:
+                pass
+            except Exception:
+                pass
 
-            if current_user is None:
-                return jsonify({'message': 'Authentication failed'}), 401
+        return f(user, *args, **kwargs)
 
-            if not current_user.is_active:
-                return jsonify({'message': 'Authentication failed'}), 403
+    return decorated
 
-        except InvalidTokenError:
+
+def login_required(f):
+
+    @wraps(f)
+    def decorated(current_user, *args, **kwargs):
+        if current_user is None:
             return jsonify({'message': 'Authentication failed'}), 401
-        except Exception:
-            return jsonify({'message': 'Authentication failed'}), 401
+
+        if not current_user.is_active:
+            return jsonify({'message': 'Authentication failed'}), 403
 
         return f(current_user, *args, **kwargs)
 
-    return decorated
+    return current_user(decorated)
 
 
 def admin_required(f):
