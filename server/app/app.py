@@ -218,12 +218,14 @@ def __create_app(_config_class, _db):
     app.route('/bookings/process/passengers', methods=['POST'])(create_booking_passengers)
     app.route('/bookings/process/confirm', methods=['POST'])(confirm_booking)
     app.route('/bookings/process/payment', methods=['POST'])(create_booking_payment)
-    app.route('/bookings/process/<public_id>/completion', methods=['GET'])(get_process_booking_completion)
     app.route('/bookings/process/payment/<public_id>/details', methods=['GET'])(get_booking_payment)
-    app.route('/bookings/process/payment/webhook', methods=['POST'])(payment_webhook)
+    app.route('/bookings/process/<public_id>/completion', methods=['GET'])(get_process_booking_completion)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
+
+    # external
+    app.route('/payments/webhook', methods=['POST'])(payment_webhook)
 
     migrate = Migrate(app, db)
 

@@ -34,13 +34,11 @@ class Config:
     # Yookassa settings
     YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
     YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
-    YOOKASSA_USE_MOCK = os.environ.get('YOOKASSA_USE_MOCK', 'False').lower() == 'true'
-    _DEFAULT_API_URL = 'https://api.yookassa.ru/v3'
-    _DEFAULT_MOCK_URL = 'http://yookassa-mock:8000'
+    YOOKASSA_USE_MOCK = os.environ.get('YOOKASSA_USE_MOCK') == 'True'
     YOOKASSA_API_URL = (
-        os.environ.get('YOOKASSA_MOCK_URL', _DEFAULT_MOCK_URL)
+        os.environ.get('YOOKASSA_MOCK_URL')
         if YOOKASSA_USE_MOCK
-        else os.environ.get('YOOKASSA_API_URL', _DEFAULT_API_URL)
+        else os.environ.get('YOOKASSA_API_URL')
     )
 
     # Enum classes
@@ -106,4 +104,3 @@ class Config:
     # Other variables
     PNR_MASK = 'ABXXXX'
     DEFAULT_CITIZENSHIP_CODE = 'RU'
-    MAX_PASSENGERS = 9
