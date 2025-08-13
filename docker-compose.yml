@@ -86,12 +86,12 @@ services:
   #     - 1025:1025
   #     - 8025:8025
 
-  yookassa-mock:
-    container_name: yookassa-mock
-    build: ./yookassa
-    ports:
-      - 8050:8000
-    volumes:
-      - ./yookassa:/app
-    depends_on:
-      - server-app
+  # yookassa-mock:
+  #   container_name: yookassa-mock
+  #   build: ./yookassa
+  #   ports:
+  #     - 8050:8000
+  #   volumes:
+  #     - ./yookassa:/app
+  #   depends_on:
+  #     - server-app
