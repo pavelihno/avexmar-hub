@@ -231,12 +231,11 @@ def get_booking_details(current_user, public_id):
 def create_booking_payment(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
-    return_url = data.get('return_url')
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
 
     booking = Booking.get_by_public_id(public_id)
-    payment = create_payment(booking, return_url)
+    payment = create_payment(booking)
     return jsonify(payment.to_dict()), 201
 
 
