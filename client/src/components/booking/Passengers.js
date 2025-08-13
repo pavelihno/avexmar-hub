@@ -38,6 +38,7 @@ import {
 	formatTime,
 	formatDuration,
 	findBookingPassengerDuplicates,
+	extractRouteInfo,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
 
@@ -240,21 +241,7 @@ const Passengers = () => {
 		}
 	};
 
-	const [outboundFlight = null, returnFlight = null] = (booking?.flights ?? [])
-		.slice()
-		.filter((f) => f && f.scheduled_departure)
-		.sort(
-			(a, b) =>
-				(new Date(a.scheduled_departure).getTime() || Infinity) -
-				(new Date(b.scheduled_departure).getTime() || Infinity)
-		);
-
-	const extractRouteInfo = (flight) => {
-		if (!flight || !flight.route) return {};
-		const origin = flight.route.origin_airport;
-		const destination = flight.route.destination_airport;
-		return { from: origin.iata_code, to: destination.iata_code, date: new Date(flight.scheduled_departure) };
-	};
+	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
 	const outboundRouteInfo = extractRouteInfo(outboundFlight);
 	const returnRouteInfo = extractRouteInfo(returnFlight);

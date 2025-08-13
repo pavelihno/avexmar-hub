@@ -135,12 +135,12 @@ class Booking(BaseModel):
         old_status = booking.status.value
         new_status = kwargs.get('status', old_status)
         history = list(booking.status_history or [])
-        if old_status != new_status:
-            history.append({
-                'status': new_status,
-                'at': datetime.now().isoformat()
-            })
-            kwargs['status_history'] = history
+        history.append({
+            'status': new_status,
+            'at': datetime.now().isoformat()
+        })
+        kwargs['status_history'] = history
+
         return super().update(id, session=session, **kwargs)
     
     @classmethod
@@ -166,7 +166,7 @@ class Booking(BaseModel):
     PAGE_FLOW = {
         'created': ['passengers'],
         'passengers_added': ['passengers', 'confirmation'],
-        'confirmed': ['passengers', 'confirmation', 'payment'],
+        'confirmed': ['payment'],
         'payment_pending': ['payment'],
         'payment_failed': ['payment'],
         'payment_confirmed': ['payment', 'completion'],

@@ -17,8 +17,8 @@ class Payment(BaseModel):
     payment_status = db.Column(db.Enum(Config.PAYMENT_STATUS), nullable=False, default=Config.DEFAULT_PAYMENT_STATUS)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
-    provider_payment_id = db.Column(db.String(100), unique=True)
-    confirmation_token = db.Column(db.String(255))
+    provider_payment_id = db.Column(db.String, unique=True)
+    confirmation_token = db.Column(db.String)
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='payments')
 

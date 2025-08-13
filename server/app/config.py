@@ -31,7 +31,7 @@ class Config:
     MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
     MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
 
-    # Payment provider settings
+    # Yookassa settings
     YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
     YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
 
@@ -85,14 +85,8 @@ class Config:
         succeeded = 'succeeded'
         canceled = 'canceled'
 
-        # Legacy statuses
-        paid = 'paid'
-        refunded = 'refunded'
-        failed = 'failed'
-
     class PAYMENT_METHOD(enum.Enum):
-        card = 'card'
-        cash = 'cash'
+        yookassa = 'yookassa'
 
     # Default variables
     DEFAULT_USER_ROLE = USER_ROLE.standard

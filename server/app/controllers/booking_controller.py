@@ -1,16 +1,15 @@
 from flask import request, jsonify
-from sqlalchemy.exc import DataError
 
 from app.database import db
+from app.config import Config
 from app.models.booking import Booking
+from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
 from app.models.passenger import Passenger
-from app.models.booking_passenger import BookingPassenger
-from app.middlewares.auth_middleware import admin_required
+from app.models.payment import Payment
+from app.middlewares.auth_middleware import admin_required, current_user
 from app.utils.business_logic import calculate_price_details
-from app.config import Config
-from app.utils.datetime import parse_date
-from app.middlewares.auth_middleware import current_user
+from app.utils.payment import create_payment, handle_webhook
 
 
 @admin_required
@@ -49,7 +48,12 @@ def delete_booking(current_user, booking_id):
 
 
 @current_user
-def process_booking_create(current_user):
+def get_process_booking_access(current_user, public_id):
+    return jsonify({'pages': Booking.get_accessible_pages(current_user, public_id)}), 200
+
+
+@current_user
+def create_booking_process(current_user):
     data = request.json or {}
     session = db.session
 
@@ -93,7 +97,7 @@ def process_booking_create(current_user):
 
 
 @current_user
-def process_booking_passengers(current_user):
+def create_booking_passengers(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
     buyer = data.get('buyer', {})
@@ -148,7 +152,7 @@ def process_booking_passengers(current_user):
 
 
 @current_user
-def process_booking_confirm(current_user):
+def confirm_booking(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
     if not public_id:
@@ -165,7 +169,6 @@ def process_booking_confirm(current_user):
     return jsonify({'status': 'ok'}), 200
 
 
-
 @current_user
 def get_process_booking_completion(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
@@ -179,7 +182,7 @@ def get_process_booking_completion(current_user, public_id):
 
 
 @current_user
-def get_process_booking_details(current_user, public_id):
+def get_booking_details(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
     passengers = []
@@ -207,24 +210,50 @@ def get_process_booking_details(current_user, public_id):
             for _ in range(count):
                 passengers.append({'category': category})
 
+    passenger_counts = dict(booking.passenger_counts or {})
+
     flights = [bf.flight.to_dict(return_children=True) for bf in booking.booking_flights]
     flights.sort(key=lambda f: (f.get('scheduled_departure'), f.get('scheduled_departure_time') or ''))
-
-    result['passengers'] = passengers
-    result['passengers_exist'] = passengers_exist
-    result['flights'] = flights
-
-    passenger_counts = dict(booking.passenger_counts or {})
 
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
     price_details = calculate_price_details(outbound_id, return_id, booking.tariff_id, passenger_counts)
+
+    result['passengers'] = passengers
+    result['passengers_exist'] = passengers_exist
+    result['flights'] = flights
     result['price_details'] = price_details
 
     return jsonify(result), 200
 
 
 @current_user
-def get_process_booking_access(current_user, public_id):
-    return jsonify({'pages': Booking.get_accessible_pages(current_user, public_id)}), 200
+def create_booking_payment(current_user):
+    data = request.json or {}
+    public_id = data.get('public_id')
+    return_url = data.get('return_url')
+    if not public_id:
+        return jsonify({'message': 'public_id required'}), 400
 
+    booking = Booking.get_by_public_id(public_id)
+    payment = create_payment(booking, return_url)
+    return jsonify(payment.to_dict()), 201
+
+
+@current_user
+def get_booking_payment(current_user, public_id):
+    booking = Booking.get_by_public_id(public_id)
+    payment = (
+        Payment.query.filter_by(booking_id=booking.id)
+        .order_by(Payment.id.desc())
+        .first()
+    )
+    if not payment:
+        return jsonify({'message': 'payment not found'}), 404
+    return jsonify(payment.to_dict()), 200
+
+
+def payment_webhook():
+    payload = request.json or {}
+    handle_webhook(payload)
+    return jsonify({'status': 'ok'}), 200

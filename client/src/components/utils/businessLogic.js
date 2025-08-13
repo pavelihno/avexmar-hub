@@ -137,3 +137,10 @@ export const getPassengerFormConfig = (documentType) => {
 
 	return { show, required };
 };
+
+export const extractRouteInfo = (flight) => {
+	if (!flight || !flight.route) return {};
+	const origin = flight.route.origin_airport;
+	const destination = flight.route.destination_airport;
+	return { from: origin.iata_code, to: destination.iata_code, date: new Date(flight.scheduled_departure) };
+};

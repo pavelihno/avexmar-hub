@@ -21,39 +21,37 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import {
-        fetchBookingDetails,
-        confirmBooking,
-        fetchBookingAccess,
-} from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
-import { formatNumber, formatDate, formatTime, formatDuration } from '../utils';
+import { formatNumber, formatDate, formatTime, formatDuration, extractRouteInfo } from '../utils';
 
 const Confirmation = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-        const booking = useSelector((state) => state.bookingProcess.current);
+	const booking = useSelector((state) => state.bookingProcess.current);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
 	}, [dispatch, publicId]);
 
-        const getRouteInfo = (flight) => {
-                if (!flight?.route) return null;
-                const origin = flight.route.origin_airport || {};
-                const dest = flight.route.destination_airport || {};
-                return {
-                        from: origin.city_name || origin.iata_code,
-                        to: dest.city_name || dest.iata_code,
-                };
-        };
+	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
-        const outboundFlight = booking?.flights?.[0];
-        const returnFlight = booking?.flights?.[1];
-        const outboundRouteInfo = getRouteInfo(outboundFlight);
-        const returnRouteInfo = getRouteInfo(returnFlight);
-        const flightMap = { outbound: outboundFlight, return: returnFlight };
+	const outboundRouteInfo = extractRouteInfo(outboundFlight);
+	const returnRouteInfo = extractRouteInfo(returnFlight);
+
+	const flightMap = { outbound: outboundRouteInfo, return: returnRouteInfo };
+
+	useEffect(() => {
+		if (outboundRouteInfo) {
+			document.title = UI_LABELS.SEARCH.from_to_date(
+				outboundRouteInfo.from,
+				outboundRouteInfo.to,
+				outboundRouteInfo.date,
+				returnRouteInfo.date
+			);
+		}
+	}, [outboundRouteInfo, returnRouteInfo]);
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
@@ -67,10 +65,11 @@ const Confirmation = () => {
 		}
 	};
 
-        return (
-                <Base maxWidth='lg'>
+	return (
+		<Base maxWidth='md'>
 			<BookingProgress activeStep='confirmation' />
 			<Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', rowGap: 2 }}>
+				{/* Flights */}
 				{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 					<Accordion variant='outlined'>
 						<AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -89,6 +88,7 @@ const Confirmation = () => {
 							</Typography>
 						</AccordionSummary>
 						<AccordionDetails>
+							{/* flight cards */}
 							<Grid container spacing={2}>
 								{booking.flights.map((f, idx) => {
 									const origin = f.route?.origin_airport || {};
@@ -101,6 +101,7 @@ const Confirmation = () => {
 									const airline = f.airline?.name || '';
 									const flightNo = f.airline_flight_number || f.flight_number || '';
 									const aircraft = f.aircraft?.type;
+
 									return (
 										<Grid item xs={12} md={6} key={f.id || idx}>
 											<Card>
@@ -155,7 +156,11 @@ const Confirmation = () => {
 													</Box>
 													{aircraft && (
 														<Box
-															sx={{ display: 'flex', justifyContent: 'center', mt: 0.5 }}
+															sx={{
+																display: 'flex',
+																justifyContent: 'center',
+																mt: 0.5,
+															}}
 														>
 															<Typography variant='caption' color='text.secondary'>
 																{aircraft}
@@ -173,6 +178,7 @@ const Confirmation = () => {
 					</Accordion>
 				)}
 
+				{/* Passengers */}
 				{Array.isArray(booking?.passengers) && booking.passengers.length > 0 && (
 					<Accordion variant='outlined'>
 						<AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -214,11 +220,17 @@ const Confirmation = () => {
 					</Accordion>
 				)}
 
+				{/* Price Details */}
 				{booking && (
-					<Card>
-						<CardContent>
-                                                       {(booking.price_details?.directions || []).map((dir, idx) => {
-                                                                const info = getRouteInfo(flightMap[dir.direction]) || {};
+					<Accordion variant='outlined'>
+						<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+							<Typography variant='subtitle1'>
+								{UI_LABELS.BOOKING.buyer_form.summary.price_details}
+							</Typography>
+						</AccordionSummary>
+						<AccordionDetails>
+							{(booking.price_details?.directions || []).map((dir, idx) => {
+								const info = flightMap[dir.direction] || {};
 								return (
 									<Box key={dir.direction} sx={{ mb: 2 }}>
 										<Typography variant='subtitle1' sx={{ fontWeight: 500, mb: 0.5 }}>
@@ -246,8 +258,10 @@ const Confirmation = () => {
 												{dir.passengers.map((p) => (
 													<TableRow key={p.category}>
 														<TableCell>{`${
-															ENUM_LABELS.PASSENGER_CATEGORY[p.category] || p.category
-														} x${p.count}`}</TableCell>
+															UI_LABELS.BOOKING.confirmation.passenger_categories[
+																p.category
+															] || p.category
+														} x ${p.count}`}</TableCell>
 														<TableCell align='right'>{`${formatNumber(
 															p.fare_price
 														)} ${currencySymbol}`}</TableCell>
@@ -271,7 +285,8 @@ const Confirmation = () => {
 									</Box>
 								);
 							})}
-							{booking.price_details?.fees && booking.price_details.fees.length > 0 && (
+
+							{booking.price_details?.fees?.length > 0 && (
 								<Table size='small'>
 									<TableHead>
 										<TableRow>
@@ -291,6 +306,7 @@ const Confirmation = () => {
 									</TableBody>
 								</Table>
 							)}
+
 							<Divider sx={{ my: 1 }} />
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 								<Typography>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>
@@ -306,7 +322,7 @@ const Confirmation = () => {
 									)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}
-							{booking.price_details?.fees && booking.price_details.fees.length > 0 && (
+							{booking.price_details?.fees?.length > 0 && (
 								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.service_fee}</Typography>
 									<Typography>{`${formatNumber(
@@ -321,13 +337,16 @@ const Confirmation = () => {
 									booking.price_details?.total_price || 0
 								)} ${currencySymbol}`}</Typography>
 							</Box>
-						</CardContent>
-					</Card>
+						</AccordionDetails>
+					</Accordion>
 				)}
 
-				<Button variant='contained' color='orange' onClick={handlePayment} sx={{ alignSelf: 'flex-start' }}>
-					{UI_LABELS.BOOKING.confirmation.payment_button}
-				</Button>
+				{/* Payment button */}
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+					<Button variant='contained' color='orange' onClick={handlePayment}>
+						{UI_LABELS.BOOKING.confirmation.payment_button}
+					</Button>
+				</Box>
 			</Box>
 		</Base>
 	);

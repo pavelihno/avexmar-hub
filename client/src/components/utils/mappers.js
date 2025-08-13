@@ -21,16 +21,6 @@ export const mappingConfigs = {
 	],
 };
 
-export const buildMaps = (pairs = []) => {
-	const clientToApi = {};
-	const apiToClient = {};
-	for (const [apiKey, clientKey] of pairs) {
-		clientToApi[clientKey] = apiKey;
-		apiToClient[apiKey] = clientKey;
-	}
-	return { clientToApi, apiToClient };
-};
-
 export function mapFromApi(src = {}, pairs = [], defaults = {}) {
 	const result = {};
 	for (const [apiKey, clientKey] of pairs) {
