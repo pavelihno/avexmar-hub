@@ -84,3 +84,17 @@ services:
   #   ports:
   #     - 1025:1025
   #     - 8025:8025
+  yookassa-mock:
+    build: ./mock_yookassa
+    ports:
+      - 8050:8000
+    environment:
+      AUTHORIZE_OK: ${MOCK_AUTHORIZE_OK:-true}
+      CAPTURE_OK: ${MOCK_CAPTURE_OK:-true}
+      WEBHOOK_URL: ${MOCK_WEBHOOK_URL:-http://server-app:5000/api/payments/webhook}
+    volumes:
+      - ./mock_yookassa:/app
+    env_file:
+      - .env
+    depends_on:
+      - server-app
