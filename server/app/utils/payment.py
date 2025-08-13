@@ -9,6 +9,8 @@ from app.config import Config
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
+from app.models.booking_flight import BookingFlight
+from app.utils.business_logic import calculate_price_details
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID or ''
@@ -16,40 +18,57 @@ Configuration.secret_key = Config.YOOKASSA_SECRET_KEY or ''
 
 
 def generate_receipt(booking: Booking) -> Dict[str, Any]:
-    """Form receipt object with passenger categories, discounts and fees."""
-    currency = booking.currency.value.upper()
-    counts = booking.passenger_counts or {}
-    total_passengers = sum(counts.values()) or 1
-    base_per_passenger = booking.fare_price / total_passengers
+    """Form receipt object with detailed breakdown."""
+    flights = booking.booking_flights.order_by(BookingFlight.id).all()
+    outbound_id = flights[0].flight_id if len(flights) > 0 else None
+    return_id = flights[1].flight_id if len(flights) > 1 else None
+
+    price_details = calculate_price_details(
+        outbound_id, return_id, booking.tariff_id, booking.passenger_counts or {}
+    )
+
+    currency = price_details.get('currency', booking.currency.value).upper()
+    total_passengers = sum(booking.passenger_counts.values()) or 1
 
     items = []
-    for category, count in counts.items():
-        if count <= 0:
-            continue
-        items.append({
-            'description': f'Ticket {category}',
-            'quantity': count,
-            'amount': {'value': f'{base_per_passenger:.2f}', 'currency': currency},
-            'vat_code': 1,
-            'payment_mode': 'full_payment',
-            'payment_subject': 'service',
-        })
+    for direction in price_details.get('directions', []):
+        dir_name = direction.get('direction', '')
+        for passenger in direction.get('passengers', []):
+            count = passenger.get('count', 0)
+            if count <= 0:
+                continue
+            fare_price = passenger.get('fare_price', 0.0)
+            unit_price = fare_price / count if count else 0.0
+            items.append({
+                'description': f"{dir_name.capitalize()} {passenger.get('category')} ticket",
+                'quantity': count,
+                'amount': {'value': f'{unit_price:.2f}', 'currency': currency},
+                'vat_code': 1,
+                'payment_mode': 'full_payment',
+                'payment_subject': 'service',
+            })
 
-    if booking.total_discounts:
-        items.append({
-            'description': 'Discount',
-            'quantity': 1,
-            'amount': {'value': f'-{booking.total_discounts:.2f}', 'currency': currency},
-            'vat_code': 1,
-            'payment_mode': 'full_payment',
-            'payment_subject': 'service',
-        })
+            discount = passenger.get('discount', 0.0)
+            if discount > 0:
+                unit_discount = discount / count if count else 0.0
+                desc = f"Discount {dir_name} {passenger.get('category')}"
+                discount_name = passenger.get('discount_name')
+                if discount_name:
+                    desc += f" ({discount_name})"
+                items.append({
+                    'description': desc,
+                    'quantity': count,
+                    'amount': {'value': f'-{unit_discount:.2f}', 'currency': currency},
+                    'vat_code': 1,
+                    'payment_mode': 'full_payment',
+                    'payment_subject': 'service',
+                })
 
-    if booking.fees:
+    for fee in price_details.get('fees', []):
         items.append({
-            'description': 'Fees',
-            'quantity': 1,
-            'amount': {'value': f'{booking.fees:.2f}', 'currency': currency},
+            'description': fee.get('name'),
+            'quantity': total_passengers,
+            'amount': {'value': f"{fee.get('amount', 0.0):.2f}", 'currency': currency},
             'vat_code': 1,
             'payment_mode': 'full_payment',
             'payment_subject': 'service',
