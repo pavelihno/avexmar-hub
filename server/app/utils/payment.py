@@ -15,6 +15,7 @@ from app.utils.business_logic import calculate_price_details
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID or ''
 Configuration.secret_key = Config.YOOKASSA_SECRET_KEY or ''
+Configuration.api_url = Config.YOOKASSA_API_URL
 
 
 def generate_receipt(booking: Booking) -> Dict[str, Any]:

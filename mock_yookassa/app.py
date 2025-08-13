@@ -42,6 +42,14 @@ def create_payment():
     return jsonify(payment)
 
 
+@app.get("/payments/<payment_id>")
+def get_payment(payment_id):
+    payment = payments.get(payment_id)
+    if not payment:
+        return jsonify({"message": "Not found"}), 404
+    return jsonify(payment)
+
+
 @app.post("/payments/<payment_id>/capture")
 def capture_payment(payment_id):
     payment = payments.get(payment_id)
