@@ -17,14 +17,20 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-	FEE: {
-		name: {
-			REQUIRED: 'Наименование сбора обязательно',
-		},
-		amount: {
-			REQUIRED: 'Сумма обязательна',
-		},
-	},
+        FEE: {
+                name: {
+                        REQUIRED: 'Наименование сбора обязательно',
+                },
+                amount: {
+                        REQUIRED: 'Сумма обязательна',
+                },
+                application: {
+                        REQUIRED: 'Применение сбора обязательно',
+                },
+                application_term: {
+                        REQUIRED: 'Срок применения сбора обязателен',
+                },
+        },
 
 	AIRPORT: {
 		name: {
