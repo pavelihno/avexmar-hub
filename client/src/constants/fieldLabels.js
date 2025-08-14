@@ -4,11 +4,13 @@ export const FIELD_LABELS = {
 		discount_type: 'Тип скидки',
 		percentage_value: 'Процент скидки',
 	},
-	FEE: {
-		name: 'Наименование сбора',
-		description: 'Описание',
-		amount: 'Сумма',
-	},
+        FEE: {
+                name: 'Наименование сбора',
+                description: 'Описание',
+                amount: 'Сумма',
+                application: 'Применение сбора',
+                application_term: 'Срок применения сбора',
+        },
 	BOOKING: {
 		booking_number: 'Номер бронирования',
 		booking_date: 'Дата бронирования',
