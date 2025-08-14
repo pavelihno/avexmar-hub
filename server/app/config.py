@@ -94,12 +94,24 @@ class Config:
     class PAYMENT_METHOD(enum.Enum):
         yookassa = 'yookassa'
 
+    class FEE_APPLICATION(enum.Enum):
+        booking = 'booking'
+        cancellation = 'cancellation'
+
+    class FEE_TERM(enum.Enum):
+        none = 'none'
+        before_24h = 'before_24h'
+        within_24h = 'within_24h'
+        after_departure = 'after_departure'
+
     # Default variables
     DEFAULT_USER_ROLE = USER_ROLE.standard
     DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
     DEFAULT_CURRENCY = CURRENCY.rub
     DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
     DEFAULT_PASSENGER_CATEGORY = PASSENGER_CATEGORY.adult
+    DEFAULT_FEE_APPLICATION = FEE_APPLICATION.booking
+    DEFAULT_FEE_TERM = FEE_TERM.none
 
     # Other variables
     PNR_MASK = 'ABXXXX'

@@ -8,6 +8,8 @@ export const FIELD_LABELS = {
 		name: 'Наименование сбора',
 		description: 'Описание',
 		amount: 'Сумма',
+		application: 'Применение сбора',
+		application_term: 'Срок применения сбора',
 	},
 	BOOKING: {
 		booking_number: 'Номер бронирования',

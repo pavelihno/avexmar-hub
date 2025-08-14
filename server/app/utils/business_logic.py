@@ -1,3 +1,4 @@
+from app.config import Config
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
@@ -109,14 +110,12 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
             'passengers': leg_breakdown,
         })
 
-    total_passengers = sum(passengers.values())
-    fees = []
-    for fee in Fee.get_all():
-        fee_total = fee.amount * total_passengers
-        fees.append(
-            {'name': fee.name, 'amount': fee.amount, 'total': fee_total}
-        )
-        total_price += fee_total
+    seats_number = get_seats_number(passengers) * (2 if is_round_trip else 1)
+    fees, fees_total = Fee.calculate_fees(
+        seats_number=seats_number,
+        application=Config.FEE_APPLICATION.booking,
+    )
+    total_price += fees_total
 
     return {
         'tariff': tariff_info,

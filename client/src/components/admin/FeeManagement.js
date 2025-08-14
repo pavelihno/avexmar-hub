@@ -6,7 +6,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 import { fetchFees, createFee, updateFee, deleteFee, deleteAllFees } from '../../redux/actions/fee';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatNumber } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
 
 const FeeManagement = () => {
 	const dispatch = useDispatch();
@@ -33,6 +33,24 @@ const FeeManagement = () => {
 			float: true,
 			formatter: (value) => (value != null ? formatNumber(value) : ''),
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.FEE.amount.REQUIRED : null),
+		},
+		application: {
+			key: 'application',
+			apiKey: 'application',
+			label: FIELD_LABELS.FEE.application,
+			type: FIELD_TYPES.SELECT,
+			options: getEnumOptions('FEE_APPLICATION'),
+			formatter: (value) => ENUM_LABELS.FEE_APPLICATION[value] || value,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FEE.application.REQUIRED : null),
+		},
+		applicationTerm: {
+			key: 'applicationTerm',
+			apiKey: 'application_term',
+			label: FIELD_LABELS.FEE.application_term,
+			type: FIELD_TYPES.SELECT,
+			options: getEnumOptions('FEE_TERM'),
+			formatter: (value) => ENUM_LABELS.FEE_TERM[value] || value,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.FEE.application_term.REQUIRED : null),
 		},
 		description: {
 			key: 'description',

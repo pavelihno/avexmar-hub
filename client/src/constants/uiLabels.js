@@ -287,7 +287,7 @@ export const UI_LABELS = {
 						? `${count} пассажира`
 						: `${count} пассажиров`,
 				tickets: 'Билеты',
-				service_fee: 'Сервисный сбор',
+				fees: 'Сборы',
 				discount: 'Скидка',
 			},
 		},
@@ -308,7 +308,6 @@ export const UI_LABELS = {
 				infants: 'Младенцы',
 				infants_seat: 'Младенцы с местом',
 			},
-
 		},
 		passenger_form: {
 			type_labels: {

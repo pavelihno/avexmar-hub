@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import db
@@ -49,7 +49,7 @@ class Payment(BaseModel):
         }
 
     @classmethod
-    def create(cls, session: db.Session | None = None, **kwargs):
+    def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
         status = kwargs.get('payment_status', Config.DEFAULT_PAYMENT_STATUS.value)
         kwargs['status_history'] = [
@@ -58,7 +58,7 @@ class Payment(BaseModel):
         return super().create(session, **kwargs)
 
     @classmethod
-    def update(cls, _id, session: db.Session | None = None, **kwargs):
+    def update(cls, _id, session: Session | None = None, **kwargs):
         session = session or db.session
         payment = cls.get_or_404(_id, session)
         new_status = kwargs.get('payment_status')
