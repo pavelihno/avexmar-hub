@@ -18,7 +18,7 @@ export const FIELD_LABELS = {
 		currency: 'Валюта',
 		fare_price: 'Стоимость билетов',
 		total_discounts: 'Скидка',
-		fees: 'Сервисный сбор',
+		fees: 'Сборы',
 		total_price: 'Итоговая цена',
 		passengers: 'Пассажиры',
 	},

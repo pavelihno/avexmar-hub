@@ -292,14 +292,23 @@ export const UI_LABELS = {
 			},
 		},
 		confirmation: {
-			passenger_column: 'Пассажир',
+			passengers_title: 'Пассажиры',
+			price_title: 'К оплате',
+			buyer_title: 'Покупатель',
+			passenger_columns: {
+				name: 'Пассажир',
+				birth_date: 'Дата рождения',
+				gender: 'Пол',
+				document: 'Документ',
+			},
 			payment_button: 'Перейти к оплате',
 			passenger_categories: {
 				adults: 'Взрослые',
 				children: 'Дети',
 				infants: 'Младенцы',
 				infants_seat: 'Младенцы с местом',
-			}
+			},
+
 		},
 		passenger_form: {
 			type_labels: {
