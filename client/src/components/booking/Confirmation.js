@@ -333,7 +333,7 @@ const Confirmation = () => {
 								</Box>
 								{booking.price_details?.fees?.length > 0 && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-										<Typography>{UI_LABELS.BOOKING.buyer_form.summary.service_fee}</Typography>
+										<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
 										<Typography>{`${formatNumber(
 											booking.price_details.fees.reduce((s, f) => s + f.total, 0)
 										)} ${currencySymbol}`}</Typography>

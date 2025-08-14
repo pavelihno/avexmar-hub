@@ -447,7 +447,7 @@ const Passengers = () => {
 							</Box>
 							{serviceFee > 0 && (
 								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.service_fee}</Typography>
+									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
 									<Typography>{`${formatNumber(serviceFee)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}

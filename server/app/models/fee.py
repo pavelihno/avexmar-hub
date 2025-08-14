@@ -9,10 +9,8 @@ class Fee(BaseModel):
     name = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String, nullable=True)
     amount = db.Column(db.Float, nullable=False)
-    application = db.Column(db.Enum(Config.FEE_APPLICATION), nullable=False)
-    application_term = db.Column(
-        db.Enum(Config.FEE_TERM), nullable=False, default=Config.FEE_TERM.none
-    )
+    application = db.Column(db.Enum(Config.FEE_APPLICATION), nullable=False, default=Config.DEFAULT_FEE_APPLICATION)
+    application_term = db.Column(db.Enum(Config.FEE_TERM), nullable=False, default=Config.DEFAULT_FEE_TERM)
 
     def to_dict(self, return_children=False):
         return {
@@ -47,13 +45,13 @@ class Fee(BaseModel):
 
     @classmethod
     def calculate_fees(
-        cls, passengers_count, application, hours_before_departure=None
+        cls, seats_number, application, hours_before_departure=None
     ):
         fees = cls.get_applicable(application, hours_before_departure)
         result = []
         total = 0.0
         for fee in fees:
-            fee_total = fee.amount * passengers_count
+            fee_total = fee.amount * seats_number
             result.append({'name': fee.name, 'amount': fee.amount, 'total': fee_total})
             total += fee_total
         return result, total

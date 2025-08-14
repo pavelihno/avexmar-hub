@@ -110,9 +110,9 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
             'passengers': leg_breakdown,
         })
 
-    total_passengers = sum(passengers.values())
+    seats_number = get_seats_number(passengers) * (2 if is_round_trip else 1)
     fees, fees_total = Fee.calculate_fees(
-        passengers_count=total_passengers,
+        seats_number=seats_number,
         application=Config.FEE_APPLICATION.booking,
     )
     total_price += fees_total
