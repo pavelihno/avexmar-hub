@@ -332,7 +332,6 @@ export const UI_LABELS = {
 		return: 'Обратное направление',
 		filter: 'Фильтр',
 		select: 'Выбрать',
-		ask_return: 'Нужен ли обратный билет?',
 		select_flights: 'Выбрать рейсы',
 		from_to: (from, to) => {
 			if (!from || !to) return '';
@@ -364,7 +363,7 @@ export const UI_LABELS = {
 				flexible: 'Гибкие даты',
 			},
 			schedule_button: 'Расписание',
-			button: 'Найти билеты',
+			button: 'Найти рейсы',
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
 					? 'пассажир'
@@ -386,8 +385,8 @@ export const UI_LABELS = {
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {
-			select_ticket: 'Выбрать билет',
-			book_ticket: 'Оформить билет',
+			select_ticket: 'Выбрать рейс',
+			book_ticket: 'Перейти к оформлению',
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',

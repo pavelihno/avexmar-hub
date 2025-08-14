@@ -192,7 +192,6 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	return (
 		<>
 			<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-				<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_ticket}</DialogTitle>
 				<DialogContent dividers>
 					<Box
 						sx={{
