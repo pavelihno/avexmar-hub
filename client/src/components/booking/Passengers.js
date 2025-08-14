@@ -334,21 +334,19 @@ const Passengers = () => {
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>
 									<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-										<Box>
-											{outboundRouteInfo && (
-												<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-													{Object.keys(returnRouteInfo || {}).length > 0
-														? UI_LABELS.BOOKING.flight_details.from_to_from(
-																outboundRouteInfo.from,
-																outboundRouteInfo.to
-														  )
-														: UI_LABELS.BOOKING.flight_details.from_to(
-																outboundRouteInfo.from,
-																outboundRouteInfo.to
-														  )}
-												</Typography>
-											)}
-										</Box>
+										{outboundRouteInfo && (
+											<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
+												{Object.keys(returnRouteInfo || {}).length > 0
+													? UI_LABELS.BOOKING.flight_details.from_to_from(
+															outboundRouteInfo.from,
+															outboundRouteInfo.to
+													  )
+													: UI_LABELS.BOOKING.flight_details.from_to(
+															outboundRouteInfo.from,
+															outboundRouteInfo.to
+													  )}
+											</Typography>
+										)}
 									</AccordionSummary>
 									<AccordionDetails>
 										{booking.flights.map((f, idx) => {
