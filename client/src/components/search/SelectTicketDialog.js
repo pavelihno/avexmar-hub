@@ -54,7 +54,16 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 	const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
 
 	return (
-		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, p: 1 }}>
+		<Box
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: 0.25,
+				p: 1,
+				backgroundColor: 'background.lightBlue',
+				borderRadius: 1,
+			}}
+		>
 			<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
 				{origin.iata_code} → {dest.iata_code}
 			</Typography>
@@ -287,7 +296,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								{/* Return flight if exists */}
 								{returnFlight && (
 									<>
-										<Divider sx={{ my: 1 }} />
+										<Divider sx={{ my: 0.5 }} />
 
 										<FlightTariffRow
 											flight={returnFlight}
@@ -304,7 +313,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								)}
 							</Box>
 
-							<Divider sx={{ my: 1 }} />
+							<Divider sx={{ my: 0.5 }} />
 
 							{/* Passenger categories */}
 							<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}>
