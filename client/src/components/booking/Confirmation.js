@@ -35,17 +35,17 @@ const Confirmation = () => {
 		dispatch(fetchBookingDetails(publicId));
 	}, [dispatch, publicId]);
 
-        const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
+	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
-        const outboundRouteInfo = extractRouteInfo(outboundFlight);
-        const returnRouteInfo = extractRouteInfo(returnFlight);
+	const outboundRouteInfo = extractRouteInfo(outboundFlight);
+	const returnRouteInfo = extractRouteInfo(returnFlight);
 
-        const flightMap = { outbound: outboundRouteInfo, return: returnRouteInfo };
+	const flightMap = { outbound: outboundRouteInfo, return: returnRouteInfo };
 
-        const tariffMap = useMemo(() => {
-                const dirs = booking?.price_details?.directions || [];
-                return dirs.reduce((acc, d) => ({ ...acc, [d.direction]: d.tariff }), {});
-        }, [booking?.price_details]);
+	const tariffMap = useMemo(() => {
+		const dirs = booking?.price_details?.directions || [];
+		return dirs.reduce((acc, d) => ({ ...acc, [d.direction]: d.tariff }), {});
+	}, [booking?.price_details]);
 
 	useEffect(() => {
 		if (outboundRouteInfo) {
@@ -95,51 +95,57 @@ const Confirmation = () => {
 							</AccordionSummary>
 							<AccordionDetails>
 								<Grid container spacing={2}>
-                                                                        {booking.flights.map((f, idx) => {
-                                                                                const origin = f.route?.origin_airport || {};
-                                                                                const dest = f.route?.destination_airport || {};
-                                                                                const depDate = formatDate(f.scheduled_departure);
-                                                                                const depTime = formatTime(f.scheduled_departure_time);
-                                                                                const arrDate = formatDate(f.scheduled_arrival);
-                                                                                const arrTime = formatTime(f.scheduled_arrival_time);
-                                                                                const duration = formatDuration(f.duration);
-                                                                                const airline = f.airline?.name || '';
-                                                                                const flightNo = f.airline_flight_number || f.flight_number || '';
-                                                                                const aircraft = f.aircraft?.type;
-                                                                                const direction = idx === 0 ? 'outbound' : 'return';
-                                                                                const tariff = tariffMap[direction];
+									{booking.flights.map((f, idx) => {
+										const origin = f.route?.origin_airport || {};
+										const dest = f.route?.destination_airport || {};
+										const depDate = formatDate(f.scheduled_departure);
+										const depTime = formatTime(f.scheduled_departure_time);
+										const arrDate = formatDate(f.scheduled_arrival);
+										const arrTime = formatTime(f.scheduled_arrival_time);
+										const duration = formatDuration(f.duration);
+										const airline = f.airline?.name || '';
+										const flightNo = f.airline_flight_number || f.flight_number || '';
+										const aircraft = f.aircraft?.type;
+										const direction = idx === 0 ? 'outbound' : 'return';
+										const tariff = tariffMap[direction];
 
-                                                                                return (
-                                                                                        <Grid item xs={12} md={6} key={f.id || idx}>
-                                                                                                <Card>
-                                                                                                        <CardContent>
-                                                                                                                <Box
-                                                                                                                        sx={{
-                                                                                                                               display: 'flex',
-                                                                                                                               justifyContent: 'space-between',
-                                                                                                                               alignItems: 'center',
-                                                                                                                               mb: 0.5,
-                                                                                                                        }}
-                                                                                                                >
-                                                                                                                        <Typography variant='subtitle2'>{airline}</Typography>
-                                                                                                                        <Typography variant='caption' color='text.secondary'>
-                                                                                                                               {flightNo}
-                                                                                                                        </Typography>
-                                                                                                                </Box>
-                                                                                                                {tariff && (
-                                                                                                                        <Typography variant='caption' color='text.secondary' sx={{ mb: 0.5, display: 'block' }}>
-                                                                                                                               {`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class]} — ${tariff.title}`}
-                                                                                                                        </Typography>
-                                                                                                                )}
-                                                                                                                <Box
-                                                                                                                        sx={{
-                                                                                                                               display: 'grid',
-                                                                                                                               gridTemplateColumns: '1fr auto 1fr',
-                                                                                                                               gap: 1,
-                                                                                                                               alignItems: 'center',
-                                                                                                                        }}
-                                                                                                                >
-                                                                                                                       <Box>
+										return (
+											<Grid item xs={12} md={6} key={f.id || idx}>
+												<Card>
+													<CardContent>
+														<Box
+															sx={{
+																display: 'flex',
+																justifyContent: 'space-between',
+																alignItems: 'center',
+																mb: 0.5,
+															}}
+														>
+															<Typography variant='subtitle2'>{airline}</Typography>
+															<Typography variant='caption' color='text.secondary'>
+																{flightNo}
+															</Typography>
+														</Box>
+														{tariff && (
+															<Typography
+																variant='caption'
+																color='text.secondary'
+																sx={{ mb: 0.5, display: 'block' }}
+															>
+																{`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class]} — ${
+																	tariff.title
+																}`}
+															</Typography>
+														)}
+														<Box
+															sx={{
+																display: 'grid',
+																gridTemplateColumns: '1fr auto 1fr',
+																gap: 1,
+																alignItems: 'center',
+															}}
+														>
+															<Box>
 																<Typography variant='h6'>{depTime}</Typography>
 																<Typography variant='caption' color='text.secondary'>
 																	{depDate}
