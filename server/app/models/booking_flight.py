@@ -7,6 +7,7 @@ from app.models._base_model import BaseModel
 if TYPE_CHECKING:
     from app.models.booking import Booking
     from app.models.flight import Flight
+    from app.models.tariff import Tariff
 
 
 class BookingFlight(BaseModel):
@@ -14,9 +15,11 @@ class BookingFlight(BaseModel):
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id'), nullable=False)
+    tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id'), nullable=False)
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_flights')
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='booking_flights')
+    tariff: Mapped['Tariff'] = db.relationship('Tariff')
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -32,4 +35,6 @@ class BookingFlight(BaseModel):
             'booking_id': self.booking_id,
             'flight': self.flight.to_dict(return_children) if return_children else {},
             'flight_id': self.flight_id,
+            'tariff': self.tariff.to_dict(return_children) if return_children else {},
+            'tariff_id': self.tariff_id,
         }

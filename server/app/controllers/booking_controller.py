@@ -59,7 +59,8 @@ def create_booking_process(current_user):
 
     outbound_id = int(data.get('outbound_id', 0))
     return_id = int(data.get('return_id', 0))
-    tariff_id = int(data.get('tariff_id', 0))
+    outbound_tariff_id = int(data.get('outbound_tariff_id', 0))
+    return_tariff_id = int(data.get('return_tariff_id', 0))
     raw_passengers = data.get('passengers', {})
 
     passengers = {}
@@ -71,11 +72,16 @@ def create_booking_process(current_user):
         if count > 0:
             passengers[key] = count
 
-    price = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+    price = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        passengers,
+    )
 
     booking = Booking.create(
         session,
-        tariff_id=tariff_id,
         currency=price['currency'],
         fare_price=price['fare_price'],
         fees=sum(f['total'] for f in price['fees']),
@@ -86,9 +92,19 @@ def create_booking_process(current_user):
     )
 
     if outbound_id:
-        BookingFlight.create(session, booking_id=booking.id, flight_id=outbound_id)
+        BookingFlight.create(
+            session,
+            booking_id=booking.id,
+            flight_id=outbound_id,
+            tariff_id=outbound_tariff_id,
+        )
     if return_id:
-        BookingFlight.create(session, booking_id=booking.id, flight_id=return_id)
+        BookingFlight.create(
+            session,
+            booking_id=booking.id,
+            flight_id=return_id,
+            tariff_id=return_tariff_id,
+        )
 
     session.refresh(booking)
 
@@ -217,7 +233,18 @@ def get_booking_details(current_user, public_id):
 
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
-    price_details = calculate_price_details(outbound_id, return_id, booking.tariff_id, passenger_counts)
+
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
+    outbound_tariff_id = tariffs_map.get(outbound_id)
+    return_tariff_id = tariffs_map.get(return_id)
+
+    price_details = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        passenger_counts,
+    )
 
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist

@@ -14,16 +14,22 @@ def get_seats_number(params):
     )
 
 
-def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
-    tariff = Tariff.get_or_404(tariff_id)
-    FlightTariff.query.filter_by(
-        flight_id=outbound_id, tariff_id=tariff_id
-    ).first_or_404()
-    is_round_trip = bool(return_id)
-    if is_round_trip:
+def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_tariff_id, passengers):
+    legs = []
+    if outbound_id and outbound_tariff_id:
+        tariff_out = Tariff.get_or_404(outbound_tariff_id)
         FlightTariff.query.filter_by(
-            flight_id=return_id, tariff_id=tariff_id
+            flight_id=outbound_id, tariff_id=outbound_tariff_id
         ).first_or_404()
+        legs.append(('outbound', outbound_id, tariff_out))
+    if return_id and return_tariff_id:
+        tariff_ret = Tariff.get_or_404(return_tariff_id)
+        FlightTariff.query.filter_by(
+            flight_id=return_id, tariff_id=return_tariff_id
+        ).first_or_404()
+        legs.append(('return', return_id, tariff_ret))
+
+    is_round_trip = len(legs) > 1
 
     passengers = passengers or {}
     categories = ['adults', 'children', 'infants', 'infants_seat']
@@ -37,24 +43,20 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
         d.discount_type.value: d.discount_name for d in discounts
     }
 
-    legs = [('outbound', outbound_id)]
-    if is_round_trip:
-        legs.append(('return', return_id))
-
     fare_total_price = 0.0
     total_discounts = 0.0
     total_price = 0.0
-    tariff_info = {
-        'id': tariff.id,
-        'title': tariff.title,
-        'seat_class': tariff.seat_class.value,
-        'price': tariff.price,
-        'currency': tariff.currency.value,
-        'conditions': tariff.conditions,
-    }
     directions = []
 
-    for leg_key, flight_id in legs:
+    for leg_key, flight_id, tariff in legs:
+        tariff_info = {
+            'id': tariff.id,
+            'title': tariff.title,
+            'seat_class': tariff.seat_class.value,
+            'price': tariff.price,
+            'currency': tariff.currency.value,
+            'conditions': tariff.conditions,
+        }
         leg_breakdown = []
         for category, count in passengers.items():
             if not count:
@@ -105,12 +107,14 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
         directions.append({
             'direction': leg_key,
             'flight_id': flight_id,
-            'route_id': Flight.get_or_404(flight_id).route_id,
+            'route': Flight.get_or_404(flight_id).route.to_dict(return_children=True),
             'tariff': tariff_info,
             'passengers': leg_breakdown,
         })
 
-    seats_number = get_seats_number(passengers) * (2 if is_round_trip else 1)
+    currency = legs[0][2].currency.value if legs else None
+
+    seats_number = get_seats_number(passengers) * len(legs)
     fees, fees_total = Fee.calculate_fees(
         seats_number=seats_number,
         application=Config.FEE_APPLICATION.booking,
@@ -118,8 +122,7 @@ def calculate_price_details(outbound_id, return_id, tariff_id, passengers):
     total_price += fees_total
 
     return {
-        'tariff': tariff_info,
-        'currency': tariff.currency.value,
+        'currency': currency,
         'directions': directions,
         'fees': fees,
         'fare_price': fare_total_price,

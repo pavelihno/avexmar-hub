@@ -12,12 +12,20 @@ import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
 	airports: [],
+	airportsLoading: false,
+
 	flights: [],
+	flightsLoading: false,
+
 	nearbyOutboundFlights: [],
-	nearbyReturnFlights: [],
-	isLoading: false,
 	nearbyOutboundLoading: false,
+
+	nearbyReturnFlights: [],
 	nearbyReturnLoading: false,
+
+	outboundTariffsLoading: false,
+	returnTariffsLoading: false,
+
 	errors: null,
 };
 
@@ -27,53 +35,81 @@ const searchSlice = createSlice({
 	reducers: {},
 	extraReducers: (builder) => {
 		builder
-			.addCase(fetchSearchAirports.pending, handlePending)
-			.addCase(fetchSearchAirports.rejected, handleRejected)
+			.addCase(fetchSearchAirports.pending, (state) =>
+				handlePending(state, { isLoading: 'airportsLoading', errors: 'errors' })
+			)
+			.addCase(fetchSearchAirports.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'airportsLoading', errors: 'errors' })
+			)
 			.addCase(fetchSearchAirports.fulfilled, (state, action) => {
 				state.airports = action.payload;
-				state.isLoading = false;
+				state.airportsLoading = false;
 			})
 
-			.addCase(fetchSearchFlights.pending, handlePending)
-			.addCase(fetchSearchFlights.rejected, handleRejected)
+			.addCase(fetchSearchFlights.pending, (state) =>
+				handlePending(state, { isLoading: 'flightsLoading', errors: 'errors' })
+			)
+			.addCase(fetchSearchFlights.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'flightsLoading', errors: 'errors' })
+			)
 			.addCase(fetchSearchFlights.fulfilled, (state, action) => {
 				state.flights = action.payload;
-				state.isLoading = false;
+				state.flightsLoading = false;
 			})
 
-			.addCase(fetchScheduleFlights.pending, handlePending)
-			.addCase(fetchScheduleFlights.rejected, handleRejected)
+			.addCase(fetchScheduleFlights.pending, (state) =>
+				handlePending(state, { isLoading: 'flightsLoading', errors: 'errors' })
+			)
+			.addCase(fetchScheduleFlights.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'flightsLoading', errors: 'errors' })
+			)
 			.addCase(fetchScheduleFlights.fulfilled, (state, action) => {
 				state.flights = action.payload;
-				state.isLoading = false;
+				state.flightsLoading = false;
 			})
 
-			.addCase(fetchNearbyOutboundFlights.pending, handlePending)
-			.addCase(fetchNearbyOutboundFlights.rejected, handleRejected)
+			.addCase(fetchNearbyOutboundFlights.pending, (state) =>
+				handlePending(state, { isLoading: 'nearbyOutboundLoading', errors: 'errors' })
+			)
+			.addCase(fetchNearbyOutboundFlights.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'nearbyOutboundLoading', errors: 'errors' })
+			)
 			.addCase(fetchNearbyOutboundFlights.fulfilled, (state, action) => {
 				state.nearbyOutboundFlights = action.payload;
-				state.isLoading = false;
+				state.nearbyOutboundLoading = false;
 			})
 
-			.addCase(fetchNearbyReturnFlights.pending, handlePending)
-			.addCase(fetchNearbyReturnFlights.rejected, handleRejected)
+			.addCase(fetchNearbyReturnFlights.pending, (state) =>
+				handlePending(state, { isLoading: 'nearbyReturnLoading', errors: 'errors' })
+			)
+			.addCase(fetchNearbyReturnFlights.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'nearbyReturnLoading', errors: 'errors' })
+			)
 			.addCase(fetchNearbyReturnFlights.fulfilled, (state, action) => {
 				state.nearbyReturnFlights = action.payload;
-				state.isLoading = false;
+				state.nearbyReturnLoading = false;
 			})
 
-			.addCase(fetchOutboundFlightTariffs.pending, handlePending)
-			.addCase(fetchOutboundFlightTariffs.rejected, handleRejected)
+			.addCase(fetchOutboundFlightTariffs.pending, (state) =>
+				handlePending(state, { isLoading: 'outboundTariffsLoading', errors: 'errors' })
+			)
+			.addCase(fetchOutboundFlightTariffs.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'outboundTariffsLoading', errors: 'errors' })
+			)
 			.addCase(fetchOutboundFlightTariffs.fulfilled, (state, action) => {
 				state.outboundFlightTariffs = action.payload;
-				state.isLoading = false;
+				state.outboundTariffsLoading = false;
 			})
 
-			.addCase(fetchReturnFlightTariffs.pending, handlePending)
-			.addCase(fetchReturnFlightTariffs.rejected, handleRejected)
+			.addCase(fetchReturnFlightTariffs.pending, (state) =>
+				handlePending(state, { isLoading: 'returnTariffsLoading', errors: 'errors' })
+			)
+			.addCase(fetchReturnFlightTariffs.rejected, (state, action) =>
+				handleRejected(state, action, { isLoading: 'returnTariffsLoading', errors: 'errors' })
+			)
 			.addCase(fetchReturnFlightTariffs.fulfilled, (state, action) => {
 				state.returnFlightTariffs = action.payload;
-				state.isLoading = false;
+				state.returnTariffsLoading = false;
 			});
 	},
 });

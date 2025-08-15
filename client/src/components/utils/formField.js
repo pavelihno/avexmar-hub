@@ -22,6 +22,7 @@ import {
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
 } from '../../constants';
+import { parseDate } from './format';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -166,7 +167,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
 							label={field.label}
-							value={value ? new Date(value) : null}
+							value={value ? parseDate(value) : null}
 							onChange={(date) => onChange(date)}
 							minDate={minDate}
 							format={field.dateFormat || DATE_FORMAT}
@@ -192,7 +193,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<TimePicker
 							label={field.label}
-							value={value ? new Date(value) : null}
+							value={value ? parseDate(value) : null}
 							onChange={(time) => onChange(time)}
 							ampm={false}
 							format={field.timeFormat || TIME_FORMAT}
@@ -218,7 +219,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DateTimePicker
 							label={field.label}
-							value={value ? new Date(value) : null}
+							value={value ? parseDate(value) : null}
 							onChange={(dateTime) => onChange(dateTime)}
 							format={field.dateTimeFormat || DATETIME_FORMAT}
 							slotProps={{

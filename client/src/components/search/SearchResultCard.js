@@ -69,16 +69,13 @@ const SegmentSkeleton = () => {
 	);
 };
 
-const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
+const Segment = ({ flight, isOutbound }) => {
 	if (!flight) return null;
 
-	const airline = airlines.find((a) => a.id === flight.airline_id) || null;
-
-	const route = routes.find((r) => r.id === flight.route_id) || null;
-
-	const originAirport = route ? airports.find((a) => a.id === route.origin_airport_id) || null : null;
-
-	const destinationAirport = route ? airports.find((a) => a.id === route.destination_airport_id) || null : null;
+	const airline = flight.airline || {};
+	const route = flight.route || {};
+	const originAirport = route.origin_airport || {};
+	const destinationAirport = route.destination_airport || {};
 
 	return (
 		<Box sx={{ mb: 1 }}>
@@ -155,17 +152,15 @@ const Segment = ({ flight, isOutbound, airlines, airports, routes }) => {
 	);
 };
 
-const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, isLoading }) => {
+const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 	const theme = useTheme();
-	const currency = isLoading ? '' : outbound?.currency || returnFlight?.currency;
-	const currencySymbol = isLoading ? '' : currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-	const totalPrice = isLoading ? 0 : outbound.price + (returnFlight?.price || 0);
-	const totalMinPrice = isLoading ? 0 : outbound.min_price + (returnFlight?.min_price || 0);
+	const currency = outbound?.currency || returnFlight?.currency;
+	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
+	const totalPrice = outbound.price + (returnFlight?.price || 0);
+	const totalMinPrice = outbound.min_price + (returnFlight?.min_price || 0);
 	const [openDialog, setOpenDialog] = useState(false);
 
-	const priceText = isLoading
-		? ''
-		: totalPrice
+	const priceText = totalPrice
 		? `${formatNumber(totalPrice)} ${currencySymbol}`
 		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
 				totalMinPrice
@@ -212,7 +207,7 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 							setOpenDialog(true);
 						}}
 					>
-						{UI_LABELS.SEARCH.flight_details.select_ticket}
+						{UI_LABELS.SEARCH.flight_details.select_tariff_title}
 					</Button>
 				</Box>
 				<Box sx={{ flexGrow: 1, pl: 2 }}>
@@ -224,23 +219,9 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 						</>
 					) : (
 						<>
-							<Segment
-								flight={outbound}
-								isOutbound
-								airlines={airlines}
-								airports={airports}
-								routes={routes}
-							/>
+							<Segment flight={outbound} isOutbound />
 							{returnFlight && <Divider sx={{ my: 1 }} />}
-							{returnFlight && (
-								<Segment
-									flight={returnFlight}
-									isOutbound={false}
-									airlines={airlines}
-									airports={airports}
-									routes={routes}
-								/>
-							)}
+							{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
 						</>
 					)}
 				</Box>
@@ -250,9 +231,6 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 				onClose={() => setOpenDialog(false)}
 				outbound={outbound}
 				returnFlight={returnFlight}
-				airlines={airlines}
-				airports={airports}
-				routes={routes}
 			/>
 		</>
 	);

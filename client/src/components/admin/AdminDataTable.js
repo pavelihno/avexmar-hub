@@ -35,7 +35,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
-import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate } from '../utils';
+import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate, parseDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 import { useTheme, alpha } from '@mui/material/styles';
 
@@ -273,7 +273,7 @@ const AdminDataTable = ({
 			switch (column.type) {
 				case FIELD_TYPES.DATE:
 				case FIELD_TYPES.DATETIME:
-					return raw ? new Date(raw).getTime() : 0;
+					return raw ? parseDate(raw).getTime() : 0;
 				case FIELD_TYPES.TIME:
 					return raw ? parseTime(raw) : 0;
 				case FIELD_TYPES.NUMBER:

@@ -257,6 +257,11 @@ const Passengers = () => {
 		}
 	}, [outboundRouteInfo, returnRouteInfo]);
 
+	const tariffMap = useMemo(() => {
+		const dirs = booking?.price_details?.directions || [];
+		return dirs.reduce((acc, d) => ({ ...acc, [d.direction]: d.tariff }), {});
+	}, [booking?.price_details]);
+
 	const farePrice = booking?.fare_price || 0;
 	const serviceFee = booking?.fees || 0;
 	const discount = booking?.total_discounts || 0;
@@ -360,6 +365,8 @@ const Passengers = () => {
 											const airline = f.airline?.name || '';
 											const flightNo = f.airline_flight_number || f.flight_number || '';
 											const aircraft = f.aircraft?.type;
+											const direction = idx === 0 ? 'outbound' : 'return';
+											const tariff = tariffMap[direction];
 											return (
 												<Box
 													key={f.id || idx}
@@ -378,6 +385,17 @@ const Passengers = () => {
 															{flightNo}
 														</Typography>
 													</Box>
+													{tariff && (
+														<Typography
+															variant='caption'
+															color='text.secondary'
+															sx={{ mb: 0.5, display: 'block' }}
+														>
+															{`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class]} — ${
+																tariff.title
+															}`}
+														</Typography>
+													)}
 													<Box
 														sx={{
 															display: 'grid',

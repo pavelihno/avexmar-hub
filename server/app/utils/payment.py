@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from typing import Any, Dict
+from datetime import datetime, timedelta
 
 from yookassa import Configuration, Payment as YooPayment
 
@@ -24,8 +25,16 @@ def generate_receipt(booking: Booking) -> Dict[str, Any]:
     outbound_id = flights[0].flight_id if len(flights) > 0 else None
     return_id = flights[1].flight_id if len(flights) > 1 else None
 
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in flights}
+    outbound_tariff_id = tariffs_map.get(outbound_id)
+    return_tariff_id = tariffs_map.get(return_id)
+
     price_details = calculate_price_details(
-        outbound_id, return_id, booking.tariff_id, booking.passenger_counts or {}
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        booking.passenger_counts or {},
     )
 
     currency = price_details.get('currency', booking.currency.value).upper()
@@ -87,12 +96,13 @@ def create_payment(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
+    expires_at = datetime.utcnow() + timedelta(hours=1)
     body: Dict[str, Any] = {
         'amount': amount,
         'confirmation': {'type': 'embedded'},
         'capture': False,
         'description': f'Booking {booking.booking_number or booking.id}',
-        'metadata': {'booking_id': booking.id},
+        'metadata': {'booking_id': booking.id, 'expires_at': expires_at.isoformat()},
     }
     yoo_payment: Any = YooPayment.create(body, uuid.uuid4())
 

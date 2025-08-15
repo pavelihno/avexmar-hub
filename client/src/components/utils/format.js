@@ -101,16 +101,24 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 	}
 };
 
-export const parseTime = (value) => {
-	if (!value) return '';
+export const parseDate = (value) => {
+	if (!value) return null;
 	try {
-		const date = new Date(`1970-01-01T${value}`);
-		if (isNaN(date.getTime())) {
-			throw new Error('Invalid time format');
-		}
-		return date.getTime();
+		const d = new Date(value);
+		return isNaN(d) ? null : d;
+	} catch (error) {
+		console.error('Invalid date value:', value);
+		return null;
+	}
+};
+
+export const parseTime = (value) => {
+	if (!value) return null;
+	try {
+		const d = new Date(`1970-01-01T${value}`);
+		return isNaN(d.getTime()) ? null : d.getTime();
 	} catch (error) {
 		console.error('Invalid time value:', value);
-		return value;
+		return null;
 	}
 };

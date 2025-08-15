@@ -36,38 +36,6 @@ import { processBookingCreate } from '../../redux/actions/bookingProcess';
 
 const passengerCategories = UI_LABELS.SEARCH.form.passenger_categories;
 
-const buildTariffOptions = (outboundTariffs, returnTariffs) => {
-	const filterBySeats = (tariffs) => tariffs.filter((t) => t.seats_left === undefined || t.seats_left > 0);
-
-	const outboundFiltered = filterBySeats(outboundTariffs).sort((a, b) => a.price - b.price);
-
-	if (!returnTariffs || returnTariffs.length === 0) {
-		return outboundFiltered.map((t) => ({ ...t }));
-	}
-
-	const returnFiltered = filterBySeats(returnTariffs);
-	const map = {};
-	outboundFiltered.forEach((t) => {
-		map[t.id] = { ...t };
-	});
-
-	const options = [];
-	returnFiltered.forEach((t) => {
-		if (map[t.id]) {
-			options.push({
-				...map[t.id],
-				price: map[t.id].price + t.price,
-				seats_left:
-					map[t.id].seats_left !== undefined && t.seats_left !== undefined
-						? Math.min(map[t.id].seats_left, t.seats_left)
-						: t.seats_left ?? map[t.id].seats_left,
-			});
-		}
-	});
-
-	return filterBySeats(options).sort((a, b) => a.price - b.price);
-};
-
 const getDefaultTariffId = (tariffs, seatClass, seatsNumber) => {
 	if (seatClass) {
 		const classTariffs = tariffs.filter((t) => t.seat_class === seatClass && t.seats_left >= seatsNumber);
@@ -78,30 +46,95 @@ const getDefaultTariffId = (tariffs, seatClass, seatsNumber) => {
 	return tariffs[0]?.id;
 };
 
-const FlightInfo = ({ flight, airlines, airports, routes }) => {
+const FlightInfo = ({ flight }) => {
 	if (!flight) return null;
-	const airline = airlines.find((a) => a.id === flight.airline_id) || {};
-	const route = routes.find((r) => r.id === flight.route_id) || {};
-	const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
-	const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
+	const airline = flight.airline || {};
+	const route = flight.route || {};
+	const origin = route.origin_airport || {};
+	const dest = route.destination_airport || {};
 
 	return (
-		<Card sx={{ p: 1, flex: 1 }}>
-			<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-				{airline.name}
-			</Typography>
-			<Typography variant='subtitle2'>{flight.airline_flight_number}</Typography>
-			<Typography variant='body2'>
+		<Box
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: 0.25,
+				p: 2,
+				mr: 0.5,
+				backgroundColor: 'background.lightBlue',
+				borderRadius: 1,
+			}}
+		>
+			<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
 				{origin.iata_code} → {dest.iata_code}
 			</Typography>
-			<Typography variant='caption' color='text.secondary'>
+			<Typography variant='subtitle2'>{airline.name}</Typography>
+			<Typography variant='subtitle2'>{flight.airline_flight_number}</Typography>
+			<Typography variant='body2' color='text.secondary'>
 				{`${formatDate(flight.scheduled_departure)} ${formatTime(flight.scheduled_departure_time)}`}
 			</Typography>
-		</Card>
+		</Box>
 	);
 };
 
-const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, airports, routes }) => {
+const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions, setShowConditions }) => {
+	return (
+		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+			{/* Flight description */}
+			<FlightInfo flight={flight} />
+
+			{/* Tariff selection */}
+			<Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', minWidth: 0 }}>
+				{(tariffs || []).map((t) => {
+					const isSelected = t.id === selectedId;
+					return (
+						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 22vh' }}>
+							<Box display='flex' justifyContent='flex-end'>
+								<IconButton
+									sx={{ m: 0, p: 0.5 }}
+									size='small'
+									disabled={!t.conditions}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (t.conditions) {
+											setConditions(t.conditions);
+											setShowConditions(true);
+										}
+									}}
+								>
+									<Tooltip title={UI_LABELS.SEARCH.flight_details.tariff_conditions}>
+										<InfoOutlinedIcon fontSize='small' />
+									</Tooltip>
+								</IconButton>
+							</Box>
+
+							<CardActionArea
+								onClick={() => onSelect(t.id)}
+								sx={{
+									p: 1,
+									bgcolor: isSelected ? 'action.selected' : 'background.paper',
+								}}
+							>
+								<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+									{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
+								</Typography>
+								<Typography variant='body2'>{t.title}</Typography>
+								<Typography variant='body1' sx={{ fontWeight: 700 }}>
+									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+								</Typography>
+								<Typography variant='caption' color='text.secondary'>
+									{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
+								</Typography>
+							</CardActionArea>
+						</Card>
+					);
+				})}
+			</Box>
+		</Box>
+	);
+};
+
+const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
@@ -143,45 +176,64 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 		dispatch(fetchReturnFlightTariffs(returnFlight.id));
 	}, [open, returnFlight]);
 
-	const tariffOptions = useMemo(
-		() => buildTariffOptions(outboundTariffs || [], returnTariffs || []),
-		[outboundTariffs, returnTariffs]
+	const defaultOutboundTariffId = useMemo(
+		() => getDefaultTariffId(outboundTariffs || [], seatClass, seatsNumber),
+		[outboundTariffs, seatClass, seatsNumber]
+	);
+	const defaultReturnTariffId = useMemo(
+		() => getDefaultTariffId(returnTariffs || [], seatClass, seatsNumber),
+		[returnTariffs, seatClass, seatsNumber]
 	);
 
-	const defaultTariffId = useMemo(
-		() => getDefaultTariffId(tariffOptions, seatClass, seatsNumber, initialParams.tariff),
-		[tariffOptions, seatClass, seatsNumber, initialParams.tariff]
+	const [outboundTariffId, setOutboundTariffId] = useState(defaultOutboundTariffId);
+	const [returnTariffId, setReturnTariffId] = useState(defaultReturnTariffId);
+
+	useEffect(() => {
+		setOutboundTariffId(defaultOutboundTariffId);
+	}, [defaultOutboundTariffId]);
+	useEffect(() => {
+		setReturnTariffId(defaultReturnTariffId);
+	}, [defaultReturnTariffId]);
+
+	const selectedOutboundTariff = useMemo(
+		() => (outboundTariffs || []).find((t) => t.id === outboundTariffId),
+		[outboundTariffs, outboundTariffId]
+	);
+	const selectedReturnTariff = useMemo(
+		() => (returnTariffs || []).find((t) => t.id === returnTariffId),
+		[returnTariffs, returnTariffId]
 	);
 
-	const [tariffId, setTariffId] = useState(defaultTariffId);
+	const currencySymbol = priceDetails ? ENUM_LABELS.CURRENCY_SYMBOL[priceDetails.currency] || '' : '';
 
 	useEffect(() => {
-		setTariffId(defaultTariffId);
-	}, [defaultTariffId]);
-
-	const selectedTariff = useMemo(() => tariffOptions.find((t) => t.id === tariffId), [tariffOptions, tariffId]);
-	const currencySymbol = selectedTariff ? ENUM_LABELS.CURRENCY_SYMBOL[selectedTariff.currency] || '' : '';
-
-	useEffect(() => {
-		if (!tariffId) return;
+		if (!outboundTariffId) return;
 		const payload = {
 			outbound_id: outbound.id,
-			tariff_id: tariffId,
+			outbound_tariff_id: outboundTariffId,
 			passengers,
 		};
-		if (returnFlight) payload.return_id = returnFlight.id;
+		if (returnFlight) {
+			payload.return_id = returnFlight.id;
+			payload.return_tariff_id = returnTariffId;
+		}
 		dispatch(calculatePrice(payload));
-	}, [dispatch, passengers, tariffId, outbound, returnFlight]);
+	}, [dispatch, passengers, outboundTariffId, returnTariffId, outbound, returnFlight]);
 
-	const hasSeats = hasAvailableSeats(selectedTariff, seatsNumber);
+	const hasSeats =
+		hasAvailableSeats(selectedOutboundTariff, seatsNumber) &&
+		(!returnFlight || hasAvailableSeats(selectedReturnTariff, seatsNumber));
 
 	const handleConfirm = async () => {
 		const payload = {
 			outbound_id: outbound.id,
-			tariff_id: tariffId,
+			outbound_tariff_id: outboundTariffId,
 			passengers,
 		};
-		if (returnFlight) payload.return_id = returnFlight.id;
+		if (returnFlight) {
+			payload.return_id = returnFlight.id;
+			payload.return_tariff_id = returnTariffId;
+		}
 		const res = await dispatch(processBookingCreate(payload)).unwrap();
 		navigate(`/booking/${res.public_id}/passengers`);
 	};
@@ -192,81 +244,63 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	return (
 		<>
 			<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-				<DialogContent dividers>
+				<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_tariff_title}</DialogTitle>
+				<DialogContent dividers sx={{ overflow: 'hidden' }}>
 					<Box
 						sx={{
 							display: 'grid',
 							gridTemplateColumns: '2fr auto 1fr',
 							gap: 1,
-							alignItems: 'start',
+							alignItems: 'stretch',
+
+							height: { xs: '70vh', md: '72vh' },
+							minHeight: 0,
 						}}
 					>
-						<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
-							<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
-								<FlightInfo flight={outbound} airlines={airlines} airports={airports} routes={routes} />
-								{returnFlight ? (
-									<FlightInfo
-										flight={returnFlight}
-										airlines={airlines}
-										airports={airports}
-										routes={routes}
-									/>
-								) : (
-									<Box />
+						{/* Flight description and passenger selection */}
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								rowGap: 2,
+								overflowY: 'auto',
+								overflowX: 'hidden',
+								minHeight: 0,
+								minWidth: 0,
+							}}
+						>
+							<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
+								{/* Outbound flight */}
+								<FlightTariffRow
+									flight={outbound}
+									tariffs={outboundTariffs}
+									selectedId={outboundTariffId}
+									onSelect={setOutboundTariffId}
+									setConditions={setConditions}
+									setShowConditions={setShowConditions}
+								/>
+
+								{/* Return flight if exists */}
+								{returnFlight && (
+									<>
+										<Divider sx={{ my: 0.5 }} />
+
+										<FlightTariffRow
+											flight={returnFlight}
+											tariffs={returnTariffs}
+											selectedId={returnTariffId}
+											onSelect={setReturnTariffId}
+											setConditions={setConditions}
+											setShowConditions={setShowConditions}
+										/>
+									</>
 								)}
 							</Box>
 
-							<Box sx={{ display: 'flex', gap: 1 }}>
-								{tariffOptions.map((t) => {
-									const isSelected = t.id === tariffId;
-									return (
-										<Card key={t.id} sx={{ p: 0.5 }}>
-											<Box display='flex' justifyContent='flex-end'>
-												<IconButton
-													sx={{ m: 0, p: 0.5 }}
-													size='small'
-													disabled={!t.conditions}
-													onClick={(e) => {
-														e.stopPropagation();
-														if (t.conditions) {
-															setConditions(t.conditions);
-															setShowConditions(true);
-														}
-													}}
-												>
-													<Tooltip title={UI_LABELS.SEARCH.flight_details.tariff_conditions}>
-														<InfoOutlinedIcon fontSize='small' />
-													</Tooltip>
-												</IconButton>
-											</Box>
+							<Divider sx={{ my: 0.5 }} />
 
-											<CardActionArea
-												onClick={() => setTariffId(t.id)}
-												sx={{
-													p: 1,
-													bgcolor: isSelected ? 'action.selected' : 'background.paper',
-												}}
-											>
-												<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-													{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
-												</Typography>
-												<Typography variant='body2'>{t.title}</Typography>
-												<Typography variant='body1' sx={{ fontWeight: 700 }}>
-													{formatNumber(t.price)}{' '}
-													{ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
-												</Typography>
-												<Typography variant='caption' color='text.secondary'>
-													{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${
-														t.seats_left ?? '-'
-													}`}
-												</Typography>
-											</CardActionArea>
-										</Card>
-									);
-								})}
-							</Box>
-
-							<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+							{/* Passenger categories */}
+							<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}>
 								{passengerCategories.map((row) => (
 									<Card
 										key={row.key}
@@ -322,14 +356,14 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 							</Box>
 						</Box>
 
-						<Divider orientation='vertical' flexItem sx={{ mx: 0.5 }} />
+						<Divider orientation='vertical' sx={{ mx: 0.5, alignSelf: 'stretch' }} />
 
 						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
 							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
 							{(priceDetails?.directions || []).map((dir) => {
-								const route = routes.find((r) => r.id === dir.route_id) || {};
-								const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
-								const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
+								const route = dir.route || {};
+								const origin = route.origin_airport || {};
+								const dest = route.destination_airport || {};
 
 								return (
 									<Box key={dir.direction} sx={{ mb: 1 }}>
@@ -407,7 +441,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								onClick={handleConfirm}
 								disabled={!hasSeats || priceLoading || bookingLoading}
 							>
-								{UI_LABELS.SEARCH.flight_details.book_ticket}
+								{UI_LABELS.SEARCH.flight_details.select_tariff}
 							</Button>
 						</span>
 					</Tooltip>

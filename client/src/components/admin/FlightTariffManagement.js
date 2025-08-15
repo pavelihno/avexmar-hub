@@ -58,7 +58,7 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 						value: t.id,
 						label: `${ENUM_LABELS.SEAT_CLASS[t.seat_class]} - ${UI_LABELS.ADMIN.modules.tariffs.tariff} ${
 							t.order_number
-						} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
+						} - ${t.title} (${formatNumber(t.price)} ${ENUM_LABELS.CURRENCY[t.currency]})`,
 					}));
 
 	const FIELDS = {

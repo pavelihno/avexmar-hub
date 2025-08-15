@@ -102,43 +102,58 @@ def __query_flights(
     flights = query.all()
     results = []
     for flight in flights:
-        f_dict = flight.to_dict()
+        f_dict = flight.to_dict(return_children=True)
         all_tariffs = __get_available_tariffs(flight.id)
         if not all_tariffs:
             # No tariffs available for this flight
             continue
 
-        matching_tariffs = all_tariffs
+        tariff = None
+        min_tariff = None
+
         if seat_class and seats_number > 0:
-            # Filter tariffs by seat class and seats number
-            matching_tariffs = [
-                t
-                for t in all_tariffs
-                if t['seat_class'] == seat_class and t['seats_left'] >= seats_number
+            # Filter tariffs by seat class
+            seat_class_tariffs = [
+                t for t in all_tariffs if t['seat_class'] == seat_class
             ]
-            if not matching_tariffs:
-                # No matching tariffs found for the specified class and seats number
+            # Filter tariffs by seats number
+            seat_num_tariffs = [
+                t for t in seat_class_tariffs if t['seats_left'] >= seats_number
+            ]
+    
+            if len(seat_class_tariffs) == 0:
+                # No tariffs found for the specified class
                 continue
 
-            elif len(matching_tariffs) > 1:
-                # If multiple tariffs, find the minimum price
-                min_tariff = min(matching_tariffs, key=lambda x: x['price'])
-                f_dict['min_price'] = min_tariff['price']
-                f_dict['currency'] = min_tariff['currency']
+            elif len(seat_num_tariffs) == 0:
+                # No tariffs found for the specified class and seats number
+                min_tariff = min(seat_class_tariffs, key=lambda x: x['price'])
+
+            elif len(seat_num_tariffs) > 1:
+                # Multiple tariffs found for the specified class and seats number
+                min_tariff = min(seat_num_tariffs, key=lambda x: x['price'])
+
             else:
-                # Only one tariff available
-                tariff = matching_tariffs[0]
-                f_dict['price'] = tariff['price']
-                f_dict['currency'] = tariff['currency']
+                # One tariff found for the specified class and seats number
+                tariff = seat_num_tariffs[0]
+
         else:
             # No specific class or seats number
-            min_tariff = min(matching_tariffs, key=lambda x: x['price'])
+            min_tariff = min(all_tariffs, key=lambda x: x['price'])
+
+        if tariff is not None:
+            f_dict['price'] = tariff['price']
+            f_dict['currency'] = tariff['currency']
+
+        if min_tariff is not None:
             f_dict['min_price'] = min_tariff['price']
             f_dict['currency'] = min_tariff['currency']
 
         if direction:
             f_dict['direction'] = direction
+
         results.append(f_dict)
+
     return results
 
 
@@ -157,11 +172,11 @@ def search_flights(is_nearby=False):
     return_from = params.get('return') if is_exact else params.get('return_from')
     return_to = None if is_exact else params.get('return_to')
 
-    outbound_airline_iata_code = params.get('outbound_airline')
-    outbound_flight_number = params.get('outbound_flight')
+    outbound_airline_iata_code = params.get('outbound_airline') if not is_nearby else None
+    outbound_flight_number = params.get('outbound_flight') if not is_nearby else None
 
-    return_airline_iata_code = params.get('return_airline')
-    return_flight_number = params.get('return_flight')
+    return_airline_iata_code = params.get('return_airline') if not is_nearby else None
+    return_flight_number = params.get('return_flight') if not is_nearby else None
 
     outbound_flights = __query_flights(
         origin_code=origin_code, dest_code=dest_code,
@@ -231,8 +246,15 @@ def calculate_price():
     data = request.json or {}
     outbound_id = data.get('outbound_id')
     return_id = data.get('return_id')
-    tariff_id = data.get('tariff_id')
+    outbound_tariff_id = data.get('outbound_tariff_id')
+    return_tariff_id = data.get('return_tariff_id')
     passengers = data.get('passengers', {})
 
-    result = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+    result = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        passengers,
+    )
     return jsonify(result)

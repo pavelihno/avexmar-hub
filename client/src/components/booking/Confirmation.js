@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -41,6 +41,11 @@ const Confirmation = () => {
 	const returnRouteInfo = extractRouteInfo(returnFlight);
 
 	const flightMap = { outbound: outboundRouteInfo, return: returnRouteInfo };
+
+	const tariffMap = useMemo(() => {
+		const dirs = booking?.price_details?.directions || [];
+		return dirs.reduce((acc, d) => ({ ...acc, [d.direction]: d.tariff }), {});
+	}, [booking?.price_details]);
 
 	useEffect(() => {
 		if (outboundRouteInfo) {
@@ -101,6 +106,8 @@ const Confirmation = () => {
 										const airline = f.airline?.name || '';
 										const flightNo = f.airline_flight_number || f.flight_number || '';
 										const aircraft = f.aircraft?.type;
+										const direction = idx === 0 ? 'outbound' : 'return';
+										const tariff = tariffMap[direction];
 
 										return (
 											<Grid item xs={12} md={6} key={f.id || idx}>
@@ -119,6 +126,17 @@ const Confirmation = () => {
 																{flightNo}
 															</Typography>
 														</Box>
+														{tariff && (
+															<Typography
+																variant='caption'
+																color='text.secondary'
+																sx={{ mb: 0.5, display: 'block' }}
+															>
+																{`${ENUM_LABELS.SEAT_CLASS[tariff.seat_class]} — ${
+																	tariff.title
+																}`}
+															</Typography>
+														)}
 														<Box
 															sx={{
 																display: 'grid',

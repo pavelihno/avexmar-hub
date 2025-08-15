@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
-import { formatDate, formatNumber, formatTime, parseTime } from '../utils';
+import { formatDate, formatNumber, formatTime, parseDate, parseTime } from '../utils';
 
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
@@ -42,7 +42,7 @@ function stableSort(array, comparator) {
 	return stabilized.map((el) => el[0]);
 }
 
-const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => {} }) => {
+const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 	const [order, setOrder] = useState('asc');
 	const [orderBy, setOrderBy] = useState('scheduledDepartureDate');
 	const [page, setPage] = useState(0);
@@ -56,28 +56,28 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 
 	const sortedRows = useMemo(() => {
 		const rows = flights.map((f) => {
-			const airline = airlines.find((a) => a.id === f.airline_id);
+			const airline = f.airline;
 			return {
 				id: f.id,
 				flightNumber: f.flight_number,
 				airlineFlightNumber: f.airline_flight_number,
-				scheduledDepartureDate: new Date(f.scheduled_departure),
+				scheduledDepartureDate: parseDate(f.scheduled_departure),
 				scheduledDepartureTime: parseTime(f.scheduled_departure_time),
-				airlineId: airline.id,
-				airline: airline.name,
+				airline: airline,
+				airlineName: airline.name,
 				price: f.min_price,
 				currency: f.currency,
 			};
 		});
 
 		return stableSort(rows, getComparator(order, orderBy));
-	}, [flights, airlines, order, orderBy]);
+	}, [flights, order, orderBy]);
 
 	const headCells = [
 		{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
 		{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
 		{ id: 'scheduledDepartureTime', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
-		{ id: 'airline', label: FIELD_LABELS.FLIGHT.airline_id },
+		{ id: 'airlineName', label: FIELD_LABELS.FLIGHT.airline_id },
 		{ id: 'price', label: FIELD_LABELS.TARIFF.price },
 		{ id: 'select', label: UI_LABELS.SCHEDULE.select },
 	];
@@ -120,10 +120,12 @@ const ScheduleTable = ({ flights, airlines, selectedId = null, onSelect = () => 
 									{formatDate(row.scheduledDepartureDate, DATE_YEAR_WEEKDAY_FORMAT)}
 								</TableCell>
 								<TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>
-								<TableCell>{row.airline}</TableCell>
-								<TableCell>{`${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
-									row.price
-								)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}</TableCell>
+								<TableCell>{row.airlineName}</TableCell>
+								<TableCell>
+									{`${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
+										row.price
+									)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}
+								</TableCell>
 								<TableCell padding='checkbox'>
 									<Radio checked={selectedId === row.id} onClick={() => onSelect(row)} />
 								</TableCell>

@@ -42,6 +42,7 @@ class Payment(BaseModel):
             'currency': self.currency.value if self.currency else None,
             'provider_payment_id': self.provider_payment_id,
             'confirmation_token': self.confirmation_token,
+            'expires_at': (self.meta or {}).get('expires_at'),
             'is_paid': self.is_paid,
             'status_history': self.status_history,
             'last_webhook': self.last_webhook,
