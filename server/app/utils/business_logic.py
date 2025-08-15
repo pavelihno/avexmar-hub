@@ -107,7 +107,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
         directions.append({
             'direction': leg_key,
             'flight_id': flight_id,
-            'route_id': Flight.get_or_404(flight_id).route_id,
+            'route': Flight.get_or_404(flight_id).route.to_dict(return_children=True),
             'tariff': tariff_info,
             'passengers': leg_breakdown,
         })

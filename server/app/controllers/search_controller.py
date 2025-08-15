@@ -102,7 +102,7 @@ def __query_flights(
     flights = query.all()
     results = []
     for flight in flights:
-        f_dict = flight.to_dict()
+        f_dict = flight.to_dict(return_children=True)
         all_tariffs = __get_available_tariffs(flight.id)
         if not all_tariffs:
             # No tariffs available for this flight

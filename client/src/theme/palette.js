@@ -69,7 +69,7 @@ const palette = {
 		default: '#FFFFFF',
 		paper: '#FFFFFF',
 		section: '#F3F4F8',
-		lightBlue: '#f0f2ff',
+		lightBlue: '#f5f6ffff',
 	},
 	white: '#FFFFFF',
 	black: '#000000',

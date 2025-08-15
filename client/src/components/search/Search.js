@@ -11,24 +11,21 @@ import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlights } from '../../redux/actions/search';
-import { fetchAirports } from '../../redux/actions/airport';
-import { fetchAirlines } from '../../redux/actions/airline';
-import { fetchRoutes } from '../../redux/actions/route';
-import { formatDate, formatNumber, parseTime } from '../utils';
+import { formatDate, formatNumber, parseDate, parseTime } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
-	const { nearbyOutboundFlights, isLoading: nearbyOutboundLoading } = useSelector((state) => state.search);
-	const { nearbyReturnFlights, isLoading: nearbyReturnLoading } = useSelector((state) => state.search);
+	const {
+		flights,
+		flightsLoading,
+		nearbyOutboundFlights,
+		nearbyOutboundLoading,
+		nearbyReturnFlights,
+		nearbyReturnLoading,
+	} = useSelector((state) => state.search);
 	const isLoading = flightsLoading || nearbyOutboundLoading || nearbyReturnLoading;
-
-	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
-	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-	const detailsLoading = airlinesLoading || airportsLoading || routesLoading;
 
 	const [params] = useSearchParams();
 	const initialParams = Object.fromEntries(params.entries());
@@ -46,12 +43,6 @@ const Search = () => {
 	const [sortKey, setSortKey] = useState('departure_date');
 	const [sortOrder, setSortOrder] = useState('asc');
 	const [visibleCount, setVisibleCount] = useState(10);
-
-	useEffect(() => {
-		dispatch(fetchAirports());
-		dispatch(fetchAirlines());
-		dispatch(fetchRoutes());
-	}, [dispatch]);
 
 	useEffect(() => {
 		dispatch(fetchSearchFlights(initialParams));
@@ -101,7 +92,7 @@ const Search = () => {
 				date,
 				price: info.price,
 				currency: info.currency,
-				diff: Math.abs(new Date(date) - new Date(selectedDate)),
+				diff: Math.abs(parseDate(date) - parseDate(selectedDate)),
 			}))
 			.sort((a, b) => a.diff - b.diff);
 
@@ -109,7 +100,7 @@ const Search = () => {
 		return sortedDates
 			.slice(0, 3)
 			.map(({ date, price, currency }) => ({ date, price, currency }))
-			.sort((a, b) => new Date(a.date) - new Date(b.date));
+			.sort((a, b) => parseDate(a.date) - parseDate(b.date));
 	};
 
 	const fetchNearbyDates = (date, direction) => {
@@ -119,9 +110,9 @@ const Search = () => {
 			return;
 		}
 
-		const selectedDate = new Date(date);
-		const start = new Date(selectedDate);
-		const end = new Date(selectedDate);
+		const selectedDate = parseDate(date);
+		const start = parseDate(selectedDate);
+		const end = parseDate(selectedDate);
 
 		start.setDate(start.getDate() - 30);
 		end.setDate(end.getDate() + 30);
@@ -159,11 +150,14 @@ const Search = () => {
 
 		// Create all valid combinations of outbound and return flights
 		for (const out of outbounds) {
-			const outboundArrival = new Date(out.scheduled_arrival);
+			const outboundArrival = parseDate(out.scheduled_arrival);
+			const outboundArrivalTime = parseTime(out.scheduled_arrival_time);
+
 			const validReturns = returns.filter((r) => {
-				const returnDeparture = new Date(r.scheduled_departure);
-				// Ensure return is after outbound arrival
-				return returnDeparture > outboundArrival;
+				const returnDeparture = parseDate(r.scheduled_departure);
+				const returnDepartureTime = parseTime(r.scheduled_departure_time);
+				// Ensure return departure is after outbound arrival
+				return returnDeparture >= outboundArrival && returnDepartureTime >= outboundArrivalTime;
 			});
 
 			// Only create groups for outbound flights that have at least one valid return flight
@@ -194,8 +188,8 @@ const Search = () => {
 					res = getTotalPrice(a) - getTotalPrice(b);
 					break;
 				case 'departure_date': {
-					const dateA = new Date(a.outbound.scheduled_departure);
-					const dateB = new Date(b.outbound.scheduled_departure);
+					const dateA = parseDate(a.outbound.scheduled_departure);
+					const dateB = parseDate(b.outbound.scheduled_departure);
 					res = dateA - dateB;
 					if (res === 0) {
 						res =
@@ -209,8 +203,8 @@ const Search = () => {
 						parseTime(a.outbound.scheduled_departure_time) - parseTime(b.outbound.scheduled_departure_time);
 					break;
 				case 'arrival_date': {
-					const dateA = new Date(a.outbound.scheduled_arrival);
-					const dateB = new Date(b.outbound.scheduled_arrival);
+					const dateA = parseDate(a.outbound.scheduled_arrival);
+					const dateB = parseDate(b.outbound.scheduled_arrival);
 					res = dateA - dateB;
 					if (res === 0) {
 						res =
@@ -388,7 +382,7 @@ const Search = () => {
 					</Box>
 				)}
 
-				{flights.length !== 0 && (
+				{!isLoading && flights.length !== 0 && (
 					<Box sx={{ display: 'flex', mb: 2, justifyContent: 'flex-end' }}>
 						<FormControl size='small' sx={{ width: 210, flexShrink: 0 }}>
 							<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
@@ -427,11 +421,11 @@ const Search = () => {
 					</Box>
 				)}
 
-				{isLoading && flights.length === 0 ? (
+				{isLoading ? (
 					<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
 						<CircularProgress />
 					</Box>
-				) : sortedGrouped && sortedGrouped.length ? (
+				) : sortedGrouped && sortedGrouped.length !== 0 ? (
 					sortedGrouped
 						.slice(0, visibleCount)
 						.map((g, idx) => (
@@ -439,10 +433,7 @@ const Search = () => {
 								key={idx}
 								outbound={g.outbound}
 								returnFlight={g.returnFlight}
-								airlines={airlines}
-								airports={airports}
-								routes={routes}
-								isLoading={detailsLoading}
+								isLoading={isLoading}
 							/>
 						))
 				) : (

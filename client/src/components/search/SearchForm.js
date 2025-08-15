@@ -27,6 +27,7 @@ import {
 	formatDate,
 	getTotalPassengers,
 	handlePassengerChange,
+	parseDate,
 } from '../utils';
 import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
@@ -97,12 +98,6 @@ const smallDateProps = {
 };
 
 const seatClassOptions = getEnumOptions('SEAT_CLASS');
-
-const parseDate = (value) => {
-	if (!value) return null;
-	const d = new Date(value);
-	return isNaN(d) ? null : d;
-};
 
 const STORAGE_KEY = 'lastSearchParams';
 

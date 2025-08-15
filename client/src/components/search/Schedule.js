@@ -9,15 +9,13 @@ import SearchForm from './SearchForm';
 import ScheduleTable from './ScheduleTable';
 import { DATE_API_FORMAT, UI_LABELS } from '../../constants';
 import { fetchScheduleFlights } from '../../redux/actions/search';
-import { fetchAirlines } from '../../redux/actions/airline';
 import { formatDate } from '../utils';
 
 const Schedule = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { flights, isLoading: flightsLoading } = useSelector((state) => state.search);
-	const { airlines, isLoading: airlinesLoading } = useSelector((state) => state.airlines);
+	const { flights, isLoading } = useSelector((state) => state.search);
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
 	const paramStr = params.toString();
@@ -39,14 +37,6 @@ const Schedule = () => {
 			document.title = UI_LABELS.APP_TITLE;
 		};
 	}, [from, to]);
-
-	useEffect(() => {
-		dispatch(fetchAirlines());
-	}, [dispatch]);
-
-	const getAirlineById = (id) => {
-		return airlines.find((a) => a.id === id);
-	};
 
 	const outboundFlights = flights.filter((f) => f.direction === 'outbound');
 	const returnFlights = flights.filter((f) => f.direction === 'return');
@@ -101,19 +91,17 @@ const Schedule = () => {
 		params.set('date_mode', 'exact');
 
 		params.set('when', formatDate(_outbound.scheduledDepartureDate, DATE_API_FORMAT));
-		params.set('outbound_airline', getAirlineById(_outbound.airlineId).iata_code);
+		params.set('outbound_airline', _outbound.airline.iata_code);
 		params.set('outbound_flight', _outbound.flightNumber);
 
 		if (_return) {
 			params.set('return', formatDate(_return.scheduledDepartureDate, DATE_API_FORMAT));
-			params.set('return_airline', getAirlineById(_return.airlineId).iata_code);
+			params.set('return_airline', _return.airline.iata_code);
 			params.set('return_flight', _return.flightNumber);
 		}
 
 		navigate(`/search?${params.toString()}`);
 	};
-
-	const isLoading = (flightsLoading && flights.length === 0) || (airlinesLoading && airlines.length === 0);
 
 	return (
 		<Base>
@@ -146,7 +134,6 @@ const Schedule = () => {
 						{outboundFlights.length ? (
 							<ScheduleTable
 								flights={outboundFlights}
-								airlines={airlines}
 								selectedId={selectedOutbound?.id || null}
 								onSelect={(f) =>
 									setSelectedOutbound(selectedOutbound && selectedOutbound.id === f?.id ? null : f)
@@ -159,10 +146,9 @@ const Schedule = () => {
 						<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 4, mb: 1 }}>
 							{UI_LABELS.SCHEDULE.from_to(to || '', from || '')}
 						</Typography>
-						{returnFlights.length ? (
+						{returnFlights.length > 0 ? (
 							<ScheduleTable
 								flights={returnFlights}
-								airlines={airlines}
 								selectedId={selectedReturn?.id || null}
 								onSelect={(f) =>
 									setSelectedReturn(selectedReturn && selectedReturn.id === f?.id ? null : f)

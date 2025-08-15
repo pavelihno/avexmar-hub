@@ -46,12 +46,12 @@ const getDefaultTariffId = (tariffs, seatClass, seatsNumber) => {
 	return tariffs[0]?.id;
 };
 
-const FlightInfo = ({ flight, airlines, airports, routes }) => {
+const FlightInfo = ({ flight }) => {
 	if (!flight) return null;
-	const airline = airlines.find((a) => a.id === flight.airline_id) || {};
-	const route = routes.find((r) => r.id === flight.route_id) || {};
-	const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
-	const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
+	const airline = flight.airline || {};
+	const route = flight.route || {};
+	const origin = route.origin_airport || {};
+	const dest = route.destination_airport || {};
 
 	return (
 		<Box
@@ -59,7 +59,8 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 				display: 'flex',
 				flexDirection: 'column',
 				gap: 0.25,
-				p: 1,
+				p: 2,
+				mr: 0.5,
 				backgroundColor: 'background.lightBlue',
 				borderRadius: 1,
 			}}
@@ -76,22 +77,11 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 	);
 };
 
-const FlightTariffRow = ({
-	flight,
-	tariffs,
-	selectedId,
-	onSelect,
-	airlines,
-	airports,
-	routes,
-	setConditions,
-	setShowConditions,
-	sx = {},
-}) => {
+const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions, setShowConditions }) => {
 	return (
-		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, ...sx }}>
+		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
 			{/* Flight description */}
-			<FlightInfo flight={flight} airlines={airlines} airports={airports} routes={routes} />
+			<FlightInfo flight={flight} />
 
 			{/* Tariff selection */}
 			<Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', minWidth: 0 }}>
@@ -144,7 +134,7 @@ const FlightTariffRow = ({
 	);
 };
 
-const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, airports, routes }) => {
+const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
@@ -286,9 +276,6 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 									tariffs={outboundTariffs}
 									selectedId={outboundTariffId}
 									onSelect={setOutboundTariffId}
-									airlines={airlines}
-									airports={airports}
-									routes={routes}
 									setConditions={setConditions}
 									setShowConditions={setShowConditions}
 								/>
@@ -303,9 +290,6 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 											tariffs={returnTariffs}
 											selectedId={returnTariffId}
 											onSelect={setReturnTariffId}
-											airlines={airlines}
-											airports={airports}
-											routes={routes}
 											setConditions={setConditions}
 											setShowConditions={setShowConditions}
 										/>
@@ -377,9 +361,9 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
 							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
 							{(priceDetails?.directions || []).map((dir) => {
-								const route = routes.find((r) => r.id === dir.route_id) || {};
-								const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
-								const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
+								const route = dir.route || {};
+								const origin = route.origin_airport || {};
+								const dest = route.destination_airport || {};
 
 								return (
 									<Box key={dir.direction} sx={{ mb: 1 }}>

@@ -11,14 +11,18 @@ export const getErrorData = (error) => {
 	return { message: error.message || 'An unknown error occurred' };
 };
 
-export const handlePending = (state) => {
-	state.isLoading = true;
-	state.errors = null;
+export const handlePending = (state, mapping = { loadingKey: 'isLoading', errorsKey: 'errors' }) => {
+	const { loadingKey, errorsKey } = mapping;
+
+	state[loadingKey] = true;
+	state[errorsKey] = null;
 };
 
-export const handleRejected = (state, action) => {
-	state.errors = action.payload;
-	state.isLoading = false;
+export const handleRejected = (state, action, mapping = { loadingKey: 'isLoading', errorsKey: 'errors' }) => {
+	const { loadingKey, errorsKey } = mapping;
+
+	state[errorsKey] = action?.payload;
+	state[loadingKey] = false;
 };
 
 // Standard CRUD action creators
