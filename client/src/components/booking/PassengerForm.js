@@ -13,6 +13,7 @@ import {
 	getPassengerFormConfig,
 	getAgeError,
 	validateDate,
+	parseDate,
 } from '../utils';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
@@ -55,7 +56,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 
 	const { minFlightDate, maxFlightDate } = useMemo(() => {
 		const validDates = flights
-			.map((f) => new Date(f.scheduled_departure))
+			.map((f) => parseDate(f.scheduled_departure))
 			.filter((date) => date instanceof Date && !isNaN(date));
 
 		if (validDates.length === 0) {
@@ -63,8 +64,8 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 		}
 
 		return {
-			minFlightDate: new Date(Math.min(...validDates)),
-			maxFlightDate: new Date(Math.max(...validDates)),
+			minFlightDate: parseDate(Math.min(...validDates)),
+			maxFlightDate: parseDate(Math.max(...validDates)),
 		};
 	}, [flights]);
 
@@ -123,8 +124,8 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				validate: (v) => {
 					if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					const birth = new Date(v);
-					const today = new Date();
+					const birth = parseDate(v);
+					const today = parseDate();
 					if (birth > today) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
 					return getAgeError(data.category, v, minFlightDate);
 				},
@@ -148,10 +149,10 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				validate: (v) => {
 					if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					const exp = new Date(v);
-					const today = new Date();
+					const exp = parseDate(v);
+					const today = parseDate();
 					if (exp < today) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
-					if (maxFlightDate && exp < new Date(maxFlightDate))
+					if (maxFlightDate && exp < parseDate(maxFlightDate))
 						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
 					return '';
 				},

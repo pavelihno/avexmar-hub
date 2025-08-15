@@ -8,7 +8,7 @@ import PaymentForm from './PaymentForm';
 import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
 import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber } from '../utils';
+import { formatNumber, parseDate } from '../utils';
 
 const Payment = () => {
 	const { publicId } = useParams();
@@ -25,7 +25,7 @@ const Payment = () => {
 
 	useEffect(() => {
 		if (!payment?.expires_at) return;
-		const expiry = new Date(payment.expires_at).getTime();
+		const expiry = parseDate(payment.expires_at).getTime();
 		const tick = () => {
 			const diff = expiry - Date.now();
 			setTimeLeft(diff > 0 ? diff : 0);

@@ -1,6 +1,7 @@
-import { MAX_PASSENGERS, DATE_API_FORMAT, VALIDATION_MESSAGES } from '../../constants';
 import { differenceInYears } from 'date-fns';
-import { formatDate } from '../utils';
+
+import { MAX_PASSENGERS, DATE_API_FORMAT, VALIDATION_MESSAGES } from '../../constants';
+import { formatDate, parseDate } from '../utils';
 
 export const getTotalPassengers = (passengers) => {
 	return (
@@ -68,7 +69,7 @@ export const disabledPassengerChange = (passengers, key, delta) => {
 
 export const getAgeError = (passengerCategory, birthDate, flightDate) => {
 	if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-	const age = differenceInYears(new Date(flightDate), new Date(birthDate));
+	const age = differenceInYears(parseDate(flightDate), parseDate(birthDate));
 	if (passengerCategory === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.ADULT;
 	if (passengerCategory === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.CHILD;
 	if (['infant', 'infant_seat'].includes(passengerCategory) && age >= 2)
@@ -142,5 +143,5 @@ export const extractRouteInfo = (flight) => {
 	if (!flight || !flight.route) return {};
 	const origin = flight.route.origin_airport;
 	const destination = flight.route.destination_airport;
-	return { from: origin.iata_code, to: destination.iata_code, date: new Date(flight.scheduled_departure) };
+	return { from: origin.iata_code, to: destination.iata_code, date: parseDate(flight.scheduled_departure) };
 };
