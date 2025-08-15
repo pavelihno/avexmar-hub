@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from typing import Any, Dict
+from datetime import datetime, timedelta
 
 from yookassa import Configuration, Payment as YooPayment
 
@@ -87,12 +88,13 @@ def create_payment(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
+    expires_at = datetime.utcnow() + timedelta(hours=1)
     body: Dict[str, Any] = {
         'amount': amount,
         'confirmation': {'type': 'embedded'},
         'capture': False,
         'description': f'Booking {booking.booking_number or booking.id}',
-        'metadata': {'booking_id': booking.id},
+        'metadata': {'booking_id': booking.id, 'expires_at': expires_at.isoformat()},
     }
     yoo_payment: Any = YooPayment.create(body, uuid.uuid4())
 
