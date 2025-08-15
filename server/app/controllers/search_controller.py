@@ -172,11 +172,11 @@ def search_flights(is_nearby=False):
     return_from = params.get('return') if is_exact else params.get('return_from')
     return_to = None if is_exact else params.get('return_to')
 
-    outbound_airline_iata_code = params.get('outbound_airline')
-    outbound_flight_number = params.get('outbound_flight')
+    outbound_airline_iata_code = params.get('outbound_airline') if not is_nearby else None
+    outbound_flight_number = params.get('outbound_flight') if not is_nearby else None
 
-    return_airline_iata_code = params.get('return_airline')
-    return_flight_number = params.get('return_flight')
+    return_airline_iata_code = params.get('return_airline') if not is_nearby else None
+    return_flight_number = params.get('return_flight') if not is_nearby else None
 
     outbound_flights = __query_flights(
         origin_code=origin_code, dest_code=dest_code,

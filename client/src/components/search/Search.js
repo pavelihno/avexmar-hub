@@ -149,22 +149,27 @@ const Search = () => {
 		const returns = filteredFlights.filter((f) => f.direction === 'return');
 
 		// Create all valid combinations of outbound and return flights
-		for (const out of outbounds) {
-			const outboundArrival = parseDate(out.scheduled_arrival);
-			const outboundArrivalTime = parseTime(out.scheduled_arrival_time);
+		for (const o of outbounds) {
+			const outboundArrival = parseDate(o.scheduled_arrival);
+			const outboundArrivalTime = parseTime(o.scheduled_arrival_time);
 
 			const validReturns = returns.filter((r) => {
 				const returnDeparture = parseDate(r.scheduled_departure);
 				const returnDepartureTime = parseTime(r.scheduled_departure_time);
+
 				// Ensure return departure is after outbound arrival
-				return returnDeparture >= outboundArrival && returnDepartureTime >= outboundArrivalTime;
+				return (
+					returnDeparture > outboundArrival ||
+					(returnDeparture.getTime() === outboundArrival.getTime() &&
+						returnDepartureTime >= outboundArrivalTime)
+				);
 			});
 
 			// Only create groups for outbound flights that have at least one valid return flight
 			if (validReturns.length > 0) {
 				// Create a group for each valid combination
 				for (const ret of validReturns) {
-					grouped.push({ outbound: out, returnFlight: ret });
+					grouped.push({ outbound: o, returnFlight: ret });
 				}
 			}
 		}
@@ -246,7 +251,7 @@ const Search = () => {
 					{UI_LABELS.SEARCH.results}
 				</Typography>
 
-				{isExact && (nearDatesOutbound.length > 0 || nearDatesReturn.length > 0) && (
+				{isExact && (
 					<Box
 						sx={{
 							display: 'flex',
@@ -288,8 +293,11 @@ const Search = () => {
 											onClick={() => {
 												const newParams = new URLSearchParams(initialParams);
 												newParams.set('when', d.date);
-												newParams.delete('when_from');
-												newParams.delete('when_to');
+												['when_from', 'when_to', 'outbound_airline', 'outbound_flight'].forEach(
+													(key) => {
+														newParams.delete(key);
+													}
+												);
 												navigate(`/search?${newParams.toString()}`);
 											}}
 										>
@@ -349,8 +357,14 @@ const Search = () => {
 													onClick={() => {
 														const newParams = new URLSearchParams(initialParams);
 														newParams.set('return', d.date);
-														newParams.delete('return_from');
-														newParams.delete('return_to');
+														[
+															'return_from',
+															'return_to',
+															'return_airline',
+															'return_flight',
+														].forEach((key) => {
+															newParams.delete(key);
+														});
 														navigate(`/search?${newParams.toString()}`);
 													}}
 												>
