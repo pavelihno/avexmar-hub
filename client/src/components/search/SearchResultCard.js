@@ -212,7 +212,7 @@ const SearchResultCard = ({ outbound, returnFlight, airlines, airports, routes, 
 							setOpenDialog(true);
 						}}
 					>
-						{UI_LABELS.SEARCH.flight_details.select_ticket}
+						{UI_LABELS.SEARCH.flight_details.select_tariff_title}
 					</Button>
 				</Box>
 				<Box sx={{ flexGrow: 1, pl: 2 }}>

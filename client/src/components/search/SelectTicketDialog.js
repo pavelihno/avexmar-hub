@@ -53,8 +53,8 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 	const origin = airports.find((a) => a.id === route.origin_airport_id) || {};
 	const dest = airports.find((a) => a.id === route.destination_airport_id) || {};
 
-        return (
-                <Card sx={{ p: 1, minWidth: 200, flex: '0 0 200px' }}>
+	return (
+		<Card sx={{ p: 1 }}>
 			<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
 				{airline.name}
 			</Typography>
@@ -70,69 +70,82 @@ const FlightInfo = ({ flight, airlines, airports, routes }) => {
 };
 
 const FlightTariffRow = ({
-        flight,
-        tariffs,
-        selectedId,
-        onSelect,
-        airlines,
-        airports,
-        routes,
-        setConditions,
-        setShowConditions,
-        sx = {},
+	flight,
+	tariffs,
+	selectedId,
+	onSelect,
+	airlines,
+	airports,
+	routes,
+	setConditions,
+	setShowConditions,
+	sx = {},
 }) => {
-        return (
-                <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1, ...sx }}>
-                        <FlightInfo flight={flight} airlines={airlines} airports={airports} routes={routes} />
+	return (
+		<Box
+			sx={{
+				display: 'grid',
+				gridTemplateColumns: '1fr 1fr',
+				gridAutoRows: 'auto',
+				gap: 1,
+				minWidth: 0,
+				...sx,
+			}}
+		>
+			{/* Flight description */}
+			<Box sx={{ gridColumn: '1 / 2' }}>
+				<FlightInfo flight={flight} airlines={airlines} airports={airports} routes={routes} />
+			</Box>
 
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, flex: 1 }}>
-                                {(tariffs || []).map((t) => {
-                                        const isSelected = t.id === selectedId;
-                                        return (
-                                                <Card key={t.id} sx={{ p: 0.5, minWidth: 180 }}>
-                                                        <Box display='flex' justifyContent='flex-end'>
-                                                                <IconButton
-                                                                        sx={{ m: 0, p: 0.5 }}
-                                                                        size='small'
-                                                                        disabled={!t.conditions}
-                                                                        onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                if (t.conditions) {
-                                                                                        setConditions(t.conditions);
-                                                                                        setShowConditions(true);
-                                                                                }
-                                                                        }}
-                                                                >
-                                                                        <Tooltip title={UI_LABELS.SEARCH.flight_details.tariff_conditions}>
-                                                                                <InfoOutlinedIcon fontSize='small' />
-                                                                        </Tooltip>
-                                                                </IconButton>
-                                                        </Box>
+			{/* Tariff selection */}
+			<Box sx={{ gridColumn: '1 / -1', display: 'flex', gap: 0.5, flexWrap: 'wrap', minWidth: 0 }}>
+				{(tariffs || []).map((t) => {
+					const isSelected = t.id === selectedId;
+					return (
+						<Card key={t.id} sx={{ p: 0.5, flex: '1 1 180px', minWidth: 0, maxWidth: '100%' }}>
+							<Box display='flex' justifyContent='flex-end'>
+								<IconButton
+									sx={{ m: 0, p: 0.5 }}
+									size='small'
+									disabled={!t.conditions}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (t.conditions) {
+											setConditions(t.conditions);
+											setShowConditions(true);
+										}
+									}}
+								>
+									<Tooltip title={UI_LABELS.SEARCH.flight_details.tariff_conditions}>
+										<InfoOutlinedIcon fontSize='small' />
+									</Tooltip>
+								</IconButton>
+							</Box>
 
-                                                        <CardActionArea
-                                                                onClick={() => onSelect(t.id)}
-                                                                sx={{
-                                                                        p: 1,
-                                                                        bgcolor: isSelected ? 'action.selected' : 'background.paper',
-                                                                }}
-                                                        >
-                                                                <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-                                                                        {ENUM_LABELS.SEAT_CLASS[t.seat_class]}
-                                                                </Typography>
-                                                                <Typography variant='body2'>{t.title}</Typography>
-                                                                <Typography variant='body1' sx={{ fontWeight: 700 }}>
-                                                                        {formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
-                                                                </Typography>
-                                                                <Typography variant='caption' color='text.secondary'>
-                                                                        {`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
-                                                                </Typography>
-                                                        </CardActionArea>
-                                                </Card>
-                                        );
-                                })}
-                        </Box>
-                </Box>
-        );
+							<CardActionArea
+								onClick={() => onSelect(t.id)}
+								sx={{
+									p: 1,
+									bgcolor: isSelected ? 'action.selected' : 'background.paper',
+								}}
+							>
+								<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+									{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
+								</Typography>
+								<Typography variant='body2'>{t.title}</Typography>
+								<Typography variant='body1' sx={{ fontWeight: 700 }}>
+									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+								</Typography>
+								<Typography variant='caption' color='text.secondary'>
+									{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
+								</Typography>
+							</CardActionArea>
+						</Card>
+					);
+				})}
+			</Box>
+		</Box>
+	);
 };
 
 const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, airports, routes }) => {
@@ -245,50 +258,69 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 	return (
 		<>
 			<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-				<DialogContent dividers>
+				<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_tariff_title}</DialogTitle>
+				<DialogContent dividers sx={{ overflow: 'hidden' }}>
 					<Box
 						sx={{
 							display: 'grid',
 							gridTemplateColumns: '2fr auto 1fr',
 							gap: 1,
-							alignItems: 'start',
+							alignItems: 'stretch',
+
+							height: { xs: '70vh', md: '72vh' },
+							minHeight: 0,
 						}}
 					>
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
-                                                                {/* Outbound flight */}
-                                                                <FlightTariffRow
-                                                                        flight={outbound}
-                                                                        tariffs={outboundTariffs}
-                                                                        selectedId={outboundTariffId}
-                                                                        onSelect={setOutboundTariffId}
-                                                                        airlines={airlines}
-                                                                        airports={airports}
-                                                                        routes={routes}
-                                                                        setConditions={setConditions}
-                                                                        setShowConditions={setShowConditions}
-                                                                />
+						{/* Flight description and passenger selection */}
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								rowGap: 2,
+								overflowY: 'auto',
+								overflowX: 'hidden',
+								minHeight: 0,
+								minWidth: 0,
+							}}
+						>
+							<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
+								{/* Outbound flight */}
+								<FlightTariffRow
+									flight={outbound}
+									tariffs={outboundTariffs}
+									selectedId={outboundTariffId}
+									onSelect={setOutboundTariffId}
+									airlines={airlines}
+									airports={airports}
+									routes={routes}
+									setConditions={setConditions}
+									setShowConditions={setShowConditions}
+								/>
 
-                                                                {/* Return flight if exists */}
-                                                                {returnFlight && (
-                                                                        <FlightTariffRow
-                                                                                flight={returnFlight}
-                                                                                tariffs={returnTariffs}
-                                                                                selectedId={returnTariffId}
-                                                                                onSelect={setReturnTariffId}
-                                                                                airlines={airlines}
-                                                                                airports={airports}
-                                                                                routes={routes}
-                                                                                setConditions={setConditions}
-                                                                                setShowConditions={setShowConditions}
-                                                                        />
-                                                                )}
-                                                        </Box>
+								{/* Return flight if exists */}
+								{returnFlight && (
+									<>
+										<Divider sx={{ my: 1 }} />
 
-                                                        <Divider sx={{ my: 1 }} />
+										<FlightTariffRow
+											flight={returnFlight}
+											tariffs={returnTariffs}
+											selectedId={returnTariffId}
+											onSelect={setReturnTariffId}
+											airlines={airlines}
+											airports={airports}
+											routes={routes}
+											setConditions={setConditions}
+											setShowConditions={setShowConditions}
+										/>
+									</>
+								)}
+							</Box>
 
-                                                        {/* Passenger categories */}
-                                                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+							<Divider sx={{ my: 1 }} />
+
+							{/* Passenger categories */}
+							<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
 								{passengerCategories.map((row) => (
 									<Card
 										key={row.key}
@@ -344,7 +376,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 							</Box>
 						</Box>
 
-						<Divider orientation='vertical' flexItem sx={{ mx: 0.5 }} />
+						<Divider orientation='vertical' sx={{ mx: 0.5, alignSelf: 'stretch' }} />
 
 						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
 							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
@@ -429,7 +461,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight, airlines, a
 								onClick={handleConfirm}
 								disabled={!hasSeats || priceLoading || bookingLoading}
 							>
-								{UI_LABELS.SEARCH.flight_details.book_ticket}
+								{UI_LABELS.SEARCH.flight_details.select_tariff}
 							</Button>
 						</span>
 					</Tooltip>
