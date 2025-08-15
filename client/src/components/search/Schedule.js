@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Alert, Box, Typography, Button, CircularProgress } from '@mui/material';
 
 import Base from '../Base';
 import SearchForm from './SearchForm';
@@ -140,7 +140,7 @@ const Schedule = () => {
 								}
 							/>
 						) : (
-							<Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
+							<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
 						)}
 
 						<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 4, mb: 1 }}>
@@ -155,7 +155,7 @@ const Schedule = () => {
 								}
 							/>
 						) : (
-							<Typography>{UI_LABELS.SCHEDULE.no_results}</Typography>
+							<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
 						)}
 					</>
 				)}

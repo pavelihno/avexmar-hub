@@ -2,7 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button, CircularProgress } from '@mui/material';
+import {
+	Alert,
+	Box,
+	Typography,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
+	Button,
+	CircularProgress,
+} from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
@@ -451,7 +461,7 @@ const Search = () => {
 							/>
 						))
 				) : (
-					<Typography>{UI_LABELS.SEARCH.no_results}</Typography>
+					<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
 				)}
 
 				{visibleCount < sortedGrouped.length && (
