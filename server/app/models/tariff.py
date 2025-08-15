@@ -22,7 +22,6 @@ class Tariff(BaseModel):
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
     )
-    bookings = db.relationship('Booking', back_populates='tariff', lazy='dynamic')
 
     def to_dict(self, return_children=False):
         return {
