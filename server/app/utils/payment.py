@@ -25,8 +25,16 @@ def generate_receipt(booking: Booking) -> Dict[str, Any]:
     outbound_id = flights[0].flight_id if len(flights) > 0 else None
     return_id = flights[1].flight_id if len(flights) > 1 else None
 
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in flights}
+    outbound_tariff_id = tariffs_map.get(outbound_id)
+    return_tariff_id = tariffs_map.get(return_id)
+
     price_details = calculate_price_details(
-        outbound_id, return_id, booking.tariff_id, booking.passenger_counts or {}
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        booking.passenger_counts or {},
     )
 
     currency = price_details.get('currency', booking.currency.value).upper()
