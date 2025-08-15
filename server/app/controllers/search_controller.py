@@ -246,8 +246,15 @@ def calculate_price():
     data = request.json or {}
     outbound_id = data.get('outbound_id')
     return_id = data.get('return_id')
-    tariff_id = data.get('tariff_id')
+    outbound_tariff_id = data.get('outbound_tariff_id')
+    return_tariff_id = data.get('return_tariff_id')
     passengers = data.get('passengers', {})
 
-    result = calculate_price_details(outbound_id, return_id, tariff_id, passengers)
+    result = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        passengers,
+    )
     return jsonify(result)
