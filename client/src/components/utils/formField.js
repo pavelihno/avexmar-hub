@@ -21,8 +21,9 @@ import {
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
+	DATE_API_FORMAT,
 } from '../../constants';
-import { parseDate } from './format';
+import { formatDate, formatTime, parseDate, parseTime } from './format';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -32,7 +33,6 @@ export const FIELD_TYPES = {
 	PHONE: 'phone',
 	DATE: 'date',
 	TIME: 'time',
-	DATETIME: 'dateTime',
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
@@ -162,14 +162,16 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps, size } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, minDate, maxDate, textFieldProps, size } =
+					allProps;
 				return (
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<DatePicker
 							label={field.label}
 							value={value ? parseDate(value) : null}
-							onChange={(date) => onChange(date)}
-							minDate={minDate}
+							onChange={(date) => onChange(formatDate(date, DATE_API_FORMAT))}
+							minDate={minDate ? parseDate(minDate) : undefined}
+							maxDate={maxDate ? parseDate(maxDate) : undefined}
 							format={field.dateFormat || DATE_FORMAT}
 							slotProps={{
 								textField: {
@@ -193,35 +195,11 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<TimePicker
 							label={field.label}
-							value={value ? parseDate(value) : null}
-							onChange={(time) => onChange(time)}
+							value={value ? parseTime(value) : null}
+							onChange={(time) => onChange(formatTime(time))}
 							ampm={false}
 							format={field.timeFormat || TIME_FORMAT}
 							mask={TIME_MASK}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-									size,
-									...textFieldProps,
-								},
-							}}
-						/>
-					</LocalizationProvider>
-				);
-			}
-
-			case FIELD_TYPES.DATETIME: {
-				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
-				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-						<DateTimePicker
-							label={field.label}
-							value={value ? parseDate(value) : null}
-							onChange={(dateTime) => onChange(dateTime)}
-							format={field.dateTimeFormat || DATETIME_FORMAT}
 							slotProps={{
 								textField: {
 									fullWidth,

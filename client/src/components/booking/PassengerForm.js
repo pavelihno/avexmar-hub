@@ -125,7 +125,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 					if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					const birth = parseDate(v);
-					const today = parseDate();
+					const today = new Date();
 					if (birth > today) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
 					return getAgeError(data.category, v, minFlightDate);
 				},
@@ -150,7 +150,7 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 					if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					const exp = parseDate(v);
-					const today = parseDate();
+					const today = new Date();
 					if (exp < today) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
 					if (maxFlightDate && exp < parseDate(maxFlightDate))
 						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;

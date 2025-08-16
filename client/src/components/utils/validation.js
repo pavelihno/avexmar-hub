@@ -1,12 +1,13 @@
 import { isValid } from 'date-fns';
 
+import { parseDate, parseTime } from './format';
+
 export const validateDate = (value) => {
 	if (!value) return false;
 	try {
-		const date = value instanceof Date ? value : new Date(value);
+		const date = parseDate(value);
 		return isValid(date);
 	} catch (error) {
-		console.error('Invalid date value:', value);
 		return false;
 	}
 };
@@ -14,21 +15,9 @@ export const validateDate = (value) => {
 export const validateTime = (value) => {
 	if (!value) return false;
 	try {
-		const date = value instanceof Date ? value : new Date(value);
-		return isValid(date);
+		const time = parseTime(value);
+		return isValid(time);
 	} catch (error) {
-		console.error('Invalid time value:', value);
-		return false;
-	}
-};
-
-export const validateDateTime = (value) => {
-	if (!value) return false;
-	try {
-		const date = value instanceof Date ? value : new Date(value);
-		return isValid(date);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
 		return false;
 	}
 };

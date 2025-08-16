@@ -1,4 +1,4 @@
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import numeral from 'numeral';
 
 import {
@@ -27,7 +27,6 @@ export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale)
 			throw new Error('Unsupported date value type');
 		}
 	} catch (error) {
-		console.error('Invalid date value:', value);
 		return value;
 	}
 };
@@ -49,17 +48,6 @@ export const formatTime = (value, timeFormat = TIME_FORMAT) => {
 			throw new Error('Unsupported time value type');
 		}
 	} catch (error) {
-		console.error('Invalid time value:', value);
-		return value;
-	}
-};
-
-export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
-	if (!value) return '';
-	try {
-		return format(new Date(value), dateTimeFormat);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
 		return value;
 	}
 };
@@ -67,7 +55,7 @@ export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
 export const formatTimeToAPI = (value) => {
 	if (!value) return '';
 	try {
-		return format(value, 'HH:mm:ss');
+		return formatTime(value, 'HH:mm:ss');
 	} catch (error) {
 		console.error('Invalid time value (API):', value);
 		return value;
@@ -77,7 +65,7 @@ export const formatTimeToAPI = (value) => {
 export const formatTimeToUI = (value) => {
 	if (!value) return '';
 	try {
-		return new Date(`1970-01-01T${value}`);
+		return parseTime(value);
 	} catch (error) {
 		console.error('Invalid time value (UI):', value);
 		return value;
@@ -96,29 +84,41 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 	try {
 		return numeral(value).format(formatString);
 	} catch (error) {
-		console.error('Invalid number value:', value);
 		return value;
 	}
 };
 
+const _dateOnlyToLocalDate = (s) => {
+	const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+	const m2 = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
+	if (m1) return new Date(+m1[1], +m1[2] - 1, +m1[3]);
+	if (m2) return new Date(+m2[3], +m2[2] - 1, +m2[1]);
+	return null;
+};
+
 export const parseDate = (value) => {
 	if (!value) return null;
-	try {
-		const d = new Date(value);
-		return isNaN(d) ? null : d;
-	} catch (error) {
-		console.error('Invalid date value:', value);
-		return null;
+	if (value instanceof Date) return value;
+	if (typeof value === 'string' && !value.includes('T')) {
+		return _dateOnlyToLocalDate(value);
 	}
+	const d = new Date(value);
+	return isNaN(d.getTime()) ? null : d;
 };
 
 export const parseTime = (value) => {
 	if (!value) return null;
-	try {
-		const d = new Date(`1970-01-01T${value}`);
-		return isNaN(d.getTime()) ? null : d.getTime();
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return null;
-	}
+	if (value instanceof Date) return value;
+	const m = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
+	if (!m) return null;
+	const h = +m[1],
+		mi = +m[2];
+	return new Date(1970, 0, 1, h, mi, 0, 0);
+};
+
+export const combineLocalDateTime = (dateStr, timeStr) => {
+	const d = _dateOnlyToLocalDate(dateStr);
+	const t = parseTime(timeStr);
+	if (!d || !t) return null;
+	return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), t.getSeconds(), 0);
 };

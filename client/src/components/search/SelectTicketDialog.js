@@ -249,7 +249,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 					<Box
 						sx={{
 							display: 'grid',
-							gridTemplateColumns: '2fr auto 1fr',
+							gridTemplateColumns: '5fr auto 2fr',
 							gap: 1,
 							alignItems: 'stretch',
 

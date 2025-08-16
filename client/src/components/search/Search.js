@@ -21,7 +21,7 @@ import SearchForm from './SearchForm';
 import SearchResultCard from './SearchResultCard';
 import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { fetchNearbyOutboundFlights, fetchNearbyReturnFlights, fetchSearchFlights } from '../../redux/actions/search';
-import { formatDate, formatNumber, parseDate, parseTime } from '../utils';
+import { combineLocalDateTime, formatDate, formatNumber, parseDate, parseTime } from '../utils';
 
 const Search = () => {
 	const dispatch = useDispatch();
@@ -121,8 +121,9 @@ const Search = () => {
 		}
 
 		const selectedDate = parseDate(date);
-		const start = parseDate(selectedDate);
-		const end = parseDate(selectedDate);
+
+		const start = new Date(selectedDate);
+		const end = new Date(selectedDate);
 
 		start.setDate(start.getDate() - 30);
 		end.setDate(end.getDate() + 30);
@@ -160,19 +161,12 @@ const Search = () => {
 
 		// Create all valid combinations of outbound and return flights
 		for (const o of outbounds) {
-			const outboundArrival = parseDate(o.scheduled_arrival);
-			const outboundArrivalTime = parseTime(o.scheduled_arrival_time);
+			const outboundArrival = combineLocalDateTime(o.scheduled_arrival, o.scheduled_arrival_time);
 
 			const validReturns = returns.filter((r) => {
-				const returnDeparture = parseDate(r.scheduled_departure);
-				const returnDepartureTime = parseTime(r.scheduled_departure_time);
-
+				const returnDeparture = combineLocalDateTime(r.scheduled_departure, r.scheduled_departure_time);
 				// Ensure return departure is after outbound arrival
-				return (
-					returnDeparture > outboundArrival ||
-					(returnDeparture.getTime() === outboundArrival.getTime() &&
-						returnDepartureTime >= outboundArrivalTime)
-				);
+				return returnDeparture >= outboundArrival;
 			});
 
 			// Only create groups for outbound flights that have at least one valid return flight

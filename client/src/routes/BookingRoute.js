@@ -23,11 +23,15 @@ const BookingRoute = ({ page, children }) => {
 
 	useEffect(() => {
 		if (!checked) return; // дождёмся окончания первого эффекта
-		if (accessiblePages.length === 0) return;
+		if (accessiblePages.length === 0) {
+			navigate('/', { replace: true });
+			return;
+		}
 
 		if (!accessiblePages.includes(page)) {
 			const last = accessiblePages[accessiblePages.length - 1];
 			navigate(last ? `/booking/${publicId}/${last}` : '/', { replace: true });
+			return;
 		}
 	}, [accessiblePages, page, navigate, publicId, checked]);
 
