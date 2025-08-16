@@ -1,4 +1,4 @@
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import numeral from 'numeral';
 
 import {
@@ -102,23 +102,61 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 };
 
 export const parseDate = (value) => {
-	if (!value) return null;
-	try {
-		const d = new Date(value);
-		return isNaN(d) ? null : d;
-	} catch (error) {
-		console.error('Invalid date value:', value);
-		return null;
-	}
+        try {
+                let d;
+                if (value == null) {
+                        d = new Date();
+                } else if (value instanceof Date) {
+                        d = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
+                } else if (typeof value === 'string') {
+                        const s = value.trim();
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                                const [y, m, day] = s.split('-').map(Number);
+                                d = new Date(Date.UTC(y, m - 1, day));
+                        } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(s)) {
+                                const [day, m, y] = s.split('.').map(Number);
+                                d = new Date(Date.UTC(y, m - 1, day));
+                        } else {
+                                d = new Date(s);
+                        }
+                } else if (typeof value === 'number') {
+                        d = new Date(value);
+                } else {
+                        return null;
+                }
+
+                if (isNaN(d.getTime())) return null;
+
+                const normalized = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+                normalized.toJSON = () => format(normalized, 'yyyy-MM-dd');
+                return normalized;
+        } catch (error) {
+                console.error('Invalid date value:', value);
+                return null;
+        }
 };
 
 export const parseTime = (value) => {
-	if (!value) return null;
-	try {
-		const d = new Date(`1970-01-01T${value}`);
-		return isNaN(d.getTime()) ? null : d.getTime();
-	} catch (error) {
-		console.error('Invalid time value:', value);
-		return null;
-	}
+        if (!value) return null;
+        try {
+                let d;
+                if (value instanceof Date) {
+                        d = value;
+                } else if (typeof value === 'number') {
+                        d = new Date(value);
+                } else if (typeof value === 'string') {
+                        d = new Date(`1970-01-01T${value}`);
+                } else {
+                        return null;
+                }
+
+                if (isNaN(d.getTime())) return null;
+
+                const normalized = new Date(d.getTime());
+                normalized.toJSON = () => format(normalized, 'HH:mm:ss');
+                return normalized;
+        } catch (error) {
+                console.error('Invalid time value:', value);
+                return null;
+        }
 };
