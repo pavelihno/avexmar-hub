@@ -66,24 +66,27 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             multiplier = 1.0
             applied_discounts = []
 
-            if tariff.seat_class.value == 'economy':
+            if tariff.seat_class == Config.SEAT_CLASS.economy:
                 if category == 'infants':
-                    pct = discount_pct.get('infant', 0.0)
+                    infant_key = Config.DISCOUNT_TYPE.infant.value
+                    pct = discount_pct.get(infant_key, 0.0)
                     multiplier *= (1.0 - pct)
-                    if 'infant' in discount_names_map:
-                        applied_discounts.append(discount_names_map['infant'])
+                    if infant_key in discount_names_map:
+                        applied_discounts.append(discount_names_map[infant_key])
                 elif category == 'children':
-                    pct = discount_pct.get('child', 0.0)
+                    child_key = Config.DISCOUNT_TYPE.child.value
+                    pct = discount_pct.get(child_key, 0.0)
                     multiplier *= (1.0 - pct)
-                    if 'child' in discount_names_map:
-                        applied_discounts.append(discount_names_map['child'])
+                    if child_key in discount_names_map:
+                        applied_discounts.append(discount_names_map[child_key])
 
                 if is_round_trip:
-                    pct_rt = discount_pct.get('round_trip', 0.0)
+                    rt_key = Config.DISCOUNT_TYPE.round_trip.value
+                    pct_rt = discount_pct.get(rt_key, 0.0)
                     multiplier *= (1.0 - pct_rt)
-                    if 'round_trip' in discount_names_map:
+                    if rt_key in discount_names_map:
                         applied_discounts.append(
-                            discount_names_map['round_trip']
+                            discount_names_map[rt_key]
                         )
 
             total_cost = fare_total * multiplier

@@ -1,12 +1,14 @@
 import datetime
 
+from app.config import Config
+
 def test_search_flights(client, future_flight, economy_flight_tariff, economy_tariff):
     date_str = future_flight.scheduled_departure.strftime('%Y-%m-%d')
     resp = client.get('/search/flights', query_string={
         'from': 'SVO',
         'to': 'PWE',
         'when': date_str,
-        'class': 'economy',
+        'class': Config.SEAT_CLASS.economy.value,
     })
     assert resp.status_code == 200
     data = resp.get_json()
@@ -30,7 +32,7 @@ def test_search_price_by_class(
             'from': 'SVO',
             'to': 'PWE',
             'when': date_str,
-            'class': 'business',
+            'class': Config.SEAT_CLASS.business.value,
             'adults': 1,
         },
     )
