@@ -22,7 +22,7 @@ import {
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
 } from '../../constants';
-import { parseDate } from './format';
+import { formatDate, formatTime, parseDate, parseTime } from './format';
 
 export const FIELD_TYPES = {
 	TEXT: 'text',
@@ -32,7 +32,6 @@ export const FIELD_TYPES = {
 	PHONE: 'phone',
 	DATE: 'date',
 	TIME: 'time',
-	DATETIME: 'dateTime',
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
@@ -168,7 +167,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						<DatePicker
 							label={field.label}
 							value={value ? parseDate(value) : null}
-							onChange={(date) => onChange(date)}
+							onChange={(date) => onChange(formatDate(date))}
 							minDate={minDate}
 							format={field.dateFormat || DATE_FORMAT}
 							slotProps={{
@@ -193,35 +192,11 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
 						<TimePicker
 							label={field.label}
-							value={value ? parseDate(value) : null}
-							onChange={(time) => onChange(time)}
+							value={value ? parseTime(value) : null}
+							onChange={(time) => onChange(formatTime(time))}
 							ampm={false}
 							format={field.timeFormat || TIME_FORMAT}
 							mask={TIME_MASK}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-									size,
-									...textFieldProps,
-								},
-							}}
-						/>
-					</LocalizationProvider>
-				);
-			}
-
-			case FIELD_TYPES.DATETIME: {
-				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
-				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-						<DateTimePicker
-							label={field.label}
-							value={value ? parseDate(value) : null}
-							onChange={(dateTime) => onChange(dateTime)}
-							format={field.dateTimeFormat || DATETIME_FORMAT}
 							slotProps={{
 								textField: {
 									fullWidth,

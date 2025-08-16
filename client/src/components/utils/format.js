@@ -101,62 +101,35 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 	}
 };
 
+const _dateOnlyToLocalDate = (s) => {
+	const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+	if (m1) return new Date(+m1[1], +m1[2] - 1, +m1[3]);
+	return null;
+};
+
 export const parseDate = (value) => {
-        try {
-                let d;
-                if (value == null) {
-                        d = new Date();
-                } else if (value instanceof Date) {
-                        d = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
-                } else if (typeof value === 'string') {
-                        const s = value.trim();
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-                                const [y, m, day] = s.split('-').map(Number);
-                                d = new Date(Date.UTC(y, m - 1, day));
-                        } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(s)) {
-                                const [day, m, y] = s.split('.').map(Number);
-                                d = new Date(Date.UTC(y, m - 1, day));
-                        } else {
-                                d = new Date(s);
-                        }
-                } else if (typeof value === 'number') {
-                        d = new Date(value);
-                } else {
-                        return null;
-                }
-
-                if (isNaN(d.getTime())) return null;
-
-                const normalized = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-                normalized.toJSON = () => format(normalized, 'yyyy-MM-dd');
-                return normalized;
-        } catch (error) {
-                console.error('Invalid date value:', value);
-                return null;
-        }
+	if (!value) return null;
+	if (value instanceof Date) return value;
+	if (typeof value === 'string' && !value.includes('T')) {
+		return _dateOnlyToLocalDate(value);
+	}
+	const d = new Date(value);
+	return isNaN(d.getTime()) ? null : d;
 };
 
 export const parseTime = (value) => {
-        if (!value) return null;
-        try {
-                let d;
-                if (value instanceof Date) {
-                        d = value;
-                } else if (typeof value === 'number') {
-                        d = new Date(value);
-                } else if (typeof value === 'string') {
-                        d = new Date(`1970-01-01T${value}`);
-                } else {
-                        return null;
-                }
+	if (!value) return null;
+	if (value instanceof Date) return value;
+	const m = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
+	if (!m) return null;
+	const h = +m[1],
+		mi = +m[2];
+	return new Date(1970, 0, 1, h, mi, 0, 0);
+};
 
-                if (isNaN(d.getTime())) return null;
-
-                const normalized = new Date(d.getTime());
-                normalized.toJSON = () => format(normalized, 'HH:mm:ss');
-                return normalized;
-        } catch (error) {
-                console.error('Invalid time value:', value);
-                return null;
-        }
+export const combineLocalDateTime = (dateStr, timeStr) => {
+	const d = _dateOnlyToLocalDate(dateStr);
+	const t = parseTime(timeStr);
+	if (!d || !t) return null;
+	return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), t.getSeconds(), 0);
 };
