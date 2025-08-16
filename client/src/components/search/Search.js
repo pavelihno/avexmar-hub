@@ -121,8 +121,9 @@ const Search = () => {
 		}
 
 		const selectedDate = parseDate(date);
-		const start = parseDate(selectedDate);
-		const end = parseDate(selectedDate);
+
+		const start = new Date(selectedDate);
+		const end = new Date(selectedDate);
 
 		start.setDate(start.getDate() - 30);
 		end.setDate(end.getDate() + 30);

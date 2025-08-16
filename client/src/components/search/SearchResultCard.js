@@ -154,17 +154,19 @@ const Segment = ({ flight, isOutbound }) => {
 
 const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 	const theme = useTheme();
-	const currency = outbound?.currency || returnFlight?.currency;
-	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
-	const totalPrice = outbound.price + (returnFlight?.price || 0);
-	const totalMinPrice = outbound.min_price + (returnFlight?.min_price || 0);
+
 	const [openDialog, setOpenDialog] = useState(false);
 
-	const priceText = totalPrice
-		? `${formatNumber(totalPrice)} ${currencySymbol}`
-		: `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
-				totalMinPrice
-		  )} ${currencySymbol}`;
+	const currency = outbound?.currency || returnFlight?.currency;
+	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
+
+	const isMinPrice = outbound?.min_price || returnFlight?.min_price;
+	const totalPrice =
+		(outbound?.price || outbound?.min_price || 0) + (returnFlight?.price || returnFlight?.min_price || 0);
+
+	const priceText = isMinPrice
+		? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(totalPrice)} ${currencySymbol}`
+		: `${formatNumber(totalPrice)} ${currencySymbol}`;
 
 	return (
 		<>
