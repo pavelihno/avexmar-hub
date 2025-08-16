@@ -116,9 +116,19 @@ class Booking(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS.value)
+        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS)
+        if isinstance(status, str):
+            try:
+                status_enum = Config.BOOKING_STATUS(status)
+            except ValueError:
+                status_enum = Config.DEFAULT_BOOKING_STATUS
+        elif isinstance(status, Config.BOOKING_STATUS):
+            status_enum = status
+        else:
+            status_enum = Config.DEFAULT_BOOKING_STATUS
+        kwargs['status'] = status_enum
         history = [{
-            'status': status,
+            'status': status_enum.value,
             'at': datetime.now().isoformat()
         }]
         kwargs['status_history'] = history
@@ -128,17 +138,21 @@ class Booking(BaseModel):
     def update(cls, id, session: Session | None = None, **kwargs):
         session = session or db.session
         booking = cls.get_or_404(id, session)
-        old_status = booking.status.value
-        new_status = kwargs.get('status', old_status)
+        old_status_enum = booking.status
+        new_status = kwargs.get('status', old_status_enum)
+        if isinstance(new_status, str):
+            new_status_enum = Config.BOOKING_STATUS(new_status)
+        else:
+            new_status_enum = new_status
         history = list(booking.status_history or [])
         history.append({
-            'status': new_status,
+            'status': new_status_enum.value,
             'at': datetime.now().isoformat()
         })
         kwargs['status_history'] = history
-
+        kwargs['status'] = new_status_enum
         return super().update(id, session=session, **kwargs)
-    
+
     @classmethod
     def update_by_public_id(cls, public_id, session: Session | None = None, **kwargs):
         session = session or db.session
@@ -146,27 +160,51 @@ class Booking(BaseModel):
         return cls.update(booking.id, session=session, **kwargs)
 
     ALLOWED_TRANSITIONS = {
-        'created': {'passengers_added', 'cancelled', 'expired'},
-        'passengers_added': {'confirmed', 'cancelled', 'expired'},
-        'confirmed': {'payment_pending', 'cancelled', 'expired'},
-        'payment_pending': {'payment_confirmed', 'payment_failed', 'cancelled', 'expired'},
-        'payment_failed': {'payment_pending', 'cancelled', 'expired'},
-        'payment_confirmed': {'completed', 'cancelled'},
-        'completed': {'cancelled'},
-        'expired': set(),
-        'cancelled': set(),
+        Config.BOOKING_STATUS.created: {
+            Config.BOOKING_STATUS.passengers_added,
+            Config.BOOKING_STATUS.cancelled,
+            Config.BOOKING_STATUS.expired,
+        },
+        Config.BOOKING_STATUS.passengers_added: {
+            Config.BOOKING_STATUS.confirmed,
+            Config.BOOKING_STATUS.cancelled,
+            Config.BOOKING_STATUS.expired,
+        },
+        Config.BOOKING_STATUS.confirmed: {
+            Config.BOOKING_STATUS.payment_pending,
+            Config.BOOKING_STATUS.cancelled,
+            Config.BOOKING_STATUS.expired,
+        },
+        Config.BOOKING_STATUS.payment_pending: {
+            Config.BOOKING_STATUS.payment_confirmed,
+            Config.BOOKING_STATUS.payment_failed,
+            Config.BOOKING_STATUS.cancelled,
+            Config.BOOKING_STATUS.expired,
+        },
+        Config.BOOKING_STATUS.payment_failed: {
+            Config.BOOKING_STATUS.payment_pending,
+            Config.BOOKING_STATUS.cancelled,
+            Config.BOOKING_STATUS.expired,
+        },
+        Config.BOOKING_STATUS.payment_confirmed: {
+            Config.BOOKING_STATUS.completed,
+            Config.BOOKING_STATUS.cancelled,
+        },
+        Config.BOOKING_STATUS.completed: {Config.BOOKING_STATUS.cancelled},
+        Config.BOOKING_STATUS.expired: set(),
+        Config.BOOKING_STATUS.cancelled: set(),
     }
 
-    TERMINAL = {'expired', 'cancelled'}
+    TERMINAL = {Config.BOOKING_STATUS.expired, Config.BOOKING_STATUS.cancelled}
 
     PAGE_FLOW = {
-        'created': ['passengers'],
-        'passengers_added': ['passengers', 'confirmation'],
-        'confirmed': ['payment'],
-        'payment_pending': ['payment'],
-        'payment_failed': ['payment'],
-        'payment_confirmed': ['payment', 'completion'],
-        'completed': ['completion'],
+        Config.BOOKING_STATUS.created: ['passengers'],
+        Config.BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
+        Config.BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
+        Config.BOOKING_STATUS.payment_pending: ['payment'],
+        Config.BOOKING_STATUS.payment_failed: ['payment'],
+        Config.BOOKING_STATUS.payment_confirmed: ['payment', 'completion'],
+        Config.BOOKING_STATUS.completed: ['completion'],
     }
 
     @classmethod
@@ -176,18 +214,27 @@ class Booking(BaseModel):
         if booking.user_id and (not current_user or booking.user_id != current_user.id):
             return []
 
-        return cls.PAGE_FLOW.get(booking.status.value, [])
+        return cls.PAGE_FLOW.get(booking.status, [])
 
     @classmethod
-    def transition_status(cls, id, to_status: str, session: Session | None = None):
+    def transition_status(cls, id, to_status, session: Session | None = None):
         session = session or db.session
         booking = cls.get_or_404(id)
-        from_status = booking.status.value
-        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set()):
-            raise ValueError(f'Illegal transition: {from_status} -> {to_status}')
+        to_status_enum = (
+            Config.BOOKING_STATUS(to_status) if isinstance(
+                to_status, str) else to_status
+        )
+        from_status_enum = booking.status
+        if (
+            from_status_enum != to_status_enum
+            and to_status_enum not in cls.ALLOWED_TRANSITIONS.get(from_status_enum, set())
+        ):
+            raise ValueError(
+                f'Illegal transition: {from_status_enum.value} -> {to_status_enum.value}'
+            )
 
         return cls.update(
             id,
             session=session,
-            status=to_status,
+            status=to_status_enum,
         )

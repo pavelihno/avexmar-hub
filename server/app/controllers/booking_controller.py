@@ -161,7 +161,7 @@ def create_booking_passengers(current_user):
     booking = Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status='passengers_added',
+        to_status=Config.BOOKING_STATUS.passengers_added.value,
     )
 
     return jsonify({'status': 'ok'}), 200
@@ -179,7 +179,7 @@ def confirm_booking(current_user):
     Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status='confirmed',
+        to_status=Config.BOOKING_STATUS.confirmed.value,
     )
 
     return jsonify({'status': 'ok'}), 200
@@ -261,8 +261,7 @@ def create_booking_payment(current_user):
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
 
-    booking = Booking.get_by_public_id(public_id)
-    payment = create_payment(booking)
+    payment = create_payment(public_id)
     return jsonify(payment.to_dict()), 201
 
 

@@ -52,9 +52,19 @@ class Payment(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        status = kwargs.get('payment_status', Config.DEFAULT_PAYMENT_STATUS.value)
+        status = kwargs.get('payment_status', Config.DEFAULT_PAYMENT_STATUS)
+        if isinstance(status, str):
+            try:
+                status_enum = Config.PAYMENT_STATUS(status)
+            except ValueError:
+                status_enum = Config.DEFAULT_PAYMENT_STATUS
+        elif isinstance(status, Config.PAYMENT_STATUS):
+            status_enum = status
+        else:
+            status_enum = Config.DEFAULT_PAYMENT_STATUS
+        kwargs['payment_status'] = status_enum
         kwargs['status_history'] = [
-            {'status': status, 'at': datetime.now().isoformat()}
+            {'status': status_enum.value, 'at': datetime.now().isoformat()}
         ]
         return super().create(session, **kwargs)
 
@@ -63,8 +73,22 @@ class Payment(BaseModel):
         session = session or db.session
         payment = cls.get_or_404(_id, session)
         new_status = kwargs.get('payment_status')
-        if new_status and new_status != payment.payment_status.value:
+        if isinstance(new_status, str):
+            try:
+                new_status_enum = Config.PAYMENT_STATUS(new_status)
+                kwargs['payment_status'] = new_status_enum
+            except ValueError:
+                new_status_enum = None
+        elif isinstance(new_status, Config.PAYMENT_STATUS):
+            new_status_enum = new_status
+        else:
+            new_status_enum = None
+
+        if new_status_enum and new_status_enum.value != payment.payment_status.value:
             history = list(payment.status_history or [])
-            history.append({'status': new_status, 'at': datetime.now().isoformat()})
+            history.append({
+                'status': new_status_enum.value,
+                'at': datetime.now().isoformat()
+            })
             kwargs['status_history'] = history
         return super().update(_id, session=session, **kwargs)

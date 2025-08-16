@@ -345,24 +345,25 @@ const Confirmation = () => {
 
 								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>
-									<Typography>{`${formatNumber(
-										booking.price_details?.fare_price || 0
-									)} ${currencySymbol}`}</Typography>
+									<Typography>
+										{`${formatNumber(booking.price_details?.fare_price || 0)} ${currencySymbol}`}
+									</Typography>
 								</Box>
-								{booking.price_details?.fees?.length > 0 && (
-									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-										<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
-										<Typography>{`${formatNumber(
-											booking.price_details.fees.reduce((s, f) => s + f.total, 0)
-										)} ${currencySymbol}`}</Typography>
-									</Box>
-								)}
+								{booking.price_details?.fees?.length > 0 &&
+									booking.price_details?.fees.map((fee, idx) => (
+										<Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+											<Typography>{fee.name}</Typography>
+											<Typography>{`${formatNumber(fee.total)} ${currencySymbol}`}</Typography>
+										</Box>
+									))}
 								{booking.price_details?.total_discounts > 0 && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 										<Typography>{UI_LABELS.BOOKING.buyer_form.summary.discount}</Typography>
-										<Typography>{`- ${formatNumber(
-											booking.price_details.total_discounts
-										)} ${currencySymbol}`}</Typography>
+										<Typography>
+											{`- ${formatNumber(
+												booking.price_details.total_discounts
+											)} ${currencySymbol}`}
+										</Typography>
 									</Box>
 								)}
 							</AccordionDetails>

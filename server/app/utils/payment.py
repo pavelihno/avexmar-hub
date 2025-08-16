@@ -90,8 +90,25 @@ def generate_receipt(booking: Booking) -> Dict[str, Any]:
     }
 
 
-def create_payment(booking: Booking) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model."""
+def create_payment(public_id: str) -> Payment:
+    """Create a two-stage payment in YooKassa and persist model"""
+    booking = Booking.get_by_public_id(public_id)
+
+    # If a non-terminal payment already exists for this booking, return it
+    existing = (
+        booking.payments
+        .filter(
+            Payment.payment_status.notin_([
+                Config.PAYMENT_STATUS.succeeded,
+                Config.PAYMENT_STATUS.canceled,
+            ])
+        )
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+    if existing:
+        return existing
+
     amount = {
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
@@ -119,7 +136,7 @@ def create_payment(booking: Booking) -> Payment:
     )
 
     Booking.transition_status(
-        id=booking.id, session=db.session, to_status='payment_pending'
+        id=booking.id, session=db.session, to_status=Config.BOOKING_STATUS.payment_pending
     )
 
     return payment
@@ -167,10 +184,10 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
             capture_payment(payment)
     elif event == 'payment.canceled':
         Booking.transition_status(
-            id=payment.booking_id, session=db.session, to_status='payment_failed'
+            id=payment.booking_id, session=db.session, to_status=Config.BOOKING_STATUS.payment_failed
         )
     elif event == 'payment.succeeded':
         Booking.transition_status(
-            id=payment.booking_id, session=db.session, to_status='payment_confirmed'
+            id=payment.booking_id, session=db.session, to_status=Config.BOOKING_STATUS.payment_confirmed
         )
 
