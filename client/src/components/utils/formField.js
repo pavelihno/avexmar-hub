@@ -21,6 +21,7 @@ import {
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
+	DATE_API_FORMAT,
 } from '../../constants';
 import { formatDate, formatTime, parseDate, parseTime } from './format';
 
@@ -167,7 +168,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						<DatePicker
 							label={field.label}
 							value={value ? parseDate(value) : null}
-							onChange={(date) => onChange(formatDate(date))}
+							onChange={(date) => onChange(formatDate(date, DATE_API_FORMAT))}
 							minDate={minDate}
 							format={field.dateFormat || DATE_FORMAT}
 							slotProps={{

@@ -27,7 +27,6 @@ export const formatDate = (value, dateFormat = DATE_FORMAT, locale = dateLocale)
 			throw new Error('Unsupported date value type');
 		}
 	} catch (error) {
-		console.error('Invalid date value:', value);
 		return value;
 	}
 };
@@ -49,17 +48,6 @@ export const formatTime = (value, timeFormat = TIME_FORMAT) => {
 			throw new Error('Unsupported time value type');
 		}
 	} catch (error) {
-		console.error('Invalid time value:', value);
-		return value;
-	}
-};
-
-export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
-	if (!value) return '';
-	try {
-		return format(new Date(value), dateTimeFormat);
-	} catch (error) {
-		console.error('Invalid datetime value:', value);
 		return value;
 	}
 };
@@ -67,7 +55,7 @@ export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT) => {
 export const formatTimeToAPI = (value) => {
 	if (!value) return '';
 	try {
-		return format(value, 'HH:mm:ss');
+		return formatTime(value, 'HH:mm:ss');
 	} catch (error) {
 		console.error('Invalid time value (API):', value);
 		return value;
@@ -77,7 +65,7 @@ export const formatTimeToAPI = (value) => {
 export const formatTimeToUI = (value) => {
 	if (!value) return '';
 	try {
-		return new Date(`1970-01-01T${value}`);
+		return parseTime(value);
 	} catch (error) {
 		console.error('Invalid time value (UI):', value);
 		return value;
@@ -96,14 +84,15 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 	try {
 		return numeral(value).format(formatString);
 	} catch (error) {
-		console.error('Invalid number value:', value);
 		return value;
 	}
 };
 
 const _dateOnlyToLocalDate = (s) => {
 	const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+	const m2 = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
 	if (m1) return new Date(+m1[1], +m1[2] - 1, +m1[3]);
+	if (m2) return new Date(+m2[3], +m2[2] - 1, +m2[1]);
 	return null;
 };
 
