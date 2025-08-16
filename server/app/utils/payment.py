@@ -12,11 +12,11 @@ from app.models.booking import Booking
 from app.models.payment import Payment
 from app.models.booking_flight import BookingFlight
 from app.utils.business_logic import calculate_price_details
+from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID or ''
 Configuration.secret_key = Config.YOOKASSA_SECRET_KEY or ''
-Configuration.api_url = Config.YOOKASSA_API_URL
 
 
 def generate_receipt(booking: Booking) -> Dict[str, Any]:
@@ -99,8 +99,8 @@ def create_payment(public_id: str) -> Payment:
         booking.payments
         .filter(
             Payment.payment_status.notin_([
-                Config.PAYMENT_STATUS.succeeded,
-                Config.PAYMENT_STATUS.canceled,
+                PAYMENT_STATUS.succeeded,
+                PAYMENT_STATUS.canceled,
             ])
         )
         .order_by(Payment.created_at.desc())
@@ -126,8 +126,8 @@ def create_payment(public_id: str) -> Payment:
     payment = Payment.create(
         db.session,
         booking_id=booking.id,
-        payment_method=Config.PAYMENT_METHOD.yookassa,
-        payment_status=Config.PAYMENT_STATUS.pending,
+        payment_method=PAYMENT_METHOD.yookassa,
+        payment_status=PAYMENT_STATUS.pending,
         amount=booking.total_price,
         currency=booking.currency,
         provider_payment_id=yoo_payment.id,
@@ -136,7 +136,7 @@ def create_payment(public_id: str) -> Payment:
     )
 
     Booking.transition_status(
-        id=booking.id, session=db.session, to_status=Config.BOOKING_STATUS.payment_pending
+        id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
     )
 
     return payment
@@ -173,21 +173,21 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         return
 
     updates: Dict[str, Any] = {'payment_status': status, 'last_webhook': payload}
-    if status == Config.PAYMENT_STATUS.succeeded.value:
+    if status == PAYMENT_STATUS.succeeded.value:
         updates['is_paid'] = True
     Payment.update(payment.id, session=db.session, **updates)
 
     if event == 'payment.waiting_for_capture':
         Booking.generate_booking_number(payment.booking_id, session=db.session)
         api_payment = YooPayment.find_one(provider_id)
-        if api_payment.status == Config.PAYMENT_STATUS.waiting_for_capture.value:
+        if api_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
             capture_payment(payment)
     elif event == 'payment.canceled':
         Booking.transition_status(
-            id=payment.booking_id, session=db.session, to_status=Config.BOOKING_STATUS.payment_failed
+            id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_failed
         )
     elif event == 'payment.succeeded':
         Booking.transition_status(
-            id=payment.booking_id, session=db.session, to_status=Config.BOOKING_STATUS.payment_confirmed
+            id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_confirmed
         )
 

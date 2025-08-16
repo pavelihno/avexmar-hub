@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.config import Config
+from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, CURRENCY, DEFAULT_PAYMENT_STATUS, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -16,10 +16,10 @@ class Payment(BaseModel):
     __tablename__ = 'payments'
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False)
-    payment_method = db.Column(db.Enum(Config.PAYMENT_METHOD), nullable=False)
-    payment_status = db.Column(db.Enum(Config.PAYMENT_STATUS), nullable=False, default=Config.DEFAULT_PAYMENT_STATUS)
+    payment_method = db.Column(db.Enum(PAYMENT_METHOD), nullable=False)
+    payment_status = db.Column(db.Enum(PAYMENT_STATUS), nullable=False, default=DEFAULT_PAYMENT_STATUS)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
-    currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
+    currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     provider_payment_id = db.Column(db.String, unique=True)
     confirmation_token = db.Column(db.String)
 
@@ -52,16 +52,16 @@ class Payment(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        status = kwargs.get('payment_status', Config.DEFAULT_PAYMENT_STATUS)
+        status = kwargs.get('payment_status', DEFAULT_PAYMENT_STATUS)
         if isinstance(status, str):
             try:
-                status_enum = Config.PAYMENT_STATUS(status)
+                status_enum = PAYMENT_STATUS(status)
             except ValueError:
-                status_enum = Config.DEFAULT_PAYMENT_STATUS
-        elif isinstance(status, Config.PAYMENT_STATUS):
+                status_enum = DEFAULT_PAYMENT_STATUS
+        elif isinstance(status, PAYMENT_STATUS):
             status_enum = status
         else:
-            status_enum = Config.DEFAULT_PAYMENT_STATUS
+            status_enum = DEFAULT_PAYMENT_STATUS
         kwargs['payment_status'] = status_enum
         kwargs['status_history'] = [
             {'status': status_enum.value, 'at': datetime.now().isoformat()}
@@ -75,11 +75,11 @@ class Payment(BaseModel):
         new_status = kwargs.get('payment_status')
         if isinstance(new_status, str):
             try:
-                new_status_enum = Config.PAYMENT_STATUS(new_status)
+                new_status_enum = PAYMENT_STATUS(new_status)
                 kwargs['payment_status'] = new_status_enum
             except ValueError:
                 new_status_enum = None
-        elif isinstance(new_status, Config.PAYMENT_STATUS):
+        elif isinstance(new_status, PAYMENT_STATUS):
             new_status_enum = new_status
         else:
             new_status_enum = None

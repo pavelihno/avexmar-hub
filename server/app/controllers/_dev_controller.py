@@ -1,6 +1,5 @@
 from flask import jsonify
 
-from app.config import Config
 from app.middlewares.auth_middleware import dev_tool
 from app.models.airport import Airport
 from app.models.airline import Airline

@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session, Mapped
 from sqlalchemy import Index
 
 from app.database import db
-from app.config import Config
 from app.models._base_model import BaseModel
 from app.models.country import Country
+from app.utils.enum import GENDER, DOCUMENT_TYPE, DEFAULT_CITIZENSHIP_CODE
 
 if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
@@ -22,9 +22,9 @@ class Passenger(BaseModel):
     last_name = db.Column(db.String, nullable=False)
     patronymic_name = db.Column(db.String, nullable=True)
 
-    gender = db.Column(db.Enum(Config.GENDER), nullable=False)
+    gender = db.Column(db.Enum(GENDER), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
-    document_type = db.Column(db.Enum(Config.DOCUMENT_TYPE), nullable=False)
+    document_type = db.Column(db.Enum(DOCUMENT_TYPE), nullable=False)
     document_number = db.Column(db.String, nullable=False)
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
@@ -97,12 +97,12 @@ class Passenger(BaseModel):
         kwargs = cls.__normalize_names(kwargs)
 
         if kwargs.get('document_type') in (
-            Config.DOCUMENT_TYPE.passport.value,
-            Config.DOCUMENT_TYPE.international_passport.value,
-            Config.DOCUMENT_TYPE.birth_certificate.value,
+            DOCUMENT_TYPE.passport.value,
+            DOCUMENT_TYPE.international_passport.value,
+            DOCUMENT_TYPE.birth_certificate.value,
         ):
             kwargs['citizenship_id'] = Country.get_by_code(
-                Config.DEFAULT_CITIZENSHIP_CODE
+                DEFAULT_CITIZENSHIP_CODE
             ).id
 
         unique_fields = [

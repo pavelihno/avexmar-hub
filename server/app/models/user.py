@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.database import db
 from app.models._base_model import BaseModel
 from sqlalchemy.orm import Session, Mapped
-from app.config import Config
+from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 
 if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
@@ -17,7 +17,7 @@ class User(BaseModel):
 
     email = db.Column(db.String, unique=True, index=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(db.Enum(Config.USER_ROLE), nullable=False, default=Config.DEFAULT_USER_ROLE)
+    role = db.Column(db.Enum(USER_ROLE), nullable=False, default=DEFAULT_USER_ROLE)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(

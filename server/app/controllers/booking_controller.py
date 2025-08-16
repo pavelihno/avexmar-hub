@@ -1,7 +1,6 @@
 from flask import request, jsonify
 
 from app.database import db
-from app.config import Config
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
@@ -10,6 +9,7 @@ from app.models.payment import Payment
 from app.middlewares.auth_middleware import admin_required, current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.payment import create_payment, handle_webhook
+from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY
 
 
 @admin_required
@@ -161,7 +161,7 @@ def create_booking_passengers(current_user):
     booking = Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status=Config.BOOKING_STATUS.passengers_added.value,
+        to_status=BOOKING_STATUS.passengers_added.value,
     )
 
     return jsonify({'status': 'ok'}), 200
@@ -179,7 +179,7 @@ def confirm_booking(current_user):
     Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status=Config.BOOKING_STATUS.confirmed.value,
+        to_status=BOOKING_STATUS.confirmed.value,
     )
 
     return jsonify({'status': 'ok'}), 200
@@ -212,10 +212,10 @@ def get_booking_details(current_user, public_id):
     if not passengers:
         counts = booking.passenger_counts or {}
         key_map = {
-            'adults': Config.PASSENGER_CATEGORY.adult.value,
-            'children': Config.PASSENGER_CATEGORY.child.value,
-            'infants': Config.PASSENGER_CATEGORY.infant.value,
-            'infants_seat': Config.PASSENGER_CATEGORY.infant_seat.value,
+            'adults': PASSENGER_CATEGORY.adult.value,
+            'children': PASSENGER_CATEGORY.child.value,
+            'infants': PASSENGER_CATEGORY.infant.value,
+            'infants_seat': PASSENGER_CATEGORY.infant_seat.value,
         }
         for key, count in counts.items():
             try:

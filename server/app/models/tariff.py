@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.config import Config
+from app.utils.enum import SEAT_CLASS, CURRENCY, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
     from app.models.flight_tariff import FlightTariff
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 class Tariff(BaseModel):
     __tablename__ = 'tariffs'
 
-    seat_class = db.Column(db.Enum(Config.SEAT_CLASS), nullable=False)
+    seat_class = db.Column(db.Enum(SEAT_CLASS), nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
+    currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     conditions = db.Column(db.String, nullable=True)
 
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(

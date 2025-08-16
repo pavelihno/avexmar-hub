@@ -6,6 +6,7 @@ from jwt import InvalidTokenError
 from app.config import Config
 from app.models.user import User
 from app.utils.jwt import verifyJWT
+from app.utils.enum import USER_ROLE
 
 
 def current_user(f):
@@ -55,7 +56,7 @@ def admin_required(f):
     @wraps(f)
     def decorated(current_user, *args, **kwargs):
 
-        if current_user.role != Config.USER_ROLE.admin:
+        if current_user.role != USER_ROLE.admin:
             return jsonify({'message': 'Access denied'}), 403
 
         return f(current_user, *args, **kwargs)

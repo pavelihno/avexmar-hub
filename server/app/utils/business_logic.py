@@ -1,4 +1,4 @@
-from app.config import Config
+from app.utils.enum import SEAT_CLASS, DISCOUNT_TYPE, FEE_APPLICATION
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
@@ -66,22 +66,22 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             multiplier = 1.0
             applied_discounts = []
 
-            if tariff.seat_class == Config.SEAT_CLASS.economy:
+            if tariff.seat_class == SEAT_CLASS.economy:
                 if category == 'infants':
-                    infant_key = Config.DISCOUNT_TYPE.infant.value
+                    infant_key = DISCOUNT_TYPE.infant.value
                     pct = discount_pct.get(infant_key, 0.0)
                     multiplier *= (1.0 - pct)
                     if infant_key in discount_names_map:
                         applied_discounts.append(discount_names_map[infant_key])
                 elif category == 'children':
-                    child_key = Config.DISCOUNT_TYPE.child.value
+                    child_key = DISCOUNT_TYPE.child.value
                     pct = discount_pct.get(child_key, 0.0)
                     multiplier *= (1.0 - pct)
                     if child_key in discount_names_map:
                         applied_discounts.append(discount_names_map[child_key])
 
                 if is_round_trip:
-                    rt_key = Config.DISCOUNT_TYPE.round_trip.value
+                    rt_key = DISCOUNT_TYPE.round_trip.value
                     pct_rt = discount_pct.get(rt_key, 0.0)
                     multiplier *= (1.0 - pct_rt)
                     if rt_key in discount_names_map:
@@ -120,7 +120,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
     seats_number = get_seats_number(passengers) * len(legs)
     fees, fees_total = Fee.calculate_fees(
         seats_number=seats_number,
-        application=Config.FEE_APPLICATION.booking,
+        application=FEE_APPLICATION.booking,
     )
     total_price += fees_total
 

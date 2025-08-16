@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.config import Config
+from app.utils.enum import BOOKING_STATUS, CURRENCY, DEFAULT_BOOKING_STATUS, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -27,7 +27,7 @@ class Booking(BaseModel):
     # Booking details
     public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)
     booking_number = db.Column(db.String, unique=True, nullable=True, index=True)
-    status = db.Column(db.Enum(Config.BOOKING_STATUS), nullable=False, default=Config.DEFAULT_BOOKING_STATUS)
+    status = db.Column(db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
@@ -37,7 +37,7 @@ class Booking(BaseModel):
     phone_number = db.Column(db.String, nullable=True)
 
     # Price details
-    currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
+    currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     fare_price = db.Column(db.Float, nullable=False)
     fees = db.Column(db.Float, nullable=False, default=0.0)
     total_discounts = db.Column(db.Float, nullable=False, default=0.0)
@@ -83,6 +83,8 @@ class Booking(BaseModel):
             'total_price': self.total_price,
         }
 
+    PNR_MASK = 'ABXXXX'
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by=['booking_number'], descending=False)
@@ -102,7 +104,7 @@ class Booking(BaseModel):
             booking_number = ''.join(
                 random.choice(string.ascii_uppercase + string.digits)
                 if ch == 'X' else ch
-                for ch in Config.PNR_MASK
+                for ch in cls.PNR_MASK
             )
             if booking_number not in existing_booking_numbers:
                 break
@@ -116,16 +118,16 @@ class Booking(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
-        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS)
+        status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
         if isinstance(status, str):
             try:
-                status_enum = Config.BOOKING_STATUS(status)
+                status_enum = BOOKING_STATUS(status)
             except ValueError:
-                status_enum = Config.DEFAULT_BOOKING_STATUS
-        elif isinstance(status, Config.BOOKING_STATUS):
+                status_enum = DEFAULT_BOOKING_STATUS
+        elif isinstance(status, BOOKING_STATUS):
             status_enum = status
         else:
-            status_enum = Config.DEFAULT_BOOKING_STATUS
+            status_enum = DEFAULT_BOOKING_STATUS
         kwargs['status'] = status_enum
         history = [{
             'status': status_enum.value,
@@ -141,7 +143,7 @@ class Booking(BaseModel):
         old_status_enum = booking.status
         new_status = kwargs.get('status', old_status_enum)
         if isinstance(new_status, str):
-            new_status_enum = Config.BOOKING_STATUS(new_status)
+            new_status_enum = BOOKING_STATUS(new_status)
         else:
             new_status_enum = new_status
         history = list(booking.status_history or [])
@@ -160,51 +162,51 @@ class Booking(BaseModel):
         return cls.update(booking.id, session=session, **kwargs)
 
     ALLOWED_TRANSITIONS = {
-        Config.BOOKING_STATUS.created: {
-            Config.BOOKING_STATUS.passengers_added,
-            Config.BOOKING_STATUS.cancelled,
-            Config.BOOKING_STATUS.expired,
+        BOOKING_STATUS.created: {
+            BOOKING_STATUS.passengers_added,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
         },
-        Config.BOOKING_STATUS.passengers_added: {
-            Config.BOOKING_STATUS.confirmed,
-            Config.BOOKING_STATUS.cancelled,
-            Config.BOOKING_STATUS.expired,
+        BOOKING_STATUS.passengers_added: {
+            BOOKING_STATUS.confirmed,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
         },
-        Config.BOOKING_STATUS.confirmed: {
-            Config.BOOKING_STATUS.payment_pending,
-            Config.BOOKING_STATUS.cancelled,
-            Config.BOOKING_STATUS.expired,
+        BOOKING_STATUS.confirmed: {
+            BOOKING_STATUS.payment_pending,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
         },
-        Config.BOOKING_STATUS.payment_pending: {
-            Config.BOOKING_STATUS.payment_confirmed,
-            Config.BOOKING_STATUS.payment_failed,
-            Config.BOOKING_STATUS.cancelled,
-            Config.BOOKING_STATUS.expired,
+        BOOKING_STATUS.payment_pending: {
+            BOOKING_STATUS.payment_confirmed,
+            BOOKING_STATUS.payment_failed,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
         },
-        Config.BOOKING_STATUS.payment_failed: {
-            Config.BOOKING_STATUS.payment_pending,
-            Config.BOOKING_STATUS.cancelled,
-            Config.BOOKING_STATUS.expired,
+        BOOKING_STATUS.payment_failed: {
+            BOOKING_STATUS.payment_pending,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
         },
-        Config.BOOKING_STATUS.payment_confirmed: {
-            Config.BOOKING_STATUS.completed,
-            Config.BOOKING_STATUS.cancelled,
+        BOOKING_STATUS.payment_confirmed: {
+            BOOKING_STATUS.completed,
+            BOOKING_STATUS.cancelled,
         },
-        Config.BOOKING_STATUS.completed: {Config.BOOKING_STATUS.cancelled},
-        Config.BOOKING_STATUS.expired: set(),
-        Config.BOOKING_STATUS.cancelled: set(),
+        BOOKING_STATUS.completed: {BOOKING_STATUS.cancelled},
+        BOOKING_STATUS.expired: set(),
+        BOOKING_STATUS.cancelled: set(),
     }
 
-    TERMINAL = {Config.BOOKING_STATUS.expired, Config.BOOKING_STATUS.cancelled}
+    TERMINAL = {BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
 
     PAGE_FLOW = {
-        Config.BOOKING_STATUS.created: ['passengers'],
-        Config.BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
-        Config.BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
-        Config.BOOKING_STATUS.payment_pending: ['payment'],
-        Config.BOOKING_STATUS.payment_failed: ['payment'],
-        Config.BOOKING_STATUS.payment_confirmed: ['payment', 'completion'],
-        Config.BOOKING_STATUS.completed: ['completion'],
+        BOOKING_STATUS.created: ['passengers'],
+        BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
+        BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_pending: ['payment'],
+        BOOKING_STATUS.payment_failed: ['payment'],
+        BOOKING_STATUS.payment_confirmed: ['payment', 'completion'],
+        BOOKING_STATUS.completed: ['completion'],
     }
 
     @classmethod
@@ -221,7 +223,7 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id)
         to_status_enum = (
-            Config.BOOKING_STATUS(to_status) if isinstance(
+            BOOKING_STATUS(to_status) if isinstance(
                 to_status, str) else to_status
         )
         from_status_enum = booking.status

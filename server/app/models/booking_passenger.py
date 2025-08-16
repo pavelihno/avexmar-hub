@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models._base_model import ModelValidationError
-from app.config import Config
+from app.utils.enum import PASSENGER_CATEGORY, DEFAULT_PASSENGER_CATEGORY
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -16,8 +16,8 @@ class BookingPassenger(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)
     category = db.Column(
-        db.Enum(Config.PASSENGER_CATEGORY),
-        default=Config.DEFAULT_PASSENGER_CATEGORY,
+        db.Enum(PASSENGER_CATEGORY),
+        default=DEFAULT_PASSENGER_CATEGORY,
         nullable=False,
     )
 
