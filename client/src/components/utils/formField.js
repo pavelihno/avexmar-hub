@@ -161,30 +161,31 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				);
 			}
 
-			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, sx, minDate, textFieldProps, size } = allProps;
-				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-						<DatePicker
-							label={field.label}
-							value={value ? parseDate(value) : null}
-							onChange={(date) => onChange(formatDate(date, DATE_API_FORMAT))}
-							minDate={minDate}
-							format={field.dateFormat || DATE_FORMAT}
-							slotProps={{
-								textField: {
-									fullWidth,
-									error,
-									helperText: error ? helperText : '',
-									sx,
-									size,
-									...textFieldProps,
-								},
-							}}
-						/>
-					</LocalizationProvider>
-				);
-			}
+                        case FIELD_TYPES.DATE: {
+                                const { value, onChange, fullWidth, error, helperText, sx, minDate, maxDate, textFieldProps, size } = allProps;
+                                return (
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
+                                                <DatePicker
+                                                        label={field.label}
+                                                        value={value ? parseDate(value) : null}
+                                                        onChange={(date) => onChange(formatDate(date, DATE_API_FORMAT))}
+                                                        minDate={minDate ? parseDate(minDate) : undefined}
+                                                        maxDate={maxDate ? parseDate(maxDate) : undefined}
+                                                        format={field.dateFormat || DATE_FORMAT}
+                                                        slotProps={{
+                                                                textField: {
+                                                                        fullWidth,
+                                                                        error,
+                                                                        helperText: error ? helperText : '',
+                                                                        sx,
+                                                                        size,
+                                                                        ...textFieldProps,
+                                                                },
+                                                        }}
+                                                />
+                                        </LocalizationProvider>
+                                );
+                        }
 
 			case FIELD_TYPES.TIME: {
 				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
