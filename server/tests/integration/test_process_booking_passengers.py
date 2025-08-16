@@ -27,7 +27,7 @@ def test_process_booking_passengers_creates_and_updates(client, future_flight, c
         "buyer": {"email": "a@example.com", "phone": "+70000000000"},
         "passengers": [
             {
-                "category": "adult",
+                "category": Config.PASSENGER_CATEGORY.adult.value,
                 "first_name": "John",
                 "last_name": "Doe",
                 "gender": Config.GENDER.м.value,
@@ -64,7 +64,7 @@ def test_process_booking_passengers_validates_age(client, future_flight, country
         "buyer": {"email": "a@example.com", "phone": "+70000000000"},
         "passengers": [
             {
-                "category": "infant",
+                "category": Config.PASSENGER_CATEGORY.infant.value,
                 "first_name": "Baby",
                 "last_name": "Test",
                 "gender": Config.GENDER.м.value,
@@ -88,7 +88,7 @@ def test_process_booking_confirm(client, future_flight, country_ru):
         "buyer": {"email": "a@example.com", "phone": "+70000000000"},
         "passengers": [
             {
-                "category": "adult",
+                "category": Config.PASSENGER_CATEGORY.adult.value,
                 "first_name": "John",
                 "last_name": "Doe",
                 "gender": Config.GENDER.м.value,
@@ -105,4 +105,7 @@ def test_process_booking_confirm(client, future_flight, country_ru):
 
     res = client.post("/bookings/process/confirm", json={"public_id": str(booking.public_id)})
     assert res.status_code == 200
-    assert Booking.get_by_public_id(booking.public_id).status.value == "confirmed"
+    assert (
+        Booking.get_by_public_id(booking.public_id).status
+        == Config.BOOKING_STATUS.confirmed
+    )
