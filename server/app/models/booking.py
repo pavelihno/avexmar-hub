@@ -173,7 +173,7 @@ class Booking(BaseModel):
     def get_accessible_pages(cls, current_user, public_id):
         booking = cls.get_by_public_id(public_id)
 
-        if booking.user_id and current_user and booking.user_id != current_user.id:
+        if booking.user_id and (not current_user or booking.user_id != current_user.id):
             return []
 
         return cls.PAGE_FLOW.get(booking.status.value, [])
