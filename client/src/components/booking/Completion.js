@@ -20,6 +20,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
+import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
 import { fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
 import { formatNumber, formatDate, formatTime, formatDuration, extractRouteInfo } from '../utils';
