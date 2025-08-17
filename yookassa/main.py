@@ -30,7 +30,6 @@ def create_payment():
         'confirmation': {'type': 'embedded'},
         'capture': False,
         'description': f'Payment description',
-        'metadata': {'booking_id': booking_id, 'expires_at': expires_at.isoformat()},
     }
 
     try:

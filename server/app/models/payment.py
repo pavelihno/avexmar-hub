@@ -15,19 +15,22 @@ if TYPE_CHECKING:
 class Payment(BaseModel):
     __tablename__ = 'payments'
 
+    # Payment details
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False)
     payment_method = db.Column(db.Enum(PAYMENT_METHOD), nullable=False)
     payment_status = db.Column(db.Enum(PAYMENT_STATUS), nullable=False, default=DEFAULT_PAYMENT_STATUS)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
+    expires_at = db.Column(db.DateTime, nullable=False)
+
+    # Provider payment details
     provider_payment_id = db.Column(db.String, unique=True)
     confirmation_token = db.Column(db.String)
 
-    # Payment processing details
+    # Metadata
     is_paid = db.Column(db.Boolean, default=False, nullable=False)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
     last_webhook = db.Column(JSONB)
-    meta = db.Column(JSONB)
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='payments')
 
@@ -42,11 +45,8 @@ class Payment(BaseModel):
             'currency': self.currency.value if self.currency else None,
             'provider_payment_id': self.provider_payment_id,
             'confirmation_token': self.confirmation_token,
-            'expires_at': (self.meta or {}).get('expires_at'),
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
             'is_paid': self.is_paid,
-            'status_history': self.status_history,
-            'last_webhook': self.last_webhook,
-            'metadata': self.meta,
         }
 
     @classmethod

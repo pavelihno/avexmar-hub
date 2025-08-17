@@ -17,60 +17,6 @@ Configuration.account_id = Config.YOOKASSA_SHOP_ID
 Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
 
 
-def create_payment(public_id: str) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model"""
-    booking = Booking.get_by_public_id(public_id)
-
-    # If a pending payment already exists for this booking, return it
-    existing = (
-        booking.payments
-        .filter(Payment.payment_status == PAYMENT_STATUS.pending)
-        .order_by(Payment.created_at.desc())
-        .first()
-    )
-    if existing:
-        return existing
-
-    amount = {
-        'value': f'{booking.total_price:.2f}',
-        'currency': booking.currency.value.upper(),
-    }
-    expires_at = datetime.now() + timedelta(hours=1)
-    body = {
-        'amount': amount,
-        'confirmation': {'type': 'embedded'},
-        'capture': False,
-        'description': f'Booking {booking.public_id}',
-        'metadata': {'booking_id': str(booking.public_id), 'expires_at': expires_at.isoformat()},
-    }
-
-    try:
-        yoo_payment = YooPayment.create(body, uuid.uuid4())
-        yookassa_payment_id = getattr(yoo_payment, 'id', None)
-        confirmation_token = getattr(getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None)
-
-        payment = Payment.create(
-            db.session,
-            booking_id=booking.id,
-            payment_method=PAYMENT_METHOD.yookassa,
-            payment_status=PAYMENT_STATUS.pending,
-            amount=booking.total_price,
-            currency=booking.currency,
-            provider_payment_id=yookassa_payment_id,
-            confirmation_token=confirmation_token,
-            meta=body['metadata'],
-        )
-
-        Booking.transition_status(
-            id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
-        )
-
-        return payment
-
-    except Exception as e:
-        raise e
-
-
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     """Form receipt object with detailed breakdown"""
     flights = booking.booking_flights.order_by(BookingFlight.id).all()
@@ -105,6 +51,7 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
                 'description': f"{dir_name.capitalize()} {passenger.get('category')} ticket",
                 'quantity': count,
                 'amount': {'value': f'{unit_price:.2f}', 'currency': currency},
+                # TODO: ask about VAT codes
                 'vat_code': 1,
                 'payment_mode': 'full_payment',
                 'payment_subject': 'service',
@@ -120,7 +67,7 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
                 items.append({
                     'description': desc,
                     'quantity': count,
-                    'amount': {'value': f'-{unit_discount:.2f}', 'currency': currency},
+                    'amount': {'value': f'{unit_discount:.2f}', 'currency': currency},
                     'vat_code': 1,
                     'payment_mode': 'full_payment',
                     'payment_subject': 'service',
@@ -145,23 +92,84 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 def __capture_payment(payment: Payment) -> None:
     """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
-    receipt = __generate_receipt(booking)
+
+    booking = Booking.generate_booking_number(payment.booking_id, session=db.session)
+
     body = {
         'amount': {
             'value': f'{payment.amount:.2f}',
             'currency': payment.currency.value.upper(),
         },
-        'receipt': receipt,
+        # 'receipt': __generate_receipt(booking),
+        'description': f'Booking {booking.booking_number}',
         'airline': {'booking_reference': booking.booking_number},
-        'metadata': {'booking_id': booking.id, 'booking_number': booking.booking_number},
+        'metadata': {'booking_id': str(booking.public_id), 'booking_number': booking.booking_number},
     }
-
-    booking = Booking.generate_booking_number(payment.booking_id, session=db.session)
 
     try:
         yoo_payment = YooPayment.capture(payment.provider_payment_id, body)
 
         return yoo_payment
+
+    except Exception as e:
+        raise e
+
+
+def create_payment(public_id: str) -> Payment:
+    """Create a two-stage payment in YooKassa and persist model"""
+    booking = Booking.get_by_public_id(public_id)
+
+    # If a pending payment already exists for this booking, return it
+    existing = (
+        booking.payments
+        .filter(Payment.payment_status == PAYMENT_STATUS.pending)
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+    if existing:
+        return existing
+
+    amount = {
+        'value': f'{booking.total_price:.2f}',
+        'currency': booking.currency.value.upper(),
+    }
+    expires_at = datetime.now() + timedelta(hours=1)
+    body = {
+        'amount': amount,
+        'confirmation': {'type': 'embedded'},
+        'capture': False,
+        'description': f'Booking {booking.public_id}',
+        'receipt': __generate_receipt(booking),
+        'metadata': {
+            'booking_id': str(booking.public_id),
+            'expires_at': expires_at.isoformat(),
+        }
+    }
+
+    print(body)
+
+    try:
+        yoo_payment = YooPayment.create(body, uuid.uuid4())
+        yookassa_payment_id = getattr(yoo_payment, 'id', None)
+        confirmation_token = getattr(getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None)
+
+        payment = Payment.create(
+            db.session,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            amount=booking.total_price,
+            currency=booking.currency,
+            provider_payment_id=yookassa_payment_id,
+            confirmation_token=confirmation_token,
+            expires_at=expires_at,
+        )
+
+        Booking.transition_status(
+            id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
+        )
+
+        return payment
 
     except Exception as e:
         raise e
