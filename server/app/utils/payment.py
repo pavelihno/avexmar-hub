@@ -15,12 +15,70 @@ from app.utils.business_logic import calculate_price_details
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
 
 # Configure YooKassa SDK
-Configuration.account_id = Config.YOOKASSA_SHOP_ID or ''
-Configuration.secret_key = Config.YOOKASSA_SECRET_KEY or ''
+Configuration.account_id = Config.YOOKASSA_SHOP_ID
+Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
+
+
+def create_payment(public_id: str) -> Payment:
+    """Create a two-stage payment in YooKassa and persist model"""
+    booking = Booking.get_by_public_id(public_id)
+
+    # If a non-terminal payment already exists for this booking, return it
+    existing = (
+        booking.payments
+        .filter(
+            Payment.payment_status.notin_([
+                PAYMENT_STATUS.succeeded,
+                PAYMENT_STATUS.canceled,
+            ])
+        )
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+    if existing:
+        return existing
+
+    amount = {
+        'value': f'{booking.total_price:.2f}',
+        'currency': booking.currency.value.upper(),
+    }
+    expires_at = datetime.now() + timedelta(hours=1)
+    body = {
+        'amount': amount,
+        'confirmation': {'type': 'embedded'},
+        'capture': False,
+        'description': f'Booking {booking.public_id}',
+        'metadata': {'booking_id': str(booking.public_id), 'expires_at': expires_at.isoformat()},
+    }
+    yoo_payment = YooPayment.create(body, uuid.uuid4())
+
+    yookassa_payment_id = getattr(yoo_payment, 'id', None)
+    confirmation_token = getattr(getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None)
+
+    payment = Payment.create(
+        db.session,
+        booking_id=booking.id,
+        payment_method=PAYMENT_METHOD.yookassa,
+        payment_status=PAYMENT_STATUS.pending,
+        amount=booking.total_price,
+        currency=booking.currency,
+        provider_payment_id=yookassa_payment_id,
+        confirmation_token=confirmation_token,
+        meta=body['metadata'],
+    )
+
+    print(f'YooKassa payment ID: {yookassa_payment_id}')
+    print(f'Confirmation token: {confirmation_token}')
+
+    Booking.transition_status(
+        id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
+    )
+
+    return payment
 
 
 def generate_receipt(booking: Booking) -> Dict[str, Any]:
-    """Form receipt object with detailed breakdown."""
+    """Form receipt object with detailed breakdown"""
     flights = booking.booking_flights.order_by(BookingFlight.id).all()
     outbound_id = flights[0].flight_id if len(flights) > 0 else None
     return_id = flights[1].flight_id if len(flights) > 1 else None
@@ -90,63 +148,11 @@ def generate_receipt(booking: Booking) -> Dict[str, Any]:
     }
 
 
-def create_payment(public_id: str) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model"""
-    booking = Booking.get_by_public_id(public_id)
-
-    # If a non-terminal payment already exists for this booking, return it
-    existing = (
-        booking.payments
-        .filter(
-            Payment.payment_status.notin_([
-                PAYMENT_STATUS.succeeded,
-                PAYMENT_STATUS.canceled,
-            ])
-        )
-        .order_by(Payment.created_at.desc())
-        .first()
-    )
-    if existing:
-        return existing
-
-    amount = {
-        'value': f'{booking.total_price:.2f}',
-        'currency': booking.currency.value.upper(),
-    }
-    expires_at = datetime.utcnow() + timedelta(hours=1)
-    body: Dict[str, Any] = {
-        'amount': amount,
-        'confirmation': {'type': 'embedded'},
-        'capture': False,
-        'description': f'Booking {booking.booking_number or booking.id}',
-        'metadata': {'booking_id': booking.id, 'expires_at': expires_at.isoformat()},
-    }
-    yoo_payment: Any = YooPayment.create(body, uuid.uuid4())
-
-    payment = Payment.create(
-        db.session,
-        booking_id=booking.id,
-        payment_method=PAYMENT_METHOD.yookassa,
-        payment_status=PAYMENT_STATUS.pending,
-        amount=booking.total_price,
-        currency=booking.currency,
-        provider_payment_id=yoo_payment.id,
-        confirmation_token=(yoo_payment.confirmation or {}).get('confirmation_token'),
-        meta=body['metadata'],
-    )
-
-    Booking.transition_status(
-        id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
-    )
-
-    return payment
-
-
 def capture_payment(payment: Payment) -> None:
-    """Capture authorized payment with receipt and booking number."""
+    """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
     receipt = generate_receipt(booking)
-    body: Dict[str, Any] = {
+    body = {
         'amount': {
             'value': f'{payment.amount:.2f}',
             'currency': payment.currency.value.upper(),
@@ -159,7 +165,7 @@ def capture_payment(payment: Payment) -> None:
 
 
 def handle_webhook(payload: Dict[str, Any]) -> None:
-    """Process YooKassa webhook notifications."""
+    """Process YooKassa webhook notifications"""
     event = payload.get('event')
     obj = payload.get('object') or {}
     provider_id = obj.get('id')
@@ -172,7 +178,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     if not payment:
         return
 
-    updates: Dict[str, Any] = {'payment_status': status, 'last_webhook': payload}
+    updates = {'payment_status': status, 'last_webhook': payload}
     if status == PAYMENT_STATUS.succeeded.value:
         updates['is_paid'] = True
     Payment.update(payment.id, session=db.session, **updates)
@@ -190,4 +196,3 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         Booking.transition_status(
             id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_confirmed
         )
-

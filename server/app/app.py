@@ -225,7 +225,7 @@ def __create_app(_config_class, _db):
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
 
     # external
-    app.route('/payments/webhook', methods=['POST'])(payment_webhook)
+    app.route('/webhooks/yookassa', methods=['POST'])(yookassa_webhook)
 
     migrate = Migrate(app, db)
 

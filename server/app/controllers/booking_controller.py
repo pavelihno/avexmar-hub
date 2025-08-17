@@ -278,7 +278,7 @@ def get_booking_payment(current_user, public_id):
     return jsonify(payment.to_dict()), 200
 
 
-def payment_webhook():
+def yookassa_webhook():
     payload = request.json or {}
     handle_webhook(payload)
     return jsonify({'status': 'ok'}), 200
