@@ -105,7 +105,7 @@ Run all tests:
 docker-compose run --rm server-app pytest -sv tests
 ```
 
-### Cloudflare Tunnel Setup 
+### Cloudflare Tunnel Setup
 
 Client App:
 
@@ -118,3 +118,7 @@ Server App:
 ```bash
 cloudflared tunnel --url http://localhost:5000 --protocol http2
 ```
+
+### Yookassa Payments
+
+[Testing documentation](https://yookassa.ru/developers/payment-acceptance/testing-and-going-live/testing)

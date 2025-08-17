@@ -62,9 +62,6 @@ def create_payment(public_id: str) -> Payment:
         meta=body['metadata'],
     )
 
-    print(f'YooKassa payment ID: {yookassa_payment_id}')
-    print(f'Confirmation token: {confirmation_token}')
-
     Booking.transition_status(
         id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
     )

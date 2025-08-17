@@ -55,15 +55,3 @@ export const confirmBooking = createAsyncThunk('bookingProcess/confirm', async (
 		return rejectWithValue(getErrorData(err));
 	}
 });
-
-export const fetchCompletionDetails = createAsyncThunk(
-	'bookingProcess/fetchCompletion',
-	async (publicId, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get(`/bookings/process/${publicId}/completion`);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(getErrorData(err));
-		}
-	}
-);

@@ -186,18 +186,6 @@ def confirm_booking(current_user):
 
 
 @current_user
-def get_process_booking_completion(current_user, public_id):
-    booking = Booking.get_by_public_id(public_id)
-    result = {
-        'booking_number': booking.booking_number,
-        'status': booking.status.value,
-        'total_price': booking.total_price,
-        'currency': booking.currency.value,
-    }
-    return jsonify(result), 200
-
-
-@current_user
 def get_booking_details(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
     result = booking.to_dict()
@@ -270,11 +258,6 @@ def get_booking_payment(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
     payment = (
         Payment.query.filter_by(booking_id=booking.id)
-        .filter(
-            Payment.payment_status.notin_(
-                [PAYMENT_STATUS.succeeded, PAYMENT_STATUS.canceled]
-            )
-        )
         .order_by(Payment.id.desc())
         .first_or_404()
     )
