@@ -203,9 +203,9 @@ class Booking(BaseModel):
         BOOKING_STATUS.created: ['passengers'],
         BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
         BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
-        BOOKING_STATUS.payment_pending: ['payment'],
-        BOOKING_STATUS.payment_failed: ['payment'],
-        BOOKING_STATUS.payment_confirmed: ['payment', 'completion'],
+        BOOKING_STATUS.payment_pending: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_failed: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_confirmed: ['confirmation', 'payment'],
         BOOKING_STATUS.completed: ['completion'],
     }
 

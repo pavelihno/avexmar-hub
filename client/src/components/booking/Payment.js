@@ -19,9 +19,9 @@ const Payment = () => {
 	const [timeLeft, setTimeLeft] = useState(null);
 
 	useEffect(() => {
-                dispatch(fetchBookingDetails(publicId));
-                dispatch(fetchPayment(publicId));
-        }, [dispatch, publicId]);
+		dispatch(fetchBookingDetails(publicId));
+		dispatch(fetchPayment(publicId));
+	}, [dispatch, publicId]);
 
 	useEffect(() => {
 		if (!payment?.expires_at) return;
@@ -43,15 +43,10 @@ const Payment = () => {
 		}
 	}, [status, navigate, publicId]);
 
-	const handleSuccess = useCallback(() => {
+	const handleError = useCallback(() => {
 		dispatch(fetchBookingDetails(publicId));
 		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
-
-        const handleError = useCallback(() => {
-                dispatch(fetchBookingDetails(publicId));
-                dispatch(fetchPayment(publicId));
-        }, [dispatch, publicId]);
 
 	const getRouteInfo = (flight) => {
 		if (!flight?.route) return null;
@@ -103,7 +98,6 @@ const Payment = () => {
 							<PaymentForm
 								confirmationToken={payment?.confirmation_token}
 								returnUrl={window.location.href}
-								onSuccess={handleSuccess}
 								onError={handleError}
 							/>
 						)}
