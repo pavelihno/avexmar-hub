@@ -51,7 +51,7 @@ class Payment(BaseModel):
 
     @classmethod
     def get_by_provider_payment_id(cls, provider_payment_id: str):
-        return cls.filter_by(provider_payment_id=provider_payment_id).first_or_404()
+        return cls.query.filter(cls.provider_payment_id == provider_payment_id).first_or_404()
 
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
