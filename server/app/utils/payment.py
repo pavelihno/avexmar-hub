@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
@@ -45,31 +43,35 @@ def create_payment(public_id: str) -> Payment:
         'description': f'Booking {booking.public_id}',
         'metadata': {'booking_id': str(booking.public_id), 'expires_at': expires_at.isoformat()},
     }
-    yoo_payment = YooPayment.create(body, uuid.uuid4())
 
-    yookassa_payment_id = getattr(yoo_payment, 'id', None)
-    confirmation_token = getattr(getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None)
+    try:
+        yoo_payment = YooPayment.create(body, uuid.uuid4())
+        yookassa_payment_id = getattr(yoo_payment, 'id', None)
+        confirmation_token = getattr(getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None)
 
-    payment = Payment.create(
-        db.session,
-        booking_id=booking.id,
-        payment_method=PAYMENT_METHOD.yookassa,
-        payment_status=PAYMENT_STATUS.pending,
-        amount=booking.total_price,
-        currency=booking.currency,
-        provider_payment_id=yookassa_payment_id,
-        confirmation_token=confirmation_token,
-        meta=body['metadata'],
-    )
+        payment = Payment.create(
+            db.session,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            amount=booking.total_price,
+            currency=booking.currency,
+            provider_payment_id=yookassa_payment_id,
+            confirmation_token=confirmation_token,
+            meta=body['metadata'],
+        )
 
-    Booking.transition_status(
-        id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
-    )
+        Booking.transition_status(
+            id=booking.id, session=db.session, to_status=BOOKING_STATUS.payment_pending
+        )
 
-    return payment
+        return payment
+
+    except Exception as e:
+        raise e
 
 
-def generate_receipt(booking: Booking) -> Dict[str, Any]:
+def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     """Form receipt object with detailed breakdown"""
     flights = booking.booking_flights.order_by(BookingFlight.id).all()
     outbound_id = flights[0].flight_id if len(flights) > 0 else None
@@ -140,10 +142,10 @@ def generate_receipt(booking: Booking) -> Dict[str, Any]:
     }
 
 
-def capture_payment(payment: Payment) -> None:
+def __capture_payment(payment: Payment) -> None:
     """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
-    receipt = generate_receipt(booking)
+    receipt = __generate_receipt(booking)
     body = {
         'amount': {
             'value': f'{payment.amount:.2f}',
@@ -153,7 +155,16 @@ def capture_payment(payment: Payment) -> None:
         'airline': {'booking_reference': booking.booking_number},
         'metadata': {'booking_id': booking.id, 'booking_number': booking.booking_number},
     }
-    YooPayment.capture(payment.provider_payment_id, body)
+
+    booking = Booking.generate_booking_number(payment.booking_id, session=db.session)
+
+    try:
+        yoo_payment = YooPayment.capture(payment.provider_payment_id, body)
+
+        return yoo_payment
+
+    except Exception as e:
+        raise e
 
 
 def handle_webhook(payload: Dict[str, Any]) -> None:
@@ -166,22 +177,24 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     if not provider_id or not status:
         return
 
-    payment = Payment.query.filter_by(provider_payment_id=provider_id).first_or_404()
+    payment = Payment.get_by_provider_payment_id(provider_id)
 
     updates = {'payment_status': status, 'last_webhook': payload}
     if status == PAYMENT_STATUS.succeeded.value:
         updates['is_paid'] = True
-    Payment.update(payment.id, session=db.session, **updates)
+
+    payment = Payment.update(payment.id, session=db.session, **updates)
 
     if event == 'payment.waiting_for_capture':
-        Booking.generate_booking_number(payment.booking_id, session=db.session)
-        api_payment = YooPayment.find_one(provider_id)
-        if api_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
-            capture_payment(payment)
+        yoo_payment = YooPayment.find_one(provider_id)
+        if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
+            __capture_payment(payment)
+
     elif event == 'payment.canceled':
         Booking.transition_status(
             id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_failed
         )
+
     elif event == 'payment.succeeded':
         Booking.transition_status(
             id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_confirmed
@@ -189,3 +202,6 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         Booking.transition_status(
             id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.completed
         )
+
+    else:
+        raise ValueError(f'Unknown event type: {event}')

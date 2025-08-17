@@ -51,13 +51,41 @@ def create_payment():
         raise
 
 
-def confirm_payment():
-    pass
+def capture_payment():
+    payment_id = '3033b916-000f-5001-8000-117e3f89084e'
+    total_price = 39500
+    currency = 'rub'
+
+    body = {
+        'amount': {
+            'value': f'{total_price:.2f}',
+            'currency': currency.upper(),
+        }
+    }
+    try:
+        payment = YooPayment.capture(payment_id, body)
+
+        print("Payment captured successfully:", payment)
+
+    except Exception as e:
+        print("Unexpected error:", type(e).__name__, e)
+        raise
 
 
 def decline_payment():
-    pass
+    payment_id = '3033aee9-000f-5001-8000-146f7e05aba1'
+
+    try:
+        payment = YooPayment.cancel(payment_id)
+
+        print("Payment declined successfully:", payment)
+
+    except Exception as e:
+        print("Unexpected error:", type(e).__name__, e)
+        raise
 
 
 if __name__ == "__main__":
-    create_payment()
+    # create_payment()
+    capture_payment()
+    # decline_payment()
