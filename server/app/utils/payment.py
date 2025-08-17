@@ -186,3 +186,6 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         Booking.transition_status(
             id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.payment_confirmed
         )
+        Booking.transition_status(
+            id=payment.booking_id, session=db.session, to_status=BOOKING_STATUS.completed
+        )
