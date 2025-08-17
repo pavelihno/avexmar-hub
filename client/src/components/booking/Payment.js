@@ -8,33 +8,7 @@ import BookingProgress from './BookingProgress';
 import PaymentForm from './PaymentForm';
 import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, parseDate } from '../utils';
-
-const formatTimer = (ms) => {
-	const total = Math.max(0, Math.floor(ms / 1000));
-	const hours = Math.floor(total / 3600);
-	const minutes = Math.floor((total % 3600) / 60);
-	const seconds = total % 60;
-	return (
-		`${hours.toString().padStart(2, '0')}:` +
-		`${minutes.toString().padStart(2, '0')}:` +
-		`${seconds.toString().padStart(2, '0')}`
-	);
-};
-
-const toExpiryMs = (isoLike) => {
-	if (!isoLike) return NaN;
-	let s = String(isoLike).trim();
-
-	// Trim fractional seconds to 3 digits (milliseconds)
-	s = s.replace(/\.(\d{3})\d+$/, '.$1');
-
-	// If there's no timezone info, assume UTC (append Z)
-	if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) s += 'Z';
-
-	const t = Date.parse(s);
-	return Number.isNaN(t) ? NaN : t;
-};
+import { formatNumber } from '../utils';
 
 const Payment = () => {
 	const { publicId } = useParams();
@@ -46,34 +20,11 @@ const Payment = () => {
 	const paymentStatus = payment?.payment_status;
 	const paymentAmount = payment?.amount;
 	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
-	const expiresAt = payment?.expires_at;
 	const confirmationToken = payment?.confirmation_token;
-
-	const [timeLeft, setTimeLeft] = useState(null);
 
 	useEffect(() => {
 		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
-
-	useEffect(() => {
-		if (!expiresAt) return;
-
-		const expiry = toExpiryMs(expiresAt);
-		if (Number.isNaN(expiry)) {
-			setTimeLeft(0);
-			return;
-		}
-
-		const tick = () => {
-			const left = Math.max(expiry - Date.now(), 0);
-			setTimeLeft(left);
-			if (left === 0) clearInterval(id);
-		};
-
-		tick();
-		const id = setInterval(tick, 1000);
-		return () => clearInterval(id);
-	}, [expiresAt]);
 
 	useEffect(() => {
 		if (paymentStatus === 'succeeded') {
@@ -100,11 +51,6 @@ const Payment = () => {
 									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
 								</Typography>
 							</Box>
-							{expiresAt && timeLeft !== null && (
-								<Box>
-									<Typography variant='h6'>{formatTimer(timeLeft)}</Typography>
-								</Box>
-							)}
 						</Box>
 
 						{paymentStatus === 'canceled' && (
