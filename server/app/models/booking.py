@@ -222,21 +222,17 @@ class Booking(BaseModel):
     def transition_status(cls, id, to_status, session: Session | None = None):
         session = session or db.session
         booking = cls.get_or_404(id)
-        to_status_enum = (
-            BOOKING_STATUS(to_status) if isinstance(
-                to_status, str) else to_status
-        )
-        from_status_enum = booking.status
+        from_status = booking.status
         if (
-            from_status_enum != to_status_enum
-            and to_status_enum not in cls.ALLOWED_TRANSITIONS.get(from_status_enum, set())
+            from_status != to_status
+            and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
         ):
             raise ValueError(
-                f'Illegal transition: {from_status_enum.value} -> {to_status_enum.value}'
+                f'Illegal transition: {from_status.value} -> {to_status.value}'
             )
 
         return cls.update(
             id,
             session=session,
-            status=to_status_enum,
+            status=to_status,
         )

@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { Box, Alert } from '@mui/material';
+
+import { UI_LABELS } from '../../constants/uiLabels';
+
 // Renders YooKassa checkout widget inside booking payment step.
 const WIDGET_SRC = 'https://yookassa.ru/checkout-widget/v1/checkout-widget.js';
 
@@ -34,6 +38,10 @@ const PaymentForm = ({ confirmationToken, returnUrl, onError }) => {
 				await ensureScript();
 				if (!window.YooMoneyCheckoutWidget || !confirmationToken) return;
 
+				// Ensure container exists in DOM before rendering
+				const el = document.getElementById('payment-form');
+				if (!el) return;
+
 				if (containerRef.current) containerRef.current.innerHTML = '';
 				widget = new window.YooMoneyCheckoutWidget({
 					confirmation_token: confirmationToken,
@@ -43,7 +51,7 @@ const PaymentForm = ({ confirmationToken, returnUrl, onError }) => {
 				widget.render('payment-form');
 				setError(null);
 			} catch (e) {
-				const message = e?.message || 'Failed to load payment widget';
+				const message = e?.message || UI_LABELS.BOOKING.payment_form.load_error;
 				setError(message);
 				onError && onError(e);
 			}
@@ -55,28 +63,32 @@ const PaymentForm = ({ confirmationToken, returnUrl, onError }) => {
 			if (widget && typeof widget.destroy === 'function') {
 				try {
 					widget.destroy();
-				} catch (_) {
-					// ignore
-				}
+				} catch (_) {}
 			}
 			if (containerRef.current) containerRef.current.innerHTML = '';
 		};
 	}, [confirmationToken, returnUrl, onError, ensureScript]);
 
-	if (loading) {
-		return <div style={{ padding: '8px 0', color: '#666', fontSize: 14 }}>Loading payment form…</div>;
-	}
-
-	if (error) {
-		return <div style={{ padding: '8px 0', color: '#c62828', fontSize: 14 }}>{error}</div>;
-	}
-
-	if (!confirmationToken) {
-		return <div style={{ padding: '8px 0', color: '#666', fontSize: 14 }}>Waiting for payment token…</div>;
-	}
-
-	return <div id='payment-form' ref={containerRef} />;
+	return (
+		<Box>
+			{loading && (
+				<Alert severity='info' sx={{ my: 1, fontSize: 14 }}>
+					{UI_LABELS.BOOKING.payment_form.loading}
+				</Alert>
+			)}
+			{error && (
+				<Alert severity='error' sx={{ my: 1, fontSize: 14 }}>
+					{error}
+				</Alert>
+			)}
+			{!confirmationToken && (
+				<Alert severity='warning' sx={{ my: 1, fontSize: 14 }}>
+					{UI_LABELS.BOOKING.payment_form.waiting}
+				</Alert>
+			)}
+			<Box id='payment-form' ref={containerRef} />
+		</Box>
+	);
 };
 
 export default PaymentForm;
-

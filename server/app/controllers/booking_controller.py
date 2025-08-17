@@ -161,7 +161,7 @@ def create_booking_passengers(current_user):
     booking = Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status=BOOKING_STATUS.passengers_added.value,
+        to_status=BOOKING_STATUS.passengers_added,
     )
 
     return jsonify({'status': 'ok'}), 200
@@ -179,7 +179,7 @@ def confirm_booking(current_user):
     Booking.transition_status(
         id=booking.id,
         session=session,
-        to_status=BOOKING_STATUS.confirmed.value,
+        to_status=BOOKING_STATUS.confirmed,
     )
 
     return jsonify({'status': 'ok'}), 200

@@ -6,19 +6,34 @@ import { Box, Card, CardContent, Typography, Button, Alert } from '@mui/material
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PaymentForm from './PaymentForm';
-import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
 import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber, parseDate } from '../utils';
 
-const formatTime = (ms) => {
-	const total = Math.floor(ms / 1000);
+const formatTimer = (ms) => {
+	const total = Math.max(0, Math.floor(ms / 1000));
 	const hours = Math.floor(total / 3600);
 	const minutes = Math.floor((total % 3600) / 60);
 	const seconds = total % 60;
-	return `${hours.toString().padStart(2, '0')}:${minutes
-		.toString()
-		.padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	return (
+		`${hours.toString().padStart(2, '0')}:` +
+		`${minutes.toString().padStart(2, '0')}:` +
+		`${seconds.toString().padStart(2, '0')}`
+	);
+};
+
+const toExpiryMs = (isoLike) => {
+	if (!isoLike) return NaN;
+	let s = String(isoLike).trim();
+
+	// Trim fractional seconds to 3 digits (milliseconds)
+	s = s.replace(/\.(\d{3})\d+$/, '.$1');
+
+	// If there's no timezone info, assume UTC (append Z)
+	if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+
+	const t = Date.parse(s);
+	return Number.isNaN(t) ? NaN : t;
 };
 
 const Payment = () => {
@@ -26,97 +41,99 @@ const Payment = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const booking = useSelector((s) => s.bookingProcess.current);
 	const payment = useSelector((s) => s.payment.current);
+
+	const paymentStatus = payment?.payment_status;
+	const paymentAmount = payment?.amount;
+	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
+	const expiresAt = payment?.expires_at;
+	const confirmationToken = payment?.confirmation_token;
+
 	const [timeLeft, setTimeLeft] = useState(null);
 
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
 		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
 
 	useEffect(() => {
-		if (!payment?.expires_at) return;
-		const expiry = parseDate(payment.expires_at).getTime();
-		const tick = () => setTimeLeft(Math.max(expiry - Date.now(), 0));
+		if (!expiresAt) return;
+
+		const expiry = toExpiryMs(expiresAt);
+		if (Number.isNaN(expiry)) {
+			setTimeLeft(0);
+			return;
+		}
+
+		const tick = () => {
+			const left = Math.max(expiry - Date.now(), 0);
+			setTimeLeft(left);
+			if (left === 0) clearInterval(id);
+		};
+
 		tick();
 		const id = setInterval(tick, 1000);
 		return () => clearInterval(id);
-	}, [payment?.expires_at]);
-
-	const status = booking?.status;
+	}, [expiresAt]);
 
 	useEffect(() => {
-		if (status === 'payment_confirmed' || status === 'completed') {
+		if (paymentStatus === 'succeeded') {
 			navigate(`/booking/${publicId}/completion`);
 		}
-	}, [status, navigate, publicId]);
+	}, [paymentStatus, navigate, publicId]);
 
 	const handleError = useCallback(() => {
-		dispatch(fetchBookingDetails(publicId));
 		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
-
-	const flight = booking?.flights?.[0];
-	const route = flight?.route;
-	const routeInfo =
-		route &&
-		UI_LABELS.SCHEDULE.from_to(
-			route.origin_airport?.city_name || route.origin_airport?.iata_code,
-			route.destination_airport?.city_name || route.destination_airport?.iata_code,
-		);
-
-	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='payment' />
-			<Box sx={{ mt: 2 }}>
+			<Box sx={{ mt: 2, mx: 'auto', width: '100%', maxWidth: 'md' }}>
 				<Card>
 					<CardContent>
 						<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-							{routeInfo && (
-								<Typography variant='h6'>{routeInfo}</Typography>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+								<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+									{`${UI_LABELS.BOOKING.payment_form.total}: `}
+								</Typography>
+								<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
+									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
+								</Typography>
+							</Box>
+							{expiresAt && timeLeft !== null && (
+								<Box>
+									<Typography variant='h6'>{formatTimer(timeLeft)}</Typography>
+								</Box>
 							)}
-							<Typography variant='h6' sx={{ fontWeight: 600 }}>
-								{UI_LABELS.BOOKING.buyer_form.summary.total}:{' '}
-								{formatNumber(booking?.total_price || 0)} {currencySymbol}
-							</Typography>
 						</Box>
-						{payment?.expires_at && timeLeft !== null && (
-							<Typography variant='body2' sx={{ mb: 2 }}>
-								{UI_LABELS.BOOKING.payment_time_left || 'Time left to pay'}:{' '}
-								{formatTime(timeLeft)}
-							</Typography>
-						)}
-						{status === 'payment_failed' && (
+
+						{paymentStatus === 'canceled' && (
 							<Alert severity='error' sx={{ mb: 2 }}>
-								{UI_LABELS.BOOKING.payment_failed || 'Payment failed'}
+								{UI_LABELS.BOOKING.payment_form.payment_failed}
 							</Alert>
 						)}
-						{status !== 'payment_confirmed' && (
+						{paymentStatus !== 'succeeded' && (
 							<PaymentForm
-								confirmationToken={payment?.confirmation_token}
+								confirmationToken={confirmationToken}
 								returnUrl={window.location.href}
 								onError={handleError}
 							/>
 						)}
-						{status === 'payment_failed' && (
+						{paymentStatus === 'canceled' && (
 							<Button
 								variant='contained'
 								color='orange'
 								sx={{ mt: 2 }}
 								onClick={() => {
-									dispatch(fetchBookingDetails(publicId));
 									dispatch(
 										createPayment({
 											public_id: publicId,
 											return_url: window.location.href,
-										}),
+										})
 									);
 								}}
 							>
-								{UI_LABELS.BOOKING.retry_payment || 'Retry payment'}
+								{UI_LABELS.BOOKING.payment_form.retry_payment}
 							</Button>
 						)}
 					</CardContent>
@@ -127,4 +144,3 @@ const Payment = () => {
 };
 
 export default Payment;
-

@@ -66,8 +66,10 @@ const Confirmation = () => {
 	const handlePayment = async () => {
 		setLoading(true);
 		try {
-			await dispatch(confirmBooking(publicId)).unwrap();
-			await dispatch(createPayment({ public_id: publicId })).unwrap();
+			if (booking.status === 'passengers_added') {
+				await dispatch(confirmBooking(publicId)).unwrap();
+				await dispatch(createPayment({ public_id: publicId })).unwrap();
+			}
 			await dispatch(fetchBookingAccess(publicId)).unwrap();
 			navigate(`/booking/${publicId}/payment`);
 		} catch (e) {

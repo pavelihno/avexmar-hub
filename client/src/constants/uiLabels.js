@@ -322,6 +322,14 @@ export const UI_LABELS = {
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
+		payment_form: {
+			total: 'К оплате',
+			payment_failed: 'Оплата не прошла',
+			retry_payment: 'Повторить оплату',
+			loading: 'Загрузка формы оплаты...',
+			waiting: 'Ожидание токена оплаты...',
+			load_error: 'Не удалось загрузить виджет оплаты',
+		},
 	},
 	SCHEDULE: {
 		title: 'Расписание рейсов',

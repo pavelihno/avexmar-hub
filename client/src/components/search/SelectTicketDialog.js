@@ -433,7 +433,22 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={onClose}>{UI_LABELS.BUTTONS.close}</Button>
-					<Tooltip title={!hasSeats ? UI_LABELS.SEARCH.flight_details.seats_unavailable : ''}>
+					<Tooltip
+						title={
+							!hasSeats ? (
+								<Typography variant='caption'>
+									{UI_LABELS.SEARCH.flight_details.seats_unavailable}
+								</Typography>
+							) : (
+								''
+							)
+						}
+						open={!hasSeats}
+						placement='top'
+						disableHoverListener
+						disableFocusListener
+						disableTouchListener
+					>
 						<span>
 							<Button
 								variant='contained'
