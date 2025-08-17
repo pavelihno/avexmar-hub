@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, Alert } from '@mui/material';
+
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PaymentForm from './PaymentForm';
@@ -10,12 +11,23 @@ import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
 import { formatNumber, parseDate } from '../utils';
 
+const formatTime = (ms) => {
+	const total = Math.floor(ms / 1000);
+	const hours = Math.floor(total / 3600);
+	const minutes = Math.floor((total % 3600) / 60);
+	const seconds = total % 60;
+	return `${hours.toString().padStart(2, '0')}:${minutes
+		.toString()
+		.padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
 const Payment = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const booking = useSelector((state) => state.bookingProcess.current);
-	const payment = useSelector((state) => state.payment.current);
+
+	const booking = useSelector((s) => s.bookingProcess.current);
+	const payment = useSelector((s) => s.payment.current);
 	const [timeLeft, setTimeLeft] = useState(null);
 
 	useEffect(() => {
@@ -26,13 +38,10 @@ const Payment = () => {
 	useEffect(() => {
 		if (!payment?.expires_at) return;
 		const expiry = parseDate(payment.expires_at).getTime();
-		const tick = () => {
-			const diff = expiry - Date.now();
-			setTimeLeft(diff > 0 ? diff : 0);
-		};
+		const tick = () => setTimeLeft(Math.max(expiry - Date.now(), 0));
 		tick();
-		const interval = setInterval(tick, 1000);
-		return () => clearInterval(interval);
+		const id = setInterval(tick, 1000);
+		return () => clearInterval(id);
 	}, [payment?.expires_at]);
 
 	const status = booking?.status;
@@ -48,26 +57,16 @@ const Payment = () => {
 		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
 
-	const getRouteInfo = (flight) => {
-		if (!flight?.route) return null;
-		const origin = flight.route.origin_airport || {};
-		const dest = flight.route.destination_airport || {};
-		return UI_LABELS.SCHEDULE.from_to(origin.city_name || origin.iata_code, dest.city_name || dest.iata_code);
-	};
-
-	const routeInfo = getRouteInfo(booking?.flights?.[0]);
+	const flight = booking?.flights?.[0];
+	const route = flight?.route;
+	const routeInfo =
+		route &&
+		UI_LABELS.SCHEDULE.from_to(
+			route.origin_airport?.city_name || route.origin_airport?.iata_code,
+			route.destination_airport?.city_name || route.destination_airport?.iata_code,
+		);
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
-
-	const formatTime = (ms) => {
-		const total = Math.floor(ms / 1000);
-		const hours = Math.floor(total / 3600);
-		const minutes = Math.floor((total % 3600) / 60);
-		const seconds = total % 60;
-		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
-			.toString()
-			.padStart(2, '0')}`;
-	};
 
 	return (
 		<Base maxWidth='lg'>
@@ -75,18 +74,19 @@ const Payment = () => {
 			<Box sx={{ mt: 2 }}>
 				<Card>
 					<CardContent>
-						{routeInfo && (
-							<Typography variant='h6' sx={{ mb: 2 }}>
-								{routeInfo}
+						<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+							{routeInfo && (
+								<Typography variant='h6'>{routeInfo}</Typography>
+							)}
+							<Typography variant='h6' sx={{ fontWeight: 600 }}>
+								{UI_LABELS.BOOKING.buyer_form.summary.total}:{' '}
+								{formatNumber(booking?.total_price || 0)} {currencySymbol}
 							</Typography>
-						)}
-						<Typography variant='body1' sx={{ mb: 2 }}>
-							{UI_LABELS.BOOKING.buyer_form.summary.total}: {formatNumber(booking?.total_price || 0)}{' '}
-							{currencySymbol}
-						</Typography>
+						</Box>
 						{payment?.expires_at && timeLeft !== null && (
 							<Typography variant='body2' sx={{ mb: 2 }}>
-								{UI_LABELS.BOOKING.payment_time_left || 'Time left to pay'}: {formatTime(timeLeft)}
+								{UI_LABELS.BOOKING.payment_time_left || 'Time left to pay'}:{' '}
+								{formatTime(timeLeft)}
 							</Typography>
 						)}
 						{status === 'payment_failed' && (
@@ -108,7 +108,12 @@ const Payment = () => {
 								sx={{ mt: 2 }}
 								onClick={() => {
 									dispatch(fetchBookingDetails(publicId));
-									dispatch(createPayment({ public_id: publicId, return_url: window.location.href }));
+									dispatch(
+										createPayment({
+											public_id: publicId,
+											return_url: window.location.href,
+										}),
+									);
 								}}
 							>
 								{UI_LABELS.BOOKING.retry_payment || 'Retry payment'}
@@ -122,3 +127,4 @@ const Payment = () => {
 };
 
 export default Payment;
+
