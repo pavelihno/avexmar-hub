@@ -43,12 +43,20 @@ const PaymentForm = ({ confirmationToken, returnUrl, onError }) => {
 				if (!el) return;
 
 				if (containerRef.current) containerRef.current.innerHTML = '';
+
 				widget = new window.YooMoneyCheckoutWidget({
 					confirmation_token: confirmationToken,
 					return_url: returnUrl,
 					error_callback: onError,
+					language: 'ru',
 				});
+
+				widget.on('complete', () => {
+					widget.destroy();
+				});
+
 				widget.render('payment-form');
+
 				setError(null);
 			} catch (e) {
 				const message = e?.message || UI_LABELS.BOOKING.payment_form.load_error;
