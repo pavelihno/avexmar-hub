@@ -146,7 +146,7 @@ def create_payment(public_id: str) -> Payment:
         }
     }
 
-    print(body)
+    # print(body)
 
     try:
         yoo_payment = YooPayment.create(body, uuid.uuid4())
