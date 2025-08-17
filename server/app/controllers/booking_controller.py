@@ -9,7 +9,7 @@ from app.models.payment import Payment
 from app.middlewares.auth_middleware import admin_required, current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.payment import create_payment, handle_webhook
-from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY
+from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY, PAYMENT_STATUS
 
 
 @admin_required
@@ -270,11 +270,14 @@ def get_booking_payment(current_user, public_id):
     booking = Booking.get_by_public_id(public_id)
     payment = (
         Payment.query.filter_by(booking_id=booking.id)
+        .filter(
+            Payment.payment_status.notin_(
+                [PAYMENT_STATUS.succeeded, PAYMENT_STATUS.canceled]
+            )
+        )
         .order_by(Payment.id.desc())
-        .first()
+        .first_or_404()
     )
-    if not payment:
-        return jsonify({'message': 'payment not found'}), 404
     return jsonify(payment.to_dict()), 200
 
 

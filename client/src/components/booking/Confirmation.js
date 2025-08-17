@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -9,31 +9,36 @@ import {
 	Button,
 	Divider,
 	Table,
-	TableBody,
-	TableHead,
-	TableRow,
-	TableCell,
-	Grid,
-	Accordion,
-	AccordionSummary,
-	AccordionDetails,
+        TableBody,
+        TableHead,
+        TableRow,
+        TableCell,
+        Grid,
+        Accordion,
+        AccordionSummary,
+        AccordionDetails,
+        CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
+import { createPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
 import { formatNumber, formatDate, formatTime, formatDuration, extractRouteInfo } from '../utils';
 
 const Confirmation = () => {
-	const { publicId } = useParams();
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
-	const booking = useSelector((state) => state.bookingProcess.current);
+        const { publicId } = useParams();
+        const dispatch = useDispatch();
+        const navigate = useNavigate();
+        const { current: booking, isLoading: bookingLoading } = useSelector(
+                (state) => state.bookingProcess
+        );
+        const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+        useEffect(() => {
+                dispatch(fetchBookingDetails(publicId));
+        }, [dispatch, publicId]);
 
 	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
@@ -60,22 +65,36 @@ const Confirmation = () => {
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
-	const handlePayment = async () => {
-		try {
-			await dispatch(confirmBooking(publicId)).unwrap();
-			await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/payment`);
-		} catch (e) {
-			// errors handled via redux state
-		}
-	};
+        const handlePayment = async () => {
+                setLoading(true);
+                try {
+                        await dispatch(confirmBooking(publicId)).unwrap();
+                        await dispatch(createPayment({ public_id: publicId })).unwrap();
+                        await dispatch(fetchBookingAccess(publicId)).unwrap();
+                        navigate(`/booking/${publicId}/payment`);
+                } catch (e) {
+                        // errors handled via redux state
+                        setLoading(false);
+                }
+        };
 
-	return (
-		<Base maxWidth='lg'>
-			<BookingProgress activeStep='confirmation' />
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
-				<Grid item xs={12} md={9} lg={9}>
-					{/* Flights */}
+        if (bookingLoading || !booking) {
+                return (
+                        <Base maxWidth='lg'>
+                                <BookingProgress activeStep='confirmation' />
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                        <CircularProgress />
+                                </Box>
+                        </Base>
+                );
+        }
+
+        return (
+                <Base maxWidth='lg'>
+                        <BookingProgress activeStep='confirmation' />
+                        <Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+                                <Grid item xs={12} md={9} lg={9}>
+                                        {/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 						<Accordion variant='outlined' sx={{ mb: 2 }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -371,11 +390,20 @@ const Confirmation = () => {
 					)}
 
 					{/* Payment button */}
-					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-						<Button variant='contained' color='orange' onClick={handlePayment}>
-							{UI_LABELS.BOOKING.confirmation.payment_button}
-						</Button>
-					</Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                <Button
+                                                        variant='contained'
+                                                        color='orange'
+                                                        onClick={handlePayment}
+                                                        disabled={loading}
+                                                >
+                                                        {loading ? (
+                                                                <CircularProgress size={24} color='inherit' />
+                                                        ) : (
+                                                                UI_LABELS.BOOKING.confirmation.payment_button
+                                                        )}
+                                                </Button>
+                                        </Box>
 				</Grid>
 			</Grid>
 		</Base>

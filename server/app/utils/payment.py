@@ -23,15 +23,10 @@ def create_payment(public_id: str) -> Payment:
     """Create a two-stage payment in YooKassa and persist model"""
     booking = Booking.get_by_public_id(public_id)
 
-    # If a non-terminal payment already exists for this booking, return it
+    # If a pending payment already exists for this booking, return it
     existing = (
         booking.payments
-        .filter(
-            Payment.payment_status.notin_([
-                PAYMENT_STATUS.succeeded,
-                PAYMENT_STATUS.canceled,
-            ])
-        )
+        .filter(Payment.payment_status == PAYMENT_STATUS.pending)
         .order_by(Payment.created_at.desc())
         .first()
     )
@@ -174,9 +169,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     if not provider_id or not status:
         return
 
-    payment = Payment.query.filter_by(provider_payment_id=provider_id).first()
-    if not payment:
-        return
+    payment = Payment.query.filter_by(provider_payment_id=provider_id).first_or_404()
 
     updates = {'payment_status': status, 'last_webhook': payload}
     if status == PAYMENT_STATUS.succeeded.value:
