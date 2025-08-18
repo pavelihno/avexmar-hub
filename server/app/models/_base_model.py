@@ -141,7 +141,7 @@ class BaseModel(db.Model):
 
         try:
             session.delete(instance)
-            if commit and not session.in_transaction():
+            if commit:
                 session.commit()
             else:
                 session.flush()
@@ -155,7 +155,7 @@ class BaseModel(db.Model):
         cls,
         session: Session | None = None,
         *,
-        commit: bool = False,
+        commit: bool = True,
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
@@ -168,7 +168,7 @@ class BaseModel(db.Model):
 
         session.add(instance)
         try:
-            if commit and not session.in_transaction():
+            if commit:
                 session.commit()
             else:
                 session.flush()
@@ -183,7 +183,7 @@ class BaseModel(db.Model):
         _id,
         session: Session | None = None,
         *,
-        commit: bool = False,
+        commit: bool = True,
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
@@ -199,7 +199,7 @@ class BaseModel(db.Model):
             raise ModelValidationError(errors)
 
         try:
-            if commit and not session.in_transaction():
+            if commit:
                 session.commit()
             else:
                 session.flush()
@@ -220,7 +220,7 @@ class BaseModel(db.Model):
         cls,
         session: Session | None = None,
         *,
-        commit: bool = False,
+        commit: bool = True,
     ) -> int:
         session = session or db.session
         try:

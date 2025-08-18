@@ -18,8 +18,8 @@ class Tariff(BaseModel):
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     conditions = db.Column(db.String, nullable=True)
-    baggage = db.Column(db.Integer, nullable=False, default=0)
-    hand_luggage = db.Column(db.Integer, nullable=False, default=0)
+    baggage = db.Column(db.Integer, nullable=False)
+    hand_luggage = db.Column(db.Integer, nullable=False)
 
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
