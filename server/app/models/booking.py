@@ -122,7 +122,13 @@ class Booking(BaseModel):
         )
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         kwargs = cls.convert_enums(kwargs)
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
@@ -131,7 +137,7 @@ class Booking(BaseModel):
             'at': datetime.now().isoformat()
         }]
         kwargs['status_history'] = history
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
     def update(

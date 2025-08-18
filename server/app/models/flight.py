@@ -178,7 +178,11 @@ class Flight(BaseModel):
         )
 
     @classmethod
-    def upload_from_file(cls, file, session: Session | None = None):
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
         session = session or db.session
         rows = parse_xlsx(
             file,
@@ -237,6 +241,7 @@ class Flight(BaseModel):
                         scheduled_departure_time=parse_time(row.get('scheduled_departure_time')),
                         scheduled_arrival=parse_date(row.get('scheduled_arrival')),
                         scheduled_arrival_time=parse_time(row.get('scheduled_arrival_time')),
+                        commit=False,
                     )
 
                     used_tariffs = {}
@@ -262,6 +267,7 @@ class Flight(BaseModel):
                             flight_id=flight.id,
                             tariff_id=tariff.id,
                             seats_number=seats_number,
+                            commit=False,
                         )
 
                     flights.append(flight)
@@ -270,6 +276,8 @@ class Flight(BaseModel):
 
             if row.get('error'):
                 error_rows.append(row)
+
+        session.commit()
 
         return flights, error_rows
 
@@ -302,7 +310,13 @@ class Flight(BaseModel):
                 {'flight_number': 'Flight with this number already exists for the given airline and route.'})
 
     @classmethod
-    def create(cls, session=None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         flight_number = kwargs.get('flight_number')
         airline_id = kwargs.get('airline_id')
@@ -311,10 +325,17 @@ class Flight(BaseModel):
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure
         )
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def update(cls, _id, session=None, **kwargs):
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         flight_number = kwargs.get('flight_number')
         airline_id = kwargs.get('airline_id')
@@ -323,4 +344,4 @@ class Flight(BaseModel):
         cls._check_flight_uniqueness(
             session, flight_number, airline_id, route_id, scheduled_departure, exclude_id=_id
         )
-        return super().update(_id, session, **kwargs)
+        return super().update(_id, session, commit=commit, **kwargs)

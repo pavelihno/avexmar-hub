@@ -18,13 +18,27 @@ class PasswordResetToken(BaseModel):
     user: Mapped['User'] = db.relationship('User', back_populates='reset_tokens')
 
     @classmethod
-    def create(cls, user: User, session: Session | None = None, expires_in_hours=1):
+    def create(
+        cls,
+        user: User,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        expires_in_hours=1,
+    ):
         session = session or db.session
-        
+
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now() + timedelta(hours=expires_in_hours)
 
-        return super().create(session=db.session, token=token, user_id=user.id, expires_at=expires_at, used=False)
+        return super().create(
+            session=session,
+            commit=commit,
+            token=token,
+            user_id=user.id,
+            expires_at=expires_at,
+            used=False,
+        )
 
     @classmethod
     def verify_token(cls, token):

@@ -81,7 +81,11 @@ class Airport(BaseModel):
         return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
-    def upload_from_file(cls, file, session: Session | None = None):
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
         session = session or db.session
         rows = parse_xlsx(
             file,
@@ -120,6 +124,7 @@ class Airport(BaseModel):
                         city_code=str(row.get('city_code')),
                         country_id=country.id,
                         timezone_id=tz.id if tz else None,
+                        commit=False,
                     )
                     airports.append(airport)
                 except Exception as e:
@@ -127,5 +132,7 @@ class Airport(BaseModel):
 
             if row.get('error'):
                 error_rows.append(row)
+
+        session.commit()
 
         return airports, error_rows

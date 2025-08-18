@@ -46,11 +46,17 @@ class Country(BaseModel):
         return super().get_all(sort_by=['name'], descending=False)
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         kwargs['code_a2'] = kwargs.get('code_a2', '').upper()
         kwargs['code_a3'] = kwargs.get('code_a3', '').upper()
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
     def get_xlsx_template(cls):
@@ -65,7 +71,11 @@ class Country(BaseModel):
         return cls.query.filter((cls.code_a2 == code) | (cls.code_a3 == code)).one_or_none()
 
     @classmethod
-    def upload_from_file(cls, file, session: Session | None = None):
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
         session = session or db.session
         rows = parse_xlsx(
             file, cls.upload_fields,
@@ -77,11 +87,12 @@ class Country(BaseModel):
             if not row.get('error'):
                 try:
                     country = cls.create(
-                        session, 
+                        session,
                         name=str(row.get('name')),
                         name_en=str(row.get('name_en')),
                         code_a2=str(row.get('code_a2')),
-                        code_a3=str(row.get('code_a3'))
+                        code_a3=str(row.get('code_a3')),
+                        commit=False,
                     )
                     countries.append(country)
                 except Exception as e:
@@ -89,5 +100,7 @@ class Country(BaseModel):
 
             if row.get('error'):
                 error_rows.append(row)
+
+        session.commit()
 
         return countries, error_rows

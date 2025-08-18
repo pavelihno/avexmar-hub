@@ -1,5 +1,5 @@
 from typing import List, TYPE_CHECKING
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
@@ -47,23 +47,36 @@ class FlightTariff(BaseModel):
             raise ModelValidationError({'seat_class': 'flight tariff for this class already exists'})
 
     @classmethod
-    def create(cls, session=None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         # Deprecated
         # flight_id = kwargs.get('flight_id')
         # tariff_id = kwargs.get('tariff_id')
         # if flight_id is not None and tariff_id is not None:
         #     cls.__check_seat_class_unique(session, flight_id, tariff_id)
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def update(cls, _id, session=None, **kwargs):
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
         # Deprecated
         # flight_id = kwargs.get('flight_id', instance.flight_id)
         # tariff_id = kwargs.get('tariff_id', instance.tariff_id)
         # if flight_id is not None and tariff_id is not None:
-            # cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
+        #     cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
 
-        return super().update(_id, session, **kwargs)
+        return super().update(_id, session, commit=commit, **kwargs)
