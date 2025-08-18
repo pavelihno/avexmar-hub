@@ -57,6 +57,19 @@ def __create_app(_config_class, _db):
     init_mail(app)
     register_error_handlers(app)
 
+    @app.teardown_request
+    def teardown_transaction(exception=None):
+        session = db.session
+        if exception:
+            session.rollback()
+        else:
+            try:
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+        session.remove()
+
     # auth
     app.route('/register', methods=['POST'])(register)
     app.route('/login', methods=['POST'])(login)

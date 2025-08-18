@@ -80,7 +80,6 @@ def reset_password():
 
     user = User.change_password(token.user_id, password)
     token.used = True
-    db.session.commit()
     if user:
         token_jwt = signJWT(user.email)
         return jsonify({'token': token_jwt, 'user': user.to_dict()}), 200
