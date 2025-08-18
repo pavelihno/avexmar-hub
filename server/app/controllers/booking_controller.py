@@ -80,36 +80,36 @@ def create_booking_process(current_user):
         passengers,
     )
 
-    with session.begin():
-        booking = Booking.create(
+    booking = Booking.create(
+        session,
+        commit=False,
+        currency=price['currency'],
+        fare_price=price['fare_price'],
+        fees=sum(f['total'] for f in price['fees']),
+        total_discounts=price['total_discounts'],
+        total_price=price['total_price'],
+        passenger_counts=passengers,
+        user_id=current_user.id if current_user else None,
+    )
+
+    if outbound_id:
+        BookingFlight.create(
             session,
             commit=False,
-            currency=price['currency'],
-            fare_price=price['fare_price'],
-            fees=sum(f['total'] for f in price['fees']),
-            total_discounts=price['total_discounts'],
-            total_price=price['total_price'],
-            passenger_counts=passengers,
-            user_id=current_user.id if current_user else None,
+            booking_id=booking.id,
+            flight_id=outbound_id,
+            tariff_id=outbound_tariff_id,
+        )
+    if return_id:
+        BookingFlight.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            flight_id=return_id,
+            tariff_id=return_tariff_id,
         )
 
-        if outbound_id:
-            BookingFlight.create(
-                session,
-                commit=False,
-                booking_id=booking.id,
-                flight_id=outbound_id,
-                tariff_id=outbound_tariff_id,
-            )
-        if return_id:
-            BookingFlight.create(
-                session,
-                commit=False,
-                booking_id=booking.id,
-                flight_id=return_id,
-                tariff_id=return_tariff_id,
-            )
-
+    session.flush()
     session.refresh(booking)
     result = {'public_id': str(booking.public_id)}
     return jsonify(result), 201
@@ -126,71 +126,71 @@ def create_booking_passengers(current_user):
 
     session = db.session
 
-    with session.begin():
-        booking = Booking.update_by_public_id(
-            public_id,
-            session=session,
-            commit=False,
-            **buyer
-        )
+    booking = Booking.update_by_public_id(
+        public_id,
+        session=session,
+        commit=False,
+        **buyer
+    )
 
-        existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
-        processed_ids = set()
-        for pdata in passengers:
-            pid = pdata.get('id')
-            category = pdata.get('category')
+    existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
+    processed_ids = set()
+    for pdata in passengers:
+        pid = pdata.get('id')
+        category = pdata.get('category')
 
-            passenger_fields = {k: v for k, v in {
-                'first_name': pdata.get('first_name'),
-                'last_name': pdata.get('last_name'),
-                'patronymic_name': pdata.get('patronymic_name'),
-                'gender': pdata.get('gender'),
-                'birth_date': pdata.get('birth_date'),
-                'document_type': pdata.get('document_type'),
-                'document_number': pdata.get('document_number'),
-                'document_expiry_date': pdata.get('document_expiry_date'),
-                'citizenship_id': pdata.get('citizenship_id'),
-            }.items() if v is not None and v != ''}
-            if pid:
-                passenger = Passenger.update(
-                    pid,
-                    session=session,
-                    commit=False,
-                    **passenger_fields,
-                )
-            else:
-                passenger = Passenger.create(
-                    session,
-                    commit=False,
-                    **passenger_fields,
-                )
+        passenger_fields = {k: v for k, v in {
+            'first_name': pdata.get('first_name'),
+            'last_name': pdata.get('last_name'),
+            'patronymic_name': pdata.get('patronymic_name'),
+            'gender': pdata.get('gender'),
+            'birth_date': pdata.get('birth_date'),
+            'document_type': pdata.get('document_type'),
+            'document_number': pdata.get('document_number'),
+            'document_expiry_date': pdata.get('document_expiry_date'),
+            'citizenship_id': pdata.get('citizenship_id'),
+        }.items() if v is not None and v != ''}
+        if pid:
+            passenger = Passenger.update(
+                pid,
+                session=session,
+                commit=False,
+                **passenger_fields,
+            )
+        else:
+            passenger = Passenger.create(
+                session,
+                commit=False,
+                **passenger_fields,
+            )
 
-            processed_ids.add(passenger.id)
-            bp = existing.get(passenger.id)
-            if bp:
-                BookingPassenger.update(
-                    bp.id,
-                    session=session,
-                    commit=False,
-                    passenger_id=passenger.id,
-                    category=category,
-                )
-            else:
-                BookingPassenger.create(
-                    session,
-                    commit=False,
-                    booking_id=booking.id,
-                    passenger_id=passenger.id,
-                    category=category,
-                )
+        processed_ids.add(passenger.id)
+        bp = existing.get(passenger.id)
+        if bp:
+            BookingPassenger.update(
+                bp.id,
+                session=session,
+                commit=False,
+                passenger_id=passenger.id,
+                category=category,
+            )
+        else:
+            BookingPassenger.create(
+                session,
+                commit=False,
+                booking_id=booking.id,
+                passenger_id=passenger.id,
+                category=category,
+            )
 
-        booking = Booking.transition_status(
-            id=booking.id,
-            session=session,
-            commit=False,
-            to_status=BOOKING_STATUS.passengers_added,
-        )
+    Booking.transition_status(
+        id=booking.id,
+        session=session,
+        commit=False,
+        to_status=BOOKING_STATUS.passengers_added,
+    )
 
+    session.flush()
     return jsonify({'status': 'ok'}), 200
 
 
@@ -203,14 +203,16 @@ def confirm_booking(current_user):
 
     session = db.session
     booking = Booking.get_by_public_id(public_id)
-    with session.begin():
-        Booking.transition_status(
-            id=booking.id,
-            session=session,
-            commit=False,
-            to_status=BOOKING_STATUS.confirmed,
-        )
+    booking_id = booking.id
 
+    Booking.transition_status(
+        id=booking_id,
+        session=session,
+        commit=False,
+        to_status=BOOKING_STATUS.confirmed,
+    )
+
+    session.flush()
     return jsonify({'status': 'ok'}), 200
 
 

@@ -155,7 +155,7 @@ class BaseModel(db.Model):
         cls,
         session: Session | None = None,
         *,
-        commit: bool = True,
+        commit: bool = False,
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
@@ -183,7 +183,7 @@ class BaseModel(db.Model):
         _id,
         session: Session | None = None,
         *,
-        commit: bool = True,
+        commit: bool = False,
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
@@ -220,7 +220,7 @@ class BaseModel(db.Model):
         cls,
         session: Session | None = None,
         *,
-        commit: bool = True,
+        commit: bool = False,
     ) -> int:
         session = session or db.session
         try:
