@@ -74,9 +74,10 @@ def create_booking_process(current_user):
             tariff_id=return_tariff_id,
         )
 
-    session.flush()
-    session.refresh(booking)
+    session.commit()
+
     result = {'public_id': str(booking.public_id)}
+
     return jsonify(result), 201
 
 
@@ -156,7 +157,8 @@ def create_booking_process_passengers(current_user):
         to_status=BOOKING_STATUS.passengers_added,
     )
 
-    session.flush()
+    session.commit()
+
     return jsonify({'status': 'ok'}), 200
 
 
@@ -178,7 +180,8 @@ def confirm_booking_process(current_user):
         to_status=BOOKING_STATUS.confirmed,
     )
 
-    session.flush()
+    session.commit()
+
     return jsonify({'status': 'ok'}), 200
 
 

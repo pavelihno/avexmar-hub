@@ -9,10 +9,10 @@ def register_session_handler(app):
         session = db.session
         try:
             if exception:
-                if session.in_transaction():
+                if session.is_active:
                     session.rollback()
             else:
-                if session.in_transaction():
+                if session.is_active:
                     session.commit()
         except Exception:
             session.rollback()

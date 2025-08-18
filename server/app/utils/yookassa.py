@@ -155,8 +155,6 @@ def create_payment(public_id: str) -> Payment:
         }
     }
 
-    print(body)
-
     try:
         yoo_payment = YooPayment.create(body, uuid.uuid4())
         yookassa_payment_id = getattr(yoo_payment, 'id', None)
@@ -185,8 +183,8 @@ def create_payment(public_id: str) -> Payment:
             to_status=BOOKING_STATUS.payment_pending,
         )
 
-        session.flush()
         session.commit()
+
         return payment
 
     except Exception as e:
@@ -251,5 +249,4 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     else:
         raise ValueError(f'Unknown event type: {event}')
 
-    session.flush()
     session.commit()
