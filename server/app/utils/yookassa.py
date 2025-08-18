@@ -186,6 +186,7 @@ def create_payment(public_id: str) -> Payment:
         )
 
         session.flush()
+        session.commit()
         return payment
 
     except Exception as e:
@@ -251,3 +252,4 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         raise ValueError(f'Unknown event type: {event}')
 
     session.flush()
+    session.commit()

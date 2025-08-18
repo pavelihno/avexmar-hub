@@ -7,12 +7,15 @@ def register_session_handler(app):
     @app.teardown_request
     def _teardown_transaction(exception=None):
         session = db.session
-        if exception:
+        try:
+            if exception:
+                if session.in_transaction():
+                    session.rollback()
+            else:
+                if session.in_transaction():
+                    session.commit()
+        except Exception:
             session.rollback()
-        else:
-            try:
-                session.commit()
-            except Exception:
-                session.rollback()
-                raise
-        session.remove()
+            raise
+        finally:
+            session.remove()
