@@ -17,20 +17,20 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-        FEE: {
-                name: {
-                        REQUIRED: 'Наименование сбора обязательно',
-                },
-                amount: {
-                        REQUIRED: 'Сумма обязательна',
-                },
-                application: {
-                        REQUIRED: 'Применение сбора обязательно',
-                },
-                application_term: {
-                        REQUIRED: 'Срок применения сбора обязателен',
-                },
-        },
+	FEE: {
+		name: {
+			REQUIRED: 'Наименование сбора обязательно',
+		},
+		amount: {
+			REQUIRED: 'Сумма обязательна',
+		},
+		application: {
+			REQUIRED: 'Применение сбора обязательно',
+		},
+		application_term: {
+			REQUIRED: 'Срок применения сбора обязателен',
+		},
+	},
 
 	AIRPORT: {
 		name: {
@@ -227,6 +227,12 @@ export const VALIDATION_MESSAGES = {
 		},
 		tariff: {
 			REQUIRED: 'Тариф обязателен',
+		},
+		hand_luggage: {
+			REQUIRED: 'Ручная кладь обязательна',
+		},
+		baggage: {
+			REQUIRED: 'Багаж обязателен',
 		},
 	},
 

@@ -19,6 +19,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LuggageOutlinedIcon from '@mui/icons-material/LuggageOutlined';
+import BackpackOutlinedIcon from '@mui/icons-material/BackpackOutlined';
 
 import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import {
@@ -77,7 +79,7 @@ const FlightInfo = ({ flight }) => {
 	);
 };
 
-const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions, setShowConditions }) => {
+const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setTariffDetails, setShowTariffDetails }) => {
 	return (
 		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
 			{/* Flight description */}
@@ -87,18 +89,24 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions,
 			<Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', minWidth: 0 }}>
 				{(tariffs || []).map((t) => {
 					const isSelected = t.id === selectedId;
+					const hasAnyInfo = Boolean(t?.conditions) || t?.hand_luggage > 0 || t?.baggage > 0;
 					return (
 						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 22vh' }}>
 							<Box display='flex' justifyContent='flex-end'>
 								<IconButton
 									sx={{ m: 0, p: 0.5 }}
 									size='small'
-									disabled={!t.conditions}
+									disabled={!hasAnyInfo}
 									onClick={(e) => {
 										e.stopPropagation();
-										if (t.conditions) {
-											setConditions(t.conditions);
-											setShowConditions(true);
+										const details = {
+											terms: t?.conditions ? String(t.conditions).trim() : '',
+											hand_luggage: t?.hand_luggage ?? null,
+											baggage: t?.baggage ?? null,
+										};
+										if (details.terms || details.hand_luggage > 0 || details.baggage > 0) {
+											setTariffDetails(details);
+											setShowTariffDetails(true);
 										}
 									}}
 								>
@@ -111,6 +119,9 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions,
 							<CardActionArea
 								onClick={() => onSelect(t.id)}
 								sx={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'flex-start',
 									p: 1,
 									bgcolor: isSelected ? 'action.selected' : 'background.paper',
 								}}
@@ -119,20 +130,14 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions,
 									{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
 								</Typography>
 								<Typography variant='body2'>{t.title}</Typography>
-                                                                <Typography variant='body1' sx={{ fontWeight: 700 }}>
-                                                                        {formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
-                                                                </Typography>
-                                                                <Typography variant='caption'>
-                                                                        {`${UI_LABELS.SEARCH.flight_details.hand_luggage}: ${t.hand_luggage} кг`}
-                                                                </Typography>
-                                                                <Typography variant='caption'>
-                                                                        {`${UI_LABELS.SEARCH.flight_details.baggage}: ${t.baggage} кг`}
-                                                                </Typography>
-                                                                <Typography variant='caption' color='text.secondary'>
-                                                                        {`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
-                                                                </Typography>
-                                                        </CardActionArea>
-                                                </Card>
+								<Typography variant='body1' sx={{ fontWeight: 700 }}>
+									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+								</Typography>
+								<Typography variant='caption' color='text.secondary'>
+									{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
+								</Typography>
+							</CardActionArea>
+						</Card>
 					);
 				})}
 			</Box>
@@ -244,8 +249,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 		navigate(`/booking/${res.public_id}/passengers`);
 	};
 
-	const [conditions, setConditions] = useState('');
-	const [showConditions, setShowConditions] = useState(false);
+	const [tariffDetails, setTariffDetails] = useState({ terms: '', hand_luggage: null, baggage: null });
+	const [showTariffDetails, setShowTariffDetails] = useState(false);
 
 	return (
 		<>
@@ -282,8 +287,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 									tariffs={outboundTariffs}
 									selectedId={outboundTariffId}
 									onSelect={setOutboundTariffId}
-									setConditions={setConditions}
-									setShowConditions={setShowConditions}
+									setTariffDetails={setTariffDetails}
+									setShowTariffDetails={setShowTariffDetails}
 								/>
 
 								{/* Return flight if exists */}
@@ -296,8 +301,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 											tariffs={returnTariffs}
 											selectedId={returnTariffId}
 											onSelect={setReturnTariffId}
-											setConditions={setConditions}
-											setShowConditions={setShowConditions}
+											setTariffDetails={setTariffDetails}
+											setShowTariffDetails={setShowTariffDetails}
 										/>
 									</>
 								)}
@@ -468,15 +473,40 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 					</Tooltip>
 				</DialogActions>
 			</Dialog>
-			<Dialog open={showConditions} onClose={() => setShowConditions(false)} maxWidth='sm'>
-				<DialogTitle>{UI_LABELS.SEARCH.flight_details.tariff_conditions}</DialogTitle>
-				<DialogContent dividers>
-					<Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
-						{conditions}
-					</Typography>
+			<Dialog open={showTariffDetails} onClose={() => setShowTariffDetails(false)} maxWidth='sm'>
+				<DialogTitle>{UI_LABELS.SEARCH.flight_details.tariff_information}</DialogTitle>
+				<DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
+					{tariffDetails.hand_luggage > 0 && (
+						<Box sx={{ display: 'flex', alignItems: 'center', columnGap: 0.5 }}>
+							<BackpackOutlinedIcon fontSize='small' />
+							<Typography variant='body2'>
+								{UI_LABELS.SEARCH.flight_details.hand_luggage(tariffDetails.hand_luggage)}
+							</Typography>
+						</Box>
+					)}
+
+					{tariffDetails.baggage > 0 && (
+						<Box sx={{ display: 'flex', alignItems: 'center', columnGap: 0.5 }}>
+							<LuggageOutlinedIcon fontSize='small' />
+							<Typography variant='body2'>
+								{UI_LABELS.SEARCH.flight_details.baggage(tariffDetails.baggage)}
+							</Typography>
+						</Box>
+					)}
+
+					{tariffDetails.terms && (
+						<Box sx={{ mt: 1 }}>
+							<Typography variant='body1' sx={{ fontWeight: 'bold' }}>
+								{UI_LABELS.SEARCH.flight_details.tariff_conditions}
+							</Typography>
+							<Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
+								{tariffDetails.terms}
+							</Typography>
+						</Box>
+					)}
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={() => setShowConditions(false)}>{UI_LABELS.BUTTONS.close}</Button>
+					<Button onClick={() => setShowTariffDetails(false)}>{UI_LABELS.BUTTONS.close}</Button>
 				</DialogActions>
 			</Dialog>
 		</>
