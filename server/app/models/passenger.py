@@ -91,7 +91,14 @@ class Passenger(BaseModel):
         return kwargs
 
     @classmethod
-    def __prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
+    def __prepare_for_save(
+        cls,
+        session: Session,
+        kwargs: dict,
+        *,
+        commit: bool,
+        current_id=None,
+    ):
         """Apply defaults and reuse existing passenger if unique data matches"""
         # Ensure names are stored in uppercase
         kwargs = cls.__normalize_names(kwargs)
@@ -125,32 +132,45 @@ class Passenger(BaseModel):
                 cls.document_number == kwargs['document_number'],
             ).one_or_none()
             if existing and (current_id is None or existing.id != current_id):
-                super().update(existing.id, session, **kwargs)
+                super().update(existing.id, session, commit=commit, **kwargs)
                 return existing
 
         return None
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs)
+        existing = cls.__prepare_for_save(session, kwargs, commit=commit)
         if existing:
             return existing
 
         # Ensure names are uppercase on direct create as well
         kwargs = cls.__normalize_names(kwargs)
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def update(cls, _id, session: Session | None = None, **kwargs):
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         """Update passenger or reuse existing one with the same unique data."""
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs, current_id=_id)
+        existing = cls.__prepare_for_save(session, kwargs, commit=commit, current_id=_id)
         if existing:
             return existing
 
         # Ensure names are uppercase on update
         kwargs = cls.__normalize_names(kwargs)
-        return super().update(_id, session, **kwargs)
+        return super().update(_id, session, commit=commit, **kwargs)

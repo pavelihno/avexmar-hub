@@ -43,7 +43,13 @@ class Tariff(BaseModel):
         return super().get_all(sort_by=['seat_class', 'order_number'], descending=False)
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         seat_class = kwargs.get('seat_class')
 
@@ -53,4 +59,4 @@ class Tariff(BaseModel):
             next_order = (max_order.order_number + 1) if max_order else 1
             kwargs['order_number'] = next_order
 
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)

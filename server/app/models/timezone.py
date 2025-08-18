@@ -42,7 +42,11 @@ class Timezone(BaseModel):
         return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
-    def upload_from_file(cls, file, session: Session | None = None):
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
         session = session or db.session
         rows = parse_xlsx(
             file,
@@ -57,8 +61,9 @@ class Timezone(BaseModel):
             if not row.get('error'):
                 try:
                     tz = cls.create(
-                        session, 
+                        session,
                         name=str(row.get('name')),
+                        commit=False,
                     )
                     timezones.append(tz)
                 except Exception as e:
@@ -66,5 +71,7 @@ class Timezone(BaseModel):
 
             if row.get('error'):
                 error_rows.append(row)
+
+        session.commit()
 
         return timezones, error_rows
