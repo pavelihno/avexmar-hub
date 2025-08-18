@@ -1,6 +1,7 @@
 import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
 from yookassa import Configuration, Payment as YooPayment
 
@@ -15,6 +16,13 @@ from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
 Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
+
+
+Q = Decimal('0.01')
+
+
+def money(x) -> Decimal:
+    return (Decimal(str(x))).quantize(Q, rounding=ROUND_HALF_UP)
 
 
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
@@ -36,7 +44,6 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     )
 
     currency = price_details.get('currency', booking.currency.value).upper()
-    total_passengers = sum(booking.passenger_counts.values()) or 1
 
     category_map = {
         'adults': 'Взрослый',
@@ -50,44 +57,39 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
         route = direction.get('route') or {}
         origin = (route.get('origin_airport') or {}).get('iata_code', '')
         dest = (route.get('destination_airport') or {}).get('iata_code', '')
-        route_desc = f"Рейс {origin} - {dest}".strip()
+        base_desc = f'Рейс {origin}-{dest}'.strip('- ').strip()
+
         for passenger in direction.get('passengers', []):
-            count = passenger.get('count', 0)
+            count = int(passenger.get('count', 0) or 0)
             if count <= 0:
                 continue
-            fare_price = passenger.get('fare_price', 0.0)
-            unit_price = fare_price / count if count else 0.0
-            category = category_map.get(passenger.get('category', ''), '')
+            cat = category_map.get(passenger.get('category', ''), 'Пассажир')
+
+            fare = money(passenger.get('fare_price', 0))
+            disc = money(passenger.get('discount', 0))
+            line_total = max(money(fare - disc), Decimal('0.00'))
+            unit = (line_total / Decimal(count)).quantize(Q, rounding=ROUND_HALF_UP)
+
             items.append({
-                'description': f"{route_desc}: Билет {category}",
+                'description': f"{base_desc}: Билет «{cat}»",
                 'quantity': count,
-                'amount': {'value': f'{unit_price:.2f}', 'currency': currency},
+                'amount': {'value': f"{unit:.2f}", 'currency': currency},
+                # TODO: check VAT codes
                 'vat_code': 1,
                 'payment_mode': 'full_payment',
                 'payment_subject': 'service',
             })
 
-            discount = passenger.get('discount', 0.0)
-            if discount > 0:
-                unit_discount = discount / count if count else 0.0
-                discount_name = passenger.get('discount_name')
-                desc = f"{route_desc}: Скидка {category}"
-                if discount_name:
-                    desc += f" ({discount_name})"
-                items.append({
-                    'description': desc,
-                    'quantity': count,
-                    'amount': {'value': f'{unit_discount:.2f}', 'currency': currency},
-                    'vat_code': 1,
-                    'payment_mode': 'full_payment',
-                    'payment_subject': 'service',
-                })
-
     for fee in price_details.get('fees', []):
+        unit_amount = money(fee.get('amount', 0))
+        total_amount = money(fee.get('total', 0))
+        quantity = int(total_amount / unit_amount) if unit_amount > 0 else 1
+
         items.append({
             'description': fee.get('name'),
-            'quantity': total_passengers,
-            'amount': {'value': f"{fee.get('amount', 0.0):.2f}", 'currency': currency},
+            'quantity': quantity,
+            'amount': {'value': f"{unit_amount:.2f}", 'currency': currency},
+            # TODO: check VAT codes
             'vat_code': 1,
             'payment_mode': 'full_payment',
             'payment_subject': 'service',
@@ -153,7 +155,7 @@ def create_payment(public_id: str) -> Payment:
         }
     }
 
-    # print(body)
+    print(body)
 
     try:
         yoo_payment = YooPayment.create(body, uuid.uuid4())
@@ -193,9 +195,15 @@ def create_payment(public_id: str) -> Payment:
 def handle_webhook(payload: Dict[str, Any]) -> None:
     """Process YooKassa webhook notifications"""
     event = payload.get('event')
+
     obj = payload.get('object') or {}
     provider_id = obj.get('id')
     status = obj.get('status')
+    is_paid = obj.get('paid', False)
+    captured_at = obj.get('captured_at')
+
+    print(type(is_paid), is_paid)
+    print(type(captured_at), captured_at)
 
     if not provider_id or not status:
         return
@@ -203,8 +211,9 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     payment = Payment.get_by_provider_payment_id(provider_id)
 
     updates = {'payment_status': status, 'last_webhook': payload}
-    if status == PAYMENT_STATUS.succeeded.value:
-        updates['is_paid'] = True
+    if is_paid:
+        updates['is_paid'] = is_paid
+        updates['paid_at'] = captured_at
 
     session = db.session
     payment = Payment.update(
