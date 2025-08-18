@@ -119,14 +119,20 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setConditions,
 									{ENUM_LABELS.SEAT_CLASS[t.seat_class]}
 								</Typography>
 								<Typography variant='body2'>{t.title}</Typography>
-								<Typography variant='body1' sx={{ fontWeight: 700 }}>
-									{formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
-								</Typography>
-								<Typography variant='caption' color='text.secondary'>
-									{`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
-								</Typography>
-							</CardActionArea>
-						</Card>
+                                                                <Typography variant='body1' sx={{ fontWeight: 700 }}>
+                                                                        {formatNumber(t.price)} {ENUM_LABELS.CURRENCY_SYMBOL[t.currency] || ''}
+                                                                </Typography>
+                                                                <Typography variant='caption'>
+                                                                        {`${UI_LABELS.SEARCH.flight_details.hand_luggage}: ${t.hand_luggage} кг`}
+                                                                </Typography>
+                                                                <Typography variant='caption'>
+                                                                        {`${UI_LABELS.SEARCH.flight_details.baggage}: ${t.baggage} кг`}
+                                                                </Typography>
+                                                                <Typography variant='caption' color='text.secondary'>
+                                                                        {`${UI_LABELS.SEARCH.flight_details.seats_available}: ${t.seats_left ?? '-'}`}
+                                                                </Typography>
+                                                        </CardActionArea>
+                                                </Card>
 					);
 				})}
 			</Box>

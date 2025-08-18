@@ -43,6 +43,8 @@ def __get_available_tariffs(flight_id):
             'price': t.price,
             'currency': t.currency.value,
             'conditions': t.conditions,
+            'baggage': t.baggage,
+            'hand_luggage': t.hand_luggage,
             'seats_left': ft.seats_number,
         }
         for ft, t in tariff_query
