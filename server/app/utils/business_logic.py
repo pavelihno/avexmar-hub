@@ -56,6 +56,8 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             'price': tariff.price,
             'currency': tariff.currency.value,
             'conditions': tariff.conditions,
+            'baggage': tariff.baggage,
+            'hand_luggage': tariff.hand_luggage,
         }
         leg_breakdown = []
         for category, count in passengers.items():

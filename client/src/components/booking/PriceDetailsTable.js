@@ -29,6 +29,9 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap }) => {
                                                         <Typography variant='subtitle2' color='text.secondary'>
                                                                 {`${ENUM_LABELS.SEAT_CLASS[dir.tariff.seat_class]} — ${dir.tariff.title}`}
                                                         </Typography>
+                                                        <Typography variant='body2' color='text.secondary'>
+                                                                {`${UI_LABELS.SEARCH.flight_details.hand_luggage}: ${dir.tariff.hand_luggage} кг • ${UI_LABELS.SEARCH.flight_details.baggage}: ${dir.tariff.baggage} кг`}
+                                                        </Typography>
                                                 </Box>
                                                 <Table size='small'>
                                                         <TableHead>
