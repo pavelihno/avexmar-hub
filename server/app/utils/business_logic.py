@@ -4,6 +4,8 @@ from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
 from app.models.discount import Discount
 from app.models.flight import Flight
+from app.models.booking_passenger import BookingPassenger
+from app.models.booking_flight import BookingFlight
 
 
 def get_seats_number(params):
@@ -64,7 +66,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             if not count:
                 continue
 
-            fare_total = tariff.price * count
+            unit_fare_price = tariff.price
             multiplier = 1.0
             applied_discounts = []
 
@@ -91,18 +93,21 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
                             discount_names_map[rt_key]
                         )
 
-            total_cost = fare_total * multiplier
-            discount_amount = fare_total - total_cost
-            discount_label = ', '.join(
-                applied_discounts
-            ) if applied_discounts else None
-
+            unit_total_price = unit_fare_price * multiplier
+            unit_discount = unit_fare_price - unit_total_price
+            fare_total = unit_fare_price * count
+            discount_amount = unit_discount * count
+            total_cost = unit_total_price * count
+            discount_label = ', '.join(applied_discounts) if applied_discounts else None
             leg_breakdown.append({
                 'category': category,
                 'count': count,
                 'fare_price': fare_total,
+                'unit_fare_price': unit_fare_price,
                 'discount': discount_amount,
+                'unit_discount': unit_discount,
                 'total_price': total_cost,
+                'unit_total_price': unit_total_price,
                 'discount_name': discount_label,
             })
             fare_total_price += fare_total
@@ -133,4 +138,58 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
         'fare_price': fare_total_price,
         'total_discounts': total_discounts,
         'total_price': total_price,
+    }
+
+
+def calculate_receipt_details(booking):
+    """Prepare detailed data for fiscal receipt items."""
+    flights = booking.booking_flights.order_by(BookingFlight.id).all()
+    outbound_id = flights[0].flight_id if len(flights) > 0 else None
+    return_id = flights[1].flight_id if len(flights) > 1 else None
+
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in flights}
+    outbound_tariff_id = tariffs_map.get(outbound_id)
+    return_tariff_id = tariffs_map.get(return_id)
+
+    price_details = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        booking.passenger_counts or {},
+    )
+
+    passengers_map = {}
+    for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
+        passenger = bp.passenger
+        full_name = " ".join(
+            filter(None, [passenger.last_name, passenger.first_name, passenger.patronymic_name])
+        )
+        passengers_map.setdefault(bp.category.value, []).append(full_name)
+
+    fee_per_seat = sum(fee['amount'] for fee in price_details.get('fees', []))
+
+    directions = []
+    for direction in price_details.get('directions', []):
+        flight = Flight.get_or_404(direction.get('flight_id'))
+        seat_class = direction.get('tariff', {}).get('seat_class')
+        route = direction.get('route')
+        date = flight.scheduled_departure if flight else None
+        dir_passengers = []
+        for p in direction.get('passengers', []):
+            names = passengers_map.get(p['category'], [])
+            unit_price = p.get('unit_total_price', 0.0)
+            price_with_fees = unit_price + fee_per_seat
+            for name in names:
+                dir_passengers.append({'full_name': name, 'price': price_with_fees})
+        directions.append({
+            'route': route,
+            'seat_class': seat_class,
+            'date': date,
+            'passengers': dir_passengers,
+        })
+
+    return {
+        'currency': price_details.get('currency'),
+        'directions': directions,
     }

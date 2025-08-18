@@ -8,8 +8,8 @@ from app.config import Config
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
-from app.models.booking_flight import BookingFlight
-from app.utils.business_logic import calculate_price_details
+from app.utils.business_logic import calculate_receipt_details
+from app.utils.datetime import format_date
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
 
 # Configure YooKassa SDK
@@ -19,35 +19,30 @@ Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
 
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     """Form receipt object with detailed breakdown"""
-    flights = booking.booking_flights.order_by(BookingFlight.id).all()
-    outbound_id = flights[0].flight_id if len(flights) > 0 else None
-    return_id = flights[1].flight_id if len(flights) > 1 else None
-
-    tariffs_map = {bf.flight_id: bf.tariff_id for bf in flights}
-    outbound_tariff_id = tariffs_map.get(outbound_id)
-    return_tariff_id = tariffs_map.get(return_id)
-
-    price_details = calculate_price_details(
-        outbound_id,
-        outbound_tariff_id,
-        return_id,
-        return_tariff_id,
-        booking.passenger_counts or {},
-    )
-
-    currency = price_details.get('currency', booking.currency.value).upper()
+    details = calculate_receipt_details(booking)
+    currency = details.get('currency', booking.currency.value).upper()
+    seat_class_map = {'economy': 'Эконом', 'business': 'Бизнес'}
 
     items = []
-    for direction in price_details.get('directions', []):
+    for direction in details.get('directions', []):
         route = direction.get('route') or {}
         origin = (route.get('origin_airport') or {}).get('city_name', '')
         dest = (route.get('destination_airport') or {}).get('city_name', '')
+        seat_class = seat_class_map.get(direction.get('seat_class', ''), direction.get('seat_class', ''))
+        date = direction.get('date')
+        date_str = format_date(date, '%d.%m.%y')
 
         for passenger in direction.get('passengers', []):
+            price = passenger.get('price', 0.0)
+            full_name = passenger.get('full_name', '')
+            description = (
+                f'Организация авиаперевозки пассажиров и багажа по маршруту '
+                f'{origin}-{dest}. {seat_class} класс. {date_str} {full_name}'
+            )
             items.append({
-                'description': 'Организация авиаперевозки пассажиров и багажа по маршруту Москва-Певек. Эконом класс. 11.08.25 ФИО',
-                'quantity': '',
-                'amount': {'value': f"{final_price:.2f}", 'currency': currency},
+                'description': description,
+                'quantity': '1',
+                'amount': {'value': f"{price:.2f}", 'currency': currency},
                 'vat_code': 7,
                 'payment_mode': 'full_payment',
                 'payment_subject': 'service',

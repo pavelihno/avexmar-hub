@@ -52,6 +52,11 @@ class Fee(BaseModel):
         total = 0.0
         for fee in fees:
             fee_total = fee.amount * seats_number
-            result.append({'name': fee.name, 'amount': fee.amount, 'total': fee_total})
+            result.append({
+                'name': fee.name,
+                'amount': fee.amount,
+                'quantity': seats_number,
+                'total': fee_total,
+            })
             total += fee_total
         return result, total
