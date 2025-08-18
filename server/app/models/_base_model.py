@@ -124,7 +124,13 @@ class BaseModel(db.Model):
         return instance
 
     @classmethod
-    def delete_or_404(cls, _id, session: Session | None = None) -> Optional[Dict]:
+    def delete_or_404(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> Optional[Dict]:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
@@ -135,14 +141,23 @@ class BaseModel(db.Model):
 
         try:
             session.delete(instance)
-            session.commit()
+            if commit and not session.in_transaction():
+                session.commit()
+            else:
+                session.flush()
             return instance_dict
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({"message": str(e)}) from e
 
     @classmethod
-    def create(cls, session: Session | None = None, **data) -> Optional['BaseModel']:
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **data,
+    ) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls(**data)
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
@@ -153,7 +168,10 @@ class BaseModel(db.Model):
 
         session.add(instance)
         try:
-            session.commit()
+            if commit and not session.in_transaction():
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e
@@ -161,7 +179,12 @@ class BaseModel(db.Model):
 
     @classmethod
     def update(
-        cls, _id, session: Session | None = None, **data
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
@@ -176,7 +199,10 @@ class BaseModel(db.Model):
             raise ModelValidationError(errors)
 
         try:
-            session.commit()
+            if commit and not session.in_transaction():
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e
@@ -190,11 +216,19 @@ class BaseModel(db.Model):
         return cls.delete_or_404(_id, session)
 
     @classmethod
-    def delete_all(cls, session: Session | None = None) -> int:
+    def delete_all(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> int:
         session = session or db.session
         try:
             count = session.query(cls).delete()
-            session.commit()
+            if commit and not session.in_transaction():
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e

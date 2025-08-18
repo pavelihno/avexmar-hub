@@ -94,7 +94,13 @@ class Booking(BaseModel):
         return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
 
     @classmethod
-    def generate_booking_number(cls, id, session: Session):
+    def generate_booking_number(
+        cls,
+        id,
+        session: Session,
+        *,
+        commit: bool = False,
+    ):
         """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
             booking.booking_number for booking in session.query(cls).all()
@@ -112,6 +118,7 @@ class Booking(BaseModel):
         return cls.update(
             id,
             session=session,
+            commit=commit,
             booking_number=booking_number
         )
 
@@ -137,7 +144,14 @@ class Booking(BaseModel):
         return super().create(session, **kwargs)
 
     @classmethod
-    def update(cls, id, session: Session | None = None, **kwargs):
+    def update(
+        cls,
+        id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         booking = cls.get_or_404(id, session)
         old_status_enum = booking.status
@@ -153,13 +167,20 @@ class Booking(BaseModel):
         })
         kwargs['status_history'] = history
         kwargs['status'] = new_status_enum
-        return super().update(id, session=session, **kwargs)
+        return super().update(id, session=session, commit=commit, **kwargs)
 
     @classmethod
-    def update_by_public_id(cls, public_id, session: Session | None = None, **kwargs):
+    def update_by_public_id(
+        cls,
+        public_id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         booking = cls.get_by_public_id(public_id)
-        return cls.update(booking.id, session=session, **kwargs)
+        return cls.update(booking.id, session=session, commit=commit, **kwargs)
 
     ALLOWED_TRANSITIONS = {
         BOOKING_STATUS.created: {
@@ -219,7 +240,14 @@ class Booking(BaseModel):
         return cls.PAGE_FLOW.get(booking.status, [])
 
     @classmethod
-    def transition_status(cls, id, to_status, session: Session | None = None):
+    def transition_status(
+        cls,
+        id,
+        to_status,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ):
         session = session or db.session
         booking = cls.get_or_404(id)
         from_status = booking.status
@@ -234,5 +262,6 @@ class Booking(BaseModel):
         return cls.update(
             id,
             session=session,
+            commit=commit,
             status=to_status,
         )
