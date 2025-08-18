@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.models._base_model import ModelValidationError
 from app.utils.enum import PASSENGER_CATEGORY, DEFAULT_PASSENGER_CATEGORY
 
 if TYPE_CHECKING:

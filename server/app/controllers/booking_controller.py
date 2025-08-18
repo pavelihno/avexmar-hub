@@ -9,7 +9,7 @@ from app.models.payment import Payment
 from app.middlewares.auth_middleware import admin_required, current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.payment import create_payment, handle_webhook
-from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY, PAYMENT_STATUS
+from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY
 
 
 @admin_required

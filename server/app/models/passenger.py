@@ -95,11 +95,12 @@ class Passenger(BaseModel):
         """Apply defaults and reuse existing passenger if unique data matches"""
         # Ensure names are stored in uppercase
         kwargs = cls.__normalize_names(kwargs)
+        kwargs = cls.convert_enums(kwargs)
 
         if kwargs.get('document_type') in (
-            DOCUMENT_TYPE.passport.value,
-            DOCUMENT_TYPE.international_passport.value,
-            DOCUMENT_TYPE.birth_certificate.value,
+            DOCUMENT_TYPE.passport,
+            DOCUMENT_TYPE.international_passport,
+            DOCUMENT_TYPE.birth_certificate,
         ):
             kwargs['citizenship_id'] = Country.get_by_code(
                 DEFAULT_CITIZENSHIP_CODE

@@ -22,6 +22,7 @@ class Payment(BaseModel):
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     expires_at = db.Column(db.DateTime, nullable=False)
+    paid_at = db.Column(db.DateTime, nullable=True)
 
     # Provider payment details
     provider_payment_id = db.Column(db.String, unique=True)
@@ -56,19 +57,10 @@ class Payment(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
+        kwargs = cls.convert_enums(kwargs)
         status = kwargs.get('payment_status', DEFAULT_PAYMENT_STATUS)
-        if isinstance(status, str):
-            try:
-                status_enum = PAYMENT_STATUS(status)
-            except ValueError:
-                status_enum = DEFAULT_PAYMENT_STATUS
-        elif isinstance(status, PAYMENT_STATUS):
-            status_enum = status
-        else:
-            status_enum = DEFAULT_PAYMENT_STATUS
-        kwargs['payment_status'] = status_enum
         kwargs['status_history'] = [
-            {'status': status_enum.value, 'at': datetime.now().isoformat()}
+            {'status': status.value, 'at': datetime.now().isoformat()}
         ]
         return super().create(session, **kwargs)
 
@@ -76,22 +68,14 @@ class Payment(BaseModel):
     def update(cls, _id, session: Session | None = None, **kwargs):
         session = session or db.session
         payment = cls.get_or_404(_id, session)
-        new_status = kwargs.get('payment_status')
-        if isinstance(new_status, str):
-            try:
-                new_status_enum = PAYMENT_STATUS(new_status)
-                kwargs['payment_status'] = new_status_enum
-            except ValueError:
-                new_status_enum = None
-        elif isinstance(new_status, PAYMENT_STATUS):
-            new_status_enum = new_status
-        else:
-            new_status_enum = None
+        kwargs = cls.convert_enums(kwargs)
+        old_status = payment.payment_status
+        new_status = kwargs.get('payment_status', old_status)
 
-        if new_status_enum and new_status_enum.value != payment.payment_status.value:
+        if new_status and new_status != old_status:
             history = list(payment.status_history or [])
             history.append({
-                'status': new_status_enum.value,
+                'status': new_status.value,
                 'at': datetime.now().isoformat()
             })
             kwargs['status_history'] = history

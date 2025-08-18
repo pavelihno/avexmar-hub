@@ -3,10 +3,9 @@ import string
 import uuid
 from uuid import UUID as UUID_cls
 from typing import List, TYPE_CHECKING
+from datetime import datetime
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-
-from datetime import datetime, timezone
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -125,19 +124,10 @@ class Booking(BaseModel):
     @classmethod
     def create(cls, session: Session | None = None, **kwargs):
         session = session or db.session
+        kwargs = cls.convert_enums(kwargs)
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
-        if isinstance(status, str):
-            try:
-                status_enum = BOOKING_STATUS(status)
-            except ValueError:
-                status_enum = DEFAULT_BOOKING_STATUS
-        elif isinstance(status, BOOKING_STATUS):
-            status_enum = status
-        else:
-            status_enum = DEFAULT_BOOKING_STATUS
-        kwargs['status'] = status_enum
         history = [{
-            'status': status_enum.value,
+            'status': status.value,
             'at': datetime.now().isoformat()
         }]
         kwargs['status_history'] = history
@@ -154,19 +144,15 @@ class Booking(BaseModel):
     ):
         session = session or db.session
         booking = cls.get_or_404(id, session)
-        old_status_enum = booking.status
-        new_status = kwargs.get('status', old_status_enum)
-        if isinstance(new_status, str):
-            new_status_enum = BOOKING_STATUS(new_status)
-        else:
-            new_status_enum = new_status
+        kwargs = cls.convert_enums(kwargs)
+        old_status = booking.status
+        new_status = kwargs.get('status', old_status)
         history = list(booking.status_history or [])
         history.append({
-            'status': new_status_enum.value,
+            'status': new_status.value,
             'at': datetime.now().isoformat()
         })
         kwargs['status_history'] = history
-        kwargs['status'] = new_status_enum
         return super().update(id, session=session, commit=commit, **kwargs)
 
     @classmethod

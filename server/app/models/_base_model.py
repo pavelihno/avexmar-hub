@@ -38,7 +38,7 @@ class BaseModel(db.Model):
         return {k: v for k, v in kwargs.items() if k in valid}
 
     @classmethod
-    def _convert_enums(cls, data: dict) -> dict:
+    def convert_enums(cls, data: dict) -> dict:
         """Convert enum field values to enum instances, set None if invalid"""
         mapper = inspect(cls)
         for column in mapper.columns:
@@ -51,15 +51,15 @@ class BaseModel(db.Model):
                         continue
                     if not isinstance(value, enum_cls):
                         try:
-                            data[key] = enum_cls(getattr(value, "value", value))
+                            data[key] = enum_cls(getattr(value, 'value', value))
                         except Exception:
                             data[key] = None
         return data
 
     def __init__(self, **kwargs) -> None:
-        filtered_kwargs = self.__filter_out_non_existing_fields(kwargs)
-        filtered_kwargs = type(self)._convert_enums(filtered_kwargs)
-        super().__init__(**filtered_kwargs)
+        kwargs = self.__filter_out_non_existing_fields(kwargs)
+        kwargs = type(self).convert_enums(kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def get_all(cls, sort_by: list = [], descending: bool = False) -> List['BaseModel']:
@@ -85,7 +85,7 @@ class BaseModel(db.Model):
         return cls.query.get(_id)
 
     @classmethod
-    def _unique_constraints(cls) -> List[List[str]]:
+    def __unique_constraints(cls) -> List[List[str]]:
         """Return list of unique constraint column name lists"""
         uniques: List[List[str]] = []
         for column in cls.__table__.columns:
@@ -97,12 +97,12 @@ class BaseModel(db.Model):
         return uniques
 
     @classmethod
-    def _check_unique(
+    def __check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
         """Check if the provided data violates unique constraints"""
         errors: Dict[str, str] = {}
-        for columns in cls._unique_constraints():
+        for columns in cls.__unique_constraints():
             if not all(col in data for col in columns):
                 continue
             query = session.query(cls)
@@ -116,7 +116,7 @@ class BaseModel(db.Model):
         return errors
 
     @classmethod
-    def _check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
+    def __check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
         """Ensure that all provided foreign keys reference existing rows"""
         for column in cls.__table__.columns:
             if column.foreign_keys and column.name in data:
@@ -180,11 +180,11 @@ class BaseModel(db.Model):
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
-        data = cls._convert_enums(data)
+        data = cls.convert_enums(data)
         instance = cls(**data)
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
-        cls._check_foreign_keys_exist(session, filtered_data)
-        errors = cls._check_unique(session, filtered_data)
+        cls.__check_foreign_keys_exist(session, filtered_data)
+        errors = cls.__check_unique(session, filtered_data)
         if errors:
             raise ModelValidationError(errors)
 
@@ -212,9 +212,9 @@ class BaseModel(db.Model):
         instance = cls.get_or_404(_id, session)
 
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
-        filtered_data = cls._convert_enums(filtered_data)
-        cls._check_foreign_keys_exist(session, filtered_data)
-        errors = cls._check_unique(session, filtered_data, instance.id)
+        filtered_data = cls.convert_enums(filtered_data)
+        cls.__check_foreign_keys_exist(session, filtered_data)
+        errors = cls.__check_unique(session, filtered_data, instance.id)
         for key, value in filtered_data.items():
             setattr(instance, key, value)
         if errors:
