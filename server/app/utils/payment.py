@@ -163,27 +163,27 @@ def create_payment(public_id: str) -> Payment:
         )
 
         session = db.session
-        with session.begin():
-            payment = Payment.create(
-                session,
-                commit=False,
-                booking_id=booking.id,
-                payment_method=PAYMENT_METHOD.yookassa,
-                payment_status=PAYMENT_STATUS.pending,
-                amount=booking.total_price,
-                currency=booking.currency,
-                provider_payment_id=yookassa_payment_id,
-                confirmation_token=confirmation_token,
-                expires_at=expires_at,
-            )
+        payment = Payment.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            amount=booking.total_price,
+            currency=booking.currency,
+            provider_payment_id=yookassa_payment_id,
+            confirmation_token=confirmation_token,
+            expires_at=expires_at,
+        )
 
-            Booking.transition_status(
-                id=booking.id,
-                session=session,
-                commit=False,
-                to_status=BOOKING_STATUS.payment_pending,
-            )
+        Booking.transition_status(
+            id=booking.id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.payment_pending,
+        )
 
+        session.flush()
         return payment
 
     except Exception as e:
@@ -207,37 +207,38 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         updates['is_paid'] = True
 
     session = db.session
-    with session.begin():
-        payment = Payment.update(
-            payment.id, session=session, commit=False, **updates
+    payment = Payment.update(
+        payment.id, session=session, commit=False, **updates
+    )
+
+    if event == 'payment.waiting_for_capture':
+        yoo_payment = YooPayment.find_one(provider_id)
+        if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
+            __capture_payment(payment, session)
+
+    elif event == 'payment.canceled':
+        Booking.transition_status(
+            id=payment.booking_id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.payment_failed,
         )
 
-        if event == 'payment.waiting_for_capture':
-            yoo_payment = YooPayment.find_one(provider_id)
-            if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
-                __capture_payment(payment, session)
+    elif event == 'payment.succeeded':
+        Booking.transition_status(
+            id=payment.booking_id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.payment_confirmed,
+        )
+        Booking.transition_status(
+            id=payment.booking_id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.completed,
+        )
 
-        elif event == 'payment.canceled':
-            Booking.transition_status(
-                id=payment.booking_id,
-                session=session,
-                commit=False,
-                to_status=BOOKING_STATUS.payment_failed,
-            )
+    else:
+        raise ValueError(f'Unknown event type: {event}')
 
-        elif event == 'payment.succeeded':
-            Booking.transition_status(
-                id=payment.booking_id,
-                session=session,
-                commit=False,
-                to_status=BOOKING_STATUS.payment_confirmed,
-            )
-            Booking.transition_status(
-                id=payment.booking_id,
-                session=session,
-                commit=False,
-                to_status=BOOKING_STATUS.completed,
-            )
-
-        else:
-            raise ValueError(f'Unknown event type: {event}')
+    session.flush()
