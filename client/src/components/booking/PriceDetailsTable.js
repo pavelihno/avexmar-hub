@@ -34,38 +34,31 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap }) => {
 							)}
 						</Box>
 						<Table size='small'>
-							<TableHead>
-								<TableRow>
-									<TableCell>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</TableCell>
-									<TableCell align='right'>{FIELD_LABELS.BOOKING.fare_price}</TableCell>
-									<TableCell align='right'>{FIELD_LABELS.BOOKING.total_discounts}</TableCell>
-									<TableCell align='right'>{FIELD_LABELS.BOOKING.total_price}</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{dir.passengers.map((p) => (
-									<TableRow key={p.category}>
-										<TableCell>{`${
-											UI_LABELS.BOOKING.confirmation.passenger_categories[p.category] ||
-											p.category
-										} x ${p.count}`}</TableCell>
-										<TableCell align='right'>{`${formatNumber(
-											p.fare_price
-										)} ${currencySymbol}`}</TableCell>
-										<TableCell align='right'>
-											{p.discount > 0
-												? `- ${formatNumber(p.discount)} ${currencySymbol}${
-														p.discount_name ? ` (${p.discount_name})` : ''
-												  }`
-												: '-'}
-										</TableCell>
-										<TableCell align='right'>{`${formatNumber(
-											p.total_price
-										)} ${currencySymbol}`}</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+                                                        <TableHead>
+                                                                <TableRow>
+                                                                        <TableCell>{FIELD_LABELS.BOOKING.passengers}</TableCell>
+                                                                        <TableCell align='right'>{FIELD_LABELS.BOOKING.quantity}</TableCell>
+                                                                        <TableCell align='right'>{FIELD_LABELS.BOOKING.ticket_price}</TableCell>
+                                                                        <TableCell align='right'>{FIELD_LABELS.BOOKING.total_discounts}</TableCell>
+                                                                        <TableCell align='right'>{FIELD_LABELS.BOOKING.total_price}</TableCell>
+                                                                </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                                {dir.passengers.map((p) => (
+                                                                        <TableRow key={p.category}>
+                                                                                <TableCell>{UI_LABELS.BOOKING.confirmation.passenger_categories[p.category] || p.category}</TableCell>
+                                                                                <TableCell align='right'>{p.count}</TableCell>
+                                                                                <TableCell align='right'>{`${formatNumber(p.unit_fare_price || 0)} ${currencySymbol}`}</TableCell>
+                                                                                <TableCell align='right'>
+                                                                                        {p.unit_discount > 0
+                                                                                                ? `- ${formatNumber(p.unit_discount)} ${currencySymbol}${p.discount_name ? ` (${p.discount_name})` : ''}`
+                                                                                                : '-'}
+                                                                                </TableCell>
+                                                                                <TableCell align='right'>{`${formatNumber(p.total_price)} ${currencySymbol}`}</TableCell>
+                                                                        </TableRow>
+                                                                ))}
+                                                        </TableBody>
+                                                </Table>
 					</Box>
 				);
 			})}
