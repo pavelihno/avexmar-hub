@@ -9,7 +9,7 @@ from app.database import db
 
 
 def handle_exceptions(f: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to handle common exceptions and return JSON responses."""
+    """Decorator to handle common exceptions and return JSON responses"""
 
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -31,7 +31,7 @@ def handle_exceptions(f: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def register_error_handlers(app):
-    """Register global error handlers on the given Flask app."""
+    """Register global error handlers on the given Flask app"""
 
     @app.errorhandler(ModelValidationError)
     def _handle_model_validation_error(e):

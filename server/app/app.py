@@ -8,6 +8,7 @@ from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
 from app.middlewares.error_handler import register_error_handlers
+from app.middlewares.session_middleware import register_session_handler
 
 from app.controllers._dev_controller import *
 from app.controllers.auth_controller import *
@@ -56,19 +57,7 @@ def __create_app(_config_class, _db):
     _db.init_app(app)
     init_mail(app)
     register_error_handlers(app)
-
-    @app.teardown_request
-    def teardown_transaction(exception=None):
-        session = db.session
-        if exception:
-            session.rollback()
-        else:
-            try:
-                session.commit()
-            except Exception:
-                session.rollback()
-                raise
-        session.remove()
+    register_session_handler(app)
 
     # auth
     app.route('/register', methods=['POST'])(register)
