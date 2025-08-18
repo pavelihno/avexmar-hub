@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
+import enum
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, Enum as SAEnum
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -36,8 +37,28 @@ class BaseModel(db.Model):
         valid = set(mapper.attrs.keys())
         return {k: v for k, v in kwargs.items() if k in valid}
 
+    @classmethod
+    def _convert_enums(cls, data: dict) -> dict:
+        """Convert enum field values to enum instances, set None if invalid"""
+        mapper = inspect(cls)
+        for column in mapper.columns:
+            if isinstance(column.type, SAEnum):
+                enum_cls = column.type.enum_class
+                key = column.name
+                if key in data:
+                    value = data[key]
+                    if value is None:
+                        continue
+                    if not isinstance(value, enum_cls):
+                        try:
+                            data[key] = enum_cls(getattr(value, "value", value))
+                        except Exception:
+                            data[key] = None
+        return data
+
     def __init__(self, **kwargs) -> None:
         filtered_kwargs = self.__filter_out_non_existing_fields(kwargs)
+        filtered_kwargs = type(self)._convert_enums(filtered_kwargs)
         super().__init__(**filtered_kwargs)
 
     @classmethod
@@ -159,6 +180,7 @@ class BaseModel(db.Model):
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
+        data = cls._convert_enums(data)
         instance = cls(**data)
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
         cls._check_foreign_keys_exist(session, filtered_data)
@@ -190,6 +212,7 @@ class BaseModel(db.Model):
         instance = cls.get_or_404(_id, session)
 
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
+        filtered_data = cls._convert_enums(filtered_data)
         cls._check_foreign_keys_exist(session, filtered_data)
         errors = cls._check_unique(session, filtered_data, instance.id)
         for key, value in filtered_data.items():
