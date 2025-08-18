@@ -1,7 +1,6 @@
 import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
-from decimal import Decimal, ROUND_HALF_UP
 
 from yookassa import Configuration, Payment as YooPayment
 
@@ -16,13 +15,6 @@ from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
 Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
-
-
-Q = Decimal('0.01')
-
-
-def money(x) -> Decimal:
-    return (Decimal(str(x))).quantize(Q, rounding=ROUND_HALF_UP)
 
 
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
@@ -45,55 +37,21 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 
     currency = price_details.get('currency', booking.currency.value).upper()
 
-    category_map = {
-        'adults': 'Взрослый',
-        'children': 'Ребёнок',
-        'infants': 'Младенец',
-        'infants_seat': 'Младенец с местом',
-    }
-
     items = []
     for direction in price_details.get('directions', []):
         route = direction.get('route') or {}
-        origin = (route.get('origin_airport') or {}).get('iata_code', '')
-        dest = (route.get('destination_airport') or {}).get('iata_code', '')
-        base_desc = f'Рейс {origin}-{dest}'.strip('- ').strip()
+        origin = (route.get('origin_airport') or {}).get('city_name', '')
+        dest = (route.get('destination_airport') or {}).get('city_name', '')
 
         for passenger in direction.get('passengers', []):
-            count = int(passenger.get('count', 0) or 0)
-            if count <= 0:
-                continue
-            cat = category_map.get(passenger.get('category', ''), 'Пассажир')
-
-            fare = money(passenger.get('fare_price', 0))
-            disc = money(passenger.get('discount', 0))
-            line_total = max(money(fare - disc), Decimal('0.00'))
-            unit = (line_total / Decimal(count)).quantize(Q, rounding=ROUND_HALF_UP)
-
             items.append({
-                'description': f"{base_desc}: Билет «{cat}»",
-                'quantity': count,
-                'amount': {'value': f"{unit:.2f}", 'currency': currency},
-                # TODO: check VAT codes
-                'vat_code': 1,
+                'description': 'Организация авиаперевозки пассажиров и багажа по маршруту Москва-Певек. Эконом класс. 11.08.25 ФИО',
+                'quantity': '',
+                'amount': {'value': f"{final_price:.2f}", 'currency': currency},
+                'vat_code': 7,
                 'payment_mode': 'full_payment',
                 'payment_subject': 'service',
             })
-
-    for fee in price_details.get('fees', []):
-        unit_amount = money(fee.get('amount', 0))
-        total_amount = money(fee.get('total', 0))
-        quantity = int(total_amount / unit_amount) if unit_amount > 0 else 1
-
-        items.append({
-            'description': fee.get('name'),
-            'quantity': quantity,
-            'amount': {'value': f"{unit_amount:.2f}", 'currency': currency},
-            # TODO: check VAT codes
-            'vat_code': 1,
-            'payment_mode': 'full_payment',
-            'payment_subject': 'service',
-        })
 
     return {
         'customer': {'email': booking.email_address},
@@ -114,7 +72,6 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
             'value': f'{payment.amount:.2f}',
             'currency': payment.currency.value.upper(),
         },
-        # 'receipt': __generate_receipt(booking),
         'description': f'Booking {booking.booking_number}',
         'airline': {'booking_reference': booking.booking_number},
         'metadata': {'booking_id': str(booking.public_id), 'booking_number': booking.booking_number},
