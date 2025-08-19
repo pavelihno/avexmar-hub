@@ -304,7 +304,7 @@ export const UI_LABELS = {
 				document: 'Документ',
 			},
 			price_details: {
-				passengers: 'Пассажиры',
+				passenger_category: 'Категория пассажиров',
 				quantity: 'Кол-во',
 				unit_fare_price: 'Цена (ед.)',
 				unit_discount: 'Скидка (ед.)',
