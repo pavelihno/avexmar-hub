@@ -344,6 +344,7 @@ export const UI_LABELS = {
 			title: 'Бронирование завершено',
 			price_title: 'Оплачено',
 			payment_details: 'Детали платежа',
+			buyer: 'Покупатель', 
 		},
 	},
 	SCHEDULE: {

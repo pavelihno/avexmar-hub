@@ -111,16 +111,6 @@ const Completion = () => {
 							</AccordionSummary>
 							<AccordionDetails>
 								<PassengersTable passengers={booking.passengers} />
-								<Box sx={{ display: 'flex' }}>
-									<Typography variant='subtitle1' sx={{ mr: 1 }}>
-										{`${UI_LABELS.BOOKING.confirmation.buyer_title}:`}
-									</Typography>
-									<Typography>
-										{`${booking.buyer_last_name || ''} ${booking.buyer_first_name || ''}, ${
-											booking.email_address
-										}, ${booking.phone_number}`}
-									</Typography>
-								</Box>
 							</AccordionDetails>
 						</Accordion>
 					)}
@@ -166,31 +156,50 @@ const Completion = () => {
 									{UI_LABELS.BOOKING.completion.payment_details}
 								</Typography>
 							</AccordionSummary>
-							<AccordionDetails>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-									<Typography>{FIELD_LABELS.PAYMENT.amount}</Typography>
-									<Typography>{`${formatNumber(payment.amount || 0)} ${currencySymbol}`}</Typography>
+							<AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+									<Typography sx={{ fontWeight: 'bold' }}>{FIELD_LABELS.PAYMENT.amount}</Typography>
+									<Typography sx={{ fontWeight: 'bold' }}>{`${formatNumber(
+										payment.amount
+									)} ${currencySymbol}`}</Typography>
 								</Box>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+									<Typography>{UI_LABELS.BOOKING.completion.buyer}</Typography>
+									<Typography>
+										{`${booking.buyer_last_name || ''} ${booking.buyer_first_name || ''}`}
+									</Typography>
+								</Box>
+
+								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+									<Typography>{FIELD_LABELS.BOOKING.email_address}</Typography>
+									<Typography>{booking.email_address}</Typography>
+								</Box>
+
+								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+									<Typography>{FIELD_LABELS.BOOKING.phone_number}</Typography>
+									<Typography>{booking.phone_number}</Typography>
+								</Box>
+
+								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
 									<Typography>{FIELD_LABELS.PAYMENT.method}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method}
 									</Typography>
 								</Box>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
 									<Typography>{FIELD_LABELS.PAYMENT.status}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status}
 									</Typography>
 								</Box>
 								{payment.provider_payment_id && (
-									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
 										<Typography>{FIELD_LABELS.PAYMENT.transaction_id}</Typography>
 										<Typography>{payment.provider_payment_id}</Typography>
 									</Box>
 								)}
 								{payment.paid_at && (
-									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
 										<Typography>{FIELD_LABELS.PAYMENT.payment_date}</Typography>
 										<Typography>{formatDate(payment.paid_at)}</Typography>
 									</Box>
