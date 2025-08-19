@@ -91,7 +91,7 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setTariffDetai
 					const isSelected = t.id === selectedId;
 					const hasAnyInfo = Boolean(t?.conditions) || t?.hand_luggage > 0 || t?.baggage > 0;
 					return (
-						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 22vh' }}>
+						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 22vh', mb: 0.5 }}>
 							<Box display='flex' justifyContent='flex-end'>
 								<IconButton
 									sx={{ m: 0, p: 0.5 }}
@@ -278,6 +278,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 								overflowX: 'hidden',
 								minHeight: 0,
 								minWidth: 0,
+								mb: 3,
 							}}
 						>
 							<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
@@ -369,7 +370,16 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 
 						<Divider orientation='vertical' sx={{ mx: 0.5, alignSelf: 'stretch' }} />
 
-						<Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', rowGap: 0.5 }}>
+						<Box
+							sx={{
+								flex: 1,
+								display: 'flex',
+								flexDirection: 'column',
+								overflowY: 'auto',
+								rowGap: 0.5,
+								mb: 3,
+							}}
+						>
 							<Typography sx={{ fontWeight: 600 }}>{UI_LABELS.SEARCH.flight_details.tickets}</Typography>
 							{(priceDetails?.directions || []).map((dir) => {
 								const route = dir.route || {};
@@ -434,10 +444,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 								variant='body1'
 								sx={{ fontSize: '1.1rem', fontWeight: 600, textDecoration: 'underline' }}
 							>
-								{UI_LABELS.SEARCH.flight_details.total_price}
+								{UI_LABELS.SEARCH.flight_details.final_price}
 							</Typography>
 							<Typography variant='body2' sx={{ fontSize: '1.1rem' }}>
-								{`${formatNumber(priceDetails?.total_price)} ${currencySymbol}`}
+								{`${formatNumber(priceDetails?.final_price)} ${currencySymbol}`}
 							</Typography>
 						</Box>
 					</Box>

@@ -22,7 +22,6 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     details = calculate_receipt_details(booking)
     currency = details.get('currency', booking.currency.value).upper()
     seat_class_map = {'economy': 'Эконом', 'business': 'Бизнес'}
-
     items = []
     for direction in details.get('directions', []):
         route = direction.get('route') or {}
@@ -81,14 +80,14 @@ def create_payment(public_id: str) -> Payment:
     booking = Booking.get_by_public_id(public_id)
 
     # If a pending payment already exists for this booking, return it
-    existing = (
+    existing_payment = (
         booking.payments
         .filter(Payment.payment_status == PAYMENT_STATUS.pending)
         .order_by(Payment.created_at.desc())
         .first()
     )
-    if existing:
-        return existing
+    if existing_payment:
+        return existing_payment
 
     amount = {
         'value': f'{booking.total_price:.2f}',
@@ -152,9 +151,6 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     status = obj.get('status')
     is_paid = obj.get('paid', False)
     captured_at = obj.get('captured_at')
-
-    print(type(is_paid), is_paid)
-    print(type(captured_at), captured_at)
 
     if not provider_id or not status:
         return

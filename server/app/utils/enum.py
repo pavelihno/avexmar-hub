@@ -44,6 +44,12 @@ class PASSENGER_CATEGORY(enum.Enum):
     infant_seat = 'infant_seat'
 
 
+class PASSENGER_PLURAL_CATEGORY(enum.Enum):
+    adults = 'adults'
+    children = 'children'
+    infants = 'infants'
+    infants_seat = 'infants_seat'
+
 class CURRENCY(enum.Enum):
     rub = 'rub'
 

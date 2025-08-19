@@ -63,8 +63,8 @@ const Confirmation = () => {
 		try {
 			if (booking.status === 'passengers_added') {
 				await dispatch(confirmBooking(publicId)).unwrap();
-				await dispatch(createPayment({ public_id: publicId })).unwrap();
 			}
+			await dispatch(createPayment({ public_id: publicId })).unwrap();
 			await dispatch(fetchBookingAccess(publicId)).unwrap();
 			navigate(`/booking/${publicId}/payment`);
 		} catch (e) {
@@ -156,7 +156,7 @@ const Confirmation = () => {
 										{`${UI_LABELS.BOOKING.confirmation.price_title}:`}
 									</Typography>
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-										{`${formatNumber(booking.price_details?.total_price || 0)} ${currencySymbol}`}
+										{`${formatNumber(booking.price_details?.final_price || 0)} ${currencySymbol}`}
 									</Typography>
 								</Box>
 							</AccordionSummary>

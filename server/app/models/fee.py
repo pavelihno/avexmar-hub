@@ -27,7 +27,7 @@ class Fee(BaseModel):
         return super().get_all(sort_by=['name'], descending=False)
 
     @classmethod
-    def get_applicable(cls, application, hours_before_departure=None):
+    def get_applicable_fees(cls, application, hours_before_departure=None):
         query = cls.query.filter_by(application=application)
         if application == FEE_APPLICATION.booking:
             query = query.filter_by(application_term=FEE_TERM.none)
@@ -42,21 +42,3 @@ class Fee(BaseModel):
                 term = FEE_TERM.after_departure
             query = query.filter_by(application_term=term)
         return query.all()
-
-    @classmethod
-    def calculate_fees(
-        cls, seats_number, application, hours_before_departure=None
-    ):
-        fees = cls.get_applicable(application, hours_before_departure)
-        result = []
-        total = 0.0
-        for fee in fees:
-            fee_total = fee.amount * seats_number
-            result.append({
-                'name': fee.name,
-                'amount': fee.amount,
-                'quantity': seats_number,
-                'total': fee_total,
-            })
-            total += fee_total
-        return result, total

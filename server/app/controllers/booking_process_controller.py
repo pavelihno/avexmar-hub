@@ -9,7 +9,7 @@ from app.models.payment import Payment
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.yookassa import create_payment, handle_webhook
-from app.utils.enum import BOOKING_STATUS, PASSENGER_CATEGORY
+from app.utils.enum import BOOKING_STATUS, PASSENGER_PLURAL_CATEGORY
 
 
 @current_user
@@ -37,7 +37,7 @@ def create_booking_process(current_user):
         if count > 0:
             passengers[key] = count
 
-    price = calculate_price_details(
+    price_details = calculate_price_details(
         outbound_id,
         outbound_tariff_id,
         return_id,
@@ -48,11 +48,11 @@ def create_booking_process(current_user):
     booking = Booking.create(
         session,
         commit=False,
-        currency=price['currency'],
-        fare_price=price['fare_price'],
-        fees=sum(f['total'] for f in price['fees']),
-        total_discounts=price['total_discounts'],
-        total_price=price['total_price'],
+        currency=price_details['currency'],
+        fare_price=price_details['fare_price'],
+        total_discounts=price_details['total_discounts'],
+        fees= price_details['total_fees'],
+        total_price=price_details['final_price'],
         passenger_counts=passengers,
         user_id=current_user.id if current_user else None,
     )
@@ -199,20 +199,14 @@ def get_booking_process_details(current_user, public_id):
     passengers_exist = len(passengers) > 0
     if not passengers:
         counts = booking.passenger_counts or {}
-        key_map = {
-            'adults': PASSENGER_CATEGORY.adult.value,
-            'children': PASSENGER_CATEGORY.child.value,
-            'infants': PASSENGER_CATEGORY.infant.value,
-            'infants_seat': PASSENGER_CATEGORY.infant_seat.value,
-        }
         for key, count in counts.items():
             try:
                 count = int(count)
             except (TypeError, ValueError):
                 continue
-            category = key_map.get(key, key)
+            category = BookingPassenger.get_category_from_plural(PASSENGER_PLURAL_CATEGORY(key))
             for _ in range(count):
-                passengers.append({'category': category})
+                passengers.append({'category': category.value})
 
     passenger_counts = dict(booking.passenger_counts or {})
 
@@ -232,18 +226,16 @@ def get_booking_process_details(current_user, public_id):
     outbound_tariff_id = tariffs_map.get(outbound_id)
     return_tariff_id = tariffs_map.get(return_id)
 
-    price_details = calculate_price_details(
+    result['passengers'] = passengers
+    result['passengers_exist'] = passengers_exist
+    result['flights'] = flights
+    result['price_details'] = calculate_price_details(
         outbound_id,
         outbound_tariff_id,
         return_id,
         return_tariff_id,
         passenger_counts,
     )
-
-    result['passengers'] = passengers
-    result['passengers_exist'] = passengers_exist
-    result['flights'] = flights
-    result['price_details'] = price_details
 
     return jsonify(result), 200
 

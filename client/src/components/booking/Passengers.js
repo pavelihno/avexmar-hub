@@ -263,7 +263,7 @@ const Passengers = () => {
 	}, [booking?.price_details]);
 
 	const farePrice = booking?.fare_price || 0;
-	const serviceFee = booking?.fees || 0;
+	const fees = booking?.fees || 0;
 	const discount = booking?.total_discounts || 0;
 	const totalPrice = booking?.total_price || 0;
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
@@ -463,16 +463,16 @@ const Passengers = () => {
 								<Typography>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>
 								<Typography>{`${formatNumber(farePrice)} ${currencySymbol}`}</Typography>
 							</Box>
-							{serviceFee > 0 && (
+							{fees > 0 && (
 								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
-									<Typography>{`${formatNumber(serviceFee)} ${currencySymbol}`}</Typography>
+									<Typography>{`${formatNumber(fees)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}
 							{discount > 0 && (
 								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.discount}</Typography>
-									<Typography>{`-${formatNumber(discount)} ${currencySymbol}`}</Typography>
+									<Typography>{`- ${formatNumber(discount)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -512,7 +512,7 @@ const Passengers = () => {
 							</Button>
 						</CardContent>
 					</Card>
-					<Typography variant='body2' color='textSecondary' sx={{ mt: 1 }}>
+					<Typography variant='body2' color='textSecondary' sx={{ ml: 1, mt: 1 }}>
 						{UI_LABELS.BOOKING.buyer_form.public_offer((text) => (
 							<Link to='/public_offer' target='_blank'>
 								{text}

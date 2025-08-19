@@ -277,7 +277,9 @@ export const UI_LABELS = {
 		buyer_form: {
 			title: 'Покупатель',
 			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
-			public_offer: (link) => <>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>,
+			public_offer: (link) => (
+				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
+			),
 			summary: {
 				total: 'Итого',
 				passenger_word: (count) =>
@@ -300,6 +302,13 @@ export const UI_LABELS = {
 				birth_date: 'Дата рождения',
 				gender: 'Пол',
 				document: 'Документ',
+			},
+			price_details: {
+				passengers: 'Пассажиры',
+				quantity: 'Кол-во',
+				unit_fare_price: 'Цена (ед.)',
+				unit_discount: 'Скидка (ед.)',
+				final_price: 'Итого',
 			},
 			payment_button: 'Перейти к оплате',
 			passenger_categories: {
@@ -397,7 +406,7 @@ export const UI_LABELS = {
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
-			total_price: 'Итоговая стоимость',
+			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			price_from: 'От',
 			price_per_passenger: 'За 1 пассажира',
