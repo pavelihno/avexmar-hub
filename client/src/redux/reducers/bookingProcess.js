@@ -1,19 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
-        processBookingCreate,
-        processBookingPassengers,
-        fetchBookingDetails,
-        fetchBookingAccess,
-        confirmBooking,
-        fetchCompletionDetails,
+	processBookingCreate,
+	processBookingPassengers,
+	fetchBookingDetails,
+	fetchBookingAccess,
+	confirmBooking,
 } from '../actions/bookingProcess';
 import { handlePending, handleRejected } from '../utils';
 
 const initialState = {
-        current: null,
-        completion: null,
-        isLoading: false,
-        errors: null,
+	current: null,
+	completion: null,
+	isLoading: false,
+	errors: null,
 };
 
 const bookingProcessSlice = createSlice({
@@ -47,24 +46,18 @@ const bookingProcessSlice = createSlice({
 				};
 				state.isLoading = false;
 			})
-                        .addCase(fetchBookingAccess.pending, handlePending)
-                        .addCase(fetchBookingAccess.rejected, handleRejected)
-                        .addCase(fetchBookingAccess.fulfilled, (state, action) => {
-                                state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
-                                state.isLoading = false;
-                        })
-                        .addCase(confirmBooking.pending, handlePending)
-                        .addCase(confirmBooking.rejected, handleRejected)
-                        .addCase(confirmBooking.fulfilled, (state) => {
-                                state.isLoading = false;
-                        })
-                        .addCase(fetchCompletionDetails.pending, handlePending)
-                        .addCase(fetchCompletionDetails.rejected, handleRejected)
-                        .addCase(fetchCompletionDetails.fulfilled, (state, action) => {
-                                state.completion = action.payload;
-                                state.isLoading = false;
-                        });
-        },
+			.addCase(fetchBookingAccess.pending, handlePending)
+			.addCase(fetchBookingAccess.rejected, handleRejected)
+			.addCase(fetchBookingAccess.fulfilled, (state, action) => {
+				state.current = { ...(state.current || {}), accessiblePages: action.payload.pages || [] };
+				state.isLoading = false;
+			})
+			.addCase(confirmBooking.pending, handlePending)
+			.addCase(confirmBooking.rejected, handleRejected)
+			.addCase(confirmBooking.fulfilled, (state) => {
+				state.isLoading = false;
+			});
+	},
 });
 
 export default bookingProcessSlice.reducer;

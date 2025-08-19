@@ -277,7 +277,9 @@ export const UI_LABELS = {
 		buyer_form: {
 			title: 'Покупатель',
 			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
-			public_offer: (link) => <>Нажимая «Продолжить», вы соглашаетесь с {link('публичной офертой')}</>,
+			public_offer: (link) => (
+				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
+			),
 			summary: {
 				total: 'Итого',
 				passenger_word: (count) =>
@@ -301,6 +303,13 @@ export const UI_LABELS = {
 				gender: 'Пол',
 				document: 'Документ',
 			},
+			price_details: {
+				passengers: 'Пассажиры',
+				quantity: 'Кол-во',
+				unit_fare_price: 'Цена (ед.)',
+				unit_discount: 'Скидка (ед.)',
+				final_price: 'Итого',
+			},
 			payment_button: 'Перейти к оплате',
 			passenger_categories: {
 				adults: 'Взрослые',
@@ -321,6 +330,14 @@ export const UI_LABELS = {
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+		},
+		payment_form: {
+			total: 'К оплате',
+			payment_failed: 'Оплата не прошла',
+			retry_payment: 'Повторить оплату',
+			loading: 'Загрузка формы оплаты...',
+			waiting: 'Ожидание токена оплаты...',
+			load_error: 'Не удалось загрузить виджет оплаты',
 		},
 	},
 	SCHEDULE: {
@@ -389,7 +406,7 @@ export const UI_LABELS = {
 			airline: 'Авиакомпания',
 			from_to: 'Отправление - Прибытие',
 			departure_arrival: 'Время отправления - Время прибытия',
-			total_price: 'Итоговая стоимость',
+			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			price_from: 'От',
 			price_per_passenger: 'За 1 пассажира',
@@ -397,7 +414,10 @@ export const UI_LABELS = {
 			seats_unavailable: 'Недостаточно свободных мест',
 			tickets: 'Билеты',
 			fees: 'Сборы',
+			tariff_information: 'Информация о тарифе',
 			tariff_conditions: 'Условия применения тарифа',
+			baggage: (weight) => `Багаж: ${weight} кг`,
+			hand_luggage: (weight) => `Ручная кладь: ${weight} кг`,
 		},
 		sort: {
 			label: 'Сортировка',

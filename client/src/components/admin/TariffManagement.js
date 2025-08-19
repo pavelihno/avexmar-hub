@@ -62,6 +62,32 @@ const TariffManagement = () => {
 			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.currency.REQUIRED : null),
 		},
+		baggage: {
+			key: 'baggage',
+			apiKey: 'baggage',
+			label: FIELD_LABELS.TARIFF.baggage,
+			type: FIELD_TYPES.NUMBER,
+			defaultValue: 0,
+			validate: (value) => {
+				if (value === null || value === '' || value === undefined) {
+					return VALIDATION_MESSAGES.TARIFF.baggage.REQUIRED;
+				}
+				return null;
+			},
+		},
+		handLuggage: {
+			key: 'handLuggage',
+			apiKey: 'hand_luggage',
+			label: FIELD_LABELS.TARIFF.hand_luggage,
+			type: FIELD_TYPES.NUMBER,
+			defaultValue: 0,
+			validate: (value) => {
+				if (value === null || value === '' || value === undefined) {
+					return VALIDATION_MESSAGES.TARIFF.hand_luggage.REQUIRED;
+				}
+				return null;
+			},
+		},
 		conditions: {
 			key: 'conditions',
 			apiKey: 'conditions',

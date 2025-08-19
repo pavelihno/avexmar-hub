@@ -4,7 +4,7 @@ import { getErrorData } from '../utils';
 
 export const createPayment = createAsyncThunk('payment/create', async (data, { rejectWithValue }) => {
 	try {
-		const res = await serverApi.post('/bookings/process/payment', data);
+		const res = await serverApi.post('/booking/payment', data);
 		return res.data;
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));
@@ -13,7 +13,7 @@ export const createPayment = createAsyncThunk('payment/create', async (data, { r
 
 export const fetchPayment = createAsyncThunk('payment/fetch', async (publicId, { rejectWithValue }) => {
 	try {
-		const res = await serverApi.get(`/bookings/process/payment/${publicId}/details`);
+		const res = await serverApi.get(`/booking/payment/${publicId}/details`);
 		return res.data;
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));

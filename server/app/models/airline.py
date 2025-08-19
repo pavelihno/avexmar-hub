@@ -58,7 +58,11 @@ class Airline(BaseModel):
         return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
 
     @classmethod
-    def upload_from_file(cls, file, session: Session | None = None):
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
         session = session or db.session
         rows = parse_xlsx(
             file,
@@ -83,7 +87,8 @@ class Airline(BaseModel):
                         iata_code=str(row.get('iata_code')),
                         icao_code=str(row.get('icao_code')),
                         name=str(row.get('name')),
-                        country_id=country.id
+                        country_id=country.id,
+                        commit=False,
                     )
                     airlines.append(airline)
                 except Exception as e:
@@ -91,5 +96,7 @@ class Airline(BaseModel):
 
             if row.get('error'):
                 error_rows.append(row)
+
+        session.commit()
 
         return airlines, error_rows

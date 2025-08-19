@@ -8,6 +8,7 @@ from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
 from app.middlewares.error_handler import register_error_handlers
+from app.middlewares.session_middleware import register_session_handler
 
 from app.controllers._dev_controller import *
 from app.controllers.auth_controller import *
@@ -23,6 +24,7 @@ from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
+from app.controllers.booking_process_controller import *
 from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
 from app.controllers.airline_controller import *
@@ -56,6 +58,7 @@ def __create_app(_config_class, _db):
     _db.init_app(app)
     init_mail(app)
     register_error_handlers(app)
+    register_session_handler(app)
 
     # auth
     app.route('/register', methods=['POST'])(register)
@@ -212,20 +215,19 @@ def __create_app(_config_class, _db):
     app.route('/search/calculate/price', methods=['POST'])(calculate_price)
 
     # booking process
-    app.route('/bookings/process/<public_id>/access', methods=['GET'])(get_process_booking_access)
-    app.route('/bookings/process/<public_id>/details', methods=['GET'])(get_booking_details)
-    app.route('/bookings/process/create', methods=['POST'])(create_booking_process)
-    app.route('/bookings/process/passengers', methods=['POST'])(create_booking_passengers)
-    app.route('/bookings/process/confirm', methods=['POST'])(confirm_booking)
-    app.route('/bookings/process/payment', methods=['POST'])(create_booking_payment)
-    app.route('/bookings/process/payment/<public_id>/details', methods=['GET'])(get_booking_payment)
-    app.route('/bookings/process/<public_id>/completion', methods=['GET'])(get_process_booking_completion)
+    app.route('/booking/<public_id>/access', methods=['GET'])(get_booking_process_access)
+    app.route('/booking/<public_id>/details', methods=['GET'])(get_booking_process_details)
+    app.route('/booking/create', methods=['POST'])(create_booking_process)
+    app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
+    app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
+    app.route('/booking/payment', methods=['POST'])(create_booking_process_payment)
+    app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
 
     # external
-    app.route('/payments/webhook', methods=['POST'])(payment_webhook)
+    app.route('/webhooks/yookassa', methods=['POST'])(yookassa_webhook)
 
     migrate = Migrate(app, db)
 

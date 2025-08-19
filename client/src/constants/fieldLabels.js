@@ -21,7 +21,9 @@ export const FIELD_LABELS = {
 		fare_price: 'Стоимость билетов',
 		total_discounts: 'Скидка',
 		fees: 'Сборы',
-		total_price: 'Итоговая цена',
+		total_price: 'Итого',
+		quantity: 'Кол-во',
+		ticket_price: 'Цена билета',
 		passengers: 'Пассажиры',
 	},
 	AIRPORT: {
@@ -111,6 +113,8 @@ export const FIELD_LABELS = {
 		price: 'Цена',
 		currency: 'Валюта',
 		conditions: 'Условия применения тарифа',
+		baggage: 'Багаж (кг)',
+		hand_luggage: 'Ручная кладь (кг)',
 	},
 	FLIGHT_TARIFF: {
 		flight_id: 'Рейс',

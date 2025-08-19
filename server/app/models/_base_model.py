@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
+import enum
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, Enum as SAEnum
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -36,9 +37,29 @@ class BaseModel(db.Model):
         valid = set(mapper.attrs.keys())
         return {k: v for k, v in kwargs.items() if k in valid}
 
+    @classmethod
+    def convert_enums(cls, data: dict) -> dict:
+        """Convert enum field values to enum instances, set None if invalid"""
+        mapper = inspect(cls)
+        for column in mapper.columns:
+            if isinstance(column.type, SAEnum):
+                enum_cls = column.type.enum_class
+                key = column.name
+                if key in data:
+                    value = data[key]
+                    if value is None:
+                        continue
+                    if not isinstance(value, enum_cls):
+                        try:
+                            data[key] = enum_cls(getattr(value, 'value', value))
+                        except Exception:
+                            data[key] = None
+        return data
+
     def __init__(self, **kwargs) -> None:
-        filtered_kwargs = self.__filter_out_non_existing_fields(kwargs)
-        super().__init__(**filtered_kwargs)
+        kwargs = self.__filter_out_non_existing_fields(kwargs)
+        kwargs = type(self).convert_enums(kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def get_all(cls, sort_by: list = [], descending: bool = False) -> List['BaseModel']:
@@ -64,7 +85,7 @@ class BaseModel(db.Model):
         return cls.query.get(_id)
 
     @classmethod
-    def _unique_constraints(cls) -> List[List[str]]:
+    def __unique_constraints(cls) -> List[List[str]]:
         """Return list of unique constraint column name lists"""
         uniques: List[List[str]] = []
         for column in cls.__table__.columns:
@@ -76,12 +97,12 @@ class BaseModel(db.Model):
         return uniques
 
     @classmethod
-    def _check_unique(
+    def __check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
         """Check if the provided data violates unique constraints"""
         errors: Dict[str, str] = {}
-        for columns in cls._unique_constraints():
+        for columns in cls.__unique_constraints():
             if not all(col in data for col in columns):
                 continue
             query = session.query(cls)
@@ -95,7 +116,7 @@ class BaseModel(db.Model):
         return errors
 
     @classmethod
-    def _check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
+    def __check_foreign_keys_exist(cls, session: Session, data: dict) -> None:
         """Ensure that all provided foreign keys reference existing rows"""
         for column in cls.__table__.columns:
             if column.foreign_keys and column.name in data:
@@ -124,7 +145,13 @@ class BaseModel(db.Model):
         return instance
 
     @classmethod
-    def delete_or_404(cls, _id, session: Session | None = None) -> Optional[Dict]:
+    def delete_or_404(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> Optional[Dict]:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
@@ -135,25 +162,38 @@ class BaseModel(db.Model):
 
         try:
             session.delete(instance)
-            session.commit()
+            if commit:
+                session.commit()
+            else:
+                session.flush()
             return instance_dict
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({"message": str(e)}) from e
 
     @classmethod
-    def create(cls, session: Session | None = None, **data) -> Optional['BaseModel']:
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **data,
+    ) -> Optional['BaseModel']:
         session = session or db.session
+        data = cls.convert_enums(data)
         instance = cls(**data)
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
-        cls._check_foreign_keys_exist(session, filtered_data)
-        errors = cls._check_unique(session, filtered_data)
+        cls.__check_foreign_keys_exist(session, filtered_data)
+        errors = cls.__check_unique(session, filtered_data)
         if errors:
             raise ModelValidationError(errors)
 
         session.add(instance)
         try:
-            session.commit()
+            if commit:
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e
@@ -161,14 +201,20 @@ class BaseModel(db.Model):
 
     @classmethod
     def update(
-        cls, _id, session: Session | None = None, **data
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
-        cls._check_foreign_keys_exist(session, filtered_data)
-        errors = cls._check_unique(session, filtered_data, instance.id)
+        filtered_data = cls.convert_enums(filtered_data)
+        cls.__check_foreign_keys_exist(session, filtered_data)
+        errors = cls.__check_unique(session, filtered_data, instance.id)
         for key, value in filtered_data.items():
             setattr(instance, key, value)
         if errors:
@@ -176,7 +222,10 @@ class BaseModel(db.Model):
             raise ModelValidationError(errors)
 
         try:
-            session.commit()
+            if commit:
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e
@@ -190,11 +239,19 @@ class BaseModel(db.Model):
         return cls.delete_or_404(_id, session)
 
     @classmethod
-    def delete_all(cls, session: Session | None = None) -> int:
+    def delete_all(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> int:
         session = session or db.session
         try:
             count = session.query(cls).delete()
-            session.commit()
+            if commit and not session.in_transaction():
+                session.commit()
+            else:
+                session.flush()
         except IntegrityError as e:
             session.rollback()
             raise ModelValidationError({'message': str(e)}) from e

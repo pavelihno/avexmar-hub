@@ -104,3 +104,17 @@ Run all tests:
 ```bash
 docker-compose run --rm server-app pytest -sv tests
 ```
+
+### Cloudflare Tunnel Setup
+
+Client App:
+
+```bash
+cloudflared tunnel --url http://localhost:3000 --protocol http2
+```
+
+Server App:
+
+```bash
+cloudflared tunnel --url http://localhost:5000 --protocol http2
+```

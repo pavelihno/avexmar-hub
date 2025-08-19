@@ -1,10 +1,11 @@
 from flask import request, jsonify
 
+from app.config import Config
 from app.models.user import User
 from app.utils.jwt import signJWT
 from app.utils.email import send_email
+from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.middlewares.auth_middleware import login_required
-from app.config import Config
 
 from app.models.password_reset_token import PasswordResetToken
 from app.database import db
@@ -24,7 +25,7 @@ def register():
     new_user = User.create(**{
         'email': email,
         'password': password,
-        'role': Config.DEFAULT_USER_ROLE,
+        'role': DEFAULT_USER_ROLE,
         'is_active': True
     })
     if new_user:
@@ -79,7 +80,6 @@ def reset_password():
 
     user = User.change_password(token.user_id, password)
     token.used = True
-    db.session.commit()
     if user:
         token_jwt = signJWT(user.email)
         return jsonify({'token': token_jwt, 'user': user.to_dict()}), 200

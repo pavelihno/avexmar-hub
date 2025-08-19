@@ -3,14 +3,13 @@ import string
 import uuid
 from uuid import UUID as UUID_cls
 from typing import List, TYPE_CHECKING
+from datetime import datetime
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
-from datetime import datetime, timezone
-
 from app.database import db
 from app.models._base_model import BaseModel
-from app.config import Config
+from app.utils.enum import BOOKING_STATUS, CURRENCY, DEFAULT_BOOKING_STATUS, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -27,7 +26,7 @@ class Booking(BaseModel):
     # Booking details
     public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)
     booking_number = db.Column(db.String, unique=True, nullable=True, index=True)
-    status = db.Column(db.Enum(Config.BOOKING_STATUS), nullable=False, default=Config.DEFAULT_BOOKING_STATUS)
+    status = db.Column(db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
@@ -37,7 +36,7 @@ class Booking(BaseModel):
     phone_number = db.Column(db.String, nullable=True)
 
     # Price details
-    currency = db.Column(db.Enum(Config.CURRENCY), nullable=False, default=Config.DEFAULT_CURRENCY)
+    currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     fare_price = db.Column(db.Float, nullable=False)
     fees = db.Column(db.Float, nullable=False, default=0.0)
     total_discounts = db.Column(db.Float, nullable=False, default=0.0)
@@ -83,6 +82,8 @@ class Booking(BaseModel):
             'total_price': self.total_price,
         }
 
+    PNR_MASK = 'ABXXXX'
+
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by=['booking_number'], descending=False)
@@ -92,7 +93,13 @@ class Booking(BaseModel):
         return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
 
     @classmethod
-    def generate_booking_number(cls, id, session: Session):
+    def generate_booking_number(
+        cls,
+        id,
+        session: Session,
+        *,
+        commit: bool = False,
+    ):
         """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
             booking.booking_number for booking in session.query(cls).all()
@@ -102,7 +109,7 @@ class Booking(BaseModel):
             booking_number = ''.join(
                 random.choice(string.ascii_uppercase + string.digits)
                 if ch == 'X' else ch
-                for ch in Config.PNR_MASK
+                for ch in cls.PNR_MASK
             )
             if booking_number not in existing_booking_numbers:
                 break
@@ -110,63 +117,109 @@ class Booking(BaseModel):
         return cls.update(
             id,
             session=session,
+            commit=commit,
             booking_number=booking_number
         )
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
-        status = kwargs.get('status', Config.DEFAULT_BOOKING_STATUS.value)
+        kwargs = cls.convert_enums(kwargs)
+        status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
         history = [{
-            'status': status,
+            'status': status.value,
             'at': datetime.now().isoformat()
         }]
         kwargs['status_history'] = history
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def update(cls, id, session: Session | None = None, **kwargs):
+    def update(
+        cls,
+        id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         booking = cls.get_or_404(id, session)
-        old_status = booking.status.value
+        kwargs = cls.convert_enums(kwargs)
+        old_status = booking.status
         new_status = kwargs.get('status', old_status)
         history = list(booking.status_history or [])
         history.append({
-            'status': new_status,
+            'status': new_status.value,
             'at': datetime.now().isoformat()
         })
         kwargs['status_history'] = history
+        return super().update(id, session=session, commit=commit, **kwargs)
 
-        return super().update(id, session=session, **kwargs)
-    
     @classmethod
-    def update_by_public_id(cls, public_id, session: Session | None = None, **kwargs):
+    def update_by_public_id(
+        cls,
+        public_id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
         booking = cls.get_by_public_id(public_id)
-        return cls.update(booking.id, session=session, **kwargs)
+        return cls.update(booking.id, session=session, commit=commit, **kwargs)
 
     ALLOWED_TRANSITIONS = {
-        'created': {'passengers_added', 'cancelled', 'expired'},
-        'passengers_added': {'confirmed', 'cancelled', 'expired'},
-        'confirmed': {'payment_pending', 'cancelled', 'expired'},
-        'payment_pending': {'payment_confirmed', 'payment_failed', 'cancelled', 'expired'},
-        'payment_failed': {'payment_pending', 'cancelled', 'expired'},
-        'payment_confirmed': {'completed', 'cancelled'},
-        'completed': {'cancelled'},
-        'expired': set(),
-        'cancelled': set(),
+        BOOKING_STATUS.created: {
+            BOOKING_STATUS.passengers_added,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
+        },
+        BOOKING_STATUS.passengers_added: {
+            BOOKING_STATUS.confirmed,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
+        },
+        BOOKING_STATUS.confirmed: {
+            BOOKING_STATUS.payment_pending,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
+        },
+        BOOKING_STATUS.payment_pending: {
+            BOOKING_STATUS.payment_confirmed,
+            BOOKING_STATUS.payment_failed,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
+        },
+        BOOKING_STATUS.payment_failed: {
+            BOOKING_STATUS.payment_pending,
+            BOOKING_STATUS.cancelled,
+            BOOKING_STATUS.expired,
+        },
+        BOOKING_STATUS.payment_confirmed: {
+            BOOKING_STATUS.completed,
+            BOOKING_STATUS.cancelled,
+        },
+        BOOKING_STATUS.completed: {BOOKING_STATUS.cancelled},
+        BOOKING_STATUS.expired: set(),
+        BOOKING_STATUS.cancelled: set(),
     }
 
-    TERMINAL = {'expired', 'cancelled'}
+    TERMINAL = {BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
 
     PAGE_FLOW = {
-        'created': ['passengers'],
-        'passengers_added': ['passengers', 'confirmation'],
-        'confirmed': ['payment'],
-        'payment_pending': ['payment'],
-        'payment_failed': ['payment'],
-        'payment_confirmed': ['payment', 'completion'],
-        'completed': ['completion'],
+        BOOKING_STATUS.created: ['passengers'],
+        BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
+        BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_pending: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_failed: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_confirmed: ['confirmation', 'payment'],
+        BOOKING_STATUS.completed: ['completion'],
     }
 
     @classmethod
@@ -176,18 +229,31 @@ class Booking(BaseModel):
         if booking.user_id and (not current_user or booking.user_id != current_user.id):
             return []
 
-        return cls.PAGE_FLOW.get(booking.status.value, [])
+        return cls.PAGE_FLOW.get(booking.status, [])
 
     @classmethod
-    def transition_status(cls, id, to_status: str, session: Session | None = None):
+    def transition_status(
+        cls,
+        id,
+        to_status,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ):
         session = session or db.session
         booking = cls.get_or_404(id)
-        from_status = booking.status.value
-        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set()):
-            raise ValueError(f'Illegal transition: {from_status} -> {to_status}')
+        from_status = booking.status
+        if (
+            from_status != to_status
+            and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
+        ):
+            raise ValueError(
+                f'Illegal transition: {from_status.value} -> {to_status.value}'
+            )
 
         return cls.update(
             id,
             session=session,
+            commit=commit,
             status=to_status,
         )

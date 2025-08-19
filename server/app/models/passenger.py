@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session, Mapped
 from sqlalchemy import Index
 
 from app.database import db
-from app.config import Config
 from app.models._base_model import BaseModel
 from app.models.country import Country
+from app.utils.enum import GENDER, DOCUMENT_TYPE, DEFAULT_CITIZENSHIP_CODE
 
 if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
@@ -22,9 +22,9 @@ class Passenger(BaseModel):
     last_name = db.Column(db.String, nullable=False)
     patronymic_name = db.Column(db.String, nullable=True)
 
-    gender = db.Column(db.Enum(Config.GENDER), nullable=False)
+    gender = db.Column(db.Enum(GENDER), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
-    document_type = db.Column(db.Enum(Config.DOCUMENT_TYPE), nullable=False)
+    document_type = db.Column(db.Enum(DOCUMENT_TYPE), nullable=False)
     document_number = db.Column(db.String, nullable=False)
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
@@ -91,18 +91,26 @@ class Passenger(BaseModel):
         return kwargs
 
     @classmethod
-    def __prepare_for_save(cls, session: Session, kwargs: dict, current_id=None):
+    def __prepare_for_save(
+        cls,
+        session: Session,
+        kwargs: dict,
+        *,
+        commit: bool,
+        current_id=None,
+    ):
         """Apply defaults and reuse existing passenger if unique data matches"""
         # Ensure names are stored in uppercase
         kwargs = cls.__normalize_names(kwargs)
+        kwargs = cls.convert_enums(kwargs)
 
         if kwargs.get('document_type') in (
-            Config.DOCUMENT_TYPE.passport.value,
-            Config.DOCUMENT_TYPE.international_passport.value,
-            Config.DOCUMENT_TYPE.birth_certificate.value,
+            DOCUMENT_TYPE.passport,
+            DOCUMENT_TYPE.international_passport,
+            DOCUMENT_TYPE.birth_certificate,
         ):
             kwargs['citizenship_id'] = Country.get_by_code(
-                Config.DEFAULT_CITIZENSHIP_CODE
+                DEFAULT_CITIZENSHIP_CODE
             ).id
 
         unique_fields = [
@@ -124,32 +132,45 @@ class Passenger(BaseModel):
                 cls.document_number == kwargs['document_number'],
             ).one_or_none()
             if existing and (current_id is None or existing.id != current_id):
-                super().update(existing.id, session, **kwargs)
+                super().update(existing.id, session, commit=commit, **kwargs)
                 return existing
 
         return None
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs)
+        existing = cls.__prepare_for_save(session, kwargs, commit=commit)
         if existing:
             return existing
 
         # Ensure names are uppercase on direct create as well
         kwargs = cls.__normalize_names(kwargs)
-        return super().create(session, **kwargs)
+        return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def update(cls, _id, session: Session | None = None, **kwargs):
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         """Update passenger or reuse existing one with the same unique data."""
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs, current_id=_id)
+        existing = cls.__prepare_for_save(session, kwargs, commit=commit, current_id=_id)
         if existing:
             return existing
 
         # Ensure names are uppercase on update
         kwargs = cls.__normalize_names(kwargs)
-        return super().update(_id, session, **kwargs)
+        return super().update(_id, session, commit=commit, **kwargs)

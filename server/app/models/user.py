@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.database import db
 from app.models._base_model import BaseModel
 from sqlalchemy.orm import Session, Mapped
-from app.config import Config
+from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 
 if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
@@ -17,7 +17,7 @@ class User(BaseModel):
 
     email = db.Column(db.String, unique=True, index=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(db.Enum(Config.USER_ROLE), nullable=False, default=Config.DEFAULT_USER_ROLE)
+    role = db.Column(db.Enum(USER_ROLE), nullable=False, default=DEFAULT_USER_ROLE)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
@@ -43,7 +43,13 @@ class User(BaseModel):
         return super().get_all(sort_by=['email'], descending=False)
 
     @classmethod
-    def create(cls, session: Session | None = None, **kwargs):
+    def create(
+        cls,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
 
         for key, value in kwargs.items():
@@ -52,7 +58,7 @@ class User(BaseModel):
             elif key == 'email' and isinstance(value, str):
                 kwargs['email'] = value.lower()
 
-        return super().create(session=session, **kwargs)
+        return super().create(session=session, commit=commit, **kwargs)
 
     @classmethod
     def get_by_email(cls, _email):
@@ -61,12 +67,19 @@ class User(BaseModel):
         return cls.query.filter(cls.email == _email.lower()).one_or_none()
 
     @classmethod
-    def update(cls, _id, session: Session | None = None, **kwargs):
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
         session = session or db.session
 
         kwargs = {k: v for k, v in kwargs.items() if k in ['role', 'is_active']}
-        
-        return super().update(_id, session=session, **kwargs)
+
+        return super().update(_id, session=session, commit=commit, **kwargs)
 
     @classmethod
     def login(cls, _email, _password):
