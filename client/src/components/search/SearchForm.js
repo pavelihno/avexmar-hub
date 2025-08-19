@@ -258,38 +258,59 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		);
 	};
 
-	const validateForm = () => {
-		const errors = {};
-		if (!formValues.from) errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
-		if (!formValues.to) errors.to = VALIDATION_MESSAGES.SEARCH.to.REQUIRED;
-		if (formValues.from && formValues.to && formValues.from === formValues.to) {
-			errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
-		}
+        const validateForm = () => {
+                const errors = {};
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-		if (dateMode === 'exact') {
-			if (!formValues.departDate) errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-			if (formValues.returnDate && formValues.departDate && formValues.returnDate < formValues.departDate) {
-				errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-			}
-		} else {
-			const { departFrom, departTo, returnFrom, returnTo } = formValues;
-			if (!departFrom) errors.departFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-			if (!departTo) errors.departTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-			if (departFrom && departTo && departTo < departFrom) {
-				errors.departTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-			}
-			if (returnFrom || returnTo) {
-				if (!(returnFrom && returnTo)) {
-					if (!returnFrom) errors.returnFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-					if (!returnTo) errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-				} else if (returnTo < returnFrom || (departTo && returnFrom < departTo)) {
-					errors.returnFrom = VALIDATION_MESSAGES.SEARCH.return.INVALID;
-				}
-			}
-		}
-		setValidationErrors(errors);
-		return Object.keys(errors).length === 0;
-	};
+                if (!formValues.from) errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
+                if (!formValues.to) errors.to = VALIDATION_MESSAGES.SEARCH.to.REQUIRED;
+                if (formValues.from && formValues.to && formValues.from === formValues.to) {
+                        errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
+                }
+
+                if (dateMode === 'exact') {
+                        if (!formValues.departDate) {
+                                errors.departDate = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        } else if (formValues.departDate < today) {
+                                errors.departDate = VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                        }
+                        if (formValues.returnDate) {
+                                if (formValues.departDate && formValues.returnDate < formValues.departDate) {
+                                        errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                                } else if (formValues.returnDate < today) {
+                                        errors.returnDate = VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                                }
+                        }
+                } else {
+                        const { departFrom, departTo, returnFrom, returnTo } = formValues;
+                        if (!departFrom) {
+                                errors.departFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        } else if (departFrom < today) {
+                                errors.departFrom = VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+                        }
+                        if (!departTo) {
+                                errors.departTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                        } else if (departTo < departFrom || departTo < today) {
+                                errors.departTo = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                        }
+                        if (returnFrom || returnTo) {
+                                if (!(returnFrom && returnTo)) {
+                                        if (!returnFrom) errors.returnFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                                        if (!returnTo) errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+                                } else if (
+                                        returnTo < returnFrom ||
+                                        (departTo && returnFrom < departTo) ||
+                                        returnFrom < today ||
+                                        returnTo < today
+                                ) {
+                                        errors.returnFrom = VALIDATION_MESSAGES.SEARCH.return.INVALID;
+                                }
+                        }
+                }
+                setValidationErrors(errors);
+                return Object.keys(errors).length === 0;
+        };
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
