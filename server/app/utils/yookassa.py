@@ -36,7 +36,7 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
             full_name = passenger.get('full_name', '')
             description = (
                 f'Организация авиаперевозки пассажиров и багажа по маршруту '
-                f'{origin}-{dest}. {seat_class} класс. {date_str} {full_name}'
+                f'{origin} — {dest}. {seat_class} класс. {date_str}. {full_name}'
             )
             items.append({
                 'description': description,
@@ -66,9 +66,6 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
             'value': f'{payment.amount:.2f}',
             'currency': payment.currency.value.upper(),
         },
-        'description': f'Booking {booking.booking_number}',
-        'airline': {'booking_reference': booking.booking_number},
-        'metadata': {'booking_id': str(booking.public_id), 'booking_number': booking.booking_number},
     }
 
     yoo_payment = YooPayment.capture(payment.provider_payment_id, body)
@@ -98,12 +95,7 @@ def create_payment(public_id: str) -> Payment:
         'amount': amount,
         'confirmation': {'type': 'embedded'},
         'capture': False,
-        'description': f'Booking {booking.public_id}',
         'receipt': __generate_receipt(booking),
-        'metadata': {
-            'booking_id': str(booking.public_id),
-            'expires_at': expires_at.isoformat(),
-        }
     }
 
     try:

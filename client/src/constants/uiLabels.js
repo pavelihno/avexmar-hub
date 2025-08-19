@@ -332,12 +332,18 @@ export const UI_LABELS = {
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
 		payment_form: {
+			title: (timeLeft) => `${timeLeft} для оплаты`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
 			retry_payment: 'Повторить оплату',
 			loading: 'Загрузка формы оплаты...',
 			waiting: 'Ожидание токена оплаты...',
 			load_error: 'Не удалось загрузить виджет оплаты',
+		},
+		completion: {
+			title: 'Бронирование завершено',
+			price_title: 'Оплачено',
+			payment_details: 'Детали платежа',
 		},
 	},
 	SCHEDULE: {

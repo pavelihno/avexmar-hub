@@ -49,6 +49,16 @@ const PaymentForm = ({ confirmationToken, returnUrl, onError }) => {
 					return_url: returnUrl,
 					error_callback: onError,
 					language: 'ru',
+					customization: {
+						// payment_methods: [
+						// 	'bank_card',
+						// 	'mir_pay',
+						// 	'sbp',
+						// 	'sberbank',
+						// 	'tinkoff_bank',
+						// 	'yoo_money',
+						// ],
+					},
 				});
 
 				widget.on('complete', () => {

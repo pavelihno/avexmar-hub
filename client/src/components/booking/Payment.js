@@ -18,30 +18,64 @@ const Payment = () => {
 
 	const payment = useSelector((s) => s.payment.current);
 
-        const paymentStatus = payment?.payment_status;
-        const paymentAmount = payment?.amount;
-        const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
-        const confirmationToken = payment?.confirmation_token;
-        const expiresAt = payment?.expires_at;
+	const paymentStatus = payment?.payment_status;
+	const paymentAmount = payment?.amount;
+	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
+	const confirmationToken = payment?.confirmation_token;
+	const expiresAt = payment?.expires_at;
 
-        const [timeLeft, setTimeLeft] = useState('');
+	const [timeLeft, setTimeLeft] = useState('');
 
-        useEffect(() => {
-                if (!expiresAt) return;
-                const updateTimer = () => {
-                        const diff = new Date(expiresAt) - new Date();
-                        if (diff <= 0) {
-                                setTimeLeft('00:00');
-                                return;
-                        }
-                        const minutes = Math.floor(diff / 60000);
-                        const seconds = Math.floor((diff % 60000) / 1000);
-                        setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-                };
-                updateTimer();
-                const interval = setInterval(updateTimer, 1000);
-                return () => clearInterval(interval);
-        }, [expiresAt]);
+	useEffect(() => {
+		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
+	}, [timeLeft]);
+
+	const toExpiryMs = (isoLike) => {
+		if (!isoLike) return NaN;
+		let s = String(isoLike).trim();
+
+		// Trim fractional seconds to 3 digits (milliseconds)
+		s = s.replace(/\.(\d{3})\d+$/, '.$1');
+
+		// If there's no timezone info, assume UTC (append Z)
+		if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+
+		const t = Date.parse(s);
+		return Number.isNaN(t) ? NaN : t;
+	};
+
+	useEffect(() => {
+		const targetMs = toExpiryMs(expiresAt);
+		if (!isFinite(targetMs)) {
+			setTimeLeft('');
+			return;
+		}
+
+		let timer = null;
+
+		const render = () => {
+			const now = Date.now();
+			let diff = targetMs - now;
+
+			if (diff <= 0) {
+				setTimeLeft('00:00');
+				return;
+			}
+
+			const minutes = Math.floor(diff / 60000);
+			const seconds = Math.floor((diff % 60000) / 1000);
+			setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+
+			// align next tick to the next full second to avoid drift
+			const nextIn = 1000 - (now % 1000);
+			timer = setTimeout(render, nextIn);
+		};
+
+		render();
+		return () => {
+			if (timer) clearTimeout(timer);
+		};
+	}, [expiresAt]);
 
 	const isProcessing =
 		new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
@@ -74,21 +108,21 @@ const Payment = () => {
 			<Box sx={{ mt: 2, mx: 'auto', width: '100%', maxWidth: 'md' }}>
 				<Card>
 					<CardContent>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                                        <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                                                <Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-                                                                        {`${UI_LABELS.BOOKING.payment_form.total}: `}
-                                                                </Typography>
-                                                                <Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
-                                                                        {`${formatNumber(paymentAmount)} ${currencySymbol}`}
-                                                                </Typography>
-                                                        </Box>
-                                                        {expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
-                                                                <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                                                                        {timeLeft}
-                                                                </Typography>
-                                                        )}
-                                                </Box>
+						<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+								<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+									{`${UI_LABELS.BOOKING.payment_form.total}: `}
+								</Typography>
+								<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
+									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
+								</Typography>
+							</Box>
+							{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
+								<Typography variant='h6' sx={{ fontWeight: 600 }}>
+									{timeLeft}
+								</Typography>
+							)}
+						</Box>
 
 						{paymentStatus === 'canceled' && (
 							<Alert severity='error' sx={{ mb: 2 }}>
