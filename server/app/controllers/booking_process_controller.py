@@ -214,8 +214,11 @@ def get_booking_process_details(current_user, public_id):
         bf.flight.to_dict(return_children=True)
         for bf in booking.booking_flights
     ]
-    flights.sort(key=lambda f: (f.get('scheduled_departure'),
-                 f.get('scheduled_departure_time') or ''))
+
+    flights.sort(key=lambda f: (
+        f.get('scheduled_departure'),
+        f.get('scheduled_departure_time') or ''
+    ))
 
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0

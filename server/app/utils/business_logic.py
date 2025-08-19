@@ -92,7 +92,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
                     applied_discounts.append(
                         discount_names_map[infant_key])
             if tariff.seat_class == SEAT_CLASS.economy:
-                if category == PASSENGER_CATEGORY.child:
+                if category in [PASSENGER_CATEGORY.child, PASSENGER_CATEGORY.infant_seat]:
                     child_key = DISCOUNT_TYPE.child.value
                     pct = discount_pct.get(child_key, 0.0)
                     tariff_multiplier *= (1.0 - pct)
@@ -154,6 +154,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
                 'fare_price': _fare_price,
                 'discount': _discount,
                 'fees': _fees,
+                'price': _price,
                 'final_price': _final_price,
                 'unit_fare_price': unit_fare_price,
                 'unit_discount': unit_discount,
@@ -213,7 +214,7 @@ def calculate_receipt_details(booking):
     passengers_map = {}
     for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
         passenger = bp.passenger
-        full_name = " ".join(
+        full_name = ' '.join(
             filter(
                 None,
                 [
