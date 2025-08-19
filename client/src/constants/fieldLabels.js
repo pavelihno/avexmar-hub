@@ -18,7 +18,7 @@ export const FIELD_LABELS = {
 		email_address: 'Электронная почта',
 		phone_number: 'Телефон',
 		currency: 'Валюта',
-		fare_price: 'Стоимость билетов',
+		fare_price: 'Стоимость перевозки',
 		total_discounts: 'Скидка',
 		fees: 'Сборы',
 		total_price: 'Итого',

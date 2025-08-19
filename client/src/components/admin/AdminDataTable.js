@@ -272,6 +272,7 @@ const AdminDataTable = ({
 			const raw = item[sortConfig.field];
 			switch (column.type) {
 				case FIELD_TYPES.DATE:
+					return raw ? parseDate(raw) : 0;
 				case FIELD_TYPES.TIME:
 					return raw ? parseTime(raw) : 0;
 				case FIELD_TYPES.NUMBER:

@@ -5,16 +5,16 @@ import { useTheme } from '@mui/material/styles';
 
 import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
 import {
-        createFormFields,
-        FIELD_TYPES,
-        isCyrillicText,
-        isLatinText,
-        isCyrillicDocument,
-        getPassengerFormConfig,
-        getAgeError,
-        validateDate,
-        parseDate,
-        formatDate,
+	createFormFields,
+	FIELD_TYPES,
+	isCyrillicText,
+	isLatinText,
+	isCyrillicDocument,
+	getPassengerFormConfig,
+	getAgeError,
+	validateDate,
+	parseDate,
+	formatDate,
 } from '../utils';
 import { addYears, subYears } from 'date-fns';
 
@@ -57,47 +57,47 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 	const formConfig = getPassengerFormConfig(data.documentType);
 
 	const { minFlightDate, maxFlightDate } = useMemo(() => {
-		const validDates = flights
+		const dates = flights
 			.map((f) => parseDate(f.scheduled_departure))
-			.filter((date) => date instanceof Date && !isNaN(date));
+			.filter((d) => d instanceof Date && !isNaN(d.getTime()));
 
-		if (validDates.length === 0) {
-			return { minFlightDate: null, maxFlightDate: null };
-		}
+		if (dates.length === 0) return { minFlightDate: null, maxFlightDate: null };
 
+		const times = dates.map((d) => d.getTime());
 		return {
-			minFlightDate: parseDate(Math.min(...validDates)),
-			maxFlightDate: parseDate(Math.max(...validDates)),
+			minFlightDate: new Date(Math.min(...times)),
+			maxFlightDate: new Date(Math.max(...times)),
 		};
 	}, [flights]);
 
-        const formFields = useMemo(() => {
-                const today = new Date();
-                const flightDate = minFlightDate ? parseDate(minFlightDate) : today;
+	const formFields = useMemo(() => {
+		let birthMin;
+		let birthMax;
 
-                let birthMinDate;
-                let birthMaxDate;
-                if (data.category === 'adult') {
-                        birthMaxDate = formatDate(subYears(flightDate, 12), DATE_API_FORMAT);
-                        birthMinDate = formatDate(subYears(flightDate, 120), DATE_API_FORMAT);
-                } else if (data.category === 'child') {
-                        birthMaxDate = formatDate(subYears(flightDate, 2), DATE_API_FORMAT);
-                        birthMinDate = formatDate(subYears(flightDate, 12), DATE_API_FORMAT);
-                } else if (['infant', 'infant_seat'].includes(data.category)) {
-                        birthMaxDate = formatDate(flightDate, DATE_API_FORMAT);
-                        birthMinDate = formatDate(subYears(flightDate, 2), DATE_API_FORMAT);
-                } else {
-                        birthMaxDate = formatDate(today, DATE_API_FORMAT);
-                        birthMinDate = formatDate(subYears(today, 120), DATE_API_FORMAT);
-                }
+		const today = new Date();
+		const firstFlight = minFlightDate ?? today;
+		const lastFlight = maxFlightDate ?? firstFlight;
 
-                const docMinDate = formatDate(
-                        maxFlightDate && parseDate(maxFlightDate) > today ? parseDate(maxFlightDate) : today,
-                        DATE_API_FORMAT
-                );
-                const docMaxDate = formatDate(addYears(today, 20), DATE_API_FORMAT);
+		if (data.category === 'adult') {
+			// ≥ 12 on ALL flights → must be ≥12 already on the earliest segment
+			birthMax = subYears(firstFlight, 12);
+		} else if (data.category === 'child') {
+			// 2–11 on ALL flights
+			// ≥2 on earliest segment → born on/before (earliest - 2y)
+			// <12 on latest segment → born AFTER (latest - 12y)
+			birthMin = subYears(lastFlight, 12);
+			birthMax = subYears(firstFlight, 2);
+		} else if (['infant', 'infant_seat'].includes(data.category)) {
+			// <2 on ALL flights
+			// <2 on latest segment → born AFTER (latest - 2y)
+			// also cannot be born after the first flight date
+			birthMin = subYears(lastFlight, 2);
+			birthMax = firstFlight;
+		}
 
-                const allFields = {
+		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
+
+		const allFields = {
 			lastName: {
 				key: 'lastName',
 				label: UI_LABELS.BOOKING.passenger_form.last_name,
@@ -144,24 +144,24 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				options: genderOptions,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.gender.REQUIRED : ''),
 			},
-                        birthDate: {
-                                key: 'birthDate',
-                                label: FIELD_LABELS.PASSENGER.birth_date,
-                                type: FIELD_TYPES.DATE,
-                                minDate: birthMinDate,
-                                maxDate: birthMaxDate,
-                                validate: (v) => {
-                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-                                        if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-                                        const birth = parseDate(v);
-                                        if (birthMinDate && birth < parseDate(birthMinDate))
-                                                return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-                                        if (birthMaxDate && birth > parseDate(birthMaxDate))
-                                                return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-                                        if (birth > new Date()) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
-                                        return getAgeError(data.category, v, minFlightDate);
-                                },
-                        },
+			birthDate: {
+				key: 'birthDate',
+				label: FIELD_LABELS.PASSENGER.birth_date,
+				type: FIELD_TYPES.DATE,
+				minDate: formatDate(birthMin),
+				maxDate: formatDate(birthMax),
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
+					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					const birth = parseDate(v);
+					if (!(birth instanceof Date) || isNaN(+birth)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birthMin && birth < birthMin) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birthMax && birth > birthMax) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birth > new Date()) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
+
+					return getAgeError(data.category, v, firstFlight ? formatDate(firstFlight) : undefined);
+				},
+			},
 			documentType: {
 				key: 'documentType',
 				label: FIELD_LABELS.PASSENGER.document_type,
@@ -174,23 +174,26 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				label: FIELD_LABELS.PASSENGER.document_number,
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
 			},
-                        documentExpiryDate: {
-                                key: 'documentExpiryDate',
-                                label: FIELD_LABELS.PASSENGER.document_expiry_date,
-                                type: FIELD_TYPES.DATE,
-                                minDate: docMinDate,
-                                maxDate: docMaxDate,
-                                validate: (v) => {
-                                        if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
-                                        if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-                                        const exp = parseDate(v);
-                                        if (exp < new Date()) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
-                                        if (maxFlightDate && exp < parseDate(maxFlightDate))
-                                                return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
-                                        if (exp > parseDate(docMaxDate)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-                                        return '';
-                                },
-                        },
+			documentExpiryDate: {
+				key: 'documentExpiryDate',
+				label: FIELD_LABELS.PASSENGER.document_expiry_date,
+				type: FIELD_TYPES.DATE,
+				minDate: formatDate(docMinDateDate),
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
+					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+
+					const exp = parseDate(v);
+					if (!(exp instanceof Date) || isNaN(+exp)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+
+					if (exp < new Date()) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
+
+					if (maxFlightDate && exp < maxFlightDate)
+						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
+
+					return '';
+				},
+			},
 			citizenshipId: {
 				key: 'citizenshipId',
 				label: FIELD_LABELS.PASSENGER.citizenship_id,
@@ -199,12 +202,13 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : ''),
 			},
 		};
+
 		const visibleList = Object.values(allFields).filter((f) =>
 			!formConfig?.show ? true : formConfig.show.includes(f.key)
 		);
 		const arr = createFormFields(visibleList);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [data.category, requiresCyrillic, citizenshipOptions, minFlightDate, maxFlightDate, formConfig.show]);
+	}, [data.category, requiresCyrillic, citizenshipOptions, minFlightDate, maxFlightDate, formConfig?.show]);
 
 	const handleFieldChange = (field, value) => {
 		const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(field);
@@ -244,19 +248,19 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 			</Typography>
 
 			<Grid container spacing={2}>
-                                {showFields.map((fieldName) => {
-                                        const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
-                                        const fieldDef = formFields[fieldName];
-                                        const control = fieldDef.renderField({
-                                                value: data[fieldName],
-                                                onChange: (value) => handleFieldChange(fieldName, value),
-                                                fullWidth: true,
-                                                size: 'small',
-                                                error: showErrors && !!errors[fieldName],
-                                                helperText: showErrors ? errors[fieldName] : '',
-                                                minDate: fieldDef.minDate,
-                                                maxDate: fieldDef.maxDate,
-                                        });
+				{showFields.map((fieldName) => {
+					const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
+					const fieldDef = formFields[fieldName];
+					const control = fieldDef.renderField({
+						value: data[fieldName],
+						onChange: (value) => handleFieldChange(fieldName, value),
+						fullWidth: true,
+						size: 'small',
+						error: showErrors && !!errors[fieldName],
+						helperText: showErrors ? errors[fieldName] : '',
+						minDate: fieldDef.minDate,
+						maxDate: fieldDef.maxDate,
+					});
 
 					return (
 						<Grid item xs={12} sm={4} key={fieldName}>

@@ -288,7 +288,7 @@ export const UI_LABELS = {
 						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
 						? `${count} пассажира`
 						: `${count} пассажиров`,
-				tickets: 'Билеты',
+				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
 			},
@@ -412,7 +412,7 @@ export const UI_LABELS = {
 			price_per_passenger: 'За 1 пассажира',
 			seats_available: 'Свободных мест',
 			seats_unavailable: 'Недостаточно свободных мест',
-			tickets: 'Билеты',
+			tickets: 'Стоимость перевозки',
 			fees: 'Сборы',
 			tariff_information: 'Информация о тарифе',
 			tariff_conditions: 'Условия применения тарифа',
@@ -433,7 +433,7 @@ export const UI_LABELS = {
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
-		show_more: 'Показать еще билеты',
+		show_more: 'Показать еще варианты',
 	},
 };
 
