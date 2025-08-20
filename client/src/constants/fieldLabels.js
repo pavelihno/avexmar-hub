@@ -133,9 +133,25 @@ export const FIELD_LABELS = {
 		role: 'Роль пользователя',
 		is_active: 'Активен',
 	},
-	TIMEZONE: {
-		name: 'Часовой пояс',
-	},
+        TIMEZONE: {
+                name: 'Часовой пояс',
+        },
+        CONSENT_DOC: {
+                type: 'Тип документа',
+                version: 'Версия',
+                content: 'Содержание',
+        },
+        CONSENT_EVENT: {
+                type: 'Тип события',
+                granter_user_id: 'ID пользователя',
+                booking_id: 'ID бронирования',
+                doc_id: 'ID документа',
+                action: 'Действие',
+                ip: 'IP адрес',
+                user_agent: 'User-Agent',
+                device_fingerprint: 'Отпечаток устройства',
+                subject_ids: 'ID субъектов',
+        },
 };
 
 export default FIELD_LABELS;

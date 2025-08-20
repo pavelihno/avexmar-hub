@@ -557,3 +557,4 @@ Before merging:
 -   Responses: consistent JSON shape with `message` and/or `errors` where applicable.
 -   Redux: use `createCrudActions` + `addCrudCases` for CRUD modules; keep loading/error patterns consistent.
 -   Lint/format: run ESLint, Prettier, and Ruff; fix quote violations.
+-   All SQLAlchemy models must inherit from `BaseModel`.

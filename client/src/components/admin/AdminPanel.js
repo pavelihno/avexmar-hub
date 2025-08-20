@@ -17,6 +17,8 @@ import AirlinesIcon from '@mui/icons-material/Airlines';
 import PublicIcon from '@mui/icons-material/Public';
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 import Base from '../Base';
 
@@ -110,13 +112,25 @@ const AdminPanel = () => {
 			icon: <AirplaneTicketIcon sx={iconSX} />,
 			path: '/admin/tickets',
 		},
-		{
-			title: UI_LABELS.ADMIN.modules.users.title,
-			description: UI_LABELS.ADMIN.modules.users.description,
-			icon: <ManageAccountsIcon sx={iconSX} />,
-			path: '/admin/users',
-		},
-	];
+                {
+                        title: UI_LABELS.ADMIN.modules.users.title,
+                        description: UI_LABELS.ADMIN.modules.users.description,
+                        icon: <ManageAccountsIcon sx={iconSX} />,
+                        path: '/admin/users',
+                },
+                {
+                        title: UI_LABELS.ADMIN.modules.consentDocs.title,
+                        description: UI_LABELS.ADMIN.modules.consentDocs.description,
+                        icon: <DescriptionIcon sx={iconSX} />,
+                        path: '/admin/consent-docs',
+                },
+                {
+                        title: UI_LABELS.ADMIN.modules.consentEvents.title,
+                        description: UI_LABELS.ADMIN.modules.consentEvents.description,
+                        icon: <EventNoteIcon sx={iconSX} />,
+                        path: '/admin/consent-events',
+                },
+        ];
 
 	return (
 		<Base>
