@@ -15,6 +15,7 @@ import BookingManagement from '../components/admin/BookingManagement';
 import TicketManagement from '../components/admin/TicketManagement';
 import PassengerManagement from '../components/admin/PassengerManagement';
 import UserManagement from '../components/admin/UserManagement';
+import PaymentManagement from '../components/admin/PaymentManagement';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -63,14 +64,18 @@ const AdminRoutes = ({ isAdmin }) => [
 		path: '/admin/tariffs',
 		element: <ProtectedRoute children={<TariffManagement />} condition={isAdmin} />,
 	},
-	{
-		path: '/admin/bookings',
-		element: <ProtectedRoute children={<BookingManagement />} condition={isAdmin} />,
-	},
-	{
-		path: '/admin/tickets',
-		element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
-	},
+        {
+                path: '/admin/bookings',
+                element: <ProtectedRoute children={<BookingManagement />} condition={isAdmin} />,
+        },
+        {
+                path: '/admin/payments',
+                element: <ProtectedRoute children={<PaymentManagement />} condition={isAdmin} />,
+        },
+        {
+                path: '/admin/tickets',
+                element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
+        },
 	{
 		path: '/admin/passengers',
 		element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,

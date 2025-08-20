@@ -16,6 +16,7 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AirlinesIcon from '@mui/icons-material/Airlines';
 import PublicIcon from '@mui/icons-material/Public';
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import PaymentIcon from '@mui/icons-material/Payment';
 
 import Base from '../Base';
 
@@ -85,18 +86,24 @@ const AdminPanel = () => {
 			icon: <FlightTakeoffIcon sx={iconSX} />,
 			path: '/admin/flights',
 		},
-		{
-			title: UI_LABELS.ADMIN.modules.bookings.title,
-			description: UI_LABELS.ADMIN.modules.bookings.description,
-			icon: <BookOnlineIcon sx={iconSX} />,
-			path: '/admin/bookings',
-		},
-		{
-			title: UI_LABELS.ADMIN.modules.passengers.title,
-			description: UI_LABELS.ADMIN.modules.passengers.description,
-			icon: <HailIcon sx={iconSX} />,
-			path: '/admin/passengers',
-		},
+                {
+                        title: UI_LABELS.ADMIN.modules.bookings.title,
+                        description: UI_LABELS.ADMIN.modules.bookings.description,
+                        icon: <BookOnlineIcon sx={iconSX} />,
+                        path: '/admin/bookings',
+                },
+                {
+                        title: UI_LABELS.ADMIN.modules.payments.title,
+                        description: UI_LABELS.ADMIN.modules.payments.description,
+                        icon: <PaymentIcon sx={iconSX} />,
+                        path: '/admin/payments',
+                },
+                {
+                        title: UI_LABELS.ADMIN.modules.passengers.title,
+                        description: UI_LABELS.ADMIN.modules.passengers.description,
+                        icon: <HailIcon sx={iconSX} />,
+                        path: '/admin/passengers',
+                },
 		{
 			title: UI_LABELS.ADMIN.modules.tickets.title,
 			description: UI_LABELS.ADMIN.modules.tickets.description,
