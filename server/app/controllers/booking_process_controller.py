@@ -14,7 +14,9 @@ from app.utils.enum import BOOKING_STATUS, PASSENGER_PLURAL_CATEGORY
 
 @current_user
 def get_booking_process_access(current_user, public_id):
-    return jsonify({'pages': Booking.get_accessible_pages(current_user, public_id)}), 200
+    token = request.args.get('access_token')
+    pages = Booking.get_accessible_pages(current_user, public_id, token)
+    return jsonify({'pages': pages}), 200
 
 
 @current_user
@@ -51,7 +53,7 @@ def create_booking_process(current_user):
         currency=price_details['currency'],
         fare_price=price_details['fare_price'],
         total_discounts=price_details['total_discounts'],
-        fees= price_details['total_fees'],
+        fees=price_details['total_fees'],
         total_price=price_details['final_price'],
         passenger_counts=passengers,
         user_id=current_user.id if current_user else None,
@@ -89,14 +91,14 @@ def create_booking_process_passengers(current_user):
     passengers = data.get('passengers') or []
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
+    token = data.get('access_token')
+    if not Booking.get_by_public_id_if_has_access(current_user, public_id, token):
+        return jsonify({'message': 'booking not found'}), 404
 
     session = db.session
 
     booking = Booking.update_by_public_id(
-        public_id,
-        session=session,
-        commit=False,
-        **buyer
+        public_id, session=session, commit=False, **buyer
     )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
@@ -105,17 +107,21 @@ def create_booking_process_passengers(current_user):
         pid = pdata.get('id')
         category = pdata.get('category')
 
-        passenger_fields = {k: v for k, v in {
-            'first_name': pdata.get('first_name'),
-            'last_name': pdata.get('last_name'),
-            'patronymic_name': pdata.get('patronymic_name'),
-            'gender': pdata.get('gender'),
-            'birth_date': pdata.get('birth_date'),
-            'document_type': pdata.get('document_type'),
-            'document_number': pdata.get('document_number'),
-            'document_expiry_date': pdata.get('document_expiry_date'),
-            'citizenship_id': pdata.get('citizenship_id'),
-        }.items() if v is not None and v != ''}
+        passenger_fields = {
+            k: v
+            for k, v in {
+                'first_name': pdata.get('first_name'),
+                'last_name': pdata.get('last_name'),
+                'patronymic_name': pdata.get('patronymic_name'),
+                'gender': pdata.get('gender'),
+                'birth_date': pdata.get('birth_date'),
+                'document_type': pdata.get('document_type'),
+                'document_number': pdata.get('document_number'),
+                'document_expiry_date': pdata.get('document_expiry_date'),
+                'citizenship_id': pdata.get('citizenship_id'),
+            }.items()
+            if v is not None and v != ''
+        }
 
         if pid:
             passenger = Passenger.update(
@@ -168,9 +174,12 @@ def confirm_booking_process(current_user):
     public_id = data.get('public_id')
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
+    token = data.get('access_token')
+    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
+    if not booking:
+        return jsonify({'message': 'booking not found'}), 404
 
     session = db.session
-    booking = Booking.get_by_public_id(public_id)
     booking_id = booking.id
 
     Booking.transition_status(
@@ -187,7 +196,10 @@ def confirm_booking_process(current_user):
 
 @current_user
 def get_booking_process_details(current_user, public_id):
-    booking = Booking.get_by_public_id(public_id)
+    token = request.args.get('access_token')
+    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
+    if not booking:
+        return jsonify({'message': 'booking not found'}), 404
     result = booking.to_dict()
     passengers = []
     flights = []
@@ -204,28 +216,29 @@ def get_booking_process_details(current_user, public_id):
                 count = int(count)
             except (TypeError, ValueError):
                 continue
-            category = BookingPassenger.get_category_from_plural(PASSENGER_PLURAL_CATEGORY(key))
+            category = BookingPassenger.get_category_from_plural(
+                PASSENGER_PLURAL_CATEGORY(key)
+            )
             for _ in range(count):
                 passengers.append({'category': category.value})
 
     passenger_counts = dict(booking.passenger_counts or {})
 
     flights = [
-        bf.flight.to_dict(return_children=True)
-        for bf in booking.booking_flights
+        bf.flight.to_dict(return_children=True) for bf in booking.booking_flights
     ]
 
-    flights.sort(key=lambda f: (
-        f.get('scheduled_departure'),
-        f.get('scheduled_departure_time') or ''
-    ))
+    flights.sort(
+        key=lambda f: (
+            f.get('scheduled_departure'),
+            f.get('scheduled_departure_time') or '',
+        )
+    )
 
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
 
-    tariffs_map = {
-        bf.flight_id: bf.tariff_id for bf in booking.booking_flights
-    }
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
     outbound_tariff_id = tariffs_map.get(outbound_id)
     return_tariff_id = tariffs_map.get(return_id)
 
@@ -249,6 +262,9 @@ def create_booking_process_payment(current_user):
     public_id = data.get('public_id')
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
+    token = data.get('access_token')
+    if not Booking.get_by_public_id_if_has_access(current_user, public_id, token):
+        return jsonify({'message': 'booking not found'}), 404
 
     payment = create_payment(public_id)
     return jsonify(payment.to_dict()), 201
@@ -256,7 +272,10 @@ def create_booking_process_payment(current_user):
 
 @current_user
 def get_booking_process_payment(current_user, public_id):
-    booking = Booking.get_by_public_id(public_id)
+    token = request.args.get('access_token')
+    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
+    if not booking:
+        return jsonify({'message': 'booking not found'}), 404
     payment = (
         Payment.query.filter_by(booking_id=booking.id)
         .order_by(Payment.id.desc())

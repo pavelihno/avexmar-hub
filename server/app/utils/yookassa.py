@@ -19,7 +19,7 @@ Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
 
 
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
-    """Form receipt object with detailed breakdown"""
+    '''Form receipt object with detailed breakdown'''
     details = calculate_receipt_details(booking)
     currency = details.get('currency', booking.currency.value).upper()
     seat_class_map = {'economy': 'Эконом', 'business': 'Бизнес'}
@@ -28,7 +28,9 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
         route = direction.get('route') or {}
         origin = (route.get('origin_airport') or {}).get('city_name', '')
         dest = (route.get('destination_airport') or {}).get('city_name', '')
-        seat_class = seat_class_map.get(direction.get('seat_class', ''), direction.get('seat_class', ''))
+        seat_class = seat_class_map.get(
+            direction.get('seat_class', ''), direction.get('seat_class', '')
+        )
         date = direction.get('date')
         date_str = format_date(date, '%d.%m.%y')
 
@@ -39,14 +41,16 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
                 f'Организация авиаперевозки пассажиров и багажа по маршруту '
                 f'{origin} — {dest}. {seat_class} класс. {date_str}. {full_name}'
             )
-            items.append({
-                'description': description,
-                'quantity': '1',
-                'amount': {'value': f"{price:.2f}", 'currency': currency},
-                'vat_code': 7,
-                'payment_mode': 'full_payment',
-                'payment_subject': 'service',
-            })
+            items.append(
+                {
+                    'description': description,
+                    'quantity': '1',
+                    'amount': {'value': f'{price:.2f}', 'currency': currency},
+                    'vat_code': 7,
+                    'payment_mode': 'full_payment',
+                    'payment_subject': 'service',
+                }
+            )
 
     return {
         'customer': {'email': booking.email_address},
@@ -55,12 +59,10 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 
 
 def __capture_payment(payment: Payment, session) -> YooPayment:
-    """Capture authorized payment with receipt and booking number"""
+    '''Capture authorized payment with receipt and booking number'''
     booking = payment.booking
 
-    Booking.generate_booking_number(
-        payment.booking_id, session=session, commit=False
-    )
+    Booking.generate_booking_number(payment.booking_id, session=session, commit=False)
 
     body = {
         'amount': {
@@ -74,13 +76,12 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
 
 
 def create_payment(public_id: str) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model"""
+    '''Create a two-stage payment in YooKassa and persist model'''
     booking = Booking.get_by_public_id(public_id)
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
-        booking.payments
-        .filter(Payment.payment_status == PAYMENT_STATUS.pending)
+        booking.payments.filter(Payment.payment_status == PAYMENT_STATUS.pending)
         .order_by(Payment.created_at.desc())
         .first()
     )
@@ -136,7 +137,7 @@ def create_payment(public_id: str) -> Payment:
 
 
 def handle_webhook(payload: Dict[str, Any]) -> None:
-    """Process YooKassa webhook notifications"""
+    '''Process YooKassa webhook notifications'''
     event = payload.get('event')
 
     obj = payload.get('object') or {}
@@ -156,9 +157,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         updates['paid_at'] = captured_at
 
     session = db.session
-    payment = Payment.update(
-        payment.id, session=session, commit=False, **updates
-    )
+    payment = Payment.update(payment.id, session=session, commit=False, **updates)
 
     send_confirmation = False
 
@@ -188,6 +187,14 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
             commit=False,
             to_status=BOOKING_STATUS.completed,
         )
+        booking = payment.booking
+        if not booking.access_token:
+            Booking.update(
+                booking.id,
+                session=session,
+                commit=False,
+                access_token=uuid.uuid4(),
+            )
         send_confirmation = True
 
     else:
@@ -198,7 +205,10 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     if send_confirmation:
         booking = payment.booking
         if booking and booking.email_address:
-            booking_url = f"{Config.CLIENT_URL}/booking/{booking.public_id}/completion"
+            booking_url = (
+                f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
+                f'?access_token={booking.access_token}'
+            )
             send_email(
                 subject='Booking confirmation',
                 recipients=[booking.email_address],
