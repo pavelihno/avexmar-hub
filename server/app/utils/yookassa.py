@@ -11,6 +11,7 @@ from app.models.payment import Payment
 from app.utils.business_logic import calculate_receipt_details
 from app.utils.datetime import format_date
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
+from app.utils.email import send_email
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -159,6 +160,8 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         payment.id, session=session, commit=False, **updates
     )
 
+    send_confirmation = False
+
     if event == 'payment.waiting_for_capture':
         yoo_payment = YooPayment.find_one(provider_id)
         if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
@@ -185,8 +188,23 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
             commit=False,
             to_status=BOOKING_STATUS.completed,
         )
+        send_confirmation = True
 
     else:
         raise ValueError(f'Unknown event type: {event}')
 
     session.commit()
+
+    if send_confirmation:
+        booking = payment.booking
+        if booking and booking.email_address:
+            booking_url = f"{Config.CLIENT_URL}/booking/{booking.public_id}/completion"
+            send_email(
+                subject='Booking confirmation',
+                recipients=[booking.email_address],
+                template='booking_confirmation.txt',
+                booking_number=booking.booking_number,
+                total_price=f'{booking.total_price:.2f}',
+                currency=booking.currency.value.upper(),
+                booking_url=booking_url,
+            )
