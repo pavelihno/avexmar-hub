@@ -16,6 +16,8 @@ import TicketManagement from '../components/admin/TicketManagement';
 import PassengerManagement from '../components/admin/PassengerManagement';
 import UserManagement from '../components/admin/UserManagement';
 import PaymentManagement from '../components/admin/PaymentManagement';
+import ConsentDocManagement from '../components/admin/ConsentDocManagement';
+import ConsentEventManagement from '../components/admin/ConsentEventManagement';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -80,10 +82,18 @@ const AdminRoutes = ({ isAdmin }) => [
 		path: '/admin/passengers',
 		element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,
 	},
-	{
-		path: '/admin/users',
-		element: <ProtectedRoute children={<UserManagement />} condition={isAdmin} />,
-	},
+        {
+                path: '/admin/users',
+                element: <ProtectedRoute children={<UserManagement />} condition={isAdmin} />,
+        },
+        {
+                path: '/admin/consent-docs',
+                element: <ProtectedRoute children={<ConsentDocManagement />} condition={isAdmin} />,
+        },
+        {
+                path: '/admin/consent-events',
+                element: <ProtectedRoute children={<ConsentEventManagement />} condition={isAdmin} />,
+        },
 ];
 
 export default AdminRoutes;

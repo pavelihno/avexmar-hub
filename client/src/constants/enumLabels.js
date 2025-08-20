@@ -66,12 +66,24 @@ export const ENUM_LABELS = {
 		booking: 'Бронирование',
 		cancellation: 'Отмена бронирования',
 	},
-	FEE_TERM: {
-		none: 'Отсутствует',
-		before_24h: 'Более чем за 24 часа до рейса',
-		within_24h: 'Менее чем за 24 часа до рейса',
-		after_departure: 'После вылета рейса',
-	},
+        FEE_TERM: {
+                none: 'Отсутствует',
+                before_24h: 'Более чем за 24 часа до рейса',
+                within_24h: 'Менее чем за 24 часа до рейса',
+                after_departure: 'После вылета рейса',
+        },
+        CONSENT_DOC_TYPE: {
+                offer: 'Оферта',
+                pd_policy: 'Политика ПДн',
+        },
+        CONSENT_EVENT_TYPE: {
+                offer_acceptance: 'Акцепт оферты',
+                pd_processing: 'Согласие на обработку ПДн',
+        },
+        CONSENT_ACTION: {
+                agree: 'Согласие',
+                withdraw: 'Отзыв',
+        },
 };
 
 export const getEnumOptions = (enumType) => {
