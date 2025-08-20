@@ -1,29 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Container, Typography, Box } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Base from './Base';
-import { serverApi } from '../api';
+import { fetchLatestConsentDoc } from '../redux/actions/consentDoc';
 
 const ConsentDocPage = ({ type, title }) => {
-        const [content, setContent] = useState('');
+  const dispatch = useDispatch();
+  const content = useSelector(
+    (state) => state.consentDocs.consentDoc?.content || '',
+  );
 
-        useEffect(() => {
-                serverApi
-                        .get(`/consent_docs/latest/${type}`)
-                        .then((res) => setContent(res.data.content || ''))
-                        .catch(() => setContent(''));
-        }, [type]);
+  useEffect(() => {
+    dispatch(fetchLatestConsentDoc(type));
+  }, [dispatch, type]);
 
-        return (
-                <Base>
-                        <Container maxWidth='md' sx={{ py: 4 }}>
-                                <Typography variant='h4' component='h1' gutterBottom>
-                                        {title}
-                                </Typography>
-                                <Box dangerouslySetInnerHTML={{ __html: content }} />
-                        </Container>
-                </Base>
-        );
+  return (
+    <Base>
+      <Container maxWidth='md' sx={{ py: 4 }}>
+        <Typography variant='h4' component='h1' gutterBottom>
+          {title}
+        </Typography>
+        <Box dangerouslySetInnerHTML={{ __html: content }} />
+      </Container>
+    </Base>
+  );
 };
 
 export default ConsentDocPage;
