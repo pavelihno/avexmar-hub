@@ -381,7 +381,7 @@ Each step maintains state in Redux and validates before progression.
 
 ### Container Issues
 
--   **Port Conflicts**: Check for conflicting services on ports 3000, 5000, 5432
+-   **Port Conflicts**: Check for conflicting services on ports 3000, 8000, 5432
 -   **Volume Mounting**: Ensure proper file permissions for volume mounts
 -   **Environment Variables**: Verify `.env` file configuration
 

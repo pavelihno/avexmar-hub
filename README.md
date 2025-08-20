@@ -116,5 +116,5 @@ cloudflared tunnel --url http://localhost:3000 --protocol http2
 Server App:
 
 ```bash
-cloudflared tunnel --url http://localhost:5000 --protocol http2
+cloudflared tunnel --url http://localhost:8000 --protocol http2
 ```
