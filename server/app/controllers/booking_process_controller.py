@@ -92,13 +92,12 @@ def create_booking_process_passengers(current_user):
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
-    if not Booking.get_by_public_id_if_has_access(current_user, public_id, token):
-        return jsonify({'message': 'booking not found'}), 404
+    booking = Booking.get_if_has_access(current_user, public_id, token)
 
     session = db.session
 
-    booking = Booking.update_by_public_id(
-        public_id, session=session, commit=False, **buyer
+    booking = Booking.update(
+        booking.id, session=session, commit=False, **buyer
     )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
@@ -175,15 +174,12 @@ def confirm_booking_process(current_user):
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
-    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
-    if not booking:
-        return jsonify({'message': 'booking not found'}), 404
+    booking = Booking.get_if_has_access(current_user, public_id, token)
 
     session = db.session
-    booking_id = booking.id
 
     Booking.transition_status(
-        id=booking_id,
+        id=booking.id,
         session=session,
         commit=False,
         to_status=BOOKING_STATUS.confirmed,
@@ -197,9 +193,8 @@ def confirm_booking_process(current_user):
 @current_user
 def get_booking_process_details(current_user, public_id):
     token = request.args.get('access_token')
-    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
-    if not booking:
-        return jsonify({'message': 'booking not found'}), 404
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+
     result = booking.to_dict()
     passengers = []
     flights = []
@@ -263,19 +258,17 @@ def create_booking_process_payment(current_user):
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
-    if not Booking.get_by_public_id_if_has_access(current_user, public_id, token):
-        return jsonify({'message': 'booking not found'}), 404
+    booking = Booking.get_if_has_access(current_user, public_id, token)
 
-    payment = create_payment(public_id)
+    payment = create_payment(booking)
     return jsonify(payment.to_dict()), 201
 
 
 @current_user
 def get_booking_process_payment(current_user, public_id):
     token = request.args.get('access_token')
-    booking = Booking.get_by_public_id_if_has_access(current_user, public_id, token)
-    if not booking:
-        return jsonify({'message': 'booking not found'}), 404
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+
     payment = (
         Payment.query.filter_by(booking_id=booking.id)
         .order_by(Payment.id.desc())

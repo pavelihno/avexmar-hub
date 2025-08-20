@@ -14,9 +14,9 @@ import {
 	deleteAllBookings,
 } from '../../redux/actions/booking';
 import {
-        fetchBookingPassengers,
-        createBookingPassenger,
-        deleteBookingPassenger,
+	fetchBookingPassengers,
+	createBookingPassenger,
+	deleteBookingPassenger,
 } from '../../redux/actions/bookingPassenger';
 import { fetchPassengers } from '../../redux/actions/passenger';
 import { createAdminManager } from './utils';
@@ -38,11 +38,11 @@ const BookingManagement = () => {
 		dispatch(fetchPassengers());
 	}, [dispatch]);
 
-        const currencyOptions = getEnumOptions('CURRENCY');
-        const passengerOptions = passengers.map((p) => ({
-                value: p.id,
-                label: `${p.last_name} ${p.first_name} ${formatDate(p.birth_date)}`,
-        }));
+	const currencyOptions = getEnumOptions('CURRENCY');
+	const passengerOptions = passengers.map((p) => ({
+		value: p.id,
+		label: `${p.last_name} ${p.first_name} ${formatDate(p.birth_date)}`,
+	}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -61,30 +61,30 @@ const BookingManagement = () => {
 			excludeFromForm: true,
 			formatter: (value) => formatDate(value),
 		},
-                status: {
-                        key: 'status',
-                        apiKey: 'status',
-                        label: FIELD_LABELS.BOOKING.status,
-                        type: FIELD_TYPES.SELECT,
-                        excludeFromForm: true,
-                        options: getEnumOptions('BOOKING_STATUS'),
-                        formatter: (value) => ENUM_LABELS.BOOKING_STATUS[value] || value,
-                },
-                buyerLastName: {
-                        key: 'buyerLastName',
-                        apiKey: 'buyer_last_name',
-                        label: FIELD_LABELS.BOOKING.buyer_last_name,
-                        type: FIELD_TYPES.TEXT,
-                },
-                buyerFirstName: {
-                        key: 'buyerFirstName',
-                        apiKey: 'buyer_first_name',
-                        label: FIELD_LABELS.BOOKING.buyer_first_name,
-                        type: FIELD_TYPES.TEXT,
-                },
-                emailAddress: {
-                        key: 'emailAddress',
-                        apiKey: 'email_address',
+		status: {
+			key: 'status',
+			apiKey: 'status',
+			label: FIELD_LABELS.BOOKING.status,
+			type: FIELD_TYPES.SELECT,
+			excludeFromForm: true,
+			options: getEnumOptions('BOOKING_STATUS'),
+			formatter: (value) => ENUM_LABELS.BOOKING_STATUS[value] || value,
+		},
+		buyerLastName: {
+			key: 'buyerLastName',
+			apiKey: 'buyer_last_name',
+			label: FIELD_LABELS.BOOKING.buyer_last_name,
+			type: FIELD_TYPES.TEXT,
+		},
+		buyerFirstName: {
+			key: 'buyerFirstName',
+			apiKey: 'buyer_first_name',
+			label: FIELD_LABELS.BOOKING.buyer_first_name,
+			type: FIELD_TYPES.TEXT,
+		},
+		emailAddress: {
+			key: 'emailAddress',
+			apiKey: 'email_address',
 			label: FIELD_LABELS.BOOKING.email_address,
 			type: FIELD_TYPES.EMAIL,
 			validate: (value) => {
@@ -140,44 +140,42 @@ const BookingManagement = () => {
 			inputProps: { min: 0, step: 0.01 },
 			excludeFromTable: true,
 		},
-                currency: {
-                        key: 'currency',
-                        apiKey: 'currency',
-                        label: FIELD_LABELS.BOOKING.currency,
-                        type: FIELD_TYPES.SELECT,
-                        options: currencyOptions,
-                        defaultValue: currencyOptions[0].value,
-                        excludeFromTable: true,
-                        formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
-                },
-                passengerIds: {
-                        key: 'passengerIds',
-                        label: FIELD_LABELS.BOOKING.passengers,
-                        type: FIELD_TYPES.CUSTOM,
-                        excludeFromTable: true,
-                        renderField: ({ value = [], onChange }) => {
-                                const selected = passengerOptions.filter((o) => value.includes(o.value));
-                                return (
-                                        <Autocomplete
-                                                multiple
-                                                options={passengerOptions}
-                                                value={selected}
-                                                onChange={(e, vals) => onChange(vals.map((v) => v.value))}
-                                                getOptionLabel={(o) => o.label}
-                                                renderInput={(params) => (
-                                                        <TextField {...params} label={FIELD_LABELS.BOOKING.passengers} />
-                                                )}
-                                        />
-                                );
-                        },
-                },
-                passengers: {
-                        key: 'passengers',
-                        apiKey: 'passengers',
-                        label: FIELD_LABELS.BOOKING.passengers,
-                        type: FIELD_TYPES.CUSTOM,
-                        excludeFromForm: true,
-                        renderField: (item) => {
+		currency: {
+			key: 'currency',
+			apiKey: 'currency',
+			label: FIELD_LABELS.BOOKING.currency,
+			type: FIELD_TYPES.SELECT,
+			options: currencyOptions,
+			defaultValue: currencyOptions[0].value,
+			excludeFromTable: true,
+			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
+		},
+		passengerIds: {
+			key: 'passengerIds',
+			label: FIELD_LABELS.BOOKING.passengers,
+			type: FIELD_TYPES.CUSTOM,
+			excludeFromTable: true,
+			renderField: ({ value = [], onChange }) => {
+				const selected = passengerOptions.filter((o) => value.includes(o.value));
+				return (
+					<Autocomplete
+						multiple
+						options={passengerOptions}
+						value={selected}
+						onChange={(e, vals) => onChange(vals.map((v) => v.value))}
+						getOptionLabel={(o) => o.label}
+						renderInput={(params) => <TextField {...params} label={FIELD_LABELS.BOOKING.passengers} />}
+					/>
+				);
+			},
+		},
+		passengers: {
+			key: 'passengers',
+			apiKey: 'passengers',
+			label: FIELD_LABELS.BOOKING.passengers,
+			type: FIELD_TYPES.CUSTOM,
+			excludeFromForm: true,
+			renderField: (item) => {
 				const bps = bookingPassengers.filter((bp) => bp.booking_id === item.id);
 				const linked = bps.map((bp) => passengers.find((p) => p.id === bp.passenger_id)).filter(Boolean);
 				return (
@@ -225,70 +223,70 @@ const BookingManagement = () => {
 		},
 	};
 
-        const adminManager = createAdminManager(FIELDS, {
-                addButtonText: () => UI_LABELS.ADMIN.modules.bookings.add_button,
-                editButtonText: () => UI_LABELS.ADMIN.modules.bookings.edit_button,
-        });
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: () => UI_LABELS.ADMIN.modules.bookings.add_button,
+		editButtonText: () => UI_LABELS.ADMIN.modules.bookings.edit_button,
+	});
 
-        const handleAddBooking = async (data) => {
-                const { passengerIds = [], ...bookingData } = data;
-                const created = await dispatch(createBooking(adminManager.toApiFormat(bookingData))).unwrap();
-                await Promise.all(
-                        passengerIds.map((pid) =>
-                                dispatch(
-                                        createBookingPassenger({
-                                                booking_id: created.id,
-                                                passenger_id: pid,
-                                        })
-                                ).unwrap()
-                        )
-                );
-                return created;
-        };
+	const handleAddBooking = async (data) => {
+		const { passengerIds = [], ...bookingData } = data;
+		const created = await dispatch(createBooking(adminManager.toApiFormat(bookingData))).unwrap();
+		await Promise.all(
+			passengerIds.map((pid) =>
+				dispatch(
+					createBookingPassenger({
+						booking_id: created.id,
+						passenger_id: pid,
+					})
+				).unwrap()
+			)
+		);
+		return created;
+	};
 
-        const handleEditBooking = async (data) => {
-                const { passengerIds = [], id, ...bookingData } = data;
-                const updated = await dispatch(updateBooking(adminManager.toApiFormat({ id, ...bookingData }))).unwrap();
+	const handleEditBooking = async (data) => {
+		const { passengerIds = [], id, ...bookingData } = data;
+		const updated = await dispatch(updateBooking(adminManager.toApiFormat({ id, ...bookingData }))).unwrap();
 
-                const existingBps = bookingPassengers.filter((bp) => bp.booking_id === id);
-                const existingIds = existingBps.map((bp) => bp.passenger_id);
-                const toAdd = passengerIds.filter((pid) => !existingIds.includes(pid));
-                const toRemove = existingIds.filter((pid) => !passengerIds.includes(pid));
+		const existingBps = bookingPassengers.filter((bp) => bp.booking_id === id);
+		const existingIds = existingBps.map((bp) => bp.passenger_id);
+		const toAdd = passengerIds.filter((pid) => !existingIds.includes(pid));
+		const toRemove = existingIds.filter((pid) => !passengerIds.includes(pid));
 
-                await Promise.all(
-                        toAdd.map((pid) =>
-                                dispatch(
-                                        createBookingPassenger({
-                                                booking_id: id,
-                                                passenger_id: pid,
-                                        })
-                                ).unwrap()
-                        )
-                );
+		await Promise.all(
+			toAdd.map((pid) =>
+				dispatch(
+					createBookingPassenger({
+						booking_id: id,
+						passenger_id: pid,
+					})
+				).unwrap()
+			)
+		);
 
-                await Promise.all(
-                        toRemove.map((pid) => {
-                                const bp = existingBps.find((b) => b.passenger_id === pid);
-                                return bp ? dispatch(deleteBookingPassenger(bp.id)).unwrap() : Promise.resolve();
-                        })
-                );
+		await Promise.all(
+			toRemove.map((pid) => {
+				const bp = existingBps.find((b) => b.passenger_id === pid);
+				return bp ? dispatch(deleteBookingPassenger(bp.id)).unwrap() : Promise.resolve();
+			})
+		);
 
-                return updated;
-        };
+		return updated;
+	};
 
-        const handleDeleteBooking = (id) => dispatch(deleteBooking(id)).unwrap();
+	const handleDeleteBooking = (id) => dispatch(deleteBooking(id)).unwrap();
 
 	const handleDeleteAllBookings = async () => {
 		await dispatch(deleteAllBookings()).unwrap();
 		dispatch(fetchBookings());
 	};
 
-        const formattedBookings = bookings.map((b) => {
-                const ui = adminManager.toUiFormat(b);
-                const bps = bookingPassengers.filter((bp) => bp.booking_id === b.id);
-                ui.passengerIds = bps.map((bp) => bp.passenger_id);
-                return ui;
-        });
+	const formattedBookings = bookings.map((b) => {
+		const ui = adminManager.toUiFormat(b);
+		const bps = bookingPassengers.filter((bp) => bp.booking_id === b.id);
+		ui.passengerIds = bps.map((bp) => bp.passenger_id);
+		return ui;
+	});
 
 	return (
 		<AdminDataTable

@@ -64,18 +64,18 @@ const AdminRoutes = ({ isAdmin }) => [
 		path: '/admin/tariffs',
 		element: <ProtectedRoute children={<TariffManagement />} condition={isAdmin} />,
 	},
-        {
-                path: '/admin/bookings',
-                element: <ProtectedRoute children={<BookingManagement />} condition={isAdmin} />,
-        },
-        {
-                path: '/admin/payments',
-                element: <ProtectedRoute children={<PaymentManagement />} condition={isAdmin} />,
-        },
-        {
-                path: '/admin/tickets',
-                element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
-        },
+	{
+		path: '/admin/bookings',
+		element: <ProtectedRoute children={<BookingManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/payments',
+		element: <ProtectedRoute children={<PaymentManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/tickets',
+		element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
+	},
 	{
 		path: '/admin/passengers',
 		element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,

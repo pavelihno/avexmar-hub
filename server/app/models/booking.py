@@ -120,14 +120,11 @@ class Booking(BaseModel):
         return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
 
     @classmethod
-    def get_by_public_id_if_has_access(
+    def get_if_has_access(
         cls, current_user, public_id, access_token=None
     ):
-        '''Return booking if the user or token grants access, otherwise None.'''
-        try:
-            booking = cls.get_by_public_id(public_id)
-        except NotFound:
-            return None
+        """Return booking if the user or token grants access, otherwise None"""
+        booking = cls.get_by_public_id(public_id)
 
         token = str(access_token) if access_token else None
         if booking.user_id:
@@ -149,7 +146,7 @@ class Booking(BaseModel):
         *,
         commit: bool = False,
     ):
-        '''Generates a unique booking number (PNR - Passenger Name Record)'''
+        """Generates a unique booking number (PNR - Passenger Name Record)"""
         existing_booking_numbers = {
             booking.booking_number for booking in session.query(cls).all()
         }
@@ -267,7 +264,7 @@ class Booking(BaseModel):
 
     @classmethod
     def get_accessible_pages(cls, current_user, public_id, access_token=None):
-        booking = cls.get_by_public_id_if_has_access(current_user, public_id, access_token)
+        booking = cls.get_if_has_access(current_user, public_id, access_token)
         if not booking:
             return []
         return cls.PAGE_FLOW.get(booking.status, [])

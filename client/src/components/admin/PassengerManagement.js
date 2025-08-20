@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
-        fetchPassengers,
-        createPassenger,
-        updatePassenger,
-        deletePassenger,
-        deleteAllPassengers,
+	fetchPassengers,
+	createPassenger,
+	updatePassenger,
+	deletePassenger,
+	deleteAllPassengers,
 } from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { fetchUsers } from '../../redux/actions/user';
@@ -25,44 +25,44 @@ import {
 
 const PassengerManagement = () => {
 	const dispatch = useDispatch();
-        const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
-        const { countries } = useSelector((state) => state.countries);
-        const { users } = useSelector((state) => state.users);
+	const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
+	const { countries } = useSelector((state) => state.countries);
+	const { users } = useSelector((state) => state.users);
 
 	useEffect(() => {
-                dispatch(fetchPassengers());
-                dispatch(fetchCountries());
-                dispatch(fetchUsers());
-        }, [dispatch]);
+		dispatch(fetchPassengers());
+		dispatch(fetchCountries());
+		dispatch(fetchUsers());
+	}, [dispatch]);
 
-        const citizenshipOptions = countries.map((c) => ({
-                value: c.id,
-                label: c.name,
-        }));
-        const userOptions = users.map((u) => ({ value: u.id, label: u.email }));
+	const citizenshipOptions = countries.map((c) => ({
+		value: c.id,
+		label: c.name,
+	}));
+	const userOptions = users.map((u) => ({ value: u.id, label: u.email }));
 
-        const getCountryById = (id) => countries.find((c) => c.id === id);
+	const getCountryById = (id) => countries.find((c) => c.id === id);
 
-        const FIELDS = {
-                id: { key: 'id', apiKey: 'id' },
-                ownerUserId: {
-                        key: 'ownerUserId',
-                        apiKey: 'owner_user_id',
-                        label: FIELD_LABELS.PASSENGER.owner_user_id,
-                        type: FIELD_TYPES.SELECT,
-                        options: userOptions,
-                        formatter: (value) => {
-                                const u = userOptions.find((o) => o.value === value);
-                                return u ? u.label : value;
-                        },
-                },
-                lastName: {
-                        key: 'lastName',
-                        apiKey: 'last_name',
-                        label: FIELD_LABELS.PASSENGER.last_name,
-                        type: FIELD_TYPES.TEXT,
-                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
-                },
+	const FIELDS = {
+		id: { key: 'id', apiKey: 'id' },
+		ownerUserId: {
+			key: 'ownerUserId',
+			apiKey: 'owner_user_id',
+			label: FIELD_LABELS.PASSENGER.owner_user_id,
+			type: FIELD_TYPES.SELECT,
+			options: userOptions,
+			formatter: (value) => {
+				const u = userOptions.find((o) => o.value === value);
+				return u ? u.label : value;
+			},
+		},
+		lastName: {
+			key: 'lastName',
+			apiKey: 'last_name',
+			label: FIELD_LABELS.PASSENGER.last_name,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
+		},
 		firstName: {
 			key: 'firstName',
 			apiKey: 'first_name',
@@ -119,51 +119,51 @@ const PassengerManagement = () => {
 			type: FIELD_TYPES.DATE,
 			formatter: (value) => formatDate(value),
 		},
-                citizenshipId: {
-                        key: 'citizenshipId',
-                        apiKey: 'citizenship_id',
-                        label: FIELD_LABELS.PASSENGER.citizenship_id,
-                        type: FIELD_TYPES.SELECT,
-                        options: citizenshipOptions,
-                        formatter: (value) => {
-                                const c = getCountryById(value);
-                                return c ? c.code_a2 : value;
-                        },
-                },
-        };
+		citizenshipId: {
+			key: 'citizenshipId',
+			apiKey: 'citizenship_id',
+			label: FIELD_LABELS.PASSENGER.citizenship_id,
+			type: FIELD_TYPES.SELECT,
+			options: citizenshipOptions,
+			formatter: (value) => {
+				const c = getCountryById(value);
+				return c ? c.code_a2 : value;
+			},
+		},
+	};
 
-        const adminManager = createAdminManager(FIELDS, {
-                addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
-                editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
-        });
-        const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
+	const adminManager = createAdminManager(FIELDS, {
+		addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
+		editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
+	});
+	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
 
-        const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
+	const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
 
-        const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
+	const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
 
-        const handleDeleteAllPassengers = async () => {
-                await dispatch(deleteAllPassengers()).unwrap();
-                dispatch(fetchPassengers());
-        };
+	const handleDeleteAllPassengers = async () => {
+		await dispatch(deleteAllPassengers()).unwrap();
+		dispatch(fetchPassengers());
+	};
 
-        const formattedPassengers = passengers.map(adminManager.toUiFormat);
+	const formattedPassengers = passengers.map(adminManager.toUiFormat);
 
-        return (
-                <AdminDataTable
-                        title={UI_LABELS.ADMIN.modules.passengers.management}
-                        data={formattedPassengers}
-                        columns={adminManager.columns}
-                        onAdd={handleAddPassenger}
-                        onEdit={handleEditPassenger}
-                        onDelete={handleDeletePassenger}
-                        onDeleteAll={handleDeleteAllPassengers}
-                        renderForm={adminManager.renderForm}
-                        addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
-                        isLoading={passengersLoading}
-                        error={errors}
-                />
-        );
+	return (
+		<AdminDataTable
+			title={UI_LABELS.ADMIN.modules.passengers.management}
+			data={formattedPassengers}
+			columns={adminManager.columns}
+			onAdd={handleAddPassenger}
+			onEdit={handleEditPassenger}
+			onDelete={handleDeletePassenger}
+			onDeleteAll={handleDeleteAllPassengers}
+			renderForm={adminManager.renderForm}
+			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
+			isLoading={passengersLoading}
+			error={errors}
+		/>
+	);
 };
 
 export default PassengerManagement;

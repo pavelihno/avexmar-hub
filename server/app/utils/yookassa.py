@@ -19,7 +19,7 @@ Configuration.secret_key = Config.YOOKASSA_SECRET_KEY
 
 
 def __generate_receipt(booking: Booking) -> Dict[str, Any]:
-    '''Form receipt object with detailed breakdown'''
+    """Form receipt object with detailed breakdown"""
     details = calculate_receipt_details(booking)
     currency = details.get('currency', booking.currency.value).upper()
     seat_class_map = {'economy': 'Эконом', 'business': 'Бизнес'}
@@ -59,10 +59,10 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 
 
 def __capture_payment(payment: Payment, session) -> YooPayment:
-    '''Capture authorized payment with receipt and booking number'''
+    """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
 
-    Booking.generate_booking_number(payment.booking_id, session=session, commit=False)
+    Booking.generate_booking_number(booking.id, session=session, commit=False)
 
     body = {
         'amount': {
@@ -75,9 +75,29 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
     return yoo_payment
 
 
-def create_payment(public_id: str) -> Payment:
-    '''Create a two-stage payment in YooKassa and persist model'''
-    booking = Booking.get_by_public_id(public_id)
+def __send_confirmation_email(booking: Booking) -> bool:
+    """Send booking confirmation email to the user"""
+    if not booking.email_address:
+        return False
+
+    booking_url = (
+        f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
+        f'?access_token={booking.access_token}'
+    )
+    send_email(
+        subject=f'Подтверждение бронирования № {str(booking.booking_number)}',
+        recipients=[booking.email_address],
+        template='booking_confirmation.txt',
+        booking_number=str(booking.booking_number),
+        total_price=f'{booking.total_price:.2f}',
+        currency=booking.currency.value.upper(),
+        booking_url=booking_url,
+    )
+    return True
+
+
+def create_payment(booking: Booking) -> Payment:
+    """Create a two-stage payment in YooKassa and persist model"""
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
@@ -137,7 +157,7 @@ def create_payment(public_id: str) -> Payment:
 
 
 def handle_webhook(payload: Dict[str, Any]) -> None:
-    '''Process YooKassa webhook notifications'''
+    """Process YooKassa webhook notifications"""
     event = payload.get('event')
 
     obj = payload.get('object') or {}
@@ -158,6 +178,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     session = db.session
     payment = Payment.update(payment.id, session=session, commit=False, **updates)
+    booking = payment.booking
 
     send_confirmation = False
 
@@ -168,7 +189,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     elif event == 'payment.canceled':
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.payment_failed,
@@ -176,13 +197,13 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     elif event == 'payment.succeeded':
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.payment_confirmed,
         )
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.completed,
@@ -203,18 +224,6 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
     session.commit()
 
     if send_confirmation:
-        booking = payment.booking
-        if booking and booking.email_address:
-            booking_url = (
-                f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
-                f'?access_token={booking.access_token}'
-            )
-            send_email(
-                subject='Booking confirmation',
-                recipients=[booking.email_address],
-                template='booking_confirmation.txt',
-                booking_number=booking.booking_number,
-                total_price=f'{booking.total_price:.2f}',
-                currency=booking.currency.value.upper(),
-                booking_url=booking_url,
-            )
+        __send_confirmation_email(booking)
+
+    return
