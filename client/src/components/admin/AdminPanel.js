@@ -93,16 +93,16 @@ const AdminPanel = () => {
 			path: '/admin/bookings',
 		},
 		{
-			title: UI_LABELS.ADMIN.modules.payments.title,
-			description: UI_LABELS.ADMIN.modules.payments.description,
-			icon: <PaymentIcon sx={iconSX} />,
-			path: '/admin/payments',
-		},
-		{
 			title: UI_LABELS.ADMIN.modules.passengers.title,
 			description: UI_LABELS.ADMIN.modules.passengers.description,
 			icon: <HailIcon sx={iconSX} />,
 			path: '/admin/passengers',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.payments.title,
+			description: UI_LABELS.ADMIN.modules.payments.description,
+			icon: <PaymentIcon sx={iconSX} />,
+			path: '/admin/payments',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.tickets.title,
