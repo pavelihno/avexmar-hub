@@ -203,18 +203,25 @@ export const UI_LABELS = {
 				upload_button: 'Загрузить рейсы',
 				upload_template_button: 'Скачать шаблон загрузки',
 			},
-			bookings: {
-				title: 'Бронирования',
-				description: 'Управление бронированиями',
-				management: 'Управление бронированиями',
-				add_button: 'Добавить бронирование',
-				edit_button: 'Редактировать бронирование',
-			},
-			tickets: {
-				title: 'Билеты',
-				description: 'Управление билетами',
-				management: 'Управление билетами',
-				add_button: 'Добавить билет',
+                        bookings: {
+                                title: 'Бронирования',
+                                description: 'Управление бронированиями',
+                                management: 'Управление бронированиями',
+                                add_button: 'Добавить бронирование',
+                                edit_button: 'Редактировать бронирование',
+                        },
+                        payments: {
+                                title: 'Платежи',
+                                description: 'Управление платежами',
+                                management: 'Управление платежами',
+                                add_button: 'Добавить платеж',
+                                edit_button: 'Редактировать платеж',
+                        },
+                        tickets: {
+                                title: 'Билеты',
+                                description: 'Управление билетами',
+                                management: 'Управление билетами',
+                                add_button: 'Добавить билет',
 				edit_button: 'Редактировать билет',
 			},
 			passengers: {

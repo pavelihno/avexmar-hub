@@ -4,23 +4,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
-	fetchPassengers,
-	createPassenger,
-	updatePassenger,
-	deletePassenger,
-	deleteAllPassengers,
+        fetchPassengers,
+        createPassenger,
+        updatePassenger,
+        deletePassenger,
+        deleteAllPassengers,
 } from '../../redux/actions/passenger';
-import {
-	fetchBookingPassengers,
-	createBookingPassenger,
-	updateBookingPassenger,
-	deleteBookingPassenger,
-	deleteAllBookingPassengers,
-} from '../../redux/actions/bookingPassenger';
-import { fetchBookings } from '../../redux/actions/booking';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatDate, validateDate, getExistingPassenger } from '../utils';
+import { FIELD_TYPES, formatDate, validateDate } from '../utils';
 import {
 	DATE_API_FORMAT,
 	ENUM_LABELS,
@@ -32,55 +25,44 @@ import {
 
 const PassengerManagement = () => {
 	const dispatch = useDispatch();
-	const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
-	const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
-	const { bookings } = useSelector((state) => state.bookings);
-	const { countries } = useSelector((state) => state.countries);
+        const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
+        const { countries } = useSelector((state) => state.countries);
+        const { users } = useSelector((state) => state.users);
 
 	useEffect(() => {
-		dispatch(fetchPassengers());
-		dispatch(fetchBookingPassengers());
-		dispatch(fetchBookings());
-		dispatch(fetchCountries());
-	}, [dispatch]);
+                dispatch(fetchPassengers());
+                dispatch(fetchCountries());
+                dispatch(fetchUsers());
+        }, [dispatch]);
 
-	const bookingOptions = bookings.map((b) => ({
-		value: b.id,
-		label: `${b.booking_number} - ${formatDate(b.booking_date)}`,
-	}));
-	const citizenshipOptions = countries.map((c) => ({
-		value: c.id,
-		label: c.name,
-	}));
+        const citizenshipOptions = countries.map((c) => ({
+                value: c.id,
+                label: c.name,
+        }));
+        const userOptions = users.map((u) => ({ value: u.id, label: u.email }));
 
-	const getCountryById = (id) => countries.find((c) => c.id === id);
+        const getCountryById = (id) => countries.find((c) => c.id === id);
 
-	const FIELDS = {
-		id: { key: 'id', apiKey: 'id' },
-		passengerId: {
-			key: 'passengerId',
-			apiKey: 'passenger_id',
-			excludeFromForm: true,
-			excludeFromTable: true,
-		},
-		bookingId: {
-			key: 'bookingId',
-			apiKey: 'booking_id',
-			label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
-			type: FIELD_TYPES.SELECT,
-			options: bookingOptions,
-			formatter: (value) => {
-				const booking = bookingOptions.find((b) => b.value === value);
-				return booking ? booking.label : value;
-			},
-		},
-		lastName: {
-			key: 'lastName',
-			apiKey: 'last_name',
-			label: FIELD_LABELS.PASSENGER.last_name,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
-		},
+        const FIELDS = {
+                id: { key: 'id', apiKey: 'id' },
+                ownerUserId: {
+                        key: 'ownerUserId',
+                        apiKey: 'owner_user_id',
+                        label: FIELD_LABELS.PASSENGER.owner_user_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: userOptions,
+                        formatter: (value) => {
+                                const u = userOptions.find((o) => o.value === value);
+                                return u ? u.label : value;
+                        },
+                },
+                lastName: {
+                        key: 'lastName',
+                        apiKey: 'last_name',
+                        label: FIELD_LABELS.PASSENGER.last_name,
+                        type: FIELD_TYPES.TEXT,
+                        validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED : null),
+                },
 		firstName: {
 			key: 'firstName',
 			apiKey: 'first_name',
@@ -137,131 +119,51 @@ const PassengerManagement = () => {
 			type: FIELD_TYPES.DATE,
 			formatter: (value) => formatDate(value),
 		},
-		citizenshipId: {
-			key: 'citizenshipId',
-			apiKey: 'citizenship_id',
-			label: FIELD_LABELS.PASSENGER.citizenship_id,
-			type: FIELD_TYPES.SELECT,
-			options: citizenshipOptions,
-			formatter: (value) => {
-				const c = getCountryById(value);
-				return c ? c.code_a2 : value;
-			},
-		},
-		emailAddress: {
-			key: 'emailAddress',
-			apiKey: 'email_address',
-			label: FIELD_LABELS.BOOKING.email_address,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED : null),
-		},
-		phoneNumber: {
-			key: 'phoneNumber',
-			apiKey: 'phone_number',
-			label: FIELD_LABELS.BOOKING.phone_number,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : null),
-		},
-	};
+                citizenshipId: {
+                        key: 'citizenshipId',
+                        apiKey: 'citizenship_id',
+                        label: FIELD_LABELS.PASSENGER.citizenship_id,
+                        type: FIELD_TYPES.SELECT,
+                        options: citizenshipOptions,
+                        formatter: (value) => {
+                                const c = getCountryById(value);
+                                return c ? c.code_a2 : value;
+                        },
+                },
+        };
 
-	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
-		editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
-	});
+        const adminManager = createAdminManager(FIELDS, {
+                addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
+                editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
+        });
+        const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
 
-	const handleAddPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { booking_id, ...passengerData } = apiData;
+        const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
 
-		let existing = getExistingPassenger(passengers, passengerData);
+        const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
 
-		if (!existing) {
-			existing = await dispatch(createPassenger(passengerData)).unwrap();
-		}
+        const handleDeleteAllPassengers = async () => {
+                await dispatch(deleteAllPassengers()).unwrap();
+                dispatch(fetchPassengers());
+        };
 
-		return dispatch(
-			createBookingPassenger({
-				booking_id,
-				passenger_id: existing.id,
-			})
-		).unwrap();
-	};
+        const formattedPassengers = passengers.map(adminManager.toUiFormat);
 
-	const handleEditPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { id, booking_id, passenger_id, ...passengerData } = apiData;
-
-		let existing = getExistingPassenger(passengers, passengerData);
-
-		if (!existing) {
-			existing = await dispatch(createPassenger(passengerData)).unwrap();
-		}
-
-		await dispatch(
-			updateBookingPassenger({
-				id,
-				booking_id,
-				passenger_id: existing.id,
-			})
-		).unwrap();
-
-		if (existing.id !== passenger_id) {
-			const stillLinked = bookingPassengers.some((b) => b.passenger_id === passenger_id && b.id !== id);
-			if (!stillLinked) {
-				await dispatch(deletePassenger(passenger_id)).unwrap();
-			}
-		}
-		return existing;
-	};
-
-	const handleDeletePassenger = async (id) => {
-		const bp = bookingPassengers.find((b) => b.id === id);
-		if (!bp) return Promise.resolve();
-
-		await dispatch(deleteBookingPassenger(id)).unwrap();
-
-		const stillLinked = bookingPassengers.some((b) => b.id !== id && b.passenger_id === bp.passenger_id);
-
-		if (!stillLinked) {
-			await dispatch(deletePassenger(bp.passenger_id)).unwrap();
-		}
-	};
-
-	const handleDeleteAllPassengers = async () => {
-		await dispatch(deleteAllBookingPassengers()).unwrap();
-		await dispatch(deleteAllPassengers()).unwrap();
-		dispatch(fetchBookingPassengers());
-		dispatch(fetchPassengers());
-	};
-
-	const formattedPassengers = bookingPassengers.map((bp) => {
-		const passenger = passengers.find((p) => p.id === bp.passenger_id) || {};
-		const booking = bookings.find((b) => b.id === bp.booking_id) || {};
-		return adminManager.toUiFormat({
-			...passenger,
-			id: bp.id,
-			passenger_id: passenger.id,
-			booking_id: booking.id,
-			email_address: booking.email_address,
-			phone_number: booking.phone_number,
-		});
-	});
-
-	return (
-		<AdminDataTable
-			title={UI_LABELS.ADMIN.modules.passengers.management}
-			data={formattedPassengers}
-			columns={adminManager.columns}
-			onAdd={handleAddPassenger}
-			onEdit={handleEditPassenger}
-			onDelete={handleDeletePassenger}
-			onDeleteAll={handleDeleteAllPassengers}
-			renderForm={adminManager.renderForm}
-			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
-			isLoading={passengersLoading || bookingPassengersLoading}
-			error={errors}
-		/>
-	);
+        return (
+                <AdminDataTable
+                        title={UI_LABELS.ADMIN.modules.passengers.management}
+                        data={formattedPassengers}
+                        columns={adminManager.columns}
+                        onAdd={handleAddPassenger}
+                        onEdit={handleEditPassenger}
+                        onDelete={handleDeletePassenger}
+                        onDeleteAll={handleDeleteAllPassengers}
+                        renderForm={adminManager.renderForm}
+                        addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
+                        isLoading={passengersLoading}
+                        error={errors}
+                />
+        );
 };
 
 export default PassengerManagement;
