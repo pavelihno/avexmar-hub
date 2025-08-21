@@ -18,7 +18,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
-import EventNoteIcon from '@mui/icons-material/EventNote';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 
 import Base from '../Base';
 
@@ -127,7 +127,7 @@ const AdminPanel = () => {
 		{
 			title: UI_LABELS.ADMIN.modules.consentEvents.title,
 			description: UI_LABELS.ADMIN.modules.consentEvents.description,
-			icon: <EventNoteIcon sx={iconSX} />,
+			icon: <HandshakeIcon sx={iconSX} />,
 			path: '/admin/consent-events',
 		},
 	];

@@ -144,14 +144,14 @@ export const FIELD_LABELS = {
 	},
 	CONSENT_EVENT: {
 		type: 'Тип события',
-		granter_user_id: 'ID пользователя',
-		booking_id: 'ID бронирования',
-		doc_id: 'ID документа',
+		granter_user_id: 'Пользователь',
+		booking_id: 'Бронирование',
+		doc_id: 'Документ согласия',
 		action: 'Действие',
 		ip: 'IP адрес',
 		user_agent: 'User-Agent',
 		device_fingerprint: 'Отпечаток устройства',
-		subject_ids: 'ID субъектов',
+		subject_ids: 'Субъекты согласия',
 	},
 };
 

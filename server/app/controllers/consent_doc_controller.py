@@ -20,23 +20,23 @@ def get_latest_consent_doc(doc_type):
         doc_enum = CONSENT_DOC_TYPE(doc_type)
     except ValueError:
         return jsonify({'message': 'invalid type'}), 400
+
     doc = ConsentDoc.get_latest(doc_enum)
-    if not doc:
-        return jsonify({'message': 'not found'}), 404
+
     return jsonify(doc.to_dict()), 200
 
 
 @admin_required
 def create_consent_doc(current_user):
     body = request.json or {}
-    doc = ConsentDoc.create(type=body.get('type'), content=body.get('content'), commit=True)
+    doc = ConsentDoc.create(commit=True, **body)
     return jsonify(doc.to_dict()), 201
 
 
 @admin_required
 def update_consent_doc(current_user, doc_id):
     body = request.json or {}
-    doc = ConsentDoc.update(doc_id, content=body.get('content'), commit=True)
+    doc = ConsentDoc.update(doc_id, commit=True, **body)
     return jsonify(doc.to_dict())
 
 

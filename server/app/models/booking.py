@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
     from app.models.user import User
+    from app.models.consent import ConsentEvent
 
 
 class Booking(BaseModel):
@@ -89,6 +90,9 @@ class Booking(BaseModel):
         back_populates='booking',
         lazy='dynamic',
         cascade='all, delete-orphan',
+    )
+    consent_events: Mapped[List['ConsentEvent']] = db.relationship(
+        'ConsentEvent', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     def to_dict(self, return_children=False):

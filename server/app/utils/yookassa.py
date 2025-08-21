@@ -118,6 +118,10 @@ def create_payment(booking: Booking) -> Payment:
         'confirmation': {'type': 'embedded'},
         'capture': False,
         'receipt': __generate_receipt(booking),
+        'metadata': {
+            'public_id': str(booking.public_id),
+            'expires_at': expires_at.isoformat(),
+        },
     }
 
     try:

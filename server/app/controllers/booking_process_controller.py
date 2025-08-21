@@ -133,6 +133,7 @@ def create_booking_process_passengers(current_user):
             passenger = Passenger.create(
                 session,
                 commit=False,
+                owner_user_id=current_user.id,
                 **passenger_fields,
             )
 

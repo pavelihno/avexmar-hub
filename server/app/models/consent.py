@@ -2,7 +2,6 @@ import hashlib
 import uuid
 from typing import List, TYPE_CHECKING
 
-from sqlalchemy import event
 from sqlalchemy.dialects.postgresql import UUID, INET
 from sqlalchemy.orm import Mapped
 
@@ -29,6 +28,10 @@ class ConsentDoc(BaseModel):
     content = db.Column(db.Text, nullable=False)
     hash_sha256 = db.Column(db.String(64), nullable=False)
 
+    events: Mapped[List['ConsentEvent']] = db.relationship(
+        'ConsentEvent', back_populates='doc', lazy='dynamic'
+    )
+
     __table_args__ = (
         db.UniqueConstraint('type', 'version', name='uix_consent_doc_type_version'),
     )
@@ -41,11 +44,12 @@ class ConsentDoc(BaseModel):
             'content': self.content,
             'hash_sha256': self.hash_sha256,
             'created_at': self.created_at,
+            'updated_at': self.updated_at,
         }
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by=['type', 'version'], descending=True)
+        return super().get_all(sort_by=['type', 'version'], descending=False)
 
     @classmethod
     def get_latest(cls, doc_type, *, session=None):
@@ -54,7 +58,7 @@ class ConsentDoc(BaseModel):
             session.query(cls)
             .filter(cls.type == doc_type)
             .order_by(cls.version.desc())
-            .first()
+            .first_or_404()
         )
 
     @classmethod
@@ -65,6 +69,7 @@ class ConsentDoc(BaseModel):
             session.query(db.func.max(cls.version)).filter(cls.type == doc_type).scalar() or 0
         )
         data['version'] = max_version + 1
+        data['hash_sha256'] = hashlib.sha256(data['content'].encode('utf-8')).hexdigest()
         return super().create(session=session, commit=commit, **data)
 
     @classmethod
@@ -73,17 +78,10 @@ class ConsentDoc(BaseModel):
         old_doc = cls.get_or_404(doc_id, session)
         content = data.get('content')
         if not content or content == old_doc.content:
-            return old_doc
-        max_version = (
-            session.query(db.func.max(cls.version)).filter(cls.type == old_doc.type).scalar() or 0
-        )
-        new_data = {'type': old_doc.type, 'content': content, 'version': max_version + 1}
-        return super().create(session=session, commit=commit, **new_data)
-
-
-@event.listens_for(ConsentDoc, 'before_insert')
-def set_consent_doc_hash(mapper, connection, target):
-    target.hash_sha256 = hashlib.sha256(target.content.encode('utf-8')).hexdigest()
+            return super().update(
+                doc_id, session=session, commit=commit, **data
+            )
+        return super().create(session=session, commit=commit, **data)
 
 
 class ConsentEvent(BaseModel):
@@ -99,7 +97,9 @@ class ConsentEvent(BaseModel):
     user_agent = db.Column(db.Text, nullable=True)
     device_fingerprint = db.Column(db.String(128), nullable=True)
 
-    doc: Mapped['ConsentDoc'] = db.relationship('ConsentDoc')
+    doc: Mapped['ConsentDoc'] = db.relationship('ConsentDoc', back_populates='events')
+    granter_user: Mapped['User'] = db.relationship('User', back_populates='consent_events')
+    booking: Mapped['Booking'] = db.relationship('Booking', back_populates='consent_events')
     subjects: Mapped[List['ConsentEventSubject']] = db.relationship(
         'ConsentEventSubject', back_populates='event', cascade='all, delete-orphan'
     )
@@ -116,7 +116,7 @@ class ConsentEvent(BaseModel):
             'user_agent': self.user_agent,
             'device_fingerprint': self.device_fingerprint,
             'created_at': self.created_at,
-            'subject_ids': [s.subject_id for s in self.subjects],
+            'updated_at': self.updated_at,
         }
 
     @classmethod
