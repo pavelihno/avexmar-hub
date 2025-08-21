@@ -56,6 +56,8 @@ const ConsentDocPage = ({ type, title }) => {
 	const contentRaw = consentDoc?.content || '';
 	const effectiveDate = consentDoc?.updated_at || null;
 	const version = consentDoc?.version || null;
+	
+	const hash = consentDoc?.hash_sha256 || null;
 
 	const containerRef = useRef(null);
 
@@ -63,38 +65,56 @@ const ConsentDocPage = ({ type, title }) => {
 		dispatch(fetchLatestConsentDoc(type));
 	}, [dispatch, type]);
 
-	const contentHtml = useMemo(() => DOMPurify.sanitize(contentRaw, { USE_PROFILES: { html: true } }), [contentRaw]);
+		const contentHtml = useMemo(() => DOMPurify.sanitize(contentRaw, { USE_PROFILES: { html: true } }), [contentRaw]);
 
-	const handleDownload = async () => {
-		if (containerRef.current) {
-			try {
-				await html2pdf()
-					.set({
-						margin: [20, 30, 20, 30],
-						filename: `${ENUM_LABELS.CONSENT_DOC_TYPE[type] || 'document'}. ${
-							UI_LABELS.DOC.version
-						} ${version}. ${formatDate(effectiveDate)}.pdf`,
-						html2canvas: { scale: 2 },
-						jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-					})
-					.from(containerRef.current)
-					.save();
-			} catch (err) {
-				const blob = new Blob(
-					[
-						`<!doctype html><html><head><meta charset='utf-8'><title>${title}</title></head><body>${contentHtml}</body></html>`,
-					],
-					{ type: 'text/html;charset=utf-8' }
-				);
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = `${type || 'document'}.html`;
-				a.click();
-				URL.revokeObjectURL(url);
-			}
-		}
-	};
+		const handleDownload = async () => {
+				if (!containerRef.current) return;
+				try {
+						const pdfElement = document.createElement('div');
+						const header = document.createElement('h1');
+						header.textContent = title;
+						header.style.textAlign = 'center';
+						pdfElement.appendChild(header);
+						pdfElement.appendChild(containerRef.current.cloneNode(true));
+						const footer = document.createElement('div');
+						footer.style.marginTop = '20px';
+						footer.style.fontSize = '10px';
+						footer.style.textAlign = 'center';
+						footer.textContent = [
+								`${UI_LABELS.DOC.version}: ${version || UI_LABELS.DOC.not_available}`,
+								`Хэш-сумма: ${hash || UI_LABELS.DOC.not_available}`,
+								`${UI_LABELS.DOC.last_updated}: ${
+										effectiveDate ? formatDateTime(effectiveDate) : UI_LABELS.DOC.not_available
+								}`,
+								UI_LABELS.ABOUT.company_full_name,
+						].join(' | ');
+						pdfElement.appendChild(footer);
+						await html2pdf()
+								.set({
+										margin: [20, 30, 20, 30],
+										filename: `${ENUM_LABELS.CONSENT_DOC_TYPE[type] || 'document'}. ${
+												UI_LABELS.DOC.version
+										} ${version}. ${formatDate(effectiveDate)}.pdf`,
+										html2canvas: { scale: 2 },
+										jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+								})
+								.from(pdfElement)
+								.save();
+				} catch (err) {
+						const blob = new Blob(
+								[
+										`<!doctype html><html><head><meta charset='utf-8'><title>${title}</title></head><body>${contentHtml}</body></html>`,
+								],
+								{ type: 'text/html;charset=utf-8' }
+						);
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = `${type || 'document'}.html`;
+						a.click();
+						URL.revokeObjectURL(url);
+				}
+		};
 
 	return (
 		<Base>
