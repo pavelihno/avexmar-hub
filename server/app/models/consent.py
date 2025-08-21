@@ -115,6 +115,7 @@ class ConsentEvent(BaseModel):
             'ip': self.ip,
             'user_agent': self.user_agent,
             'device_fingerprint': self.device_fingerprint,
+            'subject_ids': [s.subject_id for s in self.subjects],
             'created_at': self.created_at,
             'updated_at': self.updated_at,
         }

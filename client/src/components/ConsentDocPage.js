@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Container, Typography, Box } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
+import 'react-quill/dist/quill.snow.css';
 
 import Base from './Base';
 import { fetchLatestConsentDoc } from '../redux/actions/consentDoc';
