@@ -1,18 +1,20 @@
 import {
-	TextField,
-	Select,
-	MenuItem,
-	FormControl,
+        TextField,
+        Select,
+        MenuItem,
+        FormControl,
 	InputLabel,
 	Checkbox,
 	FormControlLabel,
 	FormHelperText,
 	Autocomplete,
-	Box,
+        Box,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 import {
 	dateLocale,
@@ -131,30 +133,16 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				);
 			}
 
-			case FIELD_TYPES.RICH_TEXT: {
-				const { value = '', onChange, fullWidth, error, helperText, sx } = allProps;
-				return (
-					<FormControl fullWidth={fullWidth} error={!!error} sx={{ ...sx }}>
-						<InputLabel shrink>{field.label}</InputLabel>
-						<Box
-							component='div'
-							contentEditable
-							onInput={(e) => onChange(e.currentTarget.innerHTML)}
-							dangerouslySetInnerHTML={{ __html: value }}
-							sx={{
-								minHeight: 150,
-								border: 1,
-								borderColor: 'divider',
-								borderRadius: 1,
-								p: 1,
-								typography: 'body2',
-								overflowY: 'auto',
-							}}
-						/>
-						{error && <FormHelperText>{helperText}</FormHelperText>}
-					</FormControl>
-				);
-			}
+                        case FIELD_TYPES.RICH_TEXT: {
+                                const { value = '', onChange, fullWidth, error, helperText, sx } = allProps;
+                                return (
+                                        <FormControl fullWidth={fullWidth} error={!!error} sx={{ ...sx }}>
+                                                <InputLabel shrink>{field.label}</InputLabel>
+                                                <ReactQuill theme='snow' value={value} onChange={onChange} />
+                                                {error && <FormHelperText>{helperText}</FormHelperText>}
+                                        </FormControl>
+                                );
+                        }
 
 			case FIELD_TYPES.NUMBER: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
