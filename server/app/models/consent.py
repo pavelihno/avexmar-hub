@@ -77,11 +77,11 @@ class ConsentDoc(BaseModel):
         session = session or db.session
         old_doc = cls.get_or_404(doc_id, session)
         content = data.get('content')
-        if not content or content == old_doc.content:
+        if content == old_doc.content:
             return super().update(
                 doc_id, session=session, commit=commit, **data
             )
-        return super().create(session=session, commit=commit, **data)
+        return cls.create(session=session, commit=commit, **{**data, 'id': None})
 
 
 class ConsentEvent(BaseModel):
