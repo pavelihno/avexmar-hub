@@ -129,10 +129,10 @@ const Passengers = () => {
 				buyerFirstName: mapped.buyerFirstName || '',
 				emailAddress: mapped.emailAddress || '',
 				phoneNumber: mapped.phoneNumber || '',
-				consent: passengersExist ? true : mapped.consent,
+				consent: mapped.consent || false,
 			});
 		}
-	}, [booking?.buyer, passengersExist]);
+	}, [booking, passengersExist]);
 
 	const buyerFormFields = useMemo(() => {
 		const fields = {
