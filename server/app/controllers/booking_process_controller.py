@@ -9,7 +9,13 @@ from app.models.payment import Payment
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.yookassa import create_payment, handle_webhook
-from app.utils.enum import BOOKING_STATUS, PASSENGER_PLURAL_CATEGORY
+from app.utils.enum import (
+    BOOKING_STATUS,
+    PASSENGER_PLURAL_CATEGORY,
+    CONSENT_ACTION,
+    CONSENT_EVENT_TYPE,
+)
+from app.utils.consent import create_booking_consents
 
 
 @current_user
@@ -88,6 +94,7 @@ def create_booking_process_passengers(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
     buyer = data.get('buyer', {})
+    consent = bool(buyer.pop('consent', False))
     passengers = data.get('passengers') or []
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
@@ -162,6 +169,14 @@ def create_booking_process_passengers(current_user):
         commit=False,
         to_status=BOOKING_STATUS.passengers_added,
     )
+
+    if consent:
+        create_booking_consents(
+            booking,
+            current_user.id if current_user else None,
+            list(processed_ids),
+            session=session,
+        )
 
     session.commit()
 
@@ -238,6 +253,13 @@ def get_booking_process_details(current_user, public_id):
     outbound_tariff_id = tariffs_map.get(outbound_id)
     return_tariff_id = tariffs_map.get(return_id)
 
+    consent_exists = (
+        booking.consent_events.filter_by(
+            type=CONSENT_EVENT_TYPE.pd_processing, action=CONSENT_ACTION.agree
+        ).count()
+        > 0
+    )
+
     result['passengers'] = passengers
     result['passengers_exist'] = passengers_exist
     result['flights'] = flights
@@ -248,6 +270,7 @@ def get_booking_process_details(current_user, public_id):
         return_tariff_id,
         passenger_counts,
     )
+    result['consent'] = consent_exists
 
     return jsonify(result), 200
 
