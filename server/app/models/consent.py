@@ -38,7 +38,7 @@ class ConsentDoc(BaseModel):
 
     @staticmethod
     def _calc_hash(content: str) -> str:
-        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        return hashlib.sha256((content or '').encode('utf-8')).hexdigest()
 
     def to_dict(self):
         return {
@@ -83,17 +83,16 @@ class ConsentDoc(BaseModel):
         content = data.get('content')
         doc_type = data.get('type', old_doc.type)
 
-        if content is not None:
-            new_hash = cls._calc_hash(content)
-            if new_hash != old_doc.hash_sha256:
-                latest_doc = cls.get_latest(doc_type, session=session)
-                if latest_doc.id == old_doc.id and latest_doc.events.count() > 0:
-                    return cls.create(
-                        session=session,
-                        commit=commit,
-                        **{**data, 'id': None, 'type': doc_type},
-                    )
-                data['hash_sha256'] = new_hash
+        new_hash = cls._calc_hash(content)
+        if new_hash != old_doc.hash_sha256:
+            latest_doc = cls.get_latest(doc_type, session=session)
+            if latest_doc.id == old_doc.id and latest_doc.events.count() > 0:
+                return cls.create(
+                    session=session,
+                    commit=commit,
+                    **{**data, 'id': None, 'type': doc_type},
+                )
+            data['hash_sha256'] = new_hash
         return super().update(doc_id, session=session, commit=commit, **data)
 
 

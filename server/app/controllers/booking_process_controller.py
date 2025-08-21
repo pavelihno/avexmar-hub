@@ -14,8 +14,9 @@ from app.utils.enum import (
     PASSENGER_PLURAL_CATEGORY,
     CONSENT_ACTION,
     CONSENT_EVENT_TYPE,
+    CONSENT_DOC_TYPE,
 )
-from app.utils.consent import create_booking_consents
+from app.utils.consent import create_booking_consent
 
 
 @current_user
@@ -171,10 +172,20 @@ def create_booking_process_passengers(current_user):
     )
 
     if consent:
-        create_booking_consents(
+        create_booking_consent(
             booking,
+            CONSENT_EVENT_TYPE.pd_processing,
+            CONSENT_DOC_TYPE.pd_policy,
             current_user.id if current_user else None,
             list(processed_ids),
+            session=session,
+        )
+        create_booking_consent(
+            booking,
+            CONSENT_EVENT_TYPE.offer_acceptance,
+            CONSENT_DOC_TYPE.offer,
+            current_user.id if current_user else None,
+            [],
             session=session,
         )
 
