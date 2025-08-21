@@ -62,8 +62,7 @@ export const UI_LABELS = {
 	},
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
-		company_full_name:
-			'Общество с ограниченной ответственностью «АВЕКСМАР»',
+		company_full_name: 'Общество с ограниченной ответственностью «АВЕКСМАР»',
 		contact_email: 'contact@avexmar.com',
 		contact_phone: '+7 (123) 456-78-90',
 		legal_address_value: 'г. Москва, ул. Примерная, д. 1',
@@ -83,8 +82,7 @@ export const UI_LABELS = {
 		public_offer: 'Публичная оферта',
 		marketing_consent: 'Согласие на получение рекламной рассылки',
 		all_rights_reserved: 'Все права защищены',
-		company_description:
-			'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
+		company_description: 'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
 		cards: [
 			{
 				title: 'Широкий спектр клиентов и партнёров в сфере воздушных перевозок',
@@ -110,9 +108,9 @@ export const UI_LABELS = {
 		],
 	},
 	DOC: {
-		version: 'Версия:',
-		effective_from: 'Действует с:',
-		last_updated: 'Последнее обновление:',
+		version: 'Версия',
+		effective_from: 'Действует с',
+		last_updated: 'Последнее обновление',
 		not_available: '—',
 	},
 	ADMIN: {
@@ -310,25 +308,18 @@ export const UI_LABELS = {
 		},
 		buyer_form: {
 			title: 'Покупатель',
-			privacy_policy: (link) => (
-				<>Даю {link('согласие')} на обработку персональных данных</>
-			),
+			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
 			public_offer: (link) => (
-				<>
-					Нажимая «Продолжить», Вы принимаете условия{' '}
-					{link('публичной оферты')} ООО «АВЕКСМАР»
-				</>
+				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
 			),
 			summary: {
 				total: 'Итого',
 				passenger_word: (count) =>
 					count % 10 === 1 && count % 100 !== 11
 						? `${count} пассажир`
-						: count % 10 >= 2 &&
-							  count % 10 <= 4 &&
-							  (count % 100 < 10 || count % 100 >= 20)
-							? `${count} пассажира`
-							: `${count} пассажиров`,
+						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
+						? `${count} пассажира`
+						: `${count} пассажиров`,
 				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
@@ -370,8 +361,7 @@ export const UI_LABELS = {
 			last_name: 'Фамилия',
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
-			name_hint: (requiresCyrillic) =>
-				`${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
 		payment_form: {
 			title: (timeLeft) => `${timeLeft} для оплаты`,
@@ -432,11 +422,9 @@ export const UI_LABELS = {
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
 					? 'пассажир'
-					: count % 10 >= 2 &&
-						  count % 10 <= 4 &&
-						  (count % 100 < 10 || count % 100 >= 20)
-						? 'пассажира'
-						: 'пассажиров',
+					: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
+					? 'пассажира'
+					: 'пассажиров',
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
@@ -456,8 +444,7 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to)
-				return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
+			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {
