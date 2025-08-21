@@ -8,7 +8,7 @@ import { UI_LABELS } from '../constants/uiLabels';
 const aboutLinks = [
 	{ href: '/privacy_policy', label: UI_LABELS.ABOUT.privacy_policy_agreement },
 	{ href: '/public_offer', label: UI_LABELS.ABOUT.public_offer },
-	{ href: '/marketing_consent', label: UI_LABELS.ABOUT.marketing_consent },
+	// { href: '/marketing_consent', label: UI_LABELS.ABOUT.marketing_consent },
 ];
 
 const About = () => {
