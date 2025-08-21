@@ -35,25 +35,31 @@ const Footer = () => {
 						</Typography>
 					</Stack>
 
-					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 3 }} alignItems='center'>
-						<Link component={RouterLink} to='/about' color='inherit' underline='hover' sx={{ px: 1 }}>
-							{UI_LABELS.ABOUT.about_us}
-						</Link>
-						<Link
-							href={`mailto:${contactEmail}`}
-							color='inherit'
-							underline='hover'
-							sx={{
-								display: 'flex',
-								alignItems: 'center',
-								gap: 1,
-								px: 1,
-							}}
-						>
-							{contactEmail}
-							<MailOutlineIcon fontSize='small' />
-						</Link>
-					</Stack>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 3 }} alignItems='center'>
+                                                <Link component={RouterLink} to='/about' color='inherit' underline='hover' sx={{ px: 1 }}>
+                                                        {UI_LABELS.ABOUT.about_us}
+                                                </Link>
+                                                <Link component={RouterLink} to='/privacy_policy' color='inherit' underline='hover' sx={{ px: 1 }}>
+                                                        {UI_LABELS.ABOUT.privacy_policy_agreement}
+                                                </Link>
+                                                <Link component={RouterLink} to='/public_offer' color='inherit' underline='hover' sx={{ px: 1 }}>
+                                                        {UI_LABELS.ABOUT.public_offer}
+                                                </Link>
+                                                <Link
+                                                        href={`mailto:${contactEmail}`}
+                                                        color='inherit'
+                                                        underline='hover'
+                                                        sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: 1,
+                                                                px: 1,
+                                                        }}
+                                                >
+                                                        {contactEmail}
+                                                        <MailOutlineIcon fontSize='small' />
+                                                </Link>
+                                        </Stack>
 				</Stack>
 			</Container>
 		</Box>

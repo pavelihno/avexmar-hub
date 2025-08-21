@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { Typography, Grid, Box, Container, Paper, Link, Avatar, IconButton, Tooltip, Snackbar } from '@mui/material';
-import { LocationOn, Phone, Email, ArrowForward, ContentCopy } from '@mui/icons-material';
+import { Typography, Box, Container, Paper, Link, Avatar, IconButton, Tooltip, Snackbar, Grid } from '@mui/material';
+import { ArrowForward, ContentCopy } from '@mui/icons-material';
 import Base from './Base';
 import { UI_LABELS } from '../constants/uiLabels';
 
@@ -20,15 +20,29 @@ const About = () => {
 		icon: `images/icons/${card.icon}.svg`,
 	}));
 
-	const companyDescription = UI_LABELS.ABOUT.company_description;
+        const companyDescription = UI_LABELS.ABOUT.company_description;
 
-	const contactInfo = {
-		address: UI_LABELS.ABOUT.contact_address,
-		phone: UI_LABELS.ABOUT.contact_phone,
-		email: UI_LABELS.ABOUT.contact_email,
-	};
+        const companyName = UI_LABELS.ABOUT.company_name;
 
-	const companyName = UI_LABELS.ABOUT.company_name;
+        const companyDetails = [
+                { label: UI_LABELS.ABOUT.full_name, value: UI_LABELS.ABOUT.company_full_name },
+                { label: UI_LABELS.ABOUT.ogrn, value: UI_LABELS.ABOUT.ogrn_value },
+                { label: UI_LABELS.ABOUT.inn, value: UI_LABELS.ABOUT.inn_value },
+                {
+                        label: UI_LABELS.ABOUT.legal_address,
+                        value: UI_LABELS.ABOUT.legal_address_value,
+                },
+                {
+                        label: UI_LABELS.ABOUT.phone,
+                        value: UI_LABELS.ABOUT.contact_phone,
+                        href: `tel:${UI_LABELS.ABOUT.contact_phone}`,
+                },
+                {
+                        label: UI_LABELS.ABOUT.email,
+                        value: UI_LABELS.ABOUT.contact_email,
+                        href: `mailto:${UI_LABELS.ABOUT.contact_email}`,
+                },
+        ];
 
 	const handleCopy = (text, type) => {
 		navigator.clipboard
@@ -120,149 +134,61 @@ const About = () => {
 					))}
 				</Box>
 
-				<Box mb={4}>
-					<Typography variant='h4' component='h2' gutterBottom>
-						{UI_LABELS.ABOUT.contact_info}
-					</Typography>
-					<Paper elevation={1} sx={{ p: 2 }}>
-						<Grid container alignItems='center'>
-							<Grid
-								item
-								xs={12}
-								md={4}
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									py: 1,
-								}}
-							>
-								<LocationOn color='primary' sx={{ mr: 2 }} />
-								<Box sx={{ flexGrow: 1 }}>
-									<Typography variant='subtitle2' color='text.secondary'>
-										{UI_LABELS.ABOUT.address}
-									</Typography>
-									<Box
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-										}}
-									>
-										<Typography variant='body2' sx={{ mr: 1 }}>
-											{contactInfo.address}
-										</Typography>
-										<Tooltip title={UI_LABELS.BUTTONS.copy}>
-											<IconButton
-												size='small'
-												onClick={() => handleCopy(contactInfo.address, UI_LABELS.ABOUT.address)}
-												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.address}`}
-											>
-												<ContentCopy fontSize='small' />
-											</IconButton>
-										</Tooltip>
-									</Box>
-								</Box>
-							</Grid>
-							<Grid
-								item
-								xs={12}
-								md={4}
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									py: 1,
-								}}
-							>
-								<Phone color='primary' sx={{ mr: 2 }} />
-								<Box sx={{ flexGrow: 1 }}>
-									<Typography variant='subtitle2' color='text.secondary'>
-										{UI_LABELS.ABOUT.phone}
-									</Typography>
-									<Box
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-										}}
-									>
-										<Link
-											href={`tel:${contactInfo.phone}`}
-											variant='body2'
-											sx={{
-												mr: 1,
-												textDecoration: 'none',
-												color: 'text.primary',
-												'&:hover': {
-													textDecoration: 'underline',
-													color: 'primary.main',
-												},
-											}}
-										>
-											{contactInfo.phone}
-										</Link>
-										<Tooltip title={UI_LABELS.BUTTONS.copy}>
-											<IconButton
-												size='small'
-												onClick={() => handleCopy(contactInfo.phone, UI_LABELS.ABOUT.phone)}
-												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.phone}`}
-											>
-												<ContentCopy fontSize='small' />
-											</IconButton>
-										</Tooltip>
-									</Box>
-								</Box>
-							</Grid>
-							<Grid
-								item
-								xs={12}
-								md={4}
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									py: 1,
-								}}
-							>
-								<Email color='primary' sx={{ mr: 2 }} />
-								<Box sx={{ flexGrow: 1 }}>
-									<Typography variant='subtitle2' color='text.secondary'>
-										{UI_LABELS.ABOUT.email}
-									</Typography>
-									<Box
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-										}}
-									>
-										<Link
-											href={`mailto:${contactInfo.email}`}
-											variant='body2'
-											sx={{
-												mr: 1,
-												textDecoration: 'none',
-												color: 'text.primary',
-												'&:hover': {
-													textDecoration: 'underline',
-													color: 'primary.main',
-												},
-											}}
-										>
-											{contactInfo.email}
-										</Link>
-										<Tooltip title={UI_LABELS.BUTTONS.copy}>
-											<IconButton
-												size='small'
-												onClick={() =>
-													handleCopy(contactInfo.email, UI_LABELS.ABOUT.email_address)
-												}
-												aria-label={`${UI_LABELS.BUTTONS.copy} ${UI_LABELS.ABOUT.email_address}`}
-											>
-												<ContentCopy fontSize='small' />
-											</IconButton>
-										</Tooltip>
-									</Box>
-								</Box>
-							</Grid>
-						</Grid>
-					</Paper>
-				</Box>
+                                <Box mb={4}>
+                                        <Typography variant='h4' component='h2' gutterBottom>
+                                                {UI_LABELS.ABOUT.company_details}
+                                        </Typography>
+                                        <Paper elevation={1} sx={{ p: 2 }}>
+                                                {companyDetails.map(({ label, value, href }, index) => (
+                                                        <Box
+                                                                key={index}
+                                                                sx={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        py: 1,
+                                                                }}
+                                                        >
+                                                                <Typography
+                                                                        variant='subtitle2'
+                                                                        color='text.secondary'
+                                                                        sx={{ minWidth: { xs: 'auto', sm: 220 }, mr: 1 }}
+                                                                >
+                                                                        {label}
+                                                                </Typography>
+                                                                {href ? (
+                                                                        <Link
+                                                                                href={href}
+                                                                                variant='body2'
+                                                                                sx={{
+                                                                                        mr: 1,
+                                                                                        textDecoration: 'none',
+                                                                                        color: 'text.primary',
+                                                                                        '&:hover': {
+                                                                                                textDecoration: 'underline',
+                                                                                                color: 'primary.main',
+                                                                                        },
+                                                                                }}
+                                                                        >
+                                                                                {value}
+                                                                        </Link>
+                                                                ) : (
+                                                                        <Typography variant='body2' sx={{ mr: 1 }}>
+                                                                                {value}
+                                                                        </Typography>
+                                                                )}
+                                                                <Tooltip title={UI_LABELS.BUTTONS.copy}>
+                                                                        <IconButton
+                                                                                size='small'
+                                                                                onClick={() => handleCopy(value, label)}
+                                                                                aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+                                                                        >
+                                                                                <ContentCopy fontSize='small' />
+                                                                        </IconButton>
+                                                                </Tooltip>
+                                                        </Box>
+                                                ))}
+                                        </Paper>
+                                </Box>
 
 				<Box mb={4}>
 					<Typography variant='h4' component='h2' gutterBottom>
