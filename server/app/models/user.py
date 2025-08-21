@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
     from app.models.passenger import Passenger
     from app.models.booking import Booking
+    from app.models.consent import ConsentEvent
 
 
 class User(BaseModel):
@@ -28,6 +29,9 @@ class User(BaseModel):
     )
     bookings: Mapped[List['Booking']] = db.relationship(
         'Booking', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    consent_events: Mapped[List['ConsentEvent']] = db.relationship(
+        'ConsentEvent', back_populates='granter_user', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     def to_dict(self, return_children=False):

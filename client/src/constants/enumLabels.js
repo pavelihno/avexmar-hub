@@ -72,6 +72,18 @@ export const ENUM_LABELS = {
 		within_24h: 'Менее чем за 24 часа до рейса',
 		after_departure: 'После вылета рейса',
 	},
+	CONSENT_DOC_TYPE: {
+		offer: 'Оферта',
+		pd_policy: 'Политика обработки персональных данных',
+	},
+	CONSENT_EVENT_TYPE: {
+		offer_acceptance: 'Акцепт оферты',
+		pd_processing: 'Согласие на обработку персональных данных',
+	},
+	CONSENT_ACTION: {
+		agree: 'Согласие',
+		withdraw: 'Отзыв',
+	},
 };
 
 export const getEnumOptions = (enumType) => {

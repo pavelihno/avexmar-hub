@@ -11,6 +11,7 @@ from app.models.payment import Payment
 from app.utils.business_logic import calculate_receipt_details
 from app.utils.datetime import format_date
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
+from app.utils.email import send_email
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -27,7 +28,9 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
         route = direction.get('route') or {}
         origin = (route.get('origin_airport') or {}).get('city_name', '')
         dest = (route.get('destination_airport') or {}).get('city_name', '')
-        seat_class = seat_class_map.get(direction.get('seat_class', ''), direction.get('seat_class', ''))
+        seat_class = seat_class_map.get(
+            direction.get('seat_class', ''), direction.get('seat_class', '')
+        )
         date = direction.get('date')
         date_str = format_date(date, '%d.%m.%y')
 
@@ -36,16 +39,18 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
             full_name = passenger.get('full_name', '')
             description = (
                 f'Организация авиаперевозки пассажиров и багажа по маршруту '
-                f'{origin}-{dest}. {seat_class} класс. {date_str} {full_name}'
+                f'{origin} — {dest}. {seat_class} класс. {date_str}. {full_name}'
             )
-            items.append({
-                'description': description,
-                'quantity': '1',
-                'amount': {'value': f"{price:.2f}", 'currency': currency},
-                'vat_code': 7,
-                'payment_mode': 'full_payment',
-                'payment_subject': 'service',
-            })
+            items.append(
+                {
+                    'description': description,
+                    'quantity': '1',
+                    'amount': {'value': f'{price:.2f}', 'currency': currency},
+                    'vat_code': 7,
+                    'payment_mode': 'full_payment',
+                    'payment_subject': 'service',
+                }
+            )
 
     return {
         'customer': {'email': booking.email_address},
@@ -57,32 +62,46 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
     """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
 
-    Booking.generate_booking_number(
-        payment.booking_id, session=session, commit=False
-    )
+    Booking.generate_booking_number(booking.id, session=session, commit=False)
 
     body = {
         'amount': {
             'value': f'{payment.amount:.2f}',
             'currency': payment.currency.value.upper(),
         },
-        'description': f'Booking {booking.booking_number}',
-        'airline': {'booking_reference': booking.booking_number},
-        'metadata': {'booking_id': str(booking.public_id), 'booking_number': booking.booking_number},
     }
 
     yoo_payment = YooPayment.capture(payment.provider_payment_id, body)
     return yoo_payment
 
 
-def create_payment(public_id: str) -> Payment:
+def __send_confirmation_email(booking: Booking) -> bool:
+    """Send booking confirmation email to the user"""
+    if not booking.email_address:
+        return False
+
+    booking_url = (
+        f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
+        f'?access_token={booking.access_token}'
+    )
+    send_email(
+        subject=f'Подтверждение бронирования № {str(booking.booking_number)}',
+        recipients=[booking.email_address],
+        template='booking_confirmation.txt',
+        booking_number=str(booking.booking_number),
+        total_price=f'{booking.total_price:.2f}',
+        currency=booking.currency.value.upper(),
+        booking_url=booking_url,
+    )
+    return True
+
+
+def create_payment(booking: Booking) -> Payment:
     """Create a two-stage payment in YooKassa and persist model"""
-    booking = Booking.get_by_public_id(public_id)
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
-        booking.payments
-        .filter(Payment.payment_status == PAYMENT_STATUS.pending)
+        booking.payments.filter(Payment.payment_status == PAYMENT_STATUS.pending)
         .order_by(Payment.created_at.desc())
         .first()
     )
@@ -98,12 +117,11 @@ def create_payment(public_id: str) -> Payment:
         'amount': amount,
         'confirmation': {'type': 'embedded'},
         'capture': False,
-        'description': f'Booking {booking.public_id}',
         'receipt': __generate_receipt(booking),
         'metadata': {
-            'booking_id': str(booking.public_id),
+            'public_id': str(booking.public_id),
             'expires_at': expires_at.isoformat(),
-        }
+        },
     }
 
     try:
@@ -163,9 +181,10 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
         updates['paid_at'] = captured_at
 
     session = db.session
-    payment = Payment.update(
-        payment.id, session=session, commit=False, **updates
-    )
+    payment = Payment.update(payment.id, session=session, commit=False, **updates)
+    booking = payment.booking
+
+    send_confirmation = False
 
     if event == 'payment.waiting_for_capture':
         yoo_payment = YooPayment.find_one(provider_id)
@@ -174,7 +193,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     elif event == 'payment.canceled':
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.payment_failed,
@@ -182,19 +201,33 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     elif event == 'payment.succeeded':
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.payment_confirmed,
         )
         Booking.transition_status(
-            id=payment.booking_id,
+            id=booking.id,
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.completed,
         )
+        booking = payment.booking
+        if not booking.access_token:
+            Booking.update(
+                booking.id,
+                session=session,
+                commit=False,
+                access_token=uuid.uuid4(),
+            )
+        send_confirmation = True
 
     else:
         raise ValueError(f'Unknown event type: {event}')
 
     session.commit()
+
+    if send_confirmation:
+        __send_confirmation_email(booking)
+
+    return

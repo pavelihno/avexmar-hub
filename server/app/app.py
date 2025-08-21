@@ -32,6 +32,8 @@ from app.controllers.country_controller import *
 from app.controllers.search_controller import *
 from app.controllers.timezone_controller import *
 from app.controllers.fee_controller import *
+from app.controllers.consent_doc_controller import *
+from app.controllers.consent_event_controller import *
 
 
 def __import_models():
@@ -163,6 +165,20 @@ def __create_app(_config_class, _db):
     app.route('/fees/<int:fee_id>', methods=['GET'])(get_fee)
     app.route('/fees/<int:fee_id>', methods=['PUT'])(update_fee)
     app.route('/fees/<int:fee_id>', methods=['DELETE'])(delete_fee)
+
+    # consent docs
+    app.route('/consent_docs', methods=['GET'])(get_consent_docs)
+    app.route('/consent_docs', methods=['POST'])(create_consent_doc)
+    app.route('/consent_docs/<uuid:doc_id>', methods=['GET'])(get_consent_doc)
+    app.route('/consent_docs/<uuid:doc_id>', methods=['PUT'])(update_consent_doc)
+    app.route('/consent_docs/<uuid:doc_id>', methods=['DELETE'])(delete_consent_doc)
+    app.route('/consent_docs/latest/<string:doc_type>', methods=['GET'])(get_latest_consent_doc)
+
+    app.route('/consent_events', methods=['GET'])(get_consent_events)
+    app.route('/consent_events', methods=['POST'])(create_consent_event)
+    app.route('/consent_events/<uuid:event_id>', methods=['GET'])(get_consent_event)
+    app.route('/consent_events/<uuid:event_id>', methods=['PUT'])(update_consent_event)
+    app.route('/consent_events/<uuid:event_id>', methods=['DELETE'])(delete_consent_event)
 
     # seats
     app.route('/seats', methods=['GET'])(get_seats)

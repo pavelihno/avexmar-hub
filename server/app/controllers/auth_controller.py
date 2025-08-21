@@ -59,7 +59,7 @@ def forgot_password():
     token = PasswordResetToken.create(user, expires_in_hours=1)
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
-        'Password Reset',
+        'Сброс пароля',
         [user.email],
         'forgot_password.txt',
         reset_url=reset_url,

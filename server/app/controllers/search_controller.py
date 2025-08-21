@@ -1,6 +1,7 @@
 from flask import jsonify, request
-from sqlalchemy import or_
+from sqlalchemy import or_, false
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import func
 
 from app.database import db
 from app.models.airline import Airline
@@ -81,25 +82,34 @@ def __query_flights(
     if airline_iata_code and flight_number:
         query = query.join(Airline, Flight.airline_id == Airline.id)
         query = query.filter(
-            Airline.iata_code == airline_iata_code, Flight.flight_number == flight_number
+            Airline.iata_code == airline_iata_code, 
+            Flight.flight_number == flight_number
         )
 
+    today = func.current_date()
     if is_exact:
         if date_from:
-            query = query.filter(Flight.scheduled_departure == date_from)
+            query = query.filter(
+                Flight.scheduled_departure == date_from,
+                Flight.scheduled_departure >= today,
+            )
         else:
             # No date provided, return no results
-            query = query.filter(True == False)
+            query = query.filter(false())
     else:
         if date_from and date_to:
             query = query.filter(
-                Flight.scheduled_departure.between(date_from, date_to)
+                Flight.scheduled_departure.between(date_from, date_to),
+                Flight.scheduled_departure >= today
             )
         elif date_from:
-            query = query.filter(Flight.scheduled_departure >= date_from)
+            query = query.filter(
+                Flight.scheduled_departure >= date_from,
+                Flight.scheduled_departure >= today
+            )
         else:
             # No date provided, return no results
-            query = query.filter(True == False)
+            query = query.filter(false())
 
     flights = query.all()
     results = []

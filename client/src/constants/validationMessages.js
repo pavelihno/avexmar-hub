@@ -84,6 +84,29 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	CONSENT_DOC: {
+		type: {
+			REQUIRED: 'Тип документа обязателен',
+		},
+		content: {
+			REQUIRED: 'Содержание обязательно',
+		},
+	},
+	CONSENT_EVENT: {
+		type: {
+			REQUIRED: 'Тип события обязателен',
+		},
+		booking_id: {
+			REQUIRED: 'ID бронирования обязателен',
+		},
+		doc_id: {
+			REQUIRED: 'ID документа обязателен',
+		},
+		action: {
+			REQUIRED: 'Действие обязательно',
+		},
+	},
+
 	PASSENGER: {
 		first_name: {
 			REQUIRED: 'Введите имя',
@@ -246,9 +269,11 @@ export const VALIDATION_MESSAGES = {
 		},
 		when: {
 			REQUIRED: 'Укажите дату отправления',
+			TODAY: 'Дата отправления должна быть не раньше сегодня',
 		},
 		return: {
-			INVALID: 'Дата возвращения не может быть раньше даты отправления',
+			INVALID: 'Дата возвращения должна быть позже даты отправления',
+			TODAY: 'Дата возвращения должна быть не раньше сегодня',
 		},
 		passengers: {
 			REQUIRED: 'Укажите пассажиров',

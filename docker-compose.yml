@@ -5,7 +5,7 @@ services:
     container_name: server-app
     build: ./server
     ports:
-      - 5000:5000
+      - 8000:8000
     environment:
       SECRET_KEY: $SERVER_SECRET_KEY
       DATABASE_URI: $SERVER_DATABASE_URI
@@ -15,7 +15,6 @@ services:
       - .env
     depends_on:
       - postgres
-      # - mailhog
 
   client-app:
     container_name: client-app

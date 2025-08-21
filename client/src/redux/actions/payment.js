@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { serverApi } from '../../api';
-import { getErrorData } from '../utils';
+import { getErrorData, createCrudActions } from '../utils';
 
 export const createPayment = createAsyncThunk('payment/create', async (data, { rejectWithValue }) => {
 	try {
@@ -19,3 +19,12 @@ export const fetchPayment = createAsyncThunk('payment/fetch', async (publicId, {
 		return rejectWithValue(getErrorData(err));
 	}
 });
+
+export const {
+	fetchAll: fetchPayments,
+	fetchOne: fetchPaymentById,
+	create: createPaymentAdmin,
+	update: updatePayment,
+	remove: deletePayment,
+	removeAll: deleteAllPayments,
+} = createCrudActions('payments');

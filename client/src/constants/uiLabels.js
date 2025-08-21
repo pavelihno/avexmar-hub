@@ -1,5 +1,4 @@
 import { formatDate } from '../components/utils';
-import { FIELD_LABELS } from './fieldLabels';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
@@ -21,6 +20,7 @@ export const UI_LABELS = {
 		confirm: 'Подтвердить',
 		send: 'Отправить',
 		continue: 'Продолжить',
+		download: 'Скачать',
 		pagination: {
 			rows_per_page: 'Записей на странице',
 			displayed_rows: ({ from, to, count }) => {
@@ -62,15 +62,20 @@ export const UI_LABELS = {
 	},
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
+		company_full_name: 'Общество с ограниченной ответственностью «АВЕКСМАР»',
 		contact_email: 'contact@avexmar.com',
 		contact_phone: '+7 (123) 456-78-90',
-		contact_address: 'г. Москва, ул. Примерная, д. 1',
+		legal_address_value: 'г. Москва, ул. Примерная, д. 1',
 		about_us: 'О нас',
-		copied: 'Скопирован',
-		contact_info: 'Контактная информация',
-		address: 'Адрес',
-		phone: 'Телефон',
-		email: 'Электронная почта',
+		copied: 'Скопировано',
+		company_details: 'Реквизиты компании',
+		full_name: 'Наименование организации',
+		ogrn: 'ОГРН',
+		ogrn_value: '1234567890123',
+		inn: 'ИНН',
+		inn_value: '1234567890',
+		legal_address: 'Юридический адрес',
+		phone: 'Контактный телефон',
 		email_address: 'Адрес электронной почты',
 		legal_info: 'Правовая информация',
 		privacy_policy_agreement: 'Согласие на обработку персональных данных',
@@ -101,6 +106,12 @@ export const UI_LABELS = {
 				icon: 'airplane',
 			},
 		],
+	},
+	DOC: {
+		version: 'Версия',
+		effective_from: 'Действует с',
+		last_updated: 'Последнее обновление',
+		not_available: '—',
 	},
 	ADMIN: {
 		actions: 'Действия',
@@ -210,6 +221,13 @@ export const UI_LABELS = {
 				add_button: 'Добавить бронирование',
 				edit_button: 'Редактировать бронирование',
 			},
+			payments: {
+				title: 'Платежи',
+				description: 'Управление платежами',
+				management: 'Управление платежами',
+				add_button: 'Добавить платеж',
+				edit_button: 'Редактировать платеж',
+			},
 			tickets: {
 				title: 'Билеты',
 				description: 'Управление билетами',
@@ -230,6 +248,20 @@ export const UI_LABELS = {
 				management: 'Управление пользователями',
 				add_button: 'Добавить пользователя',
 				edit_button: 'Редактировать пользователя',
+			},
+			consentDocs: {
+				title: 'Документы согласий',
+				description: 'Управление документами согласий',
+				management: 'Управление документами согласий',
+				add_button: 'Добавить документ',
+				edit_button: 'Редактировать документ',
+			},
+			consentEvents: {
+				title: 'Пользовательские согласия',
+				description: 'Управление событиями пользовательских согласий',
+				management: 'Управление событиями пользовательских согласий',
+				add_button: 'Добавить событие',
+				edit_button: 'Редактировать событие',
 			},
 		},
 	},
@@ -288,7 +320,7 @@ export const UI_LABELS = {
 						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
 						? `${count} пассажира`
 						: `${count} пассажиров`,
-				tickets: 'Билеты',
+				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
 			},
@@ -304,7 +336,7 @@ export const UI_LABELS = {
 				document: 'Документ',
 			},
 			price_details: {
-				passengers: 'Пассажиры',
+				passenger_category: 'Категория пассажиров',
 				quantity: 'Кол-во',
 				unit_fare_price: 'Цена (ед.)',
 				unit_discount: 'Скидка (ед.)',
@@ -332,12 +364,19 @@ export const UI_LABELS = {
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
 		payment_form: {
+			title: (timeLeft) => `${timeLeft} для оплаты`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
 			retry_payment: 'Повторить оплату',
 			loading: 'Загрузка формы оплаты...',
 			waiting: 'Ожидание токена оплаты...',
 			load_error: 'Не удалось загрузить виджет оплаты',
+		},
+		completion: {
+			title: 'Бронирование завершено',
+			price_title: 'Оплачено',
+			payment_details: 'Детали платежа',
+			buyer: 'Покупатель',
 		},
 	},
 	SCHEDULE: {
@@ -389,8 +428,16 @@ export const UI_LABELS = {
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
-				{ key: 'infants', label: 'Младенцы без места', desc: 'до 2 лет' },
-				{ key: 'infants_seat', label: 'Младенцы с местом', desc: 'до 2 лет' },
+				{
+					key: 'infants',
+					label: 'Младенцы без места',
+					desc: 'до 2 лет',
+				},
+				{
+					key: 'infants_seat',
+					label: 'Младенцы с местом',
+					desc: 'до 2 лет',
+				},
 			],
 		},
 		results: 'Результаты поиска',
@@ -412,7 +459,7 @@ export const UI_LABELS = {
 			price_per_passenger: 'За 1 пассажира',
 			seats_available: 'Свободных мест',
 			seats_unavailable: 'Недостаточно свободных мест',
-			tickets: 'Билеты',
+			tickets: 'Стоимость перевозки',
 			fees: 'Сборы',
 			tariff_information: 'Информация о тарифе',
 			tariff_conditions: 'Условия применения тарифа',
@@ -433,7 +480,7 @@ export const UI_LABELS = {
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
-		show_more: 'Показать еще билеты',
+		show_more: 'Показать еще варианты',
 	},
 };
 

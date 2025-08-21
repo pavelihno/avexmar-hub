@@ -7,9 +7,16 @@ from datetime import datetime
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
+from werkzeug.exceptions import NotFound
+
 from app.database import db
 from app.models._base_model import BaseModel
-from app.utils.enum import BOOKING_STATUS, CURRENCY, DEFAULT_BOOKING_STATUS, DEFAULT_CURRENCY
+from app.utils.enum import (
+    BOOKING_STATUS,
+    CURRENCY,
+    DEFAULT_BOOKING_STATUS,
+    DEFAULT_CURRENCY,
+)
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -18,15 +25,23 @@ if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
     from app.models.user import User
+    from app.models.consent import ConsentEvent
 
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
 
     # Booking details
-    public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)
+    public_id = db.Column(
+        UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True
+    )
+    access_token = db.Column(
+        UUID(as_uuid=True), unique=True, nullable=True
+    )
     booking_number = db.Column(db.String, unique=True, nullable=True, index=True)
-    status = db.Column(db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS)
+    status = db.Column(
+        db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS
+    )
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
@@ -43,13 +58,20 @@ class Booking(BaseModel):
     total_price = db.Column(db.Float, nullable=False)
 
     # Metadata
-    passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    passenger_counts = db.Column(
+        JSONB, nullable=False, server_default='{}', default=dict
+    )
+    user_id = db.Column(
+        db.Integer, db.ForeignKey('users.id'), nullable=True, index=True
+    )
 
     # Relationships
     user: Mapped['User'] = db.relationship('User', back_populates='bookings')
     payments: Mapped[List['Payment']] = db.relationship(
-        'Payment', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+        'Payment',
+        back_populates='booking',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
     )
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
@@ -58,10 +80,19 @@ class Booking(BaseModel):
         'Seat', back_populates='booking', lazy='dynamic', cascade='save-update, merge'
     )
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
-        'BookingPassenger', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+        'BookingPassenger',
+        back_populates='booking',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
     )
     booking_flights: Mapped[List['BookingFlight']] = db.relationship(
-        'BookingFlight', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
+        'BookingFlight',
+        back_populates='booking',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+    )
+    consent_events: Mapped[List['ConsentEvent']] = db.relationship(
+        'ConsentEvent', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     def to_dict(self, return_children=False):
@@ -93,6 +124,25 @@ class Booking(BaseModel):
         return cls.query.filter_by(public_id=UUID_cls(str(public_id))).first_or_404()
 
     @classmethod
+    def get_if_has_access(
+        cls, current_user, public_id, access_token=None
+    ):
+        """Return booking if the user or token grants access, otherwise None"""
+        booking = cls.get_by_public_id(public_id)
+
+        token = str(access_token) if access_token else None
+        if booking.user_id:
+            if current_user and booking.user_id == getattr(current_user, 'id', None):
+                return booking
+            if token and str(booking.access_token) == token:
+                return booking
+            return None
+
+        if token and str(booking.access_token) != token:
+            return None
+        return booking
+
+    @classmethod
     def generate_booking_number(
         cls,
         id,
@@ -107,18 +157,18 @@ class Booking(BaseModel):
         booking_number = None
         while True:
             booking_number = ''.join(
-                random.choice(string.ascii_uppercase + string.digits)
-                if ch == 'X' else ch
+                (
+                    random.choice(string.ascii_uppercase + string.digits)
+                    if ch == 'X'
+                    else ch
+                )
                 for ch in cls.PNR_MASK
             )
             if booking_number not in existing_booking_numbers:
                 break
 
         return cls.update(
-            id,
-            session=session,
-            commit=commit,
-            booking_number=booking_number
+            id, session=session, commit=commit, booking_number=booking_number
         )
 
     @classmethod
@@ -132,10 +182,7 @@ class Booking(BaseModel):
         session = session or db.session
         kwargs = cls.convert_enums(kwargs)
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
-        history = [{
-            'status': status.value,
-            'at': datetime.now().isoformat()
-        }]
+        history = [{'status': status.value, 'at': datetime.now().isoformat()}]
         kwargs['status_history'] = history
         return super().create(session, commit=commit, **kwargs)
 
@@ -154,10 +201,7 @@ class Booking(BaseModel):
         old_status = booking.status
         new_status = kwargs.get('status', old_status)
         history = list(booking.status_history or [])
-        history.append({
-            'status': new_status.value,
-            'at': datetime.now().isoformat()
-        })
+        history.append({'status': new_status.value, 'at': datetime.now().isoformat()})
         kwargs['status_history'] = history
         return super().update(id, session=session, commit=commit, **kwargs)
 
@@ -223,12 +267,10 @@ class Booking(BaseModel):
     }
 
     @classmethod
-    def get_accessible_pages(cls, current_user, public_id):
-        booking = cls.get_by_public_id(public_id)
-
-        if booking.user_id and (not current_user or booking.user_id != current_user.id):
+    def get_accessible_pages(cls, current_user, public_id, access_token=None):
+        booking = cls.get_if_has_access(current_user, public_id, access_token)
+        if not booking:
             return []
-
         return cls.PAGE_FLOW.get(booking.status, [])
 
     @classmethod
@@ -243,9 +285,8 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id)
         from_status = booking.status
-        if (
-            from_status != to_status
-            and to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
+        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(
+            from_status, set()
         ):
             raise ValueError(
                 f'Illegal transition: {from_status.value} -> {to_status.value}'

@@ -52,6 +52,28 @@ export const formatTime = (value, timeFormat = TIME_FORMAT) => {
 	}
 };
 
+export const formatDateTime = (value, dateTimeFormat = DATETIME_FORMAT, locale = dateLocale) => {
+	if (!value) return '';
+	try {
+		if (typeof value === 'string') {
+			return format(new Date(value), dateTimeFormat, { locale });
+		} else if (value instanceof Date) {
+			return format(value, dateTimeFormat, { locale });
+		} else if (typeof value === 'number') {
+			const date = new Date(value);
+			if (isNaN(date.getTime())) {
+				throw new Error('Invalid date value');
+			}
+			return format(date, dateTimeFormat, { locale });
+		} else {
+			throw new Error('Unsupported date value type');
+		}
+	} catch (error) {
+		console.error('Invalid date value:', value);
+		return value;
+	}
+};
+
 export const formatTimeToAPI = (value) => {
 	if (!value) return '';
 	try {

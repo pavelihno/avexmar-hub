@@ -8,16 +8,18 @@ import {
 	FormControlLabel,
 	FormHelperText,
 	Autocomplete,
+	Box,
 } from '@mui/material';
-import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import ReactQuill from 'react-quill';
+import 'quill/dist/quill.snow.css';
 
 import {
 	dateLocale,
 	DATE_FORMAT,
 	TIME_FORMAT,
-	DATETIME_FORMAT,
 	DEFAULT_EMAIL,
 	DEFAULT_PHONE_NUMBER,
 	TIME_MASK,
@@ -36,6 +38,7 @@ export const FIELD_TYPES = {
 	SELECT: 'select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
+	RICH_TEXT: 'rich_text',
 };
 
 export const createFieldRenderer = (field, defaultProps = {}) => {
@@ -130,6 +133,54 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				);
 			}
 
+			case FIELD_TYPES.RICH_TEXT: {
+				const { value = '', onChange, fullWidth, error, helperText, sx, rows } = allProps;
+				const editorRows = rows || field.rows || 20;
+				const editorMinHeight = editorRows * 24;
+				const modules = {
+					toolbar: [
+						[{ header: [1, 2, false] }],
+						['bold', 'italic', 'underline', 'strike', 'blockquote'],
+						[{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+						['link', 'clean'],
+					],
+				};
+				const formats = [
+					'header',
+					'bold',
+					'italic',
+					'underline',
+					'strike',
+					'blockquote',
+					'list',
+					'bullet',
+					'indent',
+					'link',
+				];
+				return (
+					<FormControl
+						fullWidth={fullWidth}
+						error={!!error}
+						sx={{
+							'& .ql-editor': { minHeight: editorMinHeight },
+							'& .ql-editor ul': { listStyle: 'disc' },
+							'& .ql-editor ol': { listStyle: 'decimal' },
+							...sx,
+						}}
+					>
+						<InputLabel shrink>{field.label}</InputLabel>
+						<ReactQuill
+							theme='snow'
+							value={value}
+							onChange={onChange}
+							modules={modules}
+							formats={formats}
+						/>
+						{error && <FormHelperText>{helperText}</FormHelperText>}
+					</FormControl>
+				);
+			}
+
 			case FIELD_TYPES.NUMBER: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
 
@@ -154,7 +205,12 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 								onChange(rounded);
 							}
 						}}
-						inputProps={{ min, step, ...field.inputProps, ...inputProps }}
+						inputProps={{
+							min,
+							step,
+							...field.inputProps,
+							...inputProps,
+						}}
 						size={size}
 						sx={{ ...sx }}
 					/>
@@ -349,5 +405,7 @@ export const createFormFields = (fields) => {
 			defaultValue: field.defaultValue,
 			renderField: createFieldRenderer(field),
 			validate: field.validate,
+			minDate: field.minDate,
+			maxDate: field.maxDate,
 		}));
 };

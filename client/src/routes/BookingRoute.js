@@ -22,7 +22,7 @@ const BookingRoute = ({ page, children }) => {
 	}, [dispatch, publicId, navigate]);
 
 	useEffect(() => {
-		if (!checked) return; // дождёмся окончания первого эффекта
+		if (!checked) return;
 		if (accessiblePages.length === 0) {
 			navigate('/', { replace: true });
 			return;

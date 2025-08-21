@@ -10,9 +10,9 @@ RUN pip install --upgrade pip setuptools && pip install --no-cache-dir -r requir
 
 COPY . /app
 
-EXPOSE 5000
+EXPOSE 8000
 
 ENV FLASK_APP='app/app.py'
 
 # CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0"]
-CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--debug"]
+CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=8000", "--debug"]

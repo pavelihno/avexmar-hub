@@ -16,6 +16,9 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AirlinesIcon from '@mui/icons-material/Airlines';
 import PublicIcon from '@mui/icons-material/Public';
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 
 import Base from '../Base';
 
@@ -98,6 +101,12 @@ const AdminPanel = () => {
 			path: '/admin/passengers',
 		},
 		{
+			title: UI_LABELS.ADMIN.modules.payments.title,
+			description: UI_LABELS.ADMIN.modules.payments.description,
+			icon: <PaymentIcon sx={iconSX} />,
+			path: '/admin/payments',
+		},
+		{
 			title: UI_LABELS.ADMIN.modules.tickets.title,
 			description: UI_LABELS.ADMIN.modules.tickets.description,
 			icon: <AirplaneTicketIcon sx={iconSX} />,
@@ -108,6 +117,18 @@ const AdminPanel = () => {
 			description: UI_LABELS.ADMIN.modules.users.description,
 			icon: <ManageAccountsIcon sx={iconSX} />,
 			path: '/admin/users',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.consentDocs.title,
+			description: UI_LABELS.ADMIN.modules.consentDocs.description,
+			icon: <DescriptionIcon sx={iconSX} />,
+			path: '/admin/consent-docs',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.consentEvents.title,
+			description: UI_LABELS.ADMIN.modules.consentEvents.description,
+			icon: <HandshakeIcon sx={iconSX} />,
+			path: '/admin/consent-events',
 		},
 	];
 

@@ -82,6 +82,21 @@ class FEE_TERM(enum.Enum):
     after_departure = 'after_departure'
 
 
+class CONSENT_DOC_TYPE(enum.Enum):
+    offer = 'offer'
+    pd_policy = 'pd_policy'
+
+
+class CONSENT_EVENT_TYPE(enum.Enum):
+    offer_acceptance = 'offer_acceptance'
+    pd_processing = 'pd_processing'
+
+
+class CONSENT_ACTION(enum.Enum):
+    agree = 'agree'
+    withdraw = 'withdraw'
+
+
 # Default variables
 DEFAULT_USER_ROLE = USER_ROLE.standard
 DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created

@@ -47,6 +47,7 @@ class Payment(BaseModel):
             'provider_payment_id': self.provider_payment_id,
             'confirmation_token': self.confirmation_token,
             'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+            'paid_at': self.paid_at.isoformat() if self.paid_at else None,
             'is_paid': self.is_paid,
         }
 

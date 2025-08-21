@@ -2,6 +2,8 @@ import React from 'react';
 
 import Home from '../components/Home';
 import About from '../components/About';
+import PrivacyPolicy from '../components/PrivacyPolicy';
+import PublicOffer from '../components/PublicOffer';
 import ResetPassword from '../components/auth/ResetPassword';
 import Search from '../components/search/Search';
 import Schedule from '../components/search/Schedule';
@@ -13,7 +15,9 @@ import BookingRoute from './BookingRoute';
 
 const PublicRoutes = () => [
 	{ path: '/', element: <Home /> },
-	{ path: '/about', element: <About /> },
+        { path: '/about', element: <About /> },
+        { path: '/privacy_policy', element: <PrivacyPolicy /> },
+        { path: '/public_offer', element: <PublicOffer /> },
 
 	{ path: '/reset_password', element: <ResetPassword /> },
 

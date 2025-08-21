@@ -91,7 +91,7 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setTariffDetai
 					const isSelected = t.id === selectedId;
 					const hasAnyInfo = Boolean(t?.conditions) || t?.hand_luggage > 0 || t?.baggage > 0;
 					return (
-						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 22vh', mb: 0.5 }}>
+						<Card key={t.id} sx={{ p: 0.5, flex: '0 0 18vh', mb: 0.5 }}>
 							<Box display='flex' justifyContent='flex-end'>
 								<IconButton
 									sx={{ m: 0, p: 0.5 }}
@@ -260,10 +260,9 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 					<Box
 						sx={{
 							display: 'grid',
-							gridTemplateColumns: '5fr auto 2fr',
+							gridTemplateColumns: '6fr auto 3fr',
 							gap: 1,
 							alignItems: 'stretch',
-
 							height: { xs: '70vh', md: '72vh' },
 							minHeight: 0,
 						}}

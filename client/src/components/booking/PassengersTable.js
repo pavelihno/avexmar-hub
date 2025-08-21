@@ -19,16 +19,41 @@ const PassengersTable = ({ passengers = [] }) => {
 				</TableRow>
 			</TableHead>
 			<TableBody>
-				{passengers.map((p, idx) => (
-					<TableRow key={p.id || idx}>
-						<TableCell>{`${p.last_name || ''} ${p.first_name || ''}`}</TableCell>
-						<TableCell>{formatDate(p.birth_date)}</TableCell>
-						<TableCell>{ENUM_LABELS.GENDER_SHORT[p.gender]}</TableCell>
-						<TableCell>{`${ENUM_LABELS.DOCUMENT_TYPE[p.document_type]}, ${
-							p.document_number || ''
-						}`}</TableCell>
-					</TableRow>
-				))}
+				{passengers.map((p, idx) => {
+					const {
+						id,
+						last_name = '',
+						first_name = '',
+						birth_date,
+						gender: genderKey,
+						document_type: docType,
+						document_number: docNumber = '',
+						citizenship,
+					} = p;
+
+					const passengerName = `${last_name} ${first_name}`.trim();
+					const birthDate = birth_date ? formatDate(birth_date) : '';
+					const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
+
+					const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
+					const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : undefined;
+
+					const documentDetails = [
+						docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel),
+						docNumber,
+					]
+						.filter(Boolean)
+						.join(', ');
+
+					return (
+						<TableRow key={id ?? idx}>
+							<TableCell>{passengerName}</TableCell>
+							<TableCell>{birthDate}</TableCell>
+							<TableCell>{gender}</TableCell>
+							<TableCell>{documentDetails}</TableCell>
+						</TableRow>
+					);
+				})}
 			</TableBody>
 		</Table>
 	);

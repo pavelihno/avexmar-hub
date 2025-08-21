@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from yookassa import Configuration, Payment as YooPayment
 
 
-WEBHOOK_URL = 'http://localhost:5000/webhooks/yookassa'
+WEBHOOK_URL = 'http://localhost:8000/webhooks/yookassa'
 
 dotenv.load_dotenv('../.env')
 

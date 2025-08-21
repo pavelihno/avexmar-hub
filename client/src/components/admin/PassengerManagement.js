@@ -10,17 +10,10 @@ import {
 	deletePassenger,
 	deleteAllPassengers,
 } from '../../redux/actions/passenger';
-import {
-	fetchBookingPassengers,
-	createBookingPassenger,
-	updateBookingPassenger,
-	deleteBookingPassenger,
-	deleteAllBookingPassengers,
-} from '../../redux/actions/bookingPassenger';
-import { fetchBookings } from '../../redux/actions/booking';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatDate, validateDate, getExistingPassenger } from '../utils';
+import { FIELD_TYPES, formatDate, validateDate } from '../utils';
 import {
 	DATE_API_FORMAT,
 	ENUM_LABELS,
@@ -33,45 +26,34 @@ import {
 const PassengerManagement = () => {
 	const dispatch = useDispatch();
 	const { passengers, isLoading: passengersLoading, errors } = useSelector((state) => state.passengers);
-	const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
-	const { bookings } = useSelector((state) => state.bookings);
 	const { countries } = useSelector((state) => state.countries);
+	const { users } = useSelector((state) => state.users);
 
 	useEffect(() => {
 		dispatch(fetchPassengers());
-		dispatch(fetchBookingPassengers());
-		dispatch(fetchBookings());
 		dispatch(fetchCountries());
+		dispatch(fetchUsers());
 	}, [dispatch]);
 
-	const bookingOptions = bookings.map((b) => ({
-		value: b.id,
-		label: `${b.booking_number} - ${formatDate(b.booking_date)}`,
-	}));
 	const citizenshipOptions = countries.map((c) => ({
 		value: c.id,
 		label: c.name,
 	}));
+	const userOptions = users.map((u) => ({ value: u.id, label: u.email }));
 
 	const getCountryById = (id) => countries.find((c) => c.id === id);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
-		passengerId: {
-			key: 'passengerId',
-			apiKey: 'passenger_id',
-			excludeFromForm: true,
-			excludeFromTable: true,
-		},
-		bookingId: {
-			key: 'bookingId',
-			apiKey: 'booking_id',
-			label: FIELD_LABELS.BOOKING_PASSENGER.booking_id,
+		ownerUserId: {
+			key: 'ownerUserId',
+			apiKey: 'owner_user_id',
+			label: FIELD_LABELS.PASSENGER.owner_user_id,
 			type: FIELD_TYPES.SELECT,
-			options: bookingOptions,
+			options: userOptions,
 			formatter: (value) => {
-				const booking = bookingOptions.find((b) => b.value === value);
-				return booking ? booking.label : value;
+				const u = userOptions.find((o) => o.value === value);
+				return u ? u.label : value;
 			},
 		},
 		lastName: {
@@ -120,7 +102,7 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.document_type,
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('DOCUMENT_TYPE'),
-			excludeFromTable: true,
+			formatter: (value) => ENUM_LABELS.DOCUMENT_TYPE[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : null),
 		},
 		documentNumber: {
@@ -135,6 +117,7 @@ const PassengerManagement = () => {
 			apiKey: 'document_expiry_date',
 			label: FIELD_LABELS.PASSENGER.document_expiry_date,
 			type: FIELD_TYPES.DATE,
+			excludeFromTable: true,
 			formatter: (value) => formatDate(value),
 		},
 		citizenshipId: {
@@ -148,104 +131,24 @@ const PassengerManagement = () => {
 				return c ? c.code_a2 : value;
 			},
 		},
-		emailAddress: {
-			key: 'emailAddress',
-			apiKey: 'email_address',
-			label: FIELD_LABELS.BOOKING.email_address,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED : null),
-		},
-		phoneNumber: {
-			key: 'phoneNumber',
-			apiKey: 'phone_number',
-			label: FIELD_LABELS.BOOKING.phone_number,
-			type: FIELD_TYPES.TEXT,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED : null),
-		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
 		addButtonText: () => UI_LABELS.ADMIN.modules.passengers.add_button,
 		editButtonText: () => UI_LABELS.ADMIN.modules.passengers.edit_button,
 	});
+	const handleAddPassenger = (data) => dispatch(createPassenger(adminManager.toApiFormat(data))).unwrap();
 
-	const handleAddPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { booking_id, ...passengerData } = apiData;
+	const handleEditPassenger = (data) => dispatch(updatePassenger(adminManager.toApiFormat(data))).unwrap();
 
-		let existing = getExistingPassenger(passengers, passengerData);
-
-		if (!existing) {
-			existing = await dispatch(createPassenger(passengerData)).unwrap();
-		}
-
-		return dispatch(
-			createBookingPassenger({
-				booking_id,
-				passenger_id: existing.id,
-			})
-		).unwrap();
-	};
-
-	const handleEditPassenger = async (data) => {
-		const apiData = adminManager.toApiFormat(data);
-		const { id, booking_id, passenger_id, ...passengerData } = apiData;
-
-		let existing = getExistingPassenger(passengers, passengerData);
-
-		if (!existing) {
-			existing = await dispatch(createPassenger(passengerData)).unwrap();
-		}
-
-		await dispatch(
-			updateBookingPassenger({
-				id,
-				booking_id,
-				passenger_id: existing.id,
-			})
-		).unwrap();
-
-		if (existing.id !== passenger_id) {
-			const stillLinked = bookingPassengers.some((b) => b.passenger_id === passenger_id && b.id !== id);
-			if (!stillLinked) {
-				await dispatch(deletePassenger(passenger_id)).unwrap();
-			}
-		}
-		return existing;
-	};
-
-	const handleDeletePassenger = async (id) => {
-		const bp = bookingPassengers.find((b) => b.id === id);
-		if (!bp) return Promise.resolve();
-
-		await dispatch(deleteBookingPassenger(id)).unwrap();
-
-		const stillLinked = bookingPassengers.some((b) => b.id !== id && b.passenger_id === bp.passenger_id);
-
-		if (!stillLinked) {
-			await dispatch(deletePassenger(bp.passenger_id)).unwrap();
-		}
-	};
+	const handleDeletePassenger = (id) => dispatch(deletePassenger(id)).unwrap();
 
 	const handleDeleteAllPassengers = async () => {
-		await dispatch(deleteAllBookingPassengers()).unwrap();
 		await dispatch(deleteAllPassengers()).unwrap();
-		dispatch(fetchBookingPassengers());
 		dispatch(fetchPassengers());
 	};
 
-	const formattedPassengers = bookingPassengers.map((bp) => {
-		const passenger = passengers.find((p) => p.id === bp.passenger_id) || {};
-		const booking = bookings.find((b) => b.id === bp.booking_id) || {};
-		return adminManager.toUiFormat({
-			...passenger,
-			id: bp.id,
-			passenger_id: passenger.id,
-			booking_id: booking.id,
-			email_address: booking.email_address,
-			phone_number: booking.phone_number,
-		});
-	});
+	const formattedPassengers = passengers.map(adminManager.toUiFormat);
 
 	return (
 		<AdminDataTable
@@ -258,7 +161,7 @@ const PassengerManagement = () => {
 			onDeleteAll={handleDeleteAllPassengers}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
-			isLoading={passengersLoading || bookingPassengersLoading}
+			isLoading={passengersLoading}
 			error={errors}
 		/>
 	);

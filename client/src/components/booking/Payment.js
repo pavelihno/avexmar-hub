@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, Alert, CircularProgress } from '@mui/material';
@@ -22,6 +22,60 @@ const Payment = () => {
 	const paymentAmount = payment?.amount;
 	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
 	const confirmationToken = payment?.confirmation_token;
+	const expiresAt = payment?.expires_at;
+
+	const [timeLeft, setTimeLeft] = useState('');
+
+	useEffect(() => {
+		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
+	}, [timeLeft]);
+
+	const toExpiryMs = (isoLike) => {
+		if (!isoLike) return NaN;
+		let s = String(isoLike).trim();
+
+		// Trim fractional seconds to 3 digits (milliseconds)
+		s = s.replace(/\.(\d{3})\d+$/, '.$1');
+
+		// If there's no timezone info, assume UTC (append Z)
+		if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+
+		const t = Date.parse(s);
+		return Number.isNaN(t) ? NaN : t;
+	};
+
+	useEffect(() => {
+		const targetMs = toExpiryMs(expiresAt);
+		if (!isFinite(targetMs)) {
+			setTimeLeft('');
+			return;
+		}
+
+		let timer = null;
+
+		const render = () => {
+			const now = Date.now();
+			let diff = targetMs - now;
+
+			if (diff <= 0) {
+				setTimeLeft('00:00');
+				return;
+			}
+
+			const minutes = Math.floor(diff / 60000);
+			const seconds = Math.floor((diff % 60000) / 1000);
+			setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+
+			// align next tick to the next full second to avoid drift
+			const nextIn = 1000 - (now % 1000);
+			timer = setTimeout(render, nextIn);
+		};
+
+		render();
+		return () => {
+			if (timer) clearTimeout(timer);
+		};
+	}, [expiresAt]);
 
 	const isProcessing =
 		new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
@@ -63,6 +117,11 @@ const Payment = () => {
 									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
 								</Typography>
 							</Box>
+							{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
+								<Typography variant='h6' sx={{ fontWeight: 600 }}>
+									{timeLeft}
+								</Typography>
+							)}
 						</Box>
 
 						{paymentStatus === 'canceled' && (
