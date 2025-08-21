@@ -36,6 +36,10 @@ class ConsentDoc(BaseModel):
         db.UniqueConstraint('type', 'version', name='uix_consent_doc_type_version'),
     )
 
+    @staticmethod
+    def _calc_hash(content: str) -> str:
+        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
     def to_dict(self):
         return {
             'id': str(self.id),
@@ -69,7 +73,7 @@ class ConsentDoc(BaseModel):
             session.query(db.func.max(cls.version)).filter(cls.type == doc_type).scalar() or 0
         )
         data['version'] = max_version + 1
-        data['hash_sha256'] = hashlib.sha256(data['content'].encode('utf-8')).hexdigest()
+        data['hash_sha256'] = cls._calc_hash(data['content'])
         return super().create(session=session, commit=commit, **data)
 
     @classmethod
@@ -77,11 +81,20 @@ class ConsentDoc(BaseModel):
         session = session or db.session
         old_doc = cls.get_or_404(doc_id, session)
         content = data.get('content')
-        if content == old_doc.content:
-            return super().update(
-                doc_id, session=session, commit=commit, **data
-            )
-        return cls.create(session=session, commit=commit, **{**data, 'id': None})
+        doc_type = data.get('type', old_doc.type)
+
+        if content is not None:
+            new_hash = cls._calc_hash(content)
+            if new_hash != old_doc.hash_sha256:
+                latest_doc = cls.get_latest(doc_type, session=session)
+                if latest_doc.id == old_doc.id and latest_doc.events.count() > 0:
+                    return cls.create(
+                        session=session,
+                        commit=commit,
+                        **{**data, 'id': None, 'type': doc_type},
+                    )
+                data['hash_sha256'] = new_hash
+        return super().update(doc_id, session=session, commit=commit, **data)
 
 
 class ConsentEvent(BaseModel):
