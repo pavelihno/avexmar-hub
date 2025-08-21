@@ -112,25 +112,25 @@ const AdminPanel = () => {
 			icon: <AirplaneTicketIcon sx={iconSX} />,
 			path: '/admin/tickets',
 		},
-                {
-                        title: UI_LABELS.ADMIN.modules.users.title,
-                        description: UI_LABELS.ADMIN.modules.users.description,
-                        icon: <ManageAccountsIcon sx={iconSX} />,
-                        path: '/admin/users',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.consentDocs.title,
-                        description: UI_LABELS.ADMIN.modules.consentDocs.description,
-                        icon: <DescriptionIcon sx={iconSX} />,
-                        path: '/admin/consent-docs',
-                },
-                {
-                        title: UI_LABELS.ADMIN.modules.consentEvents.title,
-                        description: UI_LABELS.ADMIN.modules.consentEvents.description,
-                        icon: <EventNoteIcon sx={iconSX} />,
-                        path: '/admin/consent-events',
-                },
-        ];
+		{
+			title: UI_LABELS.ADMIN.modules.users.title,
+			description: UI_LABELS.ADMIN.modules.users.description,
+			icon: <ManageAccountsIcon sx={iconSX} />,
+			path: '/admin/users',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.consentDocs.title,
+			description: UI_LABELS.ADMIN.modules.consentDocs.description,
+			icon: <DescriptionIcon sx={iconSX} />,
+			path: '/admin/consent-docs',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.consentEvents.title,
+			description: UI_LABELS.ADMIN.modules.consentEvents.description,
+			icon: <EventNoteIcon sx={iconSX} />,
+			path: '/admin/consent-events',
+		},
+	];
 
 	return (
 		<Base>

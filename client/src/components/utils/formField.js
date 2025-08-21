@@ -1,16 +1,16 @@
 import {
-        TextField,
-        Select,
-        MenuItem,
-        FormControl,
-        InputLabel,
-        Checkbox,
-        FormControlLabel,
-        FormHelperText,
-        Autocomplete,
-        Box,
+	TextField,
+	Select,
+	MenuItem,
+	FormControl,
+	InputLabel,
+	Checkbox,
+	FormControlLabel,
+	FormHelperText,
+	Autocomplete,
+	Box,
 } from '@mui/material';
-import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -33,10 +33,10 @@ export const FIELD_TYPES = {
 	PHONE: 'phone',
 	DATE: 'date',
 	TIME: 'time',
-        SELECT: 'select',
-        BOOLEAN: 'boolean',
-        CUSTOM: 'custom',
-        RICH_TEXT: 'rich_text',
+	SELECT: 'select',
+	BOOLEAN: 'boolean',
+	CUSTOM: 'custom',
+	RICH_TEXT: 'rich_text',
 };
 
 export const createFieldRenderer = (field, defaultProps = {}) => {
@@ -109,52 +109,52 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				);
 			}
 
-                        case FIELD_TYPES.TEXT_AREA: {
-                                const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
-                                return (
-                                        <TextField
-                                                label={field.label}
-                                                value={value}
-                                                onChange={(e) => onChange(e.target.value)}
-                                                fullWidth={fullWidth}
-                                                error={error}
-                                                helperText={error ? helperText : ''}
-                                                multiline
-                                                rows={field.rows || 5}
-                                                inputProps={{ ...field.inputProps, ...inputProps }}
-                                                size={size}
-                                                sx={{
-                                                        '& .MuiInputBase-root': { padding: '4px' },
-                                                        ...sx,
-                                                }}
-                                        />
-                                );
-                        }
+			case FIELD_TYPES.TEXT_AREA: {
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				return (
+					<TextField
+						label={field.label}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						fullWidth={fullWidth}
+						error={error}
+						helperText={error ? helperText : ''}
+						multiline
+						rows={field.rows || 5}
+						inputProps={{ ...field.inputProps, ...inputProps }}
+						size={size}
+						sx={{
+							'& .MuiInputBase-root': { padding: '4px' },
+							...sx,
+						}}
+					/>
+				);
+			}
 
-                        case FIELD_TYPES.RICH_TEXT: {
-                                const { value = '', onChange, fullWidth, error, helperText, sx } = allProps;
-                                return (
-                                        <FormControl fullWidth={fullWidth} error={!!error} sx={{ ...sx }}>
-                                                <InputLabel shrink>{field.label}</InputLabel>
-                                                <Box
-                                                        component='div'
-                                                        contentEditable
-                                                        onInput={(e) => onChange(e.currentTarget.innerHTML)}
-                                                        dangerouslySetInnerHTML={{ __html: value }}
-                                                        sx={{
-                                                                minHeight: 150,
-                                                                border: 1,
-                                                                borderColor: 'divider',
-                                                                borderRadius: 1,
-                                                                p: 1,
-                                                                typography: 'body2',
-                                                                overflowY: 'auto',
-                                                        }}
-                                                />
-                                                {error && <FormHelperText>{helperText}</FormHelperText>}
-                                        </FormControl>
-                                );
-                        }
+			case FIELD_TYPES.RICH_TEXT: {
+				const { value = '', onChange, fullWidth, error, helperText, sx } = allProps;
+				return (
+					<FormControl fullWidth={fullWidth} error={!!error} sx={{ ...sx }}>
+						<InputLabel shrink>{field.label}</InputLabel>
+						<Box
+							component='div'
+							contentEditable
+							onInput={(e) => onChange(e.currentTarget.innerHTML)}
+							dangerouslySetInnerHTML={{ __html: value }}
+							sx={{
+								minHeight: 150,
+								border: 1,
+								borderColor: 'divider',
+								borderRadius: 1,
+								p: 1,
+								typography: 'body2',
+								overflowY: 'auto',
+							}}
+						/>
+						{error && <FormHelperText>{helperText}</FormHelperText>}
+					</FormControl>
+				);
+			}
 
 			case FIELD_TYPES.NUMBER: {
 				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;

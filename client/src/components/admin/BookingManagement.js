@@ -46,6 +46,13 @@ const BookingManagement = () => {
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
+		publicId: {
+			key: 'publicId',
+			apiKey: 'public_id',
+			label: FIELD_LABELS.BOOKING.public_id,
+			type: FIELD_TYPES.TEXT,
+			excludeFromForm: true,
+		},
 		bookingNumber: {
 			key: 'bookingNumber',
 			apiKey: 'booking_number',
@@ -75,18 +82,21 @@ const BookingManagement = () => {
 			apiKey: 'buyer_last_name',
 			label: FIELD_LABELS.BOOKING.buyer_last_name,
 			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		buyerFirstName: {
 			key: 'buyerFirstName',
 			apiKey: 'buyer_first_name',
 			label: FIELD_LABELS.BOOKING.buyer_first_name,
 			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		emailAddress: {
 			key: 'emailAddress',
 			apiKey: 'email_address',
 			label: FIELD_LABELS.BOOKING.email_address,
 			type: FIELD_TYPES.EMAIL,
+			excludeFromTable: true,
 			validate: (value) => {
 				if (!value) return VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED;
 				if (!validateEmail(value)) return VALIDATION_MESSAGES.BOOKING.email_address.INVALID;
@@ -98,6 +108,7 @@ const BookingManagement = () => {
 			apiKey: 'phone_number',
 			label: FIELD_LABELS.BOOKING.phone_number,
 			type: FIELD_TYPES.PHONE,
+			excludeFromTable: true,
 			validate: (value) => {
 				if (!value) return VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
 				if (!validatePhoneNumber(value)) return VALIDATION_MESSAGES.BOOKING.phone_number.INVALID;
@@ -224,8 +235,19 @@ const BookingManagement = () => {
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
-		addButtonText: () => UI_LABELS.ADMIN.modules.bookings.add_button,
-		editButtonText: () => UI_LABELS.ADMIN.modules.bookings.edit_button,
+		addButtonText: (item) => UI_LABELS.ADMIN.modules.bookings.add_button,
+		editButtonText: (item) => {
+			if (!item) return UI_LABELS.ADMIN.modules.bookings.edit_button;
+			else {
+				const bookingNumber = item[FIELDS.bookingNumber.key] || '';
+				const publicId = item[FIELDS.publicId.key];
+				const bookingDate = item[FIELDS.bookingDate.key] ? formatDate(item[FIELDS.bookingDate.key]) : '';
+
+				return `${UI_LABELS.ADMIN.modules.bookings.edit_button} ${
+					bookingNumber ? `№ ${bookingNumber}` : ''
+				} — ${publicId} — ${bookingDate}`;
+			}
+		},
 	});
 
 	const handleAddBooking = async (data) => {

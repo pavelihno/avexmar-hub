@@ -12,6 +12,7 @@ export const FIELD_LABELS = {
 		application_term: 'Срок применения сбора',
 	},
 	BOOKING: {
+		public_id: 'ID бронирования',
 		booking_number: 'Номер бронирования',
 		booking_date: 'Дата бронирования',
 		status: 'Статус бронирования',
@@ -64,7 +65,7 @@ export const FIELD_LABELS = {
 		document_number: 'Номер документа',
 		document_expiry_date: 'Срок действия',
 		citizenship_id: 'Гражданство',
-		owner_user_id: 'ID владельца',
+		owner_user_id: 'Пользователь',
 	},
 	BOOKING_PASSENGER: {
 		booking_id: 'Бронирование',
@@ -80,7 +81,7 @@ export const FIELD_LABELS = {
 		price: 'Цена',
 	},
 	PAYMENT: {
-		booking_id: 'ID бронирования',
+		booking_id: 'Бронирование',
 		payment_method: 'Метод оплаты',
 		payment_status: 'Статус платежа',
 		amount: 'Сумма',
@@ -133,25 +134,25 @@ export const FIELD_LABELS = {
 		role: 'Роль пользователя',
 		is_active: 'Активен',
 	},
-        TIMEZONE: {
-                name: 'Часовой пояс',
-        },
-        CONSENT_DOC: {
-                type: 'Тип документа',
-                version: 'Версия',
-                content: 'Содержание',
-        },
-        CONSENT_EVENT: {
-                type: 'Тип события',
-                granter_user_id: 'ID пользователя',
-                booking_id: 'ID бронирования',
-                doc_id: 'ID документа',
-                action: 'Действие',
-                ip: 'IP адрес',
-                user_agent: 'User-Agent',
-                device_fingerprint: 'Отпечаток устройства',
-                subject_ids: 'ID субъектов',
-        },
+	TIMEZONE: {
+		name: 'Часовой пояс',
+	},
+	CONSENT_DOC: {
+		type: 'Тип документа',
+		version: 'Версия',
+		content: 'Содержание',
+	},
+	CONSENT_EVENT: {
+		type: 'Тип события',
+		granter_user_id: 'ID пользователя',
+		booking_id: 'ID бронирования',
+		doc_id: 'ID документа',
+		action: 'Действие',
+		ip: 'IP адрес',
+		user_agent: 'User-Agent',
+		device_fingerprint: 'Отпечаток устройства',
+		subject_ids: 'ID субъектов',
+	},
 };
 
 export default FIELD_LABELS;

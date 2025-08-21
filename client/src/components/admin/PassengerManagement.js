@@ -102,7 +102,7 @@ const PassengerManagement = () => {
 			label: FIELD_LABELS.PASSENGER.document_type,
 			type: FIELD_TYPES.SELECT,
 			options: getEnumOptions('DOCUMENT_TYPE'),
-			excludeFromTable: true,
+			formatter: (value) => ENUM_LABELS.DOCUMENT_TYPE[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : null),
 		},
 		documentNumber: {
@@ -117,6 +117,7 @@ const PassengerManagement = () => {
 			apiKey: 'document_expiry_date',
 			label: FIELD_LABELS.PASSENGER.document_expiry_date,
 			type: FIELD_TYPES.DATE,
+			excludeFromTable: true,
 			formatter: (value) => formatDate(value),
 		},
 		citizenshipId: {

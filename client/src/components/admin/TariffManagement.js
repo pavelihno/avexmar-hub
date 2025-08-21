@@ -49,6 +49,7 @@ const TariffManagement = () => {
 			apiKey: 'price',
 			label: FIELD_LABELS.TARIFF.price,
 			type: FIELD_TYPES.NUMBER,
+			float: true,
 			validate: (value) => (value == null ? VALIDATION_MESSAGES.TARIFF.price.REQUIRED : null),
 			formatter: (value) => (value != null ? `${formatNumber(value)}` : ''),
 		},

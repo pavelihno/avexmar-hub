@@ -12,7 +12,7 @@ import {
 } from '../../redux/actions/payment';
 import { fetchBookings } from '../../redux/actions/booking';
 import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../constants';
 import { formatDate } from '../utils';
 
@@ -28,7 +28,7 @@ const PaymentManagement = () => {
 
 	const bookingOptions = bookings.map((b) => ({
 		value: b.id,
-		label: `${b.booking_number} - ${formatDate(b.booking_date)}`,
+		label: `${b.booking_number || b.public_id} — ${formatDate(b.booking_date)}`,
 	}));
 
 	const methodOptions = getEnumOptions('PAYMENT_METHOD');
@@ -56,6 +56,14 @@ const PaymentManagement = () => {
 			options: methodOptions,
 			formatter: (value) => ENUM_LABELS.PAYMENT_METHOD[value] || value,
 		},
+		providerPaymentId: {
+			key: 'providerPaymentId',
+			apiKey: 'provider_payment_id',
+			label: FIELD_LABELS.PAYMENT.provider_payment_id,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
+		},
+
 		paymentStatus: {
 			key: 'paymentStatus',
 			apiKey: 'payment_status',
@@ -70,6 +78,7 @@ const PaymentManagement = () => {
 			label: FIELD_LABELS.PAYMENT.amount,
 			type: FIELD_TYPES.NUMBER,
 			float: true,
+			formatter: (value) => (value != null ? formatNumber(value) : ''),
 			inputProps: { min: 0, step: 0.01 },
 		},
 		currency: {
@@ -97,13 +106,6 @@ const PaymentManagement = () => {
 			formatter: (value) => formatDate(value),
 			excludeFromTable: true,
 		},
-		providerPaymentId: {
-			key: 'providerPaymentId',
-			apiKey: 'provider_payment_id',
-			label: FIELD_LABELS.PAYMENT.provider_payment_id,
-			type: FIELD_TYPES.TEXT,
-			excludeFromTable: true,
-		},
 		confirmationToken: {
 			key: 'confirmationToken',
 			apiKey: 'confirmation_token',
@@ -116,6 +118,7 @@ const PaymentManagement = () => {
 			apiKey: 'is_paid',
 			label: FIELD_LABELS.PAYMENT.is_paid,
 			type: FIELD_TYPES.BOOLEAN,
+			formatter: (value) => ENUM_LABELS.BOOLEAN[value] || value,
 		},
 	};
 

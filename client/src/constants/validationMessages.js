@@ -78,34 +78,34 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
-        TIMEZONE: {
-                name: {
-                        REQUIRED: 'Часовой пояс обязателен',
-                },
-        },
+	TIMEZONE: {
+		name: {
+			REQUIRED: 'Часовой пояс обязателен',
+		},
+	},
 
-        CONSENT_DOC: {
-                type: {
-                        REQUIRED: 'Тип документа обязателен',
-                },
-                content: {
-                        REQUIRED: 'Содержание обязательно',
-                },
-        },
-        CONSENT_EVENT: {
-                type: {
-                        REQUIRED: 'Тип события обязателен',
-                },
-                booking_id: {
-                        REQUIRED: 'ID бронирования обязателен',
-                },
-                doc_id: {
-                        REQUIRED: 'ID документа обязателен',
-                },
-                action: {
-                        REQUIRED: 'Действие обязательно',
-                },
-        },
+	CONSENT_DOC: {
+		type: {
+			REQUIRED: 'Тип документа обязателен',
+		},
+		content: {
+			REQUIRED: 'Содержание обязательно',
+		},
+	},
+	CONSENT_EVENT: {
+		type: {
+			REQUIRED: 'Тип события обязателен',
+		},
+		booking_id: {
+			REQUIRED: 'ID бронирования обязателен',
+		},
+		doc_id: {
+			REQUIRED: 'ID документа обязателен',
+		},
+		action: {
+			REQUIRED: 'Действие обязательно',
+		},
+	},
 
 	PASSENGER: {
 		first_name: {
