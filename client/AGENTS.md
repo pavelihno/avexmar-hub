@@ -164,3 +164,7 @@ Minor inconsistencies and recommendations:
 - `removeAll` thunk is generated but not handled in reducers via `addCrudCases`. Add a helper (e.g., `addRemoveAllCase`) or include it in `addCrudCases` when needed.
 - Store configuration uses legacy `createStore` + `redux-thunk`. Consider migrating to RTK’s `configureStore` for simpler setup and better devtools integration.
 - Enforce single quotes via `.prettierrc` (above) and ESLint `quotes` rules to avoid drift.
+
+## Code Style
+
+- JavaScript files within this directory must use tabs for indentation with a tab width of four spaces.
