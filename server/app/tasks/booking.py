@@ -12,7 +12,10 @@ def cleanup_expired_bookings():
     now = datetime.now()
     expired = (
         Booking.query.join(BookingHold)
-        .filter(BookingHold.expires_at < now)
+        .filter(
+            BookingHold.expires_at < now,
+            Booking.status.notin_(Booking.TERMINAL),
+        )
         .with_for_update()
         .all()
     )
@@ -21,6 +24,12 @@ def cleanup_expired_bookings():
 
     with db.session.begin():
         for booking in expired:
-            booking.delete(commit=False)
+            BookingHold.delete_by_booking_id(booking.id, session=db.session)
+            Booking.update(
+                booking.id,
+                session=db.session,
+                commit=False,
+                status=BOOKING_STATUS.expired,
+            )
 
     return len(expired)
