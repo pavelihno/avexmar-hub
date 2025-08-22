@@ -20,7 +20,6 @@ from app.controllers.flight_controller import *
 from app.controllers.tariff_controller import *
 from app.controllers.flight_tariff_controller import *
 from app.controllers.discount_controller import *
-from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
@@ -179,13 +178,6 @@ def __create_app(_config_class, _db):
     app.route('/consent_events/<uuid:event_id>', methods=['GET'])(get_consent_event)
     app.route('/consent_events/<uuid:event_id>', methods=['PUT'])(update_consent_event)
     app.route('/consent_events/<uuid:event_id>', methods=['DELETE'])(delete_consent_event)
-
-    # seats
-    app.route('/seats', methods=['GET'])(get_seats)
-    app.route('/seats', methods=['POST'])(create_seat)
-    app.route('/seats/<int:seat_id>', methods=['GET'])(get_seat)
-    app.route('/seats/<int:seat_id>', methods=['PUT'])(update_seat)
-    app.route('/seats/<int:seat_id>', methods=['DELETE'])(delete_seat)
 
     # passengers
     app.route('/passengers', methods=['GET'])(get_passengers)

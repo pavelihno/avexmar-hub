@@ -17,11 +17,11 @@ from app.utils.enum import (
     DEFAULT_BOOKING_STATUS,
     DEFAULT_CURRENCY,
 )
+from app.utils.business_logic import get_seats_number
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
     from app.models.ticket import Ticket
-    from app.models.seat import Seat
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
     from app.models.user import User
@@ -77,9 +77,7 @@ class Booking(BaseModel):
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
-    seats: Mapped[List['Seat']] = db.relationship(
-        'Seat', back_populates='booking', lazy='dynamic', cascade='save-update, merge'
-    )
+    seats_number = db.Column(db.Integer, nullable=False, default=0)
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger',
         back_populates='booking',
@@ -119,6 +117,7 @@ class Booking(BaseModel):
             'total_discounts': self.total_discounts,
             'fees': self.fees,
             'total_price': self.total_price,
+            'seats_number': self.seats_number,
             'expires_at': (
                 self.booking_hold.expires_at.isoformat()
                 if self.booking_hold and self.booking_hold.expires_at
@@ -194,6 +193,8 @@ class Booking(BaseModel):
     ):
         session = session or db.session
         kwargs = cls.convert_enums(kwargs)
+        passenger_counts = kwargs.get('passenger_counts') or {}
+        kwargs['seats_number'] = get_seats_number(passenger_counts)
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
         history = [{'status': status.value, 'at': datetime.now().isoformat()}]
         kwargs['status_history'] = history
@@ -211,6 +212,9 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id, session)
         kwargs = cls.convert_enums(kwargs)
+        passenger_counts = kwargs.get('passenger_counts')
+        if passenger_counts is not None:
+            kwargs['seats_number'] = get_seats_number(passenger_counts)
         old_status = booking.status
         new_status = kwargs.get('status', old_status)
         history = list(booking.status_history or [])

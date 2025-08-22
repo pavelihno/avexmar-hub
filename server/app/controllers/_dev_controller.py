@@ -8,7 +8,6 @@ from app.models.route import Route
 from app.models.flight import Flight
 from app.models.tariff import Tariff
 from app.models.discount import Discount
-from app.models.seat import Seat
 from app.models.passenger import Passenger
 from app.models.booking import Booking
 from app.models.payment import Payment
@@ -24,7 +23,6 @@ MODEL_MAP = {
     'flights': Flight,
     'tariffs': Tariff,
     'discounts': Discount,
-    'seats': Seat,
     'passengers': Passenger,
     'bookings': Booking,
     'payments': Payment,
