@@ -22,14 +22,20 @@ def cleanup_expired_bookings():
     if not expired:
         return 0
 
-    with db.session.begin():
+    session = db.session
+    count = len(expired)
+    try:
         for booking in expired:
-            BookingHold.delete_by_booking_id(booking.id, session=db.session)
+            BookingHold.delete_by_booking_id(booking.id, session=session)
             Booking.update(
                 booking.id,
-                session=db.session,
+                session=session,
                 commit=False,
                 status=BOOKING_STATUS.expired,
             )
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
 
-    return len(expired)
+    return count

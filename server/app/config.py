@@ -34,7 +34,6 @@ class Config:
 
     # Celery settings
     CELERY_BROKER_URL = os.environ.get('SERVER_CELERY_BROKER_URL')
-    CELERY_RESULT_BACKEND = os.environ.get('SERVER_CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
 
     # Business logic settings
     JWT_EXP_HOURS = 72
