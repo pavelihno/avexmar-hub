@@ -38,6 +38,16 @@ class Config:
         else os.environ.get('YOOKASSA_API_URL')
     )
 
+    # Celery settings
+    CELERY_BROKER_URL = os.environ.get(
+        'SERVER_CELERY_BROKER_URL',
+        f"redis://:{os.environ.get('REDIS_PASSWORD', '')}@redis:6379/0",
+    )
+    CELERY_RESULT_BACKEND = os.environ.get(
+        'SERVER_CELERY_RESULT_BACKEND',
+        CELERY_BROKER_URL,
+    )
+
     # Business logic settings
     JWT_EXP_HOURS = 72
     PASSWORD_RESET_EXP_HOURS = 1

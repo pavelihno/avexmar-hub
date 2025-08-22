@@ -1,6 +1,6 @@
 version: '3'
 services:
-  
+
   server-app:
     container_name: server-app
     build: ./server
@@ -30,7 +30,7 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:15  
+    image: postgres:15
     ports:
       - 5432:5432
     environment:
@@ -44,15 +44,15 @@ services:
     env_file:
       - .env
 
-  # redis:
-  #   container_name: redis
-  #   image: redis:7.2.1-alpine
-  #   ports:
-  #     - 6379:6379
-  #   environment:
-  #     - REDIS_PASSWORD=$REDIS_PASSWORD
-  #   env_file:
-  #     - .env
+  redis:
+    container_name: redis
+    image: redis:7.2.1-alpine
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=$REDIS_PASSWORD
+    env_file:
+      - .env
 
   # redis-commander:
   #   container_name: redis-commander
