@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useTimer } from 'react-timer-hook';
 
 export const toExpiryMs = (isoLike) => {
 	if (!isoLike) return NaN;
@@ -12,36 +13,19 @@ export const toExpiryMs = (isoLike) => {
 };
 
 export const useExpiryCountdown = (expiresAt) => {
-	const [timeLeft, setTimeLeft] = useState('');
+	const targetMs = toExpiryMs(expiresAt);
+	const expiry = isFinite(targetMs) ? new Date(targetMs) : new Date();
+	const { seconds, minutes, hours, restart } = useTimer({
+		expiryTimestamp: expiry,
+		autoStart: isFinite(targetMs),
+	});
 	useEffect(() => {
-		const targetMs = toExpiryMs(expiresAt);
-		if (!isFinite(targetMs)) {
-			setTimeLeft('');
-			return;
+		if (isFinite(targetMs)) {
+			restart(new Date(targetMs), true);
 		}
-		let timer = null;
-		const render = () => {
-			const now = Date.now();
-			let diff = targetMs - now;
-			if (diff <= 0) {
-				setTimeLeft('00:00');
-				return;
-			}
-			const hours = Math.floor(diff / 3600000);
-			const minutes = hours > 0 ? Math.floor((diff % 3600000) / 60000) : Math.floor(diff / 60000);
-			const seconds = Math.floor((diff % 60000) / 1000);
-			const formatted =
-				hours > 0
-					? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-					: `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-			setTimeLeft(formatted);
-			const nextIn = 1000 - (now % 1000);
-			timer = setTimeout(render, nextIn);
-		};
-		render();
-		return () => {
-			if (timer) clearTimeout(timer);
-		};
-	}, [expiresAt]);
-	return timeLeft;
+	}, [targetMs, restart]);
+	if (!isFinite(targetMs)) return '';
+	return hours > 0
+		? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+		: `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
