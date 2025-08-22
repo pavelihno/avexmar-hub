@@ -34,7 +34,10 @@ const consentDocSlice = createSlice({
 			'consentDoc'
 		);
 		builder
-			.addCase(fetchLatestConsentDoc.pending, handlePending)
+			.addCase(fetchLatestConsentDoc.pending, (state) => {
+				state.consentDoc = null;
+				handlePending(state);
+			})
 			.addCase(fetchLatestConsentDoc.fulfilled, (state, action) => {
 				state.consentDoc = action.payload;
 				state.isLoading = false;
