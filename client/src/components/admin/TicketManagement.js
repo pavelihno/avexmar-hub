@@ -82,7 +82,7 @@ const TicketManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: discountOptions,
 		},
-		};
+	};
 
 	const adminManager = createAdminManager(FIELDS, {
 		addButtonText: (item) => UI_LABELS.ADMIN.modules.tickets.add_button,

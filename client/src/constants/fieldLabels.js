@@ -71,13 +71,13 @@ export const FIELD_LABELS = {
 		booking_id: 'Бронирование',
 		passenger_id: 'Пассажир',
 	},
-        TICKET: {
-                ticket_number: 'Номер билета',
-                booking_id: 'ID бронирования',
-                passenger_id: 'ID пассажира',
-                flight_id: 'ID рейса',
-                price: 'Цена',
-        },
+	TICKET: {
+		ticket_number: 'Номер билета',
+		booking_id: 'ID бронирования',
+		passenger_id: 'ID пассажира',
+		flight_id: 'ID рейса',
+		price: 'Цена',
+	},
 	PAYMENT: {
 		booking_id: 'Бронирование',
 		payment_method: 'Метод оплаты',

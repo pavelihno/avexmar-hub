@@ -6,10 +6,9 @@ from app.config import Config
 
 
 def signJWT(email):
-    exp_hours = Config.JWT_EXP_HOURS
     token_data = {
         'email': email,
-        'exp': datetime.now() + timedelta(hours=exp_hours)
+        'exp': datetime.now() + timedelta(hours=Config.JWT_EXP_HOURS)
     }
     return jwt.encode(token_data, Config.SECRET_KEY, algorithm='HS256')
 

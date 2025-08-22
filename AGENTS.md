@@ -131,7 +131,6 @@ Each step maintains state in Redux and validates before progression.
 
 ### Authentication Issues
 
-- **JWT Expiration**: Check `SERVER_JWT_EXP_HOURS` configuration
 - **Role Access**: Verify user roles in database
 - **CORS Errors**: Ensure `SERVER_CLIENT_URL` matches frontend URL
 

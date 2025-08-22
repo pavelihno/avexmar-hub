@@ -56,13 +56,14 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    token = PasswordResetToken.create(user, expires_in_hours=1)
+    token = PasswordResetToken.create(user)
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
         'Сброс пароля',
         [user.email],
         'forgot_password.txt',
         reset_url=reset_url,
+        expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS
     )
     return jsonify({'message': 'Password reset instructions sent'}), 200
 

@@ -112,7 +112,7 @@ def create_payment(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
-    expires_at = datetime.now() + timedelta(hours=1)
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_PAYMENT_EXP_HOURS)
     body = {
         'amount': amount,
         'confirmation': {'type': 'embedded'},

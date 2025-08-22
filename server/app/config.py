@@ -11,8 +11,6 @@ class Config:
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 
-    JWT_EXP_HOURS = int(os.environ.get('SERVER_JWT_EXP_HOURS'))
-
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('SERVER_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -39,3 +37,11 @@ class Config:
         if YOOKASSA_USE_MOCK
         else os.environ.get('YOOKASSA_API_URL')
     )
+
+    # Business logic settings
+    JWT_EXP_HOURS = 72
+    PASSWORD_RESET_EXP_HOURS = 1
+
+    BOOKING_CONFIRMATION_EXP_HOURS = 2
+    BOOKING_PAYMENT_EXP_HOURS = 1
+

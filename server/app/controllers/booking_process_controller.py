@@ -1,6 +1,7 @@
 from flask import request, jsonify
 
 from app.database import db
+from app.config import Config
 from datetime import datetime, timedelta
 
 from app.models.booking import Booking
@@ -85,7 +86,7 @@ def create_booking_process(current_user):
             flight_id=return_id,
             tariff_id=return_tariff_id,
         )
-    expires_at = datetime.now() + timedelta(minutes=20)
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS)
     BookingHold.set_hold(
         booking.id,
         expires_at,
@@ -306,7 +307,7 @@ def create_booking_process_payment(current_user):
     session = db.session
     BookingHold.set_hold(
         booking.id,
-        datetime.now() + timedelta(minutes=60),
+        datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS),
         session=session,
         commit=False,
     )

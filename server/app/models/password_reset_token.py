@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
+from app.config import Config
 from app.models._base_model import BaseModel
 from app.models.user import User
 
@@ -24,12 +25,11 @@ class PasswordResetToken(BaseModel):
         session: Session | None = None,
         *,
         commit: bool = False,
-        expires_in_hours=1,
     ):
         session = session or db.session
 
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(hours=expires_in_hours)
+        expires_at = datetime.now() + timedelta(hours=Config.PASSWORD_RESET_EXP_HOURS)
 
         return super().create(
             session=session,
