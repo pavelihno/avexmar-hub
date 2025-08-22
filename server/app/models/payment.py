@@ -6,7 +6,15 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, CURRENCY, DEFAULT_PAYMENT_STATUS, DEFAULT_CURRENCY
+from app.utils.enum import (
+    PAYMENT_METHOD,
+    PAYMENT_STATUS,
+    CURRENCY,
+    PAYMENT_TYPE,
+    DEFAULT_PAYMENT_STATUS,
+    DEFAULT_CURRENCY,
+    DEFAULT_PAYMENT_TYPE,
+)
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -19,6 +27,7 @@ class Payment(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False)
     payment_method = db.Column(db.Enum(PAYMENT_METHOD), nullable=False)
     payment_status = db.Column(db.Enum(PAYMENT_STATUS), nullable=False, default=DEFAULT_PAYMENT_STATUS)
+    payment_type = db.Column(db.Enum(PAYMENT_TYPE), nullable=False, default=DEFAULT_PAYMENT_TYPE)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
     expires_at = db.Column(db.DateTime, nullable=False)
@@ -42,6 +51,7 @@ class Payment(BaseModel):
             'booking_id': self.booking_id,
             'payment_method': self.payment_method.value,
             'payment_status': self.payment_status.value,
+            'payment_type': self.payment_type.value,
             'amount': float(self.amount) if self.amount is not None else None,
             'currency': self.currency.value if self.currency else None,
             'provider_payment_id': self.provider_payment_id,

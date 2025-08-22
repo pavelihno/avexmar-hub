@@ -60,8 +60,13 @@ export const ENUM_LABELS = {
 		canceled: 'Отменён',
 	},
 	PAYMENT_METHOD: {
-		yookassa: 'ЮKassa',
-	},
+	yookassa: 'ЮKassa',
+},
+	PAYMENT_TYPE: {
+	payment: 'Платёж',
+	invoice: 'Счёт',
+	refund: 'Возврат',
+},
 	FEE_APPLICATION: {
 		booking: 'Бронирование',
 		cancellation: 'Отмена бронирования',

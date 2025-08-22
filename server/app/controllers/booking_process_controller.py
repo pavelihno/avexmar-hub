@@ -11,7 +11,7 @@ from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import calculate_price_details
-from app.utils.yookassa import create_payment, handle_webhook
+from app.utils.yookassa import create_payment, create_invoice, handle_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
     PASSENGER_PLURAL_CATEGORY,
@@ -311,6 +311,25 @@ def create_booking_process_payment(current_user):
         commit=False,
     )
     payment = create_payment(booking)
+    return jsonify(payment.to_dict()), 201
+
+
+@current_user
+def create_booking_process_invoice(current_user):
+    data = request.json or {}
+    public_id = data.get('public_id')
+    if not public_id:
+        return jsonify({'message': 'public_id required'}), 400
+    token = data.get('access_token')
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+    session = db.session
+    BookingHold.set_hold(
+        booking.id,
+        datetime.now() + timedelta(days=1),
+        session=session,
+        commit=False,
+    )
+    payment = create_invoice(booking)
     return jsonify(payment.to_dict()), 201
 
 

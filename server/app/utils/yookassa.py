@@ -2,7 +2,7 @@ import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
 
-from yookassa import Configuration, Payment as YooPayment
+from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 from app.config import Config
 from app.database import db
@@ -10,7 +10,7 @@ from app.models.booking import Booking
 from app.models.payment import Payment
 from app.utils.business_logic import calculate_receipt_details
 from app.utils.datetime import format_date
-from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
+from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
 from app.utils.email import send_email
 
 # Configure YooKassa SDK
@@ -58,6 +58,11 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     }
 
 
+def __generate_cart(booking: Booking) -> Dict[str, Any]:
+    receipt = __generate_receipt(booking)
+    return {'items': receipt.get('items', [])}
+
+
 def __capture_payment(payment: Payment, session) -> YooPayment:
     """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
@@ -73,6 +78,10 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
 
     yoo_payment = YooPayment.capture(payment.provider_payment_id, body)
     return yoo_payment
+
+
+def __capture_invoice(payment: Payment, session) -> YooPayment:
+    return __capture_payment(payment, session)
 
 
 def __send_confirmation_email(booking: Booking) -> bool:
@@ -96,12 +105,27 @@ def __send_confirmation_email(booking: Booking) -> bool:
     return True
 
 
+def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
+    if not booking.email_address or not payment_url:
+        return False
+    send_email(
+        subject='Счёт на оплату бронирования',
+        recipients=[booking.email_address],
+        template='invoice_payment.txt',
+        payment_url=payment_url,
+    )
+    return True
+
+
 def create_payment(booking: Booking) -> Payment:
     """Create a two-stage payment in YooKassa and persist model"""
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
-        booking.payments.filter(Payment.payment_status == PAYMENT_STATUS.pending)
+        booking.payments.filter(
+            Payment.payment_status == PAYMENT_STATUS.pending,
+            Payment.payment_type == PAYMENT_TYPE.payment,
+        )
         .order_by(Payment.created_at.desc())
         .first()
     )
@@ -138,6 +162,7 @@ def create_payment(booking: Booking) -> Payment:
             booking_id=booking.id,
             payment_method=PAYMENT_METHOD.yookassa,
             payment_status=PAYMENT_STATUS.pending,
+            payment_type=PAYMENT_TYPE.payment,
             amount=booking.total_price,
             currency=booking.currency,
             provider_payment_id=yookassa_payment_id,
@@ -160,6 +185,69 @@ def create_payment(booking: Booking) -> Payment:
         raise e
 
 
+def create_invoice(booking: Booking) -> Payment:
+    existing_invoice = (
+        booking.payments.filter(
+            Payment.payment_status == PAYMENT_STATUS.pending,
+            Payment.payment_type == PAYMENT_TYPE.invoice,
+        )
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+    if existing_invoice:
+        return existing_invoice
+
+    amount = {
+        'value': f'{booking.total_price:.2f}',
+        'currency': booking.currency.value.upper(),
+    }
+    expires_at = datetime.now() + timedelta(days=1)
+    body = {
+        'amount': amount,
+        'cart': __generate_cart(booking),
+        'due_date': expires_at.isoformat(),
+        'metadata': {
+            'public_id': str(booking.public_id),
+            'expires_at': expires_at.isoformat(),
+        },
+    }
+
+    try:
+        yoo_invoice = YooInvoice.create(body, uuid.uuid4())
+        invoice_id = getattr(yoo_invoice, 'id', None)
+        payment_url = getattr(yoo_invoice, 'payment_url', None)
+
+        session = db.session
+        payment = Payment.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            payment_type=PAYMENT_TYPE.invoice,
+            amount=booking.total_price,
+            currency=booking.currency,
+            provider_payment_id=invoice_id,
+            expires_at=expires_at,
+        )
+
+        Booking.transition_status(
+            id=booking.id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.payment_pending,
+        )
+
+        session.commit()
+
+        __send_invoice_email(booking, payment_url)
+
+        return payment
+
+    except Exception as e:
+        raise e
+
+
 def handle_webhook(payload: Dict[str, Any]) -> None:
     """Process YooKassa webhook notifications"""
     event = payload.get('event')
@@ -175,7 +263,10 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     payment = Payment.get_by_provider_payment_id(provider_id)
 
-    updates = {'payment_status': status, 'last_webhook': payload}
+    status_map = {'issued': PAYMENT_STATUS.pending, 'paid': PAYMENT_STATUS.succeeded}
+    mapped_status = status_map.get(status, status)
+
+    updates = {'payment_status': mapped_status, 'last_webhook': payload}
     if is_paid:
         updates['is_paid'] = is_paid
         updates['paid_at'] = captured_at
@@ -186,12 +277,15 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     send_confirmation = False
 
-    if event == 'payment.waiting_for_capture':
+    if event in ('payment.waiting_for_capture', 'invoice.waiting_for_capture'):
         yoo_payment = YooPayment.find_one(provider_id)
         if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
-            __capture_payment(payment, session)
+            if payment.payment_type == PAYMENT_TYPE.invoice:
+                __capture_invoice(payment, session)
+            else:
+                __capture_payment(payment, session)
 
-    elif event == 'payment.canceled':
+    elif event in ('payment.canceled', 'invoice.canceled'):
         Booking.transition_status(
             id=booking.id,
             session=session,
@@ -199,7 +293,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
             to_status=BOOKING_STATUS.payment_failed,
         )
 
-    elif event == 'payment.succeeded':
+    elif event in ('payment.succeeded', 'invoice.paid'):
         Booking.transition_status(
             id=booking.id,
             session=session,
