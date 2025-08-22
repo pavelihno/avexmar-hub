@@ -11,13 +11,7 @@ if TYPE_CHECKING:
 class BookingHold(BaseModel):
     __tablename__ = 'booking_holds'
 
-    booking_id = db.Column(
-        db.Integer,
-        db.ForeignKey('bookings.id', ondelete='CASCADE'),
-        nullable=False,
-        index=True,
-        unique=True,
-    )
+    booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False, index=True, unique=True)
     expires_at = db.Column(db.DateTime, nullable=False)
 
     booking: Mapped['Booking'] = db.relationship(
@@ -73,7 +67,4 @@ class BookingHold(BaseModel):
     ):
         session = session or db.session
         hold = cls.query.filter_by(booking_id=booking_id).first()
-        if not hold:
-            return False
-        cls.delete(hold.id, session=session, commit=commit)
-        return True
+        return cls.delete_or_404(hold.id if hold else None, session=session, commit=commit)
