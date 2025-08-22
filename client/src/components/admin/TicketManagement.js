@@ -82,13 +82,7 @@ const TicketManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: discountOptions,
 		},
-		seatId: {
-			key: 'seatId',
-			apiKey: 'seat_id',
-			label: 'Seat ID',
-			type: FIELD_TYPES.NUMBER,
-		},
-	};
+		};
 
 	const adminManager = createAdminManager(FIELDS, {
 		addButtonText: (item) => UI_LABELS.ADMIN.modules.tickets.add_button,

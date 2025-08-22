@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from sqlalchemy import or_, false
+from sqlalchemy import and_, or_, false
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 
@@ -10,7 +10,7 @@ from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.models.booking import Booking
 from app.models.booking_hold import BookingHold
-from app.models.seat import Seat
+from app.models.booking_flight import BookingFlight
 from app.utils.enum import BOOKING_STATUS
 from app.models.airport import Airport
 from app.models.flight import Flight
@@ -36,16 +36,24 @@ def search_airports():
 
 def __get_available_tariffs(flight_id):
     taken_seats = (
-        db.session.query(Seat.tariff_id, func.count(Seat.id))
-        .join(Booking, Seat.booking_id == Booking.id)
-        .outerjoin(BookingHold, Booking.id == BookingHold.booking_id)
-        .join(FlightTariff, Seat.tariff_id == FlightTariff.id)
-        .filter(
-            FlightTariff.flight_id == flight_id,
-            Booking.status != BOOKING_STATUS.canceled,
-            or_(BookingHold.expires_at == None, BookingHold.expires_at > func.now()),
+        db.session.query(
+            BookingFlight.tariff_id,
+            func.coalesce(func.sum(Booking.seats_number), 0),
         )
-        .group_by(Seat.tariff_id)
+        .join(Booking, BookingFlight.booking_id == Booking.id)
+        .outerjoin(BookingHold, Booking.id == BookingHold.booking_id)
+        .filter(
+            BookingFlight.flight_id == flight_id,
+            or_(
+                Booking.status == BOOKING_STATUS.completed,
+                and_(
+                    Booking.status != BOOKING_STATUS.canceled,
+                    BookingHold.expires_at != None,
+                    BookingHold.expires_at > func.now(),
+                ),
+            ),
+        )
+        .group_by(BookingFlight.tariff_id)
         .all()
     )
     taken_map = {tariff_id: count for tariff_id, count in taken_seats}
