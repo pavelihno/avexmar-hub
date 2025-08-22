@@ -1,0 +1,9 @@
+{% extends 'email/html/base.html' %}
+
+{% block greeting %}Здравствуйте!{% endblock %}
+
+{% block content %}
+<p>Ваше бронирование № {{ booking_number }} успешно завершено.</p>
+<p>Сумма: {{ total_price }} {{ currency }}</p>
+<p>Детали бронирования: <a href="{{ booking_url }}">посмотреть</a></p>
+{% endblock %}
