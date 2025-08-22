@@ -21,7 +21,9 @@ const Payment = () => {
 	const paymentStatus = payment?.payment_status;
 	const paymentAmount = payment?.amount;
 	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
-	const confirmationToken = payment?.confirmation_token;
+        const confirmationToken = payment?.confirmation_token;
+        const paymentType = payment?.payment_type;
+        const isInvoice = paymentType === 'invoice';
 	const expiresAt = payment?.expires_at;
 
 	const timeLeft = useExpiryCountdown(expiresAt);
@@ -30,8 +32,8 @@ const Payment = () => {
 			document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
 	}, [timeLeft]);
 
-	const isProcessing =
-	new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
+        const isProcessing =
+        new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
 
 	useEffect(() => {
 	dispatch(fetchPayment(publicId));
@@ -89,30 +91,35 @@ const Payment = () => {
 						</Box>
 					)}
 
-					{!isProcessing && paymentStatus !== 'succeeded' && (
-						<PaymentForm
-							confirmationToken={confirmationToken}
-							returnUrl={returnUrl}
-							onError={handleError}
-						/>
-					)}
+                                        {!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (
+                                                <PaymentForm
+                                                        confirmationToken={confirmationToken}
+                                                        returnUrl={returnUrl}
+                                                        onError={handleError}
+                                                />
+                                        )}
+                                        {isInvoice && paymentStatus !== 'succeeded' && (
+                                                <Typography sx={{ mt: 2 }}>
+                                                        {UI_LABELS.BOOKING.payment_form.invoice_waiting}
+                                                </Typography>
+                                        )}
 
-					{paymentStatus === 'canceled' && (
-						<Button
-							variant='contained'
-							color='orange'
-							sx={{ mt: 2 }}
-							onClick={() => {
-								dispatch(
-									createPayment({
-										public_id: publicId,
-									})
-								);
-							}}
-						>
-							{UI_LABELS.BOOKING.payment_form.retry_payment}
-						</Button>
-					)}
+                                        {paymentStatus === 'canceled' && !isInvoice && (
+                                                <Button
+                                                        variant='contained'
+                                                        color='orange'
+                                                        sx={{ mt: 2 }}
+                                                        onClick={() => {
+                                                                dispatch(
+                                                                        createPayment({
+                                                                                public_id: publicId,
+                                                                        })
+                                                                );
+                                                        }}
+                                                >
+                                                        {UI_LABELS.BOOKING.payment_form.retry_payment}
+                                                </Button>
+                                        )}
 				</CardContent>
 			</Card>
 		</Box>

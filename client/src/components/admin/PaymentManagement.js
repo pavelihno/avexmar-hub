@@ -31,9 +31,10 @@ const PaymentManagement = () => {
 		label: `${b.booking_number || b.public_id} — ${formatDate(b.booking_date)}`,
 	}));
 
-	const methodOptions = getEnumOptions('PAYMENT_METHOD');
-	const statusOptions = getEnumOptions('PAYMENT_STATUS');
-	const currencyOptions = getEnumOptions('CURRENCY');
+const methodOptions = getEnumOptions('PAYMENT_METHOD');
+const statusOptions = getEnumOptions('PAYMENT_STATUS');
+const currencyOptions = getEnumOptions('CURRENCY');
+	const typeOptions = getEnumOptions('PAYMENT_TYPE');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -64,13 +65,21 @@ const PaymentManagement = () => {
 			excludeFromTable: true,
 		},
 
-		paymentStatus: {
-			key: 'paymentStatus',
-			apiKey: 'payment_status',
-			label: FIELD_LABELS.PAYMENT.payment_status,
-			type: FIELD_TYPES.SELECT,
-			options: statusOptions,
-			formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
+paymentStatus: {
+key: 'paymentStatus',
+apiKey: 'payment_status',
+label: FIELD_LABELS.PAYMENT.payment_status,
+type: FIELD_TYPES.SELECT,
+options: statusOptions,
+formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
+		},
+		paymentType: {
+			key:  'paymentType',
+			apiKey:  'payment_type',
+			label:  FIELD_LABELS.PAYMENT.payment_type,
+			type:  FIELD_TYPES.SELECT,
+			options:  typeOptions,
+			formatter:  (value) => ENUM_LABELS.PAYMENT_TYPE[value] || value,
 		},
 		amount: {
 			key: 'amount',

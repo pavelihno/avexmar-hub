@@ -342,7 +342,8 @@ export const UI_LABELS = {
 				unit_discount: 'Скидка (ед.)',
 				final_price: 'Итого',
 			},
-			payment_button: 'Перейти к оплате',
+			payment_button:  'Перейти к оплате',
+			invoice_button:  'Выставить счет',
 			passenger_categories: {
 				adults: 'Взрослые',
 				children: 'Дети',
@@ -363,7 +364,7 @@ export const UI_LABELS = {
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
-		payment_form: {
+payment_form: {
 			title: (timeLeft) => `${timeLeft} для оплаты`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
@@ -371,7 +372,8 @@ export const UI_LABELS = {
 			loading: 'Загрузка формы оплаты...',
 			waiting: 'Ожидание токена оплаты...',
 			load_error: 'Не удалось загрузить виджет оплаты',
-		},
+			invoice_waiting:  'Счет отправлен клиенту. Ожидаем оплату...',
+},
 		completion: {
 			title: 'Бронирование завершено',
 			price_title: 'Оплачено',
