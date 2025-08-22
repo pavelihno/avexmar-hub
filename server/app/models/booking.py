@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from app.models.booking_flight import BookingFlight
     from app.models.user import User
     from app.models.consent import ConsentEvent
+    from app.models.booking_hold import BookingHold
 
 
 class Booking(BaseModel):
@@ -91,9 +92,16 @@ class Booking(BaseModel):
         lazy='dynamic',
         cascade='all, delete-orphan',
     )
+    booking_hold: Mapped['BookingHold'] = db.relationship(
+        'BookingHold', back_populates='booking', uselist=False, cascade='all, delete-orphan'
+    )
     consent_events: Mapped[List['ConsentEvent']] = db.relationship(
         'ConsentEvent', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
+
+    @property
+    def flights(self):
+        return [bf.flight for bf in self.booking_flights]
 
     def to_dict(self, return_children=False):
         return {
@@ -111,6 +119,11 @@ class Booking(BaseModel):
             'total_discounts': self.total_discounts,
             'fees': self.fees,
             'total_price': self.total_price,
+            'expires_at': (
+                self.booking_hold.expires_at.isoformat()
+                if self.booking_hold and self.booking_hold.expires_at
+                else None
+            ),
         }
 
     PNR_MASK = 'ABXXXX'

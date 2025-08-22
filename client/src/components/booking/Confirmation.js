@@ -17,7 +17,7 @@ import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { createPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, extractRouteInfo } from '../utils';
+import { formatNumber, extractRouteInfo, useExpiryCountdown } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
@@ -26,7 +26,9 @@ const Confirmation = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
+		const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
+	   const expiresAt = booking?.expires_at;
+	   const timeLeft = useExpiryCountdown(expiresAt);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -84,10 +86,17 @@ const Confirmation = () => {
 		);
 	}
 
-	return (
-		<Base maxWidth='lg'>
-			<BookingProgress activeStep='confirmation' />
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+return (
+<Base maxWidth='lg'>
+<BookingProgress activeStep='confirmation' />
+{expiresAt && (
+<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+<Typography variant='h6' sx={{ fontWeight: 600 }}>
+{timeLeft}
+</Typography>
+</Box>
+)}
+<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
