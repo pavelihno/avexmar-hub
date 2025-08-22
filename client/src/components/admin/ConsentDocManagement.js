@@ -2,7 +2,13 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { fetchConsentDocs, createConsentDoc, updateConsentDoc, deleteConsentDoc } from '../../redux/actions/consentDoc';
+import {
+	fetchConsentDocs,
+	createConsentDoc,
+	updateConsentDoc,
+	deleteConsentDoc,
+	deleteAllConsentDocs,
+} from '../../redux/actions/consentDoc';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
@@ -51,26 +57,32 @@ const ConsentDocManagement = () => {
 
 	const handleAdd = (data) => dispatch(createConsentDoc(adminManager.toApiFormat(data))).unwrap();
 	const handleEdit = async (data) => {
-		await dispatch(updateConsentDoc(adminManager.toApiFormat(data))).unwrap();
-		dispatch(fetchConsentDocs());
+	await dispatch(updateConsentDoc(adminManager.toApiFormat(data))).unwrap();
+	dispatch(fetchConsentDocs());
 	};
 	const handleDelete = (id) => dispatch(deleteConsentDoc(id)).unwrap();
+	
+	const handleDeleteAll = async () => {
+	await dispatch(deleteAllConsentDocs()).unwrap();
+	dispatch(fetchConsentDocs());
+	};
 
 	const formattedDocs = consentDocs.map(adminManager.toUiFormat);
 
 	return (
-		<AdminDataTable
-			title={UI_LABELS.ADMIN.modules.consentDocs.management}
-			data={formattedDocs}
-			columns={adminManager.columns}
-			onAdd={handleAdd}
-			onEdit={handleEdit}
-			onDelete={handleDelete}
-			renderForm={adminManager.renderForm}
-			addButtonText={UI_LABELS.ADMIN.modules.consentDocs.add_button}
-			isLoading={isLoading}
-			error={errors}
-		/>
+	<AdminDataTable
+	title={UI_LABELS.ADMIN.modules.consentDocs.management}
+	data={formattedDocs}
+	columns={adminManager.columns}
+	onAdd={handleAdd}
+	onEdit={handleEdit}
+	onDelete={handleDelete}
+	onDeleteAll={handleDeleteAll}
+	renderForm={adminManager.renderForm}
+	addButtonText={UI_LABELS.ADMIN.modules.consentDocs.add_button}
+	isLoading={isLoading}
+	error={errors}
+	/>
 	);
 };
 

@@ -38,7 +38,7 @@ def update_user(current_user, user_id):
 
 @admin_required
 def delete_user(current_user, user_id):
-    deleted_user = User.delete_or_404(user_id)
+    deleted_user = User.delete_or_404(user_id, commit=True)
     return jsonify(deleted_user)
 
 

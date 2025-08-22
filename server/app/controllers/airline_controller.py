@@ -31,7 +31,7 @@ def update_airline(current_user, airline_id):
 
 @admin_required
 def delete_airline(current_user, airline_id):
-    deleted = Airline.delete_or_404(airline_id)
+    deleted = Airline.delete_or_404(airline_id, commit=True)
     return jsonify(deleted)
 
 

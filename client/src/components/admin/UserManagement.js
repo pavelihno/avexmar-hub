@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../redux/actions/user';
+import { fetchUsers, createUser, updateUser, deleteUser, deleteAllUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
@@ -51,21 +51,27 @@ const UserManagement = () => {
 	const handleAddUser = (data) => dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
 	const handleEditUser = (data) => dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
 	const handleDeleteUser = (id) => dispatch(deleteUser(id)).unwrap();
+	
+	const handleDeleteAllUsers = async () => {
+	await dispatch(deleteAllUsers()).unwrap();
+	dispatch(fetchUsers());
+	};
 
 	const formattedUsers = users.map(adminManager.toUiFormat);
 
 	return (
-		<AdminDataTable
-			title={UI_LABELS.ADMIN.modules.users.management}
-			data={formattedUsers}
-			columns={adminManager.columns}
-			onAdd={handleAddUser}
-			onEdit={handleEditUser}
-			onDelete={handleDeleteUser}
-			renderForm={adminManager.renderForm}
-			isLoading={isLoading}
-			error={errors}
-		/>
+	<AdminDataTable
+	title={UI_LABELS.ADMIN.modules.users.management}
+	data={formattedUsers}
+	columns={adminManager.columns}
+	onAdd={handleAddUser}
+	onEdit={handleEditUser}
+	onDelete={handleDeleteUser}
+	onDeleteAll={handleDeleteAllUsers}
+	renderForm={adminManager.renderForm}
+	isLoading={isLoading}
+	error={errors}
+	/>
 	);
 };
 

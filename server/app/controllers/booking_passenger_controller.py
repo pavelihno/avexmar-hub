@@ -32,5 +32,5 @@ def update_booking_passenger(current_user, booking_passenger_id):
 
 @admin_required
 def delete_booking_passenger(current_user, booking_passenger_id):
-    deleted = BookingPassenger.delete_or_404(booking_passenger_id)
+    deleted = BookingPassenger.delete_or_404(booking_passenger_id, commit=True)
     return jsonify(deleted)
