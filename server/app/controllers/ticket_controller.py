@@ -32,5 +32,5 @@ def update_ticket(current_user, ticket_id):
 
 @admin_required
 def delete_ticket(current_user, ticket_id):
-    deleted = Ticket.delete_or_404(ticket_id)
+    deleted = Ticket.delete_or_404(ticket_id, commit=True)
     return jsonify(deleted)

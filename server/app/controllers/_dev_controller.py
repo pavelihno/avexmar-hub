@@ -38,6 +38,6 @@ def clear_table(current_user, table_name: str):
     if not model:
         return jsonify({'message': 'Invalid table name'}), 404
 
-    deleted = model.delete_all()
+    deleted = model.delete_all(commit=True)
 
     return jsonify({'deleted': deleted})

@@ -233,10 +233,14 @@ class BaseModel(db.Model):
 
     @classmethod
     def delete(
-        cls, _id, session: Session | None = None
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
     ) -> Optional[Dict]:
         session = session or db.session
-        return cls.delete_or_404(_id, session)
+        return cls.delete_or_404(_id, session, commit=commit)
 
     @classmethod
     def delete_all(
@@ -248,7 +252,7 @@ class BaseModel(db.Model):
         session = session or db.session
         try:
             count = session.query(cls).delete()
-            if commit and not session.in_transaction():
+            if commit:
                 session.commit()
             else:
                 session.flush()

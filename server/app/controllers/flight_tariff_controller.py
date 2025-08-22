@@ -34,5 +34,5 @@ def update_flight_tariff(current_user, flight_tariff_id):
 
 @admin_required
 def delete_flight_tariff(current_user, flight_tariff_id):
-    deleted = FlightTariff.delete_or_404(flight_tariff_id)
+    deleted = FlightTariff.delete_or_404(flight_tariff_id, commit=True)
     return jsonify(deleted)

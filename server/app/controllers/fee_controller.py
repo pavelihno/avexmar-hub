@@ -30,5 +30,5 @@ def update_fee(current_user, fee_id):
 
 @admin_required
 def delete_fee(current_user, fee_id):
-    deleted = Fee.delete_or_404(fee_id)
+    deleted = Fee.delete_or_404(fee_id, commit=True)
     return jsonify(deleted)

@@ -31,7 +31,7 @@ def update_airport(current_user, airport_id):
 
 @admin_required
 def delete_airport(current_user, airport_id):
-    deleted = Airport.delete_or_404(airport_id)
+    deleted = Airport.delete_or_404(airport_id, commit=True)
     return jsonify(deleted)
 
 

@@ -7,6 +7,7 @@ import {
 	createConsentEvent,
 	updateConsentEvent,
 	deleteConsentEvent,
+	deleteAllConsentEvents,
 } from '../../redux/actions/consentEvent';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -98,22 +99,28 @@ const ConsentEventManagement = () => {
 	const handleAdd = (data) => dispatch(createConsentEvent(adminManager.toApiFormat(data))).unwrap();
 	const handleEdit = (data) => dispatch(updateConsentEvent(adminManager.toApiFormat(data))).unwrap();
 	const handleDelete = (id) => dispatch(deleteConsentEvent(id)).unwrap();
+	
+	const handleDeleteAll = async () => {
+	await dispatch(deleteAllConsentEvents()).unwrap();
+	dispatch(fetchConsentEvents());
+	};
 
 	const formattedEvents = consentEvents.map(adminManager.toUiFormat);
 
 	return (
-		<AdminDataTable
-			title={UI_LABELS.ADMIN.modules.consentEvents.management}
-			data={formattedEvents}
-			columns={adminManager.columns}
-			onAdd={handleAdd}
-			onEdit={handleEdit}
-			onDelete={handleDelete}
-			renderForm={adminManager.renderForm}
-			addButtonText={UI_LABELS.ADMIN.modules.consentEvents.add_button}
-			isLoading={isLoading}
-			error={errors}
-		/>
+	<AdminDataTable
+	title={UI_LABELS.ADMIN.modules.consentEvents.management}
+	data={formattedEvents}
+	columns={adminManager.columns}
+	onAdd={handleAdd}
+	onEdit={handleEdit}
+	onDelete={handleDelete}
+	onDeleteAll={handleDeleteAll}
+	renderForm={adminManager.renderForm}
+	addButtonText={UI_LABELS.ADMIN.modules.consentEvents.add_button}
+	isLoading={isLoading}
+	error={errors}
+	/>
 	);
 };
 

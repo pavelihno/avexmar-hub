@@ -32,5 +32,5 @@ def update_discount(current_user, discount_id):
 
 @admin_required
 def delete_discount(current_user, discount_id):
-    deleted = Discount.delete_or_404(discount_id)
+    deleted = Discount.delete_or_404(discount_id, commit=True)
     return jsonify(deleted)
