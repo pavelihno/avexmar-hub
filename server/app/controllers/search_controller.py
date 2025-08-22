@@ -8,6 +8,10 @@ from app.models.airline import Airline
 from app.models.route import Route
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
+from app.models.booking import Booking
+from app.models.booking_hold import BookingHold
+from app.models.seat import Seat
+from app.utils.enum import BOOKING_STATUS
 from app.models.airport import Airport
 from app.models.flight import Flight
 from app.utils.business_logic import get_seats_number, calculate_price_details
@@ -31,6 +35,21 @@ def search_airports():
 
 
 def __get_available_tariffs(flight_id):
+    taken_seats = (
+        db.session.query(Seat.tariff_id, func.count(Seat.id))
+        .join(Booking, Seat.booking_id == Booking.id)
+        .outerjoin(BookingHold, Booking.id == BookingHold.booking_id)
+        .join(FlightTariff, Seat.tariff_id == FlightTariff.id)
+        .filter(
+            FlightTariff.flight_id == flight_id,
+            Booking.status != BOOKING_STATUS.canceled,
+            or_(BookingHold.expires_at == None, BookingHold.expires_at > func.now()),
+        )
+        .group_by(Seat.tariff_id)
+        .all()
+    )
+    taken_map = {tariff_id: count for tariff_id, count in taken_seats}
+
     tariff_query = (
         db.session.query(FlightTariff, Tariff)
         .join(Tariff, FlightTariff.tariff_id == Tariff.id)
@@ -46,10 +65,10 @@ def __get_available_tariffs(flight_id):
             'conditions': t.conditions,
             'baggage': t.baggage,
             'hand_luggage': t.hand_luggage,
-            'seats_left': ft.seats_number,
+            'seats_left': max(ft.seats_number - taken_map.get(ft.id, 0), 0),
         }
         for ft, t in tariff_query
-        if ft.seats_number > 0 and t.price is not None
+        if (ft.seats_number - taken_map.get(ft.id, 0)) > 0 and t.price is not None
     ], key=lambda x: x['price'])
 
 
@@ -156,10 +175,13 @@ def __query_flights(
         if tariff is not None:
             f_dict['price'] = tariff['price']
             f_dict['currency'] = tariff['currency']
+            f_dict['seats_left'] = tariff['seats_left']
 
         if min_tariff is not None:
             f_dict['min_price'] = min_tariff['price']
             f_dict['currency'] = min_tariff['currency']
+            if 'seats_left' not in f_dict:
+                f_dict['seats_left'] = min_tariff['seats_left']
 
         if direction:
             f_dict['direction'] = direction

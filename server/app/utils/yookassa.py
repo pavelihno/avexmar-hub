@@ -8,6 +8,7 @@ from app.config import Config
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
+from app.models.booking_hold import BookingHold
 from app.utils.business_logic import calculate_receipt_details
 from app.utils.datetime import format_date
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
@@ -220,6 +221,11 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
                 commit=False,
                 access_token=uuid.uuid4(),
             )
+        BookingHold.delete_by_booking_id(
+            booking.id,
+            session=session,
+            commit=False,
+        )
         send_confirmation = True
 
     else:

@@ -1,11 +1,14 @@
 from flask import request, jsonify
 
 from app.database import db
+from datetime import datetime, timedelta
+
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
 from app.models.passenger import Passenger
 from app.models.payment import Payment
+from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import calculate_price_details
 from app.utils.yookassa import create_payment, handle_webhook
@@ -82,7 +85,13 @@ def create_booking_process(current_user):
             flight_id=return_id,
             tariff_id=return_tariff_id,
         )
-
+    expires_at = datetime.now() + timedelta(minutes=20)
+    BookingHold.set_hold(
+        booking.id,
+        expires_at,
+        session=session,
+        commit=False,
+    )
     session.commit()
 
     result = {'public_id': str(booking.public_id)}
@@ -294,7 +303,13 @@ def create_booking_process_payment(current_user):
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
-
+    session = db.session
+    BookingHold.set_hold(
+        booking.id,
+        datetime.now() + timedelta(minutes=60),
+        session=session,
+        commit=False,
+    )
     payment = create_payment(booking)
     return jsonify(payment.to_dict()), 201
 
