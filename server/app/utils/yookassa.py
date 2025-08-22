@@ -111,12 +111,13 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
         EMAIL_TYPE.invoice_payment,
         recipients=[booking.email_address],
         payment_url=payment_url,
+        hours=Config.BOOKING_INVOICE_EXP_HOURS,
     )
     return True
 
 
 def create_payment(booking: Booking) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model"""
+    """Create a two-stage payment in YooKassa"""
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
@@ -184,6 +185,9 @@ def create_payment(booking: Booking) -> Payment:
 
 
 def create_invoice(booking: Booking) -> Payment:
+    """Create a two-stage invoice in YooKassa"""
+
+    # If a pending invoice already exists for this booking, return it
     existing_invoice = (
         booking.payments.filter(
             Payment.payment_status == PAYMENT_STATUS.pending,
@@ -199,7 +203,7 @@ def create_invoice(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
-    expires_at = datetime.now() + timedelta(days=1)
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_INVOICE_EXP_HOURS)
     body = {
         'amount': amount,
         'cart': __generate_cart(booking),

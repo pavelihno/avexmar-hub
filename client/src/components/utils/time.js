@@ -27,9 +27,14 @@ export const useExpiryCountdown = (expiresAt) => {
 				setTimeLeft('00:00');
 				return;
 			}
-			const minutes = Math.floor(diff / 60000);
+			const hours = Math.floor(diff / 3600000);
+			const minutes = hours > 0 ? Math.floor((diff % 3600000) / 60000) : Math.floor(diff / 60000);
 			const seconds = Math.floor((diff % 60000) / 1000);
-			setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+			const formatted =
+				hours > 0
+					? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+					: `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+			setTimeLeft(formatted);
 			const nextIn = 1000 - (now % 1000);
 			timer = setTimeout(render, nextIn);
 		};

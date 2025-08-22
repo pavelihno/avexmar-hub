@@ -18,8 +18,8 @@ export const createInvoice = createAsyncThunk('payment/createInvoice', async (da
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));
 	}
-	});
-	
+});
+
 export const fetchPayment = createAsyncThunk('payment/fetch', async (publicId, { rejectWithValue }) => {
 	try {
 		const res = await serverApi.get(`/booking/payment/${publicId}/details`);

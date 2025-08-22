@@ -35,35 +35,40 @@ def search_airports():
 
 
 def __get_available_tariffs(flight_id):
-    taken_seats = (
+    active_hold_exists = db.session.query(BookingHold.id).filter(
+        BookingHold.booking_id == Booking.id,
+        BookingHold.expires_at != None,
+        BookingHold.expires_at > func.now(),
+    ).exists()
+
+    taken_rows = (
         db.session.query(
-            BookingFlight.tariff_id,
-            func.coalesce(func.sum(Booking.seats_number), 0),
+            BookingFlight.tariff_id.label("tariff_id"),
+            func.coalesce(func.sum(Booking.seats_number), 0).label("taken"),
         )
+        .select_from(BookingFlight)
         .join(Booking, BookingFlight.booking_id == Booking.id)
-        .outerjoin(BookingHold, Booking.id == BookingHold.booking_id)
         .filter(
             BookingFlight.flight_id == flight_id,
             or_(
                 Booking.status == BOOKING_STATUS.completed,
                 and_(
-                    Booking.status != BOOKING_STATUS.canceled,
-                    BookingHold.expires_at != None,
-                    BookingHold.expires_at > func.now(),
+                    ~Booking.status.in_([BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]),
+                    active_hold_exists,
                 ),
             ),
         )
         .group_by(BookingFlight.tariff_id)
         .all()
     )
-    taken_map = {tariff_id: count for tariff_id, count in taken_seats}
+    taken_map = {row.tariff_id: row.taken for row in taken_rows}
 
     tariff_query = (
         db.session.query(FlightTariff, Tariff)
         .join(Tariff, FlightTariff.tariff_id == Tariff.id)
         .filter(FlightTariff.flight_id == flight_id)
     )
-    return sorted([
+    result = [
         {
             'id': t.id,
             'seat_class': t.seat_class.value,
@@ -73,11 +78,13 @@ def __get_available_tariffs(flight_id):
             'conditions': t.conditions,
             'baggage': t.baggage,
             'hand_luggage': t.hand_luggage,
-            'seats_left': max(ft.seats_number - taken_map.get(ft.id, 0), 0),
+            'seats_left': max((ft.seats_number or 0) - taken_map.get(ft.tariff_id, 0), 0),
         }
         for ft, t in tariff_query
-        if (ft.seats_number - taken_map.get(ft.id, 0)) > 0 and t.price is not None
-    ], key=lambda x: x['price'])
+        if (ft.seats_number or 0) - taken_map.get(ft.tariff_id, 0) > 0 and t.price is not None
+    ]
+
+    return sorted(result, key=lambda x: x['price'])
 
 
 def __query_flights(

@@ -37,25 +37,25 @@ const paymentSlice = createSlice({
 			'payment'
 		);
 
-builder
-	.addCase(createPayment.pending, handlePending)
-	.addCase(createPayment.rejected, handleRejected)
-	.addCase(createPayment.fulfilled, (state, action) => {
-	state.current = action.payload;
-	state.isLoading = false;
-	})
-	.addCase(createInvoice.pending, handlePending)
-	.addCase(createInvoice.rejected, handleRejected)
-	.addCase(createInvoice.fulfilled, (state, action) => {
-	state.current = action.payload;
-	state.isLoading = false;
-	})
-	.addCase(fetchPayment.pending, handlePending)
-	.addCase(fetchPayment.rejected, handleRejected)
-	.addCase(fetchPayment.fulfilled, (state, action) => {
-	state.current = action.payload;
-	state.isLoading = false;
-	});
+		builder
+			.addCase(createPayment.pending, handlePending)
+			.addCase(createPayment.rejected, handleRejected)
+			.addCase(createPayment.fulfilled, (state, action) => {
+				state.current = action.payload;
+				state.isLoading = false;
+			})
+			.addCase(createInvoice.pending, handlePending)
+			.addCase(createInvoice.rejected, handleRejected)
+			.addCase(createInvoice.fulfilled, (state, action) => {
+				state.current = action.payload;
+				state.isLoading = false;
+			})
+			.addCase(fetchPayment.pending, handlePending)
+			.addCase(fetchPayment.rejected, handleRejected)
+			.addCase(fetchPayment.fulfilled, (state, action) => {
+				state.current = action.payload;
+				state.isLoading = false;
+			});
 	},
 });
 

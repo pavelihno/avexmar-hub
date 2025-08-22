@@ -21,109 +21,107 @@ const Payment = () => {
 	const paymentStatus = payment?.payment_status;
 	const paymentAmount = payment?.amount;
 	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
-        const confirmationToken = payment?.confirmation_token;
-        const paymentType = payment?.payment_type;
-        const isInvoice = paymentType === 'invoice';
+	const confirmationToken = payment?.confirmation_token;
+	const paymentType = payment?.payment_type;
+	const isInvoice = paymentType === 'invoice';
 	const expiresAt = payment?.expires_at;
 
 	const timeLeft = useExpiryCountdown(expiresAt);
 
 	useEffect(() => {
-			document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
+		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
 	}, [timeLeft]);
 
-        const isProcessing =
-        new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
+	const isProcessing =
+		new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
 
 	useEffect(() => {
-	dispatch(fetchPayment(publicId));
+		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
 
 	useEffect(() => {
-	if (!isProcessing || ['succeeded', 'canceled'].includes(paymentStatus)) return;
-	const id = setInterval(() => dispatch(fetchPayment(publicId)), 3000);
-	return () => clearInterval(id);
+		if (!isProcessing || ['succeeded', 'canceled'].includes(paymentStatus)) return;
+		const id = setInterval(() => dispatch(fetchPayment(publicId)), 3000);
+		return () => clearInterval(id);
 	}, [isProcessing, paymentStatus, dispatch, publicId]);
 
 	useEffect(() => {
-	if (paymentStatus === 'succeeded') {
-		navigate(`/booking/${publicId}/completion`);
-	}
+		if (paymentStatus === 'succeeded') {
+			navigate(`/booking/${publicId}/completion`);
+		}
 	}, [paymentStatus, navigate, publicId]);
 
 	const handleError = useCallback(() => {
-	dispatch(fetchPayment(publicId));
+		dispatch(fetchPayment(publicId));
 	}, [dispatch, publicId]);
 
 	const returnUrl = `${window.location.origin}${window.location.pathname}?processing=1`;
 
 	return (
-	<Base maxWidth='lg'>
-		<BookingProgress activeStep='payment' />
-		<Box sx={{ mt: 2, mx: 'auto', width: '100%', maxWidth: 'md' }}>
-			<Card>
-				<CardContent>
-					<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-						<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-							<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-								{`${UI_LABELS.BOOKING.payment_form.total}: `}
-							</Typography>
-							<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
-								{`${formatNumber(paymentAmount)} ${currencySymbol}`}
-							</Typography>
+		<Base maxWidth='lg'>
+			<BookingProgress activeStep='payment' />
+			<Box sx={{ mt: 2, mx: 'auto', width: '100%', maxWidth: 'md' }}>
+				<Card>
+					<CardContent>
+						<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+								<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+									{`${UI_LABELS.BOOKING.payment_form.total}: `}
+								</Typography>
+								<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
+									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
+								</Typography>
+							</Box>
+							{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
+								<Typography variant='h6' sx={{ fontWeight: 600 }}>
+									{timeLeft}
+								</Typography>
+							)}
 						</Box>
-						{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
-							<Typography variant='h6' sx={{ fontWeight: 600 }}>
-								{timeLeft}
-							</Typography>
+
+						{paymentStatus === 'canceled' && (
+							<Alert severity='error' sx={{ mb: 2 }}>
+								{UI_LABELS.BOOKING.payment_form.payment_failed}
+							</Alert>
 						)}
-					</Box>
 
-					{paymentStatus === 'canceled' && (
-						<Alert severity='error' sx={{ mb: 2 }}>
-							{UI_LABELS.BOOKING.payment_form.payment_failed}
-						</Alert>
-					)}
+						{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
+							<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+								<CircularProgress />
+							</Box>
+						)}
 
-					{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
-						<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-							<CircularProgress />
-						</Box>
-					)}
+						{!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (
+							<PaymentForm
+								confirmationToken={confirmationToken}
+								returnUrl={returnUrl}
+								onError={handleError}
+							/>
+						)}
+						{isInvoice && paymentStatus !== 'succeeded' && (
+							<Typography sx={{ mt: 2 }}>{UI_LABELS.BOOKING.payment_form.invoice_waiting}</Typography>
+						)}
 
-                                        {!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (
-                                                <PaymentForm
-                                                        confirmationToken={confirmationToken}
-                                                        returnUrl={returnUrl}
-                                                        onError={handleError}
-                                                />
-                                        )}
-                                        {isInvoice && paymentStatus !== 'succeeded' && (
-                                                <Typography sx={{ mt: 2 }}>
-                                                        {UI_LABELS.BOOKING.payment_form.invoice_waiting}
-                                                </Typography>
-                                        )}
-
-                                        {paymentStatus === 'canceled' && !isInvoice && (
-                                                <Button
-                                                        variant='contained'
-                                                        color='orange'
-                                                        sx={{ mt: 2 }}
-                                                        onClick={() => {
-                                                                dispatch(
-                                                                        createPayment({
-                                                                                public_id: publicId,
-                                                                        })
-                                                                );
-                                                        }}
-                                                >
-                                                        {UI_LABELS.BOOKING.payment_form.retry_payment}
-                                                </Button>
-                                        )}
-				</CardContent>
-			</Card>
-		</Box>
-	</Base>
+						{paymentStatus === 'canceled' && !isInvoice && (
+							<Button
+								variant='contained'
+								color='orange'
+								sx={{ mt: 2 }}
+								onClick={() => {
+									dispatch(
+										createPayment({
+											public_id: publicId,
+										})
+									);
+								}}
+							>
+								{UI_LABELS.BOOKING.payment_form.retry_payment}
+							</Button>
+						)}
+					</CardContent>
+				</Card>
+			</Box>
+		</Base>
 	);
 };
 

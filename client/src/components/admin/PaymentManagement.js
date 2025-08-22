@@ -31,9 +31,9 @@ const PaymentManagement = () => {
 		label: `${b.booking_number || b.public_id} — ${formatDate(b.booking_date)}`,
 	}));
 
-const methodOptions = getEnumOptions('PAYMENT_METHOD');
-const statusOptions = getEnumOptions('PAYMENT_STATUS');
-const currencyOptions = getEnumOptions('CURRENCY');
+	const methodOptions = getEnumOptions('PAYMENT_METHOD');
+	const statusOptions = getEnumOptions('PAYMENT_STATUS');
+	const currencyOptions = getEnumOptions('CURRENCY');
 	const typeOptions = getEnumOptions('PAYMENT_TYPE');
 
 	const FIELDS = {
@@ -57,6 +57,22 @@ const currencyOptions = getEnumOptions('CURRENCY');
 			options: methodOptions,
 			formatter: (value) => ENUM_LABELS.PAYMENT_METHOD[value] || value,
 		},
+		paymentType: {
+			key: 'paymentType',
+			apiKey: 'payment_type',
+			label: FIELD_LABELS.PAYMENT.payment_type,
+			type: FIELD_TYPES.SELECT,
+			options: typeOptions,
+			formatter: (value) => ENUM_LABELS.PAYMENT_TYPE[value] || value,
+		},
+		paymentStatus: {
+			key: 'paymentStatus',
+			apiKey: 'payment_status',
+			label: FIELD_LABELS.PAYMENT.payment_status,
+			type: FIELD_TYPES.SELECT,
+			options: statusOptions,
+			formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
+		},
 		providerPaymentId: {
 			key: 'providerPaymentId',
 			apiKey: 'provider_payment_id',
@@ -64,22 +80,12 @@ const currencyOptions = getEnumOptions('CURRENCY');
 			type: FIELD_TYPES.TEXT,
 			excludeFromTable: true,
 		},
-
-paymentStatus: {
-key: 'paymentStatus',
-apiKey: 'payment_status',
-label: FIELD_LABELS.PAYMENT.payment_status,
-type: FIELD_TYPES.SELECT,
-options: statusOptions,
-formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
-		},
-		paymentType: {
-			key:  'paymentType',
-			apiKey:  'payment_type',
-			label:  FIELD_LABELS.PAYMENT.payment_type,
-			type:  FIELD_TYPES.SELECT,
-			options:  typeOptions,
-			formatter:  (value) => ENUM_LABELS.PAYMENT_TYPE[value] || value,
+		confirmationToken: {
+			key: 'confirmationToken',
+			apiKey: 'confirmation_token',
+			label: FIELD_LABELS.PAYMENT.confirmation_token,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		amount: {
 			key: 'amount',
@@ -113,13 +119,6 @@ formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
 			label: FIELD_LABELS.PAYMENT.paid_at,
 			type: FIELD_TYPES.DATE,
 			formatter: (value) => formatDate(value),
-			excludeFromTable: true,
-		},
-		confirmationToken: {
-			key: 'confirmationToken',
-			apiKey: 'confirmation_token',
-			label: FIELD_LABELS.PAYMENT.confirmation_token,
-			type: FIELD_TYPES.TEXT,
 			excludeFromTable: true,
 		},
 		isPaid: {

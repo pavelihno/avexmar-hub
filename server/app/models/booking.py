@@ -43,6 +43,7 @@ class Booking(BaseModel):
     status = db.Column(
         db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS
     )
+    seats_number = db.Column(db.Integer, nullable=False, default=0)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
@@ -77,7 +78,6 @@ class Booking(BaseModel):
     tickets: Mapped[List['Ticket']] = db.relationship(
         'Ticket', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
-    seats_number = db.Column(db.Integer, nullable=False, default=0)
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger',
         back_populates='booking',
@@ -278,9 +278,11 @@ class Booking(BaseModel):
         BOOKING_STATUS.passengers_added: ['passengers', 'confirmation'],
         BOOKING_STATUS.confirmed: ['confirmation', 'payment'],
         BOOKING_STATUS.payment_pending: ['confirmation', 'payment'],
-        BOOKING_STATUS.payment_failed: ['confirmation', 'payment'],
         BOOKING_STATUS.payment_confirmed: ['confirmation', 'payment'],
+        BOOKING_STATUS.payment_failed: ['confirmation', 'payment'],
         BOOKING_STATUS.completed: ['completion'],
+        BOOKING_STATUS.expired: [],
+        BOOKING_STATUS.cancelled: ['completion'],
     }
 
     @classmethod

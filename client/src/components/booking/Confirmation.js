@@ -26,12 +26,12 @@ const Confirmation = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-		const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
-	   const expiresAt = booking?.expires_at;
-	   const timeLeft = useExpiryCountdown(expiresAt);
-        const [loading, setLoading] = useState(false);
-        const [invoiceLoading, setInvoiceLoading] = useState(false);
-        const isAdmin = useSelector((state) => state.auth.isAdmin);
+	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
+	const expiresAt = booking?.expires_at;
+	const timeLeft = useExpiryCountdown(expiresAt);
+	const [loading, setLoading] = useState(false);
+	const [invoiceLoading, setInvoiceLoading] = useState(false);
+	const isAdmin = useSelector((state) => state.auth.isAdmin);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -62,34 +62,34 @@ const Confirmation = () => {
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
-        const handlePayment = async () => {
-                setLoading(true);
-                try {
-                        if (booking.status === 'passengers_added') {
-                                await dispatch(confirmBooking(publicId)).unwrap();
-                        }
-                        await dispatch(createPayment({ public_id: publicId })).unwrap();
-                        await dispatch(fetchBookingAccess(publicId)).unwrap();
-                        navigate(`/booking/${publicId}/payment`);
-                } catch (e) {
-                        // errors handled via redux state
-                        setLoading(false);
-                }
-        };
+	const handlePayment = async () => {
+		setLoading(true);
+		try {
+			if (booking.status === 'passengers_added') {
+				await dispatch(confirmBooking(publicId)).unwrap();
+			}
+			await dispatch(createPayment({ public_id: publicId })).unwrap();
+			await dispatch(fetchBookingAccess(publicId)).unwrap();
+			navigate(`/booking/${publicId}/payment`);
+		} catch (e) {
+			// errors handled via redux state
+			setLoading(false);
+		}
+	};
 
-        const handleInvoice = async () => {
-                setInvoiceLoading(true);
-                try {
-                        if (booking.status === 'passengers_added') {
-                                await dispatch(confirmBooking(publicId)).unwrap();
-                        }
-                        await dispatch(createInvoice({ public_id: publicId })).unwrap();
-                        await dispatch(fetchBookingAccess(publicId)).unwrap();
-                        navigate(`/booking/${publicId}/payment?processing=1`);
-                } catch (e) {
-                        setInvoiceLoading(false);
-                }
-        };
+	const handleInvoice = async () => {
+		setInvoiceLoading(true);
+		try {
+			if (booking.status === 'passengers_added') {
+				await dispatch(confirmBooking(publicId)).unwrap();
+			}
+			await dispatch(createInvoice({ public_id: publicId })).unwrap();
+			await dispatch(fetchBookingAccess(publicId)).unwrap();
+			navigate(`/booking/${publicId}/payment?processing=1`);
+		} catch (e) {
+			setInvoiceLoading(false);
+		}
+	};
 
 	if (bookingLoading || !booking) {
 		return (
@@ -102,17 +102,17 @@ const Confirmation = () => {
 		);
 	}
 
-return (
-<Base maxWidth='lg'>
-<BookingProgress activeStep='confirmation' />
-{expiresAt && (
-<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-<Typography variant='h6' sx={{ fontWeight: 600 }}>
-{timeLeft}
-</Typography>
-</Box>
-)}
-<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+	return (
+		<Base maxWidth='lg'>
+			<BookingProgress activeStep='confirmation' />
+			{expiresAt && (
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+					<Typography variant='h6' sx={{ fontWeight: 600 }}>
+						{timeLeft}
+					</Typography>
+				</Box>
+			)}
+			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
@@ -196,25 +196,30 @@ return (
 						</Accordion>
 					)}
 
-                                        {/* Payment buttons */}
-                                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                                                <Button variant='contained' color='orange' onClick={handlePayment} disabled={loading}>
-                                                        {loading ? (
-                                                                <CircularProgress size={24} color='inherit' />
-                                                        ) : (
-                                                                UI_LABELS.BOOKING.confirmation.payment_button
-                                                        )}
-                                                </Button>
-                                                {isAdmin && (
-                                                        <Button variant='contained' color='orange' onClick={handleInvoice} disabled={invoiceLoading}>
-                                                                {invoiceLoading ? (
-                                                                        <CircularProgress size={24} color='inherit' />
-                                                                ) : (
-                                                                        UI_LABELS.BOOKING.confirmation.invoice_button
-                                                                )}
-                                                        </Button>
-                                                )}
-                                        </Box>
+					{/* Payment buttons */}
+					<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+						<Button variant='contained' color='orange' onClick={handlePayment} disabled={loading}>
+							{loading ? (
+								<CircularProgress size={24} color='inherit' />
+							) : (
+								UI_LABELS.BOOKING.confirmation.payment_button
+							)}
+						</Button>
+						{isAdmin && (
+							<Button
+								variant='contained'
+								color='orange'
+								onClick={handleInvoice}
+								disabled={invoiceLoading}
+							>
+								{invoiceLoading ? (
+									<CircularProgress size={24} color='inherit' />
+								) : (
+									UI_LABELS.BOOKING.confirmation.invoice_button
+								)}
+							</Button>
+						)}
+					</Box>
 				</Grid>
 			</Grid>
 		</Base>

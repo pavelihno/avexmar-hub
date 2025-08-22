@@ -28,18 +28,18 @@ import { processBookingPassengers, fetchBookingDetails, fetchBookingAccess } fro
 import { fetchCountries } from '../../redux/actions/country';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import {
-		createFormFields,
-		FIELD_TYPES,
-		formatNumber,
-		getPassengerFormConfig,
-		validateEmail,
-		validatePhoneNumber,
-		formatDate,
-		formatTime,
-		formatDuration,
-		findBookingPassengerDuplicates,
-		extractRouteInfo,
-	   useExpiryCountdown,
+	createFormFields,
+	FIELD_TYPES,
+	formatNumber,
+	getPassengerFormConfig,
+	validateEmail,
+	validatePhoneNumber,
+	formatDate,
+	formatTime,
+	formatDuration,
+	findBookingPassengerDuplicates,
+	extractRouteInfo,
+	useExpiryCountdown,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
 
@@ -52,10 +52,10 @@ const Passengers = () => {
 		isLoading: bookingLoading,
 		errors: bookingErrors,
 	} = useSelector((state) => state.bookingProcess);
-		const { countries } = useSelector((state) => state.countries);
+	const { countries } = useSelector((state) => state.countries);
 
-	   const expiresAt = booking?.expires_at;
-	   const timeLeft = useExpiryCountdown(expiresAt);
+	const expiresAt = booking?.expires_at;
+	const timeLeft = useExpiryCountdown(expiresAt);
 
 	const existingPassengerData = booking?.passengers;
 	const passengersExist = booking?.passengersExist;
@@ -274,17 +274,17 @@ const Passengers = () => {
 
 	const passengersReady = !bookingLoading && Array.isArray(passengerData);
 
-		return (
-				<Base maxWidth='lg'>
-						<BookingProgress activeStep='passengers' />
-					   {expiresAt && (
-							   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-									   <Typography variant='h6' sx={{ fontWeight: 600 }}>
-											   {timeLeft}
-									   </Typography>
-							   </Box>
-					   )}
-						<Grid container spacing={2}>
+	return (
+		<Base maxWidth='lg'>
+			<BookingProgress activeStep='passengers' />
+			{expiresAt && (
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+					<Typography variant='h6' sx={{ fontWeight: 600 }}>
+						{timeLeft}
+					</Typography>
+				</Box>
+			)}
+			<Grid container spacing={2}>
 				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
 					{errorMessages.length > 0 && (
 						<Stack spacing={1} sx={{ mb: 2 }}>
