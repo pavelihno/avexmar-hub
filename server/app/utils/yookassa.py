@@ -11,7 +11,7 @@ from app.models.payment import Payment
 from app.utils.business_logic import calculate_receipt_details
 from app.utils.datetime import format_date
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
-from app.utils.email import send_email
+from app.utils.email import EMAIL_TYPE, send_email
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -94,9 +94,8 @@ def __send_confirmation_email(booking: Booking) -> bool:
         f'?access_token={booking.access_token}'
     )
     send_email(
-        subject=f'Подтверждение бронирования № {str(booking.booking_number)}',
+        EMAIL_TYPE.booking_confirmation,
         recipients=[booking.email_address],
-        template='booking_confirmation.txt',
         booking_number=str(booking.booking_number),
         total_price=f'{booking.total_price:.2f}',
         currency=booking.currency.value.upper(),
@@ -109,9 +108,8 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
     if not booking.email_address or not payment_url:
         return False
     send_email(
-        subject='Счёт на оплату бронирования',
+        EMAIL_TYPE.invoice_payment,
         recipients=[booking.email_address],
-        template='invoice_payment.txt',
         payment_url=payment_url,
     )
     return True
