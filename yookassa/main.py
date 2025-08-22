@@ -4,7 +4,7 @@ import requests
 import dotenv
 
 from datetime import datetime, timedelta
-from yookassa import Configuration, Payment as YooPayment
+from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 
 WEBHOOK_URL = 'http://localhost:8000/webhooks/yookassa'
@@ -24,20 +24,31 @@ def create_payment():
         'value': f'{total_price:.2f}',
         'currency': currency.upper(),
     }
+    receipt = {
+        'customer': {'email': 'test@example.com'},
+        'items': [
+            {
+                'description': 'Test booking',
+                'quantity': '1',
+                'amount': {'value': f'{total_price:.2f}', 'currency': currency.upper()},
+                'vat_code': 7,
+                'payment_mode': 'full_payment',
+                'payment_subject': 'service',
+            }
+        ],
+    }
     expires_at = datetime.now() + timedelta(hours=1)
     body = {
         'amount': amount,
         'confirmation': {'type': 'embedded'},
         'capture': False,
-        'description': f'Payment description',
+        'receipt': receipt,
+        'metadata': {'public_id': booking_id, 'expires_at': expires_at.isoformat()},
     }
 
     try:
         payment = YooPayment.create(body, uuid.uuid4())
-
-        token = getattr(getattr(payment, 'confirmation', None),
-                        'confirmation_token', None)
-
+        token = getattr(getattr(payment, 'confirmation', None), 'confirmation_token', None)
         print('payment_id:', payment.id)
         print('status:', payment.status)
         print('confirmation_token:', token)
@@ -85,77 +96,115 @@ def decline_payment():
 
 
 def create_invoice():
-    pass
+    booking_id = '12345'
+    total_price = 100
+    currency = 'rub'
+
+    amount = {
+        'value': f'{total_price:.2f}',
+        'currency': currency.upper(),
+    }
+    cart = {
+        'items': [
+            {
+                'description': 'Test booking',
+                'quantity': '1',
+                'amount': {'value': f'{total_price:.2f}', 'currency': currency.upper()},
+                'vat_code': 7,
+                'payment_mode': 'full_payment',
+                'payment_subject': 'service',
+            }
+        ]
+    }
+    expires_at = datetime.now() + timedelta(days=1)
+    body = {
+        'amount': amount,
+        'cart': cart,
+        'due_date': expires_at.isoformat(),
+        'metadata': {'public_id': booking_id, 'expires_at': expires_at.isoformat()},
+    }
+
+    try:
+        invoice = YooInvoice.create(body, uuid.uuid4())
+        print('invoice_id:', getattr(invoice, 'id', None))
+        print('payment_url:', getattr(invoice, 'payment_url', None))
+
+    except requests.exceptions.ConnectionError as e:
+        print('Network/DNS error contacting YooKassa:', e)
+
+    except Exception as e:
+        print('Unexpected error:', type(e).__name__, e)
+        raise
 
 
 def capture_invoice():
-    pass
+    invoice_id = '3033b916-000f-5001-8000-117e3f89084e'
+    total_price = 100
+    currency = 'rub'
+
+    body = {
+        'amount': {
+            'value': f'{total_price:.2f}',
+            'currency': currency.upper(),
+        }
+    }
+    try:
+        payment = YooPayment.capture(invoice_id, body)
+        print('Invoice captured successfully:', payment)
+
+    except Exception as e:
+        print('Unexpected error:', type(e).__name__, e)
+        raise
 
 
 def decline_invoice():
-    pass
+    invoice_id = '3033aee9-000f-5001-8000-146f7e05aba1'
+
+    try:
+        payment = YooPayment.cancel(invoice_id)
+        print('Invoice declined successfully:', payment)
+
+    except Exception as e:
+        print('Unexpected error:', type(e).__name__, e)
+        raise
 
 
 def send_notification():
-    payment_id = '303422b0-000f-5000-b000-15cdb5826584'
-    status = 'succeeded'
+    provider_id = '303422b0-000f-5000-b000-15cdb5826584'
+    event = 'payment.succeeded'
 
-    event_map = {
-        'succeeded': 'payment.succeeded',
-        'canceled': 'payment.canceled',
-        'waiting_for_capture': 'payment.waiting_for_capture'
-    }
-
-    event = event_map.get(status)
-
-    webhook_data = {
-        'type': 'notification',
-        'event': event,
-        'object': {
-            'id': payment_id,
-            'status': status,
+    event_data = {
+        'payment.waiting_for_capture': {'status': 'waiting_for_capture', 'paid': True},
+        'payment.succeeded': {
+            'status': 'succeeded',
             'paid': True,
-            'amount': {
-                'value': '2.00',
-                'currency': 'RUB'
-            },
-            'authorization_details': {
-                'rrn': '603668680243',
-                'auth_code': '000000',
-                'three_d_secure': {
-                    'applied': True
-                }
-            },
-            'created_at': '2018-07-10T14:27:54.691Z',
-            'description': 'Заказ №72',
-            'expires_at': '2018-07-17T14:28:32.484Z',
-            'metadata': {},
-            'payment_method': {
-                'type': 'bank_card',
-                'id': '22d6d597-000f-5000-9000-145f6df21d6f',
-                'saved': False,
-                'card': {
-                    'first6': '555555',
-                    'last4': '4444',
-                    'expiry_month': '07',
-                    'expiry_year': '2021',
-                    'card_type': 'MasterCard',
-                    'issuer_country': 'RU',
-                    'issuer_name': 'Sberbank'
-                },
-                'title': 'Bank card *4444'
-            },
-            'refundable': False,
-            'test': False,
-            'id': payment_id,
-            'event': event
-        }
+            'captured_at': datetime.now().isoformat(),
+        },
+        'payment.canceled': {'status': 'canceled', 'paid': False},
+        'invoice.waiting_for_capture': {'status': 'waiting_for_capture', 'paid': True},
+        'invoice.paid': {
+            'status': 'paid',
+            'paid': True,
+            'captured_at': datetime.now().isoformat(),
+        },
+        'invoice.canceled': {'status': 'canceled', 'paid': False},
     }
+
+    info = event_data.get(event, {})
+    obj = {
+        'id': provider_id,
+        'status': info.get('status'),
+        'paid': info.get('paid', False),
+        'amount': {'value': '2.00', 'currency': 'RUB'},
+    }
+    if info.get('captured_at'):
+        obj['captured_at'] = info['captured_at']
+
+    webhook_data = {'type': 'notification', 'event': event, 'object': obj}
 
     try:
         response = requests.post(WEBHOOK_URL, json=webhook_data)
         response.raise_for_status()
-
         print('Notification sent successfully:', response.json())
 
     except Exception as e:
