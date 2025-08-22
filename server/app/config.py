@@ -31,22 +31,10 @@ class Config:
     # Yookassa settings
     YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
     YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
-    YOOKASSA_USE_MOCK = os.environ.get('YOOKASSA_USE_MOCK') == 'True'
-    YOOKASSA_API_URL = (
-        os.environ.get('YOOKASSA_MOCK_URL')
-        if YOOKASSA_USE_MOCK
-        else os.environ.get('YOOKASSA_API_URL')
-    )
 
     # Celery settings
-    CELERY_BROKER_URL = os.environ.get(
-        'SERVER_CELERY_BROKER_URL',
-        f"redis://:{os.environ.get('REDIS_PASSWORD', '')}@redis:6379/0",
-    )
-    CELERY_RESULT_BACKEND = os.environ.get(
-        'SERVER_CELERY_RESULT_BACKEND',
-        CELERY_BROKER_URL,
-    )
+    CELERY_BROKER_URL = os.environ.get('SERVER_CELERY_BROKER_URL')
+    CELERY_RESULT_BACKEND = os.environ.get('SERVER_CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
 
     # Business logic settings
     JWT_EXP_HOURS = 72

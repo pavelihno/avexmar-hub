@@ -9,7 +9,7 @@ from app.utils.enum import BOOKING_STATUS
 
 @celery.task
 def cleanup_expired_bookings():
-    now = datetime.utcnow()
+    now = datetime.now()
     expired = (
         Booking.query.join(BookingHold)
         .filter(BookingHold.expires_at < now)
@@ -21,12 +21,6 @@ def cleanup_expired_bookings():
 
     with db.session.begin():
         for booking in expired:
-            Booking.transition_status(
-                booking.id,
-                BOOKING_STATUS.expired,
-                session=db.session,
-                commit=False,
-            )
-            db.session.delete(booking)
+            booking.delete(commit=False)
 
     return len(expired)
