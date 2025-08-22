@@ -3,7 +3,7 @@ from flask import request, jsonify
 from app.config import Config
 from app.models.user import User
 from app.utils.jwt import signJWT
-from app.utils.email import send_email
+from app.utils.email import EMAIL_TYPE, send_email
 from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.middlewares.auth_middleware import login_required
 
@@ -59,11 +59,10 @@ def forgot_password():
     token = PasswordResetToken.create(user)
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
-        'Сброс пароля',
-        [user.email],
-        'forgot_password.txt',
+        EMAIL_TYPE.password_reset,
+        recipients=[user.email],
         reset_url=reset_url,
-        expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS
+        expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,
     )
     return jsonify({'message': 'Password reset instructions sent'}), 200
 
