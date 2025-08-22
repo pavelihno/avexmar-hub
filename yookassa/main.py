@@ -84,6 +84,18 @@ def decline_payment():
         raise
 
 
+def create_invoice():
+    pass
+
+
+def capture_invoice():
+    pass
+
+
+def decline_invoice():
+    pass
+
+
 def send_notification():
     payment_id = '303422b0-000f-5000-b000-15cdb5826584'
     status = 'succeeded'
