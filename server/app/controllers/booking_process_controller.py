@@ -1,4 +1,5 @@
-from flask import request, jsonify
+from flask import request, jsonify, send_file
+from io import BytesIO
 
 from app.database import db
 from app.config import Config
@@ -11,7 +12,7 @@ from app.models.passenger import Passenger
 from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
-from app.utils.business_logic import calculate_price_details
+from app.utils.business_logic import calculate_price_details, get_booking_details
 from app.utils.yookassa import create_payment, create_invoice, handle_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
@@ -21,6 +22,7 @@ from app.utils.enum import (
     CONSENT_DOC_TYPE,
 )
 from app.utils.consent import create_booking_consent
+from app.utils.pdf import generate_booking_pdf
 
 
 @current_user
@@ -231,69 +233,21 @@ def confirm_booking_process(current_user):
 def get_booking_process_details(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
-
-    result = booking.to_dict()
-    passengers = []
-    flights = []
-
-    for bp in booking.booking_passengers:
-        p = bp.passenger.to_dict(return_children=True)
-        p['category'] = bp.category.value if bp.category else None
-        passengers.append(p)
-    passengers_exist = len(passengers) > 0
-    if not passengers:
-        counts = booking.passenger_counts or {}
-        for key, count in counts.items():
-            try:
-                count = int(count)
-            except (TypeError, ValueError):
-                continue
-            category = BookingPassenger.get_category_from_plural(
-                PASSENGER_PLURAL_CATEGORY(key)
-            )
-            for _ in range(count):
-                passengers.append({'category': category.value})
-
-    passenger_counts = dict(booking.passenger_counts or {})
-
-    flights = [
-        bf.flight.to_dict(return_children=True) for bf in booking.booking_flights
-    ]
-
-    flights.sort(
-        key=lambda f: (
-            f.get('scheduled_departure'),
-            f.get('scheduled_departure_time') or '',
-        )
-    )
-
-    outbound_id = flights[0]['id'] if len(flights) > 0 else 0
-    return_id = flights[1]['id'] if len(flights) > 1 else 0
-
-    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
-    outbound_tariff_id = tariffs_map.get(outbound_id)
-    return_tariff_id = tariffs_map.get(return_id)
-
-    consent_exists = (
-        booking.consent_events.filter_by(
-            type=CONSENT_EVENT_TYPE.pd_processing, action=CONSENT_ACTION.agree
-        ).count()
-        > 0
-    )
-
-    result['passengers'] = passengers
-    result['passengers_exist'] = passengers_exist
-    result['flights'] = flights
-    result['price_details'] = calculate_price_details(
-        outbound_id,
-        outbound_tariff_id,
-        return_id,
-        return_tariff_id,
-        passenger_counts,
-    )
-    result['consent'] = consent_exists
-
+    result = get_booking_details(booking)
     return jsonify(result), 200
+
+
+@current_user
+def get_booking_process_pdf(current_user, public_id):
+    token = request.args.get('access_token')
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+    pdf = generate_booking_pdf(booking)
+    return send_file(
+        BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'booking_{booking.booking_number}.pdf',
+    )
 
 
 @current_user

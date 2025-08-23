@@ -47,6 +47,18 @@ export const fetchBookingAccess = createAsyncThunk(
 	}
 );
 
+export const downloadBookingPdf = createAsyncThunk(
+	'bookingProcess/downloadPdf',
+	async (publicId, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/booking/${publicId}/pdf`, { responseType: 'blob' });
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	},
+);
+
 export const confirmBooking = createAsyncThunk('bookingProcess/confirm', async (publicId, { rejectWithValue }) => {
 	try {
 		const res = await serverApi.post('/booking/confirm', { public_id: publicId });

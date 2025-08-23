@@ -1,4 +1,12 @@
-from app.utils.enum import PASSENGER_CATEGORY, PASSENGER_PLURAL_CATEGORY, SEAT_CLASS, DISCOUNT_TYPE, FEE_APPLICATION
+from app.utils.enum import (
+    PASSENGER_CATEGORY,
+    PASSENGER_PLURAL_CATEGORY,
+    SEAT_CLASS,
+    DISCOUNT_TYPE,
+    FEE_APPLICATION,
+    CONSENT_ACTION,
+    CONSENT_EVENT_TYPE,
+)
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
@@ -6,6 +14,7 @@ from app.models.discount import Discount
 from app.models.flight import Flight
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
+from app.models.payment import Payment
 
 
 PASSENGER_WITH_SEAT_CATEGORIES = [
@@ -256,3 +265,72 @@ def calculate_receipt_details(booking):
         'currency': price_details.get('currency'),
         'directions': directions,
     }
+
+
+def get_booking_details(booking):
+    """Assemble comprehensive booking details for emails and PDFs."""
+    result = booking.to_dict()
+
+    passengers = []
+    for bp in booking.booking_passengers:
+        p = bp.passenger.to_dict(return_children=True)
+        p['category'] = bp.category.value if bp.category else None
+        passengers.append(p)
+
+    passengers_exist = len(passengers) > 0
+    if not passengers:
+        counts = booking.passenger_counts or {}
+        for key, count in counts.items():
+            try:
+                count = int(count)
+            except (TypeError, ValueError):
+                continue
+            category = BookingPassenger.get_category_from_plural(
+                PASSENGER_PLURAL_CATEGORY(key)
+            )
+            for _ in range(count):
+                passengers.append({'category': category.value})
+
+    passenger_counts = dict(booking.passenger_counts or {})
+
+    flights = [
+        bf.flight.to_dict(return_children=True) for bf in booking.booking_flights
+    ]
+    flights.sort(
+        key=lambda f: (
+            f.get('scheduled_departure'),
+            f.get('scheduled_departure_time') or '',
+        )
+    )
+
+    outbound_id = flights[0]['id'] if len(flights) > 0 else 0
+    return_id = flights[1]['id'] if len(flights) > 1 else 0
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
+    outbound_tariff_id = tariffs_map.get(outbound_id)
+    return_tariff_id = tariffs_map.get(return_id)
+
+    result['passengers'] = passengers
+    result['passengers_exist'] = passengers_exist
+    result['flights'] = flights
+    result['price_details'] = calculate_price_details(
+        outbound_id,
+        outbound_tariff_id,
+        return_id,
+        return_tariff_id,
+        passenger_counts,
+    )
+
+    payment = booking.payments.order_by(Payment.id.desc()).first()
+    if payment:
+        result['payment'] = payment.to_dict()
+
+    consent_exists = (
+        booking.consent_events.filter_by(
+            type=CONSENT_EVENT_TYPE.pd_processing,
+            action=CONSENT_ACTION.agree,
+        ).count()
+        > 0
+    )
+    result['consent'] = consent_exists
+
+    return result

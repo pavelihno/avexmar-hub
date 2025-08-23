@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, downloadBookingPdf } from '../../redux/actions/bookingProcess';
 import { fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
 import { formatNumber, extractRouteInfo, formatDate, formatDateTime } from '../utils';
@@ -18,6 +18,22 @@ const Completion = () => {
 	const dispatch = useDispatch();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 	const payment = useSelector((state) => state.payment.current);
+
+	const handleDownloadPdf = async () => {
+		try {
+			const data = await dispatch(downloadBookingPdf(publicId)).unwrap();
+			const url = window.URL.createObjectURL(new Blob([data]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `booking_${booking.booking_number}.pdf`;
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (e) {
+			// ignore
+		}
+	};
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -74,6 +90,10 @@ const Completion = () => {
 									{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number}
 								</Typography>
 							)}
+
+						<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
+							Скачать PDF
+						</Button>
 						</CardContent>
 					</Card>
 
