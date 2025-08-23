@@ -96,6 +96,7 @@ def __send_confirmation_email(booking: Booking) -> bool:
     send_email(
         EMAIL_TYPE.booking_confirmation,
         recipients=[booking.email_address],
+        is_noreply=False,
         booking_number=str(booking.booking_number),
         total_price=f'{booking.total_price:.2f}',
         currency=booking.currency.value.upper(),
@@ -110,6 +111,7 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
     send_email(
         EMAIL_TYPE.invoice_payment,
         recipients=[booking.email_address],
+        is_noreply=False,
         payment_url=payment_url,
         hours=Config.BOOKING_INVOICE_EXP_HOURS,
     )

@@ -22,11 +22,12 @@ class Config:
     # Mail settings
     MAIL_SERVER = os.environ.get('SERVER_MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('SERVER_MAIL_PORT', 25))
-    MAIL_USERNAME = os.environ.get('SERVER_MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('SERVER_MAIL_PASSWORD')
     MAIL_USE_TLS = os.environ.get('SERVER_MAIL_USE_TLS') == 'True'
     MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
-    MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
+    MAIL_DEFAULT_USERNAME = os.environ.get('SERVER_MAIL_DEFAULT_USERNAME')
+    MAIL_DEFAULT_PASSWORD = os.environ.get('SERVER_MAIL_DEFAULT_PASSWORD')
+    MAIL_NOREPLY_USERNAME = os.environ.get('SERVER_MAIL_NOREPLY_USERNAME')
+    MAIL_NOREPLY_PASSWORD = os.environ.get('SERVER_MAIL_NOREPLY_PASSWORD')
 
     # Yookassa settings
     YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')

@@ -61,6 +61,7 @@ def forgot_password():
     send_email(
         EMAIL_TYPE.password_reset,
         recipients=[user.email],
+        is_noreply=True,
         reset_url=reset_url,
         expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,
     )
