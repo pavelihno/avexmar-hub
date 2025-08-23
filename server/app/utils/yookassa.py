@@ -8,10 +8,10 @@ from app.config import Config
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
-from app.utils.business_logic import calculate_receipt_details
-from app.utils.datetime import format_date
+from app.utils.business_logic import calculate_receipt_details, get_booking_details
+from app.utils.datetime import format_date, format_time
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
-from app.utils.email import EMAIL_TYPE, send_email
+from app.utils.pdf import generate_booking_pdf
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -93,14 +93,54 @@ def __send_confirmation_email(booking: Booking) -> bool:
         f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
         f'?access_token={booking.access_token}'
     )
+    details = get_booking_details(booking)
+
+    flights = []
+    for f in details.get('flights', []):
+        route = f.get('route') or {}
+        origin = route.get('origin_airport') or {}
+        dest = route.get('destination_airport') or {}
+        flights.append(
+            {
+                'number': f.get('airline_flight_number'),
+                'from': f"{origin.get('city_name')} ({origin.get('iata_code')})",
+                'to': f"{dest.get('city_name')} ({dest.get('iata_code')})",
+                'departure': f"{format_date(f.get('scheduled_departure'))} {format_time(f.get('scheduled_departure_time'))}",
+                'arrival': f"{format_date(f.get('scheduled_arrival'))} {format_time(f.get('scheduled_arrival_time'))}",
+            }
+        )
+    flights.sort(key=lambda x: x['departure'])
+
+    category_labels = {
+        'adult': 'Взрослый',
+        'child': 'Ребёнок',
+        'infant': 'Младенец',
+        'infant_seat': 'Младенец с местом',
+    }
+    passengers = []
+    for p in details.get('passengers', []):
+        name = ' '.join(
+            filter(None, [p.get('last_name'), p.get('first_name')])
+        ).strip()
+        passengers.append(
+            {'name': name, 'category': category_labels.get(p.get('category'), p.get('category'))}
+        )
+
+    pdf_data = generate_booking_pdf(booking, details=details)
+
     send_email(
         EMAIL_TYPE.booking_confirmation,
         recipients=[booking.email_address],
         is_noreply=False,
         booking_number=str(booking.booking_number),
-        total_price=f'{booking.total_price:.2f}',
-        currency=booking.currency.value.upper(),
         booking_url=booking_url,
+        flights=flights,
+        passengers=passengers,
+        attachments=[{
+            'filename': f'booking_{booking.booking_number}.pdf',
+            'content_type': 'application/pdf',
+            'data': pdf_data,
+        }],
     )
     return True
 

@@ -4,6 +4,32 @@
 
 {% block content %}
 <p>Ваше бронирование № {{ booking_number }} успешно завершено.</p>
-<p>Сумма: {{ total_price }} {{ currency }}</p>
+
+<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+  <thead>
+    <tr>
+      <th>Рейс</th>
+      <th>Отправление</th>
+      <th>Прибытие</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in flights %}
+    <tr>
+      <td>{{ f.number }}</td>
+      <td>{{ f.from }}<br/>{{ f.departure }}</td>
+      <td>{{ f.to }}<br/>{{ f.arrival }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p>Пассажиры:</p>
+<ul>
+  {% for p in passengers %}
+  <li>{{ p.name }} – {{ p.category }}</li>
+  {% endfor %}
+</ul>
+
 <p>Детали бронирования: <a href="{{ booking_url }}">посмотреть</a></p>
 {% endblock %}
