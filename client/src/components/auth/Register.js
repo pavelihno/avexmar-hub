@@ -39,9 +39,12 @@ const Register = ({ isModal = false }) => {
 	const [errors, setErrors] = useState({});
 	const [successMessage, setSuccessMessage] = useState('');
 
-	const { email, password, password2 } = formData;
+const { email, password, password2 } = formData;
 
-	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => {
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: name === 'email' ? value.toLowerCase() : value });
+	};
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
@@ -126,13 +129,14 @@ const Register = ({ isModal = false }) => {
 							id='email'
 							label={FIELD_LABELS.USER.email}
 							name='email'
+							type='email'
 							autoComplete='email'
 							autoFocus
 							value={email}
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
-						/>
+							/>
 						<TextField
 							margin='dense'
 							required
@@ -145,8 +149,8 @@ const Register = ({ isModal = false }) => {
 							value={password}
 							onChange={onChange}
 							error={!!errors.password}
-							helperText={errors.password ? errors.password : ''}
-						/>
+							helperText={errors.email ? errors.email : ''}
+							/>
 						<TextField
 							margin='dense'
 							required
@@ -159,8 +163,8 @@ const Register = ({ isModal = false }) => {
 							value={password2}
 							onChange={onChange}
 							error={!!errors.password2}
-							helperText={errors.password2 ? errors.password2 : ''}
-						/>
+							helperText={errors.email ? errors.email : ''}
+							/>
 						<Divider sx={{ my: 1 }} />
 						<Button type='submit' fullWidth variant='contained'>
 							{UI_LABELS.BUTTONS.register}
