@@ -289,6 +289,8 @@ export const UI_LABELS = {
 		have_account: 'Уже есть аккаунт?',
 		or: 'или',
 		forgot_password: 'Забыли пароль?',
+		two_factor_prompt: (email) => `Введите код, отправленный на ${email}`,
+		two_factor_code_label: 'Код',
 	},
 PROFILE: {
 profile: 'Профиль',
