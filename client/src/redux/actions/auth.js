@@ -24,7 +24,30 @@ export const activateAccount = createAsyncThunk('auth/activateAccount', async (d
 
 export const login = createAsyncThunk('auth/login', async (formData, { rejectWithValue }) => {
 	try {
-			const res = await serverApi.post('/login', { ...formData, email: formData.email.toLowerCase() });
+		const res = await serverApi.post('/login', { ...formData, email: formData.email.toLowerCase() });
+		const { token, user } = res.data;
+		if (token) {
+			setAuthToken(token);
+			return user;
+		}
+		return rejectWithValue(res.data);
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
+});
+
+export const setupTwoFactor = createAsyncThunk('auth/setupTwoFactor', async (email, { rejectWithValue }) => {
+	try {
+		const res = await serverApi.post('/setup_2fa', { email: email.toLowerCase() });
+		return res.data;
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
+});
+
+export const verifyTwoFactor = createAsyncThunk('auth/verifyTwoFactor', async (data, { rejectWithValue }) => {
+	try {
+		const res = await serverApi.post('/verify_2fa', { ...data, email: data.email.toLowerCase() });
 		const { token, user } = res.data;
 		setAuthToken(token);
 		return user;

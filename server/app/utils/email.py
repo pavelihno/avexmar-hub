@@ -25,6 +25,10 @@ class EMAIL_TYPE(enum.Enum):
         'account_activation',
         'Активация аккаунта',
     )
+    two_factor = (
+        'two_factor',
+        'Код подтверждения входа',
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template
