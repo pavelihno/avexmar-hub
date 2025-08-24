@@ -127,12 +127,14 @@ export const FIELD_LABELS = {
 		tariff_id: 'Тариф',
 		seats_number: 'Количество мест',
 	},
-	USER: {
-		email: 'Электронная почта',
-		password: 'Пароль',
-		role: 'Роль пользователя',
-		is_active: 'Активен',
-	},
+        USER: {
+                email: 'Электронная почта',
+                password: 'Пароль',
+                role: 'Роль пользователя',
+                is_active: 'Активен',
+                failed_login_attempts: 'Неудачные входы',
+                is_locked: 'Заблокирован',
+        },
 	TIMEZONE: {
 		name: 'Часовой пояс',
 	},

@@ -46,11 +46,35 @@ def login():
     email = body.get('email', '').lower()
     password = body.get('password', '')
 
-    user = User.login(email, password)
-    if user:
-        token = signJWT(user.email)
-        return jsonify({'token': token, 'user': user.to_dict()}), 200
-    return jsonify({'message': 'Invalid email or password'}), 401
+    user = User.get_by_email(email)
+    if not user:
+        return jsonify({'message': 'Invalid email or password'}), 401
+
+    if user.is_locked:
+        return jsonify({'message': 'Account locked. Check your email to unlock'}), 403
+
+    if not user.is_active or not user.verify_password(password):
+        User.register_failed_login(user)
+        if user.is_locked:
+            token = PasswordResetToken.create(user)
+            reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
+            send_email(
+                EMAIL_TYPE.password_reset,
+                recipients=[user.email],
+                is_noreply=True,
+                reset_url=reset_url,
+                expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,
+            )
+            return jsonify({'message': 'Account locked. Password reset instructions sent'}), 403
+        attempts_left = Config.MAX_FAILED_LOGIN_ATTEMPTS - user.failed_login_attempts
+        return (
+            jsonify({'message': f'Invalid email or password. {attempts_left} attempts left'}),
+            401,
+        )
+
+    User.reset_failed_logins(user)
+    token = signJWT(user.email)
+    return jsonify({'token': token, 'user': user.to_dict()}), 200
 
 
 def forgot_password():
