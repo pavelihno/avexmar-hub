@@ -1,6 +1,4 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,9 +11,6 @@ import Footer from './Footer';
 import { pageTransition } from '../theme/animations';
 
 const Base = ({ children, maxWidth = 'lg' }) => {
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
-
 	return (
 		<Box>
 			<CssBaseline />

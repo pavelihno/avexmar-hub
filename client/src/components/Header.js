@@ -13,6 +13,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SearchIcon from '@mui/icons-material/Search';
 
 import { useAuthModal } from '../context/AuthModalContext';
 import { selectIsAuth, selectIsAdmin } from '../redux/reducers/auth';
@@ -24,8 +25,8 @@ const Header = () => {
 
 	const dispatch = useDispatch();
 
-        const { openLoginModal, openRegisterModal } = useAuthModal();
-        const navigate = useNavigate();
+	const { openLoginModal, openRegisterModal } = useAuthModal();
+	const navigate = useNavigate();
 
 	const isAuth = useSelector(selectIsAuth);
 	const isAdmin = useSelector(selectIsAdmin);
@@ -42,10 +43,10 @@ const Header = () => {
 		setAnchorEl(null);
 	};
 
-        const handleGoToProfile = () => {
-                navigate('/profile');
-                handleMenuClose();
-        };
+	const handleGoToProfile = () => {
+		navigate('/profile');
+		handleMenuClose();
+	};
 
 	const handleLogout = () => {
 		handleMenuClose();
@@ -84,29 +85,30 @@ const Header = () => {
 					{companyName.toUpperCase()}
 				</Typography>
 			</Box>
+
 			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-								{isAdmin && (
-										<Button
-												component={Link}
-												to='/admin'
-												color='inherit'
-												startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
-												sx={{ textTransform: 'none' }}
-										>
-												{UI_LABELS.ADMIN.panel}
-										</Button>
-								)}
+				<Button
+					component={Link}
+					to='/search/booking'
+					color='inherit'
+					startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
+					sx={{ textTransform: 'none' }}
+				>
+					{UI_LABELS.BOOKING_SEARCH.link}
+				</Button>
 
-								<Button
-										component={Link}
-										to='/search/booking'
-										color='inherit'
-										sx={{ textTransform: 'none' }}
-								>
-										{UI_LABELS.BOOKING_SEARCH.link}
-								</Button>
-
-								{isAuth ? (
+				{isAdmin && (
+					<Button
+						component={Link}
+						to='/admin'
+						color='inherit'
+						startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
+						sx={{ textTransform: 'none' }}
+					>
+						{UI_LABELS.ADMIN.panel}
+					</Button>
+				)}
+				{isAuth ? (
 					<>
 						<Button
 							color='inherit'
@@ -130,7 +132,7 @@ const Header = () => {
 								horizontal: 'right',
 							}}
 						>
-                                                        <MenuItem onClick={handleGoToProfile}>
+							<MenuItem onClick={handleGoToProfile}>
 								<SettingsIcon fontSize='small' sx={{ mr: 1 }} />
 								{UI_LABELS.TITLES.settings}
 							</MenuItem>

@@ -18,11 +18,21 @@ const BookingSearch = () => {
 		last_name: '',
 	});
 
-	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => {
+		const { name, value } = e.target;
+		const upperCaseFields = ['first_name', 'last_name'];
+		const newValue = upperCaseFields.includes(name) ? value.toUpperCase() : value;
+		setFormData({ ...formData, [name]: newValue });
+	};
 
 	const onSubmit = (e) => {
 		e.preventDefault();
-		dispatch(searchBooking(formData))
+		const submissionData = {
+			...formData,
+			first_name: formData.first_name.toUpperCase(),
+			last_name: formData.last_name.toUpperCase(),
+		};
+		dispatch(searchBooking(submissionData))
 			.unwrap()
 			.then((res) => {
 				navigate(`/booking/${res.public_id}/completion?access_token=${res.access_token}`);
@@ -31,7 +41,7 @@ const BookingSearch = () => {
 	};
 
 	return (
-		<Base>
+		<Base maxWidth='md'>
 			<Container maxWidth='sm'>
 				<Paper sx={{ p: 4, mt: 4 }}>
 					<Typography variant='h4' component='h4' align='center' gutterBottom>
@@ -39,7 +49,11 @@ const BookingSearch = () => {
 					</Typography>
 					<Fade in={!!errors} timeout={300}>
 						<div>
-							{errors?.message && <Alert severity='error' sx={{ mb: 2 }}>{errors.message}</Alert>}
+							{errors?.message && (
+								<Alert severity='error' sx={{ mb: 2 }}>
+									{errors.message}
+								</Alert>
+							)}
 						</div>
 					</Fade>
 					<Box component='form' onSubmit={onSubmit}>
@@ -55,19 +69,19 @@ const BookingSearch = () => {
 						<TextField
 							fullWidth
 							required
-							label={UI_LABELS.BOOKING_SEARCH.first_name}
-							name='first_name'
+							label={UI_LABELS.BOOKING_SEARCH.last_name}
+							name='last_name'
 							margin='normal'
-							value={formData.first_name}
+							value={formData.last_name}
 							onChange={onChange}
 						/>
 						<TextField
 							fullWidth
 							required
-							label={UI_LABELS.BOOKING_SEARCH.last_name}
-							name='last_name'
+							label={UI_LABELS.BOOKING_SEARCH.first_name}
+							name='first_name'
 							margin='normal'
-							value={formData.last_name}
+							value={formData.first_name}
 							onChange={onChange}
 						/>
 						<Button type='submit' variant='contained' fullWidth sx={{ mt: 2 }} disabled={isLoading}>
