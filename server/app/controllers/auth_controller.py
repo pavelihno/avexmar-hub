@@ -2,7 +2,7 @@ from flask import request, jsonify
 
 from app.config import Config
 from app.models.user import User
-from app.utils.jwt import signJWT
+from app.utils.jwt import signJWT, sign_activation_token, verify_activation_token
 from app.utils.email import EMAIL_TYPE, send_email
 from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.middlewares.auth_middleware import login_required
@@ -26,11 +26,19 @@ def register():
         'email': email,
         'password': password,
         'role': DEFAULT_USER_ROLE,
-        'is_active': True
+        'is_active': False
     })
     if new_user:
-        token = signJWT(new_user.email)
-        return jsonify({'token': token, 'user': new_user.to_dict()}), 201
+        token = sign_activation_token(new_user.email)
+        activation_url = f"{Config.CLIENT_URL}/activate?token={token}"
+        send_email(
+            EMAIL_TYPE.account_activation,
+            recipients=[new_user.email],
+            is_noreply=True,
+            activation_url=activation_url,
+            expires_in_hours=Config.ACCOUNT_ACTIVATION_EXP_HOURS,
+        )
+        return jsonify({'message': 'Activation instructions sent'}), 201
 
 
 def login():
@@ -90,3 +98,21 @@ def reset_password():
 @login_required
 def auth(current_user):
     return jsonify(current_user.to_dict()), 200
+
+
+def activate_account():
+    body = request.json
+    token_value = body.get('token')
+    email = verify_activation_token(token_value) if token_value else None
+    if not email:
+        return jsonify({'message': 'Invalid or expired token'}), 400
+
+    user = User.get_by_email(email)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    if user.is_active:
+        return jsonify({'message': 'Account already activated'}), 200
+
+    User.update(user.id, commit=True, is_active=True)
+    return jsonify({'message': 'Account activated'}), 200
