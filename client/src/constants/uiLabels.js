@@ -5,18 +5,21 @@ export const UI_LABELS = {
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
 		full_name: 'Наименование организации',
-		company_full_name: 'Общество с ограниченной ответственностью «АВЕКСМАР»',
+		company_full_name:
+			'Общество с ограниченной ответственностью «АВЕКСМАР»',
 		ogrn: 'ОГРН',
 		ogrn_value: '1167746881279',
 		inn: 'ИНН',
 		inn_value: '9701049956',
 		legal_address: 'Юридический адрес',
-		legal_address_value: '105082, г. Москва, ул. Бакунинская, д. 69, строение 1, помещение 1, офис 16',
+		legal_address_value:
+			'105082, г. Москва, ул. Бакунинская, д. 69, строение 1, помещение 1, офис 16',
 		phone: 'Контактный телефон',
 		contact_phone: '+7 495 363-59-11',
 		email_address: 'Адрес электронной почты',
 		contact_email: 'mail@avexmar.ru',
-		company_description: 'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
+		company_description:
+			'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
 		cards: [
 			{
 				title: 'Широкий спектр клиентов и партнёров в сфере воздушных перевозок',
@@ -263,8 +266,19 @@ export const UI_LABELS = {
 				add_button: 'Добавить событие',
 				edit_button: 'Редактировать событие',
 			},
+},
+		exports: {
+				title: 'Экспорт',
+				description: 'Загрузка данных для сторонних систем',
+				flightPassengers: {
+						link: 'Список пассажиров по рейсу',
+						title: 'Выгрузка пассажиров',
+						description: 'Формирование списка пассажиров по рейсу',
+						route: 'Маршрут',
+						flight: 'Рейс',
+				},
 		},
-	},
+},
 	AUTH: {
 		old_password: 'Текущий пароль',
 		new_password: 'Новый пароль',
@@ -308,18 +322,25 @@ export const UI_LABELS = {
 		},
 		buyer_form: {
 			title: 'Покупатель',
-			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
+			privacy_policy: (link) => (
+				<>Даю {link('согласие')} на обработку персональных данных</>
+			),
 			public_offer: (link) => (
-				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
+				<>
+					Нажимая «Продолжить», Вы принимаете условия{' '}
+					{link('публичной оферты')} ООО «АВЕКСМАР»
+				</>
 			),
 			summary: {
 				total: 'Итого',
 				passenger_word: (count) =>
 					count % 10 === 1 && count % 100 !== 11
 						? `${count} пассажир`
-						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
-						? `${count} пассажира`
-						: `${count} пассажиров`,
+						: count % 10 >= 2 &&
+							  count % 10 <= 4 &&
+							  (count % 100 < 10 || count % 100 >= 20)
+							? `${count} пассажира`
+							: `${count} пассажиров`,
 				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
@@ -362,7 +383,8 @@ export const UI_LABELS = {
 			last_name: 'Фамилия',
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
-			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+			name_hint: (requiresCyrillic) =>
+				`${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 		},
 		payment_form: {
 			title: (timeLeft) => `${timeLeft} для оплаты`,
@@ -424,9 +446,11 @@ export const UI_LABELS = {
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
 					? 'пассажир'
-					: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
-					? 'пассажира'
-					: 'пассажиров',
+					: count % 10 >= 2 &&
+						  count % 10 <= 4 &&
+						  (count % 100 < 10 || count % 100 >= 20)
+						? 'пассажира'
+						: 'пассажиров',
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
@@ -446,7 +470,8 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
+			if (date_to)
+				return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {

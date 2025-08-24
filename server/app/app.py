@@ -33,6 +33,7 @@ from app.controllers.timezone_controller import *
 from app.controllers.fee_controller import *
 from app.controllers.consent_doc_controller import *
 from app.controllers.consent_event_controller import *
+from app.controllers.passenger_export_controller import *
 
 
 def __import_models():
@@ -232,6 +233,14 @@ def __create_app(_config_class, _db):
     app.route('/booking/payment', methods=['POST'])(create_booking_process_payment)
     app.route('/booking/invoice', methods=['POST'])(create_booking_process_invoice)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
+
+    # exports
+    app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
+    app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
+    app.route(
+        '/exports/flight-passengers/routes/<int:route_id>/flights',
+        methods=['GET'],
+    )(get_passenger_export_flights)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
