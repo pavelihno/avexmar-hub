@@ -68,6 +68,7 @@ def __create_app(_config_class, _db):
     app.route('/auth', methods=['GET'])(auth)
     app.route('/forgot_password', methods=['POST'])(forgot_password)
     app.route('/reset_password', methods=['POST'])(reset_password)
+    app.route('/activate', methods=['POST'])(activate_account)
 
     # users
     app.route('/users', methods=['GET'])(get_users)
@@ -222,6 +223,7 @@ def __create_app(_config_class, _db):
     app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
     app.route('/search/flights/<int:flight_id>/tariffs', methods=['GET'])(search_flight_tariffs)
     app.route('/search/calculate/price', methods=['POST'])(calculate_price)
+    app.route('/search/booking', methods=['POST'])(search_booking)
 
     # booking process
     app.route('/booking/<public_id>/access', methods=['GET'])(get_booking_process_access)

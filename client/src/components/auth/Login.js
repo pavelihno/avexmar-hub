@@ -50,7 +50,10 @@ const Login = ({ isModal = false }) => {
 
 	const { email, password } = formData;
 
-	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => {
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: name === 'email' ? value.toLowerCase() : value });
+	};
 
 	const onSubmit = async (e) => {
 		e.preventDefault();

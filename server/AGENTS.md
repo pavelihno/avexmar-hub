@@ -157,3 +157,10 @@ Minor inconsistencies and recommendations:
 - Flight tariffs: list/read endpoints are admin-only while similar reference entities (airports/airlines/flights/tariffs) are public. If intentional for business reasons, document it; otherwise, align access level.
 - Upload endpoints return 201 even when returning an error xlsx. Recommendation: return 200 for ‘processed with issues’ (or 207 Multi-Status) with the file.
 - app.py uses wildcard imports and manual route binding for every function. Recommendation: migrate to blueprints to reduce boilerplate and improve cohesion.
+
+### Email Templates
+
+- Each email must have matching `.txt` and `.html` templates under `app/templates/email/`.
+- HTML templates extend `email/html/base.html` and provide the same content as the text version.
+- Keep messages concise; placeholders use Jinja syntax like `{{ variable }}`.
+- When sending emails, always pass both `activation_url` or similar context and `expires_in_hours` if expiration is time based.

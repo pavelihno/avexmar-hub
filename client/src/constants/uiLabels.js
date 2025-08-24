@@ -78,12 +78,13 @@ export const UI_LABELS = {
 			},
 		},
 	},
-	TITLES: {
-		login: 'Вход',
-		register: 'Регистрация',
-		settings: 'Настройки',
-		forgot_password: 'Восстановление пароля',
-	},
+TITLES: {
+login: 'Вход',
+register: 'Регистрация',
+settings: 'Настройки',
+forgot_password: 'Восстановление пароля',
+activate_account: 'Активация аккаунта',
+},
 	MESSAGES: {
 		confirm_action: 'Подтвердите действие',
 		confirm_delete: 'Вы уверены, что хотите удалить запись?',
@@ -98,8 +99,9 @@ export const UI_LABELS = {
 		delete: 'Запись успешно удалена',
 		delete_all: 'Все записи успешно удалены',
 		login: 'Вход выполнен успешно',
-		register: 'Регистрация выполнена успешно',
-		password_reset: 'Инструкция отправлена на электронную почту',
+register: 'Инструкции по активации отправлены на электронную почту',
+account_activated: 'Аккаунт успешно активирован',
+password_reset: 'Инструкция отправлена на электронную почту',
 	},
 	WARNINGS: {
 		upload: 'Некоторые записи не были созданы. Подробнее в файле',
@@ -508,6 +510,14 @@ export const UI_LABELS = {
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
 		show_more: 'Показать еще варианты',
+	},
+	BOOKING_SEARCH: {
+		link: 'Найти бронирование',
+		title: 'Найти бронирование',
+		booking_number: 'Номер бронирования',
+		first_name: 'Имя пассажира',
+		last_name: 'Фамилия пассажира',
+		button: 'Найти',
 	},
 };
 

@@ -86,19 +86,28 @@ const Header = () => {
 				</Typography>
 			</Box>
 			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-				{isAdmin && (
-					<Button
-						component={Link}
-						to='/admin'
-						color='inherit'
-						startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
-						sx={{ textTransform: 'none' }}
-					>
-						{UI_LABELS.ADMIN.panel}
-					</Button>
-				)}
+								{isAdmin && (
+										<Button
+												component={Link}
+												to='/admin'
+												color='inherit'
+												startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
+												sx={{ textTransform: 'none' }}
+										>
+												{UI_LABELS.ADMIN.panel}
+										</Button>
+								)}
 
-				{isAuth ? (
+								<Button
+										component={Link}
+										to='/search/booking'
+										color='inherit'
+										sx={{ textTransform: 'none' }}
+								>
+										{UI_LABELS.BOOKING_SEARCH.link}
+								</Button>
+
+								{isAuth ? (
 					<>
 						<Button
 							color='inherit'
