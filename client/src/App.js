@@ -11,7 +11,7 @@ import AuthModal from './components/auth/AuthModal';
 import AdminRoutes from './routes/AdminRoutes';
 import PublicRoutes from './routes/PublicRoutes';
 
-import { selectIsAuth, selectIsAdmin } from './redux/reducers/auth';
+import { selectIsAuth } from './redux/reducers/auth';
 import { auth } from './redux/actions/auth';
 import theme from './theme';
 
@@ -20,7 +20,7 @@ function App() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	const isAuth = useSelector(selectIsAuth);
-	const isAdmin = useSelector(selectIsAdmin);
+	const currentUser = useSelector((state) => state.auth.currentUser);
 
 	useEffect(() => {
 		const initAuth = async () => {
@@ -31,7 +31,7 @@ function App() {
 		initAuth();
 	}, [dispatch]);
 
-        const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ isAdmin })];
+	const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ currentUser })];
 	const routing = useRoutes(routes);
 
 	// Show loading indicator while authenticating

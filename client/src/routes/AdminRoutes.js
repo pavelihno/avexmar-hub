@@ -22,7 +22,9 @@ import ConsentEventManagement from '../components/admin/ConsentEventManagement';
 
 import ProtectedRoute from './ProtectedRoute';
 
-const AdminRoutes = ({ isAdmin }) => [
+const AdminRoutes = ({ currentUser }) => {
+	const isAdmin = currentUser?.role === 'admin';
+	return [
 	{
 		path: '/admin',
 		element: <ProtectedRoute children={<AdminPanel />} condition={isAdmin} />,
@@ -98,7 +100,8 @@ const AdminRoutes = ({ isAdmin }) => [
 	{
 		path: '/admin/exports/flight-passengers',
 		element: <ProtectedRoute children={<FlightPassengerExport />} condition={isAdmin} />,
-	},
-];
+},
+	];
+};
 
 export default AdminRoutes;
