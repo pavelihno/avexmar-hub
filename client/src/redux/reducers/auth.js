@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { login, register, auth, logout, resetPassword, activateAccount } from '../actions/auth';
+import { login, register, auth, logout, resetPassword, activateAccount, verifyTwoFactor } from '../actions/auth';
 import { changePassword } from '../actions/user';
 import { handlePending, handleRejected } from '../utils';
 
@@ -23,13 +23,21 @@ const authSlice = createSlice({
 		},
 		extraReducers: (builder) => {
 				builder
-						// Login
-						.addCase(login.pending, handlePending)
-						.addCase(login.rejected, handleRejected)
-						.addCase(login.fulfilled, (state, action) => {
-								state.currentUser = action.payload;
-								state.isLoading = false;
-						})
+												// Login
+												.addCase(login.pending, handlePending)
+												.addCase(login.rejected, handleRejected)
+												.addCase(login.fulfilled, (state, action) => {
+																state.currentUser = action.payload;
+																state.isLoading = false;
+												})
+
+												// Verify two-factor
+												.addCase(verifyTwoFactor.pending, handlePending)
+												.addCase(verifyTwoFactor.rejected, handleRejected)
+												.addCase(verifyTwoFactor.fulfilled, (state, action) => {
+																state.currentUser = action.payload;
+																state.isLoading = false;
+												})
 
 						// Register
 						.addCase(register.pending, handlePending)

@@ -22,7 +22,7 @@ import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 
 import Base from '../Base';
 import { selectIsAdmin } from '../../redux/reducers/auth';
-import { login } from '../../redux/actions/auth';
+import { login, setupTwoFactor, verifyTwoFactor } from '../../redux/actions/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
@@ -39,8 +39,11 @@ const Login = ({ isModal = false }) => {
 		password: '',
 	});
 
-	const [errors, setErrors] = useState({});
-	const [successMessage, setSuccessMessage] = useState('');
+		const [errors, setErrors] = useState({});
+		const [successMessage, setSuccessMessage] = useState('');
+		const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+		const [code, setCode] = useState('');
+		const [twoFactorErrors, setTwoFactorErrors] = useState({});
 
 	useEffect(() => {
 		if (successMessage && isAdmin) {
@@ -55,19 +58,40 @@ const Login = ({ isModal = false }) => {
 		setFormData({ ...formData, [name]: name === 'email' ? value.toLowerCase() : value });
 	};
 
-	const onSubmit = async (e) => {
-		e.preventDefault();
-		setErrors({});
-		dispatch(login(formData))
-			.unwrap()
-			.then(() => {
-				setSuccessMessage(UI_LABELS.SUCCESS.login);
-				if (isModal) {
-					setTimeout(() => closeAuthModal(), 1500);
-				}
-			})
-			.catch((res) => setErrors(res));
-	};
+		const onSubmit = async (e) => {
+				e.preventDefault();
+				setErrors({});
+				dispatch(login(formData))
+						.unwrap()
+						.then(() => {
+								setSuccessMessage(UI_LABELS.SUCCESS.login);
+								if (isModal) {
+										setTimeout(() => closeAuthModal(), 1500);
+								}
+						})
+						.catch((res) => {
+								if (res && res.message === 'Two-factor authentication required') {
+										setTwoFactorRequired(true);
+										dispatch(setupTwoFactor(email));
+								} else {
+										setErrors(res);
+								}
+						});
+		};
+
+		const onVerify = async (e) => {
+				e.preventDefault();
+				setTwoFactorErrors({});
+				dispatch(verifyTwoFactor({ email, code }))
+						.unwrap()
+						.then(() => {
+								setSuccessMessage(UI_LABELS.SUCCESS.login);
+								if (isModal) {
+										setTimeout(() => closeAuthModal(), 1500);
+								}
+						})
+						.catch((res) => setTwoFactorErrors(res));
+		};
 
 	const handleRegisterClick = (e) => {
 		e.preventDefault();
@@ -128,57 +152,77 @@ const Login = ({ isModal = false }) => {
 					</div>
 				</Fade>
 
-				{!successMessage ? (
-					<Box component='form' onSubmit={onSubmit}>
-						<TextField
-							margin='dense'
-							required
-							fullWidth
-							id='email'
-							label={FIELD_LABELS.USER.email}
-							name='email'
-							autoComplete='email'
-							autoFocus
-							value={email}
-							onChange={onChange}
-							error={!!errors.email}
-							helperText={errors.email ? errors.email : ''}
-						/>
-						<TextField
-							margin='dense'
-							required
-							fullWidth
-							name='password'
-							label={FIELD_LABELS.USER.password}
-							type='password'
-							id='password'
-							autoComplete='current-password'
-							value={password}
-							onChange={onChange}
-							error={!!errors.password}
-							helperText={errors.password ? errors.password : ''}
-						/>
-						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.login}
-						</Button>
-					</Box>
-				) : (
-					<Box
-						sx={{
-							height: '160px',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						<CircularProgress color='primary' size={40} />
-					</Box>
-				)}
+								{!successMessage && !twoFactorRequired ? (
+										<Box component='form' onSubmit={onSubmit}>
+												<TextField
+														margin='dense'
+														required
+														fullWidth
+														id='email'
+														label={FIELD_LABELS.USER.email}
+														name='email'
+														autoComplete='email'
+														autoFocus
+														value={email}
+														onChange={onChange}
+														error={!!errors.email}
+														helperText={errors.email ? errors.email : ''}
+												/>
+												<TextField
+														margin='dense'
+														required
+														fullWidth
+														name='password'
+														label={FIELD_LABELS.USER.password}
+														type='password'
+														id='password'
+														autoComplete='current-password'
+														value={password}
+														onChange={onChange}
+														error={!!errors.password}
+														helperText={errors.password ? errors.password : ''}
+												/>
+												<Divider sx={{ my: 1 }} />
+												<Button type='submit' fullWidth variant='contained'>
+														{UI_LABELS.BUTTONS.login}
+												</Button>
+										</Box>
+								) : !successMessage && twoFactorRequired ? (
+										<Box component='form' onSubmit={onVerify}>
+												<TextField
+														margin='dense'
+														required
+														fullWidth
+														id='code'
+														label='Код'
+														name='code'
+														autoFocus
+														value={code}
+														onChange={(e) => setCode(e.target.value)}
+														error={!!twoFactorErrors.message}
+														helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
+												/>
+												<Divider sx={{ my: 1 }} />
+												<Button type='submit' fullWidth variant='contained'>
+														{UI_LABELS.BUTTONS.confirm}
+												</Button>
+										</Box>
+								) : (
+										<Box
+												sx={{
+														height: '160px',
+														display: 'flex',
+														alignItems: 'center',
+														justifyContent: 'center',
+												}}
+										>
+												<CircularProgress color='primary' size={40} />
+										</Box>
+								)}
 
-				{!successMessage && (
-					<>
-						<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
+								{!successMessage && !twoFactorRequired && (
+										<>
+												<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
 
 						<Box sx={{ textAlign: 'center' }}>
 							<Typography variant='body2'>

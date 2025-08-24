@@ -1,0 +1,6 @@
+{% extends 'email/html/base.html' %}
+
+{% block content %}
+<p>Ваш код подтверждения входа: <strong>{{ code }}</strong></p>
+<p>Код действует 5 минут.</p>
+{% endblock %}

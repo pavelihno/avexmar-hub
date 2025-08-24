@@ -1,4 +1,5 @@
 from flask import request, jsonify
+import pyotp
 
 from app.config import Config
 from app.models.user import User
@@ -48,9 +49,40 @@ def login():
 
     user = User.login(email, password)
     if user:
+        if user.role == USER_ROLE.admin:
+            return jsonify({'message': 'Two-factor authentication required'}), 200
         token = signJWT(user.email)
         return jsonify({'token': token, 'user': user.to_dict()}), 200
     return jsonify({'message': 'Invalid email or password'}), 401
+
+
+def setup_2fa():
+    body = request.json
+    email = body.get('email', '').lower()
+    user = User.get_by_email(email)
+    if not user or user.role != USER_ROLE.admin:
+        return jsonify({'message': 'User not found'}), 404
+    if not user.totp_secret:
+        user.totp_secret = pyotp.random_base32()
+        db.session.commit()
+    totp = pyotp.TOTP(user.totp_secret)
+    code = totp.now()
+    send_email(EMAIL_TYPE.two_factor, recipients=[user.email], code=code)
+    return jsonify({'message': 'Verification code sent'}), 200
+
+
+def verify_2fa():
+    body = request.json
+    email = body.get('email', '').lower()
+    code = body.get('code', '')
+    user = User.get_by_email(email)
+    if not user or user.role != USER_ROLE.admin or not user.totp_secret:
+        return jsonify({'message': 'Invalid request'}), 400
+    totp = pyotp.TOTP(user.totp_secret)
+    if totp.verify(code):
+        token = signJWT(user.email)
+        return jsonify({'token': token, 'user': user.to_dict()}), 200
+    return jsonify({'message': 'Invalid code'}), 400
 
 
 def forgot_password():

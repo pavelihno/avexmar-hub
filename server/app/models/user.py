@@ -20,6 +20,7 @@ class User(BaseModel):
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.Enum(USER_ROLE), nullable=False, default=DEFAULT_USER_ROLE)
     is_active = db.Column(db.Boolean, default=False, nullable=False)
+    totp_secret = db.Column(db.String, nullable=True)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
