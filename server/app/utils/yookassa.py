@@ -12,6 +12,7 @@ from app.utils.business_logic import calculate_receipt_details, get_booking_deta
 from app.utils.datetime import format_date, format_time
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
 from app.utils.pdf import generate_booking_pdf
+from app.utils.email import EMAIL_TYPE, send_email
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -130,8 +131,8 @@ def __send_confirmation_email(booking: Booking) -> bool:
 
     send_email(
         EMAIL_TYPE.booking_confirmation,
-        recipients=[booking.email_address],
         is_noreply=False,
+        recipients=[booking.email_address],
         booking_number=str(booking.booking_number),
         booking_url=booking_url,
         flights=flights,
@@ -150,8 +151,8 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
         return False
     send_email(
         EMAIL_TYPE.invoice_payment,
-        recipients=[booking.email_address],
         is_noreply=False,
+        recipients=[booking.email_address],
         payment_url=payment_url,
         hours=Config.BOOKING_INVOICE_EXP_HOURS,
     )

@@ -11,23 +11,23 @@ mail = Mail()
 class EMAIL_TYPE(enum.Enum):
     booking_confirmation = (
         'booking_confirmation',
-        'Подтверждение бронирования № {booking_number}',
+        'Бронирование № {booking_number} подтверждено — {brand_name}',
     )
     invoice_payment = (
         'invoice_payment',
-        'Счёт на оплату бронирования',
+        'Оплата бронирования — {brand_name}',
     )
     password_reset = (
         'forgot_password',
-        'Сброс пароля',
+        'Сброс пароля — {brand_name}',
     )
     account_activation = (
         'account_activation',
-        'Активация аккаунта',
+        'Активация аккаунта — {brand_name}',
     )
     two_factor = (
         'two_factor',
-        'Код подтверждения входа',
+        'Код входа — {brand_name}',
     )
 
     def __init__(self, template: str, subject: str):
@@ -63,6 +63,13 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
     attachments = context.pop('attachments', [])
     if not recipients:
         return
+
+    context = {
+        'brand_name': 'Авексмар',
+        'support_email': 'mail@avexmar.com',
+        'site_url': 'https://avexmar.ru',
+        **context
+    }
     subject = email_type.subject.format(**context)
     template = email_type.template
 

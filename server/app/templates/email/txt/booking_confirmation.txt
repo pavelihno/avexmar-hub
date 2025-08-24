@@ -1,17 +1,17 @@
 Здравствуйте!
 
-Ваше бронирование № {{ booking_number }} успешно завершено.
+Спасибо! Ваше бронирование № {{ booking_number }} успешно завершено.
 
 Рейсы:
-{% for f in flights %}- {{ f.number }} {{ f.from }} -> {{ f.to }}, {{ f.departure }} - {{ f.arrival }}
+{% for f in flights %}- {{ f.number }}: {{ f.from }} ({{ f.departure }}) -> {{ f.to }} ({{ f.arrival }})
 {% endfor %}
 
 Пассажиры:
-{% for p in passengers %}- {{ p.name }} ({{ p.category }})
+{% for p in passengers %}- {{ p.name }} — {{ p.category }}
 {% endfor %}
 
-Детали бронирования:
+Детали бронирования доступны по ссылке:
 {{ booking_url }}
 
 С уважением,
-Авексмар
+{{ brand_name }}

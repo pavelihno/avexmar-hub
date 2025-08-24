@@ -91,6 +91,12 @@ with app.app_context():
 "
 ```
 
+### Fix _migrations/versions_ permissions
+
+```bash
+sudo chown -R $USER:$USER server/migrations/versions
+```
+
 ### Run Server Tests
 
 Start the server:

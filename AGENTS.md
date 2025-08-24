@@ -241,5 +241,5 @@ Before merging:
 ## Email Guidelines
 
 - Every outbound email must have both plain-text and HTML templates with matching filenames.
-- HTML templates extend `email/html/base.html`; text templates live in `email/txt`.
+- HTML templates extend `email/html/_base.html`; text templates live in `email/txt`.
 - Keep content consistent between formats and use Jinja placeholders for variables.

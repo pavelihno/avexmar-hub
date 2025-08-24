@@ -87,41 +87,51 @@ class User(BaseModel):
     ):
         session = session or db.session
 
-        kwargs = {k: v for k, v in kwargs.items() if k in ['role', 'is_active', 'is_locked', 'failed_login_attempts']}
+        kwargs = {k: v for k, v in kwargs.items() if k not in ['email', 'password']}
 
         return super().update(_id, session=session, commit=commit, **kwargs)
 
     @classmethod
     def login(cls, _email, _password):
         user = cls.get_by_email(_email)
-        if (
-            user
-            and user.is_active
-            and not user.is_locked
-            and cls.__is_password_correct(user.password, _password)
-        ):
+        if not user or not user.is_active:
+            return None
+        
+        if user.is_locked:
+            return None
+            
+        if cls.__is_password_correct(user.password, _password):
+            cls.reset_failed_logins(user)
             return user
-        return None
+        else:
+            cls.register_failed_login(user)
+            return None
 
     def verify_password(self, _password):
         return self.__is_password_correct(self.password, _password)
 
     @classmethod
     def register_failed_login(cls, user, session: Session | None = None):
-        session = session or db.session
-        user.failed_login_attempts += 1
-        if user.failed_login_attempts >= Config.MAX_FAILED_LOGIN_ATTEMPTS:
-            user.is_locked = True
-        session.add(user)
-        session.commit()
+        failed_attempts = user.failed_login_attempts + 1
+        is_locked = failed_attempts >= Config.MAX_FAILED_LOGIN_ATTEMPTS
+        
+        return cls.update(
+            user.id,
+            session=session,
+            commit=True,
+            failed_login_attempts=failed_attempts,
+            is_locked=is_locked
+        )
 
     @classmethod
     def reset_failed_logins(cls, user, session: Session | None = None):
-        session = session or db.session
-        user.failed_login_attempts = 0
-        user.is_locked = False
-        session.add(user)
-        session.commit()
+        return cls.update(
+            user.id, 
+            session=session,
+            commit=True,
+            failed_login_attempts=0,
+            is_locked=False
+        )
 
     @classmethod
     def change_password(cls, _id, _password, session: Session | None = None):

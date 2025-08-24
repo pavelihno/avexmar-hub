@@ -9,7 +9,6 @@ from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.middlewares.auth_middleware import login_required
 
 from app.models.password_reset_token import PasswordResetToken
-from app.database import db
 
 
 def register():
@@ -34,8 +33,8 @@ def register():
         activation_url = f"{Config.CLIENT_URL}/activate?token={token}"
         send_email(
             EMAIL_TYPE.account_activation,
-            recipients=[new_user.email],
             is_noreply=True,
+            recipients=[new_user.email],
             activation_url=activation_url,
             expires_in_hours=Config.ACCOUNT_ACTIVATION_EXP_HOURS,
         )
@@ -46,6 +45,14 @@ def login():
     body = request.json
     email = body.get('email', '').lower()
     password = body.get('password', '')
+
+    user = User.get_by_email(email)
+    if not user or not user.is_active:
+        return jsonify({'message': 'Invalid email or password'}), 401
+    
+    if user.is_locked:
+        return jsonify({'message': 'Account is locked due to too many failed login attempts'}), 401
+    
     user = User.login(email, password)
     if user:
         if user.role == USER_ROLE.admin:
@@ -61,12 +68,22 @@ def setup_2fa():
     user = User.get_by_email(email)
     if not user or user.role != USER_ROLE.admin:
         return jsonify({'message': 'User not found'}), 404
-    if not user.totp_secret:
-        user.totp_secret = pyotp.random_base32()
-        db.session.commit()
-    totp = pyotp.TOTP(user.totp_secret)
+    
+    totp_secret = user.totp_secret
+    if not totp_secret:
+        totp_secret = pyotp.random_base32()
+        user = User.update(user.id, commit=True, totp_secret=totp_secret)
+        user = User.get_by_email(email)
+
+    totp = pyotp.TOTP(user.totp_secret, interval=Config.LOGIN_TOTP_INTERVAL_SECONDS)
     code = totp.now()
-    send_email(EMAIL_TYPE.two_factor, recipients=[user.email], code=code)
+    send_email(
+        EMAIL_TYPE.two_factor, 
+        is_noreply=True, 
+        recipients=[user.email], 
+        code=code, 
+        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60
+    )
     return jsonify({'message': 'Verification code sent'}), 200
 
 
@@ -79,9 +96,12 @@ def verify_2fa():
         return jsonify({'message': 'Invalid request'}), 400
     totp = pyotp.TOTP(user.totp_secret)
     if totp.verify(code):
+        User.reset_failed_logins(user)
         token = signJWT(user.email)
         return jsonify({'token': token, 'user': user.to_dict()}), 200
-    return jsonify({'message': 'Invalid code'}), 400
+    else:
+        User.register_failed_login(user)
+        return jsonify({'message': 'Invalid code'}), 400
 
 
 def forgot_password():
@@ -99,8 +119,8 @@ def forgot_password():
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
         EMAIL_TYPE.password_reset,
-        recipients=[user.email],
         is_noreply=True,
+        recipients=[user.email],
         reset_url=reset_url,
         expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,
     )

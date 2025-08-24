@@ -161,6 +161,6 @@ Minor inconsistencies and recommendations:
 ### Email Templates
 
 - Each email must have matching `.txt` and `.html` templates under `app/templates/email/`.
-- HTML templates extend `email/html/base.html` and provide the same content as the text version.
+- HTML templates extend `email/html/_base.html` and provide the same content as the text version.
 - Keep messages concise; placeholders use Jinja syntax like `{{ variable }}`.
 - When sending emails, always pass both `activation_url` or similar context and `expires_in_hours` if expiration is time based.

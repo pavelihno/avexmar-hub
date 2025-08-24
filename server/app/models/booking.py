@@ -33,16 +33,10 @@ class Booking(BaseModel):
     __tablename__ = 'bookings'
 
     # Booking details
-    public_id = db.Column(
-        UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True
-    )
-    access_token = db.Column(
-        UUID(as_uuid=True), unique=True, nullable=True
-    )
+    public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)
+    access_token = db.Column(UUID(as_uuid=True), unique=True, nullable=True)
     booking_number = db.Column(db.String, unique=True, nullable=True, index=True)
-    status = db.Column(
-        db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS
-    )
+    status = db.Column(db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS)
     seats_number = db.Column(db.Integer, nullable=False, default=0)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
@@ -60,12 +54,8 @@ class Booking(BaseModel):
     total_price = db.Column(db.Float, nullable=False)
 
     # Metadata
-    passenger_counts = db.Column(
-        JSONB, nullable=False, server_default='{}', default=dict
-    )
-    user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id'), nullable=True, index=True
-    )
+    passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
 
     # Relationships
     user: Mapped['User'] = db.relationship('User', back_populates='bookings')
