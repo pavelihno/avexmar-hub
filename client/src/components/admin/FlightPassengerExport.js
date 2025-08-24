@@ -10,29 +10,35 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { formatDate } from '../utils';
 import { UI_LABELS, DATE_API_FORMAT } from '../../constants';
-import {
-	fetchExportRoutes,
-	fetchExportFlights,
-	downloadFlightPassengerExport,
-} from '../../redux/actions/flightPassengerExport';
+import { fetchExportData, downloadExport } from '../../redux/actions/export';
 
 const FlightPassengerExport = () => {
 	const dispatch = useDispatch();
-	const { routes, flights } = useSelector(
-		(state) => state.flightPassengerExport,
+	const { routes = [], flights = [] } = useSelector(
+		(state) => state.exports.data,
 	);
 	const [routeId, setRouteId] = useState('');
 	const [flightId, setFlightId] = useState('');
 
 	useEffect(() => {
-		dispatch(fetchExportRoutes());
+		dispatch(
+			fetchExportData({
+				key: 'routes',
+				endpoint: '/exports/flight-passengers/routes',
+			}),
+		);
 	}, [dispatch]);
 
 	const handleRouteChange = (e) => {
 		const id = e.target.value;
 		setRouteId(id);
 		setFlightId('');
-		dispatch(fetchExportFlights(id));
+		dispatch(
+			fetchExportData({
+				key: 'flights',
+				endpoint: `/exports/flight-passengers/routes/${id}/flights`,
+			}),
+		);
 	};
 
 	const handleDownload = async () => {
@@ -40,9 +46,12 @@ const FlightPassengerExport = () => {
 		if (!flight) return;
 		try {
 			const data = await dispatch(
-				downloadFlightPassengerExport({
-					flightId,
-					date: formatDate(flight.scheduled_departure, DATE_API_FORMAT),
+				downloadExport({
+					endpoint: '/exports/flight-passengers',
+					params: {
+						flight_id: flightId,
+						date: formatDate(flight.scheduled_departure, DATE_API_FORMAT),
+					},
 				}),
 			).unwrap();
 			const url = window.URL.createObjectURL(new Blob([data]));
@@ -102,4 +111,3 @@ const FlightPassengerExport = () => {
 };
 
 export default FlightPassengerExport;
-
