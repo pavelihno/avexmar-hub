@@ -27,7 +27,7 @@ class EMAIL_TYPE(enum.Enum):
     )
     two_factor = (
         'two_factor',
-        'Код входа — {brand_name}',
+        'Код для входа —  {brand_name}',
     )
 
     def __init__(self, template: str, subject: str):
