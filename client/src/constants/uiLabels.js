@@ -290,22 +290,24 @@ export const UI_LABELS = {
 		or: 'или',
 		forgot_password: 'Забыли пароль?',
 	},
-	PROFILE: {
-		profile: 'Профиль',
-		settings: 'Настройки профиля',
-		maintenance: 'Скоро здесь будет личный кабинет',
-		change_password: 'Сменить пароль',
-		password_changed: 'Пароль успешно изменен',
-		passwords_dont_match: 'Пароли не совпадают',
-		user_info: 'Данные пользователя',
-		email: 'Электронная почта',
-		role: 'Роль',
-		bookings: 'Мои бронирования',
-		no_bookings: 'Бронирования отсутствуют',
-		booking_number: 'Номер',
-		status: 'Статус',
-		total_price: 'Сумма',
-	},
+PROFILE: {
+profile: 'Профиль',
+settings: 'Настройки профиля',
+maintenance: 'Скоро здесь будет личный кабинет',
+change_password: 'Сменить пароль',
+password_changed: 'Пароль успешно изменен',
+passwords_dont_match: 'Пароли не совпадают',
+user_info: 'Данные пользователя',
+email: 'Электронная почта',
+role: 'Роль',
+bookings: 'Мои бронирования',
+passengers: 'Пассажиры',
+no_passengers: 'Пассажиры отсутствуют',
+no_bookings: 'Бронирования отсутствуют',
+booking_number: 'Номер',
+status: 'Статус',
+total_price: 'Сумма',
+},
 	HOME: {},
 	BOOKING: {
 		progress_steps: {
@@ -382,9 +384,9 @@ export const UI_LABELS = {
 				infants_seat: 'Младенцы с местом',
 			},
 		},
-		passenger_form: {
-			type_labels: {
-				adult: 'Взрослый, старше 12 лет',
+passenger_form: {
+type_labels: {
+adult: 'Взрослый, старше 12 лет',
 				child: 'Ребёнок, от 2 до 12 лет',
 				infant: 'Младенец, до 2 лет',
 				infant_seat: 'Младенец с местом, до 2 лет',
@@ -392,10 +394,11 @@ export const UI_LABELS = {
 			add_passenger: 'Добавить пассажира',
 			last_name: 'Фамилия',
 			first_name: 'Имя',
-			patronymic_name: 'Отчество (при наличии)',
-			name_hint: (requiresCyrillic) =>
-				`${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
-		},
+patronymic_name: 'Отчество (при наличии)',
+name_hint: (requiresCyrillic) =>
+`${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
+},
 		payment_form: {
 			title: (timeLeft) => `${timeLeft} для оплаты`,
 			total: 'К оплате',

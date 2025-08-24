@@ -2,6 +2,7 @@ from flask import request, jsonify
 
 from app.models.user import User
 from app.models.booking import Booking
+from app.models.passenger import Passenger
 from app.middlewares.auth_middleware import admin_required, login_required
 
 
@@ -66,6 +67,23 @@ def get_user_bookings(current_user, user_id):
         return jsonify({'message': 'Forbidden'}), 403
     bookings = Booking.query.filter_by(user_id=user_id).all()
     return jsonify([b.to_dict() for b in bookings])
+
+
+@login_required
+def get_user_passengers(current_user, user_id):
+    if current_user.id != user_id:
+        return jsonify({'message': 'Forbidden'}), 403
+    passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
+    return jsonify([p.to_dict() for p in passengers])
+
+
+@login_required
+def create_user_passenger(current_user, user_id):
+    if current_user.id != user_id:
+        return jsonify({'message': 'Forbidden'}), 403
+    body = request.json or {}
+    passenger = Passenger.create(owner_user_id=user_id, **body)
+    return jsonify(passenger.to_dict()), 201
 
 
 @login_required
