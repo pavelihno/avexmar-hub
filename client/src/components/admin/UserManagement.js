@@ -41,6 +41,20 @@ const UserManagement = () => {
 			type: FIELD_TYPES.BOOLEAN,
 			formatter: (value) => ENUM_LABELS.BOOLEAN[value] || value,
 		},
+		isLocked: {
+			key: 'isLocked',
+			apiKey: 'is_locked',
+			label: FIELD_LABELS.USER.is_locked,
+			type: FIELD_TYPES.BOOLEAN,
+			formatter: (value) => ENUM_LABELS.BOOLEAN[value] || value,
+		},
+		failedLoginAttempts: {
+			key: 'failedLoginAttempts',
+			apiKey: 'failed_login_attempts',
+			label: FIELD_LABELS.USER.failed_login_attempts,
+			type: FIELD_TYPES.NUMBER,
+			excludeFromForm: true,
+		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
@@ -49,29 +63,35 @@ const UserManagement = () => {
 	});
 
 	const handleAddUser = (data) => dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
-	const handleEditUser = (data) => dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
+	const handleEditUser = (data) => {
+		const updated = { ...data };
+		if (updated.isLocked === false) {
+			updated.failedLoginAttempts = 0;
+		}
+		return dispatch(updateUser(adminManager.toApiFormat(updated))).unwrap();
+	};
 	const handleDeleteUser = (id) => dispatch(deleteUser(id)).unwrap();
-	
+
 	const handleDeleteAllUsers = async () => {
-	await dispatch(deleteAllUsers()).unwrap();
-	dispatch(fetchUsers());
+		await dispatch(deleteAllUsers()).unwrap();
+		dispatch(fetchUsers());
 	};
 
 	const formattedUsers = users.map(adminManager.toUiFormat);
 
 	return (
-	<AdminDataTable
-	title={UI_LABELS.ADMIN.modules.users.management}
-	data={formattedUsers}
-	columns={adminManager.columns}
-	onAdd={handleAddUser}
-	onEdit={handleEditUser}
-	onDelete={handleDeleteUser}
-	onDeleteAll={handleDeleteAllUsers}
-	renderForm={adminManager.renderForm}
-	isLoading={isLoading}
-	error={errors}
-	/>
+		<AdminDataTable
+			title={UI_LABELS.ADMIN.modules.users.management}
+			data={formattedUsers}
+			columns={adminManager.columns}
+			onAdd={handleAddUser}
+			onEdit={handleEditUser}
+			onDelete={handleDeleteUser}
+			onDeleteAll={handleDeleteAllUsers}
+			renderForm={adminManager.renderForm}
+			isLoading={isLoading}
+			error={errors}
+		/>
 	);
 };
 
