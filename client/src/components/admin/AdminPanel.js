@@ -1,7 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Box, Typography, Card, CardContent, Grid, CardActionArea } from '@mui/material';
+import {
+	Box,
+	Typography,
+	Card,
+	CardContent,
+	Grid,
+	CardActionArea,
+} from '@mui/material';
 import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
@@ -19,6 +26,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 import Base from '../Base';
 
@@ -130,43 +138,59 @@ const AdminPanel = () => {
 			icon: <HandshakeIcon sx={iconSX} />,
 			path: '/admin/consent-events',
 		},
-	];
+];
 
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
-				<Typography variant='h3' sx={{ mb: 4 }}>
+				<Typography variant="h3" sx={{ mb: 4 }}>
 					{UI_LABELS.ADMIN.panel}
 				</Typography>
 
-				<Grid container spacing={3}>
-					{adminModules.map((module, index) => (
-						<Grid item xs={12} sm={6} md={3} key={index}>
-							<Card sx={{ height: '100%' }}>
-								<CardActionArea
-									component={Link}
-									to={module.path}
-									sx={{
-										height: '100%',
-										display: 'flex',
-										flexDirection: 'column',
-										alignItems: 'center',
-									}}
-								>
-									<CardContent sx={{ textAlign: 'center' }}>
-										{module.icon}
-										<Typography variant='h6' sx={{ mt: 2 }}>
-											{module.title}
-										</Typography>
-										<Typography variant='body2' color='text.secondary'>
-											{module.description}
-										</Typography>
-									</CardContent>
-								</CardActionArea>
-							</Card>
-						</Grid>
-					))}
-				</Grid>
+<Grid container spacing={3}>
+{adminModules.map((module, index) => (
+<Grid item xs={12} sm={6} md={3} key={index}>
+<Card sx={{ height: '100%' }}>
+<CardActionArea
+component={Link}
+to={module.path}
+sx={{
+height: '100%',
+display: 'flex',
+flexDirection: 'column',
+alignItems: 'center',
+}}
+>
+<CardContent sx={{ textAlign: 'center' }}>
+{module.icon}
+<Typography variant="h6" sx={{ mt: 2 }}>
+{module.title}
+</Typography>
+<Typography
+variant="body2"
+color="text.secondary"
+>
+{module.description}
+</Typography>
+</CardContent>
+</CardActionArea>
+</Card>
+</Grid>
+))}
+</Grid>
+<Box sx={{ mt: 6 }}>
+<Typography variant="h4" sx={{ mb: 1 }}>
+{UI_LABELS.ADMIN.exports.title}
+</Typography>
+<Typography variant="body2" sx={{ mb: 2 }}>
+{UI_LABELS.ADMIN.exports.description}
+</Typography>
+<Typography>
+<Link to="/admin/exports/flight-passengers">
+{UI_LABELS.ADMIN.exports.flightPassengers.link}
+</Link>
+</Typography>
+</Box>
 			</Box>
 		</Base>
 	);

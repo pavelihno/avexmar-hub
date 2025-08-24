@@ -268,8 +268,19 @@ export const UI_LABELS = {
 				add_button: 'Добавить событие',
 				edit_button: 'Редактировать событие',
 			},
+},
+		exports: {
+				title: 'Экспорт',
+				description: 'Загрузка данных для сторонних систем',
+				flightPassengers: {
+						link: 'Список пассажиров по рейсу',
+						title: 'Выгрузка пассажиров',
+						description: 'Формирование списка пассажиров по рейсу',
+						route: 'Маршрут',
+						flight: 'Рейс',
+				},
 		},
-	},
+},
 	AUTH: {
 		old_password: 'Текущий пароль',
 		new_password: 'Новый пароль',
@@ -507,6 +518,14 @@ export const UI_LABELS = {
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
 		show_more: 'Показать еще варианты',
+	},
+	BOOKING_SEARCH: {
+		link: 'Найти бронирование',
+		title: 'Найти бронирование',
+		booking_number: 'Номер бронирования',
+		first_name: 'Имя пассажира',
+		last_name: 'Фамилия пассажира',
+		button: 'Найти',
 	},
 };
 
