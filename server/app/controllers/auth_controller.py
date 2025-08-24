@@ -46,7 +46,6 @@ def login():
     body = request.json
     email = body.get('email', '').lower()
     password = body.get('password', '')
-
     user = User.login(email, password)
     if user:
         if user.role == USER_ROLE.admin:

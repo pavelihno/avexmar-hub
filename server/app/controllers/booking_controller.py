@@ -5,8 +5,8 @@ from app.database import db
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
 from app.models.passenger import Passenger
-from app.utils.enum import BOOKING_STATUS
-from app.middlewares.auth_middleware import admin_required
+from app.utils.enum import BOOKING_STATUS, USER_ROLE
+from app.middlewares.auth_middleware import admin_required, login_required
 
 
 @admin_required
@@ -15,9 +15,11 @@ def get_bookings(current_user):
     return jsonify([booking.to_dict() for booking in bookings])
 
 
-@admin_required
+@login_required
 def get_booking(current_user, booking_id):
     booking = Booking.get_or_404(booking_id)
+    if current_user.role != USER_ROLE.admin and booking.user_id != current_user.id:
+        return jsonify({'message': 'Forbidden'}), 403
     return jsonify(booking.to_dict()), 200
 
 
