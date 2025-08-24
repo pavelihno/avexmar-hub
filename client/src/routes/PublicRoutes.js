@@ -14,8 +14,10 @@ import Payment from '../components/booking/Payment';
 import Completion from '../components/booking/Completion';
 import BookingSearch from '../components/booking/BookingSearch';
 import BookingRoute from './BookingRoute';
+import ProtectedRoute from './ProtectedRoute';
+import Profile from '../components/profile/Profile';
 
-const PublicRoutes = () => [
+const PublicRoutes = ({ isAuth }) => [
 	{ path: '/', element: <Home /> },
 	{ path: '/about', element: <About /> },
 	{ path: '/privacy_policy', element: <PrivacyPolicy /> },
@@ -60,6 +62,10 @@ const PublicRoutes = () => [
 				<Completion />
 			</BookingRoute>
 		),
+	},
+	{
+		path: '/profile',
+		element: <ProtectedRoute children={<Profile />} condition={isAuth} />,
 	},
 ];
 

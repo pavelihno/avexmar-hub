@@ -6,8 +6,9 @@ import {
 	createBooking,
 	updateBooking,
 	deleteBooking,
+	fetchUserBookings,
 } from '../actions/booking';
-import { addCrudCases } from '../utils';
+import { addCrudCases, handlePending, handleRejected } from '../utils';
 
 const initialState = {
 	bookings: [],
@@ -31,8 +32,16 @@ const bookingSlice = createSlice({
 				remove: deleteBooking,
 			},
 			'bookings',
-			'booking'
+			'booking',
 		);
+
+		builder
+			.addCase(fetchUserBookings.pending, handlePending)
+			.addCase(fetchUserBookings.fulfilled, (state, action) => {
+				state.bookings = action.payload;
+				state.isLoading = false;
+			})
+			.addCase(fetchUserBookings.rejected, handleRejected);
 	},
 });
 

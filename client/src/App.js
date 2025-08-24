@@ -5,10 +5,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Box, CircularProgress } from '@mui/material';
 
 import { AuthModalProvider } from './context/AuthModalContext';
-import { ProfileModalProvider } from './context/ProfileModalContext';
 
 import AuthModal from './components/auth/AuthModal';
-import ProfileModal from './components/profile/ProfileModal';
 
 import AdminRoutes from './routes/AdminRoutes';
 import PublicRoutes from './routes/PublicRoutes';
@@ -33,7 +31,7 @@ function App() {
 		initAuth();
 	}, [dispatch]);
 
-	const routes = [...PublicRoutes(), ...AdminRoutes({ isAdmin })];
+        const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ isAdmin })];
 	const routing = useRoutes(routes);
 
 	// Show loading indicator while authenticating
@@ -49,15 +47,12 @@ function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<AuthModalProvider>
-				<ProfileModalProvider>
-					{routing}
-					<ProfileModal />
-				</ProfileModalProvider>
-				<AuthModal />
-			</AuthModalProvider>
-		</ThemeProvider>
-	);
+                        <AuthModalProvider>
+                                {routing}
+                                <AuthModal />
+                        </AuthModalProvider>
+                </ThemeProvider>
+        );
 }
 
 export default App;

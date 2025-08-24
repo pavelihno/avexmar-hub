@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import Box from '@mui/material/Box';
@@ -15,7 +15,6 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import { useAuthModal } from '../context/AuthModalContext';
-import { useProfileModal } from '../context/ProfileModalContext';
 import { selectIsAuth, selectIsAdmin } from '../redux/reducers/auth';
 import { logout } from '../redux/actions/auth';
 import { UI_LABELS } from '../constants';
@@ -25,8 +24,8 @@ const Header = () => {
 
 	const dispatch = useDispatch();
 
-	const { openLoginModal, openRegisterModal } = useAuthModal();
-	const { openProfileModal } = useProfileModal();
+        const { openLoginModal, openRegisterModal } = useAuthModal();
+        const navigate = useNavigate();
 
 	const isAuth = useSelector(selectIsAuth);
 	const isAdmin = useSelector(selectIsAdmin);
@@ -43,10 +42,10 @@ const Header = () => {
 		setAnchorEl(null);
 	};
 
-	const handleOpenProfileModal = () => {
-		openProfileModal();
-		handleMenuClose();
-	};
+        const handleGoToProfile = () => {
+                navigate('/profile');
+                handleMenuClose();
+        };
 
 	const handleLogout = () => {
 		handleMenuClose();
@@ -131,7 +130,7 @@ const Header = () => {
 								horizontal: 'right',
 							}}
 						>
-							<MenuItem onClick={handleOpenProfileModal}>
+                                                        <MenuItem onClick={handleGoToProfile}>
 								<SettingsIcon fontSize='small' sx={{ mr: 1 }} />
 								{UI_LABELS.TITLES.settings}
 							</MenuItem>
