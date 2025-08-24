@@ -22,7 +22,7 @@ import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 
 import Base from '../Base';
 import { selectIsAdmin } from '../../redux/reducers/auth';
-import { login, setupTwoFactor, verifyTwoFactor } from '../../redux/actions/auth';
+import { login, verifyTwoFactor } from '../../redux/actions/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
@@ -39,11 +39,12 @@ const Login = ({ isModal = false }) => {
 		password: '',
 	});
 
-		const [errors, setErrors] = useState({});
-		const [successMessage, setSuccessMessage] = useState('');
-		const [twoFactorRequired, setTwoFactorRequired] = useState(false);
-		const [code, setCode] = useState('');
-		const [twoFactorErrors, setTwoFactorErrors] = useState({});
+const [errors, setErrors] = useState({});
+const [successMessage, setSuccessMessage] = useState('');
+const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+const [code, setCode] = useState('');
+const [twoFactorErrors, setTwoFactorErrors] = useState({});
+const [twoFactorEmail, setTwoFactorEmail] = useState('');
 
 	useEffect(() => {
 		if (successMessage && isAdmin) {
@@ -69,14 +70,14 @@ const Login = ({ isModal = false }) => {
 										setTimeout(() => closeAuthModal(), 1500);
 								}
 						})
-						.catch((res) => {
-								if (res && res.message === 'Two-factor authentication required') {
-										setTwoFactorRequired(true);
-										dispatch(setupTwoFactor(email));
-								} else {
-										setErrors(res);
-								}
-						});
+.catch((res) => {
+if (res && res.message === 'Two-factor authentication required') {
+setTwoFactorRequired(true);
+setTwoFactorEmail(res.email || email);
+} else {
+setErrors(res);
+}
+});
 		};
 
 		const onVerify = async (e) => {
@@ -188,25 +189,28 @@ const Login = ({ isModal = false }) => {
 												</Button>
 										</Box>
 								) : !successMessage && twoFactorRequired ? (
-										<Box component='form' onSubmit={onVerify}>
-												<TextField
-														margin='dense'
-														required
-														fullWidth
-														id='code'
-														label='Код'
-														name='code'
-														autoFocus
-														value={code}
-														onChange={(e) => setCode(e.target.value)}
-														error={!!twoFactorErrors.message}
-														helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
-												/>
-												<Divider sx={{ my: 1 }} />
-												<Button type='submit' fullWidth variant='contained'>
-														{UI_LABELS.BUTTONS.confirm}
-												</Button>
-										</Box>
+								<Box component='form' onSubmit={onVerify}>
+									<Alert severity='info' sx={{ mb: 2 }}>
+									{UI_LABELS.AUTH.two_factor_prompt(twoFactorEmail)}
+									</Alert>
+									<TextField
+									margin='dense'
+									required
+									fullWidth
+									id='code'
+									label={UI_LABELS.AUTH.two_factor_code_label}
+									name='code'
+									autoFocus
+									value={code}
+									onChange={(e) => setCode(e.target.value)}
+									error={!!twoFactorErrors.message}
+									helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
+									/>
+									<Divider sx={{ my: 1 }} />
+									<Button type='submit' fullWidth variant='contained'>
+									{UI_LABELS.BUTTONS.confirm}
+									</Button>
+								</Box>
 								) : (
 										<Box
 												sx={{
