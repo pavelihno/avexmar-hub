@@ -1,6 +1,7 @@
 from flask import request, jsonify
 
 from app.models.user import User
+from app.models.booking import Booking
 from app.middlewares.auth_middleware import admin_required, login_required
 
 
@@ -60,12 +61,20 @@ def deactivate_user(current_user, user_id):
 
 
 @login_required
+def get_user_bookings(current_user, user_id):
+    if current_user.id != user_id:
+        return jsonify({'message': 'Forbidden'}), 403
+    bookings = Booking.query.filter_by(user_id=user_id).all()
+    return jsonify([b.to_dict() for b in bookings])
+
+
+@login_required
 def change_password(current_user):
     body = request.json
     password = body.get('password', '')
 
     if not password:
-        return jsonify({'message': 'Invalid password'}), 404
+        return jsonify({'message': 'Invalid password'}), 400
     updated_user = User.change_password(current_user.id, password)
     if updated_user:
         return jsonify(updated_user.to_dict())

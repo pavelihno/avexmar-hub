@@ -77,6 +77,7 @@ def __create_app(_config_class, _db):
     app.route('/users/<int:user_id>', methods=['DELETE'])(delete_user)
     app.route('/users/<int:user_id>/activate', methods=['PUT'])(activate_user)
     app.route('/users/<int:user_id>/deactivate', methods=['PUT'])(deactivate_user)
+    app.route('/users/<int:user_id>/bookings', methods=['GET'])(get_user_bookings)
     app.route('/users/change_password', methods=['PUT'])(change_password)
 
     # airports

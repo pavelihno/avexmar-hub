@@ -13,15 +13,17 @@ import Confirmation from '../components/booking/Confirmation';
 import Payment from '../components/booking/Payment';
 import Completion from '../components/booking/Completion';
 import BookingRoute from './BookingRoute';
+import ProtectedRoute from './ProtectedRoute';
+import Profile from '../components/profile/Profile';
 
-const PublicRoutes = () => [
+const PublicRoutes = ({ isAuth }) => [
 	{ path: '/', element: <Home /> },
-		{ path: '/about', element: <About /> },
-		{ path: '/privacy_policy', element: <PrivacyPolicy /> },
-		{ path: '/public_offer', element: <PublicOffer /> },
+	{ path: '/about', element: <About /> },
+	{ path: '/privacy_policy', element: <PrivacyPolicy /> },
+	{ path: '/public_offer', element: <PublicOffer /> },
 
-		{ path: '/reset_password', element: <ResetPassword /> },
-		{ path: '/activate', element: <ActivateAccount /> },
+	{ path: '/reset_password', element: <ResetPassword /> },
+	{ path: '/activate', element: <ActivateAccount /> },
 
 	{ path: '/search', element: <Search /> },
 	{ path: '/schedule', element: <Schedule /> },
@@ -61,6 +63,10 @@ const PublicRoutes = () => [
 				<Completion />
 			</BookingRoute>
 		),
+	},
+	{
+		path: '/profile',
+		element: <ProtectedRoute children={<Profile />} condition={isAuth} />,
 	},
 ];
 
