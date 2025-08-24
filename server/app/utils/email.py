@@ -21,6 +21,10 @@ class EMAIL_TYPE(enum.Enum):
         'forgot_password',
         'Сброс пароля',
     )
+    account_activation = (
+        'account_activation',
+        'Активация аккаунта',
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template

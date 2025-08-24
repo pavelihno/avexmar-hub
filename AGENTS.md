@@ -237,3 +237,9 @@ Before merging:
 - Redux: use `createCrudActions` + `addCrudCases` for CRUD modules; keep loading/error patterns consistent.
 - Client: call serverApi only within Redux actions and reducers.
 - Lint/format: run ESLint, Prettier, and Ruff; fix quote violations.
+
+## Email Guidelines
+
+- Every outbound email must have both plain-text and HTML templates with matching filenames.
+- HTML templates extend `email/html/base.html`; text templates live in `email/txt`.
+- Keep content consistent between formats and use Jinja placeholders for variables.
