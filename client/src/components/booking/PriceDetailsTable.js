@@ -13,19 +13,25 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 			<Divider sx={{ mb: 2 }} />
 
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-				<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>
+				<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>
+					{UI_LABELS.BOOKING.buyer_form.summary.tickets}
+				</Typography>
 				<Typography>{`${formatNumber(priceDetails.fare_price || 0)} ${currencySymbol}`}</Typography>
 			</Box>
 			{priceDetails.fees?.length > 0 &&
 				priceDetails.fees.map((fee, idx) => (
 					<Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-						<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>{fee.name}</Typography>
+						<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>
+							{fee.name}
+						</Typography>
 						<Typography>{`${formatNumber(fee.total)} ${currencySymbol}`}</Typography>
 					</Box>
 				))}
 			{priceDetails.total_discounts > 0 && (
 				<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-					<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>{UI_LABELS.BOOKING.buyer_form.summary.discount}</Typography>
+					<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>
+						{UI_LABELS.BOOKING.buyer_form.summary.discount}
+					</Typography>
 					<Typography>{`- ${formatNumber(priceDetails.total_discounts)} ${currencySymbol}`}</Typography>
 				</Box>
 			)}

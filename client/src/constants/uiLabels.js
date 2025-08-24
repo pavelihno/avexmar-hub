@@ -286,7 +286,18 @@ export const UI_LABELS = {
 		have_account: 'Уже есть аккаунт?',
 		or: 'или',
 		forgot_password: 'Забыли пароль?',
-		two_factor_prompt: (email) => `Введите код, отправленный на ${email}`,
+		two_factor_prompt: (email) => {
+			if (!email || email.length < 5) return `Введите код, отправленный на ${email}`;
+			const [local, domain] = email.split('@');
+			if (!domain) return `Введите код, отправленный на ${email}`;
+
+			const maskedLocal =
+				local.length > 4
+					? `${local.slice(0, 2)}****${local.slice(-2)}`
+					: `${local.slice(0, 1)}**${local.slice(-1)}`;
+
+			return `Введите код, отправленный на ${maskedLocal}@${domain}`;
+		},
 		two_factor_code_label: 'Код',
 	},
 	PROFILE: {

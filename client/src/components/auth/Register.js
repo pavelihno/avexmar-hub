@@ -39,7 +39,7 @@ const Register = ({ isModal = false }) => {
 	const [errors, setErrors] = useState({});
 	const [successMessage, setSuccessMessage] = useState('');
 
-const { email, password, password2 } = formData;
+	const { email, password, password2 } = formData;
 
 	const onChange = (e) => {
 		const { name, value } = e.target;
@@ -136,7 +136,7 @@ const { email, password, password2 } = formData;
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
-							/>
+						/>
 						<TextField
 							margin='dense'
 							required
@@ -150,7 +150,7 @@ const { email, password, password2 } = formData;
 							onChange={onChange}
 							error={!!errors.password}
 							helperText={errors.email ? errors.email : ''}
-							/>
+						/>
 						<TextField
 							margin='dense'
 							required
@@ -164,7 +164,7 @@ const { email, password, password2 } = formData;
 							onChange={onChange}
 							error={!!errors.password2}
 							helperText={errors.email ? errors.email : ''}
-							/>
+						/>
 						<Divider sx={{ my: 1 }} />
 						<Button type='submit' fullWidth variant='contained'>
 							{UI_LABELS.BUTTONS.register}

@@ -41,10 +41,22 @@ const ActivateAccount = () => {
 					{UI_LABELS.TITLES.activate_account}
 				</Typography>
 				<Fade in={!!error} timeout={300}>
-					<div>{error && <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>}</div>
+					<div>
+						{error && (
+							<Alert severity='error' sx={{ mb: 2 }}>
+								{error}
+							</Alert>
+						)}
+					</div>
 				</Fade>
 				<Fade in={!!message} timeout={300}>
-					<div>{message && <Alert severity='success' sx={{ mb: 2 }}>{message}</Alert>}</div>
+					<div>
+						{message && (
+							<Alert severity='success' sx={{ mb: 2 }}>
+								{message}
+							</Alert>
+						)}
+					</div>
 				</Fade>
 				{!message && !error && (
 					<Box sx={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

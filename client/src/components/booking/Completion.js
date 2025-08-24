@@ -1,7 +1,17 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, Button } from '@mui/material';
+import {
+	Box,
+	Card,
+	CardContent,
+	Typography,
+	Grid,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
+	Button,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
@@ -91,9 +101,9 @@ const Completion = () => {
 								</Typography>
 							)}
 
-						<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
-							Скачать PDF
-						</Button>
+							<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
+								Скачать PDF
+							</Button>
 						</CardContent>
 					</Card>
 
