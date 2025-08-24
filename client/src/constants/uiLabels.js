@@ -484,6 +484,14 @@ export const UI_LABELS = {
 		},
 		show_more: 'Показать еще варианты',
 	},
+	BOOKING_SEARCH: {
+		link: 'Найти бронирование',
+		title: 'Найти бронирование',
+		booking_number: 'Номер бронирования',
+		first_name: 'Имя пассажира',
+		last_name: 'Фамилия пассажира',
+		button: 'Найти',
+	},
 };
 
 export default UI_LABELS;
