@@ -24,7 +24,9 @@ import bookingProcessReducer from './reducers/bookingProcess';
 import paymentReducer from './reducers/payment';
 import consentDocReducer from './reducers/consentDoc';
 import consentEventReducer from './reducers/consentEvent';
+import flightPassengerExportReducer from './reducers/flightPassengerExport';
 import bookingSearchReducer from './reducers/bookingSearch';
+
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -50,9 +52,10 @@ const rootReducer = combineReducers({
 	bookingSearch: bookingSearchReducer,
 	price: priceReducer,
 	bookingProcess: bookingProcessReducer,
-	payment: paymentReducer,
-	consentDocs: consentDocReducer,
-	consentEvents: consentEventReducer,
+		payment: paymentReducer,
+		consentDocs: consentDocReducer,
+		consentEvents: consentEventReducer,
+		flightPassengerExport: flightPassengerExportReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));
