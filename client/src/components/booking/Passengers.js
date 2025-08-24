@@ -26,6 +26,7 @@ import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
 import { processBookingPassengers, fetchBookingDetails, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchUserPassengers } from '../../redux/actions/passenger';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import {
 	createFormFields,
@@ -52,10 +53,12 @@ const Passengers = () => {
 		isLoading: bookingLoading,
 		errors: bookingErrors,
 	} = useSelector((state) => state.bookingProcess);
-	const { countries } = useSelector((state) => state.countries);
+const { countries } = useSelector((state) => state.countries);
+const { currentUser } = useSelector((state) => state.auth);
+const userPassengers = useSelector((state) => state.passengers.passengers);
 
-	const expiresAt = booking?.expires_at;
-	const timeLeft = useExpiryCountdown(expiresAt);
+const expiresAt = booking?.expires_at;
+const timeLeft = useExpiryCountdown(expiresAt);
 
 	const existingPassengerData = booking?.passengers;
 	const passengersExist = booking?.passengersExist;
@@ -90,12 +93,18 @@ const Passengers = () => {
 		return [];
 	}, [errors]);
 
-	useEffect(() => {
-		if (Array.isArray(existingPassengerData)) {
-			const mapped = existingPassengerData.map(fromApiPassenger);
-			setPassengerData(mapped);
-		}
-	}, [existingPassengerData, passengersExist]);
+useEffect(() => {
+if (Array.isArray(existingPassengerData)) {
+const mapped = existingPassengerData.map(fromApiPassenger);
+setPassengerData(mapped);
+}
+}, [existingPassengerData, passengersExist]);
+
+useEffect(() => {
+if (currentUser) {
+dispatch(fetchUserPassengers(currentUser.id));
+}
+}, [dispatch, currentUser]);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -177,11 +186,20 @@ const Passengers = () => {
 
 	const [buyerErrors, setBuyerErrors] = useState({});
 
-	const handlePassengerChange = (index) => (field, value, data) => {
-		setPassengerData((prev) =>
-			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
-		);
-	};
+const handlePassengerChange = (index) => (field, value, data) => {
+setPassengerData((prev) =>
+Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
+);
+};
+
+const handlePrefillPassenger = (index, passenger) => {
+const mapped = fromApiPassenger(passenger);
+setPassengerData((prev) =>
+Array.isArray(prev)
+? prev.map((p, i) => (i === index ? { ...p, ...mapped } : p))
+: prev,
+);
+};
 
 	const handleBuyerChange = (field, value) => {
 		setBuyer((prev) => ({ ...prev, [field]: value }));
@@ -286,26 +304,47 @@ const Passengers = () => {
 			)}
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
-					{errorMessages.length > 0 && (
-						<Stack spacing={1} sx={{ mb: 2 }}>
+{errorMessages.length > 0 && (
+<Stack spacing={1} sx={{ mb: 2 }}>
 							{errorMessages.map((msg, idx) => (
 								<Alert key={idx} severity='error'>
 									{msg}
 								</Alert>
 							))}
 						</Stack>
-					)}
-					{passengersReady &&
-						passengerData.map((p, index) => (
-							<PassengerForm
-								key={p.id || index}
-								passenger={p}
-								flights={booking.flights}
-								onChange={handlePassengerChange(index)}
-								citizenshipOptions={citizenshipOptions}
-								ref={(el) => (passengerRefs.current[index] = el)}
-							/>
-						))}
+)}
+{!currentUser && (
+<Alert severity='info' sx={{ mb: 2 }}>
+{UI_LABELS.BOOKING.passenger_form.login_hint}
+</Alert>
+)}
+{passengersReady &&
+passengerData.map((p, index) => (
+<Box key={p.id || index} sx={{ mb: 2 }}>
+{currentUser && userPassengers.length > 0 && (
+<Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+{userPassengers.map((up) => {
+const mapped = fromApiPassenger(up);
+return (
+<Chip
+key={up.id}
+label={`${mapped.lastName || ''} ${mapped.firstName || ''}`}
+size='small'
+onClick={() => handlePrefillPassenger(index, up)}
+/>
+);
+})}
+</Box>
+)}
+<PassengerForm
+passenger={p}
+flights={booking.flights}
+onChange={handlePassengerChange(index)}
+citizenshipOptions={citizenshipOptions}
+ref={(el) => (passengerRefs.current[index] = el)}
+/>
+</Box>
+))}
 					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
 						<Typography variant='h4' sx={{ mb: 3 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}

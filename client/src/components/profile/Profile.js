@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import { UI_LABELS } from '../../constants/uiLabels';
 import UserInfo from './UserInfo';
 import BookingsTab from './BookingsTab';
+import PassengersTab from './PassengersTab';
 import PasswordTab from './PasswordTab';
 
 const Profile = () => {
@@ -24,14 +25,16 @@ const Profile = () => {
 				<Typography variant='h5' sx={{ mb: 2 }}>
 					{UI_LABELS.PROFILE.settings}
 				</Typography>
-				<Tabs value={tab} onChange={handleChange} sx={{ mb: 3 }}>
-					<Tab label={UI_LABELS.PROFILE.user_info} />
-					<Tab label={UI_LABELS.PROFILE.bookings} />
-					<Tab label={UI_LABELS.PROFILE.change_password} />
-				</Tabs>
-				{tab === 0 && <UserInfo />}
-				{tab === 1 && <BookingsTab />}
-				{tab === 2 && <PasswordTab />}
+<Tabs value={tab} onChange={handleChange} sx={{ mb: 3 }}>
+<Tab label={UI_LABELS.PROFILE.user_info} />
+<Tab label={UI_LABELS.PROFILE.bookings} />
+<Tab label={UI_LABELS.PROFILE.passengers} />
+<Tab label={UI_LABELS.PROFILE.change_password} />
+</Tabs>
+{tab === 0 && <UserInfo />}
+{tab === 1 && <BookingsTab />}
+{tab === 2 && <PassengersTab />}
+{tab === 3 && <PasswordTab />}
 			</Paper>
 		</Box>
 	);

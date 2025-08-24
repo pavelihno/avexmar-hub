@@ -6,8 +6,10 @@ import {
 	createPassenger,
 	updatePassenger,
 	deletePassenger,
+	fetchUserPassengers,
+	createUserPassenger,
 } from '../actions/passenger';
-import { addCrudCases } from '../utils';
+import { addCrudCases, handlePending, handleRejected } from '../utils';
 
 const initialState = {
 	passengers: [],
@@ -33,6 +35,20 @@ const passengerSlice = createSlice({
 			'passengers',
 			'passenger'
 		);
+
+		builder
+			.addCase(fetchUserPassengers.pending, handlePending)
+			.addCase(fetchUserPassengers.fulfilled, (state, action) => {
+				state.passengers = action.payload;
+				state.isLoading = false;
+			})
+			.addCase(fetchUserPassengers.rejected, handleRejected)
+			.addCase(createUserPassenger.pending, handlePending)
+			.addCase(createUserPassenger.fulfilled, (state, action) => {
+				state.passengers.push(action.payload);
+				state.isLoading = false;
+			})
+			.addCase(createUserPassenger.rejected, handleRejected);
 	},
 });
 
