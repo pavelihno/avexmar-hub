@@ -90,6 +90,6 @@ export const { setCurrentUser, setErrors } = authSlice.actions;
 export const selectIsAuth = (state) => !!state.auth.currentUser;
 export const selectIsAdmin = (state) => !!state.auth.currentUser && state.auth.currentUser.role === 'admin';
 
-export const isDev = () => process.env.REACT_APP_APP_ENV in ('dev', 'test');
+export const isDev = () => ['dev','test'].includes(process.env.REACT_APP_APP_ENV);
 
 export default authSlice.reducer;
