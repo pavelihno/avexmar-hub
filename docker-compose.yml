@@ -11,7 +11,7 @@ services:
     volumes:
       - ./server:/app
     env_file:
-      - .env
+      - ./envs/server/.env
     depends_on:
       - postgres
       - redis
@@ -19,14 +19,12 @@ services:
   client-app:
     container_name: client-app
     build: ./client
-    ports:
-      - 3000:3000
-    tty: true
-    volumes:
-      - ./client:/app
-      - /app/node_modules
+    depends_on:
+      - server-app
     env_file:
-      - .env
+      - ./envs/client/.env
+    ports:
+      - 80:80
 
   postgres:
     container_name: postgres
@@ -37,12 +35,10 @@ services:
       POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      POSTGRES_MULTIPLE_DATABASES: $POSTGRES_TEST_DB
     volumes:
-      - ./db/temp/psqlDB:/var/lib/postgresql/data
-      - ./db/init.sh:/docker-entrypoint-initdb.d/multiple-db.sh
+      - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - ./envs/db/.env
 
   redis:
     container_name: redis
@@ -53,7 +49,7 @@ services:
       - REDIS_PASSWORD=$REDIS_PASSWORD
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     env_file:
-      - .env
+      - ./envs/redis/.env
 
   # redis-commander:
   #   container_name: redis-commander
@@ -64,16 +60,9 @@ services:
   #       - REDIS_HOSTS=$REDIS_COMMANDER_HOSTS
   #       - REDIS_PASSWORD=$REDIS_PASSWORD
   #   env_file:
-  #     - .env
+  #     - ./envs/redis/.env
   #   depends_on:
   #       - redis
 
-  adminer:
-    container_name: adminer
-    image: adminer:latest
-    ports:
-      - 8082:8080
-    env_file:
-      - .env
-    depends_on:
-      - postgres
+volumes:
+  postgres_data:

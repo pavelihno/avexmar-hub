@@ -97,20 +97,6 @@ with app.app_context():
 sudo chown -R $USER:$USER server/migrations/versions
 ```
 
-### Run Server Tests
-
-Start the server:
-
-```bash
-docker-compose up -d
-```
-
-Run all tests:
-
-```bash
-docker-compose run --rm server-app pytest -sv tests
-```
-
 ### Cloudflare Tunnel Setup
 
 Client App:
