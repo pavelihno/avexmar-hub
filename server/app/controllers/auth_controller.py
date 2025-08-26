@@ -93,11 +93,11 @@ def setup_2fa():
     totp = pyotp.TOTP(user.totp_secret, interval=Config.LOGIN_TOTP_INTERVAL_SECONDS)
     code = totp.now()
     send_email(
-        EMAIL_TYPE.two_factor, 
-        is_noreply=True, 
-        recipients=[user.email], 
-        code=code, 
-        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60
+        EMAIL_TYPE.two_factor,
+        is_noreply=True,
+        recipients=[user.email],
+        code=code,
+        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
     )
     return jsonify({'message': 'Verification code sent'}), 200
 
