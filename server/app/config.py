@@ -17,7 +17,6 @@ class Config:
 
     # Security settings
     CSRF_ENABLED = True
-    CORS_ORIGINS = CLIENT_URL
 
     # Mail settings
     MAIL_SERVER = os.environ.get('SERVER_MAIL_SERVER')

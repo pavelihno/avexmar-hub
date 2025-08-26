@@ -2,7 +2,6 @@ import os
 import importlib
 from flask import Flask
 from flask_migrate import Migrate
-from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -54,9 +53,6 @@ def __import_models():
 def __create_app(_config_class, _db):
     app = Flask(__name__)
     app.config.from_object(_config_class)
-
-    # Enable CORS for all routes
-    CORS(app, resources={r"/*": {'origins': Config.CORS_ORIGINS}})
 
     # Required for tracking migrations
     __import_models()
