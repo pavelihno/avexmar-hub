@@ -32,16 +32,19 @@ Run the following command to create an admin user:
 ```bash
 docker-compose exec server-app python -c "
 from app.app import app
-from app.config import Config
+from app.utils.enum import USER_ROLE
 from app.models.user import User
 
 with app.app_context():
-    admin = User.create(**{
-        'email': 'admin',
-        'password': '1234',
-        'role': Config.USER_ROLE.admin,
-        'is_active': True
-    })
+    admin = User.create(
+        commit=True,
+        **{
+            'email': 'admin',
+            'password': '1234',
+            'role': USER_ROLE.admin,
+            'is_active': True
+        }
+    )
     if not admin:
         print('Failed to create admin user')
     else:
