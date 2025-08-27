@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Container, Box, Tabs, Tab, Paper, Typography } from '@mui/material';
+import { Container, Box, Tabs, Tab, Paper, Typography, Grid } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FlightIcon from '@mui/icons-material/Flight';
 import GroupIcon from '@mui/icons-material/Group';
@@ -46,18 +46,14 @@ const Profile = () => {
 						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
 					</Tabs>
 					{tab === 0 && (
-						<Box
-							sx={{
-								display: 'flex',
-								flexDirection: { xs: 'column', md: 'row' },
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								px: 10,
-							}}
-						>
-							<UserInfo />
-							<PasswordTab />
-						</Box>
+						<Grid container spacing={4} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
+							<Grid item xs={10} md={6}>
+								<UserInfo />
+							</Grid>
+							<Grid item xs={10} md={4}>
+								<PasswordTab />
+							</Grid>
+						</Grid>
 					)}
 					{tab === 1 && <BookingsTab />}
 					{tab === 2 && <PassengersTab />}
