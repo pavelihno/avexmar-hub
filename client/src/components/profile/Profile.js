@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+import { Container, Box, Tabs, Tab, Paper, Typography } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FlightIcon from '@mui/icons-material/Flight';
 import GroupIcon from '@mui/icons-material/Group';
-import Stack from '@mui/material/Stack';
 
 import Base from '../Base';
 import { UI_LABELS } from '../../constants/uiLabels';
@@ -25,26 +20,25 @@ const Profile = () => {
 	};
 
 	return (
-		<Base maxWidth="lg">
+		<Base maxWidth='lg'>
 			<Box
 				sx={{
-					minHeight: '80vh',
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
 					p: 4,
 				}}
 			>
-				<Paper elevation={0} sx={{ p: 3, width: '100%', maxWidth: 600 }}>
-					<Typography variant="h5" sx={{ mb: 2 }}>
-						{UI_LABELS.PROFILE.settings}
+				<Paper elevation={0} sx={{ p: 3, width: '100%' }}>
+					<Typography variant='h3' sx={{ mb: 2 }}>
+						{UI_LABELS.PROFILE.profile}
 					</Typography>
 					<Tabs
 						value={tab}
 						onChange={handleChange}
 						centered
-						indicatorColor="primary"
-						textColor="primary"
+						indicatorColor='primary'
+						textColor='primary'
 						sx={{ mb: 3 }}
 					>
 						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
@@ -52,10 +46,18 @@ const Profile = () => {
 						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
 					</Tabs>
 					{tab === 0 && (
-						<Stack spacing={3} alignItems="center">
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: { xs: 'column', md: 'row' },
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								px: 10,
+							}}
+						>
 							<UserInfo />
 							<PasswordTab />
-						</Stack>
+						</Box>
 					)}
 					{tab === 1 && <BookingsTab />}
 					{tab === 2 && <PassengersTab />}

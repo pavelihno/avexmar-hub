@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 374449ad36e1
+Revision ID: 14171bcce4a6
 Revises: 
-Create Date: 2025-08-27 07:42:29.240496
+Create Date: 2025-08-27 08:11:52.745646
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '374449ad36e1'
+revision = '14171bcce4a6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -103,6 +103,7 @@ def upgrade():
     sa.Column('is_locked', sa.Boolean(), nullable=False),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
+    sa.Column('phone_number', sa.String(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -236,7 +237,7 @@ def upgrade():
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('type', sa.Enum('offer_acceptance', 'pd_processing', name='consent_event_type'), nullable=False),
     sa.Column('granter_user_id', sa.Integer(), nullable=True),
-    sa.Column('booking_id', sa.Integer(), nullable=False),
+    sa.Column('booking_id', sa.Integer(), nullable=True),
     sa.Column('doc_id', sa.UUID(), nullable=False),
     sa.Column('action', sa.Enum('agree', 'withdraw', name='consent_action'), nullable=False),
     sa.Column('ip', postgresql.INET(), nullable=True),

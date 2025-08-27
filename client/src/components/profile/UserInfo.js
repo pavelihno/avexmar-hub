@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import FormHelperText from '@mui/material/FormHelperText';
-import { Link } from 'react-router-dom';
+import {
+	Box,
+	Typography,
+	Paper,
+	TextField,
+	Button,
+	FormControl,
+	FormControlLabel,
+	Checkbox,
+	FormHelperText,
+} from '@mui/material';
 
 import { UI_LABELS } from '../../constants/uiLabels';
 import { FIELD_LABELS } from '../../constants/fieldLabels';
@@ -47,14 +49,10 @@ const UserInfo = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const newErrors = {};
-		if (!formData.lastName)
-			newErrors.lastName = VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
-		if (!formData.firstName)
-			newErrors.firstName = VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
-		if (!formData.phoneNumber)
-			newErrors.phoneNumber = VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
-		if (!formData.consent)
-			newErrors.consent = VALIDATION_MESSAGES.BOOKING.consent.REQUIRED;
+		if (!formData.lastName) newErrors.lastName = VALIDATION_MESSAGES.PASSENGER.last_name.REQUIRED;
+		if (!formData.firstName) newErrors.firstName = VALIDATION_MESSAGES.PASSENGER.first_name.REQUIRED;
+		if (!formData.phoneNumber) newErrors.phoneNumber = VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
+		if (!formData.consent) newErrors.consent = VALIDATION_MESSAGES.BOOKING.consent.REQUIRED;
 		if (Object.keys(newErrors).length) {
 			setErrors(newErrors);
 			return;
@@ -66,7 +64,7 @@ const UserInfo = () => {
 				last_name: formData.lastName,
 				phone_number: formData.phoneNumber,
 				consent: formData.consent,
-			}),
+			})
 		)
 			.unwrap()
 			.then((user) => {
@@ -79,14 +77,15 @@ const UserInfo = () => {
 
 	return (
 		<Paper sx={{ p: 2, width: '100%', maxWidth: 400 }}>
-			<Typography variant="h6" sx={{ mb: 2 }}>
+			<Typography variant='h6' sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.user_info}
 			</Typography>
-			<Box component="form" onSubmit={handleSubmit}>
+			<Box component='form' onSubmit={handleSubmit}>
 				<TextField
-					margin="dense"
+					margin='dense'
 					fullWidth
-					name="lastName"
+					name='lastName'
+					
 					label={FIELD_LABELS.PASSENGER.last_name}
 					value={formData.lastName}
 					onChange={handleChange}
@@ -94,9 +93,9 @@ const UserInfo = () => {
 					helperText={errors.lastName || ''}
 				/>
 				<TextField
-					margin="dense"
+					margin='dense'
 					fullWidth
-					name="firstName"
+					name='firstName'
 					label={FIELD_LABELS.PASSENGER.first_name}
 					value={formData.firstName}
 					onChange={handleChange}
@@ -104,9 +103,9 @@ const UserInfo = () => {
 					helperText={errors.firstName || ''}
 				/>
 				<TextField
-					margin="dense"
+					margin='dense'
 					fullWidth
-					name="phoneNumber"
+					name='phoneNumber'
 					label={FIELD_LABELS.BOOKING.phone_number}
 					value={formData.phoneNumber}
 					onChange={handleChange}
@@ -118,15 +117,13 @@ const UserInfo = () => {
 						control={
 							<Checkbox
 								checked={formData.consent}
-								onChange={(e) =>
-									setFormData({ ...formData, consent: e.target.checked })
-								}
+								onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
 							/>
 						}
 						label={
-							<Typography variant="subtitle2" color="textSecondary">
+							<Typography variant='subtitle2' color='textSecondary'>
 								{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-									<Link to="/privacy_policy" target="_blank">
+									<Link to='/privacy_policy' target='_blank'>
 										{text}
 									</Link>
 								))}
@@ -135,7 +132,7 @@ const UserInfo = () => {
 					/>
 					{errors.consent && <FormHelperText>{errors.consent}</FormHelperText>}
 				</FormControl>
-				<Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }}>
 					{UI_LABELS.BUTTONS.save_changes}
 				</Button>
 			</Box>

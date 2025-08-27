@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Typography from '@mui/material/Typography';
-import Table from '@mui/material/Table';
-import TableHead from '@mui/material/TableHead';
-import TableBody from '@mui/material/TableBody';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
+import {
+	Typography,
+	Table,
+	TableHead,
+	TableBody,
+	TableRow,
+	TableCell,
+	TableContainer,
+	Paper,
+	Box,
+} from '@mui/material';
 
 import { fetchUserBookings } from '../../redux/actions/booking';
 import { UI_LABELS } from '../../constants/uiLabels';
@@ -31,20 +33,16 @@ const BookingsTab = () => {
 
 	return bookings && bookings.length ? (
 		<Box sx={{ maxWidth: 600, mx: 'auto' }}>
-			<Typography variant="h6" sx={{ mb: 2 }}>
+			<Typography variant='h6' sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.bookings}
 			</Typography>
 			<TableContainer component={Paper}>
-				<Table size="small">
+				<Table size='small'>
 					<TableHead sx={{ bgcolor: 'background.paper' }}>
 						<TableRow>
-							<TableCell sx={{ fontWeight: 'bold' }}>
-								{UI_LABELS.PROFILE.booking_number}
-							</TableCell>
-							<TableCell sx={{ fontWeight: 'bold' }}>
-								{UI_LABELS.PROFILE.status}
-							</TableCell>
-							<TableCell align="right" sx={{ fontWeight: 'bold' }}>
+							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.booking_number}</TableCell>
+							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.status}</TableCell>
+							<TableCell align='right' sx={{ fontWeight: 'bold' }}>
 								{UI_LABELS.PROFILE.total_price}
 							</TableCell>
 						</TableRow>
@@ -54,7 +52,7 @@ const BookingsTab = () => {
 							<TableRow key={b.id}>
 								<TableCell>{b.booking_number}</TableCell>
 								<TableCell>{b.status}</TableCell>
-								<TableCell align="right">{b.total_price}</TableCell>
+								<TableCell align='right'>{b.total_price}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
@@ -62,9 +60,7 @@ const BookingsTab = () => {
 			</TableContainer>
 		</Box>
 	) : (
-		<Typography sx={{ textAlign: 'center' }}>
-			{UI_LABELS.PROFILE.no_bookings}
-		</Typography>
+		<Typography sx={{ textAlign: 'center' }}>{UI_LABELS.PROFILE.no_bookings}</Typography>
 	);
 };
 
