@@ -1,11 +1,13 @@
+import base64
+import pyotp
+import hashlib
+
 from flask import request, jsonify
 
+from app.database import db
 from app.models.user import User
 from app.models.booking import Booking
 from app.models.passenger import Passenger
-import base64
-import hashlib
-import pyotp
 
 from app.utils.enum import USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
 from app.middlewares.auth_middleware import admin_required, login_required
@@ -44,21 +46,26 @@ def update_user(current_user, user_id):
 
     body = request.json or {}
 
+    session = db.session
+
     personal_fields = any(k in body for k in ['first_name', 'last_name', 'phone_number'])
     if current_user.id == user_id and personal_fields:
         consent = body.pop('consent', False)
         if not consent:
             return jsonify({'message': 'Consent required'}), 400
+
         create_user_consent(
             current_user,
             CONSENT_EVENT_TYPE.pd_processing,
             CONSENT_DOC_TYPE.pd_policy,
+            session=session,
         )
 
-    updated_user = User.update(user_id, **body)
-    if updated_user:
-        return jsonify(updated_user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+    updated_user = User.update(user_id, session=session, **body)
+
+    session.commit()
+
+    return jsonify(updated_user.to_dict())
 
 
 @admin_required

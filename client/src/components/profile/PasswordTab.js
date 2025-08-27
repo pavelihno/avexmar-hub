@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Box, Button, Alert, Paper, Typography } from '@mui/material';
+import { Box, Button, Alert, Paper, Typography, CircularProgress } from '@mui/material';
 
 import { changePassword } from '../../redux/actions/user';
 import { UI_LABELS } from '../../constants/uiLabels';
@@ -18,6 +18,7 @@ const PasswordTab = () => {
 	const [errors, setErrors] = useState({});
 	const [successMessage, setSuccessMessage] = useState('');
 	const [codeSent, setCodeSent] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const formFields = useMemo(() => {
 		const fields = {
@@ -26,12 +27,14 @@ const PasswordTab = () => {
 				label: UI_LABELS.AUTH.new_password,
 				type: FIELD_TYPES.TEXT,
 				inputProps: { type: 'password' },
+				validate: (v) => (!v ? VALIDATION_MESSAGES.USER.password.REQUIRED : ''),
 			},
 			confirmPassword: {
 				key: 'confirmPassword',
 				label: UI_LABELS.AUTH.confirm_password,
 				type: FIELD_TYPES.TEXT,
 				inputProps: { type: 'password' },
+				validate: (v) => (!v ? VALIDATION_MESSAGES.USER.password2.REQUIRED : ''),
 			},
 			code: { key: 'code', label: UI_LABELS.AUTH.two_factor_code_label },
 		};
@@ -47,7 +50,20 @@ const PasswordTab = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const newErrors = {};
-		if (passwordData.newPassword !== passwordData.confirmPassword) {
+		// run per-field validations similar to UserInfo
+		['newPassword', 'confirmPassword'].forEach((name) => {
+			const field = formFields[name];
+			if (field?.validate) {
+				const err = field.validate(passwordData[name]);
+				if (err) newErrors[name] = err;
+			}
+		});
+		// only check match if both provided and not already errored
+		if (
+			!newErrors.newPassword &&
+			!newErrors.confirmPassword &&
+			passwordData.newPassword !== passwordData.confirmPassword
+		) {
 			newErrors.confirmPassword = UI_LABELS.PROFILE.passwords_dont_match;
 		}
 		if (codeSent && !passwordData.code) {
@@ -57,6 +73,7 @@ const PasswordTab = () => {
 			setErrors(newErrors);
 			return;
 		}
+		setIsSubmitting(true);
 		dispatch(
 			changePassword({
 				password: passwordData.newPassword,
@@ -77,7 +94,8 @@ const PasswordTab = () => {
 			})
 			.catch((res) => {
 				setErrors(res);
-			});
+			})
+			.finally(() => setIsSubmitting(false));
 	};
 
 	return (
@@ -106,6 +124,7 @@ const PasswordTab = () => {
 								fullWidth: true,
 								error: !!errors[name],
 								helperText: errors[name] || '',
+								disabled: isSubmitting,
 							})}
 						</Box>
 					);
@@ -118,11 +137,18 @@ const PasswordTab = () => {
 							fullWidth: true,
 							error: !!errors.code,
 							helperText: errors.code || '',
+							disabled: isSubmitting,
 						})}
 					</Box>
 				)}
-				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }} disabled={codeSent && !passwordData.code}>
-					{UI_LABELS.BUTTONS.save_changes}
+				<Button
+					type='submit'
+					fullWidth
+					variant='contained'
+					sx={{ mt: 2 }}
+					disabled={(codeSent && !passwordData.code) || isSubmitting}
+				>
+					{isSubmitting ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.save_changes}
 				</Button>
 			</Box>
 		</Paper>

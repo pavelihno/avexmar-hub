@@ -2,7 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Alert, Box, Typography, Paper, Button, FormControl, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
+import {
+	Alert,
+	Box,
+	Typography,
+	Paper,
+	Button,
+	FormControl,
+	FormControlLabel,
+	Checkbox,
+	FormHelperText,
+} from '@mui/material';
 
 import { UI_LABELS } from '../../constants/uiLabels';
 import { FIELD_LABELS } from '../../constants/fieldLabels';
@@ -94,7 +104,7 @@ const UserInfo = () => {
 				last_name: formData.lastName,
 				phone_number: formData.phoneNumber,
 				consent: formData.consent,
-			}),
+			})
 		)
 			.unwrap()
 			.then((user) => {
