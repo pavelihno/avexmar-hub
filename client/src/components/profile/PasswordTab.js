@@ -48,48 +48,48 @@ const PasswordTab = () => {
 	};
 
 	return (
-		<Paper sx={{ p: 2, maxWidth: 400 }}>
-			<Typography variant='h6' sx={{ mb: 2 }}>
+		<Paper sx={{ p: 2, maxWidth: 400, width: '100%' }}>
+			<Typography variant="h6" sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.change_password}
 			</Typography>
-			<Box component='form' onSubmit={handleSubmit}>
+			<Box component="form" onSubmit={handleSubmit}>
 				{errors.message && (
-					<Alert severity='error' sx={{ mb: 2 }}>
+					<Alert severity="error" sx={{ mb: 2 }}>
 						{errors.message}
 					</Alert>
 				)}
 				{successMessage && (
-					<Alert severity='success' sx={{ mb: 2 }}>
+					<Alert severity="success" sx={{ mb: 2 }}>
 						{successMessage}
 					</Alert>
 				)}
 				<TextField
-					margin='dense'
+					margin="dense"
 					required
 					fullWidth
-					name='newPassword'
+					name="newPassword"
 					label={UI_LABELS.AUTH.new_password}
-					type='password'
-					id='newPassword'
+					type="password"
+					id="newPassword"
 					value={passwordData.newPassword}
 					onChange={handleChange}
 					error={!!errors.newPassword}
 					helperText={errors.newPassword ? errors.newPassword : ''}
 				/>
 				<TextField
-					margin='dense'
+					margin="dense"
 					required
 					fullWidth
-					name='confirmPassword'
+					name="confirmPassword"
 					label={UI_LABELS.AUTH.confirm_password}
-					type='password'
-					id='confirmPassword'
+					type="password"
+					id="confirmPassword"
 					value={passwordData.confirmPassword}
 					onChange={handleChange}
 					error={!!errors.confirmPassword}
 					helperText={errors.confirmPassword ? errors.confirmPassword : ''}
 				/>
-				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }}>
+				<Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
 					{UI_LABELS.BUTTONS.save_changes}
 				</Button>
 			</Box>

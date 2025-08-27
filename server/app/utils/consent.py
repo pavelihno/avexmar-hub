@@ -42,3 +42,27 @@ def create_booking_consent(
         subject_ids=subject_ids,
         **sender_info,
     )
+
+
+def create_user_consent(
+    user,
+    event_type: CONSENT_EVENT_TYPE,
+    doc_type: CONSENT_DOC_TYPE,
+    *,
+    session=None,
+):
+    session = session or db.session
+    sender_info = get_sender_info()
+
+    doc = ConsentDoc.get_latest(doc_type, session=session)
+    return ConsentEvent.create(
+        session=session,
+        commit=False,
+        type=event_type,
+        granter_user_id=user.id,
+        booking_id=None,
+        doc_id=doc.id,
+        action=CONSENT_ACTION.agree,
+        subject_ids=[],
+        **sender_info,
+    )
