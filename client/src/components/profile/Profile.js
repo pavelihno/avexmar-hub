@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import PersonIcon from '@mui/icons-material/Person';
 import FlightIcon from '@mui/icons-material/Flight';
 import GroupIcon from '@mui/icons-material/Group';
-import LockIcon from '@mui/icons-material/Lock';
+import Stack from '@mui/material/Stack';
 
 import Base from '../Base';
 import { UI_LABELS } from '../../constants/uiLabels';
@@ -26,31 +26,34 @@ const Profile = () => {
 
 	return (
 		<Base maxWidth='lg'>
-			<Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-				<Paper elevation={0} sx={{ p: 3 }}>
+	                <Box sx={{ maxWidth: 900, mx: 'auto', p: 4, mt: 6 }}>
+	                        <Paper elevation={0} sx={{ p: 3 }}>
 					<Typography variant='h5' sx={{ mb: 2 }}>
 						{UI_LABELS.PROFILE.settings}
 					</Typography>
-					<Tabs
-						value={tab}
-						onChange={handleChange}
-						variant='fullWidth'
-						indicatorColor='primary'
-						textColor='primary'
-						sx={{ mb: 3 }}
-					>
-						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
-						<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
-						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
-						<Tab icon={<LockIcon />} label={UI_LABELS.PROFILE.change_password} />
-					</Tabs>
-					{tab === 0 && <UserInfo />}
-					{tab === 1 && <BookingsTab />}
-					{tab === 2 && <PassengersTab />}
-					{tab === 3 && <PasswordTab />}
-				</Paper>
-			</Box>
-		</Base>
+	                                <Tabs
+	                                        value={tab}
+	                                        onChange={handleChange}
+	                                        centered
+	                                        indicatorColor='primary'
+	                                        textColor='primary'
+	                                        sx={{ mb: 3 }}
+	                                >
+	                                        <Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
+	                                        <Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
+	                                        <Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+	                                </Tabs>
+	                                {tab === 0 && (
+	                                        <Stack spacing={3}>
+	                                                <UserInfo />
+	                                                <PasswordTab />
+	                                        </Stack>
+	                                )}
+	                                {tab === 1 && <BookingsTab />}
+	                                {tab === 2 && <PassengersTab />}
+	                        </Paper>
+	                </Box>
+	        </Base>
 	);
 };
 
