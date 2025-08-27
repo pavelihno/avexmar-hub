@@ -50,18 +50,18 @@ const ResetPassword = ({ isModal = false, token: tokenProp = null }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
 					mx: 'auto',
 					outline: 'none',
+					width: '100%',
 				}}
 			>
 				{isModal && (
 					<IconButton
 						aria-label='close'
 						onClick={closeAuthModal}
-						sx={{ position: 'absolute', right: 8, top: 8 }}
+						sx={{ position: 'absolute', right: { xs: 4, sm: 8 }, top: { xs: 4, sm: 8 } }}
 					>
 						<CloseIcon />
 					</IconButton>
@@ -129,7 +129,14 @@ const ResetPassword = ({ isModal = false, token: tokenProp = null }) => {
 						</Button>
 					</Box>
 				) : (
-					<Box sx={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+					<Box
+						sx={{
+							minHeight: { xs: '10rem', sm: '12rem' },
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
 						<CircularProgress color='primary' size={40} />
 					</Box>
 				)}
@@ -150,9 +157,12 @@ const ResetPassword = ({ isModal = false, token: tokenProp = null }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
-			<Container maxWidth='sm'>{content}</Container>
+			<Container maxWidth='sm' sx={{ mt: { xs: 2, sm: 3 } }}>
+				{content}
+			</Container>
 		</Base>
 	);
 };

@@ -6,22 +6,23 @@ export const AuthModalProvider = ({ children }) => {
 	const [authModal, setAuthModal] = useState({
 		isOpen: false,
 		type: null, // 'login', 'register' or 'forgotPassword'
+		redirectPath: null,
 	});
 
-	const openLoginModal = () => {
-		setAuthModal({ isOpen: true, type: 'login' });
+	const openLoginModal = (redirectPath = null) => {
+		setAuthModal({ isOpen: true, type: 'login', redirectPath });
 	};
 
 	const openRegisterModal = () => {
-		setAuthModal({ isOpen: true, type: 'register' });
+		setAuthModal({ isOpen: true, type: 'register', redirectPath: null });
 	};
 
 	const openForgotPasswordModal = () => {
-		setAuthModal({ isOpen: true, type: 'forgotPassword' });
+		setAuthModal({ isOpen: true, type: 'forgotPassword', redirectPath: null });
 	};
 
 	const closeAuthModal = () => {
-		setAuthModal({ isOpen: false, type: null });
+		setAuthModal({ isOpen: false, type: null, redirectPath: null });
 	};
 
 	return (

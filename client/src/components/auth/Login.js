@@ -30,7 +30,7 @@ const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { closeAuthModal, openRegisterModal, openForgotPasswordModal } = useAuthModal();
+	const { closeAuthModal, openRegisterModal, openForgotPasswordModal, authModal } = useAuthModal();
 
 	const isAdmin = useSelector(selectIsAdmin);
 
@@ -66,6 +66,10 @@ const Login = ({ isModal = false }) => {
 			.unwrap()
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
@@ -87,6 +91,10 @@ const Login = ({ isModal = false }) => {
 			.unwrap()
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}

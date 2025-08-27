@@ -29,7 +29,7 @@ class PasswordResetToken(BaseModel):
         session = session or db.session
 
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(hours=Config.PASSWORD_RESET_EXP_HOURS)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=Config.PASSWORD_RESET_EXP_HOURS)
 
         return super().create(
             session=session,
@@ -49,8 +49,10 @@ class PasswordResetToken(BaseModel):
         if not instance:
             return None
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         expires_at = instance.expires_at
+        if expires_at is None:
+            return None
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)
         if expires_at < now:
