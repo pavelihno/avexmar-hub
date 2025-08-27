@@ -12,7 +12,6 @@ import Button from '@mui/material/Button';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { useAuthModal } from '../context/AuthModalContext';
@@ -116,7 +115,7 @@ const Header = () => {
 							startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
 							sx={{ textTransform: 'none' }}
 						>
-							{currentUser?.name || UI_LABELS.PROFILE.profile}
+							{UI_LABELS.PROFILE.profile}
 						</Button>
 
 						<Menu
@@ -132,9 +131,18 @@ const Header = () => {
 								horizontal: 'right',
 							}}
 						>
-							<MenuItem onClick={handleGoToProfile}>
-								<SettingsIcon fontSize='small' sx={{ mr: 1 }} />
-								{UI_LABELS.TITLES.settings}
+							<MenuItem onClick={handleGoToProfile} sx={{ py: 1.5 }}>
+								<Box sx={{ display: 'flex', alignItems: 'center' }}>
+									<Avatar sx={{ width: 32, height: 32, mr: 1 }} />
+									<Box>
+										<Typography variant='subtitle2'>{UI_LABELS.PROFILE.to_profile}</Typography>
+										{currentUser?.email && (
+											<Typography variant='caption' color='text.secondary'>
+												{currentUser.email}
+											</Typography>
+										)}
+									</Box>
+								</Box>
 							</MenuItem>
 							<MenuItem onClick={handleLogout}>
 								<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />

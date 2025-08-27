@@ -78,7 +78,7 @@ export const UI_LABELS = {
 	TITLES: {
 		login: 'Вход',
 		register: 'Регистрация',
-		settings: 'Настройки',
+		profile: 'Личный кабинет',
 		forgot_password: 'Восстановление пароля',
 		activate_account: 'Активация аккаунта',
 	},
@@ -301,8 +301,8 @@ export const UI_LABELS = {
 		two_factor_code_label: 'Код',
 	},
 	PROFILE: {
-		profile: 'Профиль',
-		settings: 'Настройки профиля',
+		profile: 'Личный кабинет',
+		to_profile: 'Перейти в личный кабинет',
 		maintenance: 'Скоро здесь будет личный кабинет',
 		change_password: 'Сменить пароль',
 		password_changed: 'Пароль успешно изменен',
