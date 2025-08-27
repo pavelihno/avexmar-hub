@@ -5,7 +5,12 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import PersonIcon from '@mui/icons-material/Person';
+import FlightIcon from '@mui/icons-material/Flight';
+import GroupIcon from '@mui/icons-material/Group';
+import LockIcon from '@mui/icons-material/Lock';
 
+import Base from '../Base';
 import { UI_LABELS } from '../../constants/uiLabels';
 import UserInfo from './UserInfo';
 import BookingsTab from './BookingsTab';
@@ -20,24 +25,34 @@ const Profile = () => {
 	};
 
 	return (
-		<Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-			<Paper elevation={3} sx={{ p: 3 }}>
-				<Typography variant='h5' sx={{ mb: 2 }}>
-					{UI_LABELS.PROFILE.settings}
-				</Typography>
-<Tabs value={tab} onChange={handleChange} sx={{ mb: 3 }}>
-<Tab label={UI_LABELS.PROFILE.user_info} />
-<Tab label={UI_LABELS.PROFILE.bookings} />
-<Tab label={UI_LABELS.PROFILE.passengers} />
-<Tab label={UI_LABELS.PROFILE.change_password} />
-</Tabs>
-{tab === 0 && <UserInfo />}
-{tab === 1 && <BookingsTab />}
-{tab === 2 && <PassengersTab />}
-{tab === 3 && <PasswordTab />}
-			</Paper>
-		</Box>
+		<Base maxWidth='md'>
+			<Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
+				<Paper elevation={3} sx={{ p: 3 }}>
+					<Typography variant='h5' sx={{ mb: 2 }}>
+						{UI_LABELS.PROFILE.settings}
+					</Typography>
+					<Tabs
+						value={tab}
+						onChange={handleChange}
+						variant='fullWidth'
+						indicatorColor='primary'
+						textColor='primary'
+						sx={{ mb: 3 }}
+					>
+						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
+						<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
+						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+						<Tab icon={<LockIcon />} label={UI_LABELS.PROFILE.change_password} />
+					</Tabs>
+					{tab === 0 && <UserInfo />}
+					{tab === 1 && <BookingsTab />}
+					{tab === 2 && <PassengersTab />}
+					{tab === 3 && <PasswordTab />}
+				</Paper>
+			</Box>
+		</Base>
 	);
 };
 
 export default Profile;
+
