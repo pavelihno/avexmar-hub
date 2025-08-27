@@ -127,25 +127,36 @@ const Passengers = () => {
 	};
 
 	const [buyer, setBuyer] = useState({
-		buyerLastName: '',
-		buyerFirstName: '',
-		emailAddress: '',
-		phoneNumber: '',
-		consent: false,
+	        buyerLastName: '',
+	        buyerFirstName: '',
+	        emailAddress: '',
+	        phoneNumber: '',
+	        consent: false,
 	});
 
 	useEffect(() => {
-		if (passengersExist) {
-			const mapped = fromApiBuyer(booking);
-			setBuyer({
-				buyerLastName: mapped.buyerLastName || '',
-				buyerFirstName: mapped.buyerFirstName || '',
-				emailAddress: mapped.emailAddress || '',
-				phoneNumber: mapped.phoneNumber || '',
-				consent: mapped.consent || false,
-			});
-		}
+	        if (passengersExist) {
+	                const mapped = fromApiBuyer(booking);
+	                setBuyer({
+	                        buyerLastName: mapped.buyerLastName || '',
+	                        buyerFirstName: mapped.buyerFirstName || '',
+	                        emailAddress: mapped.emailAddress || '',
+	                        phoneNumber: mapped.phoneNumber || '',
+	                        consent: mapped.consent || false,
+	                });
+	        }
 	}, [booking, passengersExist]);
+
+	useEffect(() => {
+		if (currentUser?.first_name && currentUser?.last_name) {
+			setBuyer((prev) => ({
+				...prev,
+				buyerLastName: prev.buyerLastName || currentUser.last_name,
+				buyerFirstName: prev.buyerFirstName || currentUser.first_name,
+			}));
+		}
+	}, [currentUser]);
+
 
 	const buyerFormFields = useMemo(() => {
 		const fields = {
