@@ -11,15 +11,15 @@ const UserInfo = () => {
 	const currentUser = useSelector((state) => state.auth.currentUser);
 
 	return (
-	        <Paper sx={{ p: 2 }}>
-	                <Typography variant='h6' gutterBottom>
-	                        {UI_LABELS.PROFILE.user_info}
-	                </Typography>
-	                <Stack spacing={1}>
-	                        <Typography>{`${currentUser?.last_name || ''} ${currentUser?.first_name || ''}`}</Typography>
-	                        <Typography>{`${UI_LABELS.PROFILE.email}: ${currentUser?.email}`}</Typography>
-	                </Stack>
-	        </Paper>
+		<Paper sx={{ p: 2 }}>
+			<Typography variant='h6' gutterBottom>
+				{UI_LABELS.PROFILE.user_info}
+			</Typography>
+			<Stack spacing={1}>
+				<Typography>{`${currentUser?.last_name || ''} ${currentUser?.first_name || ''}`}</Typography>
+				<Typography>{`${UI_LABELS.PROFILE.email}: ${currentUser?.email}`}</Typography>
+			</Stack>
+		</Paper>
 	);
 };
 

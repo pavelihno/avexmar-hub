@@ -16,8 +16,6 @@ def register():
     body = request.json
     email = body.get('email', '').lower()
     password = body.get('password', '')
-    first_name = body.get('first_name')
-    last_name = body.get('last_name')
     if not email or not password:
         return jsonify({'message': 'Email and password are required'}), 400
 
@@ -30,8 +28,8 @@ def register():
         'password': password,
         'role': DEFAULT_USER_ROLE,
         'is_active': False,
-        'first_name': first_name,
-        'last_name': last_name,
+        'first_name': '',
+        'last_name': '',
     })
     if new_user:
         token = sign_activation_token(new_user.email)

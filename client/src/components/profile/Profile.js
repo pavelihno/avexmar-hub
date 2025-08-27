@@ -26,34 +26,34 @@ const Profile = () => {
 
 	return (
 		<Base maxWidth='lg'>
-	                <Box sx={{ maxWidth: 900, mx: 'auto', p: 4, mt: 6 }}>
-	                        <Paper elevation={0} sx={{ p: 3 }}>
+			<Box maxWidth='md' sx={{ mx: 'auto', p: 4 }}>
+				<Paper elevation={0} sx={{ p: 3,  mt: 3 }}>
 					<Typography variant='h5' sx={{ mb: 2 }}>
 						{UI_LABELS.PROFILE.settings}
 					</Typography>
-	                                <Tabs
-	                                        value={tab}
-	                                        onChange={handleChange}
-	                                        centered
-	                                        indicatorColor='primary'
-	                                        textColor='primary'
-	                                        sx={{ mb: 3 }}
-	                                >
-	                                        <Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
-	                                        <Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
-	                                        <Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
-	                                </Tabs>
-	                                {tab === 0 && (
-	                                        <Stack spacing={3}>
-	                                                <UserInfo />
-	                                                <PasswordTab />
-	                                        </Stack>
-	                                )}
-	                                {tab === 1 && <BookingsTab />}
-	                                {tab === 2 && <PassengersTab />}
-	                        </Paper>
-	                </Box>
-	        </Base>
+					<Tabs
+						value={tab}
+						onChange={handleChange}
+						centered
+						indicatorColor='primary'
+						textColor='primary'
+						sx={{ mb: 3 }}
+					>
+						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
+						<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
+						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+					</Tabs>
+					{tab === 0 && (
+						<Stack spacing={3}>
+							<UserInfo />
+							<PasswordTab />
+						</Stack>
+					)}
+					{tab === 1 && <BookingsTab />}
+					{tab === 2 && <PassengersTab />}
+				</Paper>
+			</Box>
+		</Base>
 	);
 };
 
