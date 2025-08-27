@@ -12,13 +12,14 @@ export const {
 	removeAll: deleteAllUsers,
 } = createCrudActions('users');
 
-export const changePassword = createAsyncThunk('users/changePassword', async (password, { rejectWithValue }) => {
-	try {
-		const res = await serverApi.put('/users/change_password', {
-			password,
-		});
-		return res.data;
-	} catch (err) {
-		return rejectWithValue(getErrorData(err));
-	}
-});
+export const changePassword = createAsyncThunk(
+	'users/changePassword',
+	async (data, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.put('/users/change_password', data);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	},
+);
