@@ -1,6 +1,6 @@
-from typing import List, TYPE_CHECKING
-from werkzeug.security import generate_password_hash, check_password_hash
 import pyotp
+from werkzeug.security import generate_password_hash, check_password_hash
+from typing import List, TYPE_CHECKING
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -116,7 +116,7 @@ class User(BaseModel):
             cls.register_failed_login(user)
             return None
 
-    def get_totp(self, interval: int = Config.LOGIN_TOTP_INTERVAL_SECONDS):
+    def get_totp(self, interval: int):
         return pyotp.TOTP(self.totp_secret, interval=interval)
 
     def verify_password(self, _password):

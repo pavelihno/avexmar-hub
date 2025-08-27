@@ -50,7 +50,6 @@ const PasswordTab = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const newErrors = {};
-		// run per-field validations similar to UserInfo
 		['newPassword', 'confirmPassword'].forEach((name) => {
 			const field = formFields[name];
 			if (field?.validate) {
@@ -58,7 +57,6 @@ const PasswordTab = () => {
 				if (err) newErrors[name] = err;
 			}
 		});
-		// only check match if both provided and not already errored
 		if (
 			!newErrors.newPassword &&
 			!newErrors.confirmPassword &&
@@ -124,7 +122,7 @@ const PasswordTab = () => {
 								fullWidth: true,
 								error: !!errors[name],
 								helperText: errors[name] || '',
-								disabled: isSubmitting,
+								disabled: isSubmitting || codeSent,
 							})}
 						</Box>
 					);
@@ -148,7 +146,7 @@ const PasswordTab = () => {
 					sx={{ mt: 2 }}
 					disabled={(codeSent && !passwordData.code) || isSubmitting}
 				>
-					{isSubmitting ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.save_changes}
+					{isSubmitting ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.change_password}
 				</Button>
 			</Box>
 		</Paper>

@@ -52,6 +52,7 @@ export const UI_LABELS = {
 	BUTTONS: {
 		save: 'Сохранить',
 		save_changes: 'Сохранить изменения',
+		change_password: 'Сохранить новый пароль',
 		close: 'Закрыть',
 		login: 'Войти',
 		exit: 'Выйти',
@@ -303,9 +304,9 @@ export const UI_LABELS = {
 	PROFILE: {
 		profile: 'Личный кабинет',
 		to_profile: 'Перейти в личный кабинет',
-		maintenance: 'Скоро здесь будет личный кабинет',
 		change_password: 'Сменить пароль',
-		verification_code_sent: 'Код отправлен на вашу электронную почту. Введите его для смены пароля',
+		verification_code_sent: 'Код подтверждения отправлен на вашу электронную почту',
+		user_info_changed: 'Личные данные успешно изменены',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 		user_info: 'Личные данные',
