@@ -1,15 +1,16 @@
 import os
+from time import timezone
 import uuid
 import requests
 import dotenv
 
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 
 WEBHOOK_URL = 'http://localhost:8000/webhooks/yookassa'
 
-dotenv.load_dotenv('../.env')
+dotenv.load_dotenv('../server/.env')
 
 Configuration.account_id = os.environ.get('YOOKASSA_SHOP_ID')
 Configuration.secret_key = os.environ.get('YOOKASSA_SECRET_KEY')
@@ -104,7 +105,9 @@ def create_invoice():
         'value': f'{total_price:.2f}',
         'currency': currency.upper(),
     }
-    cart = {
+
+    receipt = {
+        'customer': {'email': 'test@example.com'},
         'items': [
             {
                 'description': 'Test booking',
@@ -116,11 +119,29 @@ def create_invoice():
             }
         ]
     }
+
+    cart = [
+        {
+            'description': item['description'],
+            'price': {
+                'value': item['amount']['value'],
+                'currency': item['amount']['currency'],
+            },
+            'quantity': item['quantity'],
+        }
+        for item in receipt.get('items', [])
+    ]
+
     expires_at = datetime.now() + timedelta(days=1)
+
     body = {
-        'amount': amount,
+        'payment_data': {
+            'amount': amount,
+            'receipt': receipt,
+            'capture': False,
+        },
         'cart': cart,
-        'due_date': expires_at.isoformat(),
+        'expires_at': expires_at.isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
         'metadata': {'public_id': booking_id, 'expires_at': expires_at.isoformat()},
     }
 
@@ -216,4 +237,5 @@ if __name__ == '__main__':
     # create_payment()
     # capture_payment()
     # decline_payment()
-    send_notification()
+    # send_notification()
+    create_invoice()
