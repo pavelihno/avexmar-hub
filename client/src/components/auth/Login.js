@@ -33,6 +33,7 @@ const Login = ({ isModal = false }) => {
 	const { closeAuthModal, openRegisterModal, openForgotPasswordModal, authModal } = useAuthModal();
 
 	const isAdmin = useSelector(selectIsAdmin);
+	const isLoading = useSelector((state) => state.auth.isLoading);
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -176,6 +177,7 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -190,10 +192,11 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.password}
 							helperText={errors.password ? errors.password : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.login}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.login}
 						</Button>
 					</Box>
 				) : !successMessage && twoFactorRequired ? (
@@ -213,10 +216,11 @@ const Login = ({ isModal = false }) => {
 							onChange={(e) => setCode(e.target.value)}
 							error={!!twoFactorErrors.message}
 							helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.confirm}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.confirm}
 						</Button>
 					</Box>
 				) : (

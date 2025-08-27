@@ -28,6 +28,7 @@ import { FIELD_LABELS, UI_LABELS } from '../../constants';
 const Register = ({ isModal = false }) => {
 	const dispatch = useDispatch();
 	const isAuth = useSelector(selectIsAuth);
+	const isLoading = useSelector((state) => state.auth.isLoading);
 	const { closeAuthModal, openLoginModal } = useAuthModal();
 
 	const [formData, setFormData] = useState({
@@ -136,6 +137,7 @@ const Register = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -150,6 +152,7 @@ const Register = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.password}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -164,10 +167,11 @@ const Register = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.password2}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.register}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.register}
 						</Button>
 					</Box>
 				) : (
