@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, Button, Typography, Stack } from '@mui/material';
+import { Box, Button, Typography, Stack, Paper } from '@mui/material';
 
 import PassengerForm from '../booking/PassengerForm';
 import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
@@ -41,39 +41,41 @@ const PassengersTab = () => {
 		});
 	};
 
-	return (
-		<Box>
-			{passengers.length === 0 ? (
-				<Typography sx={{ mb: 2 }}>{UI_LABELS.PROFILE.no_passengers}</Typography>
-			) : (
-				<Stack spacing={1} sx={{ mb: 2 }}>
-					{passengers.map((p) => (
-						<Typography key={p.id}>{`${p.last_name} ${p.first_name}`}</Typography>
-					))}
-				</Stack>
-			)}
-			{showForm ? (
+		return (
 				<Box>
-					<PassengerForm
-						passenger={data}
-						onChange={handleChange}
-						citizenshipOptions={citizenshipOptions}
-						ref={formRef}
-					/>
-					<Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
-						{UI_LABELS.BOOKING.passenger_form.add_passenger}
-					</Button>
-					<Button variant='text' onClick={() => setShowForm(false)}>
-						{UI_LABELS.BUTTONS.cancel}
-					</Button>
+						{passengers.length === 0 ? (
+								<Typography sx={{ mb: 2 }}>{UI_LABELS.PROFILE.no_passengers}</Typography>
+						) : (
+								<Stack spacing={1} sx={{ mb: 2 }}>
+										{passengers.map((p) => (
+												<Paper key={p.id} sx={{ p: 1 }}>
+														<Typography>{`${p.last_name} ${p.first_name}`}</Typography>
+												</Paper>
+										))}
+								</Stack>
+						)}
+						{showForm ? (
+								<Paper sx={{ p: 2 }}>
+										<PassengerForm
+												passenger={data}
+												onChange={handleChange}
+												citizenshipOptions={citizenshipOptions}
+												ref={formRef}
+										/>
+										<Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
+												{UI_LABELS.BOOKING.passenger_form.add_passenger}
+										</Button>
+										<Button variant='text' onClick={() => setShowForm(false)}>
+												{UI_LABELS.BUTTONS.cancel}
+										</Button>
+								</Paper>
+						) : (
+								<Button variant='outlined' onClick={() => setShowForm(true)}>
+										{UI_LABELS.BOOKING.passenger_form.add_passenger}
+								</Button>
+						)}
 				</Box>
-			) : (
-				<Button variant='outlined' onClick={() => setShowForm(true)}>
-					{UI_LABELS.BOOKING.passenger_form.add_passenger}
-				</Button>
-			)}
-		</Box>
-	);
+		);
 };
 
 export default PassengersTab;
