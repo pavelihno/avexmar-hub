@@ -11,7 +11,7 @@ from app.utils.enum import (
 
 def get_sender_info() -> dict:
     return {
-        'ip': request.headers.get('X-Forwarded-For', request.remote_addr),
+        'ip': request.remote_addr,
         'user_agent': request.headers.get('User-Agent'),
         'device_fingerprint': request.headers.get('X-Device-Fingerprint'),
     }
