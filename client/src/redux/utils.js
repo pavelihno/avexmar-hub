@@ -11,7 +11,7 @@ export const getErrorData = (error) => {
 	return { message: error.message || 'An unknown error occurred' };
 };
 
-export const handlePending = (state, mapping = { loadingKey: 'isLoading', errorsKey: 'errors' }) => {
+export const handlePending = (state, action, mapping = { loadingKey: 'isLoading', errorsKey: 'errors' }) => {
 	const { loadingKey, errorsKey } = mapping;
 
 	state[loadingKey] = true;

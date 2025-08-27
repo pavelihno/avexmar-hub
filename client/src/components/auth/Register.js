@@ -21,13 +21,11 @@ import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 import Base from '../Base';
 
 import { register } from '../../redux/actions/auth';
-import { selectIsAuth } from '../../redux/reducers/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Register = ({ isModal = false }) => {
 	const dispatch = useDispatch();
-	const isAuth = useSelector(selectIsAuth);
 	const isLoading = useSelector((state) => state.auth.isLoading);
 	const { closeAuthModal, openLoginModal } = useAuthModal();
 
@@ -61,7 +59,7 @@ const Register = ({ isModal = false }) => {
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.register);
 				if (isModal) {
-					setTimeout(() => closeAuthModal(), 1500);
+					setTimeout(() => closeAuthModal(), 3000);
 				}
 			})
 			.catch((res) => setErrors(res));
@@ -170,7 +168,7 @@ const Register = ({ isModal = false }) => {
 							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
 							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.register}
 						</Button>
 					</Box>

@@ -195,7 +195,7 @@ const Login = ({ isModal = false }) => {
 							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
 							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.login}
 						</Button>
 					</Box>
@@ -219,7 +219,7 @@ const Login = ({ isModal = false }) => {
 							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained' disabled={isLoading} >
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
 							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.confirm}
 						</Button>
 					</Box>
