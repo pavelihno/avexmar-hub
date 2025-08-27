@@ -3,9 +3,15 @@ from flask import request, jsonify
 from app.models.user import User
 from app.models.booking import Booking
 from app.models.passenger import Passenger
+import base64
+import hashlib
+import pyotp
+
 from app.utils.enum import USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
 from app.middlewares.auth_middleware import admin_required, login_required
 from app.utils.consent import create_user_consent
+from app.utils.email import send_email, EMAIL_TYPE
+from app.config import Config
 
 
 @admin_required
@@ -105,12 +111,30 @@ def create_user_passenger(current_user, user_id):
 
 @login_required
 def change_password(current_user):
-    body = request.json
+    body = request.json or {}
     password = body.get('password', '')
+    code = body.get('code')
 
     if not password:
         return jsonify({'message': 'Invalid password'}), 400
-    updated_user = User.change_password(current_user.id, password)
-    if updated_user:
+
+    secret_source = f'{current_user.email}{password}{Config.SECRET_KEY}'
+    digest = hashlib.sha256(secret_source.encode()).digest()
+    secret = base64.b32encode(digest).decode()
+    totp = pyotp.TOTP(secret, interval=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS)
+
+    if code:
+        if not totp.verify(str(code)):
+            return jsonify({'message': 'Invalid or expired code'}), 400
+        updated_user = User.change_password(current_user.id, password)
         return jsonify(updated_user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+
+    verification_code = totp.now()
+    send_email(
+        EMAIL_TYPE.password_change,
+        is_noreply=True,
+        recipients=[current_user.email],
+        code=verification_code,
+        expires_in_minutes=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS // 60,
+    )
+    return jsonify({'message': 'Verification code sent'})

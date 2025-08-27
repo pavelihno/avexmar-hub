@@ -33,6 +33,10 @@ class EMAIL_TYPE(enum.Enum):
         'two_factor',
         'Код для входа —  {brand_name}',
     )
+    password_change = (
+        'password_change',
+        'Изменение пароля — {brand_name}',
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template
