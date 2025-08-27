@@ -1,5 +1,6 @@
 from typing import List, TYPE_CHECKING
 from werkzeug.security import generate_password_hash, check_password_hash
+import pyotp
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -74,6 +75,8 @@ class User(BaseModel):
             elif key == 'email' and isinstance(value, str):
                 kwargs['email'] = value.lower()
 
+        kwargs['totp_secret'] = pyotp.random_base32()
+
         return super().create(session=session, commit=commit, **kwargs)
 
     @classmethod
@@ -112,6 +115,9 @@ class User(BaseModel):
         else:
             cls.register_failed_login(user)
             return None
+
+    def get_totp(self, interval: int = Config.LOGIN_TOTP_INTERVAL_SECONDS):
+        return pyotp.TOTP(self.totp_secret, interval=interval)
 
     def verify_password(self, _password):
         return self.__is_password_correct(self.password, _password)
