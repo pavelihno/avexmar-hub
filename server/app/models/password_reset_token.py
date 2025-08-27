@@ -1,6 +1,5 @@
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
