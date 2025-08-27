@@ -305,6 +305,7 @@ export const UI_LABELS = {
 		to_profile: 'Перейти в личный кабинет',
 		maintenance: 'Скоро здесь будет личный кабинет',
 		change_password: 'Сменить пароль',
+		verification_code_sent: 'Код отправлен на вашу электронную почту. Введите его для смены пароля',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
 		user_info: 'Личные данные',

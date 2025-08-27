@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Box, Typography, Paper, Button, FormControl, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
+import { Alert, Box, Typography, Paper, Button, FormControl, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
 
 import { UI_LABELS } from '../../constants/uiLabels';
 import { FIELD_LABELS } from '../../constants/fieldLabels';
@@ -80,6 +80,9 @@ const UserInfo = () => {
 				if (err) newErrors[f.name] = err;
 			}
 		});
+		if (!formData.consent) {
+			newErrors.consent = VALIDATION_MESSAGES.BOOKING.consent.REQUIRED;
+		}
 		if (Object.keys(newErrors).length) {
 			setErrors(newErrors);
 			return;
@@ -91,7 +94,7 @@ const UserInfo = () => {
 				last_name: formData.lastName,
 				phone_number: formData.phoneNumber,
 				consent: formData.consent,
-			})
+			}),
 		)
 			.unwrap()
 			.then((user) => {
@@ -108,6 +111,11 @@ const UserInfo = () => {
 				{UI_LABELS.PROFILE.user_info}
 			</Typography>
 			<Box component='form' onSubmit={handleSubmit}>
+				{errors.message && (
+					<Alert severity='error' sx={{ mb: 2 }}>
+						{errors.message}
+					</Alert>
+				)}
 				{['lastName', 'firstName', 'phoneNumber', 'emailAddress'].map((name, idx) => {
 					const field = formFields[name];
 					return (
@@ -142,7 +150,7 @@ const UserInfo = () => {
 					/>
 					{errors.consent && <FormHelperText>{errors.consent}</FormHelperText>}
 				</FormControl>
-				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }}>
+				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }} disabled={!formData.consent}>
 					{UI_LABELS.BUTTONS.save_changes}
 				</Button>
 			</Box>

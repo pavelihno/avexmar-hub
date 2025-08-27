@@ -67,7 +67,7 @@ const PasswordTab = () => {
 			.then((res) => {
 				if (res.message) {
 					setCodeSent(true);
-					setSuccessMessage(res.message);
+					setSuccessMessage(UI_LABELS.PROFILE.verification_code_sent);
 				} else {
 					setPasswordData({ newPassword: '', confirmPassword: '', code: '' });
 					setErrors({});
@@ -92,7 +92,7 @@ const PasswordTab = () => {
 					</Alert>
 				)}
 				{successMessage && (
-					<Alert severity='success' sx={{ mb: 2 }}>
+					<Alert severity={codeSent ? 'info' : 'success'} sx={{ mb: 2 }}>
 						{successMessage}
 					</Alert>
 				)}
@@ -121,7 +121,7 @@ const PasswordTab = () => {
 						})}
 					</Box>
 				)}
-				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }}>
+				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }} disabled={codeSent && !passwordData.code}>
 					{UI_LABELS.BUTTONS.save_changes}
 				</Button>
 			</Box>
