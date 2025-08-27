@@ -25,45 +25,41 @@ const BookingsTab = () => {
 		}
 	}, [dispatch, currentUser]);
 
-		if (isLoading) {
-				return <Typography>{UI_LABELS.MESSAGES.loading}</Typography>;
-		}
+	if (isLoading) {
+		return <Typography>{UI_LABELS.MESSAGES.loading}</Typography>;
+	}
 
-		return bookings && bookings.length ? (
-				<Box>
-						<Typography variant='h6' sx={{ mb: 2 }}>
-								{UI_LABELS.PROFILE.bookings}
-						</Typography>
-						<TableContainer component={Paper}>
-								<Table size='small'>
-										<TableHead sx={{ bgcolor: 'background.paper' }}>
-												<TableRow>
-														<TableCell sx={{ fontWeight: 'bold' }}>
-																{UI_LABELS.PROFILE.booking_number}
-														</TableCell>
-														<TableCell sx={{ fontWeight: 'bold' }}>
-																{UI_LABELS.PROFILE.status}
-														</TableCell>
-														<TableCell align='right' sx={{ fontWeight: 'bold' }}>
-																{UI_LABELS.PROFILE.total_price}
-														</TableCell>
-												</TableRow>
-										</TableHead>
-										<TableBody>
-												{bookings.map((b) => (
-														<TableRow key={b.id}>
-																<TableCell>{b.booking_number}</TableCell>
-																<TableCell>{b.status}</TableCell>
-																<TableCell align='right'>{b.total_price}</TableCell>
-														</TableRow>
-												))}
-										</TableBody>
-								</Table>
-						</TableContainer>
-				</Box>
-		) : (
-				<Typography>{UI_LABELS.PROFILE.no_bookings}</Typography>
-		);
+	return bookings && bookings.length ? (
+		<Box>
+			<Typography variant='h6' sx={{ mb: 2 }}>
+				{UI_LABELS.PROFILE.bookings}
+			</Typography>
+			<TableContainer component={Paper}>
+				<Table size='small'>
+					<TableHead sx={{ bgcolor: 'background.paper' }}>
+						<TableRow>
+							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.booking_number}</TableCell>
+							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.status}</TableCell>
+							<TableCell align='right' sx={{ fontWeight: 'bold' }}>
+								{UI_LABELS.PROFILE.total_price}
+							</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{bookings.map((b) => (
+							<TableRow key={b.id}>
+								<TableCell>{b.booking_number}</TableCell>
+								<TableCell>{b.status}</TableCell>
+								<TableCell align='right'>{b.total_price}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</Box>
+	) : (
+		<Typography>{UI_LABELS.PROFILE.no_bookings}</Typography>
+	);
 };
 
 export default BookingsTab;

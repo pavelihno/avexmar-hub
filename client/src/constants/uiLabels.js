@@ -307,7 +307,7 @@ export const UI_LABELS = {
 		change_password: 'Сменить пароль',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
-		user_info: 'Данные пользователя',
+		user_info: 'Личные данные',
 		email: 'Электронная почта',
 		role: 'Роль',
 		bookings: 'Мои бронирования',

@@ -25,9 +25,9 @@ const Profile = () => {
 	};
 
 	return (
-		<Base maxWidth='md'>
+		<Base maxWidth='lg'>
 			<Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-				<Paper elevation={3} sx={{ p: 3 }}>
+				<Paper elevation={0} sx={{ p: 3 }}>
 					<Typography variant='h5' sx={{ mb: 2 }}>
 						{UI_LABELS.PROFILE.settings}
 					</Typography>
@@ -55,4 +55,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

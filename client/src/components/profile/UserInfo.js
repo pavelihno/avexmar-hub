@@ -16,13 +16,10 @@ const UserInfo = () => {
 				{UI_LABELS.PROFILE.user_info}
 			</Typography>
 			<Stack spacing={1}>
-				<Typography>
-					{`${UI_LABELS.PROFILE.email}: ${currentUser?.email}`}
-				</Typography>
+				<Typography>{`${UI_LABELS.PROFILE.email}: ${currentUser?.email}`}</Typography>
 			</Stack>
 		</Paper>
 	);
 };
 
 export default UserInfo;
-
