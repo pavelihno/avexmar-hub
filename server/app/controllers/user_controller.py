@@ -1,7 +1,3 @@
-import base64
-import pyotp
-import hashlib
-
 from flask import request, jsonify
 
 from app.database import db
@@ -125,10 +121,7 @@ def change_password(current_user):
     if not password:
         return jsonify({'message': 'Invalid password'}), 400
 
-    secret_source = f'{current_user.email}{password}{Config.SECRET_KEY}'
-    digest = hashlib.sha256(secret_source.encode()).digest()
-    secret = base64.b32encode(digest).decode()
-    totp = pyotp.TOTP(secret, interval=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS)
+    totp = current_user.get_totp(Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS)
 
     if code:
         if not totp.verify(str(code)):

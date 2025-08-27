@@ -31,7 +31,9 @@ const UserInfo = () => {
 		emailAddress: '',
 		consent: false,
 	});
-	const [errors, setErrors] = useState({});
+        const [errors, setErrors] = useState({});
+        const [successMessage, setSuccessMessage] = useState('');
+        const [lastSubmittedData, setLastSubmittedData] = useState(null);
 
 	const formFields = useMemo(() => {
 		const fields = {
@@ -66,20 +68,27 @@ const UserInfo = () => {
 
 	useEffect(() => {
 		if (currentUser) {
-			setFormData((prev) => ({
-				...prev,
-				firstName: currentUser.first_name || '',
-				lastName: currentUser.last_name || '',
-				phoneNumber: currentUser.phone_number || '',
-				emailAddress: currentUser.email_address || currentUser.email || '',
-			}));
-		}
-	}, [currentUser]);
+                        const initData = {
+                                firstName: currentUser.first_name || '',
+                                lastName: currentUser.last_name || '',
+                                phoneNumber: currentUser.phone_number || '',
+                                emailAddress: currentUser.email_address || currentUser.email || '',
+                        };
+                        setFormData((prev) => ({ ...prev, ...initData }));
+                        setLastSubmittedData(initData);
+                }
+        }, [currentUser]);
 
-	const handleFieldChange = (field, value) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
-		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
-	};
+        const handleFieldChange = (field, value) => {
+                setFormData((prev) => {
+                        const updated = { ...prev, [field]: value };
+                        if (field !== 'consent' && lastSubmittedData && value !== lastSubmittedData[field]) {
+                                updated.consent = false;
+                        }
+                        return updated;
+                });
+                if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
+        };
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -97,23 +106,30 @@ const UserInfo = () => {
 			setErrors(newErrors);
 			return;
 		}
-		dispatch(
-			updateUser({
-				id: currentUser.id,
-				first_name: formData.firstName,
-				last_name: formData.lastName,
-				phone_number: formData.phoneNumber,
-				consent: formData.consent,
-			})
-		)
-			.unwrap()
-			.then((user) => {
-				dispatch(setCurrentUser(user));
-				setErrors({});
-				setFormData((prev) => ({ ...prev, consent: false }));
-			})
-			.catch((res) => setErrors(res));
-	};
+                setSuccessMessage('');
+                dispatch(
+                        updateUser({
+                                id: currentUser.id,
+                                first_name: formData.firstName,
+                                last_name: formData.lastName,
+                                phone_number: formData.phoneNumber,
+                                consent: formData.consent,
+                        })
+                )
+                        .unwrap()
+                        .then((user) => {
+                                dispatch(setCurrentUser(user));
+                                setErrors({});
+                                setSuccessMessage(UI_LABELS.SUCCESS.update);
+                                setLastSubmittedData({
+                                        firstName: formData.firstName,
+                                        lastName: formData.lastName,
+                                        phoneNumber: formData.phoneNumber,
+                                        emailAddress: formData.emailAddress,
+                                });
+                        })
+                        .catch((res) => setErrors(res));
+        };
 
 	return (
 		<Paper sx={{ p: 2, width: '100%' }}>
@@ -126,10 +142,15 @@ const UserInfo = () => {
 						{errors.message}
 					</Alert>
 				)}
-				{['lastName', 'firstName', 'phoneNumber', 'emailAddress'].map((name, idx) => {
-					const field = formFields[name];
-					return (
-						<Box key={name} sx={{ mt: idx ? 2 : 0 }}>
+                                {successMessage && (
+                                        <Alert severity='success' sx={{ mb: 2 }}>
+                                                {successMessage}
+                                        </Alert>
+                                )}
+                                {['lastName', 'firstName', 'phoneNumber', 'emailAddress'].map((name, idx) => {
+                                        const field = formFields[name];
+                                        return (
+                                                <Box key={name} sx={{ mt: idx ? 2 : 0 }}>
 							{field.renderField({
 								value: formData[name],
 								onChange: (val) => handleFieldChange(name, val),
