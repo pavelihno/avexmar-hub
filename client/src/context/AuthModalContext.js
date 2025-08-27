@@ -10,7 +10,11 @@ export const AuthModalProvider = ({ children }) => {
 	});
 
 	const openLoginModal = (redirectPath = null) => {
-		setAuthModal({ isOpen: true, type: 'login', redirectPath });
+		let sanitized = null;
+		if (typeof redirectPath === 'string') {
+			sanitized = redirectPath.trim();
+		}
+		setAuthModal({ isOpen: true, type: 'login', redirectPath: sanitized });
 	};
 
 	const openRegisterModal = () => {
