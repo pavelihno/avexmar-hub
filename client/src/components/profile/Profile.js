@@ -25,18 +25,26 @@ const Profile = () => {
 	};
 
 	return (
-		<Base maxWidth='lg'>
-			<Box maxWidth='md' sx={{ mx: 'auto', p: 4 }}>
-				<Paper elevation={0} sx={{ p: 3,  mt: 3 }}>
-					<Typography variant='h5' sx={{ mb: 2 }}>
+		<Base maxWidth="lg">
+			<Box
+				sx={{
+					minHeight: '80vh',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					p: 4,
+				}}
+			>
+				<Paper elevation={0} sx={{ p: 3, width: '100%', maxWidth: 600 }}>
+					<Typography variant="h5" sx={{ mb: 2 }}>
 						{UI_LABELS.PROFILE.settings}
 					</Typography>
 					<Tabs
 						value={tab}
 						onChange={handleChange}
 						centered
-						indicatorColor='primary'
-						textColor='primary'
+						indicatorColor="primary"
+						textColor="primary"
 						sx={{ mb: 3 }}
 					>
 						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
@@ -44,7 +52,7 @@ const Profile = () => {
 						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
 					</Tabs>
 					{tab === 0 && (
-						<Stack spacing={3}>
+						<Stack spacing={3} alignItems="center">
 							<UserInfo />
 							<PasswordTab />
 						</Stack>

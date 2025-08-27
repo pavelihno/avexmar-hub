@@ -3,8 +3,9 @@ from flask import request, jsonify
 from app.models.user import User
 from app.models.booking import Booking
 from app.models.passenger import Passenger
-from app.utils.enum import USER_ROLE
+from app.utils.enum import USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
 from app.middlewares.auth_middleware import admin_required, login_required
+from app.utils.consent import create_user_consent
 
 
 @admin_required
@@ -30,9 +31,24 @@ def get_user(current_user, user_id):
     return jsonify(user.to_dict())
 
 
-@admin_required
+@login_required
 def update_user(current_user, user_id):
-    body = request.json
+    if current_user.id != user_id and current_user.role != USER_ROLE.admin:
+        return jsonify({'message': 'Forbidden'}), 403
+
+    body = request.json or {}
+
+    personal_fields = any(k in body for k in ['first_name', 'last_name', 'phone_number'])
+    if current_user.id == user_id and personal_fields:
+        consent = body.pop('consent', False)
+        if not consent:
+            return jsonify({'message': 'Consent required'}), 400
+        create_user_consent(
+            current_user,
+            CONSENT_EVENT_TYPE.pd_processing,
+            CONSENT_DOC_TYPE.pd_policy,
+        )
+
     updated_user = User.update(user_id, **body)
     if updated_user:
         return jsonify(updated_user.to_dict())

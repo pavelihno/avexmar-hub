@@ -26,6 +26,7 @@ class User(BaseModel):
     is_locked = db.Column(db.Boolean, default=False, nullable=False)
     first_name = db.Column(db.String, nullable=True)
     last_name = db.Column(db.String, nullable=True)
+    phone_number = db.Column(db.String, nullable=True)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
@@ -46,6 +47,7 @@ class User(BaseModel):
             'email': self.email,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'phone_number': self.phone_number,
             'role': self.role.value,
             'is_active': self.is_active,
             'failed_login_attempts': self.failed_login_attempts,

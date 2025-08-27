@@ -30,17 +30,21 @@ const BookingsTab = () => {
 	}
 
 	return bookings && bookings.length ? (
-		<Box>
-			<Typography variant='h6' sx={{ mb: 2 }}>
+		<Box sx={{ maxWidth: 600, mx: 'auto' }}>
+			<Typography variant="h6" sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.bookings}
 			</Typography>
 			<TableContainer component={Paper}>
-				<Table size='small'>
+				<Table size="small">
 					<TableHead sx={{ bgcolor: 'background.paper' }}>
 						<TableRow>
-							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.booking_number}</TableCell>
-							<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.status}</TableCell>
-							<TableCell align='right' sx={{ fontWeight: 'bold' }}>
+							<TableCell sx={{ fontWeight: 'bold' }}>
+								{UI_LABELS.PROFILE.booking_number}
+							</TableCell>
+							<TableCell sx={{ fontWeight: 'bold' }}>
+								{UI_LABELS.PROFILE.status}
+							</TableCell>
+							<TableCell align="right" sx={{ fontWeight: 'bold' }}>
 								{UI_LABELS.PROFILE.total_price}
 							</TableCell>
 						</TableRow>
@@ -50,7 +54,7 @@ const BookingsTab = () => {
 							<TableRow key={b.id}>
 								<TableCell>{b.booking_number}</TableCell>
 								<TableCell>{b.status}</TableCell>
-								<TableCell align='right'>{b.total_price}</TableCell>
+								<TableCell align="right">{b.total_price}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
@@ -58,7 +62,9 @@ const BookingsTab = () => {
 			</TableContainer>
 		</Box>
 	) : (
-		<Typography>{UI_LABELS.PROFILE.no_bookings}</Typography>
+		<Typography sx={{ textAlign: 'center' }}>
+			{UI_LABELS.PROFILE.no_bookings}
+		</Typography>
 	);
 };
 
