@@ -17,7 +17,7 @@ def create_user(current_user):
     body = request.json
     if 'email' in body and isinstance(body['email'], str):
         body['email'] = body['email'].lower()
-    new_user = User.create(**body)
+    new_user = User.create(commit=True, **body)
     if new_user:
         return jsonify(new_user.to_dict()), 201
     return jsonify({'message': 'User not created'}), 400
@@ -71,7 +71,7 @@ def delete_user(current_user, user_id):
 
 
 def __set_user_activity(user_id, is_active):
-    updated_user = User.update(user_id, is_active=is_active)
+    updated_user = User.update(user_id, commit=True, is_active=is_active)
     if updated_user:
         return jsonify(updated_user.to_dict())
     return jsonify({'message': 'User not found'}), 404
@@ -108,7 +108,7 @@ def create_user_passenger(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': 'Forbidden'}), 403
     body = request.json or {}
-    passenger = Passenger.create(owner_user_id=user_id, **body)
+    passenger = Passenger.create(owner_user_id=user_id, commit=True, **body)
     return jsonify(passenger.to_dict()), 201
 
 

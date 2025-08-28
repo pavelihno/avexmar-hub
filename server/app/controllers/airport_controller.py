@@ -18,14 +18,14 @@ def get_airport(airport_id):
 @admin_required
 def create_airport(current_user):
     body = request.json
-    airport = Airport.create(**body)
+    airport = Airport.create(commit=True, **body)
     return jsonify(airport.to_dict()), 201
 
 
 @admin_required
 def update_airport(current_user, airport_id):
     body = request.json
-    updated = Airport.update(airport_id, **body)
+    updated = Airport.update(airport_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

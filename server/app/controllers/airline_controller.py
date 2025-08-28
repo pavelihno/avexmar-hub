@@ -18,14 +18,14 @@ def get_airline(airline_id):
 @admin_required
 def create_airline(current_user):
     body = request.json
-    airline = Airline.create(**body)
+    airline = Airline.create(commit=True, **body)
     return jsonify(airline.to_dict()), 201
 
 
 @admin_required
 def update_airline(current_user, airline_id):
     body = request.json
-    updated = Airline.update(airline_id, **body)
+    updated = Airline.update(airline_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

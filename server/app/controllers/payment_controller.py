@@ -20,14 +20,14 @@ def get_payment(current_user, payment_id):
 @admin_required
 def create_payment(current_user):
     body = request.json
-    payment = Payment.create(**body)
+    payment = Payment.create(commit=True, **body)
     return jsonify(payment.to_dict()), 201
 
 
 @admin_required
 def update_payment(current_user, payment_id):
     body = request.json
-    updated = Payment.update(payment_id, **body)
+    updated = Payment.update(payment_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

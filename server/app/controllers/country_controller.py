@@ -18,14 +18,14 @@ def get_country(country_id):
 @admin_required
 def create_country(current_user):
     body = request.json
-    country = Country.create(**body)
+    country = Country.create(commit=True, **body)
     return jsonify(country.to_dict()), 201
 
 
 @admin_required
 def update_country(current_user, country_id):
     body = request.json
-    updated = Country.update(country_id, **body)
+    updated = Country.update(country_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

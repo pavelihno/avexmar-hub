@@ -17,14 +17,14 @@ def get_aircraft(aircraft_id):
 @admin_required
 def create_aircraft(current_user):
     data = request.get_json()
-    aircraft = Aircraft.create(**data)
+    aircraft = Aircraft.create(commit=True, **data)
     return jsonify(aircraft.to_dict()), 201
 
 
 @admin_required
 def update_aircraft(current_user, aircraft_id):
     data = request.get_json()
-    aircraft = Aircraft.update(aircraft_id, **data)
+    aircraft = Aircraft.update(aircraft_id, commit=True, **data)
     return jsonify(aircraft.to_dict())
 
 

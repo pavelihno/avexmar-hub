@@ -18,14 +18,14 @@ def get_flight(flight_id):
 @admin_required
 def create_flight(current_user):
     body = request.json
-    flight = Flight.create(**body)
+    flight = Flight.create(commit=True, **body)
     return jsonify(flight.to_dict()), 201
 
 
 @admin_required
 def update_flight(current_user, flight_id):
     body = request.json
-    updated = Flight.update(flight_id, **body)
+    updated = Flight.update(flight_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

@@ -27,7 +27,7 @@ def get_booking(current_user, booking_id):
 def create_booking(current_user):
     session = db.session
     body = request.json
-    booking = Booking.create(session, **body)
+    booking = Booking.create(session, commit=True, **body)
     return jsonify(booking.to_dict()), 201
 
 
@@ -35,7 +35,7 @@ def create_booking(current_user):
 def update_booking(current_user, booking_id):
     session = db.session
     body = request.json
-    updated = Booking.update(booking_id, session=session, **body)
+    updated = Booking.update(booking_id, session=session, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

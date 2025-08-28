@@ -18,14 +18,14 @@ def get_route(route_id):
 @admin_required
 def create_route(current_user):
     body = request.json
-    route = Route.create(**body)
+    route = Route.create(commit=True, **body)
     return jsonify(route.to_dict()), 201
 
 
 @admin_required
 def update_route(current_user, route_id):
     body = request.json
-    updated = Route.update(route_id, **body)
+    updated = Route.update(route_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
