@@ -4,6 +4,7 @@ from app.config import Config
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
+
 mail = Mail()
 
 
