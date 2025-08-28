@@ -23,7 +23,9 @@ const initialState = {
 	nearbyReturnFlights: [],
 	nearbyReturnLoading: false,
 
+	outboundFlightTariffs: [],
 	outboundTariffsLoading: false,
+	returnFlightTariffs: [],
 	returnTariffsLoading: false,
 
 	errors: null,
@@ -36,10 +38,10 @@ const searchSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			.addCase(fetchSearchAirports.pending, (state) =>
-				handlePending(state, { isLoading: 'airportsLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'airportsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchSearchAirports.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'airportsLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'airportsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchSearchAirports.fulfilled, (state, action) => {
 				state.airports = action.payload;
@@ -47,10 +49,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchSearchFlights.pending, (state) =>
-				handlePending(state, { isLoading: 'flightsLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'flightsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchSearchFlights.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'flightsLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'flightsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchSearchFlights.fulfilled, (state, action) => {
 				state.flights = action.payload;
@@ -58,10 +60,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchScheduleFlights.pending, (state) =>
-				handlePending(state, { isLoading: 'flightsLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'flightsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchScheduleFlights.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'flightsLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'flightsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchScheduleFlights.fulfilled, (state, action) => {
 				state.flights = action.payload;
@@ -69,10 +71,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchNearbyOutboundFlights.pending, (state) =>
-				handlePending(state, { isLoading: 'nearbyOutboundLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'nearbyOutboundLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchNearbyOutboundFlights.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'nearbyOutboundLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'nearbyOutboundLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchNearbyOutboundFlights.fulfilled, (state, action) => {
 				state.nearbyOutboundFlights = action.payload;
@@ -80,10 +82,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchNearbyReturnFlights.pending, (state) =>
-				handlePending(state, { isLoading: 'nearbyReturnLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'nearbyReturnLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchNearbyReturnFlights.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'nearbyReturnLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'nearbyReturnLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchNearbyReturnFlights.fulfilled, (state, action) => {
 				state.nearbyReturnFlights = action.payload;
@@ -91,10 +93,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchOutboundFlightTariffs.pending, (state) =>
-				handlePending(state, { isLoading: 'outboundTariffsLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'outboundTariffsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchOutboundFlightTariffs.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'outboundTariffsLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'outboundTariffsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchOutboundFlightTariffs.fulfilled, (state, action) => {
 				state.outboundFlightTariffs = action.payload;
@@ -102,10 +104,10 @@ const searchSlice = createSlice({
 			})
 
 			.addCase(fetchReturnFlightTariffs.pending, (state) =>
-				handlePending(state, { isLoading: 'returnTariffsLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'returnTariffsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchReturnFlightTariffs.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'returnTariffsLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'returnTariffsLoading', errorsKey: 'errors' })
 			)
 			.addCase(fetchReturnFlightTariffs.fulfilled, (state, action) => {
 				state.returnFlightTariffs = action.payload;

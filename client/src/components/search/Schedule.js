@@ -15,7 +15,7 @@ const Schedule = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { flights, isLoading } = useSelector((state) => state.search);
+	const { flights, flightsLoading: isLoading } = useSelector((state) => state.search);
 	const [params] = useSearchParams();
 	const paramObj = Object.fromEntries(params.entries());
 	const paramStr = params.toString();

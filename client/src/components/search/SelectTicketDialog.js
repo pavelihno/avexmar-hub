@@ -162,8 +162,12 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 
 	const seatsNumber = getSeatsNumber(passengers);
 
-	const { outboundFlightTariffs: outboundTariffs, isLoading: outboundLoading } = useSelector((state) => state.search);
-	const { returnFlightTariffs: returnTariffs, isLoading: returnLoading } = useSelector((state) => state.search);
+	const { outboundFlightTariffs: outboundTariffs, outboundTariffsLoading: outboundLoading } = useSelector(
+		(state) => state.search
+	);
+	const { returnFlightTariffs: returnTariffs, returnTariffsLoading: returnLoading } = useSelector(
+		(state) => state.search
+	);
 
 	const { current: priceDetails, isLoading: priceLoading } = useSelector((state) => state.price);
 	const { isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);

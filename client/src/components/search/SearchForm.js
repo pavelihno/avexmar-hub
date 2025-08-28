@@ -14,6 +14,7 @@ import {
 	Radio,
 	TextField,
 	FormControlLabel,
+	CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -106,7 +107,7 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 	const dispatch = useDispatch();
 	const theme = useTheme();
 
-	const { airports } = useSelector((state) => state.search);
+	const { airports, airportsLoading } = useSelector((state) => state.search);
 
 	let storedParams = {};
 	if (loadLocalStorage) {
@@ -427,8 +428,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						error: !!validationErrors.from,
 						helperText: validationErrors.from,
 						...selectProps,
+						disabled: airportsLoading,
 					})}
-					<IconButton aria-label='swap' onClick={swapAirports}>
+					<IconButton aria-label='swap' onClick={swapAirports} disabled={airportsLoading}>
 						<SwapHorizIcon />
 					</IconButton>
 					{formFields.to.renderField({
@@ -437,7 +439,13 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						error: !!validationErrors.to,
 						helperText: validationErrors.to,
 						...selectProps,
+						disabled: airportsLoading,
 					})}
+					{airportsLoading && (
+						<Box sx={{ ml: 1, display: 'flex', alignItems: 'center' }}>
+							<CircularProgress size={18} />
+						</Box>
+					)}
 				</Box>
 			</Box>
 

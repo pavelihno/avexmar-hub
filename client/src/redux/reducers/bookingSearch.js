@@ -15,10 +15,10 @@ const bookingSearchSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			.addCase(searchBooking.pending, (state) =>
-				handlePending(state, { isLoading: 'isLoading', errors: 'errors' })
+				handlePending(state, null, { loadingKey: 'isLoading', errorsKey: 'errors' })
 			)
 			.addCase(searchBooking.rejected, (state, action) =>
-				handleRejected(state, action, { isLoading: 'isLoading', errors: 'errors' })
+				handleRejected(state, action, { loadingKey: 'isLoading', errorsKey: 'errors' })
 			)
 			.addCase(searchBooking.fulfilled, (state, action) => {
 				state.result = action.payload;
