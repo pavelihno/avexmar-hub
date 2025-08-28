@@ -3,12 +3,11 @@ import importlib
 from flask import Flask
 from flask_migrate import Migrate
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
+from app.utils.limiter import init_limiter, limiter
 from app.middlewares.error_handler import register_error_handlers
 from app.middlewares.session_middleware import register_session_handler
 
@@ -38,8 +37,6 @@ from app.controllers.consent_event_controller import *
 from app.controllers.passenger_export_controller import *
 
 
-limiter = Limiter(key_func=get_remote_address)
-
 def __import_models():
     models_dir = 'app/models'
     for dir_path, dir_names, file_names in os.walk(models_dir):
@@ -63,10 +60,9 @@ def __create_app(_config_class, _db):
 
     _db.init_app(app)
     init_mail(app)
+    init_limiter(app)
     register_error_handlers(app)
     register_session_handler(app)
-
-    limiter.init_app(app)
 
     # auth
     app.route('/register', methods=['POST'])(register)

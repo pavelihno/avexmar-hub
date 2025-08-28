@@ -14,6 +14,7 @@ class Config:
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('SERVER_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    LIMITER_STORAGE_URI = os.environ.get('SERVER_LIMITER_STORAGE_URI')
 
     # Security settings
     CSRF_ENABLED = True
