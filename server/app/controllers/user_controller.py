@@ -1,8 +1,12 @@
 from flask import request, jsonify
+from sqlalchemy import func
 
 from app.database import db
 from app.models.user import User
 from app.models.booking import Booking
+from app.models.booking_flight import BookingFlight
+from app.models.booking_passenger import BookingPassenger
+from app.models.flight import Flight
 from app.models.passenger import Passenger
 
 from app.utils.enum import USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
@@ -91,8 +95,44 @@ def deactivate_user(current_user, user_id):
 def get_user_bookings(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': 'Forbidden'}), 403
+
     bookings = Booking.query.filter_by(user_id=user_id).all()
-    return jsonify([b.to_dict() for b in bookings])
+    if not bookings:
+        return jsonify([])
+
+    booking_ids = [b.id for b in bookings]
+
+    bf_rows = (
+        db.session.query(BookingFlight.booking_id, Flight)
+        .join(Flight, Flight.id == BookingFlight.flight_id)
+        .filter(BookingFlight.booking_id.in_(booking_ids))
+        .all()
+    )
+    flights_map: dict[int, list[Flight]] = {}
+    for bid, flight in bf_rows:
+        flights_map.setdefault(bid, []).append(flight)
+
+    pc_rows = (
+        db.session.query(BookingPassenger.booking_id, func.count(BookingPassenger.id))
+        .filter(BookingPassenger.booking_id.in_(booking_ids))
+        .group_by(BookingPassenger.booking_id)
+        .all()
+    )
+    passenger_count_map = {bid: int(cnt) for bid, cnt in pc_rows}
+
+    result = []
+    for b in bookings:
+        data = b.to_dict()
+        flights = flights_map.get(b.id, [])
+        flights_sorted = sorted(
+            flights,
+            key=lambda f: (f.scheduled_departure, f.scheduled_departure_time or None),
+        )
+        data['flights'] = [f.to_dict(return_children=True) for f in flights_sorted]
+        data['passengers_count'] = passenger_count_map.get(b.id, 0)
+        result.append(data)
+
+    return jsonify(result)
 
 
 @login_required
@@ -100,7 +140,7 @@ def get_user_passengers(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': 'Forbidden'}), 403
     passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
-    return jsonify([p.to_dict() for p in passengers])
+    return jsonify([p.to_dict(return_children=True) for p in passengers])
 
 
 @login_required

@@ -1,4 +1,4 @@
-import { formatDate } from '../components/utils';
+import { formatDate, formatTime } from '../components/utils';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
@@ -319,6 +319,29 @@ export const UI_LABELS = {
 		booking_number: 'Номер',
 		status: 'Статус',
 		total_price: 'Сумма',
+		route: 'Маршрут',
+		passengers: 'Пассажиры',
+		open_link: 'Открыть бронирование',
+		segmentBuilder: (f) => {
+			if (!f) return { key: undefined, routeText: '', timeText: '' };
+			const route = f.route || {};
+			const o = route.origin_airport || {};
+			const d = route.destination_airport || {};
+			const from = `${o.city_name || ''}${o.iata_code ? ` (${o.iata_code})` : ''}`.trim();
+			const to = `${d.city_name || ''}${d.iata_code ? ` (${d.iata_code})` : ''}`.trim();
+			const depDate = formatDate(f.scheduled_departure, 'dd.MM.yyyy');
+			const depTime = formatTime(f.scheduled_departure_time);
+			const arrDate = formatDate(f.scheduled_arrival, 'dd.MM.yyyy');
+			const arrTime = formatTime(f.scheduled_arrival_time);
+			return {
+				key: f.id,
+				routeText: from && to ? `${from} → ${to}` : '',
+				timeText:
+					depDate || depTime || arrDate || arrTime
+						? `${depDate} ${depTime || ''} — ${arrDate} ${arrTime || ''}`.trim()
+						: '',
+			};
+		},
 	},
 	HOME: {},
 	BOOKING: {
