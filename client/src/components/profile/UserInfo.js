@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
-import {
-	Alert,
-	Box,
-	Typography,
-	Paper,
-	Button,
-	FormControl,
-	FormControlLabel,
-	Checkbox,
-	FormHelperText,
-} from '@mui/material';
+import { Alert, Box, Typography, Paper, Button } from '@mui/material';
 
 import { UI_LABELS } from '../../constants/uiLabels';
 import { FIELD_LABELS } from '../../constants/fieldLabels';
@@ -20,6 +9,7 @@ import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
 import { updateUser } from '../../redux/actions/user';
 import { setCurrentUser } from '../../redux/reducers/auth';
 import { createFormFields, FIELD_TYPES } from '../utils';
+import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
 
 const UserInfo = () => {
 	const dispatch = useDispatch();
@@ -161,26 +151,13 @@ const UserInfo = () => {
 						</Box>
 					);
 				})}
-				<FormControl required error={!!errors.consent} sx={{ mt: 2 }}>
-					<FormControlLabel
-						control={
-							<Checkbox
-								checked={formData.consent}
-								onChange={(e) => handleFieldChange('consent', e.target.checked)}
-							/>
-						}
-						label={
-							<Typography variant='subtitle2' color='textSecondary'>
-								{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-									<Link to='/privacy_policy' target='_blank'>
-										{text}
-									</Link>
-								))}
-							</Typography>
-						}
-					/>
-					{errors.consent && <FormHelperText>{errors.consent}</FormHelperText>}
-				</FormControl>
+				<PrivacyConsentCheckbox
+					value={formData.consent}
+					onChange={(val) => handleFieldChange('consent', val)}
+					error={errors.consent}
+					required
+					sx={{ mt: 2 }}
+				/>
 				<Button type='submit' fullWidth variant='contained' sx={{ mt: 2 }} disabled={!formData.consent}>
 					{UI_LABELS.BUTTONS.save_changes}
 				</Button>

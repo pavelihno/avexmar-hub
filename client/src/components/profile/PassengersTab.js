@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Box, Button, Typography, Stack, Paper } from '@mui/material';
 
 import PassengerForm from '../booking/PassengerForm';
-import {
-	fetchUserPassengers,
-	createUserPassenger,
-} from '../../redux/actions/passenger';
+import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
+
+import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { mapToApi, mappingConfigs } from '../utils/mappers';
 import { UI_LABELS } from '../../constants/uiLabels';
+import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
 
 const PassengersTab = () => {
 	const dispatch = useDispatch();
@@ -19,6 +19,8 @@ const PassengersTab = () => {
 	const { countries } = useSelector((state) => state.countries);
 	const [showForm, setShowForm] = useState(false);
 	const [data, setData] = useState({});
+	const [consent, setConsent] = useState(false);
+	const [errors, setErrors] = useState({});
 	const formRef = useRef();
 
 	useEffect(() => {
@@ -31,28 +33,32 @@ const PassengersTab = () => {
 
 	const citizenshipOptions = useMemo(
 		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-		[countries],
+		[countries]
 	);
 
 	const handleChange = (_field, _value, d) => setData(d);
 
 	const handleSubmit = () => {
 		if (!formRef.current?.validate()) return;
+		if (!consent) {
+			setErrors({ consent: VALIDATION_MESSAGES.BOOKING.consent.REQUIRED });
+			return;
+		}
 		const apiData = mapToApi(data, mappingConfigs.passenger);
-		dispatch(
-			createUserPassenger({ userId: currentUser.id, data: apiData }),
-		).then(() => {
-			setShowForm(false);
-			setData({});
-		});
+		dispatch(createUserPassenger({ userId: currentUser.id, data: { ...apiData, consent } }))
+			.then(() => {
+				setShowForm(false);
+				setData({});
+				setConsent(false);
+				setErrors({});
+			})
+			.catch((res) => setErrors(res || {}));
 	};
 
 	return (
 		<Box sx={{ maxWidth: 600, mx: 'auto' }}>
 			{passengers.length === 0 ? (
-				<Typography sx={{ mb: 2 }}>
-					{UI_LABELS.PROFILE.no_passengers}
-				</Typography>
+				<Typography sx={{ mb: 2 }}>{UI_LABELS.PROFILE.no_passengers}</Typography>
 			) : (
 				<Stack spacing={1} sx={{ mb: 2 }}>
 					{passengers.map((p) => (
@@ -70,15 +76,24 @@ const PassengersTab = () => {
 						citizenshipOptions={citizenshipOptions}
 						ref={formRef}
 					/>
-					<Button variant="contained" onClick={handleSubmit} sx={{ mr: 1 }}>
+					<PrivacyConsentCheckbox
+						value={consent}
+						onChange={(val) => {
+							setConsent(val);
+							if (val && errors.consent) setErrors({ ...errors, consent: undefined });
+						}}
+						error={errors.consent}
+						sx={{ mt: 1 }}
+					/>
+					<Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
 						{UI_LABELS.BOOKING.passenger_form.add_passenger}
 					</Button>
-					<Button variant="text" onClick={() => setShowForm(false)}>
+					<Button variant='text' onClick={() => setShowForm(false)}>
 						{UI_LABELS.BUTTONS.cancel}
 					</Button>
 				</Paper>
 			) : (
-				<Button variant="outlined" onClick={() => setShowForm(true)}>
+				<Button variant='outlined' onClick={() => setShowForm(true)}>
 					{UI_LABELS.BOOKING.passenger_form.add_passenger}
 				</Button>
 			)}

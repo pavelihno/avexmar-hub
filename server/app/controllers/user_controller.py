@@ -108,7 +108,24 @@ def create_user_passenger(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': 'Forbidden'}), 403
     body = request.json or {}
-    passenger = Passenger.create(owner_user_id=user_id, commit=True, **body)
+
+    consent = body.pop('consent', False)
+    if not consent:
+        return jsonify({'message': 'Consent required'}), 400
+
+    session = db.session
+
+    create_user_consent(
+        current_user,
+        CONSENT_EVENT_TYPE.pd_processing,
+        CONSENT_DOC_TYPE.pd_policy,
+        session=session,
+    )
+
+    passenger = Passenger.create(owner_user_id=user_id, session=session, commit=False, **body)
+
+    session.commit()
+
     return jsonify(passenger.to_dict()), 201
 
 

@@ -7,11 +7,7 @@ import {
 	Typography,
 	Card,
 	CardContent,
-	Checkbox,
-	FormControlLabel,
 	Button,
-	FormControl,
-	FormHelperText,
 	Divider,
 	Chip,
 	Accordion,
@@ -43,6 +39,7 @@ import {
 	useExpiryCountdown,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
+import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
 
 const Passengers = () => {
 	const { publicId } = useParams();
@@ -560,26 +557,13 @@ const Passengers = () => {
 
 							<Divider sx={{ my: 2 }} />
 
-							<FormControl required error={!!buyerErrors.consent} sx={{ mb: 2 }}>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={buyer.consent}
-											onChange={(e) => handleBuyerChange('consent', e.target.checked)}
-										/>
-									}
-									label={
-										<Typography variant='subtitle2' color='textSecondary'>
-											{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-												<Link to='/privacy_policy' target='_blank'>
-													{text}
-												</Link>
-											))}
-										</Typography>
-									}
-								/>
-								{buyerErrors.consent && <FormHelperText>{buyerErrors.consent}</FormHelperText>}
-							</FormControl>
+							<PrivacyConsentCheckbox
+								value={buyer.consent}
+								onChange={(val) => handleBuyerChange('consent', val)}
+								error={buyerErrors.consent}
+								required
+								sx={{ mb: 2 }}
+							/>
 
 							<Button variant='contained' color='orange' fullWidth onClick={handleContinue}>
 								{UI_LABELS.BUTTONS.continue}
