@@ -100,10 +100,17 @@ class BaseModel(db.Model):
     def __check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
-        """Check if the provided data violates unique constraints"""
+        """Check if the provided data violates unique constraints.
+        NOTE: SQL UNIQUE constraints allow multiple NULLs. We therefore skip
+        validation for any (composite) unique set where at least one value is None.
+        """
         errors: Dict[str, str] = {}
         for columns in cls.__unique_constraints():
+            # Ensure we have all columns present in incoming data
             if not all(col in data for col in columns):
+                continue
+            # Skip check if any participating value is None
+            if any(data[col] is None for col in columns):
                 continue
             query = session.query(cls)
             for col in columns:

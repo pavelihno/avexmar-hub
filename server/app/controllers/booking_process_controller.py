@@ -117,7 +117,9 @@ def create_booking_process_passengers(current_user):
     session = db.session
 
     booking = Booking.update(
-        booking.id, session=session, commit=False, **buyer
+        booking.id, session=session, commit=False, 
+        user_id=current_user.id if current_user else None,
+        **buyer
     )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
-import { Box, Grid, Typography, Tooltip } from '@mui/material';
+import { Box, Grid, Typography, Tooltip, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
+import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
 	createFormFields,
 	FIELD_TYPES,
@@ -37,7 +37,10 @@ const normalizePassenger = (p = {}) => ({
 	citizenshipId: p.citizenshipId || '',
 });
 
-const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights = [] }, ref) => {
+const PassengerForm = (
+	{ passenger, onChange, citizenshipOptions = [], flights = [], prefillOptions = [], onPrefill },
+	ref
+) => {
 	const [data, setData] = useState(normalizePassenger(passenger));
 
 	const [errors, setErrors] = useState({});
@@ -246,6 +249,32 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				{typeLabels[data.category]}
 			</Typography>
+
+			{Array.isArray(prefillOptions) && prefillOptions.length > 0 && (
+				<Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+					{prefillOptions.map((opt) => (
+						<Chip
+							size='small'
+							key={opt.id || opt.label}
+							label={opt.label}
+							onClick={() => {
+								const merged = {
+									...data,
+									...opt.data,
+									category: data.category,
+									id: data.id,
+								};
+								['lastName', 'firstName', 'patronymicName'].forEach((k) => {
+									if (merged[k]) merged[k] = String(merged[k]).toUpperCase();
+								});
+								setData(merged);
+								if (onChange) onChange('_prefill', null, merged);
+								if (onPrefill) onPrefill(opt);
+							}}
+						/>
+					))}
+				</Box>
+			)}
 
 			<Grid container spacing={2}>
 				{showFields.map((fieldName) => {

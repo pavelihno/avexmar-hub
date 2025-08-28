@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Box, Typography } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 
 import AdminDataTable from './AdminDataTable';
 
@@ -25,6 +27,8 @@ const ConsentEventManagement = () => {
 	const { bookings, isLoading: bookingsLoading } = useSelector((state) => state.bookings);
 	const { consentDocs, isLoading: docsLoading } = useSelector((state) => state.consentDocs);
 	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+
+	const theme = useTheme();
 
 	useEffect(() => {
 		dispatch(fetchConsentEvents());
@@ -121,10 +125,53 @@ const ConsentEventManagement = () => {
 			apiKey: 'subject_ids',
 			label: FIELD_LABELS.CONSENT_EVENT.subject_ids,
 			type: FIELD_TYPES.CUSTOM,
-			renderField: (arg) => {
-				const ids = Array.isArray(arg?.subject_ids) ? arg.subject_ids : [];
-				const labels = ids.map((id) => passengerOptions.find((o) => o.value === id)?.label).filter(Boolean);
-				return labels.join(', ');
+			excludeFromForm: true,
+			renderField: (item) => {
+				const ids = Array.isArray(item?.subject_ids) ? item.subject_ids : [];
+				const linked = ids.map((id) => passengers.find((p) => p.id === id)).filter(Boolean);
+				return (
+					<Box
+						sx={{
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'flex-start',
+							minWidth: '200px',
+						}}
+					>
+						{linked.map((p) => {
+							const passengerLabel = `${p.last_name} ${p.first_name}${
+								p.birth_date ? ' ' + formatDate(p.birth_date) : ''
+							}`;
+							return (
+								<Box
+									key={p.id}
+									sx={{
+										display: 'flex',
+										alignItems: 'center',
+										mb: 0.5,
+										backgroundColor: alpha(theme.palette.black, 0.04),
+										borderRadius: 1,
+										p: 0.5,
+										width: 'auto',
+									}}
+								>
+									<Typography
+										variant='body2'
+										sx={{
+											mr: 1,
+											flexGrow: 1,
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+										}}
+									>
+										{passengerLabel}
+									</Typography>
+								</Box>
+							);
+						})}
+					</Box>
+				);
 			},
 		},
 	};

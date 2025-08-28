@@ -27,6 +27,7 @@ export const FIELD_LABELS = {
 		total_price: 'Итого',
 		quantity: 'Кол-во',
 		ticket_price: 'Цена билета',
+		user_id: 'Пользователь',
 		passengers: 'Пассажиры',
 	},
 	AIRPORT: {

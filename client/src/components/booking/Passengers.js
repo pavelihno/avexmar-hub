@@ -153,6 +153,7 @@ const Passengers = () => {
 				...prev,
 				buyerLastName: prev.buyerLastName || currentUser.last_name,
 				buyerFirstName: prev.buyerFirstName || currentUser.first_name,
+				emailAddress: prev.emailAddress || currentUser.email || '',
 				phoneNumber: prev.phoneNumber || currentUser.phone_number || '',
 			}));
 		}
@@ -200,13 +201,6 @@ const Passengers = () => {
 	const handlePassengerChange = (index) => (field, value, data) => {
 		setPassengerData((prev) =>
 			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
-		);
-	};
-
-	const handlePrefillPassenger = (index, passenger) => {
-		const mapped = fromApiPassenger(passenger);
-		setPassengerData((prev) =>
-			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...mapped } : p)) : prev
 		);
 	};
 
@@ -338,28 +332,26 @@ const Passengers = () => {
 					)}
 					{passengersReady &&
 						passengerData.map((p, index) => (
-							<Box key={p.id || index} sx={{ mb: 2 }}>
-								{currentUser && userPassengers.length > 0 && (
-									<Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-										{userPassengers.map((up) => {
-											const mapped = fromApiPassenger(up);
-											return (
-												<Chip
-													key={up.id}
-													label={`${mapped.lastName || ''} ${mapped.firstName || ''}`}
-													size='small'
-													onClick={() => handlePrefillPassenger(index, up)}
-												/>
-											);
-										})}
-									</Box>
-								)}
+							<Box key={index} sx={{ mb: 2 }}>
 								<PassengerForm
 									passenger={p}
 									flights={booking.flights}
 									onChange={handlePassengerChange(index)}
 									citizenshipOptions={citizenshipOptions}
 									ref={(el) => (passengerRefs.current[index] = el)}
+									prefillOptions={
+										currentUser && userPassengers.length > 0
+											? userPassengers
+													.map((up) => ({ up, mapped: fromApiPassenger(up) }))
+													.map(({ up, mapped }) => ({
+														id: up.id,
+														label: `${mapped.lastName || ''} ${
+															mapped.firstName || ''
+														}`.trim(),
+														data: mapped,
+													}))
+											: []
+									}
 								/>
 							</Box>
 						))}
