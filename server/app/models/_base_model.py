@@ -187,6 +187,7 @@ class BaseModel(db.Model):
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
+        data.pop('id', None)
         data = cls.convert_enums(data)
         instance = cls(**data)
         filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)

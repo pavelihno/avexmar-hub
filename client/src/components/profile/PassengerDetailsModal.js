@@ -66,13 +66,11 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 
 	return (
 		<Dialog open={!!passenger} onClose={onClose} fullWidth maxWidth='sm'>
-			<DialogTitle>{fullName || UI_LABELS.PROFILE.passenger_details}</DialogTitle>
+			<DialogTitle>{fullName}</DialogTitle>
 			<DialogContent>
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-						{passenger.gender && (
-							<Chip size='small' label={ENUM_LABELS.GENDER[passenger.gender] || passenger.gender} />
-						)}
+						{passenger.gender && <Chip size='small' label={ENUM_LABELS.GENDER[passenger.gender]} />}
 						{passenger.birth_date && (
 							<Chip size='small' color='default' label={formatDate(passenger.birth_date)} />
 						)}
@@ -91,7 +89,7 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
 								<PersonOutlineIcon fontSize='small' color='action' />
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-									{UI_LABELS.PROFILE.personal || 'Личные данные'}
+									{UI_LABELS.PROFILE.personal_data}
 								</Typography>
 							</Box>
 							<Grid container spacing={2}>
@@ -103,7 +101,7 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 										>
 											{label}
 										</Typography>
-										<Typography variant='body1'>{value || '-'}</Typography>
+										<Typography variant='body2'>{value || '—'}</Typography>
 									</Grid>
 								))}
 							</Grid>
@@ -116,7 +114,7 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
 								<AssignmentIndIcon fontSize='small' color='action' />
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-									{UI_LABELS.PROFILE.document || 'Документ'}
+									{UI_LABELS.PROFILE.document}
 								</Typography>
 							</Box>
 							<Grid container spacing={2}>
@@ -128,7 +126,7 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 										>
 											{label}
 										</Typography>
-										<Typography variant='body1'>{value || '-'}</Typography>
+										<Typography variant='body2'>{value || '—'}</Typography>
 									</Grid>
 								))}
 							</Grid>

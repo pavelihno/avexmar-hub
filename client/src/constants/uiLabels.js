@@ -347,6 +347,8 @@ export const UI_LABELS = {
 		document: 'Документ',
 		passenger_details: 'Данные пассажира',
 		more_details: 'Подробнее',
+		passenger_added: 'Пассажир успешно добавлен',
+		personal_data: 'Личные данные',
 	},
 	HOME: {},
 	BOOKING: {

@@ -13,6 +13,7 @@ import {
 	TableRow,
 	TableCell,
 	Paper,
+	Alert,
 } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
@@ -37,6 +38,7 @@ const PassengersTab = () => {
 	const [data, setData] = useState({});
 	const [consent, setConsent] = useState(false);
 	const [errors, setErrors] = useState({});
+	const [successMessage, setSuccessMessage] = useState('');
 	const [selectedPassenger, setSelectedPassenger] = useState(null);
 	const formRef = useRef();
 
@@ -68,13 +70,18 @@ const PassengersTab = () => {
 				data: { ...apiData, consent },
 			})
 		)
+			.unwrap()
 			.then(() => {
 				setShowForm(false);
 				setData({});
 				setConsent(false);
 				setErrors({});
+				setSuccessMessage(UI_LABELS.PROFILE.passenger_added);
 			})
-			.catch((res) => setErrors(res || {}));
+			.catch((res) => {
+				setErrors(res || {});
+				setSuccessMessage('');
+			});
 	};
 
 	return (
@@ -83,6 +90,16 @@ const PassengersTab = () => {
 				<Typography variant='h4'>{UI_LABELS.PROFILE.passengers}</Typography>
 
 				<Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+					{!showForm && errors.message && (
+						<Alert severity='error' sx={{ mb: 2 }}>
+							{errors.message}
+						</Alert>
+					)}
+					{successMessage && (
+						<Alert severity='success' sx={{ mb: 2 }}>
+							{successMessage}
+						</Alert>
+					)}
 					{passengers && passengers.length === 0 ? (
 						<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
 							{UI_LABELS.PROFILE.no_passengers}
@@ -135,6 +152,11 @@ const PassengersTab = () => {
 
 					{showForm ? (
 						<Paper elevation={1} sx={{ p: 2 }}>
+							{errors.message && (
+								<Alert severity='error' sx={{ mb: 2 }}>
+									{errors.message}
+								</Alert>
+							)}
 							<PassengerForm
 								passenger={data}
 								onChange={handleChange}
@@ -178,7 +200,14 @@ const PassengersTab = () => {
 						</Paper>
 					) : (
 						<Box>
-							<Button variant='outlined' onClick={() => setShowForm(true)}>
+							<Button
+								variant='outlined'
+								onClick={() => {
+									setSuccessMessage('');
+									setErrors({});
+									setShowForm(true);
+								}}
+							>
 								{UI_LABELS.BOOKING.passenger_form.add_passenger}
 							</Button>
 						</Box>
