@@ -263,7 +263,7 @@ def create_booking_process_payment(current_user):
     session = db.session
     BookingHold.set_hold(
         booking.id,
-        datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS),
+        datetime.now() + timedelta(hours=Config.BOOKING_PAYMENT_EXP_HOURS),
         session=session,
         commit=False,
     )
