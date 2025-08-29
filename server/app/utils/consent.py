@@ -22,12 +22,11 @@ def create_booking_consent(
     event_type: CONSENT_EVENT_TYPE,
     doc_type: CONSENT_DOC_TYPE,
     granter_user_id=None,
-    subject_ids=None,
+    subject_ids=[],
     *,
     session=None,
 ):
     session = session or db.session
-    subject_ids = subject_ids or []
     sender_info = get_sender_info()
 
     doc = ConsentDoc.get_latest(doc_type, session=session)
@@ -79,6 +78,7 @@ def create_user_consent(
     user,
     event_type: CONSENT_EVENT_TYPE,
     doc_type: CONSENT_DOC_TYPE,
+    subject_ids=[],
     *,
     session=None,
 ):
@@ -104,7 +104,7 @@ def create_user_consent(
             commit=False,
             doc_id=doc.id,
             action=CONSENT_ACTION.agree,
-            subject_ids=[],
+            subject_ids=subject_ids,
             **sender_info,
         )
     else:
@@ -116,6 +116,6 @@ def create_user_consent(
             booking_id=None,
             doc_id=doc.id,
             action=CONSENT_ACTION.agree,
-            subject_ids=[],
+            subject_ids=subject_ids,
             **sender_info,
         )

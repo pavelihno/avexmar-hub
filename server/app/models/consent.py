@@ -152,7 +152,6 @@ class ConsentEvent(BaseModel):
         session = session or db.session
         event = super().update(event_id, session=session, commit=False, **data)
         if subject_ids is not None:
-            session.query(ConsentEventSubject).filter_by(consent_event_id=event.id).delete()
             for sid in subject_ids:
                 ConsentEventSubject.create(
                     session=session, commit=False, consent_event_id=event.id, subject_id=sid
