@@ -20,15 +20,13 @@ import PassengerForm from '../booking/PassengerForm';
 import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
 import PassengerDetailsModal from './PassengerDetailsModal';
 
-import {
-	fetchUserPassengers,
-	createUserPassenger,
-} from '../../redux/actions/passenger';
+import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { mapToApi, mappingConfigs } from '../utils/mappers';
 import { formatDate } from '../utils';
 import { UI_LABELS } from '../../constants/uiLabels';
 import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
+import { ENUM_LABELS } from '../../constants';
 
 const PassengersTab = () => {
 	const dispatch = useDispatch();
@@ -52,7 +50,7 @@ const PassengersTab = () => {
 
 	const citizenshipOptions = useMemo(
 		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-		[countries],
+		[countries]
 	);
 
 	const handleChange = (_field, _value, d) => setData(d);
@@ -68,7 +66,7 @@ const PassengersTab = () => {
 			createUserPassenger({
 				userId: currentUser.id,
 				data: { ...apiData, consent },
-			}),
+			})
 		)
 			.then(() => {
 				setShowForm(false);
@@ -94,15 +92,15 @@ const PassengersTab = () => {
 							<Table size='medium'>
 								<TableHead>
 									<TableRow>
-										<TableCell sx={{ fontWeight: 'bold' }}>
-											{UI_LABELS.PROFILE.last_name}
-										</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.last_name}</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.first_name}
 										</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.birth_date}
 										</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.gender}</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.document}</TableCell>
 										<TableCell />
 									</TableRow>
 								</TableHead>
@@ -111,9 +109,9 @@ const PassengersTab = () => {
 										<TableRow key={p.id}>
 											<TableCell>{p.last_name}</TableCell>
 											<TableCell>{p.first_name}</TableCell>
-											<TableCell>
-												{p.birth_date ? formatDate(p.birth_date) : ''}
-											</TableCell>
+											<TableCell>{p.birth_date ? formatDate(p.birth_date) : ''}</TableCell>
+											<TableCell>{ENUM_LABELS.GENDER_SHORT[p.gender]}</TableCell>
+											<TableCell>{ENUM_LABELS.DOCUMENT_TYPE[p.document_type]}</TableCell>
 											<TableCell align='right'>
 												<Button
 													size='small'
@@ -157,8 +155,7 @@ const PassengersTab = () => {
 									value={consent}
 									onChange={(val) => {
 										setConsent(val);
-										if (val && errors.consent)
-											setErrors({ ...errors, consent: undefined });
+										if (val && errors.consent) setErrors({ ...errors, consent: undefined });
 									}}
 									error={errors.consent}
 								/>
@@ -189,10 +186,7 @@ const PassengersTab = () => {
 				</Box>
 			</Paper>
 			{selectedPassenger && (
-				<PassengerDetailsModal
-					passenger={selectedPassenger}
-					onClose={() => setSelectedPassenger(null)}
-				/>
+				<PassengerDetailsModal passenger={selectedPassenger} onClose={() => setSelectedPassenger(null)} />
 			)}
 		</Container>
 	);

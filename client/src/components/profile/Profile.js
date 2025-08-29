@@ -26,7 +26,6 @@ const Profile = () => {
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
-					p: 4,
 				}}
 			>
 				<Paper elevation={0} sx={{ p: 3, width: '100%' }}>

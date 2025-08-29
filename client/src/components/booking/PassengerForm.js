@@ -1,21 +1,9 @@
-import React, {
-	useState,
-	useEffect,
-	useMemo,
-	useCallback,
-	forwardRef,
-	useImperativeHandle,
-} from 'react';
+import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
 import { Box, Grid, Typography, Tooltip, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import {
-	FIELD_LABELS,
-	getEnumOptions,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-} from '../../constants';
+import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
 	createFormFields,
 	FIELD_TYPES,
@@ -50,16 +38,8 @@ const normalizePassenger = (p = {}, useCategory = true) => ({
 });
 
 const PassengerForm = (
-	{
-		passenger,
-		onChange,
-		citizenshipOptions = [],
-		flights = [],
-		prefillOptions = [],
-		onPrefill,
-		useCategory = true,
-	},
-	ref,
+	{ passenger, onChange, citizenshipOptions = [], flights = [], prefillOptions = [], onPrefill, useCategory = true },
+	ref
 ) => {
 	const [data, setData] = useState(normalizePassenger(passenger, useCategory));
 
@@ -120,8 +100,7 @@ const PassengerForm = (
 			}
 		}
 
-		const docMinDateDate =
-			maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
+		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
 
 		const allFields = {
 			lastName: {
@@ -133,8 +112,8 @@ const PassengerForm = (
 					return valid
 						? ''
 						: requiresCyrillic
-							? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-							: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
 				},
 			},
 			firstName: {
@@ -146,8 +125,8 @@ const PassengerForm = (
 					return valid
 						? ''
 						: requiresCyrillic
-							? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-							: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
 				},
 			},
 			patronymicName: {
@@ -159,8 +138,8 @@ const PassengerForm = (
 					return valid
 						? ''
 						: requiresCyrillic
-							? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
-							: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
+						? VALIDATION_MESSAGES.PASSENGER.name_language.CYRILLIC
+						: VALIDATION_MESSAGES.PASSENGER.name_language.LATIN;
 				},
 			},
 			gender: {
@@ -168,8 +147,7 @@ const PassengerForm = (
 				label: FIELD_LABELS.PASSENGER.gender,
 				type: FIELD_TYPES.SELECT,
 				options: genderOptions,
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.PASSENGER.gender.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.gender.REQUIRED : ''),
 			},
 			birthDate: {
 				key: 'birthDate',
@@ -181,20 +159,12 @@ const PassengerForm = (
 					if (!v) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					const birth = parseDate(v);
-					if (!(birth instanceof Date) || isNaN(+birth))
-						return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					if (birthMin && birth < birthMin)
-						return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					if (birthMax && birth > birthMax)
-						return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					if (birth > new Date())
-						return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
+					if (!(birth instanceof Date) || isNaN(+birth)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birthMin && birth < birthMin) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birthMax && birth > birthMax) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (birth > new Date()) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
 					if (useCategory && data.category)
-						return getAgeError(
-							data.category,
-							v,
-							firstFlight ? formatDate(firstFlight) : undefined,
-						);
+						return getAgeError(data.category, v, firstFlight ? formatDate(firstFlight) : undefined);
 					return '';
 				},
 			},
@@ -203,14 +173,12 @@ const PassengerForm = (
 				label: FIELD_LABELS.PASSENGER.document_type,
 				type: FIELD_TYPES.SELECT,
 				options: docTypeOptions,
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_type.REQUIRED : ''),
 			},
 			documentNumber: {
 				key: 'documentNumber',
 				label: FIELD_LABELS.PASSENGER.document_number,
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
 			},
 			documentExpiryDate: {
 				key: 'documentExpiryDate',
@@ -218,20 +186,16 @@ const PassengerForm = (
 				type: FIELD_TYPES.DATE,
 				minDate: formatDate(docMinDateDate),
 				validate: (v) => {
-					if (!v)
-						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
+					if (!v) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.REQUIRED;
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 
 					const exp = parseDate(v);
-					if (!(exp instanceof Date) || isNaN(+exp))
-						return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
+					if (!(exp instanceof Date) || isNaN(+exp)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 
-					if (exp < new Date())
-						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
+					if (exp < new Date()) return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.EXPIRED;
 
 					if (maxFlightDate && exp < maxFlightDate)
-						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date
-							.AFTER_FLIGHT;
+						return VALIDATION_MESSAGES.PASSENGER.document_expiry_date.AFTER_FLIGHT;
 
 					return '';
 				},
@@ -241,31 +205,20 @@ const PassengerForm = (
 				label: FIELD_LABELS.PASSENGER.citizenship_id,
 				type: FIELD_TYPES.SELECT,
 				options: citizenshipOptions,
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.citizenship_id.REQUIRED : ''),
 			},
 		};
 
 		const visibleList = Object.values(allFields).filter((f) =>
-			!formConfig?.show ? true : formConfig.show.includes(f.key),
+			!formConfig?.show ? true : formConfig.show.includes(f.key)
 		);
 		const arr = createFormFields(visibleList);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [
-		data.category,
-		requiresCyrillic,
-		citizenshipOptions,
-		minFlightDate,
-		maxFlightDate,
-		formConfig?.show,
-	]);
+	}, [data.category, requiresCyrillic, citizenshipOptions, minFlightDate, maxFlightDate, formConfig?.show]);
 
 	const handleFieldChange = (field, value) => {
-		const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(
-			field,
-		);
-		const normalizedValue =
-			isNameField && typeof value === 'string' ? value.toUpperCase() : value;
+		const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(field);
+		const normalizedValue = isNameField && typeof value === 'string' ? value.toUpperCase() : value;
 		const next = { ...data, [field]: normalizedValue };
 		setData(next);
 		if (onChange) onChange(field, normalizedValue, next);
@@ -285,7 +238,7 @@ const PassengerForm = (
 			setShowErrors(true);
 			return Object.keys(errs).length === 0;
 		},
-		[formFields, data],
+		[formFields, data]
 	);
 
 	useImperativeHandle(ref, () => ({ validate }), [validate]);
@@ -334,11 +287,7 @@ const PassengerForm = (
 
 			<Grid container spacing={2}>
 				{showFields.map((fieldName) => {
-					const isNameField = [
-						'lastName',
-						'firstName',
-						'patronymicName',
-					].includes(fieldName);
+					const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
 					const fieldDef = formFields[fieldName];
 					const control = fieldDef.renderField({
 						value: data[fieldName],
@@ -356,17 +305,11 @@ const PassengerForm = (
 							{isNameField ? (
 								<Box
 									onFocusCapture={() => setFocusedField(fieldName)}
-									onBlurCapture={() =>
-										setFocusedField((prev) =>
-											prev === fieldName ? null : prev,
-										)
-									}
+									onBlurCapture={() => setFocusedField((prev) => (prev === fieldName ? null : prev))}
 								>
 									<Tooltip
 										open={focusedField === fieldName}
-										title={UI_LABELS.BOOKING.passenger_form.name_hint(
-											requiresCyrillic,
-										)}
+										title={UI_LABELS.BOOKING.passenger_form.name_hint(requiresCyrillic)}
 										placement='top'
 										arrow
 										disableInteractive

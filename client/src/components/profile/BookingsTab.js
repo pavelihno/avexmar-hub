@@ -11,9 +11,9 @@ import {
 	TableContainer,
 	Paper,
 	Box,
-	Link as MuiLink,
 	Container,
 	Chip,
+	Button,
 } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
@@ -82,7 +82,7 @@ const BookingsTab = () => {
 							</TableHead>
 							<TableBody>
 								{rows.map((row) => (
-									<TableRow key={row.id} hover>
+									<TableRow key={row.id}>
 										<TableCell sx={{ whiteSpace: 'nowrap' }}>
 											<Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
 												{row.bookingNumber || '—'}
@@ -116,15 +116,23 @@ const BookingsTab = () => {
 										</TableCell>
 										<TableCell align='center'>{row.passengersCount || 0}</TableCell>
 										<TableCell align='right'>
-											<MuiLink
+											<Button
+												size='small'
+												component='a'
 												href={row.link}
 												target='_blank'
-												underline='hover'
-												sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+												rel='noopener noreferrer'
+												sx={{
+													display: 'inline-flex',
+													alignItems: 'center',
+													gap: 0.5,
+													textTransform: 'none',
+													lineHeight: 1,
+												}}
 											>
 												{UI_LABELS.PROFILE.open_link}
 												<OpenInNewIcon fontSize='inherit' />
-											</MuiLink>
+											</Button>
 										</TableCell>
 									</TableRow>
 								))}
@@ -132,7 +140,9 @@ const BookingsTab = () => {
 						</Table>
 					</TableContainer>
 				) : (
-					<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>{UI_LABELS.PROFILE.no_bookings}</Typography>
+					<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
+						{UI_LABELS.PROFILE.no_bookings}
+					</Typography>
 				)}
 			</Paper>
 		</Container>
