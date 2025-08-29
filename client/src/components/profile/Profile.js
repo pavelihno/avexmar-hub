@@ -45,18 +45,22 @@ const Profile = () => {
 						<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
 						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
 					</Tabs>
-					{tab === 0 && (
-						<Grid container spacing={4} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
-							<Grid item xs={10} md={6}>
-								<UserInfo />
-							</Grid>
-							<Grid item xs={10} md={4}>
-								<PasswordTab />
-							</Grid>
-						</Grid>
-					)}
-					{tab === 1 && <BookingsTab />}
-					{tab === 2 && <PassengersTab />}
+
+					<Grid container spacing={4} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
+						{tab === 0 && (
+							<>
+								<Grid item xs={10} md={6}>
+									<UserInfo />
+								</Grid>
+								<Grid item xs={10} md={4}>
+									<PasswordTab />
+								</Grid>
+							</>
+						)}
+
+						{tab === 1 && <BookingsTab />}
+						{tab === 2 && <PassengersTab />}
+					</Grid>
 				</Paper>
 			</Box>
 		</Base>

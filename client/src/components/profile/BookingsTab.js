@@ -56,7 +56,7 @@ const BookingsTab = () => {
 	}
 
 	return (
-		<Container maxWidth='md' sx={{ mt: 7 }}>
+		<Container maxWidth='md' sx={{ mt: 4 }}>
 			<Paper sx={{ p: 2, width: '100%' }}>
 				<Typography variant='h4'>{UI_LABELS.PROFILE.bookings}</Typography>
 
@@ -132,7 +132,7 @@ const BookingsTab = () => {
 						</Table>
 					</TableContainer>
 				) : (
-					<Typography sx={{ textAlign: 'center' }}>{UI_LABELS.PROFILE.no_bookings}</Typography>
+					<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>{UI_LABELS.PROFILE.no_bookings}</Typography>
 				)}
 			</Paper>
 		</Container>

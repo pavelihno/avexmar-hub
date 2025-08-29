@@ -245,7 +245,7 @@ const PassengerForm = (
 	const showFields = formConfig.show || [];
 
 	return (
-		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
+		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2 }}>
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				{typeLabels[data.category]}
 			</Typography>

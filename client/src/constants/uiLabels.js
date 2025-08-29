@@ -318,9 +318,7 @@ export const UI_LABELS = {
 		no_bookings: 'Бронирования отсутствуют',
 		booking_number: 'Номер',
 		status: 'Статус',
-		total_price: 'Сумма',
 		route: 'Маршрут',
-		passengers: 'Пассажиры',
 		open_link: 'Открыть бронирование',
 		segmentBuilder: (f) => {
 			if (!f) return { key: undefined, routeText: '', timeText: '' };
@@ -342,6 +340,10 @@ export const UI_LABELS = {
 						: '',
 			};
 		},
+		last_name: 'Фамилия',
+		first_name: 'Имя',
+		birth_date: 'Дата рождения',
+		more_details: 'Подробнее',
 	},
 	HOME: {},
 	BOOKING: {
