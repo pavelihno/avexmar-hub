@@ -11,15 +11,18 @@ export const UI_LABELS = {
 		inn: 'ИНН',
 		inn_value: '9701049956',
 		legal_address: 'Юридический адрес',
-		legal_address_value: '105082, г. Москва, ул. Бакунинская, д. 69, строение 1, помещение 1, офис 16',
+		legal_address_value:
+			'105082, г. Москва, ул. Бакунинская, д. 69, строение 1, помещение 1, офис 16',
 		phone: 'Контактный телефон',
 		contact_phone: '+7 495 363-59-11',
 		email_address: 'Адрес электронной почты',
 		contact_email: 'mail@avexmar.ru',
-		company_description: 'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
+		company_description:
+			'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
 		cards: [
 			{
-				title: 'Широкий спектр клиентов и партнёров в сфере воздушных перевозок',
+				title:
+					'Широкий спектр клиентов и партнёров в сфере воздушных перевозок',
 				content:
 					'Компания «АВЕКСМАР» является надежным партнером для старательских артелей, предприятий и организаций, таких как ОАО «Полиметалл», Морской порт Певек, ООО «Инкомнефтеремонт», ООО «Уранцветмет», ООО «Атомредметзолото», а также предприятий, связанных с ПАТЭС, обслуживаемых компаниями ООО «Запсибгидрострой», ООО «Ленмонтаж», ООО «Гидропромстрой», ООО «Плавстройотряд-34» и Нововоронежской АЭС',
 				alt: 'партнеры',
@@ -288,7 +291,8 @@ export const UI_LABELS = {
 		or: 'или',
 		forgot_password: 'Забыли пароль?',
 		two_factor_prompt: (email) => {
-			if (!email || email.length < 5) return `Введите код, отправленный на ${email}`;
+			if (!email || email.length < 5)
+				return `Введите код, отправленный на ${email}`;
 			const [local, domain] = email.split('@');
 			if (!domain) return `Введите код, отправленный на ${email}`;
 
@@ -305,7 +309,8 @@ export const UI_LABELS = {
 		profile: 'Личный кабинет',
 		to_profile: 'Перейти в личный кабинет',
 		change_password: 'Сменить пароль',
-		verification_code_sent: 'Код подтверждения отправлен на вашу электронную почту',
+		verification_code_sent:
+			'Код подтверждения отправлен на вашу электронную почту',
 		user_info_changed: 'Личные данные успешно изменены',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
@@ -325,8 +330,10 @@ export const UI_LABELS = {
 			const route = f.route || {};
 			const o = route.origin_airport || {};
 			const d = route.destination_airport || {};
-			const from = `${o.city_name || ''}${o.iata_code ? ` (${o.iata_code})` : ''}`.trim();
-			const to = `${d.city_name || ''}${d.iata_code ? ` (${d.iata_code})` : ''}`.trim();
+			const from =
+				`${o.city_name || ''}${o.iata_code ? ` (${o.iata_code})` : ''}`.trim();
+			const to =
+				`${d.city_name || ''}${d.iata_code ? ` (${d.iata_code})` : ''}`.trim();
 			const depDate = formatDate(f.scheduled_departure, 'dd.MM.yyyy');
 			const depTime = formatTime(f.scheduled_departure_time);
 			const arrDate = formatDate(f.scheduled_arrival, 'dd.MM.yyyy');
@@ -343,6 +350,7 @@ export const UI_LABELS = {
 		last_name: 'Фамилия',
 		first_name: 'Имя',
 		birth_date: 'Дата рождения',
+		passenger_details: 'Данные пассажира',
 		more_details: 'Подробнее',
 	},
 	HOME: {},
@@ -371,18 +379,25 @@ export const UI_LABELS = {
 		},
 		buyer_form: {
 			title: 'Покупатель',
-			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
+			privacy_policy: (link) => (
+				<>Даю {link('согласие')} на обработку персональных данных</>
+			),
 			public_offer: (link) => (
-				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
+				<>
+					Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')}{' '}
+					ООО «АВЕКСМАР»
+				</>
 			),
 			summary: {
 				total: 'Итого',
 				passenger_word: (count) =>
 					count % 10 === 1 && count % 100 !== 11
 						? `${count} пассажир`
-						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
-						? `${count} пассажира`
-						: `${count} пассажиров`,
+						: count % 10 >= 2 &&
+							  count % 10 <= 4 &&
+							  (count % 100 < 10 || count % 100 >= 20)
+							? `${count} пассажира`
+							: `${count} пассажиров`,
 				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
@@ -425,7 +440,8 @@ export const UI_LABELS = {
 			last_name: 'Фамилия',
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
-			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+			name_hint: (requiresCyrillic) =>
+				`${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
 		},
 		payment_form: {
@@ -488,9 +504,11 @@ export const UI_LABELS = {
 			passenger_word: (count) =>
 				count % 10 === 1 && count % 100 !== 11
 					? 'пассажир'
-					: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
-					? 'пассажира'
-					: 'пассажиров',
+					: count % 10 >= 2 &&
+						  count % 10 <= 4 &&
+						  (count % 100 < 10 || count % 100 >= 20)
+						? 'пассажира'
+						: 'пассажиров',
 			passenger_categories: [
 				{ key: 'adults', label: 'Взрослые', desc: '12 лет и старше' },
 				{ key: 'children', label: 'Дети', desc: '2–11 лет' },
@@ -510,7 +528,8 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
+			if (date_to)
+				return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
 			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
 		},
 		flight_details: {

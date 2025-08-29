@@ -13,16 +13,20 @@ import {
 	TableRow,
 	TableCell,
 	Paper,
-	Link as MuiLink,
 } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import PassengerForm from '../booking/PassengerForm';
 import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
+import PassengerDetailsModal from './PassengerDetailsModal';
 
-import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
+import {
+	fetchUserPassengers,
+	createUserPassenger,
+} from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { mapToApi, mappingConfigs } from '../utils/mappers';
+import { formatDate } from '../utils';
 import { UI_LABELS } from '../../constants/uiLabels';
 import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
 
@@ -35,6 +39,7 @@ const PassengersTab = () => {
 	const [data, setData] = useState({});
 	const [consent, setConsent] = useState(false);
 	const [errors, setErrors] = useState({});
+	const [selectedPassenger, setSelectedPassenger] = useState(null);
 	const formRef = useRef();
 
 	useEffect(() => {
@@ -47,7 +52,7 @@ const PassengersTab = () => {
 
 	const citizenshipOptions = useMemo(
 		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-		[countries]
+		[countries],
 	);
 
 	const handleChange = (_field, _value, d) => setData(d);
@@ -59,7 +64,12 @@ const PassengersTab = () => {
 			return;
 		}
 		const apiData = mapToApi(data, mappingConfigs.passenger);
-		dispatch(createUserPassenger({ userId: currentUser.id, data: { ...apiData, consent } }))
+		dispatch(
+			createUserPassenger({
+				userId: currentUser.id,
+				data: { ...apiData, consent },
+			}),
+		)
 			.then(() => {
 				setShowForm(false);
 				setData({});
@@ -84,7 +94,9 @@ const PassengersTab = () => {
 							<Table size='medium'>
 								<TableHead>
 									<TableRow>
-										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.last_name}</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.PROFILE.last_name}
+										</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.first_name}
 										</TableCell>
@@ -99,17 +111,22 @@ const PassengersTab = () => {
 										<TableRow key={p.id}>
 											<TableCell>{p.last_name}</TableCell>
 											<TableCell>{p.first_name}</TableCell>
-											<TableCell>{p.birth_date}</TableCell>
+											<TableCell>
+												{p.birth_date ? formatDate(p.birth_date) : ''}
+											</TableCell>
 											<TableCell align='right'>
-												<MuiLink
-													href={p.link}
-													target='_blank'
-													underline='hover'
-													sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+												<Button
+													size='small'
+													onClick={() => setSelectedPassenger(p)}
+													sx={{
+														display: 'inline-flex',
+														alignItems: 'center',
+														gap: 0.5,
+													}}
 												>
 													{UI_LABELS.PROFILE.more_details}
 													<OpenInNewIcon fontSize='inherit' />
-												</MuiLink>
+												</Button>
 											</TableCell>
 										</TableRow>
 									))}
@@ -125,19 +142,34 @@ const PassengersTab = () => {
 								onChange={handleChange}
 								citizenshipOptions={citizenshipOptions}
 								ref={formRef}
+								useCategory={false}
 							/>
-							<Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1, my: 1, mx: 2 }}>
+							<Box
+								sx={{
+									display: 'flex',
+									flexDirection: 'column',
+									rowGap: 1,
+									my: 1,
+									mx: 2,
+								}}
+							>
 								<PrivacyConsentCheckbox
 									value={consent}
 									onChange={(val) => {
 										setConsent(val);
-										if (val && errors.consent) setErrors({ ...errors, consent: undefined });
+										if (val && errors.consent)
+											setErrors({ ...errors, consent: undefined });
 									}}
 									error={errors.consent}
 								/>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 									<Box>
-										<Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
+										<Button
+											variant='contained'
+											onClick={handleSubmit}
+											disabled={!consent}
+											sx={{ mr: 1 }}
+										>
 											{UI_LABELS.BOOKING.passenger_form.add_passenger}
 										</Button>
 										<Button variant='text' onClick={() => setShowForm(false)}>
@@ -156,6 +188,12 @@ const PassengersTab = () => {
 					)}
 				</Box>
 			</Paper>
+			{selectedPassenger && (
+				<PassengerDetailsModal
+					passenger={selectedPassenger}
+					onClose={() => setSelectedPassenger(null)}
+				/>
+			)}
 		</Container>
 	);
 };
