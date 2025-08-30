@@ -174,3 +174,9 @@ Minor inconsistencies and recommendations:
 -   Use Material-UI breakpoints (`xs`, `sm`, `md`, `lg`, `xl`) and add custom breakpoints for tablet vs. mobile when needed.
 -   Adapt only user-facing components; skip anything under `client/src/components/admin/` and `client/src/routes/AdminRoutes.js`.
 -   Prioritize updates in this order: common layout (`Base`, `Header`, `Footer`), then feature pages (`Search`, `Schedule`, `Home`, `About`), followed by booking and profile flows.
+
+## Layout and Breakpoint Guidelines
+
+-   Use `sx` breakpoint objects instead of hardcoded dimension values.
+-   Prefer `Stack` or `Grid` components with responsive `direction` and `spacing`.
+-   Header and footer containers should be vertically centered by default.

@@ -10,20 +10,17 @@ import Footer from './Footer';
 
 import { pageTransition } from '../theme/animations';
 
-const Base = ({ children }) => {
+const Base = ({ children, maxWidth = 'lg' }) => {
 	return (
 		<Box>
 			<CssBaseline />
 			<Container
-				maxWidth={false}
 				sx={{
 					minHeight: '100vh',
 					bgcolor: 'background.default',
 					color: 'text.primary',
-					maxWidth: { xs: '100%', sm: 'sm', md: 'md', lg: 'lg' },
-					py: { xs: 1, md: 2 },
-					mx: { xs: 0, sm: 'auto' },
 				}}
+				maxWidth='xl'
 			>
 				<Header />
 				<motion.div
@@ -32,7 +29,7 @@ const Base = ({ children }) => {
 					exit={pageTransition.exit}
 					transition={pageTransition.transition}
 				>
-					{children}
+					<Container maxWidth={maxWidth}>{children}</Container>
 				</motion.div>
 			</Container>
 			<Footer />

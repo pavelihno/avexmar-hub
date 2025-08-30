@@ -77,7 +77,13 @@ const Header = () => {
 			elevation={0}
 			sx={{ borderBottom: 1, borderColor: 'divider' }}
 		>
-			<Toolbar sx={{ justifyContent: 'space-between', py: 2 }}>
+			<Toolbar
+				sx={{
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					py: { xs: 1, md: 1.5 },
+				}}
+			>
 				<Box
 					component={Link}
 					to='/'
@@ -108,32 +114,14 @@ const Header = () => {
 							<Box
 								sx={{
 									width: 250,
+									mt: 2,
 									p: 2,
 									display: 'flex',
 									flexDirection: 'column',
-									gap: 2,
+									alignItems: 'flex-start',
+									gap: 4,
 								}}
 							>
-								<Button
-									component={Link}
-									to='/search/booking'
-									color='inherit'
-									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
-									sx={{ textTransform: 'none' }}
-								>
-									{UI_LABELS.BOOKING_SEARCH.link}
-								</Button>
-								{isAdmin && (
-									<Button
-										component={Link}
-										to='/admin'
-										color='inherit'
-										startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
-										sx={{ textTransform: 'none' }}
-									>
-										{UI_LABELS.ADMIN.panel}
-									</Button>
-								)}
 								{isAuth ? (
 									<Button
 										color='inherit'
@@ -163,6 +151,26 @@ const Header = () => {
 										</Button>
 									</>
 								)}
+								{isAdmin && (
+									<Button
+										component={Link}
+										to='/admin'
+										color='inherit'
+										startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
+										sx={{ textTransform: 'none' }}
+									>
+										{UI_LABELS.ADMIN.panel}
+									</Button>
+								)}
+								<Button
+									component={Link}
+									to='/search/booking'
+									color='inherit'
+									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
+									sx={{ textTransform: 'none' }}
+								>
+									{UI_LABELS.BOOKING_SEARCH.link}
+								</Button>
 							</Box>
 						</Drawer>
 					</>

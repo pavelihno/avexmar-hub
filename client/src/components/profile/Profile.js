@@ -15,9 +15,7 @@ import PasswordTab from './PasswordTab';
 const Profile = () => {
 	const [tab, setTab] = useState(0);
 
-	const handleChange = (_e, newValue) => {
-		setTab(newValue);
-	};
+	const handleChange = (_e, newValue) => setTab(newValue);
 
 	return (
 		<Base maxWidth='lg'>
