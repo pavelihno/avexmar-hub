@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Alert, Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Alert, Box, Typography, Button, CircularProgress, TableContainer, useMediaQuery } from '@mui/material';
 
 import Base from '../Base';
 import SearchForm from './SearchForm';
@@ -15,12 +15,13 @@ const Schedule = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { flights, flightsLoading: isLoading } = useSelector((state) => state.search);
-	const [params] = useSearchParams();
-	const paramObj = Object.fromEntries(params.entries());
-	const paramStr = params.toString();
-	const from = params.get('from');
-	const to = params.get('to');
+const { flights, flightsLoading: isLoading } = useSelector((state) => state.search);
+const [params] = useSearchParams();
+const paramObj = Object.fromEntries(params.entries());
+const paramStr = params.toString();
+const from = params.get('from');
+const to = params.get('to');
+const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
 	useEffect(() => {
 		if (from && to) {
@@ -131,32 +132,36 @@ const Schedule = () => {
 						<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 3, mb: 1 }}>
 							{UI_LABELS.SCHEDULE.from_to(from || '', to || '')}
 						</Typography>
-						{outboundFlights.length ? (
-							<ScheduleTable
-								flights={outboundFlights}
-								selectedId={selectedOutbound?.id || null}
-								onSelect={(f) =>
-									setSelectedOutbound(selectedOutbound && selectedOutbound.id === f?.id ? null : f)
-								}
-							/>
-						) : (
-							<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
-						)}
+				{outboundFlights.length ? (
+					<TableContainer sx={{ overflowX: isSmallScreen ? 'auto' : 'visible' }}>
+						<ScheduleTable
+							flights={outboundFlights}
+							selectedId={selectedOutbound?.id || null}
+							onSelect={(f) =>
+								setSelectedOutbound(selectedOutbound && selectedOutbound.id === f?.id ? null : f)
+}
+								/>
+					</TableContainer>
+				) : (
+					<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
+				)}
 
 						<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mt: 4, mb: 1 }}>
 							{UI_LABELS.SCHEDULE.from_to(to || '', from || '')}
 						</Typography>
-						{returnFlights.length > 0 ? (
-							<ScheduleTable
-								flights={returnFlights}
-								selectedId={selectedReturn?.id || null}
-								onSelect={(f) =>
-									setSelectedReturn(selectedReturn && selectedReturn.id === f?.id ? null : f)
-								}
-							/>
-						) : (
-							<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
-						)}
+				{returnFlights.length > 0 ? (
+					<TableContainer sx={{ overflowX: isSmallScreen ? 'auto' : 'visible' }}>
+						<ScheduleTable
+							flights={returnFlights}
+							selectedId={selectedReturn?.id || null}
+							onSelect={(f) =>
+								setSelectedReturn(selectedReturn && selectedReturn.id === f?.id ? null : f)
+}
+								/>
+					</TableContainer>
+				) : (
+					<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
+				)}
 					</>
 				)}
 			</Box>
