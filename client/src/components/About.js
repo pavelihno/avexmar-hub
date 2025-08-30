@@ -16,13 +16,20 @@ import {
 	Avatar,
 	Snackbar,
 	Grid,
+	List,
+	ListItem,
+	useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { ArrowForward, ContentCopy } from '@mui/icons-material';
 import Base from './Base';
 import { UI_LABELS } from '../constants/uiLabels';
 
 const aboutLinks = [
-	{ href: '/privacy_policy', label: UI_LABELS.ABOUT.privacy_policy_agreement },
+	{
+		href: '/privacy_policy',
+		label: UI_LABELS.ABOUT.privacy_policy_agreement,
+	},
 	{ href: '/public_offer', label: UI_LABELS.ABOUT.public_offer },
 	// { href: '/marketing_consent', label: UI_LABELS.ABOUT.marketing_consent },
 ];
@@ -40,7 +47,10 @@ const About = () => {
 	const companyName = UI_LABELS.ABOUT.company_name;
 
 	const companyDetails = [
-		{ label: UI_LABELS.ABOUT.full_name, value: UI_LABELS.ABOUT.company_full_name },
+		{
+			label: UI_LABELS.ABOUT.full_name,
+			value: UI_LABELS.ABOUT.company_full_name,
+		},
 		{ label: UI_LABELS.ABOUT.ogrn, value: UI_LABELS.ABOUT.ogrn_value },
 		{ label: UI_LABELS.ABOUT.inn, value: UI_LABELS.ABOUT.inn_value },
 		{
@@ -58,6 +68,9 @@ const About = () => {
 			href: `mailto:${UI_LABELS.ABOUT.contact_email}`,
 		},
 	];
+
+	const theme = useTheme();
+	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const handleCopy = (text, type) => {
 		navigator.clipboard
@@ -87,86 +100,105 @@ const About = () => {
 				</Box>
 
 				<Box mb={5}>
-					{cardsData.map((card, index) => (
-						<Paper
-							key={index}
-							elevation={1}
-							sx={{
-								mb: 2,
-								overflow: 'hidden',
-								transition: 'all 0.2s',
-								'&:hover': { boxShadow: 3 },
-							}}
-						>
-							<Box
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								<Box
+					<Grid container spacing={2}>
+						{cardsData.map((card, index) => (
+							<Grid item xs={12} sm={6} md={4} key={index}>
+								<Paper
+									elevation={1}
 									sx={{
-										p: 2,
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-										minWidth: { xs: 70, sm: 100 },
+										overflow: 'hidden',
+										transition: 'all 0.2s',
+										'&:hover': { boxShadow: 3 },
 									}}
 								>
-									<Avatar
-										src={card.icon}
-										alt={card.alt}
+									<Box
 										sx={{
-											width: { xs: 40, sm: 60 },
-											height: { xs: 40, sm: 60 },
-											p: 1,
-										}}
-									/>
-								</Box>
-								<Box sx={{ p: 2, flexGrow: 1 }}>
-									<Typography
-										variant='h6'
-										component='h3'
-										gutterBottom
-										sx={{
-											fontWeight: 'medium',
-											fontSize: {
-												xs: '1rem',
-												sm: '1.25rem',
-											},
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
 										}}
 									>
-										{card.title}
-									</Typography>
-									<Typography variant='body2' color='text.secondary' sx={{ overflow: 'hidden' }}>
-										{card.content}
-									</Typography>
-								</Box>
-							</Box>
-						</Paper>
-					))}
+										<Box
+											sx={{
+												p: 2,
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'center',
+												minWidth: { xs: 70, sm: 100 },
+											}}
+										>
+											<Avatar
+												src={card.icon}
+												alt={card.alt}
+												sx={{
+													width: { xs: 40, sm: 60 },
+													height: { xs: 40, sm: 60 },
+													p: 1,
+												}}
+											/>
+										</Box>
+										<Box sx={{ p: 2, flexGrow: 1 }}>
+											<Typography
+												variant='h6'
+												component='h3'
+												gutterBottom
+												sx={{
+													fontWeight: 'medium',
+													fontSize: {
+														xs: '1rem',
+														sm: '1.25rem',
+													},
+												}}
+											>
+												{card.title}
+											</Typography>
+											<Typography
+												variant='body2'
+												color='text.secondary'
+												sx={{ overflow: 'hidden' }}
+											>
+												{card.content}
+											</Typography>
+										</Box>
+									</Box>
+								</Paper>
+							</Grid>
+						))}
+					</Grid>
 				</Box>
 
 				<Box mb={4}>
 					<Typography variant='h4' component='h2' gutterBottom>
 						{UI_LABELS.ABOUT.company_details}
 					</Typography>
-					<TableContainer component={Paper} elevation={1} sx={{ p: 2 }}>
-						<Table size='small'>
-							<TableBody>
-								{companyDetails.map(({ label, value, href }, index) => (
-									<TableRow key={index}>
-										<TableCell>
-											<Typography
-												variant='subtitle2'
-												color='text.secondary'
-												sx={{ fontWeight: 'bold' }}
-											>
-												{label}
-											</Typography>
-										</TableCell>
-										<TableCell>
+					{isXs ? (
+						<List disablePadding>
+							{companyDetails.map(
+								({ label, value, href }, index) => (
+									<ListItem
+										key={index}
+										disableGutters
+										sx={{
+											flexDirection: 'column',
+											alignItems: 'flex-start',
+											py: 1,
+										}}
+									>
+										<Typography
+											variant='subtitle2'
+											color='text.secondary'
+											sx={{ fontWeight: 'bold' }}
+										>
+											{label}
+										</Typography>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												width: '100%',
+												justifyContent: 'space-between',
+											}}
+										>
 											{href ? (
 												<Link
 													href={href}
@@ -175,7 +207,8 @@ const About = () => {
 														textDecoration: 'none',
 														color: 'text.primary',
 														'&:hover': {
-															textDecoration: 'underline',
+															textDecoration:
+																'underline',
 															color: 'primary.main',
 														},
 													}}
@@ -183,25 +216,105 @@ const About = () => {
 													{value}
 												</Link>
 											) : (
-												<Typography variant='body2'>{value}</Typography>
+												<Typography variant='body2'>
+													{value}
+												</Typography>
 											)}
-										</TableCell>
-										<TableCell align='right' sx={{ width: 40 }}>
-											<Tooltip title={UI_LABELS.BUTTONS.copy}>
+											<Tooltip
+												title={UI_LABELS.BUTTONS.copy}
+											>
 												<IconButton
 													size='small'
-													onClick={() => handleCopy(value, label)}
+													onClick={() =>
+														handleCopy(value, label)
+													}
 													aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
 												>
 													<ContentCopy fontSize='small' />
 												</IconButton>
 											</Tooltip>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</TableContainer>
+										</Box>
+									</ListItem>
+								),
+							)}
+						</List>
+					) : (
+						<TableContainer
+							component={Paper}
+							elevation={1}
+							sx={{ p: 2 }}
+						>
+							<Table size='small'>
+								<TableBody>
+									{companyDetails.map(
+										({ label, value, href }, index) => (
+											<TableRow key={index}>
+												<TableCell>
+													<Typography
+														variant='subtitle2'
+														color='text.secondary'
+														sx={{
+															fontWeight: 'bold',
+														}}
+													>
+														{label}
+													</Typography>
+												</TableCell>
+												<TableCell>
+													{href ? (
+														<Link
+															href={href}
+															variant='body2'
+															sx={{
+																textDecoration:
+																	'none',
+																color: 'text.primary',
+																'&:hover': {
+																	textDecoration:
+																		'underline',
+																	color: 'primary.main',
+																},
+															}}
+														>
+															{value}
+														</Link>
+													) : (
+														<Typography variant='body2'>
+															{value}
+														</Typography>
+													)}
+												</TableCell>
+												<TableCell
+													align='right'
+													sx={{ width: 40 }}
+												>
+													<Tooltip
+														title={
+															UI_LABELS.BUTTONS
+																.copy
+														}
+													>
+														<IconButton
+															size='small'
+															onClick={() =>
+																handleCopy(
+																	value,
+																	label,
+																)
+															}
+															aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+														>
+															<ContentCopy fontSize='small' />
+														</IconButton>
+													</Tooltip>
+												</TableCell>
+											</TableRow>
+										),
+									)}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
 				</Box>
 
 				<Box mb={4}>
@@ -210,25 +323,32 @@ const About = () => {
 					</Typography>
 
 					<Paper elevation={1} sx={{ p: 2 }}>
-						<Grid container spacing={2} wrap='nowrap'>
+						<Grid container spacing={2} wrap='wrap'>
 							{aboutLinks.map(({ href, label }) => (
-								<Grid item xs key={href}>
+								<Grid item xs={12} sm={6} md={4} key={href}>
 									<Box
 										component={Link}
 										href={href}
 										sx={{
 											display: 'flex',
 											alignItems: 'center',
-											p: 1,
+											p: 2,
 											borderRadius: 1,
 											bgcolor: 'action.hover',
 											textDecoration: 'none',
 											color: 'text.primary',
-											'&:hover': { bgcolor: 'action.selected' },
+											'&:hover': {
+												bgcolor: 'action.selected',
+											},
 										}}
 									>
-										<ArrowForward fontSize='small' sx={{ mr: 1 }} />
-										<Typography variant='body2'>{label}</Typography>
+										<ArrowForward
+											fontSize='small'
+											sx={{ mr: 1 }}
+										/>
+										<Typography variant='body2'>
+											{label}
+										</Typography>
 									</Box>
 								</Grid>
 							))}
