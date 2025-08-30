@@ -260,7 +260,7 @@ const PassengerForm = (
 			</Typography>
 
 			{Array.isArray(prefillOptions) && prefillOptions.length > 0 && (
-				<Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+				<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 					{prefillOptions.map((opt) => (
 						<Chip
 							size='small'

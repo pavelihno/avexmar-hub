@@ -295,8 +295,8 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id)
         from_status = booking.status
-        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(
-            from_status, set()
+        if (from_status != to_status and
+            to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
         ):
             raise ValueError(
                 f'Illegal transition: {from_status.value} -> {to_status.value}'

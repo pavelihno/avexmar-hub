@@ -434,7 +434,7 @@ export const UI_LABELS = {
 			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
 		},
 		payment_form: {
-			title: (timeLeft) => `${timeLeft} для оплаты`,
+			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
 			retry_payment: 'Повторить оплату',
@@ -444,6 +444,7 @@ export const UI_LABELS = {
 			invoice_waiting: 'Счет отправлен клиенту. Ожидаем оплату...',
 		},
 		completion: {
+			download_pdf: 'Скачать PDF-подтверждение',
 			title: 'Бронирование завершено',
 			price_title: 'Оплачено',
 			payment_details: 'Детали платежа',

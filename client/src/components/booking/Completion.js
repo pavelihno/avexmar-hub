@@ -89,25 +89,25 @@ const Completion = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='completion' />
+
 			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
 				<Grid item xs={12} md={9} lg={9}>
-					<Card sx={{ mb: 2 }}>
-						<CardContent>
-							<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
-								{UI_LABELS.BOOKING.completion.title}
-							</Typography>
-							{booking?.booking_number && (
-								<Typography variant='subtitle1'>
-									{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number}
-								</Typography>
-							)}
+					<Card>
+						<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
+							{UI_LABELS.BOOKING.completion.title}
+						</Typography>
 
-							<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
-								Скачать PDF
-							</Button>
-						</CardContent>
+						<Typography variant='subtitle1'>
+							{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number || '—'}
+						</Typography>
+
+						<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
+							{UI_LABELS.BOOKING.completion.download_pdf}
+						</Button>
 					</Card>
+				</Grid>
 
+				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 						<Accordion variant='outlined' sx={{ mb: 2 }}>
@@ -212,26 +212,26 @@ const Completion = () => {
 								</Box>
 
 								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.method}</Typography>
+									<Typography>{FIELD_LABELS.PAYMENT.payment_method}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method}
 									</Typography>
 								</Box>
 								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.status}</Typography>
+									<Typography>{FIELD_LABELS.PAYMENT.payment_status}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status}
 									</Typography>
 								</Box>
 								{payment.provider_payment_id && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.transaction_id}</Typography>
+										<Typography>{FIELD_LABELS.PAYMENT.provider_payment_id}</Typography>
 										<Typography>{payment.provider_payment_id}</Typography>
 									</Box>
 								)}
 								{payment.paid_at && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.payment_date}</Typography>
+										<Typography>{FIELD_LABELS.PAYMENT.paid_at}</Typography>
 										<Typography>{formatDate(payment.paid_at)}</Typography>
 									</Box>
 								)}

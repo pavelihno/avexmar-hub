@@ -1,11 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
-	createPayment,
-	createInvoice,
 	fetchPayment,
 	fetchPayments,
 	fetchPaymentById,
-	createPaymentAdmin,
+	createPayment,
 	updatePayment,
 	deletePayment,
 } from '../actions/payment';
@@ -29,7 +27,7 @@ const paymentSlice = createSlice({
 			{
 				fetchAll: fetchPayments,
 				fetchOne: fetchPaymentById,
-				create: createPaymentAdmin,
+				create: createPayment,
 				update: updatePayment,
 				remove: deletePayment,
 			},
@@ -38,18 +36,6 @@ const paymentSlice = createSlice({
 		);
 
 		builder
-			.addCase(createPayment.pending, handlePending)
-			.addCase(createPayment.rejected, handleRejected)
-			.addCase(createPayment.fulfilled, (state, action) => {
-				state.current = action.payload;
-				state.isLoading = false;
-			})
-			.addCase(createInvoice.pending, handlePending)
-			.addCase(createInvoice.rejected, handleRejected)
-			.addCase(createInvoice.fulfilled, (state, action) => {
-				state.current = action.payload;
-				state.isLoading = false;
-			})
 			.addCase(fetchPayment.pending, handlePending)
 			.addCase(fetchPayment.rejected, handleRejected)
 			.addCase(fetchPayment.fulfilled, (state, action) => {
