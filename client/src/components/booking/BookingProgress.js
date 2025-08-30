@@ -20,7 +20,7 @@ const iconMap = {
 const StepIcon = ({ icon, color }) => {
 	const stepKey = stepKeys[icon - 1];
 	const Icon = iconMap[stepKey];
-	return Icon ? <Icon sx={{ color, fontSize: 24 }} /> : null;
+	return Icon ? <Icon sx={{ color, fontSize: { xs: 32, sm: 24 } }} /> : null;
 };
 
 const BookingProgress = ({ activeStep }) => {
