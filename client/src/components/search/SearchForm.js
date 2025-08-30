@@ -30,7 +30,12 @@ import {
 	handlePassengerChange,
 	parseDate,
 } from '../utils';
-import { getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
+import {
+	getEnumOptions,
+	UI_LABELS,
+	VALIDATION_MESSAGES,
+	DATE_API_FORMAT,
+} from '../../constants';
 import { fetchSearchAirports } from '../../redux/actions/search';
 
 const selectProps = {
@@ -137,7 +142,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		infants_seat: parseInt(combinedParams.infants_seat) || 0,
 	});
 	const [dateMode, setDateMode] = useState(combinedParams.date_mode || 'exact');
-	const [seatClass, setSeatClass] = useState(combinedParams.class || seatClassOptions[0].value);
+	const [seatClass, setSeatClass] = useState(
+		combinedParams.class || seatClassOptions[0].value,
+	);
 	const [showPassengers, setShowPassengers] = useState(false);
 	const [validationErrors, setValidationErrors] = useState({});
 
@@ -146,8 +153,12 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 	const returnFromRef = useRef(null);
 	const returnToRef = useRef(null);
 	const airportOptions = useMemo(
-		() => airports.map((a) => ({ value: a.iata_code, label: `${a.city_name} (${a.iata_code})` })),
-		[airports]
+		() =>
+			airports.map((a) => ({
+				value: a.iata_code,
+				label: `${a.city_name} (${a.iata_code})`,
+			})),
+		[airports],
 	);
 
 	// Update on direction or date changes
@@ -168,12 +179,24 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				from: initialParams.from || prev.from,
 				to: initialParams.to || prev.to,
 				dateMode: initialParams.date_mode || prev.dateMode,
-				departDate: initialParams.when ? parseDate(initialParams.when) : prev.departDate,
-				returnDate: initialParams.return ? parseDate(initialParams.return) : prev.returnDate,
-				departFrom: initialParams.when_from ? parseDate(initialParams.when_from) : prev.departFrom,
-				departTo: initialParams.when_to ? parseDate(initialParams.when_to) : prev.departTo,
-				returnFrom: initialParams.return_from ? parseDate(initialParams.return_from) : prev.returnFrom,
-				returnTo: initialParams.return_to ? parseDate(initialParams.return_to) : prev.returnTo,
+				departDate: initialParams.when
+					? parseDate(initialParams.when)
+					: prev.departDate,
+				returnDate: initialParams.return
+					? parseDate(initialParams.return)
+					: prev.returnDate,
+				departFrom: initialParams.when_from
+					? parseDate(initialParams.when_from)
+					: prev.departFrom,
+				departTo: initialParams.when_to
+					? parseDate(initialParams.when_to)
+					: prev.departTo,
+				returnFrom: initialParams.return_from
+					? parseDate(initialParams.return_from)
+					: prev.returnFrom,
+				returnTo: initialParams.return_to
+					? parseDate(initialParams.return_to)
+					: prev.returnTo,
 			}));
 		}
 	}, [initialParams]);
@@ -219,18 +242,54 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 
 	const totalPassengers = getTotalPassengers(passengers);
 	const passengerWord = UI_LABELS.SEARCH.form.passenger_word(totalPassengers);
-	const seatClassLabel = seatClassOptions.find((o) => o.value === seatClass)?.label;
+	const seatClassLabel = seatClassOptions.find(
+		(o) => o.value === seatClass,
+	)?.label;
 
 	const formFields = useMemo(() => {
 		const fields = {
-			from: { key: 'from', label: UI_LABELS.SEARCH.form.from, type: FIELD_TYPES.SELECT, options: airportOptions },
-			to: { key: 'to', label: UI_LABELS.SEARCH.form.to, type: FIELD_TYPES.SELECT, options: airportOptions },
-			departDate: { key: 'departDate', label: UI_LABELS.SEARCH.form.when, type: FIELD_TYPES.DATE },
-			returnDate: { key: 'returnDate', label: UI_LABELS.SEARCH.form.return, type: FIELD_TYPES.DATE },
-			departFrom: { key: 'departFrom', label: UI_LABELS.SEARCH.form.when_from, type: FIELD_TYPES.DATE },
-			departTo: { key: 'departTo', label: UI_LABELS.SEARCH.form.when_to, type: FIELD_TYPES.DATE },
-			returnFrom: { key: 'returnFrom', label: UI_LABELS.SEARCH.form.return_from, type: FIELD_TYPES.DATE },
-			returnTo: { key: 'returnTo', label: UI_LABELS.SEARCH.form.return_to, type: FIELD_TYPES.DATE },
+			from: {
+				key: 'from',
+				label: UI_LABELS.SEARCH.form.from,
+				type: FIELD_TYPES.SELECT,
+				options: airportOptions,
+			},
+			to: {
+				key: 'to',
+				label: UI_LABELS.SEARCH.form.to,
+				type: FIELD_TYPES.SELECT,
+				options: airportOptions,
+			},
+			departDate: {
+				key: 'departDate',
+				label: UI_LABELS.SEARCH.form.when,
+				type: FIELD_TYPES.DATE,
+			},
+			returnDate: {
+				key: 'returnDate',
+				label: UI_LABELS.SEARCH.form.return,
+				type: FIELD_TYPES.DATE,
+			},
+			departFrom: {
+				key: 'departFrom',
+				label: UI_LABELS.SEARCH.form.when_from,
+				type: FIELD_TYPES.DATE,
+			},
+			departTo: {
+				key: 'departTo',
+				label: UI_LABELS.SEARCH.form.when_to,
+				type: FIELD_TYPES.DATE,
+			},
+			returnFrom: {
+				key: 'returnFrom',
+				label: UI_LABELS.SEARCH.form.return_from,
+				type: FIELD_TYPES.DATE,
+			},
+			returnTo: {
+				key: 'returnTo',
+				label: UI_LABELS.SEARCH.form.return_to,
+				type: FIELD_TYPES.DATE,
+			},
 		};
 		const arr = createFormFields(fields);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
@@ -244,18 +303,30 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				from: formValues.from,
 				to: formValues.to,
 				date_mode: dateMode,
-				when: isExact ? formatDate(formValues.departDate, DATE_API_FORMAT) : null,
-				return: isExact ? formatDate(formValues.returnDate, DATE_API_FORMAT) : null,
-				when_from: !isExact ? formatDate(formValues.departFrom, DATE_API_FORMAT) : null,
-				when_to: !isExact ? formatDate(formValues.departTo, DATE_API_FORMAT) : null,
-				return_from: !isExact ? formatDate(formValues.returnFrom, DATE_API_FORMAT) : null,
-				return_to: !isExact ? formatDate(formValues.returnTo, DATE_API_FORMAT) : null,
+				when: isExact
+					? formatDate(formValues.departDate, DATE_API_FORMAT)
+					: null,
+				return: isExact
+					? formatDate(formValues.returnDate, DATE_API_FORMAT)
+					: null,
+				when_from: !isExact
+					? formatDate(formValues.departFrom, DATE_API_FORMAT)
+					: null,
+				when_to: !isExact
+					? formatDate(formValues.departTo, DATE_API_FORMAT)
+					: null,
+				return_from: !isExact
+					? formatDate(formValues.returnFrom, DATE_API_FORMAT)
+					: null,
+				return_to: !isExact
+					? formatDate(formValues.returnTo, DATE_API_FORMAT)
+					: null,
 				adults: passengers.adults,
 				children: passengers.children,
 				infants: passengers.infants,
 				infants_seat: passengers.infants_seat,
 				class: seatClass,
-			})
+			}),
 		);
 	};
 
@@ -264,7 +335,8 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		if (!formValues.from) errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
+		if (!formValues.from)
+			errors.from = VALIDATION_MESSAGES.SEARCH.from.REQUIRED;
 		if (!formValues.to) errors.to = VALIDATION_MESSAGES.SEARCH.to.REQUIRED;
 		if (formValues.from && formValues.to && formValues.from === formValues.to) {
 			errors.to = VALIDATION_MESSAGES.SEARCH.to.SAME_AIRPORT;
@@ -277,7 +349,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				errors.departDate = VALIDATION_MESSAGES.SEARCH.when.TODAY;
 			}
 			if (formValues.returnDate) {
-				if (formValues.departDate && formValues.returnDate < formValues.departDate) {
+				if (
+					formValues.departDate &&
+					formValues.returnDate < formValues.departDate
+				) {
 					errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.INVALID;
 				} else if (formValues.returnDate < today) {
 					errors.returnDate = VALIDATION_MESSAGES.SEARCH.return.TODAY;
@@ -297,8 +372,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 			}
 			if (returnFrom || returnTo) {
 				if (!(returnFrom && returnTo)) {
-					if (!returnFrom) errors.returnFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
-					if (!returnTo) errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+					if (!returnFrom)
+						errors.returnFrom = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
+					if (!returnTo)
+						errors.returnTo = VALIDATION_MESSAGES.SEARCH.when.REQUIRED;
 				} else if (
 					returnTo < returnFrom ||
 					(departTo && returnFrom < departTo) ||
@@ -322,7 +399,11 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		params.set('date_mode', dateMode);
 		if (dateMode === 'exact') {
 			params.set('when', formatDate(formValues.departDate, DATE_API_FORMAT));
-			if (formValues.returnDate) params.set('return', formatDate(formValues.returnDate, DATE_API_FORMAT));
+			if (formValues.returnDate)
+				params.set(
+					'return',
+					formatDate(formValues.returnDate, DATE_API_FORMAT),
+				);
 		} else {
 			const { departFrom, departTo, returnFrom, returnTo } = formValues;
 			params.set('when_from', formatDate(departFrom, DATE_API_FORMAT));
@@ -346,8 +427,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 	};
 
 	const isScheduleClickOpen = useMemo(
-		() => !!formValues.from && !!formValues.to && formValues.from !== formValues.to,
-		[formValues]
+		() =>
+			!!formValues.from && !!formValues.to && formValues.from !== formValues.to,
+		[formValues],
 	);
 
 	const onScheduleClick = () => {
@@ -365,32 +447,36 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		navigate(`/schedule?${params.toString()}`);
 	};
 
-	const fromValue = airportOptions.some((o) => o.value === formValues.from) ? formValues.from : '';
-	const toValue = airportOptions.some((o) => o.value === formValues.to) ? formValues.to : '';
+	const fromValue = airportOptions.some((o) => o.value === formValues.from)
+		? formValues.from
+		: '';
+	const toValue = airportOptions.some((o) => o.value === formValues.to)
+		? formValues.to
+		: '';
 
 	return (
 		<Box
 			component='form'
 			onSubmit={handleSubmit}
 			sx={{
-				display: 'grid',
+				display: 'flex',
+				flexDirection: { xs: 'column', md: 'row' },
+				flexWrap: { md: 'wrap' },
 				backgroundColor: theme.palette.background.paper,
 				p: 1,
 				mt: 2,
-				alignItems: 'start',
-				rowGap: 1,
-				columnGap: 1,
+				alignItems: { md: 'center' },
+				gap: 1,
 				borderBottom: 1,
 				borderColor: 'divider',
 			}}
 		>
 			<Box
 				sx={{
-					gridRow: 1,
-					gridColumn: '2 / 3',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
+					width: { xs: '100%', md: 'auto' },
 				}}
 			>
 				<Typography variant='body2' sx={{ mr: 1 }}>
@@ -407,21 +493,16 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				</Typography>
 			</Box>
 
-			{/* Empty boxes */}
-			<Box sx={{ gridRow: 1, gridColumn: '3 / 4' }} />
-			<Box sx={{ gridRow: 1, gridColumn: '4 / 5' }} />
-
 			{/* From/To */}
 			<Box
 				sx={{
-					gridRow: 2,
-					gridColumn: '1 / 2',
 					display: 'flex',
 					alignItems: 'center',
-					flexDirection: 'column',
+					flexDirection: { xs: 'column', sm: 'row' },
+					width: { xs: '100%', md: 'auto' },
 				}}
 			>
-				<Box sx={{ display: 'flex', alignItems: 'center' }}>
+				<Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
 					{formFields.from.renderField({
 						value: fromValue,
 						onChange: (val) => setFormValues((p) => ({ ...p, from: val })),
@@ -430,7 +511,11 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						...selectProps,
 						disabled: airportsLoading,
 					})}
-					<IconButton aria-label='swap' onClick={swapAirports} disabled={airportsLoading}>
+					<IconButton
+						aria-label='swap'
+						onClick={swapAirports}
+						disabled={airportsLoading}
+					>
 						<SwapHorizIcon />
 					</IconButton>
 					{formFields.to.renderField({
@@ -452,15 +537,16 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 			{/* Date fields */}
 			<Box
 				sx={{
-					gridRow: 2,
-					gridColumn: '2 / 3',
 					display: 'flex',
 					flexDirection: 'column',
 					alignItems: 'center',
+					width: { xs: '100%', md: 'auto' },
 				}}
 			>
 				{dateMode === 'exact' ? (
-					<Box sx={{ display: 'flex' }}>
+					<Box
+						sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}
+					>
 						<Box sx={{ px: 0.5 }}>
 							{formFields.departDate.renderField({
 								value: formValues.departDate,
@@ -478,7 +564,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 								minDate: new Date(),
 								maxDate:
 									formValues.returnDate ||
-									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+									new Date(
+										new Date().setFullYear(new Date().getFullYear() + 1),
+									),
 								...dateProps,
 							})}
 						</Box>
@@ -486,7 +574,12 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 							{formFields.returnDate.renderField({
 								value: formValues.returnDate,
 								onChange: (val) => {
-									if (formValues.departDate && val && val < formValues.departDate) return;
+									if (
+										formValues.departDate &&
+										val &&
+										val < formValues.departDate
+									)
+										return;
 									setFormValues((p) => ({ ...p, returnDate: val }));
 								},
 								error: !!validationErrors.returnDate,
@@ -497,14 +590,17 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						</Box>
 					</Box>
 				) : (
-					<Box sx={{ display: 'flex' }}>
+					<Box
+						sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}
+					>
 						<Box sx={{ px: 0.5 }}>
 							{formFields.departFrom.renderField({
 								value: formValues.departFrom,
 								onChange: (val) => {
 									setFormValues((p) => {
 										let newDepartTo = p.departTo;
-										if (newDepartTo && val && newDepartTo < val) newDepartTo = null;
+										if (newDepartTo && val && newDepartTo < val)
+											newDepartTo = null;
 										return { ...p, departFrom: val, departTo: newDepartTo };
 									});
 									if (departToRef.current) departToRef.current.focus();
@@ -514,7 +610,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 								minDate: new Date(),
 								maxDate:
 									formValues.departTo ||
-									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+									new Date(
+										new Date().setFullYear(new Date().getFullYear() + 1),
+									),
 								textFieldProps: { inputRef: departToRef },
 								...smallDateProps,
 							})}
@@ -539,17 +637,21 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 								onChange: (val) => {
 									setFormValues((p) => {
 										let newReturnTo = p.returnTo;
-										if (newReturnTo && val && newReturnTo < val) newReturnTo = null;
+										if (newReturnTo && val && newReturnTo < val)
+											newReturnTo = null;
 										return { ...p, returnFrom: val, returnTo: newReturnTo };
 									});
 									if (returnToRef.current) returnToRef.current.focus();
 								},
 								error: !!validationErrors.returnFrom,
 								helperText: validationErrors.returnFrom,
-								minDate: formValues.departTo || formValues.departFrom || new Date(),
+								minDate:
+									formValues.departTo || formValues.departFrom || new Date(),
 								maxDate:
 									formValues.returnTo ||
-									new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+									new Date(
+										new Date().setFullYear(new Date().getFullYear() + 1),
+									),
 								textFieldProps: { inputRef: returnToRef },
 								...smallDateProps,
 							})}
@@ -557,11 +659,15 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						<Box sx={{ px: 0.5 }}>
 							{formFields.returnTo.renderField({
 								value: formValues.returnTo,
-								onChange: (val) => setFormValues((p) => ({ ...p, returnTo: val })),
+								onChange: (val) =>
+									setFormValues((p) => ({ ...p, returnTo: val })),
 								error: !!validationErrors.returnTo,
 								helperText: validationErrors.returnTo,
 								minDate:
-									formValues.returnFrom || formValues.departTo || formValues.departFrom || new Date(),
+									formValues.returnFrom ||
+									formValues.departTo ||
+									formValues.departFrom ||
+									new Date(),
 								...smallDateProps,
 							})}
 						</Box>
@@ -572,9 +678,11 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 			{/* Passenger selection */}
 			<Box
 				sx={{
-					gridRow: 2,
-					gridColumn: '3 / 4',
 					position: 'relative',
+					display: 'flex',
+					alignItems: 'center',
+					flexDirection: 'column',
+					width: { xs: '100%', md: 'auto' },
 				}}
 				ref={passengersRef}
 			>
@@ -583,9 +691,12 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 					value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
 					onClick={() => setShowPassengers((p) => !p)}
 					InputProps={{ readOnly: true }}
-					sx={{ width: 200, cursor: 'pointer' }}
+					sx={{ width: { xs: '100%', md: 200 }, cursor: 'pointer' }}
 				/>
-				<Collapse in={showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
+				<Collapse
+					in={showPassengers}
+					sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}
+				>
 					<Paper sx={{ p: 2, minWidth: 220 }}>
 						{UI_LABELS.SEARCH.form.passenger_categories.map((row) => (
 							<Box
@@ -599,7 +710,9 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 								}}
 							>
 								<Box>
-									<Typography sx={{ textDecoration: 'underline' }}>{row.label}</Typography>
+									<Typography sx={{ textDecoration: 'underline' }}>
+										{row.label}
+									</Typography>
 									<Typography variant='body2' color='text.secondary'>
 										{row.desc}
 									</Typography>
@@ -607,18 +720,24 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 
 								{/* Remove button */}
 								<IconButton
-									onClick={() => handlePassengerChange(setPassengers, row.key, -1)}
+									onClick={() =>
+										handlePassengerChange(setPassengers, row.key, -1)
+									}
 									disabled={disabledPassengerChange(passengers, row.key, -1)}
 									sx={{ p: 0 }}
 								>
 									<RemoveIcon />
 								</IconButton>
 
-								<Typography sx={{ textAlign: 'center' }}>{passengers[row.key]}</Typography>
+								<Typography sx={{ textAlign: 'center' }}>
+									{passengers[row.key]}
+								</Typography>
 
 								{/* Add button */}
 								<IconButton
-									onClick={() => handlePassengerChange(setPassengers, row.key, 1)}
+									onClick={() =>
+										handlePassengerChange(setPassengers, row.key, 1)
+									}
 									disabled={disabledPassengerChange(passengers, row.key, 1)}
 									sx={{ p: 0 }}
 								>
@@ -628,8 +747,13 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						))}
 
 						<Box sx={{ mt: 2 }}>
-							<Typography gutterBottom>{UI_LABELS.SEARCH.form.seat_class_title}</Typography>
-							<RadioGroup value={seatClass} onChange={(e) => setSeatClass(e.target.value)}>
+							<Typography gutterBottom>
+								{UI_LABELS.SEARCH.form.seat_class_title}
+							</Typography>
+							<RadioGroup
+								value={seatClass}
+								onChange={(e) => setSeatClass(e.target.value)}
+							>
 								{seatClassOptions.map((o) => (
 									<FormControlLabel
 										key={o.value}
@@ -647,11 +771,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 			{/* Schedule button */}
 			<Box
 				sx={{
-					gridRow: 1,
-					gridColumn: '4 / 5',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
+					width: { xs: '100%', md: 'auto' },
 				}}
 			>
 				<Button
@@ -662,6 +785,7 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 					sx={{
 						borderRadius: 1.5,
 						whiteSpace: 'nowrap',
+						width: { xs: '100%', md: 'auto' },
 					}}
 				>
 					{UI_LABELS.SEARCH.form.show_schedule}
@@ -670,11 +794,10 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 			{/* Search Button */}
 			<Box
 				sx={{
-					gridRow: 2,
-					gridColumn: '4 / 5',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
+					width: { xs: '100%', md: 'auto' },
 				}}
 			>
 				<Button
@@ -684,6 +807,7 @@ const SearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 					sx={{
 						borderRadius: 1.5,
 						whiteSpace: 'nowrap',
+						width: { xs: '100%', md: 'auto' },
 					}}
 				>
 					{UI_LABELS.SEARCH.form.button}
