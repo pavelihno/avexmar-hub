@@ -168,3 +168,42 @@ Minor inconsistencies and recommendations:
 ## Code Style
 
 - JavaScript files within this directory must use tabs for indentation with a tab width of four spaces.
+
+## Component Adaptiveness Rules
+
+- Use Material-UI breakpoints (`xs`, `sm`, `md`, `lg`, `xl`) and add custom breakpoints for tablet vs. mobile when needed.
+- Adapt only user-facing components; skip anything under `client/src/components/admin/` and `client/src/routes/AdminRoutes.js`.
+- Prioritize updates in this order: common layout (`Base`, `Header`, `Footer`), then feature pages (`Search`, `Schedule`, `Home`, `About`), followed by booking and profile flows.
+
+### Base layout
+- Configure `Container` `maxWidth` responsively (`{ xs: '100%', sm: 'sm', md: 'md', lg: 'lg' }`).
+- Apply responsive vertical spacing like `py: { xs: 1, md: 2 }` and ensure no horizontal scroll on screens under 600px.
+
+### Header
+- Wrap navigation in `AppBar` + `Toolbar` and switch to a hamburger `Drawer` or `Menu` below `md` using `useMediaQuery`.
+- Include user menu and auth actions inside the drawer for mobile while keeping the desktop layout for `md` and up.
+
+### Footer
+- Stack links vertically on phones (`Stack` `direction={{ xs: 'column', sm: 'row' }}`) with responsive alignment and text settings.
+- Ensure link tap targets are at least 48×48 px.
+
+### Search page
+- Use `Grid`/`Stack` layouts with breakpoint props for forms and results.
+- Collapse filter and sort controls into a menu or accordion on `sm` and below.
+- Display results cards full-width with vertical stacking on `xs`/`sm`; revert to side-by-side on `md`+.
+
+### Schedule page
+- Wrap tables in `TableContainer` with horizontal scroll on small screens or provide card layouts.
+- Keep flight selection buttons accessible without overflow.
+
+### Home page
+- Wrap `<SearchForm>` in a responsive container (`maxWidth={{ xs: '100%', sm: 500 }}`).
+- Stack form fields vertically on `xs`/`sm` and align horizontally on `md`+.
+
+### About page
+- Render info cards with `Grid` (`xs={12}`, `sm={6}`, `md={4}`) and convert tables to `Stack`/`List` on small screens.
+- Allow legal links to wrap and add padding suitable for touch devices.
+
+### Booking and profile flows
+- Review components under `booking` and `profile` for responsive breakpoints.
+- Replace fixed widths with responsive `sx` values or `Grid` layouts, ensuring touch-friendly navigation between steps.
