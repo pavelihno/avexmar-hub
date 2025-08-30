@@ -84,8 +84,8 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 
 	return (
 		<Box>
-		<TableContainer sx={{ overflowX: { xs: 'auto', sm: 'auto', md: 'visible' } }}>
-			<Table size='small' sx={{ minWidth: 650 }}>
+			<TableContainer sx={{ overflowX: { xs: 'auto', sm: 'auto', md: 'visible' } }}>
+				<Table size='small' sx={{ minWidth: 650 }}>
 					<TableHead>
 						<TableRow>
 							{headCells.map((headCell) => (

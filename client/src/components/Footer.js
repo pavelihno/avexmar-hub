@@ -31,7 +31,7 @@ const Footer = () => {
 					direction={{ xs: 'column', sm: 'row' }}
 					justifyContent='space-between'
 					alignItems={{ xs: 'flex-start', sm: 'center' }}
-					spacing={{ xs: 2, sm: 3 }}
+					spacing={{ xs: 1, sm: 3 }}
 					textAlign={{ xs: 'left', sm: 'center' }}
 				>
 					<Stack>
@@ -40,7 +40,7 @@ const Footer = () => {
 						</Typography>
 					</Stack>
 
-					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 3 }} alignItems='center'>
+					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 3 }} alignItems='center'>
 						{links.map(({ to, label }) => (
 							<Link
 								key={to}

@@ -41,4 +41,3 @@ const Base = ({ children }) => {
 };
 
 export default Base;
-

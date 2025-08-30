@@ -173,144 +173,108 @@ const About = () => {
 					</Typography>
 					{isXs ? (
 						<List disablePadding>
-							{companyDetails.map(
-								({ label, value, href }, index) => (
-									<ListItem
-										key={index}
-										disableGutters
+							{companyDetails.map(({ label, value, href }, index) => (
+								<ListItem
+									key={index}
+									disableGutters
+									sx={{
+										flexDirection: 'column',
+										alignItems: 'flex-start',
+										py: 1,
+									}}
+								>
+									<Typography variant='subtitle2' color='text.secondary' sx={{ fontWeight: 'bold' }}>
+										{label}
+									</Typography>
+									<Box
 										sx={{
-											flexDirection: 'column',
-											alignItems: 'flex-start',
-											py: 1,
+											display: 'flex',
+											alignItems: 'center',
+											width: '100%',
+											justifyContent: 'space-between',
 										}}
 									>
-										<Typography
-											variant='subtitle2'
-											color='text.secondary'
-											sx={{ fontWeight: 'bold' }}
-										>
-											{label}
-										</Typography>
-										<Box
-											sx={{
-												display: 'flex',
-												alignItems: 'center',
-												width: '100%',
-												justifyContent: 'space-between',
-											}}
-										>
-											{href ? (
-												<Link
-													href={href}
-													variant='body2'
-													sx={{
-														textDecoration: 'none',
-														color: 'text.primary',
-														'&:hover': {
-															textDecoration:
-																'underline',
-															color: 'primary.main',
-														},
-													}}
-												>
-													{value}
-												</Link>
-											) : (
-												<Typography variant='body2'>
-													{value}
-												</Typography>
-											)}
-											<Tooltip
-												title={UI_LABELS.BUTTONS.copy}
+										{href ? (
+											<Link
+												href={href}
+												variant='body2'
+												sx={{
+													textDecoration: 'none',
+													color: 'text.primary',
+													'&:hover': {
+														textDecoration: 'underline',
+														color: 'primary.main',
+													},
+												}}
 											>
-												<IconButton
-													size='small'
-													onClick={() =>
-														handleCopy(value, label)
-													}
-													aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
-												>
-													<ContentCopy fontSize='small' />
-												</IconButton>
-											</Tooltip>
-										</Box>
-									</ListItem>
-								),
-							)}
+												{value}
+											</Link>
+										) : (
+											<Typography variant='body2'>{value}</Typography>
+										)}
+										<Tooltip title={UI_LABELS.BUTTONS.copy}>
+											<IconButton
+												size='small'
+												onClick={() => handleCopy(value, label)}
+												aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+											>
+												<ContentCopy fontSize='small' />
+											</IconButton>
+										</Tooltip>
+									</Box>
+								</ListItem>
+							))}
 						</List>
 					) : (
-						<TableContainer
-							component={Paper}
-							elevation={1}
-							sx={{ p: 2 }}
-						>
+						<TableContainer component={Paper} elevation={1} sx={{ p: 2 }}>
 							<Table size='small'>
 								<TableBody>
-									{companyDetails.map(
-										({ label, value, href }, index) => (
-											<TableRow key={index}>
-												<TableCell>
-													<Typography
-														variant='subtitle2'
-														color='text.secondary'
+									{companyDetails.map(({ label, value, href }, index) => (
+										<TableRow key={index}>
+											<TableCell>
+												<Typography
+													variant='subtitle2'
+													color='text.secondary'
+													sx={{
+														fontWeight: 'bold',
+													}}
+												>
+													{label}
+												</Typography>
+											</TableCell>
+											<TableCell>
+												{href ? (
+													<Link
+														href={href}
+														variant='body2'
 														sx={{
-															fontWeight: 'bold',
+															textDecoration: 'none',
+															color: 'text.primary',
+															'&:hover': {
+																textDecoration: 'underline',
+																color: 'primary.main',
+															},
 														}}
 													>
-														{label}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													{href ? (
-														<Link
-															href={href}
-															variant='body2'
-															sx={{
-																textDecoration:
-																	'none',
-																color: 'text.primary',
-																'&:hover': {
-																	textDecoration:
-																		'underline',
-																	color: 'primary.main',
-																},
-															}}
-														>
-															{value}
-														</Link>
-													) : (
-														<Typography variant='body2'>
-															{value}
-														</Typography>
-													)}
-												</TableCell>
-												<TableCell
-													align='right'
-													sx={{ width: 40 }}
-												>
-													<Tooltip
-														title={
-															UI_LABELS.BUTTONS
-																.copy
-														}
+														{value}
+													</Link>
+												) : (
+													<Typography variant='body2'>{value}</Typography>
+												)}
+											</TableCell>
+											<TableCell align='right' sx={{ width: 40 }}>
+												<Tooltip title={UI_LABELS.BUTTONS.copy}>
+													<IconButton
+														size='small'
+														onClick={() => handleCopy(value, label)}
+														aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
 													>
-														<IconButton
-															size='small'
-															onClick={() =>
-																handleCopy(
-																	value,
-																	label,
-																)
-															}
-															aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
-														>
-															<ContentCopy fontSize='small' />
-														</IconButton>
-													</Tooltip>
-												</TableCell>
-											</TableRow>
-										),
-									)}
+														<ContentCopy fontSize='small' />
+													</IconButton>
+												</Tooltip>
+											</TableCell>
+										</TableRow>
+									))}
 								</TableBody>
 							</Table>
 						</TableContainer>
@@ -342,13 +306,8 @@ const About = () => {
 											},
 										}}
 									>
-										<ArrowForward
-											fontSize='small'
-											sx={{ mr: 1 }}
-										/>
-										<Typography variant='body2'>
-											{label}
-										</Typography>
+										<ArrowForward fontSize='small' sx={{ mr: 1 }} />
+										<Typography variant='body2'>{label}</Typography>
 									</Box>
 								</Grid>
 							))}

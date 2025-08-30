@@ -168,77 +168,77 @@ const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 		? `${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(totalPrice)} ${currencySymbol}`
 		: `${formatNumber(totalPrice)} ${currencySymbol}`;
 
-return (
-<>
-<Card sx={{ p: 2, mb: 2 }}>
-<Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-<Box
-sx={{
-width: { md: 180 },
-textAlign: 'center',
-pr: { md: 2 },
-borderRight: { md: `1px solid ${theme.palette.grey[100]}` },
-display: 'flex',
-flexDirection: 'column',
-justifyContent: 'center',
-mb: { xs: 2, md: 0 },
-}}
->
-{isLoading ? (
-<Skeleton variant='rectangular' width={150} height={40} sx={{ mb: 1, mx: 'auto' }} />
-) : (
-<>
-<Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-{priceText}
-</Typography>
-<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-{UI_LABELS.SEARCH.flight_details.price_per_passenger.toLowerCase()}
-</Typography>
-</>
-)}
-<Button
-variant='contained'
-color='orange'
-disabled={isLoading}
-sx={{
-borderRadius: 2,
-boxShadow: 'none',
-textTransform: 'none',
-whiteSpace: 'nowrap',
-}}
-onClick={(e) => {
-e.currentTarget.blur();
-setOpenDialog(true);
-}}
->
-{UI_LABELS.SEARCH.flight_details.select_tariff_title}
-</Button>
-</Box>
-<Box sx={{ flexGrow: 1, pl: { md: 2 } }}>
-{isLoading ? (
-<>
-<SegmentSkeleton />
-{returnFlight && <Divider sx={{ my: 1 }} />}
-{returnFlight && <SegmentSkeleton />}
-</>
-) : (
-<>
-<Segment flight={outbound} isOutbound />
-{returnFlight && <Divider sx={{ my: 1 }} />}
-{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
-</>
-)}
-</Box>
-</Stack>
-</Card>
-<SelectTicketDialog
-open={openDialog}
-onClose={() => setOpenDialog(false)}
-outbound={outbound}
-returnFlight={returnFlight}
-/>
-</>
-);
+	return (
+		<>
+			<Card sx={{ p: 2, mb: 2 }}>
+				<Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+					<Box
+						sx={{
+							width: { md: 180 },
+							textAlign: 'center',
+							pr: { md: 2 },
+							borderRight: { md: `1px solid ${theme.palette.grey[100]}` },
+							display: 'flex',
+							flexDirection: 'column',
+							justifyContent: 'center',
+							mb: { xs: 2, md: 0 },
+						}}
+					>
+						{isLoading ? (
+							<Skeleton variant='rectangular' width={150} height={40} sx={{ mb: 1, mx: 'auto' }} />
+						) : (
+							<>
+								<Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+									{priceText}
+								</Typography>
+								<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
+									{UI_LABELS.SEARCH.flight_details.price_per_passenger.toLowerCase()}
+								</Typography>
+							</>
+						)}
+						<Button
+							variant='contained'
+							color='orange'
+							disabled={isLoading}
+							sx={{
+								borderRadius: 2,
+								boxShadow: 'none',
+								textTransform: 'none',
+								whiteSpace: 'nowrap',
+							}}
+							onClick={(e) => {
+								e.currentTarget.blur();
+								setOpenDialog(true);
+							}}
+						>
+							{UI_LABELS.SEARCH.flight_details.select_tariff_title}
+						</Button>
+					</Box>
+					<Box sx={{ flexGrow: 1, pl: { md: 2 } }}>
+						{isLoading ? (
+							<>
+								<SegmentSkeleton />
+								{returnFlight && <Divider sx={{ my: 1 }} />}
+								{returnFlight && <SegmentSkeleton />}
+							</>
+						) : (
+							<>
+								<Segment flight={outbound} isOutbound />
+								{returnFlight && <Divider sx={{ my: 1 }} />}
+								{returnFlight && <Segment flight={returnFlight} isOutbound={false} />}
+							</>
+						)}
+					</Box>
+				</Stack>
+			</Card>
+			<SelectTicketDialog
+				open={openDialog}
+				onClose={() => setOpenDialog(false)}
+				outbound={outbound}
+				returnFlight={returnFlight}
+			/>
+		</>
+	);
 };
 
 export default SearchResultCard;

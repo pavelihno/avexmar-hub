@@ -307,11 +307,11 @@ const Passengers = () => {
 					item
 					xs={12}
 					md={8}
-				sx={{
-					maxHeight: { md: 'calc(100vh - 200px)' },
-					overflowY: { xs: 'visible', md: 'auto' },
-					pr: { md: 2 },
-				}}
+					sx={{
+						maxHeight: { md: 'calc(100vh - 200px)' },
+						overflowY: { xs: 'visible', md: 'auto' },
+						pr: { md: 2 },
+					}}
 				>
 					{errorMessages.length > 0 && (
 						<Stack spacing={1} sx={{ mb: 2 }}>

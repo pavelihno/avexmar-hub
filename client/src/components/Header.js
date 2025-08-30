@@ -71,16 +71,16 @@ const Header = () => {
 
 	return (
 		<AppBar
-			component="header"
-			position="static"
-			color="transparent"
+			component='header'
+			position='static'
+			color='transparent'
 			elevation={0}
 			sx={{ borderBottom: 1, borderColor: 'divider' }}
 		>
 			<Toolbar sx={{ justifyContent: 'space-between', py: 2 }}>
 				<Box
 					component={Link}
-					to="/"
+					to='/'
 					sx={{
 						display: 'flex',
 						alignItems: 'center',
@@ -89,30 +89,22 @@ const Header = () => {
 					}}
 				>
 					<Box
-						component="img"
-						src="/images/logo/logo32.png"
-						alt="Avexmar logo"
+						component='img'
+						src='/images/logo/logo32.png'
+						alt='Avexmar logo'
 						sx={{ width: 32, height: 32, mr: 1 }}
 					/>
-					<Typography variant="h4" component="span">
+					<Typography variant='h4' component='span'>
 						{companyName.toUpperCase()}
 					</Typography>
 				</Box>
 
 				{isMobile ? (
 					<>
-						<IconButton
-							edge="end"
-							color="inherit"
-							onClick={toggleDrawer(true)}
-						>
+						<IconButton edge='end' color='inherit' onClick={toggleDrawer(true)}>
 							<MenuIcon />
 						</IconButton>
-						<Drawer
-							anchor="right"
-							open={drawerOpen}
-							onClose={toggleDrawer(false)}
-						>
+						<Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
 							<Box
 								sx={{
 									width: 250,
@@ -124,13 +116,9 @@ const Header = () => {
 							>
 								<Button
 									component={Link}
-									to="/search/booking"
-									color="inherit"
-									startIcon={
-										<SearchIcon
-											sx={{ width: 32, height: 32 }}
-										/>
-									}
+									to='/search/booking'
+									color='inherit'
+									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
 									sx={{ textTransform: 'none' }}
 								>
 									{UI_LABELS.BOOKING_SEARCH.link}
@@ -138,13 +126,9 @@ const Header = () => {
 								{isAdmin && (
 									<Button
 										component={Link}
-										to="/admin"
-										color="inherit"
-										startIcon={
-											<AdminPanelSettingsIcon
-												sx={{ width: 32, height: 32 }}
-											/>
-										}
+										to='/admin'
+										color='inherit'
+										startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
 										sx={{ textTransform: 'none' }}
 									>
 										{UI_LABELS.ADMIN.panel}
@@ -152,13 +136,9 @@ const Header = () => {
 								)}
 								{isAuth ? (
 									<Button
-										color="inherit"
+										color='inherit'
 										onClick={handleProfileClick}
-										startIcon={
-											<Avatar
-												sx={{ width: 32, height: 32 }}
-											/>
-										}
+										startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
 										sx={{ textTransform: 'none' }}
 									>
 										{UI_LABELS.PROFILE.profile}
@@ -166,7 +146,7 @@ const Header = () => {
 								) : (
 									<>
 										<Button
-											color="inherit"
+											color='inherit'
 											onClick={openLoginModal}
 											startIcon={<LoginIcon />}
 											sx={{ textTransform: 'none' }}
@@ -174,7 +154,7 @@ const Header = () => {
 											{UI_LABELS.BUTTONS.login}
 										</Button>
 										<Button
-											color="inherit"
+											color='inherit'
 											onClick={openRegisterModal}
 											startIcon={<PersonAddIcon />}
 											sx={{ textTransform: 'none' }}
@@ -190,11 +170,9 @@ const Header = () => {
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 						<Button
 							component={Link}
-							to="/search/booking"
-							color="inherit"
-							startIcon={
-								<SearchIcon sx={{ width: 32, height: 32 }} />
-							}
+							to='/search/booking'
+							color='inherit'
+							startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
 							sx={{ textTransform: 'none' }}
 						>
 							{UI_LABELS.BOOKING_SEARCH.link}
@@ -202,13 +180,9 @@ const Header = () => {
 						{isAdmin && (
 							<Button
 								component={Link}
-								to="/admin"
-								color="inherit"
-								startIcon={
-									<AdminPanelSettingsIcon
-										sx={{ width: 32, height: 32 }}
-									/>
-								}
+								to='/admin'
+								color='inherit'
+								startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
 								sx={{ textTransform: 'none' }}
 							>
 								{UI_LABELS.ADMIN.panel}
@@ -216,11 +190,9 @@ const Header = () => {
 						)}
 						{isAuth ? (
 							<Button
-								color="inherit"
+								color='inherit'
 								onClick={handleProfileClick}
-								startIcon={
-									<Avatar sx={{ width: 32, height: 32 }} />
-								}
+								startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
 								sx={{ textTransform: 'none' }}
 							>
 								{UI_LABELS.PROFILE.profile}
@@ -228,7 +200,7 @@ const Header = () => {
 						) : (
 							<>
 								<Button
-									color="inherit"
+									color='inherit'
 									onClick={openLoginModal}
 									startIcon={<LoginIcon />}
 									sx={{ textTransform: 'none' }}
@@ -236,7 +208,7 @@ const Header = () => {
 									{UI_LABELS.BUTTONS.login}
 								</Button>
 								<Button
-									color="inherit"
+									color='inherit'
 									onClick={openRegisterModal}
 									startIcon={<PersonAddIcon />}
 									sx={{ textTransform: 'none' }}
@@ -266,14 +238,9 @@ const Header = () => {
 							<Box sx={{ display: 'flex', alignItems: 'center' }}>
 								<Avatar sx={{ width: 32, height: 32, mr: 1 }} />
 								<Box>
-									<Typography variant="subtitle2">
-										{UI_LABELS.PROFILE.to_profile}
-									</Typography>
+									<Typography variant='subtitle2'>{UI_LABELS.PROFILE.to_profile}</Typography>
 									{currentUser?.email && (
-										<Typography
-											variant="caption"
-											color="text.secondary"
-										>
+										<Typography variant='caption' color='text.secondary'>
 											{currentUser.email}
 										</Typography>
 									)}
@@ -281,10 +248,7 @@ const Header = () => {
 							</Box>
 						</MenuItem>
 						<MenuItem onClick={handleLogout}>
-							<LoginIcon
-								fontSize="small"
-								sx={{ mr: 1, color: 'red' }}
-							/>
+							<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />
 							{UI_LABELS.BUTTONS.exit}
 						</MenuItem>
 					</Menu>
