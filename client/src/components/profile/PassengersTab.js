@@ -14,17 +14,17 @@ import {
 	TableCell,
 	Paper,
 	Alert,
+	IconButton,
+	useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import PassengerForm from '../booking/PassengerForm';
 import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
 import PassengerDetailsModal from './PassengerDetailsModal';
 
-import {
-	fetchUserPassengers,
-	createUserPassenger,
-} from '../../redux/actions/passenger';
+import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { mapToApi, mappingConfigs } from '../utils/mappers';
 import { formatDate } from '../utils';
@@ -37,6 +37,8 @@ const PassengersTab = () => {
 	const { currentUser } = useSelector((state) => state.auth);
 	const { passengers } = useSelector((state) => state.passengers);
 	const { countries } = useSelector((state) => state.countries);
+	const theme = useTheme();
+	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 	const [showForm, setShowForm] = useState(false);
 	const [data, setData] = useState({});
 	const [consent, setConsent] = useState(false);
@@ -55,7 +57,7 @@ const PassengersTab = () => {
 
 	const citizenshipOptions = useMemo(
 		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-		[countries],
+		[countries]
 	);
 
 	const handleChange = (_field, _value, d) => setData(d);
@@ -73,7 +75,7 @@ const PassengersTab = () => {
 			createUserPassenger({
 				userId: currentUser.id,
 				data: { ...apiData, consent },
-			}),
+			})
 		)
 			.unwrap()
 			.then(() => {
@@ -90,17 +92,9 @@ const PassengersTab = () => {
 	};
 
 	return (
-		<Container
-			maxWidth='md'
-			sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}
-		>
+		<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
 			<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
-				<Typography
-					variant='h4'
-					sx={{ typography: { xs: 'h5', md: 'h4' } }}
-				>
-					{UI_LABELS.PROFILE.passengers}
-				</Typography>
+				<Typography variant='h4'>{UI_LABELS.PROFILE.passengers}</Typography>
 
 				<Box
 					sx={{
@@ -121,32 +115,73 @@ const PassengersTab = () => {
 						</Alert>
 					)}
 					{passengers && passengers.length === 0 ? (
-						<Typography
-							variant='subtitle1'
-							sx={{ textAlign: 'center' }}
-						>
+						<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
 							{UI_LABELS.PROFILE.no_passengers}
 						</Typography>
+					) : isXs ? (
+						// Mobile card view
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+							{passengers.map((p) => {
+								const name = `${p.last_name || ''} ${p.first_name || ''}`.trim() || '—';
+								const birth = p.birth_date ? formatDate(p.birth_date) : '';
+								const gender = ENUM_LABELS.GENDER_SHORT[p.gender] || '';
+								const doc = ENUM_LABELS.DOCUMENT_TYPE[p.document_type] || '';
+								return (
+									<Paper key={p.id} variant='outlined' sx={{ p: 1.5 }}>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'space-between',
+												gap: 1,
+												mb: 0.5,
+												flexWrap: 'wrap',
+											}}
+										>
+											<Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+												{name}
+											</Typography>
+											<IconButton
+												aria-label={UI_LABELS.PROFILE.more_details}
+												onClick={() => setSelectedPassenger(p)}
+												size='small'
+											>
+												<OpenInNewIcon fontSize='small' />
+											</IconButton>
+										</Box>
+
+										{(birth || gender) && (
+											<Typography variant='body2' sx={{ color: 'text.secondary' }}>
+												{[birth, gender].filter(Boolean).join(' · ')}
+											</Typography>
+										)}
+										{doc && (
+											<Typography
+												variant='caption'
+												sx={{ color: 'text.secondary', display: 'block', mt: 0.25 }}
+											>
+												{doc}
+											</Typography>
+										)}
+									</Paper>
+								);
+							})}
+						</Box>
 					) : (
+						// Desktop table view
 						<TableContainer sx={{ overflowX: 'auto' }}>
 							<Table size='small'>
 								<TableHead>
 									<TableRow>
-										<TableCell sx={{ fontWeight: 'bold' }}>
-											{UI_LABELS.PROFILE.last_name}
-										</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.last_name}</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.first_name}
 										</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.birth_date}
 										</TableCell>
-										<TableCell sx={{ fontWeight: 'bold' }}>
-											{UI_LABELS.PROFILE.gender}
-										</TableCell>
-										<TableCell sx={{ fontWeight: 'bold' }}>
-											{UI_LABELS.PROFILE.document}
-										</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.gender}</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.document}</TableCell>
 										<TableCell />
 									</TableRow>
 								</TableHead>
@@ -154,44 +189,21 @@ const PassengersTab = () => {
 									{passengers.map((p) => (
 										<TableRow key={p.id}>
 											<TableCell>{p.last_name}</TableCell>
-											<TableCell>
-												{p.first_name}
-											</TableCell>
-											<TableCell>
-												{p.birth_date
-													? formatDate(p.birth_date)
-													: ''}
-											</TableCell>
-											<TableCell>
-												{
-													ENUM_LABELS.GENDER_SHORT[
-														p.gender
-													]
-												}
-											</TableCell>
-											<TableCell>
-												{
-													ENUM_LABELS.DOCUMENT_TYPE[
-														p.document_type
-													]
-												}
-											</TableCell>
+											<TableCell>{p.first_name}</TableCell>
+											<TableCell>{p.birth_date ? formatDate(p.birth_date) : ''}</TableCell>
+											<TableCell>{ENUM_LABELS.GENDER_SHORT[p.gender]}</TableCell>
+											<TableCell>{ENUM_LABELS.DOCUMENT_TYPE[p.document_type]}</TableCell>
 											<TableCell align='right'>
 												<Button
 													size='small'
-													onClick={() =>
-														setSelectedPassenger(p)
-													}
+													onClick={() => setSelectedPassenger(p)}
 													sx={{
 														display: 'inline-flex',
 														alignItems: 'center',
 														gap: 0.5,
 													}}
 												>
-													{
-														UI_LABELS.PROFILE
-															.more_details
-													}
+													{UI_LABELS.PROFILE.more_details}
 													<OpenInNewIcon fontSize='inherit' />
 												</Button>
 											</TableCell>
@@ -244,21 +256,29 @@ const PassengersTab = () => {
 										gap: 2,
 									}}
 								>
-									<Box>
+									<Box
+										sx={{
+											display: 'flex',
+											flexDirection: { xs: 'column', sm: 'row' },
+											gap: { xs: 1.5, sm: 0 },
+											width: '100%',
+										}}
+									>
 										<Button
 											variant='contained'
 											onClick={handleSubmit}
 											disabled={!consent}
-											sx={{ mr: 1 }}
+											sx={{
+												mr: { sm: 1 },
+												width: { xs: '100%', sm: 'auto' },
+											}}
 										>
-											{
-												UI_LABELS.BOOKING.passenger_form
-													.add_passenger
-											}
+											{UI_LABELS.BOOKING.passenger_form.add_passenger}
 										</Button>
 										<Button
 											variant='text'
 											onClick={() => setShowForm(false)}
+											sx={{ width: { xs: '100%', sm: 'auto' } }}
 										>
 											{UI_LABELS.BUTTONS.cancel}
 										</Button>
@@ -283,10 +303,7 @@ const PassengersTab = () => {
 				</Box>
 			</Paper>
 			{selectedPassenger && (
-				<PassengerDetailsModal
-					passenger={selectedPassenger}
-					onClose={() => setSelectedPassenger(null)}
-				/>
+				<PassengerDetailsModal passenger={selectedPassenger} onClose={() => setSelectedPassenger(null)} />
 			)}
 		</Container>
 	);
