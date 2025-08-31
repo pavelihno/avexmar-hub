@@ -262,7 +262,7 @@ class Booking(BaseModel):
         BOOKING_STATUS.cancelled: set(),
     }
 
-    TERMINAL = {BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
+    FINAL_STATUSES = {BOOKING_STATUS.completed, BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
 
     PAGE_FLOW = {
         BOOKING_STATUS.created: ['passengers'],

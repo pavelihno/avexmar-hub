@@ -14,7 +14,7 @@ def cleanup_expired_bookings():
         Booking.query.join(BookingHold)
         .filter(
             BookingHold.expires_at < now,
-            Booking.status.notin_(Booking.TERMINAL),
+            Booking.status.notin_(Booking.FINAL_STATUSES),
         )
         .with_for_update()
         .all()

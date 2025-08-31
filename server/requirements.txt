@@ -17,3 +17,4 @@ python-dotenv==1.0.1
 redis==5.0.1
 Werkzeug==3.0.1
 yookassa==3.6.0
+WeasyPrint==53.3
