@@ -27,43 +27,34 @@ const Profile = () => {
 					px: { xs: 1, md: 0 },
 				}}
 			>
-				<Paper
-					elevation={0}
-					sx={{ p: { xs: 2, md: 3 }, width: '100%' }}
-				>
+				<Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 					<Typography variant='h3' sx={{ mb: { xs: 2, md: 3 } }}>
 						{UI_LABELS.PROFILE.profile}
 					</Typography>
-					<Tabs
-						value={tab}
-						onChange={handleChange}
-						variant='scrollable'
-						scrollButtons='auto'
-						allowScrollButtonsMobile
-						indicatorColor='primary'
-						textColor='primary'
-						sx={{ mb: { xs: 2, md: 3 } }}
-					>
-						<Tab
-							icon={<PersonIcon />}
-							label={UI_LABELS.PROFILE.user_info}
-						/>
-						<Tab
-							icon={<FlightIcon />}
-							label={UI_LABELS.PROFILE.bookings}
-						/>
-						<Tab
-							icon={<GroupIcon />}
-							label={UI_LABELS.PROFILE.passengers}
-						/>
-					</Tabs>
+					<Box sx={{ mb: { xs: 2, md: 3 } }}>
+						<Tabs
+							value={tab}
+							onChange={handleChange}
+							variant='scrollable'
+							scrollButtons='auto'
+							allowScrollButtonsMobile
+							indicatorColor='primary'
+							textColor='primary'
+							aria-label='profile tabs'
+							sx={{
+								mb: { xs: 2, md: 3 },
+								'& .MuiTabs-flexContainer': {
+									justifyContent: { xs: 'flex-start', md: 'center' },
+								},
+							}}
+						>
+							<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
+							<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
+							<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+						</Tabs>
+					</Box>
 
-					<Grid
-						container
-						spacing={{ xs: 2, md: 4 }}
-						justifyContent='center'
-						sx={{ mt: 1, mx: 'auto' }}
-					>
+					<Grid container spacing={{ xs: 2, md: 4 }} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
 						{tab === 0 && (
 							<>
 								<Grid item xs={12} md={6}>

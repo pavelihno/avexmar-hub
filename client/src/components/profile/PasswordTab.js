@@ -1,14 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
-	Box,
-	Button,
-	Alert,
-	Paper,
-	Typography,
-	CircularProgress,
-} from '@mui/material';
+import { Box, Button, Alert, Paper, Typography, CircularProgress } from '@mui/material';
 
 import { changePassword } from '../../redux/actions/user';
 import { UI_LABELS } from '../../constants/uiLabels';
@@ -34,16 +27,14 @@ const PasswordTab = () => {
 				label: UI_LABELS.AUTH.new_password,
 				type: FIELD_TYPES.TEXT,
 				inputProps: { type: 'password' },
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.USER.password.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.USER.password.REQUIRED : ''),
 			},
 			confirmPassword: {
 				key: 'confirmPassword',
 				label: UI_LABELS.AUTH.confirm_password,
 				type: FIELD_TYPES.TEXT,
 				inputProps: { type: 'password' },
-				validate: (v) =>
-					!v ? VALIDATION_MESSAGES.USER.password2.REQUIRED : '',
+				validate: (v) => (!v ? VALIDATION_MESSAGES.USER.password2.REQUIRED : ''),
 			},
 			code: { key: 'code', label: UI_LABELS.AUTH.two_factor_code_label },
 		};
@@ -85,7 +76,7 @@ const PasswordTab = () => {
 			changePassword({
 				password: passwordData.newPassword,
 				code: codeSent ? passwordData.code : undefined,
-			}),
+			})
 		)
 			.unwrap()
 			.then((res) => {
@@ -111,10 +102,7 @@ const PasswordTab = () => {
 
 	return (
 		<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
-			<Typography
-				variant='h4'
-				sx={{ mb: 2, typography: { xs: 'h5', md: 'h4' } }}
-			>
+			<Typography variant='h4' sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.change_password}
 			</Typography>
 			<Box component='form' onSubmit={handleSubmit}>
@@ -124,10 +112,7 @@ const PasswordTab = () => {
 					</Alert>
 				)}
 				{successMessage && (
-					<Alert
-						severity={codeSent ? 'info' : 'success'}
-						sx={{ mb: 2 }}
-					>
+					<Alert severity={codeSent ? 'info' : 'success'} sx={{ mb: 2 }}>
 						{successMessage}
 					</Alert>
 				)}
@@ -165,11 +150,7 @@ const PasswordTab = () => {
 					sx={{ mt: 2 }}
 					disabled={(codeSent && !passwordData.code) || isSubmitting}
 				>
-					{isSubmitting ? (
-						<CircularProgress size={24} color='inherit' />
-					) : (
-						UI_LABELS.BUTTONS.change_password
-					)}
+					{isSubmitting ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.change_password}
 				</Button>
 			</Box>
 		</Paper>
