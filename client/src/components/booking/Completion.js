@@ -90,9 +90,9 @@ const Completion = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='completion' />
 
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
 				<Grid item xs={12} md={9} lg={9}>
-					<Card>
+					<Card sx={{ p: { xs: 2, md: 3 } }}>
 						<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
 							{UI_LABELS.BOOKING.completion.title}
 						</Typography>
@@ -110,7 +110,7 @@ const Completion = () => {
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								{outboundRouteInfo && (
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
@@ -148,7 +148,7 @@ const Completion = () => {
 
 					{/* Price Details */}
 					{booking && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Box
 									sx={{
@@ -181,7 +181,7 @@ const Completion = () => {
 
 					{/* Payment details */}
 					{payment && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
 									{UI_LABELS.BOOKING.completion.payment_details}

@@ -1,4 +1,4 @@
-import { Stepper, Step, StepLabel, Typography } from '@mui/material';
+import { Stepper, Step, StepLabel, Typography, Tabs, Tab, Box, useMediaQuery, useTheme } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import PaymentIcon from '@mui/icons-material/Payment';
@@ -27,6 +27,8 @@ const BookingProgress = ({ activeStep }) => {
 	const { accessiblePages = [] } = useBookingAccess();
 	const { publicId } = useParams();
 	const navigate = useNavigate();
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const routes = [
 		`/booking/${publicId}/passengers`,
@@ -36,6 +38,41 @@ const BookingProgress = ({ activeStep }) => {
 	];
 
 	const stepIndex = typeof activeStep === 'string' ? stepKeys.indexOf(activeStep) : activeStep;
+
+	if (isMobile) {
+		return (
+			<Box sx={{ mt: 2, mb: 3 }}>
+				<Tabs
+					value={stepIndex}
+					onChange={(_e, val) => {
+						const key = stepKeys[val];
+						if (accessiblePages.includes(key)) navigate(routes[val]);
+					}}
+					variant='scrollable'
+					scrollButtons='auto'
+					allowScrollButtonsMobile
+					aria-label='booking progress'
+					sx={{ '& .MuiTabs-flexContainer': { justifyContent: 'flex-start' } }}
+				>
+					{stepKeys.map((key, index) => {
+						const isActive = index === stepIndex;
+						const isAccessible = accessiblePages.includes(key);
+						const Icon = iconMap[key];
+						const color = isActive ? 'primary.main' : isAccessible ? 'success.main' : 'text.disabled';
+
+						return (
+							<Tab
+								key={key}
+								icon={<Icon sx={{ color, fontSize: { xs: 32, sm: 24 } }} />}
+								label={UI_LABELS.BOOKING.progress_steps[key]}
+								disabled={!isAccessible}
+							/>
+						);
+					})}
+				</Tabs>
+			</Box>
+		);
+	}
 
 	return (
 		<Stepper activeStep={stepIndex} alternativeLabel sx={{ mt: 2, mb: 3 }}>
@@ -62,9 +99,7 @@ const BookingProgress = ({ activeStep }) => {
 								if (isAccessible) navigate(routes[index]);
 							}}
 							StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}
-							sx={{
-								cursor: isAccessible ? 'pointer' : 'default',
-							}}
+							sx={{ cursor: isAccessible ? 'pointer' : 'default' }}
 						>
 							<Typography variant='subtitle1' sx={{ color: iconColor, fontWeight: isActive ? 600 : 400 }}>
 								{UI_LABELS.BOOKING.progress_steps[key]}

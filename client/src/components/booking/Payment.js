@@ -61,8 +61,17 @@ const Payment = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='payment' />
 
-			<Container maxWidth='md' sx={{ mt: 4, mx: 'auto', width: '100%' }}>
-				<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+			<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, mx: 'auto', width: '100%', px: { xs: 2, md: 0 } }}>
+				<Box
+					sx={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						mb: 2,
+						flexDirection: { xs: 'column', sm: 'row' },
+						alignItems: { xs: 'flex-start', sm: 'center' },
+						gap: { xs: 1, sm: 0 },
+					}}
+				>
 					<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
 						<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
 							{`${UI_LABELS.BOOKING.payment_form.total}: `}
@@ -101,7 +110,7 @@ const Payment = () => {
 					<Button
 						variant='contained'
 						color='orange'
-						sx={{ mt: 2 }}
+						sx={{ mt: 2, width: { xs: '100%', sm: 'auto' } }}
 						onClick={() => {
 							dispatch(
 								createPayment({

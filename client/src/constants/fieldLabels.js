@@ -88,7 +88,7 @@ export const FIELD_LABELS = {
 		currency: 'Валюта',
 		expires_at: 'Истекает',
 		paid_at: 'Дата оплаты',
-		provider_payment_id: 'ID провайдера',
+		provider_payment_id: 'ID платежа провайдера',
 		confirmation_token: 'Токен подтверждения',
 		is_paid: 'Оплачен',
 	},

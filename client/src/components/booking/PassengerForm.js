@@ -250,7 +250,7 @@ const PassengerForm = (
 	return (
 		<Box
 			sx={{
-				p: 2,
+				p: { xs: 1, md: 2 },
 				border: `1px solid ${theme.palette.grey[200]}`,
 				borderRadius: 2,
 			}}

@@ -302,7 +302,7 @@ const Passengers = () => {
 					</Typography>
 				</Box>
 			)}
-			<Grid container spacing={2}>
+			<Grid container spacing={{ xs: 2, md: 4 }}>
 				<Grid
 					item
 					xs={12}
@@ -352,7 +352,7 @@ const Passengers = () => {
 								/>
 							</Box>
 						))}
-					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
+					<Box sx={{ p: { xs: 1, md: 2 }, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
 						<Typography variant='h4' sx={{ mb: 3 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}
 						</Typography>
@@ -392,7 +392,7 @@ const Passengers = () => {
 				</Grid>
 				<Grid item xs={12} md={4} sx={{ position: 'sticky', top: 16 }}>
 					<Card>
-						<CardContent>
+						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>
 									<AccordionSummary expandIcon={<ExpandMoreIcon />}>

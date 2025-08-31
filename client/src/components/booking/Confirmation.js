@@ -88,7 +88,7 @@ const Confirmation = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
 
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					{expiresAt && (
 						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -101,7 +101,7 @@ const Confirmation = () => {
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								{outboundRouteInfo && (
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
@@ -125,7 +125,7 @@ const Confirmation = () => {
 
 					{/* Passengers */}
 					{Array.isArray(booking?.passengers) && booking.passengers.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
 									{UI_LABELS.BOOKING.confirmation.passengers_title}
@@ -149,7 +149,7 @@ const Confirmation = () => {
 
 					{/* Price Details */}
 					{booking && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Box
 									sx={{
@@ -182,13 +182,21 @@ const Confirmation = () => {
 					)}
 
 					{/* Payment buttons */}
-					<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+					<Box
+						sx={{
+							display: 'flex',
+							justifyContent: 'flex-end',
+							gap: 2,
+							flexDirection: { xs: 'column', sm: 'row' },
+						}}
+					>
 						{isAdmin && (
 							<Button
 								variant='outlined'
 								color='secondary'
 								onClick={() => handlePayment(false)}
 								disabled={loading}
+								sx={{ width: { xs: '100%', sm: 'auto' } }}
 							>
 								{loading ? (
 									<CircularProgress size={24} color='inherit' />
@@ -202,6 +210,7 @@ const Confirmation = () => {
 							color='orange'
 							onClick={() => handlePayment(true)}
 							disabled={loading}
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
 							{loading ? (
 								<CircularProgress size={24} color='inherit' />
