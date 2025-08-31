@@ -6,7 +6,7 @@ import SearchForm from './search/SearchForm';
 const Home = () => {
 	return (
 		<Base maxWidth='xl'>
-			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+			<Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 				<Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
 					<SearchForm loadLocalStorage />
 				</Box>

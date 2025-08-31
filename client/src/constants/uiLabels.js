@@ -549,7 +549,7 @@ export const UI_LABELS = {
 			duration: 'Время в пути',
 		},
 		nearby_dates: {
-			title: 'Ближайшие даты',
+			title: (from, to) => `Ближайшие даты ${from} → ${to}`,
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},

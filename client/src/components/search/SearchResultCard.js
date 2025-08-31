@@ -170,7 +170,7 @@ const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 
 	return (
 		<>
-			<Card sx={{ p: 2, mb: 2 }}>
+			<Card sx={{ p: 2, width: '100%' }}>
 				<Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
 					<Box
 						sx={{

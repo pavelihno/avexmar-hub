@@ -15,7 +15,9 @@ import {
 	CardActionArea,
 	IconButton,
 	Divider,
+	useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -99,6 +101,7 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setTariffDetai
 									disabled={!hasAnyInfo}
 									onClick={(e) => {
 										e.stopPropagation();
+										e.currentTarget.blur();
 										const details = {
 											terms: t?.conditions ? String(t.conditions).trim() : '',
 											hand_luggage: t?.hand_luggage ?? null,
@@ -150,6 +153,8 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
 	const initialParams = Object.fromEntries(params.entries());
+	const theme = useTheme();
+	const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const seatClass = initialParams.class;
 
@@ -258,7 +263,7 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 
 	return (
 		<>
-			<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
+			<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth fullScreen={fullScreen}>
 				<DialogTitle>{UI_LABELS.SEARCH.flight_details.select_tariff_title}</DialogTitle>
 				<DialogContent dividers sx={{ overflow: 'hidden' }}>
 					<Box

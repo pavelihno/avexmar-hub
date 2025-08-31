@@ -19,6 +19,8 @@ import {
 	List,
 	ListItem,
 	useMediaQuery,
+	Card,
+	CardContent,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { ArrowForward, ContentCopy } from '@mui/icons-material';
@@ -103,65 +105,65 @@ const About = () => {
 					<Grid container spacing={{ xs: 2, sm: 3 }}>
 						{cardsData.map((card, index) => (
 							<Grid item xs={12} sm={6} md={4} key={index}>
-								<Paper
-									elevation={1}
+								<Card
+									variant='outlined'
 									sx={{
-										overflow: 'hidden',
-										transition: 'all 0.2s',
-										'&:hover': { boxShadow: 3 },
+										position: 'relative',
+										borderRadius: 3,
+										display: 'flex',
+										flexDirection: 'column',
+										height: '100%',
+										p: 0.5,
 									}}
 								>
 									<Box
 										sx={{
 											display: 'flex',
+											flexDirection: 'column',
 											alignItems: 'center',
-											justifyContent: 'center',
+											justifyContent: 'flex-start',
+											height: '100%',
+											px: { xs: 2.5, sm: 3 },
+											pt: { xs: 4, sm: 5 },
+											pb: { xs: 3, sm: 4 },
 										}}
 									>
-										<Box
+										<Avatar
+											src={card.icon}
+											alt={card.alt}
 											sx={{
-												p: 2,
+												width: { xs: 64, sm: 72 },
+												height: { xs: 64, sm: 72 },
+												mb: { xs: 2, sm: 2.5 },
+												p: 1.5,
+											}}
+										/>
+										<CardContent
+											sx={{
+												p: 0,
+												textAlign: 'center',
 												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
-												minWidth: { xs: 70, sm: 100 },
+												flexDirection: 'column',
+												flexGrow: 1,
 											}}
 										>
-											<Avatar
-												src={card.icon}
-												alt={card.alt}
-												sx={{
-													width: { xs: 40, sm: 60 },
-													height: { xs: 40, sm: 60 },
-													p: 1,
-												}}
-											/>
-										</Box>
-										<Box sx={{ p: 2, flexGrow: 1 }}>
 											<Typography
 												variant='h6'
 												component='h3'
 												gutterBottom
 												sx={{
-													fontWeight: 'medium',
-													fontSize: {
-														xs: '1rem',
-														sm: '1.25rem',
-													},
+													fontWeight: 600,
+													letterSpacing: 0.3,
 												}}
 											>
 												{card.title}
 											</Typography>
-											<Typography
-												variant='body2'
-												color='text.secondary'
-												sx={{ overflow: 'hidden' }}
-											>
+											<Typography variant='body2' color='text.secondary' sx={{ flexGrow: 1 }}>
 												{card.content}
 											</Typography>
-										</Box>
+										</CardContent>
 									</Box>
-								</Paper>
+								</Card>
 							</Grid>
 						))}
 					</Grid>
@@ -287,31 +289,45 @@ const About = () => {
 					</Typography>
 
 					<Paper elevation={1} sx={{ p: 2 }}>
-						<Grid container spacing={2} wrap='wrap'>
+						<Box
+							sx={{
+								display: 'grid',
+								gap: 2,
+								gridTemplateColumns: {
+									xs: '1fr',
+									sm: 'repeat(auto-fit, minmax(200px, 1fr))',
+									md: `repeat(${Math.min(aboutLinks.length, 3)}, 1fr)`,
+								},
+								alignItems: 'start', // prevent vertical stretching
+							}}
+						>
 							{aboutLinks.map(({ href, label }) => (
-								<Grid item xs={12} sm={6} md={4} key={href}>
-									<Box
-										component={Link}
-										href={href}
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											p: 2,
-											borderRadius: 1,
-											bgcolor: 'action.hover',
-											textDecoration: 'none',
-											color: 'text.primary',
-											'&:hover': {
-												bgcolor: 'action.selected',
-											},
-										}}
-									>
-										<ArrowForward fontSize='small' sx={{ mr: 1 }} />
-										<Typography variant='body2'>{label}</Typography>
-									</Box>
-								</Grid>
+								<Box
+									key={href}
+									component={Link}
+									href={href}
+									sx={{
+										position: 'relative',
+										display: 'flex',
+										flexDirection: 'row',
+										alignItems: 'center',
+										justifyContent: 'flex-start',
+										gap: 1,
+										p: 2,
+										borderRadius: 2,
+										bgcolor: 'action.hover',
+										textDecoration: 'none',
+										color: 'text.primary',
+										'&:hover': { bgcolor: 'action.selected' },
+									}}
+								>
+									<ArrowForward fontSize='small' />
+									<Typography variant='body2' sx={{ fontWeight: 500, textAlign: 'left' }}>
+										{label}
+									</Typography>
+								</Box>
 							))}
-						</Grid>
+						</Box>
 					</Paper>
 				</Box>
 

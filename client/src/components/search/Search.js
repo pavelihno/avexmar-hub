@@ -19,7 +19,6 @@ import {
 	Stack,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTheme } from '@mui/material/styles';
 
@@ -254,10 +253,40 @@ const Search = () => {
 		}
 	};
 
+	const sortField = (
+		<FormControl size='small' fullWidth sx={{ width: { xs: '100%', sm: 210 }, flexShrink: 0 }}>
+			<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
+			<Select labelId='sort-label' value={sortKey} label={UI_LABELS.SEARCH.sort.label} onChange={() => {}}>
+				<MenuItem value='price' onClick={() => handleSort('price')}>
+					{UI_LABELS.SEARCH.sort.price} {sortKey === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+				<MenuItem value='departure_date' onClick={() => handleSort('departure_date')}>
+					{UI_LABELS.SEARCH.sort.departure_date}{' '}
+					{sortKey === 'departure_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+				<MenuItem value='departure_time' onClick={() => handleSort('departure_time')}>
+					{UI_LABELS.SEARCH.sort.departure_time}{' '}
+					{sortKey === 'departure_time' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+				<MenuItem value='arrival_date' onClick={() => handleSort('arrival_date')}>
+					{UI_LABELS.SEARCH.sort.arrival_date}{' '}
+					{sortKey === 'arrival_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+				<MenuItem value='arrival_time' onClick={() => handleSort('arrival_time')}>
+					{UI_LABELS.SEARCH.sort.arrival_time}{' '}
+					{sortKey === 'arrival_time' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+				<MenuItem value='duration' onClick={() => handleSort('duration')}>
+					{UI_LABELS.SEARCH.sort.duration} {sortKey === 'duration' && (sortOrder === 'asc' ? '↑' : '↓')}
+				</MenuItem>
+			</Select>
+		</FormControl>
+	);
+
 	return (
-		<Base>
-			<Stack spacing={2}>
-				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+		<Base maxWidth='xl'>
+			<Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+				<Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
 					<SearchForm initialParams={initialParams} />
 				</Box>
 				<Box sx={{ p: 3 }}>
@@ -266,64 +295,47 @@ const Search = () => {
 					</Typography>
 
 					{isExact && (
-						<Box
-							sx={{
-								display: 'flex',
-								alignItems: 'center',
-								mb: 3,
-								columnGap: 2,
-							}}
-						>
-							<Box sx={{ display: 'flex', alignItems: 'center' }}>
-								<CalendarMonthIcon color='action' sx={{ mr: 1 }} />
-								<Typography variant='subtitle1' sx={{}}>
-									{UI_LABELS.SEARCH.nearby_dates.title}:
+						<Stack spacing={2} mb={3}>
+							<Box sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}>
+								<CalendarMonthIcon color='action' />
+								<Typography variant='subtitle1'>
+									{UI_LABELS.SEARCH.nearby_dates.title(from, to)}
 								</Typography>
 							</Box>
 							{nearDatesOutbound.length > 0 ? (
-								<Box>
-									<Box
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											flexWrap: 'nowrap',
-											overflowX: 'auto',
-											columnGap: 1,
-											width: '100%',
-										}}
-									>
-										{nearDatesOutbound.map((d) => (
-											<Button
-												key={d.date}
-												size='small'
-												variant='outlined'
-												sx={{
-													flexShrink: 0,
-													minWidth: 'auto',
-													borderRadius: 1,
-													px: 1.5,
-												}}
-												onClick={() => {
-													const newParams = new URLSearchParams(initialParams);
-													newParams.set('when', d.date);
-													[
-														'when_from',
-														'when_to',
-														'outbound_airline',
-														'outbound_flight',
-													].forEach((key) => {
+								<Box
+									sx={{
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										flexWrap: 'nowrap',
+										overflowX: 'auto',
+										columnGap: 1,
+										width: '100%',
+									}}
+								>
+									{nearDatesOutbound.map((d) => (
+										<Button
+											key={d.date}
+											size='small'
+											variant='outlined'
+											sx={{ flexShrink: 0, minWidth: 'auto', borderRadius: 1, px: 1.5 }}
+											onClick={() => {
+												const newParams = new URLSearchParams(initialParams);
+												newParams.set('when', d.date);
+												['when_from', 'when_to', 'outbound_airline', 'outbound_flight'].forEach(
+													(key) => {
 														newParams.delete(key);
-													});
-													navigate(`/search?${newParams.toString()}`);
-												}}
-											>
-												{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-													ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-												}`}
-											</Button>
-										))}
-									</Box>
+													}
+												);
+												navigate(`/search?${newParams.toString()}`);
+											}}
+										>
+											{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
+												ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
+											}`}
+										</Button>
+									))}
 								</Box>
 							) : (
 								<Button
@@ -343,54 +355,49 @@ const Search = () => {
 							)}
 							{hasReturn && (
 								<>
-									<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-										<ArrowForwardIcon color='action' />
+									<Box sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}>
+										<CalendarMonthIcon color='action' />
+										<Typography variant='subtitle1'>
+											{UI_LABELS.SEARCH.nearby_dates.title(to, from)}
+										</Typography>
 									</Box>
-
 									{nearDatesReturn.length > 0 ? (
-										<Box>
-											<Box
-												sx={{
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-													flexWrap: 'nowrap',
-													overflowX: 'auto',
-													columnGap: 1,
-													width: '100%',
-												}}
-											>
-												{nearDatesReturn.map((d) => (
-													<Button
-														key={d.date}
-														size='small'
-														variant='outlined'
-														sx={{
-															flexShrink: 0,
-															minWidth: 'auto',
-															borderRadius: 1,
-															px: 1.5,
-														}}
-														onClick={() => {
-															const newParams = new URLSearchParams(initialParams);
-															newParams.set('return', d.date);
-															[
-																'return_from',
-																'return_to',
-																'return_airline',
-																'return_flight',
-															].forEach((key) => {
-																newParams.delete(key);
-															});
-															navigate(`/search?${newParams.toString()}`);
-														}}
-													>
-														{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-															ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-														}`}
-													</Button>
-												))}
-											</Box>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'center',
+												flexWrap: 'nowrap',
+												overflowX: 'auto',
+												columnGap: 1,
+												width: '100%',
+											}}
+										>
+											{nearDatesReturn.map((d) => (
+												<Button
+													key={d.date}
+													size='small'
+													variant='outlined'
+													sx={{ flexShrink: 0, minWidth: 'auto', borderRadius: 1, px: 1.5 }}
+													onClick={() => {
+														const newParams = new URLSearchParams(initialParams);
+														newParams.set('return', d.date);
+														[
+															'return_from',
+															'return_to',
+															'return_airline',
+															'return_flight',
+														].forEach((key) => {
+															newParams.delete(key);
+														});
+														navigate(`/search?${newParams.toString()}`);
+													}}
+												>
+													{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
+														ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
+													}`}
+												</Button>
+											))}
 										</Box>
 									) : (
 										<Button
@@ -410,95 +417,16 @@ const Search = () => {
 									)}
 								</>
 							)}
-						</Box>
+						</Stack>
 					)}
 
 					{!isLoading &&
 						flights.length !== 0 &&
 						(isSmall ? (
-							<Accordion sx={{ mb: 2 }}>
-								<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-									{UI_LABELS.SEARCH.sort.label}
-								</AccordionSummary>
-								<AccordionDetails>
-									<FormControl fullWidth size='small'>
-										<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
-										<Select
-											labelId='sort-label'
-											value={sortKey}
-											label={UI_LABELS.SEARCH.sort.label}
-											onChange={() => {}}
-										>
-											<MenuItem value='price' onClick={() => handleSort('price')}>
-												{UI_LABELS.SEARCH.sort.price}{' '}
-												{sortKey === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-											<MenuItem
-												value='departure_date'
-												onClick={() => handleSort('departure_date')}
-											>
-												{UI_LABELS.SEARCH.sort.departure_date}{' '}
-												{sortKey === 'departure_date' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-											<MenuItem
-												value='departure_time'
-												onClick={() => handleSort('departure_time')}
-											>
-												{UI_LABELS.SEARCH.sort.departure_time}{' '}
-												{sortKey === 'departure_time' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-											<MenuItem value='arrival_date' onClick={() => handleSort('arrival_date')}>
-												{UI_LABELS.SEARCH.sort.arrival_date}{' '}
-												{sortKey === 'arrival_date' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-											<MenuItem value='arrival_time' onClick={() => handleSort('arrival_time')}>
-												{UI_LABELS.SEARCH.sort.arrival_time}{' '}
-												{sortKey === 'arrival_time' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-											<MenuItem value='duration' onClick={() => handleSort('duration')}>
-												{UI_LABELS.SEARCH.sort.duration}{' '}
-												{sortKey === 'duration' && (sortOrder === 'asc' ? '↑' : '↓')}
-											</MenuItem>
-										</Select>
-									</FormControl>
-								</AccordionDetails>
-							</Accordion>
+							<Box sx={{ width: '100%', mb: 2 }}>{sortField}</Box>
 						) : (
 							<Stack direction='row' justifyContent='flex-end' mb={2}>
-								<FormControl size='small' sx={{ width: 210, flexShrink: 0 }}>
-									<InputLabel id='sort-label'>{UI_LABELS.SEARCH.sort.label}</InputLabel>
-									<Select
-										labelId='sort-label'
-										value={sortKey}
-										label={UI_LABELS.SEARCH.sort.label}
-										onChange={() => {}}
-									>
-										<MenuItem value='price' onClick={() => handleSort('price')}>
-											{UI_LABELS.SEARCH.sort.price}{' '}
-											{sortKey === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-										<MenuItem value='departure_date' onClick={() => handleSort('departure_date')}>
-											{UI_LABELS.SEARCH.sort.departure_date}{' '}
-											{sortKey === 'departure_date' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-										<MenuItem value='departure_time' onClick={() => handleSort('departure_time')}>
-											{UI_LABELS.SEARCH.sort.departure_time}{' '}
-											{sortKey === 'departure_time' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-										<MenuItem value='arrival_date' onClick={() => handleSort('arrival_date')}>
-											{UI_LABELS.SEARCH.sort.arrival_date}{' '}
-											{sortKey === 'arrival_date' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-										<MenuItem value='arrival_time' onClick={() => handleSort('arrival_time')}>
-											{UI_LABELS.SEARCH.sort.arrival_time}{' '}
-											{sortKey === 'arrival_time' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-										<MenuItem value='duration' onClick={() => handleSort('duration')}>
-											{UI_LABELS.SEARCH.sort.duration}{' '}
-											{sortKey === 'duration' && (sortOrder === 'asc' ? '↑' : '↓')}
-										</MenuItem>
-									</Select>
-								</FormControl>
+								{sortField}
 							</Stack>
 						))}
 
@@ -507,16 +435,16 @@ const Search = () => {
 							<CircularProgress />
 						</Box>
 					) : sortedGrouped && sortedGrouped.length !== 0 ? (
-						sortedGrouped
-							.slice(0, visibleCount)
-							.map((g, idx) => (
+						<Stack spacing={2}>
+							{sortedGrouped.slice(0, visibleCount).map((g, idx) => (
 								<SearchResultCard
 									key={idx}
 									outbound={g.outbound}
 									returnFlight={g.returnFlight}
 									isLoading={isLoading}
 								/>
-							))
+							))}
+						</Stack>
 					) : (
 						<Alert severity='info'>{UI_LABELS.SEARCH.no_results}</Alert>
 					)}
@@ -529,7 +457,7 @@ const Search = () => {
 						</Stack>
 					)}
 				</Box>
-			</Stack>
+			</Box>
 		</Base>
 	);
 };
