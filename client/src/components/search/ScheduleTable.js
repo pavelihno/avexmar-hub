@@ -9,8 +9,8 @@ import {
 	TableHead,
 	TableRow,
 	TableSortLabel,
-	Radio,
 	TablePagination,
+	useMediaQuery,
 } from '@mui/material';
 
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
@@ -48,6 +48,9 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
+	const isSmDown = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+	const isMdDown = useMediaQuery((theme) => theme.breakpoints.down('md'));
+
 	const handleRequestSort = (property) => {
 		const isAsc = orderBy === property && order === 'asc';
 		setOrder(isAsc ? 'desc' : 'asc');
@@ -73,19 +76,37 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 		return stableSort(rows, getComparator(order, orderBy));
 	}, [flights, order, orderBy]);
 
-	const headCells = [
-		{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
-		{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
-		{ id: 'scheduledDepartureTime', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
-		{ id: 'airlineName', label: FIELD_LABELS.FLIGHT.airline_id },
-		{ id: 'price', label: FIELD_LABELS.TARIFF.price },
-		{ id: 'select', label: UI_LABELS.SCHEDULE.select },
-	];
+	const headCells = useMemo(() => {
+		if (isSmDown) {
+			return [
+				{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
+				{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+				{ id: 'price', label: FIELD_LABELS.TARIFF.price },
+			];
+		}
+		if (isMdDown) {
+			return [
+				{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
+				{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+				{ id: 'airlineName', label: FIELD_LABELS.FLIGHT.airline_id },
+				{ id: 'price', label: FIELD_LABELS.TARIFF.price },
+			];
+		}
+		return [
+			{ id: 'airlineFlightNumber', label: FIELD_LABELS.FLIGHT.flight_number },
+			{ id: 'scheduledDepartureDate', label: FIELD_LABELS.FLIGHT.scheduled_departure },
+			{ id: 'scheduledDepartureTime', label: FIELD_LABELS.FLIGHT.scheduled_departure_time },
+			{ id: 'airlineName', label: FIELD_LABELS.FLIGHT.airline_id },
+			{ id: 'price', label: FIELD_LABELS.TARIFF.price },
+		];
+	}, [isSmDown, isMdDown, FIELD_LABELS]);
+
+	const EmptyActions = () => null;
 
 	return (
 		<Box>
 			<TableContainer sx={{ overflowX: { xs: 'auto', sm: 'auto', md: 'visible' } }}>
-				<Table size='small' sx={{ minWidth: 650 }}>
+				<Table size='small' sx={{ minWidth: isSmDown ? 0 : 650 }}>
 					<TableHead>
 						<TableRow>
 							{headCells.map((headCell) => (
@@ -94,40 +115,43 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 									sortDirection={orderBy === headCell.id ? order : false}
 									sx={{
 										fontWeight: 'bold',
-										cursor: headCell.id !== 'select' ? 'pointer' : 'default',
+										cursor: 'pointer',
 									}}
 								>
-									{headCell.id !== 'select' ? (
-										<TableSortLabel
-											active={orderBy === headCell.id}
-											direction={orderBy === headCell.id ? order : 'asc'}
-											onClick={() => handleRequestSort(headCell.id)}
-										>
-											{headCell.label}
-										</TableSortLabel>
-									) : (
-										headCell.label
-									)}
+									<TableSortLabel
+										active={orderBy === headCell.id}
+										direction={orderBy === headCell.id ? order : 'asc'}
+										onClick={() => handleRequestSort(headCell.id)}
+									>
+										{headCell.label}
+									</TableSortLabel>
 								</TableCell>
 							))}
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-							<TableRow key={row.id}>
+							<TableRow
+								key={row.id}
+								hover
+								selected={selectedId === row.id}
+								sx={{ cursor: 'pointer' }}
+								onClick={() => onSelect(row)}
+							>
 								<TableCell>{row.airlineFlightNumber}</TableCell>
 								<TableCell>
-									{formatDate(row.scheduledDepartureDate, DATE_YEAR_WEEKDAY_FORMAT)}
+									{isSmDown
+										? `${formatDate(row.scheduledDepartureDate, 'dd.MM')} ${formatTime(
+												row.scheduledDepartureTime
+										  )}`
+										: formatDate(row.scheduledDepartureDate, DATE_YEAR_WEEKDAY_FORMAT)}
 								</TableCell>
-								<TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>
-								<TableCell>{row.airlineName}</TableCell>
+								{!isMdDown && <TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>}
+								{!isSmDown && <TableCell>{row.airlineName}</TableCell>}
 								<TableCell>
 									{`${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
 										row.price
 									)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}
-								</TableCell>
-								<TableCell padding='checkbox'>
-									<Radio checked={selectedId === row.id} onClick={() => onSelect(row)} />
 								</TableCell>
 							</TableRow>
 						))}
@@ -145,8 +169,9 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 					setPage(0);
 				}}
 				rowsPerPageOptions={[5, 10, 25]}
-				labelRowsPerPage={UI_LABELS.SCHEDULE.pagination.rows_per_page}
-				labelDisplayedRows={UI_LABELS.SCHEDULE.pagination.displayed_rows}
+				labelRowsPerPage=''
+				labelDisplayedRows={() => ''}
+				ActionsComponent={isSmDown ? EmptyActions : undefined}
 			/>
 		</Box>
 	);
