@@ -174,59 +174,66 @@ const About = () => {
 						{UI_LABELS.ABOUT.company_details}
 					</Typography>
 					{isXs ? (
-						<List disablePadding>
-							{companyDetails.map(({ label, value, href }, index) => (
-								<ListItem
-									key={index}
-									disableGutters
-									sx={{
-										flexDirection: 'column',
-										alignItems: 'flex-start',
-										py: 1,
-									}}
-								>
-									<Typography variant='subtitle2' color='text.secondary' sx={{ fontWeight: 'bold' }}>
-										{label}
-									</Typography>
-									<Box
+						<Paper elevation={1} sx={{ p: 2 }}>
+							<List dense disablePadding>
+								{companyDetails.map(({ label, value, href }, index) => (
+									<ListItem
+										key={index}
+										disableGutters
 										sx={{
 											display: 'flex',
-											alignItems: 'center',
-											width: '100%',
-											justifyContent: 'space-between',
+											alignItems: 'flex-start',
+											py: 1,
+											px: 0,
+											borderBottom: index !== companyDetails.length - 1 ? '1px solid' : 'none',
+											borderColor: 'divider',
+											gap: 1.5,
 										}}
 									>
-										{href ? (
-											<Link
-												href={href}
-												variant='body2'
-												sx={{
-													textDecoration: 'none',
-													color: 'text.primary',
-													'&:hover': {
-														textDecoration: 'underline',
-														color: 'primary.main',
-													},
-												}}
+										<Box sx={{ flexGrow: 1, minWidth: 0 }}>
+											<Typography
+												variant='subtitle2'
+												color='text.secondary'
+												sx={{ fontWeight: 'bold', mb: 0.25 }}
 											>
-												{value}
-											</Link>
-										) : (
-											<Typography variant='body2'>{value}</Typography>
-										)}
+												{label}
+											</Typography>
+											{href ? (
+												<Link
+													href={href}
+													variant='body2'
+													sx={{
+														textDecoration: 'none',
+														color: 'text.primary',
+														wordBreak: 'break-word',
+														'&:hover': {
+															textDecoration: 'underline',
+															color: 'primary.main',
+														},
+													}}
+												>
+													{value}
+												</Link>
+											) : (
+												<Typography variant='body2' sx={{ wordBreak: 'break-word' }}>
+													{value}
+												</Typography>
+											)}
+										</Box>
 										<Tooltip title={UI_LABELS.BUTTONS.copy}>
 											<IconButton
 												size='small'
 												onClick={() => handleCopy(value, label)}
 												aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+												edge='end'
 											>
 												<ContentCopy fontSize='small' />
 											</IconButton>
 										</Tooltip>
-									</Box>
-								</ListItem>
-							))}
-						</List>
+									</ListItem>
+								))}
+							</List>
+						</Paper>
 					) : (
 						<TableContainer component={Paper} elevation={1} sx={{ p: 2 }}>
 							<Table size='small'>
