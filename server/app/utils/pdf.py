@@ -82,6 +82,6 @@ def generate_booking_pdf(booking, *, details=None) -> bytes:
         'support_email': 'mail@avexmar.com',
     }
 
-    html = render_template('booking/pdf.html', **context)
+    html = render_template('pdf/booking.html', **context)
     pdf = HTML(string=html, base_url=current_app.root_path).write_pdf()
     return pdf
