@@ -11,6 +11,7 @@ import {
 	TableSortLabel,
 	TablePagination,
 	useMediaQuery,
+	Radio,
 } from '@mui/material';
 
 import { FIELD_LABELS, ENUM_LABELS, DATE_YEAR_WEEKDAY_FORMAT, UI_LABELS } from '../../constants';
@@ -127,6 +128,7 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 									</TableSortLabel>
 								</TableCell>
 							))}
+							{!isSmDown && <TableCell padding='checkbox' sx={{ width: 48 }} />}
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -135,6 +137,7 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 								key={row.id}
 								hover
 								selected={selectedId === row.id}
+								role='button'
 								sx={{ cursor: 'pointer' }}
 								onClick={() => onSelect(row)}
 							>
@@ -153,6 +156,16 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 										row.price
 									)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}
 								</TableCell>
+								{!isSmDown && (
+									<TableCell padding='checkbox' onClick={(e) => e.stopPropagation()}>
+										<Radio
+											checked={selectedId === row.id}
+											onClick={() => onSelect(row)}
+											size='small'
+											color='primary'
+										/>
+									</TableCell>
+								)}
 							</TableRow>
 						))}
 					</TableBody>
