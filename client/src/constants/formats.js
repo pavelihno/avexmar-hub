@@ -4,8 +4,7 @@ import { ruRU } from '@mui/x-date-pickers/locales';
 import numeral from 'numeral';
 
 export const dateLocale = ru;
-export const datePickerLocaleText =
-	ruRU.components.MuiLocalizationProvider.defaultProps.localeText;
+export const datePickerLocaleText = ruRU.components.MuiLocalizationProvider.defaultProps.localeText;
 
 export const DATE_FORMAT = 'dd.MM.yyyy';
 export const DATE_API_FORMAT = 'yyyy-MM-dd';

@@ -6,21 +6,21 @@ import PosterCarousel from './home/PosterCarousel';
 
 const Home = () => {
 	return (
-		<Base maxWidth='xl'>
+		<Base>
 			<Box
 				sx={{
 					display: 'flex',
-					flexDirection: { xs: 'column', md: 'row' },
+					flexDirection: 'column',
 					justifyContent: 'center',
 					alignItems: 'center',
 					gap: 2,
 				}}
 			>
-				<Box sx={{ width: '100%', px: { xs: 1, sm: 2 }, flex: 1 }}>
+				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<SearchForm loadLocalStorage />
 				</Box>
 				<Box sx={{ width: '100%', flex: 1, mt: { xs: 2, md: 0 } }}>
-					<PosterCarousel />
+					{/* <PosterCarousel /> */}
 				</Box>
 			</Box>
 		</Base>

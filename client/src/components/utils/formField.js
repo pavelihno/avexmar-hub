@@ -50,17 +50,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 		switch (type) {
 			case FIELD_TYPES.EMAIL: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -84,17 +74,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.PHONE: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -118,17 +98,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TEXT: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -146,17 +116,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TEXT_AREA: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -179,28 +139,14 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.RICH_TEXT: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					sx,
-					rows,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, sx, rows, disabled } = allProps;
 				const editorRows = rows || field.rows || 20;
 				const editorMinHeight = editorRows * 24;
 				const modules = {
 					toolbar: [
 						[{ header: [1, 2, false] }],
 						['bold', 'italic', 'underline', 'strike', 'blockquote'],
-						[
-							{ list: 'ordered' },
-							{ list: 'bullet' },
-							{ indent: '-1' },
-							{ indent: '+1' },
-						],
+						[{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
 						['link', 'clean'],
 					],
 				};
@@ -229,7 +175,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					>
 						<InputLabel shrink>{field.label}</InputLabel>
 						<ReactQuill
-							theme="snow"
+							theme='snow'
 							value={value}
 							onChange={onChange}
 							modules={modules}
@@ -242,17 +188,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.NUMBER: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 
 				const step = field.inputProps?.step ?? (field.float ? 0.01 : 1);
 				const min = field.inputProps?.min ?? 0;
@@ -260,7 +196,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 				return (
 					<TextField
-						type="number"
+						type='number'
 						label={field.label}
 						fullWidth={fullWidth}
 						error={error}
@@ -271,12 +207,8 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						onBlur={(e) => {
 							const num = e.target.valueAsNumber;
 							if (!isNaN(num)) {
-								const clamped = Math.min(
-									Math.max(min, num),
-									max,
-								);
-								const rounded =
-									Math.round(clamped / step) * step;
+								const clamped = Math.min(Math.max(min, num), max);
+								const rounded = Math.round(clamped / step) * step;
 								onChange(rounded);
 							}
 						}}
@@ -315,9 +247,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						<DatePicker
 							label={field.label}
 							value={value ? parseDate(value) : null}
-							onChange={(date) =>
-								onChange(formatDate(date, DATE_API_FORMAT))
-							}
+							onChange={(date) => onChange(formatDate(date, DATE_API_FORMAT))}
 							minDate={minDate ? parseDate(minDate) : undefined}
 							maxDate={maxDate ? parseDate(maxDate) : undefined}
 							format={field.dateFormat || DATE_FORMAT}
@@ -330,8 +260,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									sx,
 									size,
 									disabled,
-									placeholder:
-										field.dateFormat || DATE_FORMAT,
+									placeholder: field.dateFormat || DATE_FORMAT,
 									...textFieldProps,
 								},
 								field: { clearable: true },
@@ -342,17 +271,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TIME: {
-				const {
-					value,
-					onChange,
-					fullWidth,
-					error,
-					helperText,
-					sx,
-					textFieldProps,
-					size,
-					disabled,
-				} = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size, disabled } = allProps;
 
 				return (
 					<LocalizationProvider
@@ -402,34 +321,20 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					disabled,
 				} = allProps;
 
-				const resolvedValue =
-					value !== undefined && value !== null
-						? value
-						: field.defaultValue;
-				const isValidValue = options.some(
-					(o) => o.value === resolvedValue,
-				);
+				const resolvedValue = value !== undefined && value !== null ? value : field.defaultValue;
+				const isValidValue = options.some((o) => o.value === resolvedValue);
 				const safeValue = isValidValue ? resolvedValue : '';
 
 				if (!simpleSelect && options.length > 100) {
-					const valueObj =
-						options.find((o) => o.value === value) || null;
+					const valueObj = options.find((o) => o.value === value) || null;
 					return (
 						<Autocomplete
 							options={options}
 							value={valueObj}
-							onChange={(e, val) =>
-								onChange(val ? val.value : '')
-							}
+							onChange={(e, val) => onChange(val ? val.value : '')}
 							filterOptions={(opts, state) =>
 								opts
-									.filter((o) =>
-										o.label
-											.toLowerCase()
-											.includes(
-												state.inputValue.toLowerCase(),
-											),
-									)
+									.filter((o) => o.label.toLowerCase().includes(state.inputValue.toLowerCase()))
 									.slice(0, 100)
 							}
 							getOptionLabel={(o) => o.label}
@@ -463,11 +368,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							disabled={disabled}
 						>
 							{options.map((option) => (
-								<MenuItem
-									key={option.value}
-									value={option.value}
-									{...MenuItemProps}
-								>
+								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
 								</MenuItem>
 							))}
@@ -476,11 +377,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				}
 
 				return (
-					<FormControl
-						fullWidth={fullWidth}
-						error={!!error}
-						size={size}
-					>
+					<FormControl fullWidth={fullWidth} error={!!error} size={size}>
 						<InputLabel>{field.label}</InputLabel>
 						<Select
 							value={safeValue}
@@ -493,11 +390,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							disabled={disabled}
 						>
 							{options.map((option) => (
-								<MenuItem
-									key={option.value}
-									value={option.value}
-									{...MenuItemProps}
-								>
+								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
 									{option.label}
 								</MenuItem>
 							))}
@@ -515,7 +408,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							<Checkbox
 								checked={!!value}
 								onChange={(e) => onChange(e.target.checked)}
-								color="primary"
+								color='primary'
 								disabled={disabled}
 							/>
 						}
@@ -527,19 +420,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.CUSTOM:
-				return (customProps) =>
-					field.renderField({ ...allProps, ...customProps });
+				return (customProps) => field.renderField({ ...allProps, ...customProps });
 
 			default: {
-				const {
-					value = '',
-					onChange,
-					fullWidth,
-					inputProps,
-					sx,
-					size,
-					disabled,
-				} = allProps;
+				const { value = '', onChange, fullWidth, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}

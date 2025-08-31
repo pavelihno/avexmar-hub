@@ -3,24 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <title>Бронирование № {{ booking.booking_number }}</title>
-  <style>
-    body { font-family: Arial, sans-serif; font-size: 12px; }
-    header, footer { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    th, td { border: 1px solid #000; padding: 4px; }
-    ul { list-style: none; padding: 0; margin: 0 0 16px 0; }
-  </style>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 12px; margin: 0; }
+      header, footer { text-align: center; }
+      h2 { font-size: 24px; margin: 0 0 16px; }
+      h3 { font-size: 18px; margin: 16px 0 8px; }
+      h4 { font-size: 14px; margin: 16px 0 8px; }
+      p { margin: 0 0 8px; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
+      th, td { border: 1px solid #000; padding: 4px; }
+      th { background-color: #f0f0f0; }
+      ul { list-style: none; padding: 0; margin: 0 0 16px 0; }
+      footer p { font-size: 10px; }
+    </style>
 </head>
 <body>
   <header>
     <h2>{{ brand_name }}</h2>
   </header>
 
-  <h3>Бронирование № {{ booking.booking_number }} - {{ status_label }}</h3>
+  <h3>Бронирование № {{ booking.booking_number }} — {{ status_labels[booking.status] }}</h3>
 
   {% set buyer_name = (details.buyer_last_name or '') + ' ' + (details.buyer_first_name or '') %}
   {% if buyer_name.strip() or details.email_address or details.phone_number %}
-    <p><strong>Покупатель:</strong></p>
+    <h4>Покупатель</h4>
     <ul>
       {% if buyer_name.strip() %}<li>{{ buyer_name.strip() }}</li>{% endif %}
       {% if details.email_address %}<li>Email: {{ details.email_address }}</li>{% endif %}
@@ -29,30 +35,36 @@
   {% endif %}
 
   {% if details.flights %}
-    <p><strong>Рейсы:</strong></p>
+    <h4>Рейсы</h4>
     <table>
       <tr>
         <th>№</th>
         <th>Откуда → Куда</th>
         <th>Вылет</th>
         <th>Прилёт</th>
+        <th>Класс</th>
+        <th>Тариф</th>
       </tr>
       {% for f in details.flights %}
         {% set route = f.route or {} %}
         {% set origin = route.origin_airport or {} %}
         {% set dest = route.destination_airport or {} %}
+        {% set dir_key = 'outbound' if loop.index0 == 0 else 'return' %}
+        {% set t = direction_tariffs.get(dir_key) %}
         <tr>
           <td>{{ f.airline_flight_number }}</td>
           <td>{{ origin.city_name }} ({{ origin.iata_code }}) → {{ dest.city_name }} ({{ dest.iata_code }})</td>
-          <td>{{ f.scheduled_departure }} {{ f.scheduled_departure_time }}</td>
-          <td>{{ f.scheduled_arrival }} {{ f.scheduled_arrival_time }}</td>
+          <td>{{ format_date(f.scheduled_departure) }} {{ format_time(f.scheduled_departure_time) }}</td>
+          <td>{{ format_date(f.scheduled_arrival) }} {{ format_time(f.scheduled_arrival_time) }}</td>
+          <td>{% if t %}{{ seat_class_labels.get(t.seat_class, t.seat_class) }}{% endif %}</td>
+          <td>{% if t %}{{ t.title }}{% endif %}</td>
         </tr>
       {% endfor %}
     </table>
   {% endif %}
 
   {% if details.passengers %}
-    <p><strong>Пассажиры:</strong></p>
+    <h4>Пассажиры</h4>
     <table>
       <tr>
         <th>ФИО</th>
@@ -64,15 +76,15 @@
       </tr>
       {% for p in details.passengers %}
         {% set full_name = (p.last_name or '') + ' ' + (p.first_name or '') + ' ' + (p.patronymic_name or '') %}
-        {% set cat = category_labels.get(p.category, p.category) %}
+        {% set cat = passenger_labels.get(p.category, p.category) %}
         {% set gender = gender_labels.get(p.gender, p.gender) %}
         {% set doc_type = document_labels.get(p.document_type, p.document_type) %}
-        {% set country = (p.citizenship or {}).country_name %}
+        {% set country = (p.citizenship or {}).name %}
         <tr>
           <td>{{ full_name.strip() }}</td>
           <td>{{ cat }}</td>
           <td>{{ gender }}</td>
-          <td>{{ p.birth_date }}</td>
+          <td>{{ format_date(p.birth_date) }}</td>
           <td>{{ doc_type }} {{ p.document_number }}</td>
           <td>{{ country }}</td>
         </tr>
@@ -87,29 +99,70 @@
       {% set route = direction.route or {} %}
       {% set origin = route.origin_airport or {} %}
       {% set dest = route.destination_airport or {} %}
-      <p><strong>Стоимость: {{ origin.city_name }} → {{ dest.city_name }}</strong></p>
+      {% set t = direction.tariff or {} %}
+      {% set flight = (details.flights | selectattr('id', 'equalto', direction.flight_id) | list | first) %}
+      {% set airline_name = (flight.airline or {}).name %}
+      <h4>{{ origin.city_name }} → {{ dest.city_name }}</h4>
+      {% if airline_name %}
+        <p><strong>{{ airline_name }}</strong></p>
+      {% endif %}
+      {% if t %}
+        <p><u>{{ seat_class_labels.get(t.seat_class, t.seat_class) }} — {{ t.title }}</u></p>
+        {% if t.hand_luggage %}
+          <p>Ручная кладь: {{ t.hand_luggage }} кг</p>
+        {% endif %}
+        {% if t.baggage %}
+          <p>Багаж: {{ t.baggage }} кг</p>
+        {% endif %}
+      {% endif %}
       <table>
         <tr>
           <th>Категория</th>
           <th>Кол-во</th>
-          <th>Итоговая цена</th>
+          <th>Цена (ед.)</th>
+          <th>Скидка (ед.)</th>
+          <th>Итого</th>
         </tr>
         {% for p in direction.passengers or [] %}
-          {% set cat = category_labels.get(p.category, p.category) %}
+          {% set cat = passengers_labels.get(p.category, p.category) %}
           <tr>
             <td>{{ cat }}</td>
             <td>{{ p.count }}</td>
-            <td>{{ '%.2f'|format(p.final_price or 0) }} {{ currency }}</td>
+            <td>{{ '%.2f'|format(p.unit_fare_price or 0) }} {{ currency }}</td>
+            <td>
+              {% if p.unit_discount and (p.unit_discount > 0) %}
+                - {{ '%.2f'|format(p.unit_discount) }} {{ currency }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>{{ '%.2f'|format(p.price or 0) }} {{ currency }}</td>
           </tr>
         {% endfor %}
       </table>
     {% endfor %}
-    <p><strong>Итоговая стоимость:</strong></p>
+    <h4>Итоговая стоимость</h4>
     <table>
-      <tr><td>Тариф</td><td>{{ '%.2f'|format(price.fare_price or 0) }} {{ currency }}</td></tr>
-      <tr><td>Сборы</td><td>{{ '%.2f'|format(price.total_fees or 0) }} {{ currency }}</td></tr>
-      <tr><td>Скидки</td><td>{{ '%.2f'|format(price.total_discounts or 0) }} {{ currency }}</td></tr>
-      <tr><td>Итого</td><td>{{ '%.2f'|format(price.final_price or 0) }} {{ currency }}</td></tr>
+      <tr>
+        <td>Стоимость перевозки</td>
+        <td>{{ '%.2f'|format(price.fare_price or 0) }} {{ currency }}</td>
+      </tr>
+      {% for fee in price.fees or [] %}
+        <tr>
+          <td>{{ fee.name }}</td>
+          <td>{{ '%.2f'|format(fee.total or 0) }} {{ currency }}</td>
+        </tr>
+      {% endfor %}
+      {% if (price.total_discounts or 0) > 0 %}
+        <tr>
+          <td>Скидка</td>
+          <td>- {{ '%.2f'|format(price.total_discounts or 0) }} {{ currency }}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td><strong>Итого</strong></td>
+        <td><strong>{{ '%.2f'|format(price.final_price or 0) }} {{ currency }}</strong></td>
+      </tr>
     </table>
   {% endif %}
 
@@ -118,21 +171,22 @@
     {% set status = payment_status_labels.get(payment.payment_status, payment.payment_status) %}
     {% set method = payment_method_labels.get(payment.payment_method, payment.payment_method) %}
     {% set pay_currency = (payment.currency or currency).upper() %}
-    <p><strong>Платёж:</strong></p>
+    <h4>Платёж</h4>
     <ul>
       <li>Статус: {{ status }}</li>
       <li>Метод: {{ method }}</li>
       {% if payment.amount is not none %}
         <li>Сумма: {{ '%.2f'|format(payment.amount|float) }} {{ pay_currency }}</li>
       {% endif %}
-      {% if payment.paid_at %}<li>Оплачен: {{ payment.paid_at }}</li>{% endif %}
-    </ul>
-  {% endif %}
+        {% if payment.paid_at %}
+          <li>Оплачен: {{ format_datetime(payment.paid_at) }}</li>
+        {% endif %}
+      </ul>
+    {% endif %}
 
-  <footer>
-    <hr />
-    <p style="font-size:12px;">© Авексмар · <a href="{{ site_url }}">{{ site_url|replace('https://','')|replace('http://','') }}</a> · {{ support_email }}</p>
-  </footer>
-</body>
+    <footer>
+      <hr />
+      <p>© Авексмар · <a href="{{ site_url }}">{{ site_url|replace('https://','')|replace('http://','') }}</a> · {{ support_email }}</p>
+    </footer>
+  </body>
 </html>
-

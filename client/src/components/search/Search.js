@@ -284,12 +284,12 @@ const Search = () => {
 	);
 
 	return (
-		<Base maxWidth='xl'>
+		<Base>
 			<Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-				<Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
+				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<SearchForm initialParams={initialParams} />
 				</Box>
-				<Box sx={{ p: 3 }}>
+				<Box sx={{ width: '100%', p: 3 }}>
 					<Typography variant='h4' component='h1' gutterBottom sx={{ mt: 2 }}>
 						{UI_LABELS.SEARCH.results}
 					</Typography>
