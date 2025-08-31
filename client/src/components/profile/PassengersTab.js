@@ -21,7 +21,10 @@ import PassengerForm from '../booking/PassengerForm';
 import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
 import PassengerDetailsModal from './PassengerDetailsModal';
 
-import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
+import {
+	fetchUserPassengers,
+	createUserPassenger,
+} from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { mapToApi, mappingConfigs } from '../utils/mappers';
 import { formatDate } from '../utils';
@@ -52,7 +55,7 @@ const PassengersTab = () => {
 
 	const citizenshipOptions = useMemo(
 		() => (countries || []).map((c) => ({ value: c.id, label: c.name })),
-		[countries]
+		[countries],
 	);
 
 	const handleChange = (_field, _value, d) => setData(d);
@@ -60,7 +63,9 @@ const PassengersTab = () => {
 	const handleSubmit = () => {
 		if (!formRef.current?.validate()) return;
 		if (!consent) {
-			setErrors({ consent: VALIDATION_MESSAGES.BOOKING.consent.REQUIRED });
+			setErrors({
+				consent: VALIDATION_MESSAGES.BOOKING.consent.REQUIRED,
+			});
 			return;
 		}
 		const apiData = mapToApi(data, mappingConfigs.passenger);
@@ -68,7 +73,7 @@ const PassengersTab = () => {
 			createUserPassenger({
 				userId: currentUser.id,
 				data: { ...apiData, consent },
-			})
+			}),
 		)
 			.unwrap()
 			.then(() => {
@@ -85,11 +90,26 @@ const PassengersTab = () => {
 	};
 
 	return (
-		<Container maxWidth='md' sx={{ mt: 4 }}>
-			<Paper sx={{ p: 2, width: '100%' }}>
-				<Typography variant='h4'>{UI_LABELS.PROFILE.passengers}</Typography>
+		<Container
+			maxWidth='md'
+			sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}
+		>
+			<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+				<Typography
+					variant='h4'
+					sx={{ typography: { xs: 'h5', md: 'h4' } }}
+				>
+					{UI_LABELS.PROFILE.passengers}
+				</Typography>
 
-				<Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+				<Box
+					sx={{
+						mt: 2,
+						display: 'flex',
+						flexDirection: 'column',
+						gap: 2,
+					}}
+				>
 					{!showForm && errors.message && (
 						<Alert severity='error' sx={{ mb: 2 }}>
 							{errors.message}
@@ -101,23 +121,32 @@ const PassengersTab = () => {
 						</Alert>
 					)}
 					{passengers && passengers.length === 0 ? (
-						<Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
+						<Typography
+							variant='subtitle1'
+							sx={{ textAlign: 'center' }}
+						>
 							{UI_LABELS.PROFILE.no_passengers}
 						</Typography>
 					) : (
-						<TableContainer>
-							<Table size='medium'>
+						<TableContainer sx={{ overflowX: 'auto' }}>
+							<Table size='small'>
 								<TableHead>
 									<TableRow>
-										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.last_name}</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.PROFILE.last_name}
+										</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.first_name}
 										</TableCell>
 										<TableCell sx={{ fontWeight: 'bold' }}>
 											{UI_LABELS.PROFILE.birth_date}
 										</TableCell>
-										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.gender}</TableCell>
-										<TableCell sx={{ fontWeight: 'bold' }}>{UI_LABELS.PROFILE.document}</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.PROFILE.gender}
+										</TableCell>
+										<TableCell sx={{ fontWeight: 'bold' }}>
+											{UI_LABELS.PROFILE.document}
+										</TableCell>
 										<TableCell />
 									</TableRow>
 								</TableHead>
@@ -125,21 +154,44 @@ const PassengersTab = () => {
 									{passengers.map((p) => (
 										<TableRow key={p.id}>
 											<TableCell>{p.last_name}</TableCell>
-											<TableCell>{p.first_name}</TableCell>
-											<TableCell>{p.birth_date ? formatDate(p.birth_date) : ''}</TableCell>
-											<TableCell>{ENUM_LABELS.GENDER_SHORT[p.gender]}</TableCell>
-											<TableCell>{ENUM_LABELS.DOCUMENT_TYPE[p.document_type]}</TableCell>
+											<TableCell>
+												{p.first_name}
+											</TableCell>
+											<TableCell>
+												{p.birth_date
+													? formatDate(p.birth_date)
+													: ''}
+											</TableCell>
+											<TableCell>
+												{
+													ENUM_LABELS.GENDER_SHORT[
+														p.gender
+													]
+												}
+											</TableCell>
+											<TableCell>
+												{
+													ENUM_LABELS.DOCUMENT_TYPE[
+														p.document_type
+													]
+												}
+											</TableCell>
 											<TableCell align='right'>
 												<Button
 													size='small'
-													onClick={() => setSelectedPassenger(p)}
+													onClick={() =>
+														setSelectedPassenger(p)
+													}
 													sx={{
 														display: 'inline-flex',
 														alignItems: 'center',
 														gap: 0.5,
 													}}
 												>
-													{UI_LABELS.PROFILE.more_details}
+													{
+														UI_LABELS.PROFILE
+															.more_details
+													}
 													<OpenInNewIcon fontSize='inherit' />
 												</Button>
 											</TableCell>
@@ -177,11 +229,21 @@ const PassengersTab = () => {
 									value={consent}
 									onChange={(val) => {
 										setConsent(val);
-										if (val && errors.consent) setErrors({ ...errors, consent: undefined });
+										if (val && errors.consent)
+											setErrors({
+												...errors,
+												consent: undefined,
+											});
 									}}
 									error={errors.consent}
 								/>
-								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+								<Box
+									sx={{
+										display: 'flex',
+										flexDirection: 'column',
+										gap: 2,
+									}}
+								>
 									<Box>
 										<Button
 											variant='contained'
@@ -189,9 +251,15 @@ const PassengersTab = () => {
 											disabled={!consent}
 											sx={{ mr: 1 }}
 										>
-											{UI_LABELS.BOOKING.passenger_form.add_passenger}
+											{
+												UI_LABELS.BOOKING.passenger_form
+													.add_passenger
+											}
 										</Button>
-										<Button variant='text' onClick={() => setShowForm(false)}>
+										<Button
+											variant='text'
+											onClick={() => setShowForm(false)}
+										>
 											{UI_LABELS.BUTTONS.cancel}
 										</Button>
 									</Box>
@@ -215,7 +283,10 @@ const PassengersTab = () => {
 				</Box>
 			</Paper>
 			{selectedPassenger && (
-				<PassengerDetailsModal passenger={selectedPassenger} onClose={() => setSelectedPassenger(null)} />
+				<PassengerDetailsModal
+					passenger={selectedPassenger}
+					onClose={() => setSelectedPassenger(null)}
+				/>
 			)}
 		</Container>
 	);

@@ -24,32 +24,52 @@ const Profile = () => {
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
+					px: { xs: 1, md: 0 },
 				}}
 			>
-				<Paper elevation={0} sx={{ p: 3, width: '100%' }}>
-					<Typography variant='h3' sx={{ mb: 2 }}>
+				<Paper
+					elevation={0}
+					sx={{ p: { xs: 2, md: 3 }, width: '100%' }}
+				>
+					<Typography variant='h3' sx={{ mb: { xs: 2, md: 3 } }}>
 						{UI_LABELS.PROFILE.profile}
 					</Typography>
 					<Tabs
 						value={tab}
 						onChange={handleChange}
-						centered
+						variant='scrollable'
+						scrollButtons='auto'
+						allowScrollButtonsMobile
 						indicatorColor='primary'
 						textColor='primary'
-						sx={{ mb: 3 }}
+						sx={{ mb: { xs: 2, md: 3 } }}
 					>
-						<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
-						<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
-						<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+						<Tab
+							icon={<PersonIcon />}
+							label={UI_LABELS.PROFILE.user_info}
+						/>
+						<Tab
+							icon={<FlightIcon />}
+							label={UI_LABELS.PROFILE.bookings}
+						/>
+						<Tab
+							icon={<GroupIcon />}
+							label={UI_LABELS.PROFILE.passengers}
+						/>
 					</Tabs>
 
-					<Grid container spacing={4} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
+					<Grid
+						container
+						spacing={{ xs: 2, md: 4 }}
+						justifyContent='center'
+						sx={{ mt: 1, mx: 'auto' }}
+					>
 						{tab === 0 && (
 							<>
-								<Grid item xs={10} md={6}>
+								<Grid item xs={12} md={6}>
 									<UserInfo />
 								</Grid>
-								<Grid item xs={10} md={4}>
+								<Grid item xs={12} md={4}>
 									<PasswordTab />
 								</Grid>
 							</>

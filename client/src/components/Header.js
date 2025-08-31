@@ -125,7 +125,7 @@ const Header = () => {
 								{isAuth ? (
 									<Button
 										color='inherit'
-										onClick={handleProfileClick}
+										onClick={handleGoToProfile}
 										startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
 										sx={{ textTransform: 'none' }}
 									>
@@ -151,6 +151,17 @@ const Header = () => {
 										</Button>
 									</>
 								)}
+
+								<Button
+									component={Link}
+									to='/search/booking'
+									color='inherit'
+									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
+									sx={{ textTransform: 'none' }}
+								>
+									{UI_LABELS.BOOKING_SEARCH.link}
+								</Button>
+
 								{isAdmin && (
 									<Button
 										component={Link}
@@ -162,15 +173,17 @@ const Header = () => {
 										{UI_LABELS.ADMIN.panel}
 									</Button>
 								)}
-								<Button
-									component={Link}
-									to='/search/booking'
-									color='inherit'
-									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
-									sx={{ textTransform: 'none' }}
-								>
-									{UI_LABELS.BOOKING_SEARCH.link}
-								</Button>
+
+								{isAuth && (
+									<Button
+										color='inherit'
+										onClick={handleLogout}
+										startIcon={<LoginIcon sx={{ color: 'red' }} />}
+										sx={{ textTransform: 'none' }}
+									>
+										{UI_LABELS.BUTTONS.exit}
+									</Button>
+								)}
 							</Box>
 						</Drawer>
 					</>
@@ -228,7 +241,7 @@ const Header = () => {
 					</Box>
 				)}
 
-				{isAuth && (
+				{isAuth && !isMobile && (
 					<Menu
 						anchorEl={anchorEl}
 						open={open}

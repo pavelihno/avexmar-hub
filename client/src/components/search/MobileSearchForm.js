@@ -89,14 +89,17 @@ const MobileSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 		>
 			{/* Collapsed summary header */}
 			{collapsed && (
-				<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+				<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+					<Typography variant='body1' sx={{ fontWeight: 'bold' }}>
+						{UI_LABELS.SEARCH.from_to_date(fromLabel, toLabel, formValues.departDate, formValues.returnDate)}
+					</Typography>
 					<IconButton size='small' onClick={() => setCollapsed(false)} aria-label='edit-search'>
 						<ExpandMoreIcon fontSize='small' />
 					</IconButton>
 				</Box>
 			)}
 
-			<Collapse in={!collapsed} timeout='auto'>
+			<Collapse in={!collapsed}>
 				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
 					<IconButton size='small' onClick={() => setCollapsed(true)} aria-label='collapse-search'>
 						<ExpandLessIcon fontSize='small' />
@@ -122,7 +125,7 @@ const MobileSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				</Box>
 
 				{/* Dates */}
-				<Box sx={{ mt: 1 }}>
+				<Box sx={{ my: 1 }}>
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
 						<Typography variant='body2' sx={{ mr: 1 }}>
 							{UI_LABELS.SEARCH.form.date_modes.exact}
@@ -267,7 +270,7 @@ const MobileSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 				</Box>
 
 				{/* Seat class */}
-				<Box sx={{ mb: 1 }}>
+				<Box sx={{ my: 1 }}>
 					<TextField
 						select
 						fullWidth
@@ -284,24 +287,24 @@ const MobileSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => {
 						))}
 					</TextField>
 				</Box>
-			</Collapse>
 
-			{/* Buttons */}
-			<Box sx={{ display: 'flex', gap: 1 }}>
-				<Button
-					type='button'
-					variant='contained'
-					color='primary'
-					onClick={onScheduleClick}
-					disabled={!isScheduleClickOpen}
-					sx={{ flex: 1, borderRadius: 1.5 }}
-				>
-					{UI_LABELS.SEARCH.form.show_schedule}
-				</Button>
-				<Button type='submit' variant='contained' color='orange' sx={{ flex: 1, borderRadius: 1.5 }}>
-					{UI_LABELS.SEARCH.form.button}
-				</Button>
-			</Box>
+				{/* Buttons */}
+				<Box sx={{ display: 'flex', gap: 1, my: 1 }}>
+					<Button
+						type='button'
+						variant='contained'
+						color='primary'
+						onClick={onScheduleClick}
+						disabled={!isScheduleClickOpen}
+						sx={{ flex: 1, borderRadius: 1.5 }}
+					>
+						{UI_LABELS.SEARCH.form.show_schedule}
+					</Button>
+					<Button type='submit' variant='contained' color='orange' sx={{ flex: 1, borderRadius: 1.5 }}>
+						{UI_LABELS.SEARCH.form.button}
+					</Button>
+				</Box>
+			</Collapse>
 		</Box>
 	);
 };

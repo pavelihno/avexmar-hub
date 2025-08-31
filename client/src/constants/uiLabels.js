@@ -1,7 +1,7 @@
 import { formatDate, formatTime } from '../components/utils';
 
 export const UI_LABELS = {
-	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
+	APP_TITLE: 'АВЕКСМАР — Авиаперевозки',
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
 		full_name: 'Наименование организации',
@@ -72,7 +72,7 @@ export const UI_LABELS = {
 		pagination: {
 			rows_per_page: 'Записей на странице',
 			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
 		},
 	},
@@ -467,7 +467,7 @@ export const UI_LABELS = {
 		pagination: {
 			rows_per_page: 'Рейсов на странице',
 			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
 		},
 	},
@@ -516,15 +516,16 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
-			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} — ${formatDate(date_to, 'dd.MM')}`;
+			if (date_from) return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			else return `${from} → ${to}`;
 		},
 		flight_details: {
 			select_tariff_title: 'Выберите тариф',
 			select_tariff: 'Перейти к оформлению',
 			airline: 'Авиакомпания',
-			from_to: 'Отправление - Прибытие',
-			departure_arrival: 'Время отправления - Время прибытия',
+			from_to: 'Отправление — Прибытие',
+			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			price_from: 'От',
