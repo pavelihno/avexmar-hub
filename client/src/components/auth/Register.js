@@ -42,7 +42,10 @@ const Register = ({ isModal = false }) => {
 
 	const onChange = (e) => {
 		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: name === 'email' ? value.toLowerCase() : value });
+		setFormData({
+			...formData,
+			[name]: name === 'email' ? value.toLowerCase() : value,
+		});
 	};
 
 	const onSubmit = async (e) => {
@@ -74,9 +77,10 @@ const Register = ({ isModal = false }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 300 },
 					mx: 'auto',
 					outline: 'none',
 				}}
@@ -218,6 +222,7 @@ const Register = ({ isModal = false }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
 			<Container maxWidth='sm'>{content}</Container>

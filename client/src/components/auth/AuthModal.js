@@ -37,6 +37,8 @@ const AuthModal = () => {
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
+				p: { xs: 2, sm: 0 },
+				overflowY: 'auto',
 			}}
 		>
 			<Fade in={isOpen} onExited={handleExited}>

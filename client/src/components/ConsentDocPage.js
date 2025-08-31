@@ -96,7 +96,11 @@ const ConsentDocPage = ({ type, title }) => {
 						UI_LABELS.DOC.version
 					} ${version}. ${formatDate(effectiveDate)}.pdf`,
 					html2canvas: { scale: 2 },
-					jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+					jsPDF: {
+						unit: 'mm',
+						format: 'a4',
+						orientation: 'portrait',
+					},
 				})
 				.from(pdfElement)
 				.save();
@@ -127,7 +131,11 @@ const ConsentDocPage = ({ type, title }) => {
 						borderRadius: 2,
 					}}
 				>
-					<Stack direction='row' spacing={2} alignItems='center'>
+					<Stack
+						direction={{ xs: 'column', md: 'row' }}
+						spacing={2}
+						alignItems={{ xs: 'stretch', md: 'center' }}
+					>
 						<DescriptionOutlined fontSize='large' />
 						<Box sx={{ flex: 1 }}>
 							<Typography variant='h4' component='h1'>
@@ -145,7 +153,12 @@ const ConsentDocPage = ({ type, title }) => {
 								)}
 							</Stack>
 						</Box>
-						<Button onClick={handleDownload} startIcon={<DownloadOutlined />} variant='contained'>
+						<Button
+							onClick={handleDownload}
+							startIcon={<DownloadOutlined />}
+							variant='contained'
+							sx={{ alignSelf: { xs: 'stretch', md: 'center' } }}
+						>
 							{UI_LABELS.BUTTONS.download}
 						</Button>
 					</Stack>

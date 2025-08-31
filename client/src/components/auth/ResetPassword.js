@@ -52,16 +52,21 @@ const ResetPassword = ({ isModal = false, token: tokenProp = null }) => {
 				sx={{
 					p: { xs: 3, sm: 4 },
 					position: 'relative',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 360 },
 					mx: 'auto',
 					outline: 'none',
-					width: '100%',
 				}}
 			>
 				{isModal && (
 					<IconButton
 						aria-label='close'
 						onClick={closeAuthModal}
-						sx={{ position: 'absolute', right: { xs: 4, sm: 8 }, top: { xs: 4, sm: 8 } }}
+						sx={{
+							position: 'absolute',
+							right: { xs: 4, sm: 8 },
+							top: { xs: 4, sm: 8 },
+						}}
 					>
 						<CloseIcon />
 					</IconButton>

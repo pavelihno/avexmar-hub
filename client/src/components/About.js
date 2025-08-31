@@ -89,8 +89,8 @@ const About = () => {
 
 	return (
 		<Base>
-			<Container maxWidth='lg' sx={{ py: 4 }}>
-				<Box mb={4} textAlign='center'>
+			<Container maxWidth='lg' sx={{ py: { xs: 3, sm: 4 } }}>
+				<Box mb={{ xs: 3, sm: 4 }} textAlign='center'>
 					<Typography variant='h4' component='h1' gutterBottom>
 						{companyName}
 					</Typography>
@@ -99,8 +99,8 @@ const About = () => {
 					</Typography>
 				</Box>
 
-				<Box mb={5}>
-					<Grid container spacing={2}>
+				<Box mb={{ xs: 4, sm: 5 }}>
+					<Grid container spacing={{ xs: 2, sm: 3 }}>
 						{cardsData.map((card, index) => (
 							<Grid item xs={12} sm={6} md={4} key={index}>
 								<Paper
@@ -167,7 +167,7 @@ const About = () => {
 					</Grid>
 				</Box>
 
-				<Box mb={4}>
+				<Box mb={{ xs: 3, sm: 4 }}>
 					<Typography variant='h4' component='h2' gutterBottom>
 						{UI_LABELS.ABOUT.company_details}
 					</Typography>
@@ -281,7 +281,7 @@ const About = () => {
 					)}
 				</Box>
 
-				<Box mb={4}>
+				<Box mb={{ xs: 3, sm: 4 }}>
 					<Typography variant='h4' component='h2' gutterBottom>
 						{UI_LABELS.ABOUT.legal_info}
 					</Typography>

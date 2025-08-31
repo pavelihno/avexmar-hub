@@ -56,9 +56,10 @@ const ForgotPassword = ({ isModal = false }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 300 },
 					mx: 'auto',
 					outline: 'none',
 				}}
@@ -168,6 +169,7 @@ const ForgotPassword = ({ isModal = false }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
 			<Container maxWidth='sm'>{content}</Container>
