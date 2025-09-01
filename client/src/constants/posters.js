@@ -1,17 +1,17 @@
 const POSTERS = [
 	{
 		src: '/images/posters/winter.svg',
-		title: 'Winter Deals',
+		alt: 'Winter deals',
 		href: '/deals',
 	},
 	{
 		src: '/images/posters/routes.svg',
-		title: 'New Routes',
+		alt: 'New routes',
 		href: '/routes',
 	},
 	{
 		src: '/images/posters/loyalty.svg',
-		title: 'Loyalty Program',
+		alt: 'Loyalty program',
 		href: '/loyalty',
 	},
 ];

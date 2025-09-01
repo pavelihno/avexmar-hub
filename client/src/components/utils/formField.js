@@ -260,7 +260,6 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									sx,
 									size,
 									disabled,
-									placeholder: field.dateFormat || DATE_FORMAT,
 									...textFieldProps,
 								},
 								field: { clearable: true },

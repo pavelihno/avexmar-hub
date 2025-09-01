@@ -19,8 +19,14 @@ const Home = () => {
 				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<SearchForm loadLocalStorage />
 				</Box>
-				<Box sx={{ width: '100%', flex: 1, mt: { xs: 2, md: 0 } }}>
-					{/* <PosterCarousel /> */}
+				<Box
+					sx={{
+						width: { xs: '100%', md: '80%' },
+						mt: { xs: 4, md: 6 },
+						mx: 'auto',
+					}}
+				>
+					<PosterCarousel />
 				</Box>
 			</Box>
 		</Base>
