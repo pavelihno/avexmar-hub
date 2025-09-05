@@ -70,7 +70,7 @@ const FlightPassengerExport = () => {
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
-			link.setAttribute('download', 'flight_passengers.xlsx');
+link.setAttribute('download', 'flight_passengers.xls');
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
