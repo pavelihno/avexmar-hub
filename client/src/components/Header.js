@@ -96,9 +96,9 @@ const Header = () => {
 				>
 					<Box
 						component='img'
-						src='/images/logo/logo32.png'
+						src='/images/logo/icon-512.png'
 						alt='Avexmar logo'
-						sx={{ width: 32, height: 32, mr: 1 }}
+						sx={{ width: 50, height: 50, mr: 1 }}
 					/>
 					<Typography variant='h4' component='span'>
 						{companyName.toUpperCase()}

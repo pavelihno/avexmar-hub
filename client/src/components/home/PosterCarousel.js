@@ -36,7 +36,8 @@ const PosterCarousel = () => {
 	const onTouchEnd = () => {
 		const threshold = 40; // minimal px for swipe
 		if (Math.abs(touchDeltaX.current) > threshold) {
-			if (touchDeltaX.current > 0) handleChange(index - 1); else handleChange(index + 1);
+			if (touchDeltaX.current > 0) handleChange(index - 1);
+			else handleChange(index + 1);
 		}
 		touchStartX.current = null;
 	};
@@ -51,7 +52,9 @@ const PosterCarousel = () => {
 			sx={{
 				position: 'relative',
 				width: '100%',
-				height: { xs: 220, sm: 320, md: 420 }, // slightly reduced on xs
+				aspectRatio: '3 / 2',
+				maxHeight: { md: 512 },
+				width: '100%',
 				overflow: 'hidden',
 				borderRadius: 1,
 				border: (theme) => `1px solid ${theme.palette.divider}`,
@@ -61,7 +64,11 @@ const PosterCarousel = () => {
 			}}
 		>
 			{/* Accessibility live region */}
-			<Box component='span' sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} aria-live='polite'>
+			<Box
+				component='span'
+				sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+				aria-live='polite'
+			>
 				Slide {index + 1} of {POSTERS.length}
 			</Box>
 			{/* Slides */}
@@ -119,7 +126,7 @@ const PosterCarousel = () => {
 					border: (theme) => `1px solid ${theme.palette.divider}`,
 					transition: 'background-color .25s ease, opacity .3s ease',
 					opacity: 0,
-					display: { xs: 'none', sm: 'inline-flex' }, // hide on small screens to save space
+					display: { xs: 'none', sm: 'inline-flex' },
 				}}
 				size='small'
 			>
