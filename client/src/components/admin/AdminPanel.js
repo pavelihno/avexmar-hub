@@ -1,14 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-	Box,
-	Typography,
-	Card,
-	CardContent,
-	Grid,
-	CardActionArea,
-} from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid, CardActionArea, Divider } from '@mui/material';
 import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
@@ -35,7 +28,7 @@ import { UI_LABELS } from '../../constants';
 const iconSX = { fontSize: 50 };
 
 const AdminPanel = () => {
-	const adminModules = [
+	const dataTables = [
 		{
 			title: UI_LABELS.ADMIN.modules.countries.title,
 			description: UI_LABELS.ADMIN.modules.countries.description,
@@ -138,59 +131,83 @@ const AdminPanel = () => {
 			icon: <HandshakeIcon sx={iconSX} />,
 			path: '/admin/consent-events',
 		},
-];
+	];
+
+	const exportTools = [
+		{
+			title: UI_LABELS.ADMIN.exports.flightPassengers.title,
+			description: UI_LABELS.ADMIN.exports.flightPassengers.description,
+			icon: <FileDownloadIcon sx={iconSX} />,
+			path: '/admin/exports/flight-passengers',
+		},
+	];
 
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
-				<Typography variant="h3" sx={{ mb: 4 }}>
+				<Typography variant='h3' sx={{ mb: 4 }}>
 					{UI_LABELS.ADMIN.panel}
 				</Typography>
 
-<Grid container spacing={3}>
-{adminModules.map((module, index) => (
-<Grid item xs={12} sm={6} md={3} key={index}>
-<Card sx={{ height: '100%' }}>
-<CardActionArea
-component={Link}
-to={module.path}
-sx={{
-height: '100%',
-display: 'flex',
-flexDirection: 'column',
-alignItems: 'center',
-}}
->
-<CardContent sx={{ textAlign: 'center' }}>
-{module.icon}
-<Typography variant="h6" sx={{ mt: 2 }}>
-{module.title}
-</Typography>
-<Typography
-variant="body2"
-color="text.secondary"
->
-{module.description}
-</Typography>
-</CardContent>
-</CardActionArea>
-</Card>
-</Grid>
-))}
-</Grid>
-<Box sx={{ mt: 6 }}>
-<Typography variant="h4" sx={{ mb: 1 }}>
-{UI_LABELS.ADMIN.exports.title}
-</Typography>
-<Typography variant="body2" sx={{ mb: 2 }}>
-{UI_LABELS.ADMIN.exports.description}
-</Typography>
-<Typography>
-<Link to="/admin/exports/flight-passengers">
-{UI_LABELS.ADMIN.exports.flightPassengers.link}
-</Link>
-</Typography>
-</Box>
+				<Grid container spacing={3}>
+					{dataTables.map((dataTable, index) => (
+						<Grid item xs={12} sm={6} md={3} key={index}>
+							<Card sx={{ height: '100%' }}>
+								<CardActionArea
+									component={Link}
+									to={dataTable.path}
+									sx={{
+										height: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+									}}
+								>
+									<CardContent sx={{ textAlign: 'center' }}>
+										{dataTable.icon}
+										<Typography variant='h6' sx={{ mt: 2 }}>
+											{dataTable.title}
+										</Typography>
+										<Typography variant='body2' color='text.secondary'>
+											{dataTable.description}
+										</Typography>
+									</CardContent>
+								</CardActionArea>
+							</Card>
+						</Grid>
+					))}
+				</Grid>
+
+				<Divider sx={{ my: 4 }} />
+
+				<Grid container spacing={3}>
+					{exportTools.map((tool, index) => (
+						<Grid item xs={12} sm={6} md={3} key={index}>
+							<Card sx={{ height: '100%' }}>
+								<CardActionArea
+									component={Link}
+									to={tool.path}
+									sx={{
+										height: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+									}}
+								>
+									<CardContent sx={{ textAlign: 'center' }}>
+										{tool.icon}
+										<Typography variant='h6' sx={{ mt: 2 }}>
+											{tool.title}
+										</Typography>
+										<Typography variant='body2' color='text.secondary'>
+											{tool.description}
+										</Typography>
+									</CardContent>
+								</CardActionArea>
+							</Card>
+						</Grid>
+					))}
+				</Grid>
 			</Box>
 		</Base>
 	);
