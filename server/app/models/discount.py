@@ -1,10 +1,13 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
 
 from app.utils.enum import DISCOUNT_TYPE
+
+if TYPE_CHECKING:
+    from app.models.ticket import Ticket
 
 class Discount(BaseModel):
     __tablename__ = 'discounts'
@@ -13,6 +16,7 @@ class Discount(BaseModel):
     discount_type = db.Column(db.Enum(DISCOUNT_TYPE), nullable=False)
     percentage_value = db.Column(db.Float, nullable=False)
 
+    tickets: Mapped[List['Ticket']] = db.relationship('Ticket', back_populates='discount', lazy='dynamic')
 
     def to_dict(self, return_children=False):
         return {

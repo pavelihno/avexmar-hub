@@ -10,6 +10,7 @@ from app.utils.enum import GENDER, DOCUMENT_TYPE, DEFAULT_CITIZENSHIP_CODE
 
 if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
+    from app.models.ticket import Ticket
     from app.models.user import User
 
 
@@ -32,6 +33,9 @@ class Passenger(BaseModel):
     citizenship: Mapped['Country'] = db.relationship('Country', back_populates='passengers')
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
+    )
+    tickets: Mapped[List['Ticket']] = db.relationship(
+        'Ticket', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     __table_args__ = (

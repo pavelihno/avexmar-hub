@@ -30,8 +30,8 @@ User → Booking → BookingPassenger → Passenger
         BookingFlight → Flight → Route → Airport
                            ↓
                     FlightTariff → Tariff
-            ↓
-        Payment
+                           ↓
+                        Ticket → Payment
 ```
 
 **Core Models:**
@@ -44,6 +44,7 @@ User → Booking → BookingPassenger → Passenger
 - `Flight`: Scheduled flights with pricing
 - `Booking`: Customer flight reservations
 - `Passenger`: Passenger information and documents
+- `Ticket`: Generated tickets for confirmed bookings
 - `Payment`: Payment processing and status tracking
 
 ### API Endpoints Structure
@@ -62,7 +63,7 @@ All controllers follow RESTful conventions:
 - `/users` - User management
 - `/airports`, `/airlines`, `/aircrafts` - Aviation data
 - `/routes`, `/flights`, `/tariffs` - Flight scheduling
-- `/bookings`, `/passengers` - Booking process
+- `/bookings`, `/passengers`, `/tickets` - Booking process
 - `/payments` - Payment processing
 - `/search` - Flight search functionality
 
