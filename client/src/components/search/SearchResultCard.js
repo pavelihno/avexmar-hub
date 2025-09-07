@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { Card, Box, Typography, Button, Divider, IconButton, Skeleton, Stack } from '@mui/material';
+import { Card, Box, Typography, Divider, IconButton, Skeleton, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import FlightIcon from '@mui/icons-material/Flight';
 import ShareIcon from '@mui/icons-material/Share';
 
 import { ENUM_LABELS, UI_LABELS, DATE_WEEKDAY_FORMAT } from '../../constants';
 import { formatDate, formatTime, formatDuration, formatNumber } from '../utils';
-import SelectTicketDialog from './SelectTicketDialog';
 
 const SegmentSkeleton = () => {
 	return (
@@ -153,9 +152,7 @@ const Segment = ({ flight, isOutbound }) => {
 };
 
 const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
-	const theme = useTheme();
-
-	const [openDialog, setOpenDialog] = useState(false);
+        const theme = useTheme();
 
 	const currency = outbound?.currency || returnFlight?.currency;
 	const currencySymbol = currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : '';
@@ -196,23 +193,6 @@ const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 								</Typography>
 							</>
 						)}
-						<Button
-							variant='contained'
-							color='orange'
-							disabled={isLoading}
-							sx={{
-								borderRadius: 2,
-								boxShadow: 'none',
-								textTransform: 'none',
-								whiteSpace: 'nowrap',
-							}}
-							onClick={(e) => {
-								e.currentTarget.blur();
-								setOpenDialog(true);
-							}}
-						>
-							{UI_LABELS.SEARCH.flight_details.select_tariff_title}
-						</Button>
 					</Box>
 					<Box sx={{ flexGrow: 1, pl: { md: 2 } }}>
 						{isLoading ? (
@@ -231,12 +211,6 @@ const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 					</Box>
 				</Stack>
 			</Card>
-			<SelectTicketDialog
-				open={openDialog}
-				onClose={() => setOpenDialog(false)}
-				outbound={outbound}
-				returnFlight={returnFlight}
-			/>
 		</>
 	);
 };
