@@ -231,13 +231,6 @@ export const UI_LABELS = {
 				add_button: 'Добавить платеж',
 				edit_button: 'Редактировать платеж',
 			},
-			tickets: {
-				title: 'Билеты',
-				description: 'Управление билетами',
-				management: 'Управление билетами',
-				add_button: 'Добавить билет',
-				edit_button: 'Редактировать билет',
-			},
 			passengers: {
 				title: 'Пассажиры',
 				description: 'Управление пассажирами',
@@ -388,7 +381,6 @@ export const UI_LABELS = {
 						: count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)
 						? `${count} пассажира`
 						: `${count} пассажиров`,
-				tickets: 'Стоимость перевозки',
 				fees: 'Сборы',
 				discount: 'Скидка',
 			},
@@ -532,8 +524,7 @@ export const UI_LABELS = {
 			price_per_passenger: 'За 1 пассажира',
 			seats_available: 'Свободных мест',
 			seats_unavailable: 'Недостаточно свободных мест',
-			tickets: 'Стоимость перевозки',
-			fees: 'Сборы',
+				fees: 'Сборы',
 			tariff_information: 'Информация о тарифе',
 			tariff_conditions: 'Условия применения тарифа',
 			baggage: (weight) => `Багаж: ${weight} кг`,

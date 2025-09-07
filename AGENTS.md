@@ -117,7 +117,7 @@ The booking process follows a multi-step wizard pattern:
 3. **Passengers**: Passenger information collection
 4. **Confirmation**: Booking details review
 5. **Payment**: Payment processing
-6. **Completion**: Booking confirmation and ticket generation
+6. **Completion**: Booking confirmation
 
 Each step maintains state in Redux and validates before progression.
 

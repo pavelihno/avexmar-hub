@@ -15,7 +15,6 @@ from app.utils.xlsx import parse_xlsx, generate_xlsx_template
 from app.utils.datetime import combine_date_time, parse_date, parse_time
 
 if TYPE_CHECKING:
-    from app.models.ticket import Ticket
     from app.models.booking_flight import BookingFlight
 
 
@@ -40,9 +39,6 @@ class Flight(BaseModel):
     route: Mapped['Route'] = db.relationship('Route', back_populates='flights')
     airline: Mapped['Airline'] = db.relationship('Airline', back_populates='flights')
     aircraft: Mapped['Aircraft'] = db.relationship('Aircraft', back_populates='flights')
-    tickets: Mapped[List['Ticket']] = db.relationship(
-        'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
-    )
     booking_flights: Mapped[List['BookingFlight']] = db.relationship(
         'BookingFlight', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )

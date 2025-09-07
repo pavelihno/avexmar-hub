@@ -26,7 +26,6 @@ export const FIELD_LABELS = {
 		fees: 'Сборы',
 		total_price: 'Итого',
 		quantity: 'Кол-во',
-		ticket_price: 'Цена билета',
 		user_id: 'Пользователь',
 		passengers: 'Пассажиры',
 	},
@@ -71,13 +70,6 @@ export const FIELD_LABELS = {
 	BOOKING_PASSENGER: {
 		booking_id: 'Бронирование',
 		passenger_id: 'Пассажир',
-	},
-	TICKET: {
-		ticket_number: 'Номер билета',
-		booking_id: 'ID бронирования',
-		passenger_id: 'ID пассажира',
-		flight_id: 'ID рейса',
-		price: 'Цена',
 	},
 	PAYMENT: {
 		booking_id: 'Бронирование',
@@ -135,7 +127,7 @@ export const FIELD_LABELS = {
                 is_active: 'Активен',
                 failed_login_attempts: 'Неудачные входы',
                 is_locked: 'Заблокирован',
-        },
+	},
 	TIMEZONE: {
 		name: 'Часовой пояс',
 	},
