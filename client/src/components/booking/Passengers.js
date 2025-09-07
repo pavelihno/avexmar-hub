@@ -519,7 +519,7 @@ const Passengers = () => {
 								)}`}
 							</Typography>
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-								<Typography>Стоимость перевозки</Typography>
+								<Typography>{UI_LABELS.BOOKING.buyer_form.summary.tickets}</Typography>
 								<Typography>{`${formatNumber(farePrice)} ${currencySymbol}`}</Typography>
 							</Box>
 							{fees > 0 && (

@@ -9,6 +9,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
+import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
 import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 import HailIcon from '@mui/icons-material/Hail';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
@@ -105,6 +106,12 @@ const AdminPanel = () => {
 			description: UI_LABELS.ADMIN.modules.payments.description,
 			icon: <PaymentIcon sx={iconSX} />,
 			path: '/admin/payments',
+		},
+		{
+			title: UI_LABELS.ADMIN.modules.tickets.title,
+			description: UI_LABELS.ADMIN.modules.tickets.description,
+			icon: <AirplaneTicketIcon sx={iconSX} />,
+			path: '/admin/tickets',
 		},
 		{
 			title: UI_LABELS.ADMIN.modules.users.title,

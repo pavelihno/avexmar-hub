@@ -10,6 +10,7 @@ import routesReducer from './reducers/route';
 import flightReducer from './reducers/flight';
 import tariffsReducer from './reducers/tariff';
 import flightTariffsReducer from './reducers/flightTariff';
+import ticketsReducer from './reducers/ticket';
 import discountReducer from './reducers/discount';
 import feeReducer from './reducers/fee';
 import userReducer from './reducers/user';
@@ -38,6 +39,7 @@ const rootReducer = combineReducers({
 	flights: flightReducer,
 	tariffs: tariffsReducer,
 	flightTariffs: flightTariffsReducer,
+	tickets: ticketsReducer,
 	discounts: discountReducer,
 	fees: feeReducer,
 	bookings: bookingReducer,

@@ -14,6 +14,7 @@ from app.models.passenger import Passenger
 from app.models.booking import Booking
 from app.models.payment import Payment
 from app.models.user import User
+from app.models.ticket import Ticket
 from app.models.timezone import Timezone
 from app.models.consent import ConsentDoc, ConsentEvent
 
@@ -32,6 +33,7 @@ MODEL_MAP = {
     'passengers': Passenger,
     'bookings': Booking,
     'payments': Payment,
+    'tickets': Ticket,
     'users': User,
     'consent_docs': ConsentDoc,
     'consent_events': ConsentEvent,

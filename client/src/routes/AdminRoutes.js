@@ -13,6 +13,7 @@ import FlightManagement from '../components/admin/FlightManagement';
 import FlightPassengerExport from '../components/admin/FlightPassengerExport';
 import TariffManagement from '../components/admin/TariffManagement';
 import BookingManagement from '../components/admin/BookingManagement';
+import TicketManagement from '../components/admin/TicketManagement';
 import PassengerManagement from '../components/admin/PassengerManagement';
 import UserManagement from '../components/admin/UserManagement';
 import PaymentManagement from '../components/admin/PaymentManagement';
@@ -75,6 +76,10 @@ const AdminRoutes = ({ currentUser }) => {
 	{
 		path: '/admin/payments',
 		element: <ProtectedRoute children={<PaymentManagement />} condition={isAdmin} />,
+	},
+	{
+		path: '/admin/tickets',
+		element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
 	},
 	{
 		path: '/admin/passengers',
