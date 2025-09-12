@@ -14,6 +14,7 @@ const Home = () => {
 					justifyContent: 'center',
 					alignItems: 'center',
 					gap: 2,
+					mb: 2,
 				}}
 			>
 				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

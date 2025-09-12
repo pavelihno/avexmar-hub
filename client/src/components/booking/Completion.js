@@ -36,7 +36,7 @@ const Completion = () => {
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
-			link.download = `booking_${booking.booking_number}.pdf`;
+			link.download = `${booking.booking_number}.pdf`;
 			document.body.appendChild(link);
 			link.click();
 			link.remove();

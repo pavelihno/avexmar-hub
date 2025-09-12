@@ -53,6 +53,7 @@ const BookingsTab = () => {
 				passengersCount: b.passengers_count,
 				link,
 				status: b.status,
+				showLink: b.show_link,
 			};
 		});
 	}, [bookings]);
@@ -133,16 +134,18 @@ const BookingsTab = () => {
 												</span>{' '}
 												{row.passengersCount || 0}
 											</Typography>
-											<IconButton
-												component='a'
-												href={row.link}
-												target='_blank'
-												rel='noopener noreferrer'
-												aria-label={UI_LABELS.PROFILE.open_link}
-												size='small'
-											>
-												<OpenInNewIcon fontSize='small' />
-											</IconButton>
+											{row.showLink && (
+												<IconButton
+													component='a'
+													href={row.link}
+													target='_blank'
+													rel='noopener noreferrer'
+													aria-label={UI_LABELS.PROFILE.open_link}
+													size='small'
+												>
+													<OpenInNewIcon fontSize='small' />
+												</IconButton>
+											)}
 										</Box>
 									</Paper>
 								))}
@@ -232,23 +235,25 @@ const BookingsTab = () => {
 												</TableCell>
 												<TableCell align='center'>{row.passengersCount || 0}</TableCell>
 												<TableCell align='right'>
-													<Button
-														size='small'
-														component='a'
-														href={row.link}
-														target='_blank'
-														rel='noopener noreferrer'
-														sx={{
-															display: 'inline-flex',
-															alignItems: 'center',
-															gap: 0.5,
-															textTransform: 'none',
-															lineHeight: 1,
-														}}
-													>
-														{UI_LABELS.PROFILE.open_link}
-														<OpenInNewIcon fontSize='inherit' />
-													</Button>
+													{row.showLink && (
+														<Button
+															size='small'
+															component='a'
+															href={row.link}
+															target='_blank'
+															rel='noopener noreferrer'
+															sx={{
+																display: 'inline-flex',
+																alignItems: 'center',
+																gap: 0.5,
+																textTransform: 'none',
+																lineHeight: 1,
+															}}
+														>
+															{UI_LABELS.PROFILE.open_link}
+															<OpenInNewIcon fontSize='inherit' />
+														</Button>
+													)}
 												</TableCell>
 											</TableRow>
 										))}

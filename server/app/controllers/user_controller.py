@@ -9,7 +9,7 @@ from app.models.booking_passenger import BookingPassenger
 from app.models.flight import Flight
 from app.models.passenger import Passenger
 
-from app.utils.enum import USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
+from app.utils.enum import BOOKING_STATUS, USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
 from app.middlewares.auth_middleware import admin_required, login_required
 from app.utils.consent import create_user_consent
 from app.utils.email import send_email, EMAIL_TYPE
@@ -131,6 +131,7 @@ def get_user_bookings(current_user, user_id):
         )
         data['flights'] = [f.to_dict(return_children=True) for f in flights_sorted]
         data['passengers_count'] = passenger_count_map.get(b.id, 0)
+        data['show_link'] = data.get('status') != BOOKING_STATUS.expired.value
         result.append(data)
 
     return jsonify(result)

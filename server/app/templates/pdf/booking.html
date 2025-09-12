@@ -108,12 +108,7 @@
       {% endif %}
       {% if t %}
         <p><u>{{ seat_class_labels.get(t.seat_class, t.seat_class) }} — {{ t.title }}</u></p>
-        {% if t.hand_luggage %}
-          <p>Ручная кладь: {{ t.hand_luggage }} кг</p>
-        {% endif %}
-        {% if t.baggage %}
-          <p>Багаж: {{ t.baggage }} кг</p>
-        {% endif %}
+        <p>Ручная кладь: {% if t.hand_luggage %}{{ t.hand_luggage }}{% else %} — {% endif %} кг, Багаж: {% if t.baggage %}{{ t.baggage }}{% else %} — {% endif %} кг</p>
       {% endif %}
       <table>
         <tr>
@@ -131,7 +126,7 @@
             <td>{{ '%.2f'|format(p.unit_fare_price or 0) }} {{ currency }}</td>
             <td>
               {% if p.unit_discount and (p.unit_discount > 0) %}
-                - {{ '%.2f'|format(p.unit_discount) }} {{ currency }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
+                — {{ '%.2f'|format(p.unit_discount) }} {{ currency }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
               {% else %}
                 —
               {% endif %}
@@ -156,7 +151,7 @@
       {% if (price.total_discounts or 0) > 0 %}
         <tr>
           <td>Скидка</td>
-          <td>- {{ '%.2f'|format(price.total_discounts or 0) }} {{ currency }}</td>
+          <td>— {{ '%.2f'|format(price.total_discounts or 0) }} {{ currency }}</td>
         </tr>
       {% endif %}
       <tr>
