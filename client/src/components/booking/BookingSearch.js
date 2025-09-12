@@ -43,7 +43,7 @@ const BookingSearch = () => {
 	return (
 		<Base maxWidth='md'>
 			<Container maxWidth='sm'>
-				<Paper sx={{ p: 4, mt: 4 }}>
+				<Paper sx={{ p: { xs: 2, md: 4 }, mt: { xs: 2, md: 4 } }}>
 					<Typography variant='h4' component='h4' align='center' gutterBottom>
 						{UI_LABELS.BOOKING_SEARCH.title}
 					</Typography>

@@ -18,6 +18,7 @@ import 'quill/dist/quill.snow.css';
 
 import {
 	dateLocale,
+	datePickerLocaleText,
 	DATE_FORMAT,
 	TIME_FORMAT,
 	DEFAULT_EMAIL,
@@ -49,7 +50,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 
 		switch (type) {
 			case FIELD_TYPES.EMAIL: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -58,6 +59,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
+						disabled={disabled}
 						inputProps={{
 							placeholder: DEFAULT_EMAIL,
 							type: 'email',
@@ -72,7 +74,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.PHONE: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -81,6 +83,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
+						disabled={disabled}
 						inputProps={{
 							placeholder: DEFAULT_PHONE_NUMBER,
 							type: 'tel',
@@ -95,7 +98,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TEXT: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -104,6 +107,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
+						disabled={disabled}
 						inputProps={{ ...field.inputProps, ...inputProps }}
 						size={size}
 						sx={{ ...sx }}
@@ -112,7 +116,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TEXT_AREA: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -121,6 +125,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						fullWidth={fullWidth}
 						error={error}
 						helperText={error ? helperText : ''}
+						disabled={disabled}
 						multiline
 						rows={field.rows || 5}
 						inputProps={{ ...field.inputProps, ...inputProps }}
@@ -134,7 +139,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.RICH_TEXT: {
-				const { value = '', onChange, fullWidth, error, helperText, sx, rows } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, sx, rows, disabled } = allProps;
 				const editorRows = rows || field.rows || 20;
 				const editorMinHeight = editorRows * 24;
 				const modules = {
@@ -175,6 +180,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							onChange={onChange}
 							modules={modules}
 							formats={formats}
+							readOnly={disabled}
 						/>
 						{error && <FormHelperText>{helperText}</FormHelperText>}
 					</FormControl>
@@ -182,7 +188,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.NUMBER: {
-				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, error, helperText, inputProps, sx, size, disabled } = allProps;
 
 				const step = field.inputProps?.step ?? (field.float ? 0.01 : 1);
 				const min = field.inputProps?.min ?? 0;
@@ -197,6 +203,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						helperText={error ? helperText : ''}
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
+						disabled={disabled}
 						onBlur={(e) => {
 							const num = e.target.valueAsNumber;
 							if (!isNaN(num)) {
@@ -218,10 +225,25 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.DATE: {
-				const { value, onChange, fullWidth, error, helperText, sx, minDate, maxDate, textFieldProps, size } =
-					allProps;
+				const {
+					value,
+					onChange,
+					fullWidth,
+					error,
+					helperText,
+					sx,
+					minDate,
+					maxDate,
+					textFieldProps,
+					size,
+					disabled,
+				} = allProps;
 				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
+					<LocalizationProvider
+						dateAdapter={AdapterDateFns}
+						adapterLocale={dateLocale}
+						localeText={datePickerLocaleText}
+					>
 						<DatePicker
 							label={field.label}
 							value={value ? parseDate(value) : null}
@@ -229,6 +251,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							minDate={minDate ? parseDate(minDate) : undefined}
 							maxDate={maxDate ? parseDate(maxDate) : undefined}
 							format={field.dateFormat || DATE_FORMAT}
+							disabled={disabled}
 							slotProps={{
 								textField: {
 									fullWidth,
@@ -236,8 +259,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									helperText: error ? helperText : '',
 									sx,
 									size,
+									disabled,
 									...textFieldProps,
 								},
+								field: { clearable: true },
 							}}
 						/>
 					</LocalizationProvider>
@@ -245,10 +270,14 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.TIME: {
-				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size } = allProps;
+				const { value, onChange, fullWidth, error, helperText, sx, textFieldProps, size, disabled } = allProps;
 
 				return (
-					<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
+					<LocalizationProvider
+						dateAdapter={AdapterDateFns}
+						adapterLocale={dateLocale}
+						localeText={datePickerLocaleText}
+					>
 						<TimePicker
 							label={field.label}
 							value={value ? parseTime(value) : null}
@@ -256,6 +285,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							ampm={false}
 							format={field.timeFormat || TIME_FORMAT}
 							mask={TIME_MASK}
+							disabled={disabled}
 							slotProps={{
 								textField: {
 									fullWidth,
@@ -263,8 +293,10 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									helperText: error ? helperText : '',
 									sx,
 									size,
+									disabled,
 									...textFieldProps,
 								},
+								field: { clearable: true },
 							}}
 						/>
 					</LocalizationProvider>
@@ -285,6 +317,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 					simpleSelect,
 					sx,
 					size,
+					disabled,
 				} = allProps;
 
 				const resolvedValue = value !== undefined && value !== null ? value : field.defaultValue;
@@ -304,6 +337,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									.slice(0, 100)
 							}
 							getOptionLabel={(o) => o.label}
+							disabled={disabled}
 							renderInput={(params) => (
 								<TextField
 									{...params}
@@ -313,6 +347,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 									fullWidth={fullWidth}
 									size={size}
 									sx={{ ...sx }}
+									disabled={disabled}
 								/>
 							)}
 						/>
@@ -329,6 +364,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							displayEmpty={displayEmpty}
 							size={size}
 							sx={{ ...sx }}
+							disabled={disabled}
 						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
@@ -350,6 +386,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 							displayEmpty={displayEmpty}
 							size={size}
 							sx={{ ...sx }}
+							disabled={disabled}
 						>
 							{options.map((option) => (
 								<MenuItem key={option.value} value={option.value} {...MenuItemProps}>
@@ -363,14 +400,20 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 
 			case FIELD_TYPES.BOOLEAN: {
-				const { value = false, onChange, sx } = allProps;
+				const { value = false, onChange, sx, disabled } = allProps;
 				return (
 					<FormControlLabel
 						control={
-							<Checkbox checked={!!value} onChange={(e) => onChange(e.target.checked)} color='primary' />
+							<Checkbox
+								checked={!!value}
+								onChange={(e) => onChange(e.target.checked)}
+								color='primary'
+								disabled={disabled}
+							/>
 						}
 						label={field.label}
 						sx={{ ...sx }}
+						disabled={disabled}
 					/>
 				);
 			}
@@ -379,7 +422,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 				return (customProps) => field.renderField({ ...allProps, ...customProps });
 
 			default: {
-				const { value = '', onChange, fullWidth, inputProps, sx, size } = allProps;
+				const { value = '', onChange, fullWidth, inputProps, sx, size, disabled } = allProps;
 				return (
 					<TextField
 						label={field.label}
@@ -389,6 +432,7 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						inputProps={{ ...field.inputProps, ...inputProps }}
 						size={size}
 						sx={{ ...sx }}
+						disabled={disabled}
 					/>
 				);
 			}

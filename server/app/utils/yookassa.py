@@ -61,7 +61,18 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 
 def __generate_cart(booking: Booking) -> Dict[str, Any]:
     receipt = __generate_receipt(booking)
-    return {'items': receipt.get('items', [])}
+    cart = [
+        {
+            'description': item['description'],
+            'price': {
+                'value': item['amount']['value'],
+                'currency': item['amount']['currency'],
+            },
+            'quantity': item['quantity'],
+        }
+        for item in receipt.get('items', [])
+    ]
+    return receipt, cart
 
 
 def __capture_payment(payment: Payment, session) -> YooPayment:
@@ -246,11 +257,17 @@ def create_invoice(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
+    receipt, cart = __generate_cart(booking)
     expires_at = datetime.now() + timedelta(hours=Config.BOOKING_INVOICE_EXP_HOURS)
+
     body = {
-        'amount': amount,
-        'cart': __generate_cart(booking),
-        'due_date': expires_at.isoformat(),
+        'payment_data': {
+            'amount': amount,
+            'receipt': receipt,
+            'capture': False,
+        },
+        'cart': cart,
+        'expires_at': expires_at.isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
         'metadata': {
             'public_id': str(booking.public_id),
             'expires_at': expires_at.isoformat(),

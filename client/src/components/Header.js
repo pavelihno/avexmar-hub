@@ -8,12 +8,18 @@ import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
 import SearchIcon from '@mui/icons-material/Search';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import { useAuthModal } from '../context/AuthModalContext';
 import { selectIsAuth, selectIsAdmin } from '../redux/reducers/auth';
@@ -28,12 +34,16 @@ const Header = () => {
 	const { openLoginModal, openRegisterModal } = useAuthModal();
 	const navigate = useNavigate();
 
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
 	const isAuth = useSelector(selectIsAuth);
 	const isAdmin = useSelector(selectIsAdmin);
 	const currentUser = useSelector((state) => state.auth.currentUser);
 
 	const [anchorEl, setAnchorEl] = useState(null);
 	const open = Boolean(anchorEl);
+	const [drawerOpen, setDrawerOpen] = useState(false);
 
 	const handleProfileClick = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -46,124 +56,226 @@ const Header = () => {
 	const handleGoToProfile = () => {
 		navigate('/profile');
 		handleMenuClose();
+		setDrawerOpen(false);
 	};
 
 	const handleLogout = () => {
 		handleMenuClose();
 		dispatch(logout());
+		setDrawerOpen(false);
+	};
+
+	const toggleDrawer = (openState) => () => {
+		setDrawerOpen(openState);
 	};
 
 	return (
-		<Box
+		<AppBar
 			component='header'
-			sx={{
-				display: 'flex',
-				alignItems: 'center',
-				justifyContent: 'space-between',
-				py: 2,
-				borderBottom: 1,
-				borderColor: 'divider',
-			}}
+			position='static'
+			color='transparent'
+			elevation={0}
+			sx={{ borderBottom: 1, borderColor: 'divider' }}
 		>
-			<Box
-				component={Link}
-				to='/'
+			<Toolbar
 				sx={{
-					display: 'flex',
+					justifyContent: 'space-between',
 					alignItems: 'center',
-					textDecoration: 'none',
-					color: 'inherit',
+					py: { xs: 1, md: 1.5 },
 				}}
 			>
 				<Box
-					component='img'
-					src='/images/logo/logo32.png'
-					alt='Avexmar logo'
-					sx={{ width: 32, height: 32, mr: 1 }}
-				/>
-				<Typography variant='h4' component='span'>
-					{companyName.toUpperCase()}
-				</Typography>
-			</Box>
-
-			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-				<Button
 					component={Link}
-					to='/search/booking'
-					color='inherit'
-					startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
-					sx={{ textTransform: 'none' }}
+					to='/'
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						textDecoration: 'none',
+						color: 'inherit',
+					}}
 				>
-					{UI_LABELS.BOOKING_SEARCH.link}
-				</Button>
+					<Box
+						component='img'
+						src='/images/logo/icon-512.png'
+						alt='Avexmar logo'
+						sx={{ width: 50, height: 50, mr: 1.5 }}
+					/>
+					<Typography variant='h4' component='span'>
+						{companyName.toUpperCase()}
+					</Typography>
+				</Box>
 
-				{isAdmin && (
-					<Button
-						component={Link}
-						to='/admin'
-						color='inherit'
-						startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
-						sx={{ textTransform: 'none' }}
-					>
-						{UI_LABELS.ADMIN.panel}
-					</Button>
-				)}
-				{isAuth ? (
+				{isMobile ? (
 					<>
-						<Button
-							color='inherit'
-							onClick={handleProfileClick}
-							startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
-							sx={{ textTransform: 'none' }}
-						>
-							{currentUser?.name || UI_LABELS.PROFILE.profile}
-						</Button>
+						<IconButton edge='end' color='inherit' onClick={toggleDrawer(true)}>
+							<MenuIcon />
+						</IconButton>
+						<Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
+							<Box
+								sx={{
+									width: 250,
+									mt: 2,
+									p: 2,
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'flex-start',
+									gap: 4,
+								}}
+							>
+								{isAuth ? (
+									<Button
+										color='inherit'
+										onClick={handleGoToProfile}
+										startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
+										sx={{ textTransform: 'none' }}
+									>
+										{UI_LABELS.PROFILE.profile}
+									</Button>
+								) : (
+									<>
+										<Button
+											color='inherit'
+											onClick={openLoginModal}
+											startIcon={<LoginIcon />}
+											sx={{ textTransform: 'none' }}
+										>
+											{UI_LABELS.BUTTONS.login}
+										</Button>
+										<Button
+											color='inherit'
+											onClick={openRegisterModal}
+											startIcon={<PersonAddIcon />}
+											sx={{ textTransform: 'none' }}
+										>
+											{UI_LABELS.BUTTONS.register}
+										</Button>
+									</>
+								)}
 
-						<Menu
-							anchorEl={anchorEl}
-							open={open}
-							onClose={handleMenuClose}
-							anchorOrigin={{
-								vertical: 'bottom',
-								horizontal: 'right',
-							}}
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-						>
-							<MenuItem onClick={handleGoToProfile}>
-								<SettingsIcon fontSize='small' sx={{ mr: 1 }} />
-								{UI_LABELS.TITLES.settings}
-							</MenuItem>
-							<MenuItem onClick={handleLogout}>
-								<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />
-								{UI_LABELS.BUTTONS.exit}
-							</MenuItem>
-						</Menu>
+								<Button
+									component={Link}
+									to='/search/booking'
+									color='inherit'
+									startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
+									sx={{ textTransform: 'none' }}
+								>
+									{UI_LABELS.BOOKING_SEARCH.link}
+								</Button>
+
+								{isAdmin && (
+									<Button
+										component={Link}
+										to='/admin'
+										color='inherit'
+										startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
+										sx={{ textTransform: 'none' }}
+									>
+										{UI_LABELS.ADMIN.panel}
+									</Button>
+								)}
+
+								{isAuth && (
+									<Button
+										color='inherit'
+										onClick={handleLogout}
+										startIcon={<LoginIcon sx={{ color: 'red' }} />}
+										sx={{ textTransform: 'none' }}
+									>
+										{UI_LABELS.BUTTONS.exit}
+									</Button>
+								)}
+							</Box>
+						</Drawer>
 					</>
 				) : (
-					<>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 						<Button
+							component={Link}
+							to='/search/booking'
 							color='inherit'
-							onClick={openLoginModal}
-							startIcon={<LoginIcon />}
+							startIcon={<SearchIcon sx={{ width: 32, height: 32 }} />}
 							sx={{ textTransform: 'none' }}
 						>
-							{UI_LABELS.BUTTONS.login}
+							{UI_LABELS.BOOKING_SEARCH.link}
 						</Button>
-						<Button
-							color='inherit'
-							onClick={openRegisterModal}
-							startIcon={<PersonAddIcon />}
-							sx={{ textTransform: 'none' }}
-						>
-							{UI_LABELS.BUTTONS.register}
-						</Button>
-					</>
+						{isAdmin && (
+							<Button
+								component={Link}
+								to='/admin'
+								color='inherit'
+								startIcon={<AdminPanelSettingsIcon sx={{ width: 32, height: 32 }} />}
+								sx={{ textTransform: 'none' }}
+							>
+								{UI_LABELS.ADMIN.panel}
+							</Button>
+						)}
+						{isAuth ? (
+							<Button
+								color='inherit'
+								onClick={handleProfileClick}
+								startIcon={<Avatar sx={{ width: 32, height: 32 }} />}
+								sx={{ textTransform: 'none' }}
+							>
+								{UI_LABELS.PROFILE.profile}
+							</Button>
+						) : (
+							<>
+								<Button
+									color='inherit'
+									onClick={openLoginModal}
+									startIcon={<LoginIcon />}
+									sx={{ textTransform: 'none' }}
+								>
+									{UI_LABELS.BUTTONS.login}
+								</Button>
+								<Button
+									color='inherit'
+									onClick={openRegisterModal}
+									startIcon={<PersonAddIcon />}
+									sx={{ textTransform: 'none' }}
+								>
+									{UI_LABELS.BUTTONS.register}
+								</Button>
+							</>
+						)}
+					</Box>
 				)}
-			</Box>
-		</Box>
+
+				{isAuth && !isMobile && (
+					<Menu
+						anchorEl={anchorEl}
+						open={open}
+						onClose={handleMenuClose}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'right',
+						}}
+						transformOrigin={{
+							vertical: 'top',
+							horizontal: 'right',
+						}}
+					>
+						<MenuItem onClick={handleGoToProfile} sx={{ py: 1.5 }}>
+							<Box sx={{ display: 'flex', alignItems: 'center' }}>
+								<Avatar sx={{ width: 32, height: 32, mr: 1 }} />
+								<Box>
+									<Typography variant='subtitle2'>{UI_LABELS.PROFILE.to_profile}</Typography>
+									{currentUser?.email && (
+										<Typography variant='caption' color='text.secondary'>
+											{currentUser.email}
+										</Typography>
+									)}
+								</Box>
+							</Box>
+						</MenuItem>
+						<MenuItem onClick={handleLogout}>
+							<LoginIcon fontSize='small' sx={{ mr: 1, color: 'red' }} />
+							{UI_LABELS.BUTTONS.exit}
+						</MenuItem>
+					</Menu>
+				)}
+			</Toolbar>
+		</AppBar>
 	);
 };
 

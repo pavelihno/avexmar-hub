@@ -2,12 +2,11 @@ import os
 import importlib
 from flask import Flask
 from flask_migrate import Migrate
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
+from app.utils.limiter import init_limiter, limiter
 from app.middlewares.error_handler import register_error_handlers
 from app.middlewares.session_middleware import register_session_handler
 
@@ -37,8 +36,6 @@ from app.controllers.consent_event_controller import *
 from app.controllers.passenger_export_controller import *
 
 
-limiter = Limiter(key_func=get_remote_address)
-
 def __import_models():
     models_dir = 'app/models'
     for dir_path, dir_names, file_names in os.walk(models_dir):
@@ -59,10 +56,9 @@ def __create_app(_config_class, _db):
 
     _db.init_app(app)
     init_mail(app)
+    init_limiter(app)
     register_error_handlers(app)
     register_session_handler(app)
-
-    limiter.init_app(app)
 
     # auth
     app.route('/register', methods=['POST'])(register)
@@ -239,17 +235,12 @@ def __create_app(_config_class, _db):
     app.route('/booking/create', methods=['POST'])(create_booking_process)
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
-    app.route('/booking/payment', methods=['POST'])(create_booking_process_payment)
-    app.route('/booking/invoice', methods=['POST'])(create_booking_process_invoice)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
 
     # exports
     app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
     app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
-    app.route(
-        '/exports/flight-passengers/routes/<int:route_id>/flights',
-        methods=['GET'],
-    )(get_passenger_export_flights)
+    app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

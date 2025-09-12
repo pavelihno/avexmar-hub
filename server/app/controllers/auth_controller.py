@@ -1,5 +1,4 @@
 from flask import request, jsonify
-import pyotp
 import re
 
 from app.config import Config
@@ -27,7 +26,9 @@ def register():
         'email': email,
         'password': password,
         'role': DEFAULT_USER_ROLE,
-        'is_active': False
+        'is_active': False,
+        'first_name': '',
+        'last_name': '',
     })
     if new_user:
         token = sign_activation_token(new_user.email)
@@ -57,12 +58,7 @@ def login():
     user = User.login(email, password)
     if user:
         if user.role == USER_ROLE.admin and re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
-            totp_secret = user.totp_secret
-            if not totp_secret:
-                totp_secret = pyotp.random_base32()
-                user = User.update(user.id, commit=True, totp_secret=totp_secret)
-                user = User.get_by_email(email)
-            totp = pyotp.TOTP(user.totp_secret, interval=Config.LOGIN_TOTP_INTERVAL_SECONDS)
+            totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
             code = totp.now()
             send_email(
                 EMAIL_TYPE.two_factor,
@@ -84,20 +80,14 @@ def setup_2fa():
     if not user or user.role != USER_ROLE.admin:
         return jsonify({'message': 'User not found'}), 404
     
-    totp_secret = user.totp_secret
-    if not totp_secret:
-        totp_secret = pyotp.random_base32()
-        user = User.update(user.id, commit=True, totp_secret=totp_secret)
-        user = User.get_by_email(email)
-
-    totp = pyotp.TOTP(user.totp_secret, interval=Config.LOGIN_TOTP_INTERVAL_SECONDS)
+    totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
     code = totp.now()
     send_email(
-        EMAIL_TYPE.two_factor, 
-        is_noreply=True, 
-        recipients=[user.email], 
-        code=code, 
-        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60
+        EMAIL_TYPE.two_factor,
+        is_noreply=True,
+        recipients=[user.email],
+        code=code,
+        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
     )
     return jsonify({'message': 'Verification code sent'}), 200
 
@@ -109,7 +99,7 @@ def verify_2fa():
     user = User.get_by_email(email)
     if not user or user.role != USER_ROLE.admin or not user.totp_secret:
         return jsonify({'message': 'Invalid request'}), 400
-    totp = pyotp.TOTP(user.totp_secret, interval=Config.LOGIN_TOTP_INTERVAL_SECONDS)
+    totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
     if totp.verify(code):
         User.reset_failed_logins(user)
         token = signJWT(user.email)

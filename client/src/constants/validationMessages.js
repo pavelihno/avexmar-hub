@@ -5,6 +5,12 @@ export const VALIDATION_MESSAGES = {
 		INVALID_DATETIME: 'Неверный формат даты и времени',
 	},
 
+	AUTH: {
+		code: {
+			REQUIRED: 'Код обязателен',
+		},
+	},
+
 	DISCOUNT: {
 		discount_name: {
 			REQUIRED: 'Название скидки обязательно',

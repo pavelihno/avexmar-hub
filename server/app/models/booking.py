@@ -108,6 +108,7 @@ class Booking(BaseModel):
             'fees': self.fees,
             'total_price': self.total_price,
             'seats_number': self.seats_number,
+            'user_id': self.user_id,
             'expires_at': (
                 self.booking_hold.expires_at.isoformat()
                 if self.booking_hold and self.booking_hold.expires_at
@@ -193,14 +194,14 @@ class Booking(BaseModel):
     @classmethod
     def update(
         cls,
-        id,
+        booking_id,
         session: Session | None = None,
         *,
         commit: bool = False,
         **kwargs,
     ):
         session = session or db.session
-        booking = cls.get_or_404(id, session)
+        booking = cls.get_or_404(booking_id, session)
         kwargs = cls.convert_enums(kwargs)
         passenger_counts = kwargs.get('passenger_counts')
         if passenger_counts is not None:
@@ -210,7 +211,7 @@ class Booking(BaseModel):
         history = list(booking.status_history or [])
         history.append({'status': new_status.value, 'at': datetime.now().isoformat()})
         kwargs['status_history'] = history
-        return super().update(id, session=session, commit=commit, **kwargs)
+        return super().update(booking_id, session=session, commit=commit, **kwargs)
 
     @classmethod
     def update_by_public_id(
@@ -261,7 +262,7 @@ class Booking(BaseModel):
         BOOKING_STATUS.cancelled: set(),
     }
 
-    TERMINAL = {BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
+    FINAL_STATUSES = {BOOKING_STATUS.completed, BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
 
     PAGE_FLOW = {
         BOOKING_STATUS.created: ['passengers'],
@@ -294,8 +295,8 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id)
         from_status = booking.status
-        if from_status != to_status and to_status not in cls.ALLOWED_TRANSITIONS.get(
-            from_status, set()
+        if (from_status != to_status and
+            to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
         ):
             raise ValueError(
                 f'Illegal transition: {from_status.value} -> {to_status.value}'

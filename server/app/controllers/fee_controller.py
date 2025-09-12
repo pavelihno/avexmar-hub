@@ -17,14 +17,14 @@ def get_fee(fee_id):
 @admin_required
 def create_fee(current_user):
     data = request.get_json()
-    fee = Fee.create(**data)
+    fee = Fee.create(commit=True, **data)
     return jsonify(fee.to_dict()), 201
 
 
 @admin_required
 def update_fee(current_user, fee_id):
     data = request.get_json()
-    updated = Fee.update(fee_id, **data)
+    updated = Fee.update(fee_id, commit=True, **data)
     return jsonify(updated.to_dict())
 
 

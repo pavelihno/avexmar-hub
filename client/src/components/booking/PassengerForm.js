@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
-import { Box, Grid, Typography, Tooltip } from '@mui/material';
+import { Box, Grid, Typography, Tooltip, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES, DATE_API_FORMAT } from '../../constants';
+import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
 	createFormFields,
 	FIELD_TYPES,
@@ -23,9 +23,9 @@ const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
-const normalizePassenger = (p = {}) => ({
+const normalizePassenger = (p = {}, useCategory = true) => ({
 	id: p.id || '',
-	category: p.category || 'adult',
+	category: useCategory ? p.category || 'adult' : p.category || '',
 	lastName: p.lastName || '',
 	firstName: p.firstName || '',
 	patronymicName: p.patronymicName || '',
@@ -37,8 +37,11 @@ const normalizePassenger = (p = {}) => ({
 	citizenshipId: p.citizenshipId || '',
 });
 
-const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights = [] }, ref) => {
-	const [data, setData] = useState(normalizePassenger(passenger));
+const PassengerForm = (
+	{ passenger, onChange, citizenshipOptions = [], flights = [], prefillOptions = [], onPrefill, useCategory = true },
+	ref
+) => {
+	const [data, setData] = useState(normalizePassenger(passenger, useCategory));
 
 	const [errors, setErrors] = useState({});
 	const [showErrors, setShowErrors] = useState(false);
@@ -46,12 +49,12 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 
 	useEffect(() => {
 		if (!passenger) return;
-		const normalized = normalizePassenger(passenger);
+		const normalized = normalizePassenger(passenger, useCategory);
 		['lastName', 'firstName', 'patronymicName'].forEach((k) => {
 			if (normalized[k]) normalized[k] = String(normalized[k]).toUpperCase();
 		});
 		setData((prev) => ({ ...prev, ...normalized }));
-	}, [passenger]);
+	}, [passenger, useCategory]);
 
 	const requiresCyrillic = isCyrillicDocument(data.documentType);
 	const formConfig = getPassengerFormConfig(data.documentType);
@@ -78,21 +81,23 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 		const firstFlight = minFlightDate ?? today;
 		const lastFlight = maxFlightDate ?? firstFlight;
 
-		if (data.category === 'adult') {
-			// ≥ 12 on ALL flights → must be ≥12 already on the earliest segment
-			birthMax = subYears(firstFlight, 12);
-		} else if (data.category === 'child') {
-			// 2–11 on ALL flights
-			// ≥2 on earliest segment → born on/before (earliest - 2y)
-			// <12 on latest segment → born AFTER (latest - 12y)
-			birthMin = subYears(lastFlight, 12);
-			birthMax = subYears(firstFlight, 2);
-		} else if (['infant', 'infant_seat'].includes(data.category)) {
-			// <2 on ALL flights
-			// <2 on latest segment → born AFTER (latest - 2y)
-			// also cannot be born after the first flight date
-			birthMin = subYears(lastFlight, 2);
-			birthMax = firstFlight;
+		if (useCategory) {
+			if (data.category === 'adult') {
+				// ≥ 12 on ALL flights → must be ≥12 already on the earliest segment
+				birthMax = subYears(firstFlight, 12);
+			} else if (data.category === 'child') {
+				// 2–11 on ALL flights
+				// ≥2 on earliest segment → born on/before (earliest - 2y)
+				// <12 on latest segment → born AFTER (latest - 12y)
+				birthMin = subYears(lastFlight, 12);
+				birthMax = subYears(firstFlight, 2);
+			} else if (['infant', 'infant_seat'].includes(data.category)) {
+				// <2 on ALL flights
+				// <2 on latest segment → born AFTER (latest - 2y)
+				// also cannot be born after the first flight date
+				birthMin = subYears(lastFlight, 2);
+				birthMax = firstFlight;
+			}
 		}
 
 		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
@@ -158,8 +163,9 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 					if (birthMin && birth < birthMin) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					if (birthMax && birth > birthMax) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					if (birth > new Date()) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
-
-					return getAgeError(data.category, v, firstFlight ? formatDate(firstFlight) : undefined);
+					if (useCategory && data.category)
+						return getAgeError(data.category, v, firstFlight ? formatDate(firstFlight) : undefined);
+					return '';
 				},
 			},
 			documentType: {
@@ -242,10 +248,42 @@ const PassengerForm = ({ passenger, onChange, citizenshipOptions = [], flights =
 	const showFields = formConfig.show || [];
 
 	return (
-		<Box sx={{ p: 2, border: `1px solid ${theme.palette.grey[200]}`, borderRadius: 2, mb: 3 }}>
+		<Box
+			sx={{
+				p: { xs: 1, md: 2 },
+				border: `1px solid ${theme.palette.grey[200]}`,
+				borderRadius: 2,
+			}}
+		>
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				{typeLabels[data.category]}
 			</Typography>
+
+			{Array.isArray(prefillOptions) && prefillOptions.length > 0 && (
+				<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+					{prefillOptions.map((opt) => (
+						<Chip
+							size='small'
+							key={opt.id || opt.label}
+							label={opt.label}
+							onClick={() => {
+								const merged = {
+									...data,
+									...opt.data,
+									category: data.category,
+									id: data.id,
+								};
+								['lastName', 'firstName', 'patronymicName'].forEach((k) => {
+									if (merged[k]) merged[k] = String(merged[k]).toUpperCase();
+								});
+								setData(merged);
+								if (onChange) onChange('_prefill', null, merged);
+								if (onPrefill) onPrefill(opt);
+							}}
+						/>
+					))}
+				</Box>
+			)}
 
 			<Grid container spacing={2}>
 				{showFields.map((fieldName) => {

@@ -117,7 +117,9 @@ def create_booking_process_passengers(current_user):
     session = db.session
 
     booking = Booking.update(
-        booking.id, session=session, commit=False, **buyer
+        booking.id, session=session, commit=False, 
+        user_id=current_user.id if current_user else None,
+        **buyer
     )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
@@ -210,6 +212,8 @@ def create_booking_process_passengers(current_user):
 def confirm_booking_process(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
+    is_payment = data.get('is_payment', True)
+
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
@@ -217,16 +221,35 @@ def confirm_booking_process(current_user):
 
     session = db.session
 
-    Booking.transition_status(
-        id=booking.id,
-        session=session,
-        commit=False,
-        to_status=BOOKING_STATUS.confirmed,
-    )
+    # Avoid unnecessary status history entries
+    if booking.status == BOOKING_STATUS.passengers_added:
+        Booking.transition_status(
+            id=booking.id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.confirmed,
+        )
+
+    if is_payment:
+        BookingHold.set_hold(
+            booking.id,
+            datetime.now() + timedelta(hours=Config.BOOKING_PAYMENT_EXP_HOURS),
+            session=session,
+            commit=False,
+        )
+        payment = create_payment(booking)
+    else:
+        BookingHold.set_hold(
+            booking.id,
+            datetime.now() + timedelta(hours=Config.BOOKING_INVOICE_EXP_HOURS),
+            session=session,
+            commit=False,
+        )
+        payment = create_invoice(booking)
 
     session.commit()
 
-    return jsonify({'status': 'ok'}), 200
+    return jsonify(payment.to_dict()), 200
 
 
 @current_user
@@ -248,44 +271,6 @@ def get_booking_process_pdf(current_user, public_id):
         as_attachment=True,
         download_name=f'booking_{booking.booking_number}.pdf',
     )
-
-
-@current_user
-def create_booking_process_payment(current_user):
-    data = request.json or {}
-    public_id = data.get('public_id')
-    if not public_id:
-        return jsonify({'message': 'public_id required'}), 400
-    token = data.get('access_token')
-    booking = Booking.get_if_has_access(current_user, public_id, token)
-    session = db.session
-    BookingHold.set_hold(
-        booking.id,
-        datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS),
-        session=session,
-        commit=False,
-    )
-    payment = create_payment(booking)
-    return jsonify(payment.to_dict()), 201
-
-
-@current_user
-def create_booking_process_invoice(current_user):
-    data = request.json or {}
-    public_id = data.get('public_id')
-    if not public_id:
-        return jsonify({'message': 'public_id required'}), 400
-    token = data.get('access_token')
-    booking = Booking.get_if_has_access(current_user, public_id, token)
-    session = db.session
-    BookingHold.set_hold(
-        booking.id,
-        datetime.now() + timedelta(days=1),
-        session=session,
-        commit=False,
-    )
-    payment = create_invoice(booking)
-    return jsonify(payment.to_dict()), 201
 
 
 @current_user

@@ -3,3 +3,4 @@ export { default as ENUM_LABELS, getEnumOptions } from './enumLabels';
 export { default as UI_LABELS } from './uiLabels';
 export { default as VALIDATION_MESSAGES } from './validationMessages';
 export * from './formats';
+export { default as POSTERS } from './posters';

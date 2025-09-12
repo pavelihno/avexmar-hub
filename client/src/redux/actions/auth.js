@@ -2,11 +2,10 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { serverApi, setAuthToken } from '../../api';
 import { getErrorData } from '../utils';
-import { setCurrentUser } from '../reducers/auth';
 
 export const register = createAsyncThunk('auth/register', async (formData, { rejectWithValue }) => {
 	try {
-			const res = await serverApi.post('/register', { ...formData, email: formData.email.toLowerCase() });
+		const res = await serverApi.post('/register', { ...formData, email: formData.email.toLowerCase() });
 		return res.data;
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));

@@ -22,8 +22,7 @@ const UserManagement = () => {
 			key: 'email',
 			apiKey: 'email',
 			label: FIELD_LABELS.USER.email,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
+			type: FIELD_TYPES.EMAIL,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.USER.email.REQUIRED : null),
 		},
 		role: {

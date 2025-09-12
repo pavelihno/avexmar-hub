@@ -1,5 +1,6 @@
-from typing import List, TYPE_CHECKING
+import pyotp
 from werkzeug.security import generate_password_hash, check_password_hash
+from typing import List, TYPE_CHECKING
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -24,6 +25,9 @@ class User(BaseModel):
     totp_secret = db.Column(db.String, nullable=True)
     failed_login_attempts = db.Column(db.Integer, default=0, nullable=False)
     is_locked = db.Column(db.Boolean, default=False, nullable=False)
+    first_name = db.Column(db.String, nullable=True)
+    last_name = db.Column(db.String, nullable=True)
+    phone_number = db.Column(db.String, nullable=True)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
@@ -42,6 +46,9 @@ class User(BaseModel):
         return {
             'id': self.id,
             'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'phone_number': self.phone_number,
             'role': self.role.value,
             'is_active': self.is_active,
             'failed_login_attempts': self.failed_login_attempts,
@@ -67,6 +74,8 @@ class User(BaseModel):
                 kwargs['password'] = cls.__encode_password(value)
             elif key == 'email' and isinstance(value, str):
                 kwargs['email'] = value.lower()
+
+        kwargs['totp_secret'] = pyotp.random_base32()
 
         return super().create(session=session, commit=commit, **kwargs)
 
@@ -106,6 +115,9 @@ class User(BaseModel):
         else:
             cls.register_failed_login(user)
             return None
+
+    def get_totp(self, interval: int):
+        return pyotp.TOTP(self.totp_secret, interval=interval)
 
     def verify_password(self, _password):
         return self.__is_password_correct(self.password, _password)

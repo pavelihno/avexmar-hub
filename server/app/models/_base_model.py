@@ -38,6 +38,18 @@ class BaseModel(db.Model):
         return {k: v for k, v in kwargs.items() if k in valid}
 
     @classmethod
+    def __prepare_for_save(cls, data: dict) -> dict:
+        """Remove empty values so they are not persisted"""
+        cleaned = {}
+        for k, v in data.items():
+            if isinstance(v, str) and v.strip() == '':
+                continue
+            if isinstance(v, (list, tuple, set, dict)) and len(v) == 0:
+                continue
+            cleaned[k] = v
+        return cleaned
+
+    @classmethod
     def convert_enums(cls, data: dict) -> dict:
         """Convert enum field values to enum instances, set None if invalid"""
         mapper = inspect(cls)
@@ -100,10 +112,15 @@ class BaseModel(db.Model):
     def __check_unique(
         cls, session: Session, data: dict, instance_id: Optional[int] = None
     ) -> Dict[str, str]:
-        """Check if the provided data violates unique constraints"""
+        """Check if the provided data violates unique constraints.
+        NOTE: SQL UNIQUE constraints allow multiple NULLs. We therefore skip
+        validation for any (composite) unique set where at least one value is None.
+        """
         errors: Dict[str, str] = {}
         for columns in cls.__unique_constraints():
             if not all(col in data for col in columns):
+                continue
+            if any(data[col] is None for col in columns):
                 continue
             query = session.query(cls)
             for col in columns:
@@ -180,9 +197,11 @@ class BaseModel(db.Model):
         **data,
     ) -> Optional['BaseModel']:
         session = session or db.session
+        data.pop('id', None)
         data = cls.convert_enums(data)
+        data = cls.__prepare_for_save(data)
         instance = cls(**data)
-        filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
+        filtered_data = instance.__filter_out_non_existing_fields(data)
         cls.__check_foreign_keys_exist(session, filtered_data)
         errors = cls.__check_unique(session, filtered_data)
         if errors:
@@ -211,7 +230,8 @@ class BaseModel(db.Model):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
-        filtered_data = instance._BaseModel__filter_out_non_existing_fields(data)
+        filtered_data = instance.__filter_out_non_existing_fields(data)
+        filtered_data = cls.__prepare_for_save(filtered_data)
         filtered_data = cls.convert_enums(filtered_data)
         cls.__check_foreign_keys_exist(session, filtered_data)
         errors = cls.__check_unique(session, filtered_data, instance.id)

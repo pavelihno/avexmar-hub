@@ -30,9 +30,10 @@ const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { closeAuthModal, openRegisterModal, openForgotPasswordModal } = useAuthModal();
+	const { closeAuthModal, openRegisterModal, openForgotPasswordModal, authModal } = useAuthModal();
 
 	const isAdmin = useSelector(selectIsAdmin);
+	const isLoading = useSelector((state) => state.auth.isLoading);
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -56,7 +57,10 @@ const Login = ({ isModal = false }) => {
 
 	const onChange = (e) => {
 		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: name === 'email' ? value.toLowerCase() : value });
+		setFormData({
+			...formData,
+			[name]: name === 'email' ? value.toLowerCase() : value,
+		});
 	};
 
 	const onSubmit = async (e) => {
@@ -66,6 +70,10 @@ const Login = ({ isModal = false }) => {
 			.unwrap()
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
@@ -87,6 +95,10 @@ const Login = ({ isModal = false }) => {
 			.unwrap()
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
@@ -108,9 +120,10 @@ const Login = ({ isModal = false }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 300 },
 					mx: 'auto',
 					outline: 'none',
 				}}
@@ -168,6 +181,7 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -182,10 +196,11 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.password}
 							helperText={errors.password ? errors.password : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.login}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.login}
 						</Button>
 					</Box>
 				) : !successMessage && twoFactorRequired ? (
@@ -205,10 +220,11 @@ const Login = ({ isModal = false }) => {
 							onChange={(e) => setCode(e.target.value)}
 							error={!!twoFactorErrors.message}
 							helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.confirm}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.confirm}
 						</Button>
 					</Box>
 				) : (
@@ -267,6 +283,7 @@ const Login = ({ isModal = false }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
 			<Container maxWidth='sm'>{content}</Container>

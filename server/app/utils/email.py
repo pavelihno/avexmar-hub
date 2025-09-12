@@ -1,11 +1,16 @@
-from threading import Thread
 import enum
 
 from app.config import Config
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
+
 mail = Mail()
+
+
+class EmailError(Exception):
+    """Raised when sending an email fails"""
+    pass
 
 
 class EMAIL_TYPE(enum.Enum):
@@ -29,6 +34,10 @@ class EMAIL_TYPE(enum.Enum):
         'two_factor',
         'Код для входа —  {brand_name}',
     )
+    password_change = (
+        'password_change',
+        'Изменение пароля — {brand_name}',
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template
@@ -41,14 +50,13 @@ def init_mail(app):
     mail.init_app(app)
 
 
-def __send_async_email(app, msg, username, password) -> None:
+def __send_email(app, msg, username, password) -> None:
     with app.app_context():
         app.config['MAIL_USERNAME'] = username
         app.config['MAIL_PASSWORD'] = password
 
         with mail.connect() as conn:
             conn.host.login(username, password)
-
             conn.send(msg)
 
 
@@ -89,8 +97,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
         msg.body = render_template(f'email/txt/{template}.txt', **context)
         msg.html = render_template(f'email/html/{template}.html', **context)
     except Exception as e:
-        print(f"Template rendering error: {e}")
-        raise
+        raise EmailError('Failed to send email') from e
 
     for attachment in attachments:
         if isinstance(attachment, dict):
@@ -101,6 +108,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
             )
 
     app = current_app._get_current_object()
-    Thread(target=__send_async_email, args=(
-        app, msg, username, password), daemon=True
-    ).start()
+    try:
+        __send_email(app, msg, username, password)
+    except Exception as e:
+        raise EmailError('Failed to send email') from e

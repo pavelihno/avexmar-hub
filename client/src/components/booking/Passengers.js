@@ -7,11 +7,7 @@ import {
 	Typography,
 	Card,
 	CardContent,
-	Checkbox,
-	FormControlLabel,
 	Button,
-	FormControl,
-	FormHelperText,
 	Divider,
 	Chip,
 	Accordion,
@@ -43,6 +39,7 @@ import {
 	useExpiryCountdown,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
+import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
 
 const Passengers = () => {
 	const { publicId } = useParams();
@@ -147,6 +144,18 @@ const Passengers = () => {
 		}
 	}, [booking, passengersExist]);
 
+	useEffect(() => {
+		if (currentUser) {
+			setBuyer((prev) => ({
+				...prev,
+				buyerLastName: prev.buyerLastName || currentUser.last_name,
+				buyerFirstName: prev.buyerFirstName || currentUser.first_name,
+				emailAddress: prev.emailAddress || currentUser.email || '',
+				phoneNumber: prev.phoneNumber || currentUser.phone_number || '',
+			}));
+		}
+	}, [currentUser]);
+
 	const buyerFormFields = useMemo(() => {
 		const fields = {
 			buyerLastName: {
@@ -189,13 +198,6 @@ const Passengers = () => {
 	const handlePassengerChange = (index) => (field, value, data) => {
 		setPassengerData((prev) =>
 			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...data } : p)) : prev
-		);
-	};
-
-	const handlePrefillPassenger = (index, passenger) => {
-		const mapped = fromApiPassenger(passenger);
-		setPassengerData((prev) =>
-			Array.isArray(prev) ? prev.map((p, i) => (i === index ? { ...p, ...mapped } : p)) : prev
 		);
 	};
 
@@ -300,8 +302,17 @@ const Passengers = () => {
 					</Typography>
 				</Box>
 			)}
-			<Grid container spacing={2}>
-				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
+			<Grid container spacing={{ xs: 2, md: 4 }}>
+				<Grid
+					item
+					xs={12}
+					md={8}
+					sx={{
+						maxHeight: { md: 'calc(100vh - 200px)' },
+						overflowY: { xs: 'visible', md: 'auto' },
+						pr: { md: 2 },
+					}}
+				>
 					{errorMessages.length > 0 && (
 						<Stack spacing={1} sx={{ mb: 2 }}>
 							{errorMessages.map((msg, idx) => (
@@ -318,32 +329,30 @@ const Passengers = () => {
 					)}
 					{passengersReady &&
 						passengerData.map((p, index) => (
-							<Box key={p.id || index} sx={{ mb: 2 }}>
-								{currentUser && userPassengers.length > 0 && (
-									<Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-										{userPassengers.map((up) => {
-											const mapped = fromApiPassenger(up);
-											return (
-												<Chip
-													key={up.id}
-													label={`${mapped.lastName || ''} ${mapped.firstName || ''}`}
-													size='small'
-													onClick={() => handlePrefillPassenger(index, up)}
-												/>
-											);
-										})}
-									</Box>
-								)}
+							<Box key={index} sx={{ mb: 2 }}>
 								<PassengerForm
 									passenger={p}
 									flights={booking.flights}
 									onChange={handlePassengerChange(index)}
 									citizenshipOptions={citizenshipOptions}
 									ref={(el) => (passengerRefs.current[index] = el)}
+									prefillOptions={
+										currentUser && userPassengers.length > 0
+											? userPassengers
+													.map((up) => ({ up, mapped: fromApiPassenger(up) }))
+													.map(({ up, mapped }) => ({
+														id: up.id,
+														label: `${mapped.lastName || ''} ${
+															mapped.firstName || ''
+														}`.trim(),
+														data: mapped,
+													}))
+											: []
+									}
 								/>
 							</Box>
 						))}
-					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
+					<Box sx={{ p: { xs: 1, md: 2 }, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
 						<Typography variant='h4' sx={{ mb: 3 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}
 						</Typography>
@@ -383,7 +392,7 @@ const Passengers = () => {
 				</Grid>
 				<Grid item xs={12} md={4} sx={{ position: 'sticky', top: 16 }}>
 					<Card>
-						<CardContent>
+						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>
 									<AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -418,7 +427,9 @@ const Passengers = () => {
 											return (
 												<Box
 													key={f.id || idx}
-													sx={{ mb: idx < booking.flights.length - 1 ? 2 : 0 }}
+													sx={{
+														mb: idx < booking.flights.length - 1 ? 2 : 0,
+													}}
 												>
 													<Box
 														sx={{
@@ -512,13 +523,25 @@ const Passengers = () => {
 								<Typography>{`${formatNumber(farePrice)} ${currencySymbol}`}</Typography>
 							</Box>
 							{fees > 0 && (
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box
+									sx={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										mb: 1,
+									}}
+								>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
 									<Typography>{`${formatNumber(fees)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}
 							{discount > 0 && (
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box
+									sx={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										mb: 1,
+									}}
+								>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.discount}</Typography>
 									<Typography>{`- ${formatNumber(discount)} ${currencySymbol}`}</Typography>
 								</Box>
@@ -534,26 +557,13 @@ const Passengers = () => {
 
 							<Divider sx={{ my: 2 }} />
 
-							<FormControl required error={!!buyerErrors.consent} sx={{ mb: 2 }}>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={buyer.consent}
-											onChange={(e) => handleBuyerChange('consent', e.target.checked)}
-										/>
-									}
-									label={
-										<Typography variant='subtitle2' color='textSecondary'>
-											{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-												<Link to='/privacy_policy' target='_blank'>
-													{text}
-												</Link>
-											))}
-										</Typography>
-									}
-								/>
-								{buyerErrors.consent && <FormHelperText>{buyerErrors.consent}</FormHelperText>}
-							</FormControl>
+							<PrivacyConsentCheckbox
+								value={buyer.consent}
+								onChange={(val) => handleBuyerChange('consent', val)}
+								error={buyerErrors.consent}
+								required
+								sx={{ mb: 2 }}
+							/>
 
 							<Button variant='contained' color='orange' fullWidth onClick={handleContinue}>
 								{UI_LABELS.BUTTONS.continue}

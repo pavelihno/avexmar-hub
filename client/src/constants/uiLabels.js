@@ -1,7 +1,7 @@
-import { formatDate } from '../components/utils';
+import { formatDate, formatTime } from '../components/utils';
 
 export const UI_LABELS = {
-	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
+	APP_TITLE: 'АВЕКСМАР — Авиаперевозки',
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
 		full_name: 'Наименование организации',
@@ -52,6 +52,7 @@ export const UI_LABELS = {
 	BUTTONS: {
 		save: 'Сохранить',
 		save_changes: 'Сохранить изменения',
+		change_password: 'Сохранить новый пароль',
 		close: 'Закрыть',
 		login: 'Войти',
 		exit: 'Выйти',
@@ -71,14 +72,14 @@ export const UI_LABELS = {
 		pagination: {
 			rows_per_page: 'Записей на странице',
 			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
 		},
 	},
 	TITLES: {
 		login: 'Вход',
 		register: 'Регистрация',
-		settings: 'Настройки',
+		profile: 'Личный кабинет',
 		forgot_password: 'Восстановление пароля',
 		activate_account: 'Активация аккаунта',
 	},
@@ -301,13 +302,14 @@ export const UI_LABELS = {
 		two_factor_code_label: 'Код',
 	},
 	PROFILE: {
-		profile: 'Профиль',
-		settings: 'Настройки профиля',
-		maintenance: 'Скоро здесь будет личный кабинет',
+		profile: 'Личный кабинет',
+		to_profile: 'Перейти в личный кабинет',
 		change_password: 'Сменить пароль',
+		verification_code_sent: 'Код подтверждения отправлен на вашу электронную почту',
+		user_info_changed: 'Личные данные успешно изменены',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
-		user_info: 'Данные пользователя',
+		user_info: 'Личные данные',
 		email: 'Электронная почта',
 		role: 'Роль',
 		bookings: 'Мои бронирования',
@@ -316,7 +318,37 @@ export const UI_LABELS = {
 		no_bookings: 'Бронирования отсутствуют',
 		booking_number: 'Номер',
 		status: 'Статус',
-		total_price: 'Сумма',
+		route: 'Маршрут',
+		open_link: 'Открыть бронирование',
+		segmentBuilder: (f) => {
+			if (!f) return { key: undefined, routeText: '', timeText: '' };
+			const route = f.route || {};
+			const o = route.origin_airport || {};
+			const d = route.destination_airport || {};
+			const from = `${o.city_name || ''}${o.iata_code ? ` (${o.iata_code})` : ''}`.trim();
+			const to = `${d.city_name || ''}${d.iata_code ? ` (${d.iata_code})` : ''}`.trim();
+			const depDate = formatDate(f.scheduled_departure, 'dd.MM.yyyy');
+			const depTime = formatTime(f.scheduled_departure_time);
+			const arrDate = formatDate(f.scheduled_arrival, 'dd.MM.yyyy');
+			const arrTime = formatTime(f.scheduled_arrival_time);
+			return {
+				key: f.id,
+				routeText: from && to ? `${from} → ${to}` : '',
+				timeText:
+					depDate || depTime || arrDate || arrTime
+						? `${depDate} ${depTime || ''} — ${arrDate} ${arrTime || ''}`.trim()
+						: '',
+			};
+		},
+		last_name: 'Фамилия',
+		first_name: 'Имя',
+		birth_date: 'Дата рождения',
+		gender: 'Пол',
+		document: 'Документ',
+		passenger_details: 'Данные пассажира',
+		more_details: 'Подробнее',
+		passenger_added: 'Пассажир успешно добавлен',
+		personal_data: 'Личные данные',
 	},
 	HOME: {},
 	BOOKING: {
@@ -402,7 +434,7 @@ export const UI_LABELS = {
 			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
 		},
 		payment_form: {
-			title: (timeLeft) => `${timeLeft} для оплаты`,
+			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
 			retry_payment: 'Повторить оплату',
@@ -412,6 +444,7 @@ export const UI_LABELS = {
 			invoice_waiting: 'Счет отправлен клиенту. Ожидаем оплату...',
 		},
 		completion: {
+			download_pdf: 'Скачать PDF-подтверждение',
 			title: 'Бронирование завершено',
 			price_title: 'Оплачено',
 			payment_details: 'Детали платежа',
@@ -434,7 +467,7 @@ export const UI_LABELS = {
 		pagination: {
 			rows_per_page: 'Рейсов на странице',
 			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
 		},
 	},
@@ -483,15 +516,16 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
-			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} — ${formatDate(date_to, 'dd.MM')}`;
+			if (date_from) return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			else return `${from} → ${to}`;
 		},
 		flight_details: {
 			select_tariff_title: 'Выберите тариф',
 			select_tariff: 'Перейти к оформлению',
 			airline: 'Авиакомпания',
-			from_to: 'Отправление - Прибытие',
-			departure_arrival: 'Время отправления - Время прибытия',
+			from_to: 'Отправление — Прибытие',
+			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			price_from: 'От',
@@ -515,7 +549,7 @@ export const UI_LABELS = {
 			duration: 'Время в пути',
 		},
 		nearby_dates: {
-			title: 'Ближайшие даты',
+			title: (from, to) => `Ближайшие даты: ${from} → ${to}`,
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},

@@ -37,7 +37,7 @@ from app.models.user import User
 
 with app.app_context():
     admin = User.create(
-        commit=True, 
+        commit=True,
         **{
             'email': 'admin',
             'password': '1234',
@@ -53,3 +53,84 @@ with app.app_context():
 ```
 
 Replace `'1234'` with a strong password if necessary.
+
+## Development
+
+### Add ReactJS Dependencies
+
+```bash
+docker-compose exec client-app npm install <package-name> --save-prod
+docker-compose exec client-app npm i --package-lock-only
+```
+
+### Create and Apply Flask Migrations
+
+```bash
+# Initialize migrations (first time only)
+docker-compose exec server-app flask db init
+
+# Create a new migration
+docker-compose exec server-app flask db migrate -m <migration-message>
+
+# Apply migrations
+docker-compose exec server-app flask db upgrade
+```
+
+### Drop Database
+
+Run the following command to drop the database:
+
+```bash
+docker-compose exec server-app python -c "
+from app.app import app, db
+
+with app.app_context():
+    db.drop_all()
+    db.metadata.reflect(bind=db.engine)
+    db.metadata.drop_all(bind=db.engine)
+
+    with db.engine.connect() as conn:
+        conn.execute(db.text('DROP TABLE IF EXISTS alembic_version;'))
+"
+```
+
+### Fix _migrations/versions_ permissions
+
+```bash
+sudo chown -R $USER:$USER server/migrations/versions
+```
+
+### Run Server Tests
+
+Start the server:
+
+```bash
+docker-compose up -d
+```
+
+Run all tests:
+
+```bash
+docker-compose run --rm server-app pytest -sv tests
+```
+
+### Cloudflare Tunnel Setup
+
+Client App:
+
+```bash
+cloudflared tunnel --url http://localhost:3000 --protocol http2
+```
+
+Server App:
+
+```bash
+cloudflared tunnel --url http://localhost:8000 --protocol http2
+```
+
+### Merge into prod/main branch
+
+```bash
+git checkout <target_branch>
+git merge --no-commit <source_branch>
+```

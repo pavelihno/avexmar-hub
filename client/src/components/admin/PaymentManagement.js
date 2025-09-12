@@ -5,7 +5,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
 	fetchPayments,
-	createPaymentAdmin,
+	createPayment,
 	updatePayment,
 	deletePayment,
 	deleteAllPayments,
@@ -135,7 +135,7 @@ const PaymentManagement = () => {
 		editButtonText: () => UI_LABELS.ADMIN.modules.payments.edit_button,
 	});
 
-	const handleAddPayment = (data) => dispatch(createPaymentAdmin(adminManager.toApiFormat(data))).unwrap();
+	const handleAddPayment = (data) => dispatch(createPayment(adminManager.toApiFormat(data))).unwrap();
 	const handleEditPayment = (data) => dispatch(updatePayment(adminManager.toApiFormat(data))).unwrap();
 	const handleDeletePayment = (id) => dispatch(deletePayment(id)).unwrap();
 

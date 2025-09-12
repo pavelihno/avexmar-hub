@@ -14,7 +14,7 @@ def cleanup_expired_bookings():
         Booking.query.join(BookingHold)
         .filter(
             BookingHold.expires_at < now,
-            Booking.status.notin_(Booking.TERMINAL),
+            Booking.status.notin_(Booking.FINAL_STATUSES),
         )
         .with_for_update()
         .all()
@@ -26,13 +26,8 @@ def cleanup_expired_bookings():
     count = len(expired)
     try:
         for booking in expired:
-            BookingHold.delete_by_booking_id(booking.id, session=session)
-            Booking.update(
-                booking.id,
-                session=session,
-                commit=False,
-                status=BOOKING_STATUS.expired,
-            )
+            BookingHold.delete_by_booking_id(booking.id, session=session, commit=False)
+            Booking.transition_status(booking.id, BOOKING_STATUS.expired, session=session, commit=False)
         session.commit()
     except Exception:
         session.rollback()

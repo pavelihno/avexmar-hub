@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+import { Box, Tabs, Tab, Paper, Typography, Grid } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import FlightIcon from '@mui/icons-material/Flight';
+import GroupIcon from '@mui/icons-material/Group';
 
+import Base from '../Base';
 import { UI_LABELS } from '../../constants/uiLabels';
 import UserInfo from './UserInfo';
 import BookingsTab from './BookingsTab';
@@ -15,28 +15,63 @@ import PasswordTab from './PasswordTab';
 const Profile = () => {
 	const [tab, setTab] = useState(0);
 
-	const handleChange = (_e, newValue) => {
-		setTab(newValue);
-	};
+	const handleChange = (_e, newValue) => setTab(newValue);
 
 	return (
-		<Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-			<Paper elevation={3} sx={{ p: 3 }}>
-				<Typography variant='h5' sx={{ mb: 2 }}>
-					{UI_LABELS.PROFILE.settings}
-				</Typography>
-<Tabs value={tab} onChange={handleChange} sx={{ mb: 3 }}>
-<Tab label={UI_LABELS.PROFILE.user_info} />
-<Tab label={UI_LABELS.PROFILE.bookings} />
-<Tab label={UI_LABELS.PROFILE.passengers} />
-<Tab label={UI_LABELS.PROFILE.change_password} />
-</Tabs>
-{tab === 0 && <UserInfo />}
-{tab === 1 && <BookingsTab />}
-{tab === 2 && <PassengersTab />}
-{tab === 3 && <PasswordTab />}
-			</Paper>
-		</Box>
+		<Base maxWidth='lg'>
+			<Box
+				sx={{
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					px: { xs: 1, md: 0 },
+				}}
+			>
+				<Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+					<Typography variant='h3' sx={{ mb: { xs: 2, md: 3 } }}>
+						{UI_LABELS.PROFILE.profile}
+					</Typography>
+					<Box sx={{ mb: { xs: 2, md: 3 } }}>
+						<Tabs
+							value={tab}
+							onChange={handleChange}
+							variant='scrollable'
+							scrollButtons='auto'
+							allowScrollButtonsMobile
+							indicatorColor='primary'
+							textColor='primary'
+							aria-label='profile tabs'
+							sx={{
+								mb: { xs: 2, md: 3 },
+								'& .MuiTabs-flexContainer': {
+									justifyContent: { xs: 'flex-start', md: 'center' },
+								},
+							}}
+						>
+							<Tab icon={<PersonIcon />} label={UI_LABELS.PROFILE.user_info} />
+							<Tab icon={<FlightIcon />} label={UI_LABELS.PROFILE.bookings} />
+							<Tab icon={<GroupIcon />} label={UI_LABELS.PROFILE.passengers} />
+						</Tabs>
+					</Box>
+
+					<Grid container spacing={{ xs: 2, md: 4 }} justifyContent='center' sx={{ mt: 1, mx: 'auto' }}>
+						{tab === 0 && (
+							<>
+								<Grid item xs={12} md={6}>
+									<UserInfo />
+								</Grid>
+								<Grid item xs={12} md={4}>
+									<PasswordTab />
+								</Grid>
+							</>
+						)}
+
+						{tab === 1 && <BookingsTab />}
+						{tab === 2 && <PassengersTab />}
+					</Grid>
+				</Paper>
+			</Box>
+		</Base>
 	);
 };
 

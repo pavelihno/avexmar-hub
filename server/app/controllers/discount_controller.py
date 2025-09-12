@@ -19,14 +19,14 @@ def get_discount(current_user, discount_id):
 @admin_required
 def create_discount(current_user):
     body = request.json
-    discount = Discount.create(**body)
+    discount = Discount.create(commit=True, **body)
     return jsonify(discount.to_dict()), 201
 
 
 @admin_required
 def update_discount(current_user, discount_id):
     body = request.json
-    updated = Discount.update(discount_id, **body)
+    updated = Discount.update(discount_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 

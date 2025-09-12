@@ -19,14 +19,14 @@ def get_passenger(current_user, passenger_id):
 @admin_required
 def create_passenger(current_user):
     body = request.json
-    passenger = Passenger.create(**body)
+    passenger = Passenger.create(commit=True, **body)
     return jsonify(passenger.to_dict()), 201
 
 
 @admin_required
 def update_passenger(current_user, passenger_id):
     body = request.json
-    updated = Passenger.update(passenger_id, **body)
+    updated = Passenger.update(passenger_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
