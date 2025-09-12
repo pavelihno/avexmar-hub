@@ -127,3 +127,10 @@ Server App:
 ```bash
 cloudflared tunnel --url http://localhost:8000 --protocol http2
 ```
+
+### Merge into prod/main branch
+
+```bash
+git checkout <target_branch>
+git merge --no-commit <source_branch>
+```
