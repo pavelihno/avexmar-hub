@@ -193,6 +193,7 @@ def decline_invoice():
 def send_notification():
     provider_id = '303422b0-000f-5000-b000-15cdb5826584'
     event = 'payment.succeeded'
+    # event = 'payment.waiting_for_capture'
 
     event_data = {
         'payment.waiting_for_capture': {'status': 'waiting_for_capture', 'paid': True},
