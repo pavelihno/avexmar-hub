@@ -2,16 +2,17 @@ import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
 
-from yookassa import Configuration, Payment as YooPayment
+from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 from app.config import Config
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
-from app.utils.business_logic import calculate_receipt_details
-from app.utils.datetime import format_date
-from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS
-from app.utils.email import send_email
+from app.utils.business_logic import calculate_receipt_details, get_booking_details
+from app.utils.datetime import format_date, format_time
+from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
+from app.utils.pdf import generate_booking_pdf
+from app.utils.email import EMAIL_TYPE, send_email
 
 # Configure YooKassa SDK
 Configuration.account_id = Config.YOOKASSA_SHOP_ID
@@ -58,6 +59,22 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     }
 
 
+def __generate_cart(booking: Booking) -> Dict[str, Any]:
+    receipt = __generate_receipt(booking)
+    cart = [
+        {
+            'description': item['description'],
+            'price': {
+                'value': item['amount']['value'],
+                'currency': item['amount']['currency'],
+            },
+            'quantity': item['quantity'],
+        }
+        for item in receipt.get('items', [])
+    ]
+    return receipt, cart
+
+
 def __capture_payment(payment: Payment, session) -> YooPayment:
     """Capture authorized payment with receipt and booking number"""
     booking = payment.booking
@@ -75,6 +92,10 @@ def __capture_payment(payment: Payment, session) -> YooPayment:
     return yoo_payment
 
 
+def __capture_invoice(payment: Payment, session) -> YooPayment:
+    return __capture_payment(payment, session)
+
+
 def __send_confirmation_email(booking: Booking) -> bool:
     """Send booking confirmation email to the user"""
     if not booking.email_address:
@@ -84,24 +105,80 @@ def __send_confirmation_email(booking: Booking) -> bool:
         f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
         f'?access_token={booking.access_token}'
     )
+    details = get_booking_details(booking)
+
+    flights = []
+    for f in details.get('flights', []):
+        route = f.get('route') or {}
+        origin = route.get('origin_airport') or {}
+        dest = route.get('destination_airport') or {}
+        flights.append(
+            {
+                'number': f.get('airline_flight_number'),
+                'from': f"{origin.get('city_name')} ({origin.get('iata_code')})",
+                'to': f"{dest.get('city_name')} ({dest.get('iata_code')})",
+                'departure': f"{format_date(f.get('scheduled_departure'))} {format_time(f.get('scheduled_departure_time'))}",
+                'arrival': f"{format_date(f.get('scheduled_arrival'))} {format_time(f.get('scheduled_arrival_time'))}",
+            }
+        )
+    flights.sort(key=lambda x: x['departure'])
+
+    category_labels = {
+        'adult': 'Взрослый',
+        'child': 'Ребёнок',
+        'infant': 'Младенец',
+        'infant_seat': 'Младенец с местом',
+    }
+    passengers = []
+    for p in details.get('passengers', []):
+        name = ' '.join(
+            filter(None, [p.get('last_name'), p.get('first_name')])
+        ).strip()
+        passengers.append(
+            {'name': name, 'category': category_labels.get(p.get('category'), p.get('category'))}
+        )
+
+    pdf_data = generate_booking_pdf(booking, details=details)
+
     send_email(
-        subject=f'Подтверждение бронирования № {str(booking.booking_number)}',
+        EMAIL_TYPE.booking_confirmation,
+        is_noreply=False,
         recipients=[booking.email_address],
-        template='booking_confirmation.txt',
         booking_number=str(booking.booking_number),
-        total_price=f'{booking.total_price:.2f}',
-        currency=booking.currency.value.upper(),
         booking_url=booking_url,
+        flights=flights,
+        passengers=passengers,
+        attachments=[{
+            'filename': f'booking_{booking.booking_number}.pdf',
+            'content_type': 'application/pdf',
+            'data': pdf_data,
+        }],
+    )
+    return True
+
+
+def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
+    if not booking.email_address or not payment_url:
+        return False
+    send_email(
+        EMAIL_TYPE.invoice_payment,
+        is_noreply=False,
+        recipients=[booking.email_address],
+        payment_url=payment_url,
+        hours=Config.BOOKING_INVOICE_EXP_HOURS,
     )
     return True
 
 
 def create_payment(booking: Booking) -> Payment:
-    """Create a two-stage payment in YooKassa and persist model"""
+    """Create a two-stage payment in YooKassa"""
 
     # If a pending payment already exists for this booking, return it
     existing_payment = (
-        booking.payments.filter(Payment.payment_status == PAYMENT_STATUS.pending)
+        booking.payments.filter(
+            Payment.payment_status == PAYMENT_STATUS.pending,
+            Payment.payment_type == PAYMENT_TYPE.payment,
+        )
         .order_by(Payment.created_at.desc())
         .first()
     )
@@ -112,7 +189,7 @@ def create_payment(booking: Booking) -> Payment:
         'value': f'{booking.total_price:.2f}',
         'currency': booking.currency.value.upper(),
     }
-    expires_at = datetime.now() + timedelta(hours=1)
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_PAYMENT_EXP_HOURS)
     body = {
         'amount': amount,
         'confirmation': {'type': 'embedded'},
@@ -138,6 +215,7 @@ def create_payment(booking: Booking) -> Payment:
             booking_id=booking.id,
             payment_method=PAYMENT_METHOD.yookassa,
             payment_status=PAYMENT_STATUS.pending,
+            payment_type=PAYMENT_TYPE.payment,
             amount=booking.total_price,
             currency=booking.currency,
             provider_payment_id=yookassa_payment_id,
@@ -160,6 +238,78 @@ def create_payment(booking: Booking) -> Payment:
         raise e
 
 
+def create_invoice(booking: Booking) -> Payment:
+    """Create a two-stage invoice in YooKassa"""
+
+    # If a pending invoice already exists for this booking, return it
+    existing_invoice = (
+        booking.payments.filter(
+            Payment.payment_status == PAYMENT_STATUS.pending,
+            Payment.payment_type == PAYMENT_TYPE.invoice,
+        )
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+    if existing_invoice:
+        return existing_invoice
+
+    amount = {
+        'value': f'{booking.total_price:.2f}',
+        'currency': booking.currency.value.upper(),
+    }
+    receipt, cart = __generate_cart(booking)
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_INVOICE_EXP_HOURS)
+
+    body = {
+        'payment_data': {
+            'amount': amount,
+            'receipt': receipt,
+            'capture': False,
+        },
+        'cart': cart,
+        'expires_at': expires_at.isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
+        'metadata': {
+            'public_id': str(booking.public_id),
+            'expires_at': expires_at.isoformat(),
+        },
+    }
+
+    try:
+        yoo_invoice = YooInvoice.create(body, uuid.uuid4())
+        invoice_id = getattr(yoo_invoice, 'id', None)
+        payment_url = getattr(yoo_invoice, 'payment_url', None)
+
+        session = db.session
+        payment = Payment.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            payment_type=PAYMENT_TYPE.invoice,
+            amount=booking.total_price,
+            currency=booking.currency,
+            provider_payment_id=invoice_id,
+            expires_at=expires_at,
+        )
+
+        Booking.transition_status(
+            id=booking.id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.payment_pending,
+        )
+
+        session.commit()
+
+        __send_invoice_email(booking, payment_url)
+
+        return payment
+
+    except Exception as e:
+        raise e
+
+
 def handle_webhook(payload: Dict[str, Any]) -> None:
     """Process YooKassa webhook notifications"""
     event = payload.get('event')
@@ -175,7 +325,10 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     payment = Payment.get_by_provider_payment_id(provider_id)
 
-    updates = {'payment_status': status, 'last_webhook': payload}
+    status_map = {'issued': PAYMENT_STATUS.pending, 'paid': PAYMENT_STATUS.succeeded}
+    mapped_status = status_map.get(status, status)
+
+    updates = {'payment_status': mapped_status, 'last_webhook': payload}
     if is_paid:
         updates['is_paid'] = is_paid
         updates['paid_at'] = captured_at
@@ -186,12 +339,15 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
 
     send_confirmation = False
 
-    if event == 'payment.waiting_for_capture':
+    if event in ('payment.waiting_for_capture', 'invoice.waiting_for_capture'):
         yoo_payment = YooPayment.find_one(provider_id)
         if yoo_payment.status == PAYMENT_STATUS.waiting_for_capture.value:
-            __capture_payment(payment, session)
+            if payment.payment_type == PAYMENT_TYPE.invoice:
+                __capture_invoice(payment, session)
+            else:
+                __capture_payment(payment, session)
 
-    elif event == 'payment.canceled':
+    elif event in ('payment.canceled', 'invoice.canceled'):
         Booking.transition_status(
             id=booking.id,
             session=session,
@@ -199,7 +355,7 @@ def handle_webhook(payload: Dict[str, Any]) -> None:
             to_status=BOOKING_STATUS.payment_failed,
         )
 
-    elif event == 'payment.succeeded':
+    elif event in ('payment.succeeded', 'invoice.paid'):
         Booking.transition_status(
             id=booking.id,
             session=session,

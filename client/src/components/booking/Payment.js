@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Button, Alert, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
 
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PaymentForm from './PaymentForm';
 import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber } from '../utils';
+import { formatNumber, useExpiryCountdown } from '../utils';
 
 const Payment = () => {
 	const { publicId } = useParams();
@@ -22,60 +22,15 @@ const Payment = () => {
 	const paymentAmount = payment?.amount;
 	const currencySymbol = payment ? ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || '' : '';
 	const confirmationToken = payment?.confirmation_token;
+	const paymentType = payment?.payment_type;
+	const isInvoice = paymentType === 'invoice';
 	const expiresAt = payment?.expires_at;
 
-	const [timeLeft, setTimeLeft] = useState('');
+	const timeLeft = useExpiryCountdown(expiresAt);
 
 	useEffect(() => {
 		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
 	}, [timeLeft]);
-
-	const toExpiryMs = (isoLike) => {
-		if (!isoLike) return NaN;
-		let s = String(isoLike).trim();
-
-		// Trim fractional seconds to 3 digits (milliseconds)
-		s = s.replace(/\.(\d{3})\d+$/, '.$1');
-
-		// If there's no timezone info, assume UTC (append Z)
-		if (!/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) s += 'Z';
-
-		const t = Date.parse(s);
-		return Number.isNaN(t) ? NaN : t;
-	};
-
-	useEffect(() => {
-		const targetMs = toExpiryMs(expiresAt);
-		if (!isFinite(targetMs)) {
-			setTimeLeft('');
-			return;
-		}
-
-		let timer = null;
-
-		const render = () => {
-			const now = Date.now();
-			let diff = targetMs - now;
-
-			if (diff <= 0) {
-				setTimeLeft('00:00');
-				return;
-			}
-
-			const minutes = Math.floor(diff / 60000);
-			const seconds = Math.floor((diff % 60000) / 1000);
-			setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-
-			// align next tick to the next full second to avoid drift
-			const nextIn = 1000 - (now % 1000);
-			timer = setTimeout(render, nextIn);
-		};
-
-		render();
-		return () => {
-			if (timer) clearTimeout(timer);
-		};
-	}, [expiresAt]);
 
 	const isProcessing =
 		new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
@@ -105,64 +60,69 @@ const Payment = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='payment' />
-			<Box sx={{ mt: 2, mx: 'auto', width: '100%', maxWidth: 'md' }}>
-				<Card>
-					<CardContent>
-						<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-							<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-								<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-									{`${UI_LABELS.BOOKING.payment_form.total}: `}
-								</Typography>
-								<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
-									{`${formatNumber(paymentAmount)} ${currencySymbol}`}
-								</Typography>
-							</Box>
-							{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
-								<Typography variant='h6' sx={{ fontWeight: 600 }}>
-									{timeLeft}
-								</Typography>
-							)}
-						</Box>
 
-						{paymentStatus === 'canceled' && (
-							<Alert severity='error' sx={{ mb: 2 }}>
-								{UI_LABELS.BOOKING.payment_form.payment_failed}
-							</Alert>
-						)}
+			<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, mx: 'auto', width: '100%', px: { xs: 2, md: 0 } }}>
+				<Box
+					sx={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						mb: 2,
+						flexDirection: { xs: 'column', sm: 'row' },
+						alignItems: { xs: 'flex-start', sm: 'center' },
+						gap: { xs: 1, sm: 0 },
+					}}
+				>
+					<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+						<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+							{`${UI_LABELS.BOOKING.payment_form.total}: `}
+						</Typography>
+						<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
+							{`${formatNumber(paymentAmount)} ${currencySymbol}`}
+						</Typography>
+					</Box>
+					{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
+						<Typography variant='h6' sx={{ fontWeight: 600 }}>
+							{timeLeft}
+						</Typography>
+					)}
+				</Box>
 
-						{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
-							<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-								<CircularProgress />
-							</Box>
-						)}
+				{paymentStatus === 'canceled' && (
+					<Alert severity='error' sx={{ mb: 2 }}>
+						{UI_LABELS.BOOKING.payment_form.payment_failed}
+					</Alert>
+				)}
 
-						{!isProcessing && paymentStatus !== 'succeeded' && (
-							<PaymentForm
-								confirmationToken={confirmationToken}
-								returnUrl={returnUrl}
-								onError={handleError}
-							/>
-						)}
+				{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
+					<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+						<CircularProgress />
+					</Box>
+				)}
 
-						{paymentStatus === 'canceled' && (
-							<Button
-								variant='contained'
-								color='orange'
-								sx={{ mt: 2 }}
-								onClick={() => {
-									dispatch(
-										createPayment({
-											public_id: publicId,
-										})
-									);
-								}}
-							>
-								{UI_LABELS.BOOKING.payment_form.retry_payment}
-							</Button>
-						)}
-					</CardContent>
-				</Card>
-			</Box>
+				{!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (
+					<PaymentForm confirmationToken={confirmationToken} returnUrl={returnUrl} onError={handleError} />
+				)}
+				{isInvoice && paymentStatus !== 'succeeded' && (
+					<Typography sx={{ mt: 2 }}>{UI_LABELS.BOOKING.payment_form.invoice_waiting}</Typography>
+				)}
+
+				{paymentStatus === 'canceled' && !isInvoice && (
+					<Button
+						variant='contained'
+						color='orange'
+						sx={{ mt: 2, width: { xs: '100%', sm: 'auto' } }}
+						onClick={() => {
+							dispatch(
+								createPayment({
+									public_id: publicId,
+								})
+							);
+						}}
+					>
+						{UI_LABELS.BOOKING.payment_form.retry_payment}
+					</Button>
+				)}
+			</Container>
 		</Base>
 	);
 };

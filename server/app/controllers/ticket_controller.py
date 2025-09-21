@@ -19,18 +19,18 @@ def get_ticket(current_user, ticket_id):
 @admin_required
 def create_ticket(current_user):
     body = request.json
-    ticket = Ticket.create(**body)
+    ticket = Ticket.create(commit=True, **body)
     return jsonify(ticket.to_dict()), 201
 
 
 @admin_required
 def update_ticket(current_user, ticket_id):
     body = request.json
-    updated = Ticket.update(ticket_id, **body)
+    updated = Ticket.update(ticket_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_ticket(current_user, ticket_id):
-    deleted = Ticket.delete_or_404(ticket_id)
+    deleted = Ticket.delete_or_404(ticket_id, commit=True)
     return jsonify(deleted)

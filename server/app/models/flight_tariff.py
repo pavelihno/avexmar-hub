@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
@@ -7,7 +7,6 @@ from app.models.tariff import Tariff
 
 if TYPE_CHECKING:
     from app.models.flight import Flight
-    from app.models.seat import Seat
 
 
 class FlightTariff(BaseModel):
@@ -19,7 +18,6 @@ class FlightTariff(BaseModel):
 
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='tariffs')
     tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='flight_tariffs')
-    seats: Mapped[List['Seat']] = db.relationship('Seat', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan')
 
     __table_args__ = (
         db.UniqueConstraint('flight_id', 'tariff_id', name='uix_flight_tariff_flight_tariff'),

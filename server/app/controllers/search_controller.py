@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from sqlalchemy import or_, false
+from sqlalchemy import and_, or_, false
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 
@@ -8,6 +8,10 @@ from app.models.airline import Airline
 from app.models.route import Route
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
+from app.models.booking import Booking
+from app.models.booking_hold import BookingHold
+from app.models.booking_flight import BookingFlight
+from app.utils.enum import BOOKING_STATUS
 from app.models.airport import Airport
 from app.models.flight import Flight
 from app.utils.business_logic import get_seats_number, calculate_price_details
@@ -31,12 +35,40 @@ def search_airports():
 
 
 def __get_available_tariffs(flight_id):
+    active_hold_exists = db.session.query(BookingHold.id).filter(
+        BookingHold.booking_id == Booking.id,
+        BookingHold.expires_at != None,
+        BookingHold.expires_at > func.now(),
+    ).exists()
+
+    taken_rows = (
+        db.session.query(
+            BookingFlight.tariff_id.label("tariff_id"),
+            func.coalesce(func.sum(Booking.seats_number), 0).label("taken"),
+        )
+        .select_from(BookingFlight)
+        .join(Booking, BookingFlight.booking_id == Booking.id)
+        .filter(
+            BookingFlight.flight_id == flight_id,
+            or_(
+                Booking.status == BOOKING_STATUS.completed,
+                and_(
+                    ~Booking.status.in_([BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]),
+                    active_hold_exists,
+                ),
+            ),
+        )
+        .group_by(BookingFlight.tariff_id)
+        .all()
+    )
+    taken_map = {row.tariff_id: row.taken for row in taken_rows}
+
     tariff_query = (
         db.session.query(FlightTariff, Tariff)
         .join(Tariff, FlightTariff.tariff_id == Tariff.id)
         .filter(FlightTariff.flight_id == flight_id)
     )
-    return sorted([
+    result = [
         {
             'id': t.id,
             'seat_class': t.seat_class.value,
@@ -46,11 +78,13 @@ def __get_available_tariffs(flight_id):
             'conditions': t.conditions,
             'baggage': t.baggage,
             'hand_luggage': t.hand_luggage,
-            'seats_left': ft.seats_number,
+            'seats_left': max((ft.seats_number or 0) - taken_map.get(ft.tariff_id, 0), 0),
         }
         for ft, t in tariff_query
-        if ft.seats_number > 0 and t.price is not None
-    ], key=lambda x: x['price'])
+        if (ft.seats_number or 0) - taken_map.get(ft.tariff_id, 0) > 0 and t.price is not None
+    ]
+
+    return sorted(result, key=lambda x: x['price'])
 
 
 def __query_flights(
@@ -156,10 +190,13 @@ def __query_flights(
         if tariff is not None:
             f_dict['price'] = tariff['price']
             f_dict['currency'] = tariff['currency']
+            f_dict['seats_left'] = tariff['seats_left']
 
         if min_tariff is not None:
             f_dict['min_price'] = min_tariff['price']
             f_dict['currency'] = min_tariff['currency']
+            if 'seats_left' not in f_dict:
+                f_dict['seats_left'] = min_tariff['seats_left']
 
         if direction:
             f_dict['direction'] = direction

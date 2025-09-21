@@ -11,31 +11,41 @@ class Config:
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 
-    JWT_EXP_HOURS = int(os.environ.get('SERVER_JWT_EXP_HOURS'))
-
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('SERVER_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    LIMITER_STORAGE_URI = os.environ.get('SERVER_LIMITER_STORAGE_URI')
 
     # Security settings
     CSRF_ENABLED = True
-    CORS_ORIGINS = CLIENT_URL
 
     # Mail settings
     MAIL_SERVER = os.environ.get('SERVER_MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('SERVER_MAIL_PORT', 25))
-    MAIL_USERNAME = os.environ.get('SERVER_MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('SERVER_MAIL_PASSWORD')
     MAIL_USE_TLS = os.environ.get('SERVER_MAIL_USE_TLS') == 'True'
     MAIL_USE_SSL = os.environ.get('SERVER_MAIL_USE_SSL') == 'True'
-    MAIL_DEFAULT_SENDER = os.environ.get('SERVER_MAIL_DEFAULT_SENDER')
+    MAIL_DEFAULT_USERNAME = os.environ.get('SERVER_MAIL_DEFAULT_USERNAME')
+    MAIL_DEFAULT_PASSWORD = os.environ.get('SERVER_MAIL_DEFAULT_PASSWORD')
+    MAIL_NOREPLY_USERNAME = os.environ.get('SERVER_MAIL_NOREPLY_USERNAME')
+    MAIL_NOREPLY_PASSWORD = os.environ.get('SERVER_MAIL_NOREPLY_PASSWORD')
 
     # Yookassa settings
     YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
     YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
-    YOOKASSA_USE_MOCK = os.environ.get('YOOKASSA_USE_MOCK') == 'True'
-    YOOKASSA_API_URL = (
-        os.environ.get('YOOKASSA_MOCK_URL')
-        if YOOKASSA_USE_MOCK
-        else os.environ.get('YOOKASSA_API_URL')
-    )
+
+    # Celery settings
+    CELERY_BROKER_URL = os.environ.get('SERVER_CELERY_BROKER_URL')
+
+    # Business logic settings
+    JWT_EXP_HOURS = 72
+    PASSWORD_RESET_EXP_HOURS = 1
+    ACCOUNT_ACTIVATION_EXP_HOURS = 24
+
+    LOGIN_TOTP_INTERVAL_SECONDS = 300
+    LOGIN_RATE_LIMIT = '5 per minute'
+    MAX_FAILED_LOGIN_ATTEMPTS = 10
+    PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS = 600
+
+    BOOKING_CONFIRMATION_EXP_HOURS = 1
+    BOOKING_PAYMENT_EXP_HOURS = 1
+    BOOKING_INVOICE_EXP_HOURS = 24

@@ -19,18 +19,18 @@ def get_booking_passenger(current_user, booking_passenger_id):
 @admin_required
 def create_booking_passenger(current_user):
     body = request.json
-    booking_passenger = BookingPassenger.create(**body)
+    booking_passenger = BookingPassenger.create(commit=True, **body)
     return jsonify(booking_passenger.to_dict()), 201
 
 
 @admin_required
 def update_booking_passenger(current_user, booking_passenger_id):
     body = request.json
-    updated = BookingPassenger.update(booking_passenger_id, **body)
+    updated = BookingPassenger.update(booking_passenger_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_booking_passenger(current_user, booking_passenger_id):
-    deleted = BookingPassenger.delete_or_404(booking_passenger_id)
+    deleted = BookingPassenger.delete_or_404(booking_passenger_id, commit=True)
     return jsonify(deleted)

@@ -2,11 +2,11 @@ import os
 import importlib
 from flask import Flask
 from flask_migrate import Migrate
-from flask_cors import CORS
 
 from app.config import Config
 from app.database import db
 from app.utils.email import init_mail
+from app.utils.limiter import init_limiter, limiter
 from app.middlewares.error_handler import register_error_handlers
 from app.middlewares.session_middleware import register_session_handler
 
@@ -20,7 +20,6 @@ from app.controllers.flight_controller import *
 from app.controllers.tariff_controller import *
 from app.controllers.flight_tariff_controller import *
 from app.controllers.discount_controller import *
-from app.controllers.seat_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
@@ -34,6 +33,7 @@ from app.controllers.timezone_controller import *
 from app.controllers.fee_controller import *
 from app.controllers.consent_doc_controller import *
 from app.controllers.consent_event_controller import *
+from app.controllers.passenger_export_controller import *
 
 
 def __import_models():
@@ -51,23 +51,24 @@ def __create_app(_config_class, _db):
     app = Flask(__name__)
     app.config.from_object(_config_class)
 
-    # Enable CORS for all routes
-    CORS(app, resources={r"/*": {'origins': Config.CORS_ORIGINS}})
-
     # Required for tracking migrations
     __import_models()
 
     _db.init_app(app)
     init_mail(app)
+    init_limiter(app)
     register_error_handlers(app)
     register_session_handler(app)
 
     # auth
     app.route('/register', methods=['POST'])(register)
-    app.route('/login', methods=['POST'])(login)
+    app.route('/login', methods=['POST'])(limiter.limit(Config.LOGIN_RATE_LIMIT)(login))
     app.route('/auth', methods=['GET'])(auth)
     app.route('/forgot_password', methods=['POST'])(forgot_password)
     app.route('/reset_password', methods=['POST'])(reset_password)
+    app.route('/activate', methods=['POST'])(activate_account)
+    app.route('/setup_2fa', methods=['POST'])(setup_2fa)
+    app.route('/verify_2fa', methods=['POST'])(verify_2fa)
 
     # users
     app.route('/users', methods=['GET'])(get_users)
@@ -77,6 +78,9 @@ def __create_app(_config_class, _db):
     app.route('/users/<int:user_id>', methods=['DELETE'])(delete_user)
     app.route('/users/<int:user_id>/activate', methods=['PUT'])(activate_user)
     app.route('/users/<int:user_id>/deactivate', methods=['PUT'])(deactivate_user)
+    app.route('/users/<int:user_id>/bookings', methods=['GET'])(get_user_bookings)
+    app.route('/users/<int:user_id>/passengers', methods=['GET'])(get_user_passengers)
+    app.route('/users/<int:user_id>/passengers', methods=['POST'])(create_user_passenger)
     app.route('/users/change_password', methods=['PUT'])(change_password)
 
     # airports
@@ -180,13 +184,6 @@ def __create_app(_config_class, _db):
     app.route('/consent_events/<uuid:event_id>', methods=['PUT'])(update_consent_event)
     app.route('/consent_events/<uuid:event_id>', methods=['DELETE'])(delete_consent_event)
 
-    # seats
-    app.route('/seats', methods=['GET'])(get_seats)
-    app.route('/seats', methods=['POST'])(create_seat)
-    app.route('/seats/<int:seat_id>', methods=['GET'])(get_seat)
-    app.route('/seats/<int:seat_id>', methods=['PUT'])(update_seat)
-    app.route('/seats/<int:seat_id>', methods=['DELETE'])(delete_seat)
-
     # passengers
     app.route('/passengers', methods=['GET'])(get_passengers)
     app.route('/passengers', methods=['POST'])(create_passenger)
@@ -229,15 +226,21 @@ def __create_app(_config_class, _db):
     app.route('/search/flights/schedule', methods=['GET'])(schedule_flights)
     app.route('/search/flights/<int:flight_id>/tariffs', methods=['GET'])(search_flight_tariffs)
     app.route('/search/calculate/price', methods=['POST'])(calculate_price)
+    app.route('/search/booking', methods=['POST'])(search_booking)
 
     # booking process
     app.route('/booking/<public_id>/access', methods=['GET'])(get_booking_process_access)
     app.route('/booking/<public_id>/details', methods=['GET'])(get_booking_process_details)
+    app.route('/booking/<public_id>/pdf', methods=['GET'])(get_booking_process_pdf)
     app.route('/booking/create', methods=['POST'])(create_booking_process)
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
-    app.route('/booking/payment', methods=['POST'])(create_booking_process_payment)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
+
+    # exports
+    app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
+    app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
+    app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

@@ -117,6 +117,7 @@ class Airport(BaseModel):
 
                     airport = cls.create(
                         session,
+                        name=str(row.get('name')),
                         city_name=str(row.get('city_name')),
                         city_name_en=str(row.get('city_name_en')),
                         iata_code=str(row.get('iata_code')),

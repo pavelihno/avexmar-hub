@@ -22,7 +22,7 @@ import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 
 import Base from '../Base';
 import { selectIsAdmin } from '../../redux/reducers/auth';
-import { login } from '../../redux/actions/auth';
+import { login, verifyTwoFactor } from '../../redux/actions/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
@@ -30,9 +30,10 @@ const Login = ({ isModal = false }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { closeAuthModal, openRegisterModal, openForgotPasswordModal } = useAuthModal();
+	const { closeAuthModal, openRegisterModal, openForgotPasswordModal, authModal } = useAuthModal();
 
 	const isAdmin = useSelector(selectIsAdmin);
+	const isLoading = useSelector((state) => state.auth.isLoading);
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -41,6 +42,10 @@ const Login = ({ isModal = false }) => {
 
 	const [errors, setErrors] = useState({});
 	const [successMessage, setSuccessMessage] = useState('');
+	const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+	const [code, setCode] = useState('');
+	const [twoFactorErrors, setTwoFactorErrors] = useState({});
+	const [twoFactorEmail, setTwoFactorEmail] = useState('');
 
 	useEffect(() => {
 		if (successMessage && isAdmin) {
@@ -50,7 +55,13 @@ const Login = ({ isModal = false }) => {
 
 	const { email, password } = formData;
 
-	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => {
+		const { name, value } = e.target;
+		setFormData({
+			...formData,
+			[name]: name === 'email' ? value.toLowerCase() : value,
+		});
+	};
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
@@ -59,11 +70,40 @@ const Login = ({ isModal = false }) => {
 			.unwrap()
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
 				if (isModal) {
 					setTimeout(() => closeAuthModal(), 1500);
 				}
 			})
-			.catch((res) => setErrors(res));
+			.catch((res) => {
+				if (res && res.message === 'Two-factor authentication required') {
+					setTwoFactorRequired(true);
+					setTwoFactorEmail(res.email || email);
+				} else {
+					setErrors(res);
+				}
+			});
+	};
+
+	const onVerify = async (e) => {
+		e.preventDefault();
+		setTwoFactorErrors({});
+		dispatch(verifyTwoFactor({ email, code }))
+			.unwrap()
+			.then(() => {
+				setSuccessMessage(UI_LABELS.SUCCESS.login);
+				const redirect = authModal.redirectPath;
+				if (redirect) {
+					setTimeout(() => navigate(redirect), 500);
+				}
+				if (isModal) {
+					setTimeout(() => closeAuthModal(), 1500);
+				}
+			})
+			.catch((res) => setTwoFactorErrors(res));
 	};
 
 	const handleRegisterClick = (e) => {
@@ -80,9 +120,10 @@ const Login = ({ isModal = false }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 300 },
 					mx: 'auto',
 					outline: 'none',
 				}}
@@ -125,7 +166,7 @@ const Login = ({ isModal = false }) => {
 					</div>
 				</Fade>
 
-				{!successMessage ? (
+				{!successMessage && !twoFactorRequired ? (
 					<Box component='form' onSubmit={onSubmit}>
 						<TextField
 							margin='dense'
@@ -140,6 +181,7 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -154,10 +196,35 @@ const Login = ({ isModal = false }) => {
 							onChange={onChange}
 							error={!!errors.password}
 							helperText={errors.password ? errors.password : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.login}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.login}
+						</Button>
+					</Box>
+				) : !successMessage && twoFactorRequired ? (
+					<Box component='form' onSubmit={onVerify}>
+						<Alert severity='info' sx={{ mb: 2 }}>
+							{UI_LABELS.AUTH.two_factor_prompt(twoFactorEmail)}
+						</Alert>
+						<TextField
+							margin='dense'
+							required
+							fullWidth
+							id='code'
+							label={UI_LABELS.AUTH.two_factor_code_label}
+							name='code'
+							autoFocus
+							value={code}
+							onChange={(e) => setCode(e.target.value)}
+							error={!!twoFactorErrors.message}
+							helperText={twoFactorErrors.message ? twoFactorErrors.message : ''}
+							disabled={isLoading}
+						/>
+						<Divider sx={{ my: 1 }} />
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.confirm}
 						</Button>
 					</Box>
 				) : (
@@ -173,7 +240,7 @@ const Login = ({ isModal = false }) => {
 					</Box>
 				)}
 
-				{!successMessage && (
+				{!successMessage && !twoFactorRequired && (
 					<>
 						<Divider sx={{ my: 2 }}>{UI_LABELS.AUTH.or}</Divider>
 
@@ -216,6 +283,7 @@ const Login = ({ isModal = false }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
 			<Container maxWidth='sm'>{content}</Container>

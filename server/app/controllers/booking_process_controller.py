@@ -1,14 +1,19 @@
-from flask import request, jsonify
+from flask import request, jsonify, send_file
+from io import BytesIO
 
 from app.database import db
+from app.config import Config
+from datetime import datetime, timedelta
+
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
 from app.models.passenger import Passenger
 from app.models.payment import Payment
+from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
-from app.utils.business_logic import calculate_price_details
-from app.utils.yookassa import create_payment, handle_webhook
+from app.utils.business_logic import calculate_price_details, get_booking_details
+from app.utils.yookassa import create_payment, create_invoice, handle_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
     PASSENGER_PLURAL_CATEGORY,
@@ -17,6 +22,7 @@ from app.utils.enum import (
     CONSENT_DOC_TYPE,
 )
 from app.utils.consent import create_booking_consent
+from app.utils.pdf import generate_booking_pdf
 
 
 @current_user
@@ -82,7 +88,13 @@ def create_booking_process(current_user):
             flight_id=return_id,
             tariff_id=return_tariff_id,
         )
-
+    expires_at = datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS)
+    BookingHold.set_hold(
+        booking.id,
+        expires_at,
+        session=session,
+        commit=False,
+    )
     session.commit()
 
     result = {'public_id': str(booking.public_id)}
@@ -105,7 +117,9 @@ def create_booking_process_passengers(current_user):
     session = db.session
 
     booking = Booking.update(
-        booking.id, session=session, commit=False, **buyer
+        booking.id, session=session, commit=False, 
+        user_id=current_user.id if current_user else None,
+        **buyer
     )
 
     existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
@@ -198,6 +212,8 @@ def create_booking_process_passengers(current_user):
 def confirm_booking_process(current_user):
     data = request.json or {}
     public_id = data.get('public_id')
+    is_payment = data.get('is_payment', True)
+
     if not public_id:
         return jsonify({'message': 'public_id required'}), 400
     token = data.get('access_token')
@@ -205,98 +221,56 @@ def confirm_booking_process(current_user):
 
     session = db.session
 
-    Booking.transition_status(
-        id=booking.id,
-        session=session,
-        commit=False,
-        to_status=BOOKING_STATUS.confirmed,
-    )
+    # Avoid unnecessary status history entries
+    if booking.status == BOOKING_STATUS.passengers_added:
+        Booking.transition_status(
+            id=booking.id,
+            session=session,
+            commit=False,
+            to_status=BOOKING_STATUS.confirmed,
+        )
+
+    if is_payment:
+        BookingHold.set_hold(
+            booking.id,
+            datetime.now() + timedelta(hours=Config.BOOKING_PAYMENT_EXP_HOURS),
+            session=session,
+            commit=False,
+        )
+        payment = create_payment(booking)
+    else:
+        BookingHold.set_hold(
+            booking.id,
+            datetime.now() + timedelta(hours=Config.BOOKING_INVOICE_EXP_HOURS),
+            session=session,
+            commit=False,
+        )
+        payment = create_invoice(booking)
 
     session.commit()
 
-    return jsonify({'status': 'ok'}), 200
+    return jsonify(payment.to_dict()), 200
 
 
 @current_user
 def get_booking_process_details(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
-
-    result = booking.to_dict()
-    passengers = []
-    flights = []
-
-    for bp in booking.booking_passengers:
-        p = bp.passenger.to_dict(return_children=True)
-        p['category'] = bp.category.value if bp.category else None
-        passengers.append(p)
-    passengers_exist = len(passengers) > 0
-    if not passengers:
-        counts = booking.passenger_counts or {}
-        for key, count in counts.items():
-            try:
-                count = int(count)
-            except (TypeError, ValueError):
-                continue
-            category = BookingPassenger.get_category_from_plural(
-                PASSENGER_PLURAL_CATEGORY(key)
-            )
-            for _ in range(count):
-                passengers.append({'category': category.value})
-
-    passenger_counts = dict(booking.passenger_counts or {})
-
-    flights = [
-        bf.flight.to_dict(return_children=True) for bf in booking.booking_flights
-    ]
-
-    flights.sort(
-        key=lambda f: (
-            f.get('scheduled_departure'),
-            f.get('scheduled_departure_time') or '',
-        )
-    )
-
-    outbound_id = flights[0]['id'] if len(flights) > 0 else 0
-    return_id = flights[1]['id'] if len(flights) > 1 else 0
-
-    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
-    outbound_tariff_id = tariffs_map.get(outbound_id)
-    return_tariff_id = tariffs_map.get(return_id)
-
-    consent_exists = (
-        booking.consent_events.filter_by(
-            type=CONSENT_EVENT_TYPE.pd_processing, action=CONSENT_ACTION.agree
-        ).count()
-        > 0
-    )
-
-    result['passengers'] = passengers
-    result['passengers_exist'] = passengers_exist
-    result['flights'] = flights
-    result['price_details'] = calculate_price_details(
-        outbound_id,
-        outbound_tariff_id,
-        return_id,
-        return_tariff_id,
-        passenger_counts,
-    )
-    result['consent'] = consent_exists
-
+    result = get_booking_details(booking)
     return jsonify(result), 200
 
 
 @current_user
-def create_booking_process_payment(current_user):
-    data = request.json or {}
-    public_id = data.get('public_id')
-    if not public_id:
-        return jsonify({'message': 'public_id required'}), 400
-    token = data.get('access_token')
+def get_booking_process_pdf(current_user, public_id):
+    token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
-
-    payment = create_payment(booking)
-    return jsonify(payment.to_dict()), 201
+    pdf = generate_booking_pdf(booking)
+    return send_file(
+        BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'booking_{booking.booking_number}.pdf',
+    )
 
 
 @current_user

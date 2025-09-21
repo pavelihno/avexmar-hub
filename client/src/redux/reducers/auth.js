@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { login, register, auth, logout, resetPassword } from '../actions/auth';
+import { login, register, auth, logout, resetPassword, activateAccount, verifyTwoFactor } from '../actions/auth';
 import { changePassword } from '../actions/user';
 import { handlePending, handleRejected } from '../utils';
 
@@ -31,11 +31,25 @@ const authSlice = createSlice({
 				state.isLoading = false;
 			})
 
+			// Verify two-factor
+			.addCase(verifyTwoFactor.pending, handlePending)
+			.addCase(verifyTwoFactor.rejected, handleRejected)
+			.addCase(verifyTwoFactor.fulfilled, (state, action) => {
+				state.currentUser = action.payload;
+				state.isLoading = false;
+			})
+
 			// Register
 			.addCase(register.pending, handlePending)
 			.addCase(register.rejected, handleRejected)
-			.addCase(register.fulfilled, (state, action) => {
-				state.currentUser = action.payload;
+			.addCase(register.fulfilled, (state) => {
+				state.isLoading = false;
+			})
+
+			// Activate account
+			.addCase(activateAccount.pending, handlePending)
+			.addCase(activateAccount.rejected, handleRejected)
+			.addCase(activateAccount.fulfilled, (state) => {
 				state.isLoading = false;
 			})
 
@@ -76,6 +90,6 @@ export const { setCurrentUser, setErrors } = authSlice.actions;
 export const selectIsAuth = (state) => !!state.auth.currentUser;
 export const selectIsAdmin = (state) => !!state.auth.currentUser && state.auth.currentUser.role === 'admin';
 
-export const isDev = () => process.env.REACT_APP_APP_ENV in ('dev', 'test');
+export const isDev = () => ['dev', 'test'].includes(process.env.REACT_APP_APP_ENV);
 
 export default authSlice.reducer;

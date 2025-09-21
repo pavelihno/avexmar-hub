@@ -19,6 +19,7 @@ import {
 	deleteBookingPassenger,
 } from '../../redux/actions/bookingPassenger';
 import { fetchPassengers } from '../../redux/actions/passenger';
+import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
@@ -29,6 +30,7 @@ const BookingManagement = () => {
 	const { bookings, isLoading, errors } = useSelector((state) => state.bookings);
 	const { bookingPassengers, isLoading: bookingPassengersLoading } = useSelector((state) => state.bookingPassengers);
 	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+	const { users, isLoading: usersLoading } = useSelector((state) => state.users);
 
 	const theme = useTheme();
 
@@ -36,12 +38,13 @@ const BookingManagement = () => {
 		dispatch(fetchBookings());
 		dispatch(fetchBookingPassengers());
 		dispatch(fetchPassengers());
+		dispatch(fetchUsers());
 	}, [dispatch]);
 
 	const currencyOptions = getEnumOptions('CURRENCY');
-	const passengerOptions = passengers.map((p) => ({
-		value: p.id,
-		label: `${p.last_name} ${p.first_name} ${formatDate(p.birth_date)}`,
+	const userOptions = users.map((u) => ({
+		value: u.id,
+		label: `${u.email}`,
 	}));
 
 	const FIELDS = {
@@ -97,11 +100,6 @@ const BookingManagement = () => {
 			label: FIELD_LABELS.BOOKING.email_address,
 			type: FIELD_TYPES.EMAIL,
 			excludeFromTable: true,
-			validate: (value) => {
-				if (!value) return VALIDATION_MESSAGES.BOOKING.email_address.REQUIRED;
-				if (!validateEmail(value)) return VALIDATION_MESSAGES.BOOKING.email_address.INVALID;
-				return null;
-			},
 		},
 		phoneNumber: {
 			key: 'phoneNumber',
@@ -109,11 +107,6 @@ const BookingManagement = () => {
 			label: FIELD_LABELS.BOOKING.phone_number,
 			type: FIELD_TYPES.PHONE,
 			excludeFromTable: true,
-			validate: (value) => {
-				if (!value) return VALIDATION_MESSAGES.BOOKING.phone_number.REQUIRED;
-				if (!validatePhoneNumber(value)) return VALIDATION_MESSAGES.BOOKING.phone_number.INVALID;
-				return null;
-			},
 		},
 		farePrice: {
 			key: 'farePrice',
@@ -161,24 +154,13 @@ const BookingManagement = () => {
 			excludeFromTable: true,
 			formatter: (value) => ENUM_LABELS.CURRENCY[value] || value,
 		},
-		passengerIds: {
-			key: 'passengerIds',
-			label: FIELD_LABELS.BOOKING.passengers,
-			type: FIELD_TYPES.CUSTOM,
+		userId: {
+			key: 'userId',
+			apiKey: 'user_id',
+			label: FIELD_LABELS.BOOKING.user_id,
+			type: FIELD_TYPES.SELECT,
+			options: userOptions,
 			excludeFromTable: true,
-			renderField: ({ value = [], onChange }) => {
-				const selected = passengerOptions.filter((o) => value.includes(o.value));
-				return (
-					<Autocomplete
-						multiple
-						options={passengerOptions}
-						value={selected}
-						onChange={(e, vals) => onChange(vals.map((v) => v.value))}
-						getOptionLabel={(o) => o.label}
-						renderInput={(params) => <TextField {...params} label={FIELD_LABELS.BOOKING.passengers} />}
-					/>
-				);
-			},
 		},
 		passengers: {
 			key: 'passengers',
@@ -321,7 +303,7 @@ const BookingManagement = () => {
 			onDeleteAll={handleDeleteAllBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
-			isLoading={isLoading || bookingPassengersLoading || passengersLoading}
+			isLoading={isLoading || bookingPassengersLoading || passengersLoading || usersLoading}
 			error={errors}
 		/>
 	);

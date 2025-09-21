@@ -12,7 +12,7 @@ from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.utils.xlsx import parse_xlsx, generate_xlsx_template
-from app.utils.datetime import get_datetime, parse_date, parse_time
+from app.utils.datetime import combine_date_time, parse_date, parse_time
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
@@ -66,8 +66,8 @@ class Flight(BaseModel):
         if not (self.scheduled_departure and self.scheduled_arrival):
             return None
 
-        depart_dt = get_datetime(self.scheduled_departure, self.scheduled_departure_time)
-        arrive_dt = get_datetime(self.scheduled_arrival, self.scheduled_arrival_time)
+        depart_dt = combine_date_time(self.scheduled_departure, self.scheduled_departure_time)
+        arrive_dt = combine_date_time(self.scheduled_arrival, self.scheduled_arrival_time)
 
         if depart_dt is None or arrive_dt is None:
             return None

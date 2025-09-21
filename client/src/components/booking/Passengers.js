@@ -7,11 +7,7 @@ import {
 	Typography,
 	Card,
 	CardContent,
-	Checkbox,
-	FormControlLabel,
 	Button,
-	FormControl,
-	FormHelperText,
 	Divider,
 	Chip,
 	Accordion,
@@ -26,6 +22,7 @@ import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
 import { processBookingPassengers, fetchBookingDetails, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { fetchCountries } from '../../redux/actions/country';
+import { fetchUserPassengers } from '../../redux/actions/passenger';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS } from '../../constants';
 import {
 	createFormFields,
@@ -39,8 +36,10 @@ import {
 	formatDuration,
 	findBookingPassengerDuplicates,
 	extractRouteInfo,
+	useExpiryCountdown,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
+import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
 
 const Passengers = () => {
 	const { publicId } = useParams();
@@ -52,6 +51,11 @@ const Passengers = () => {
 		errors: bookingErrors,
 	} = useSelector((state) => state.bookingProcess);
 	const { countries } = useSelector((state) => state.countries);
+	const { currentUser } = useSelector((state) => state.auth);
+	const userPassengers = useSelector((state) => state.passengers.passengers);
+
+	const expiresAt = booking?.expires_at;
+	const timeLeft = useExpiryCountdown(expiresAt);
 
 	const existingPassengerData = booking?.passengers;
 	const passengersExist = booking?.passengersExist;
@@ -94,6 +98,12 @@ const Passengers = () => {
 	}, [existingPassengerData, passengersExist]);
 
 	useEffect(() => {
+		if (currentUser) {
+			dispatch(fetchUserPassengers(currentUser.id));
+		}
+	}, [dispatch, currentUser]);
+
+	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
 	}, [dispatch, publicId]);
 
@@ -133,6 +143,18 @@ const Passengers = () => {
 			});
 		}
 	}, [booking, passengersExist]);
+
+	useEffect(() => {
+		if (currentUser) {
+			setBuyer((prev) => ({
+				...prev,
+				buyerLastName: prev.buyerLastName || currentUser.last_name,
+				buyerFirstName: prev.buyerFirstName || currentUser.first_name,
+				emailAddress: prev.emailAddress || currentUser.email || '',
+				phoneNumber: prev.phoneNumber || currentUser.phone_number || '',
+			}));
+		}
+	}, [currentUser]);
 
 	const buyerFormFields = useMemo(() => {
 		const fields = {
@@ -273,8 +295,24 @@ const Passengers = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='passengers' />
-			<Grid container spacing={2}>
-				<Grid item xs={12} md={8} sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', pr: { md: 2 } }}>
+			{expiresAt && (
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+					<Typography variant='h6' sx={{ fontWeight: 600 }}>
+						{timeLeft}
+					</Typography>
+				</Box>
+			)}
+			<Grid container spacing={{ xs: 2, md: 4 }}>
+				<Grid
+					item
+					xs={12}
+					md={8}
+					sx={{
+						maxHeight: { md: 'calc(100vh - 200px)' },
+						overflowY: { xs: 'visible', md: 'auto' },
+						pr: { md: 2 },
+					}}
+				>
 					{errorMessages.length > 0 && (
 						<Stack spacing={1} sx={{ mb: 2 }}>
 							{errorMessages.map((msg, idx) => (
@@ -284,18 +322,37 @@ const Passengers = () => {
 							))}
 						</Stack>
 					)}
+					{!currentUser && (
+						<Alert severity='info' sx={{ mb: 2 }}>
+							{UI_LABELS.BOOKING.passenger_form.login_hint}
+						</Alert>
+					)}
 					{passengersReady &&
 						passengerData.map((p, index) => (
-							<PassengerForm
-								key={p.id || index}
-								passenger={p}
-								flights={booking.flights}
-								onChange={handlePassengerChange(index)}
-								citizenshipOptions={citizenshipOptions}
-								ref={(el) => (passengerRefs.current[index] = el)}
-							/>
+							<Box key={index} sx={{ mb: 2 }}>
+								<PassengerForm
+									passenger={p}
+									flights={booking.flights}
+									onChange={handlePassengerChange(index)}
+									citizenshipOptions={citizenshipOptions}
+									ref={(el) => (passengerRefs.current[index] = el)}
+									prefillOptions={
+										currentUser && userPassengers.length > 0
+											? userPassengers
+													.map((up) => ({ up, mapped: fromApiPassenger(up) }))
+													.map(({ up, mapped }) => ({
+														id: up.id,
+														label: `${mapped.lastName || ''} ${
+															mapped.firstName || ''
+														}`.trim(),
+														data: mapped,
+													}))
+											: []
+									}
+								/>
+							</Box>
 						))}
-					<Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
+					<Box sx={{ p: { xs: 1, md: 2 }, border: '1px solid #eee', borderRadius: 2, mb: 2 }}>
 						<Typography variant='h4' sx={{ mb: 3 }}>
 							{UI_LABELS.BOOKING.buyer_form.title}
 						</Typography>
@@ -335,7 +392,7 @@ const Passengers = () => {
 				</Grid>
 				<Grid item xs={12} md={4} sx={{ position: 'sticky', top: 16 }}>
 					<Card>
-						<CardContent>
+						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>
 									<AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -370,7 +427,9 @@ const Passengers = () => {
 											return (
 												<Box
 													key={f.id || idx}
-													sx={{ mb: idx < booking.flights.length - 1 ? 2 : 0 }}
+													sx={{
+														mb: idx < booking.flights.length - 1 ? 2 : 0,
+													}}
 												>
 													<Box
 														sx={{
@@ -464,13 +523,25 @@ const Passengers = () => {
 								<Typography>{`${formatNumber(farePrice)} ${currencySymbol}`}</Typography>
 							</Box>
 							{fees > 0 && (
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box
+									sx={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										mb: 1,
+									}}
+								>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.fees}</Typography>
 									<Typography>{`${formatNumber(fees)} ${currencySymbol}`}</Typography>
 								</Box>
 							)}
 							{discount > 0 && (
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box
+									sx={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										mb: 1,
+									}}
+								>
 									<Typography>{UI_LABELS.BOOKING.buyer_form.summary.discount}</Typography>
 									<Typography>{`- ${formatNumber(discount)} ${currencySymbol}`}</Typography>
 								</Box>
@@ -486,26 +557,13 @@ const Passengers = () => {
 
 							<Divider sx={{ my: 2 }} />
 
-							<FormControl required error={!!buyerErrors.consent} sx={{ mb: 2 }}>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={buyer.consent}
-											onChange={(e) => handleBuyerChange('consent', e.target.checked)}
-										/>
-									}
-									label={
-										<Typography variant='subtitle2' color='textSecondary'>
-											{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-												<Link to='/privacy_policy' target='_blank'>
-													{text}
-												</Link>
-											))}
-										</Typography>
-									}
-								/>
-								{buyerErrors.consent && <FormHelperText>{buyerErrors.consent}</FormHelperText>}
-							</FormControl>
+							<PrivacyConsentCheckbox
+								value={buyer.consent}
+								onChange={(val) => handleBuyerChange('consent', val)}
+								error={buyerErrors.consent}
+								required
+								sx={{ mb: 2 }}
+							/>
 
 							<Button variant='contained' color='orange' fullWidth onClick={handleContinue}>
 								{UI_LABELS.BUTTONS.continue}

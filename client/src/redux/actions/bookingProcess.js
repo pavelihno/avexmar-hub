@@ -47,11 +47,30 @@ export const fetchBookingAccess = createAsyncThunk(
 	}
 );
 
-export const confirmBooking = createAsyncThunk('bookingProcess/confirm', async (publicId, { rejectWithValue }) => {
-	try {
-		const res = await serverApi.post('/booking/confirm', { public_id: publicId });
-		return res.data;
-	} catch (err) {
-		return rejectWithValue(getErrorData(err));
+export const downloadBookingPdf = createAsyncThunk(
+	'bookingProcess/downloadPdf',
+	async (publicId, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/booking/${publicId}/pdf`, { responseType: 'blob' });
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
 	}
-});
+);
+
+export const confirmBooking = createAsyncThunk(
+	'bookingProcess/confirm',
+	async ({ publicId, isPayment = true }, { rejectWithValue }) => {
+		try {
+			const payload = {
+				public_id: publicId,
+				is_payment: isPayment,
+			};
+			const res = await serverApi.post('/booking/confirm', payload);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);

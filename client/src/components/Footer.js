@@ -31,15 +31,16 @@ const Footer = () => {
 					direction={{ xs: 'column', sm: 'row' }}
 					justifyContent='space-between'
 					alignItems='center'
-					spacing={3}
+					spacing={{ xs: 1, sm: 3 }}
+					textAlign={{ xs: 'left', sm: 'center' }}
 				>
 					<Stack>
-						<Typography variant='body2' color='text.secondary' align='center'>
+						<Typography variant='body2' color='text.secondary'>
 							© {currentYear}, {companyName}. {UI_LABELS.ABOUT.all_rights_reserved}
 						</Typography>
 					</Stack>
 
-					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 3 }} alignItems='center'>
+					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ sm: 3 }} alignItems='center'>
 						{links.map(({ to, label }) => (
 							<Link
 								key={to}
@@ -47,7 +48,14 @@ const Footer = () => {
 								component={RouterLink}
 								color='inherit'
 								underline='hover'
-								sx={{ px: 1 }}
+								sx={{
+									display: 'inline-flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									minWidth: 48,
+									minHeight: 48,
+									px: 1,
+								}}
 							>
 								<Typography variant='body2'>{label}</Typography>
 							</Link>

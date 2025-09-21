@@ -19,20 +19,20 @@ def get_timezone(current_user, timezone_id):
 @admin_required
 def create_timezone(current_user):
     body = request.json
-    tz = Timezone.create(**body)
+    tz = Timezone.create(commit=True, **body)
     return jsonify(tz.to_dict()), 201
 
 
 @admin_required
 def update_timezone(current_user, timezone_id):
     body = request.json
-    updated = Timezone.update(timezone_id, **body)
+    updated = Timezone.update(timezone_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_timezone(current_user, timezone_id):
-    deleted = Timezone.delete_or_404(timezone_id)
+    deleted = Timezone.delete_or_404(timezone_id, commit=True)
     return jsonify(deleted)
 
 

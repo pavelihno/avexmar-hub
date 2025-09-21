@@ -1,14 +1,14 @@
 from flask import request, jsonify
+import re
 
 from app.config import Config
 from app.models.user import User
-from app.utils.jwt import signJWT
-from app.utils.email import send_email
+from app.utils.jwt import signJWT, sign_activation_token, verify_activation_token
+from app.utils.email import EMAIL_TYPE, send_email
 from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.middlewares.auth_middleware import login_required
 
 from app.models.password_reset_token import PasswordResetToken
-from app.database import db
 
 
 def register():
@@ -26,11 +26,21 @@ def register():
         'email': email,
         'password': password,
         'role': DEFAULT_USER_ROLE,
-        'is_active': True
+        'is_active': False,
+        'first_name': '',
+        'last_name': '',
     })
     if new_user:
-        token = signJWT(new_user.email)
-        return jsonify({'token': token, 'user': new_user.to_dict()}), 201
+        token = sign_activation_token(new_user.email)
+        activation_url = f"{Config.CLIENT_URL}/activate?token={token}"
+        send_email(
+            EMAIL_TYPE.account_activation,
+            is_noreply=True,
+            recipients=[new_user.email],
+            activation_url=activation_url,
+            expires_in_hours=Config.ACCOUNT_ACTIVATION_EXP_HOURS,
+        )
+        return jsonify({'message': 'Activation instructions sent'}), 201
 
 
 def login():
@@ -38,11 +48,65 @@ def login():
     email = body.get('email', '').lower()
     password = body.get('password', '')
 
+    user = User.get_by_email(email)
+    if not user or not user.is_active:
+        return jsonify({'message': 'Invalid email or password'}), 401
+
+    if user.is_locked:
+        return jsonify({'message': 'Account is locked due to too many failed login attempts'}), 401
+
     user = User.login(email, password)
     if user:
+        if user.role == USER_ROLE.admin and re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+            totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
+            code = totp.now()
+            send_email(
+                EMAIL_TYPE.two_factor,
+                is_noreply=True,
+                recipients=[user.email],
+                code=code,
+                expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
+            )
+            return jsonify({'message': 'Two-factor authentication required', 'email': user.email}), 200
         token = signJWT(user.email)
         return jsonify({'token': token, 'user': user.to_dict()}), 200
     return jsonify({'message': 'Invalid email or password'}), 401
+
+
+def setup_2fa():
+    body = request.json
+    email = body.get('email', '').lower()
+    user = User.get_by_email(email)
+    if not user or user.role != USER_ROLE.admin:
+        return jsonify({'message': 'User not found'}), 404
+    
+    totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
+    code = totp.now()
+    send_email(
+        EMAIL_TYPE.two_factor,
+        is_noreply=True,
+        recipients=[user.email],
+        code=code,
+        expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
+    )
+    return jsonify({'message': 'Verification code sent'}), 200
+
+
+def verify_2fa():
+    body = request.json
+    email = body.get('email', '').lower()
+    code = str(body.get('code', ''))
+    user = User.get_by_email(email)
+    if not user or user.role != USER_ROLE.admin or not user.totp_secret:
+        return jsonify({'message': 'Invalid request'}), 400
+    totp = user.get_totp(Config.LOGIN_TOTP_INTERVAL_SECONDS)
+    if totp.verify(code):
+        User.reset_failed_logins(user)
+        token = signJWT(user.email)
+        return jsonify({'token': token, 'user': user.to_dict()}), 200
+    else:
+        User.register_failed_login(user)
+        return jsonify({'message': 'Invalid code'}), 400
 
 
 def forgot_password():
@@ -56,13 +120,14 @@ def forgot_password():
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    token = PasswordResetToken.create(user, expires_in_hours=1)
+    token = PasswordResetToken.create(user)
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
-        'Сброс пароля',
-        [user.email],
-        'forgot_password.txt',
+        EMAIL_TYPE.password_reset,
+        is_noreply=True,
+        recipients=[user.email],
         reset_url=reset_url,
+        expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,
     )
     return jsonify({'message': 'Password reset instructions sent'}), 200
 
@@ -89,3 +154,21 @@ def reset_password():
 @login_required
 def auth(current_user):
     return jsonify(current_user.to_dict()), 200
+
+
+def activate_account():
+    body = request.json
+    token_value = body.get('token')
+    email = verify_activation_token(token_value) if token_value else None
+    if not email:
+        return jsonify({'message': 'Invalid or expired token'}), 400
+
+    user = User.get_by_email(email)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    if user.is_active:
+        return jsonify({'message': 'Account already activated'}), 200
+
+    User.update(user.id, commit=True, is_active=True)
+    return jsonify({'message': 'Account activated'}), 200

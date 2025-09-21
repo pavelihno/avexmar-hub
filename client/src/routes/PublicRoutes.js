@@ -5,25 +5,28 @@ import About from '../components/About';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import PublicOffer from '../components/PublicOffer';
 import ResetPassword from '../components/auth/ResetPassword';
+import ActivateAccount from '../components/auth/ActivateAccount';
 import Search from '../components/search/Search';
 import Schedule from '../components/search/Schedule';
 import Passengers from '../components/booking/Passengers';
 import Confirmation from '../components/booking/Confirmation';
 import Payment from '../components/booking/Payment';
 import Completion from '../components/booking/Completion';
+import BookingSearch from '../components/booking/BookingSearch';
 import BookingRoute from './BookingRoute';
+import ProtectedRoute from './ProtectedRoute';
+import Profile from '../components/profile/Profile';
 
-const PublicRoutes = () => [
+const PublicRoutes = ({ isAuth }) => [
 	{ path: '/', element: <Home /> },
-        { path: '/about', element: <About /> },
-        { path: '/privacy_policy', element: <PrivacyPolicy /> },
-        { path: '/public_offer', element: <PublicOffer /> },
-
+	{ path: '/about', element: <About /> },
+	{ path: '/privacy_policy', element: <PrivacyPolicy /> },
+	{ path: '/public_offer', element: <PublicOffer /> },
 	{ path: '/reset_password', element: <ResetPassword /> },
-
+  { path: '/activate', element: <ActivateAccount /> },
 	{ path: '/search', element: <Search /> },
 	{ path: '/schedule', element: <Schedule /> },
-
+	{ path: '/search/booking', element: <BookingSearch /> },
 	{
 		path: '/booking/:publicId',
 		element: <BookingRoute />,
@@ -59,6 +62,10 @@ const PublicRoutes = () => [
 				<Completion />
 			</BookingRoute>
 		),
+	},
+	{
+		path: '/profile',
+		element: <ProtectedRoute children={<Profile />} condition={isAuth} />,
 	},
 ];
 

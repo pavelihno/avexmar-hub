@@ -1,0 +1,13 @@
+Бронирование № {{ booking_number }} подтверждено.
+
+Ваше бронирование успешно завершено.
+
+Рейсы:
+{% for f in flights %}- {{ f.number }}: {{ f.from }} ({{ f.departure }}) -> {{ f.to }} ({{ f.arrival }})
+{% endfor %}Пассажиры:
+{% for p in passengers %}- {{ p.name }} — {{ p.category }}
+{% endfor %}Посмотреть детали бронирования:
+{{ booking_url }}
+
+С уважением,
+{{ brand_name }}

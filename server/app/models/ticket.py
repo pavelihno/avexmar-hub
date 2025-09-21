@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from app.models.booking import Booking
     from app.models.passenger import Passenger
     from app.models.discount import Discount
-    from app.models.seat import Seat
 
 
 class Ticket(BaseModel):
@@ -21,13 +20,11 @@ class Ticket(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=True)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id', ondelete='SET NULL'), nullable=True)
     discount_id = db.Column(db.Integer, db.ForeignKey('discounts.id', ondelete='SET NULL'), nullable=True)
-    seat_id = db.Column(db.Integer, db.ForeignKey('seats.id', ondelete='CASCADE'), nullable=True, unique=True)
 
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='tickets')
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='tickets')
     passenger: Mapped['Passenger'] = db.relationship('Passenger', back_populates='tickets')
     discount: Mapped['Discount'] = db.relationship('Discount', back_populates='tickets')
-    seat: Mapped['Seat'] = db.relationship('Seat', back_populates='ticket', uselist=False)
 
     def to_dict(self, return_children=False):
         return {
@@ -41,8 +38,6 @@ class Ticket(BaseModel):
             'passenger_id': self.passenger_id,
             'discount': self.discount.to_dict(return_children) if self.discount_id and return_children else {},
             'discount_id': self.discount_id,
-            'seat': self.seat.to_dict(return_children) if self.seat_id and return_children else {},
-            'seat_id': self.seat_id,
         }
 
     @classmethod

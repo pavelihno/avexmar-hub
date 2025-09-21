@@ -1,10 +1,12 @@
-from typing import List, TYPE_CHECKING
+import pyotp
 from werkzeug.security import generate_password_hash, check_password_hash
+from typing import List, TYPE_CHECKING
 
 from app.database import db
 from app.models._base_model import BaseModel
 from sqlalchemy.orm import Session, Mapped
 from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
+from app.config import Config
 
 if TYPE_CHECKING:
     from app.models.password_reset_token import PasswordResetToken
@@ -19,7 +21,13 @@ class User(BaseModel):
     email = db.Column(db.String, unique=True, index=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.Enum(USER_ROLE), nullable=False, default=DEFAULT_USER_ROLE)
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=False, nullable=False)
+    totp_secret = db.Column(db.String, nullable=True)
+    failed_login_attempts = db.Column(db.Integer, default=0, nullable=False)
+    is_locked = db.Column(db.Boolean, default=False, nullable=False)
+    first_name = db.Column(db.String, nullable=True)
+    last_name = db.Column(db.String, nullable=True)
+    phone_number = db.Column(db.String, nullable=True)
 
     reset_tokens: Mapped[List['PasswordResetToken']] = db.relationship(
         'PasswordResetToken', back_populates='user', lazy='dynamic', cascade='all, delete-orphan'
@@ -38,8 +46,13 @@ class User(BaseModel):
         return {
             'id': self.id,
             'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'phone_number': self.phone_number,
             'role': self.role.value,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'failed_login_attempts': self.failed_login_attempts,
+            'is_locked': self.is_locked
         }
 
     @classmethod
@@ -62,6 +75,8 @@ class User(BaseModel):
             elif key == 'email' and isinstance(value, str):
                 kwargs['email'] = value.lower()
 
+        kwargs['totp_secret'] = pyotp.random_base32()
+
         return super().create(session=session, commit=commit, **kwargs)
 
     @classmethod
@@ -81,16 +96,54 @@ class User(BaseModel):
     ):
         session = session or db.session
 
-        kwargs = {k: v for k, v in kwargs.items() if k in ['role', 'is_active']}
+        kwargs = {k: v for k, v in kwargs.items() if k not in ['email', 'password']}
 
         return super().update(_id, session=session, commit=commit, **kwargs)
 
     @classmethod
     def login(cls, _email, _password):
         user = cls.get_by_email(_email)
-        if user and user.is_active and cls.__is_password_correct(user.password, _password):
+        if not user or not user.is_active:
+            return None
+        
+        if user.is_locked:
+            return None
+            
+        if cls.__is_password_correct(user.password, _password):
+            cls.reset_failed_logins(user)
             return user
-        return None
+        else:
+            cls.register_failed_login(user)
+            return None
+
+    def get_totp(self, interval: int):
+        return pyotp.TOTP(self.totp_secret, interval=interval)
+
+    def verify_password(self, _password):
+        return self.__is_password_correct(self.password, _password)
+
+    @classmethod
+    def register_failed_login(cls, user, session: Session | None = None):
+        failed_attempts = user.failed_login_attempts + 1
+        is_locked = failed_attempts >= Config.MAX_FAILED_LOGIN_ATTEMPTS
+        
+        return cls.update(
+            user.id,
+            session=session,
+            commit=True,
+            failed_login_attempts=failed_attempts,
+            is_locked=is_locked
+        )
+
+    @classmethod
+    def reset_failed_logins(cls, user, session: Session | None = None):
+        return cls.update(
+            user.id, 
+            session=session,
+            commit=True,
+            failed_login_attempts=0,
+            is_locked=False
+        )
 
     @classmethod
     def change_password(cls, _id, _password, session: Session | None = None):
@@ -98,7 +151,13 @@ class User(BaseModel):
 
         new_password = cls.__encode_password(_password)
 
-        return super().update(_id, session=session, password=new_password)
+        return super().update(
+            _id,
+            session=session,
+            password=new_password,
+            failed_login_attempts=0,
+            is_locked=False,
+        )
 
     @classmethod
     def __encode_password(cls, _password):

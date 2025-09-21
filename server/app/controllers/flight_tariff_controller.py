@@ -21,18 +21,18 @@ def get_flight_tariff(current_user, flight_tariff_id):
 @admin_required
 def create_flight_tariff(current_user):
     body = request.json
-    flight_tariff = FlightTariff.create(**body)
+    flight_tariff = FlightTariff.create(commit=True, **body)
     return jsonify(flight_tariff.to_dict()), 201
 
 
 @admin_required
 def update_flight_tariff(current_user, flight_tariff_id):
     body = request.json
-    updated = FlightTariff.update(flight_tariff_id, **body)
+    updated = FlightTariff.update(flight_tariff_id, commit=True, **body)
     return jsonify(updated.to_dict())
 
 
 @admin_required
 def delete_flight_tariff(current_user, flight_tariff_id):
-    deleted = FlightTariff.delete_or_404(flight_tariff_id)
+    deleted = FlightTariff.delete_or_404(flight_tariff_id, commit=True)
     return jsonify(deleted)

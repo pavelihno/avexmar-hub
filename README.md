@@ -1,8 +1,8 @@
 # Avexmar Hub Guide
 
-## First Time Setup
+## Production Setup
 
-Follow these steps for the initial setup of the application:
+Follow these steps for the production setup of the application:
 
 ### 1. Environment Configuration
 
@@ -32,16 +32,19 @@ Run the following command to create an admin user:
 ```bash
 docker-compose exec server-app python -c "
 from app.app import app
-from app.config import Config
+from app.utils.enum import USER_ROLE
 from app.models.user import User
 
 with app.app_context():
-    admin = User.create(**{
-        'email': 'admin',
-        'password': '1234',
-        'role': Config.USER_ROLE.admin,
-        'is_active': True
-    })
+    admin = User.create(
+        commit=True,
+        **{
+            'email': 'admin',
+            'password': '1234',
+            'role': USER_ROLE.admin,
+            'is_active': True
+        }
+    )
     if not admin:
         print('Failed to create admin user')
     else:
@@ -91,6 +94,12 @@ with app.app_context():
 "
 ```
 
+### Fix _migrations/versions_ permissions
+
+```bash
+sudo chown -R $USER:$USER server/migrations/versions
+```
+
 ### Run Server Tests
 
 Start the server:
@@ -117,4 +126,11 @@ Server App:
 
 ```bash
 cloudflared tunnel --url http://localhost:8000 --protocol http2
+```
+
+### Merge into prod/main branch
+
+```bash
+git checkout <target_branch>
+git merge --no-commit <source_branch>
 ```

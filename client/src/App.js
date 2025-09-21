@@ -5,15 +5,13 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Box, CircularProgress } from '@mui/material';
 
 import { AuthModalProvider } from './context/AuthModalContext';
-import { ProfileModalProvider } from './context/ProfileModalContext';
 
 import AuthModal from './components/auth/AuthModal';
-import ProfileModal from './components/profile/ProfileModal';
 
 import AdminRoutes from './routes/AdminRoutes';
 import PublicRoutes from './routes/PublicRoutes';
 
-import { selectIsAuth, selectIsAdmin } from './redux/reducers/auth';
+import { selectIsAuth } from './redux/reducers/auth';
 import { auth } from './redux/actions/auth';
 import theme from './theme';
 
@@ -22,7 +20,7 @@ function App() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	const isAuth = useSelector(selectIsAuth);
-	const isAdmin = useSelector(selectIsAdmin);
+	const currentUser = useSelector((state) => state.auth.currentUser);
 
 	useEffect(() => {
 		const initAuth = async () => {
@@ -33,7 +31,7 @@ function App() {
 		initAuth();
 	}, [dispatch]);
 
-	const routes = [...PublicRoutes(), ...AdminRoutes({ isAdmin })];
+	const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ currentUser })];
 	const routing = useRoutes(routes);
 
 	// Show loading indicator while authenticating
@@ -49,15 +47,12 @@ function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<AuthModalProvider>
-				<ProfileModalProvider>
-					{routing}
-					<ProfileModal />
-				</ProfileModalProvider>
-				<AuthModal />
-			</AuthModalProvider>
-		</ThemeProvider>
-	);
+                        <AuthModalProvider>
+                                {routing}
+                                <AuthModal />
+                        </AuthModalProvider>
+                </ThemeProvider>
+        );
 }
 
 export default App;

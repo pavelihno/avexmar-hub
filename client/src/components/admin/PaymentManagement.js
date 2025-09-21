@@ -5,7 +5,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 
 import {
 	fetchPayments,
-	createPaymentAdmin,
+	createPayment,
 	updatePayment,
 	deletePayment,
 	deleteAllPayments,
@@ -34,6 +34,7 @@ const PaymentManagement = () => {
 	const methodOptions = getEnumOptions('PAYMENT_METHOD');
 	const statusOptions = getEnumOptions('PAYMENT_STATUS');
 	const currencyOptions = getEnumOptions('CURRENCY');
+	const typeOptions = getEnumOptions('PAYMENT_TYPE');
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -56,14 +57,14 @@ const PaymentManagement = () => {
 			options: methodOptions,
 			formatter: (value) => ENUM_LABELS.PAYMENT_METHOD[value] || value,
 		},
-		providerPaymentId: {
-			key: 'providerPaymentId',
-			apiKey: 'provider_payment_id',
-			label: FIELD_LABELS.PAYMENT.provider_payment_id,
-			type: FIELD_TYPES.TEXT,
-			excludeFromTable: true,
+		paymentType: {
+			key: 'paymentType',
+			apiKey: 'payment_type',
+			label: FIELD_LABELS.PAYMENT.payment_type,
+			type: FIELD_TYPES.SELECT,
+			options: typeOptions,
+			formatter: (value) => ENUM_LABELS.PAYMENT_TYPE[value] || value,
 		},
-
 		paymentStatus: {
 			key: 'paymentStatus',
 			apiKey: 'payment_status',
@@ -71,6 +72,20 @@ const PaymentManagement = () => {
 			type: FIELD_TYPES.SELECT,
 			options: statusOptions,
 			formatter: (value) => ENUM_LABELS.PAYMENT_STATUS[value] || value,
+		},
+		providerPaymentId: {
+			key: 'providerPaymentId',
+			apiKey: 'provider_payment_id',
+			label: FIELD_LABELS.PAYMENT.provider_payment_id,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
+		},
+		confirmationToken: {
+			key: 'confirmationToken',
+			apiKey: 'confirmation_token',
+			label: FIELD_LABELS.PAYMENT.confirmation_token,
+			type: FIELD_TYPES.TEXT,
+			excludeFromTable: true,
 		},
 		amount: {
 			key: 'amount',
@@ -106,13 +121,6 @@ const PaymentManagement = () => {
 			formatter: (value) => formatDate(value),
 			excludeFromTable: true,
 		},
-		confirmationToken: {
-			key: 'confirmationToken',
-			apiKey: 'confirmation_token',
-			label: FIELD_LABELS.PAYMENT.confirmation_token,
-			type: FIELD_TYPES.TEXT,
-			excludeFromTable: true,
-		},
 		isPaid: {
 			key: 'isPaid',
 			apiKey: 'is_paid',
@@ -127,7 +135,7 @@ const PaymentManagement = () => {
 		editButtonText: () => UI_LABELS.ADMIN.modules.payments.edit_button,
 	});
 
-	const handleAddPayment = (data) => dispatch(createPaymentAdmin(adminManager.toApiFormat(data))).unwrap();
+	const handleAddPayment = (data) => dispatch(createPayment(adminManager.toApiFormat(data))).unwrap();
 	const handleEditPayment = (data) => dispatch(updatePayment(adminManager.toApiFormat(data))).unwrap();
 	const handleDeletePayment = (id) => dispatch(deletePayment(id)).unwrap();
 

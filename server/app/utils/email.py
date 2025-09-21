@@ -1,22 +1,114 @@
-from threading import Thread
+import enum
 
+from app.config import Config
 from flask import current_app, render_template
 from flask_mail import Mail, Message
+
 
 mail = Mail()
 
 
+class EmailError(Exception):
+    """Raised when sending an email fails"""
+    pass
+
+
+class EMAIL_TYPE(enum.Enum):
+    booking_confirmation = (
+        'booking_confirmation',
+        'Бронирование № {booking_number} подтверждено — {brand_name}',
+    )
+    invoice_payment = (
+        'invoice_payment',
+        'Оплата бронирования — {brand_name}',
+    )
+    password_reset = (
+        'forgot_password',
+        'Сброс пароля — {brand_name}',
+    )
+    account_activation = (
+        'account_activation',
+        'Активация аккаунта — {brand_name}',
+    )
+    two_factor = (
+        'two_factor',
+        'Код для входа —  {brand_name}',
+    )
+    password_change = (
+        'password_change',
+        'Изменение пароля — {brand_name}',
+    )
+
+    def __init__(self, template: str, subject: str):
+        self.template = template
+        self.subject = subject
+
+
 def init_mail(app):
+    app.config.setdefault('MAIL_USERNAME', None)
+    app.config.setdefault('MAIL_PASSWORD', None)
     mail.init_app(app)
 
 
-def _send_async_email(app, msg) -> None:
+def __send_email(app, msg, username, password) -> None:
     with app.app_context():
-        mail.send(msg)
+        app.config['MAIL_USERNAME'] = username
+        app.config['MAIL_PASSWORD'] = password
+
+        with mail.connect() as conn:
+            conn.host.login(username, password)
+            conn.send(msg)
 
 
-def send_email(subject: str, recipients: list[str], template: str, **context) -> None:
-    msg = Message(subject=subject, recipients=recipients)
-    msg.body = render_template(template, **context)
+def __select_mail_account(is_noreply: bool):
+    if is_noreply:
+        return Config.MAIL_NOREPLY_USERNAME, Config.MAIL_NOREPLY_PASSWORD
+    return Config.MAIL_DEFAULT_USERNAME, Config.MAIL_DEFAULT_PASSWORD
+
+
+def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> None:
+    recipients = context.pop('recipients', None)
+    attachments = context.pop('attachments', [])
+    if not recipients:
+        return
+
+    context = {
+        'brand_name': 'Авексмар',
+        'support_email': 'mail@avexmar.com',
+        'site_url': 'https://avexmar.ru',
+        **context
+    }
+    subject = email_type.subject.format(**context)
+    template = email_type.template
+
+    username, password = __select_mail_account(is_noreply)
+
+    if not isinstance(recipients, list):
+        recipients = [recipients]
+
+    msg = Message(
+        subject=subject,
+        recipients=recipients,
+        sender=username,
+        reply_to=username
+    )
+
+    try:
+        msg.body = render_template(f'email/txt/{template}.txt', **context)
+        msg.html = render_template(f'email/html/{template}.html', **context)
+    except Exception as e:
+        raise EmailError('Failed to send email') from e
+
+    for attachment in attachments:
+        if isinstance(attachment, dict):
+            msg.attach(
+                attachment.get('filename', 'attachment'),
+                attachment.get('content_type', 'application/octet-stream'),
+                attachment.get('data'),
+            )
+
     app = current_app._get_current_object()
-    Thread(target=_send_async_email, args=(app, msg), daemon=True).start()
+    try:
+        __send_email(app, msg, username, password)
+    except Exception as e:
+        raise EmailError('Failed to send email') from e

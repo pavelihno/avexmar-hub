@@ -1,11 +1,22 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import {
+	Box,
+	Card,
+	CardContent,
+	Typography,
+	Grid,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
+	Button,
+	CircularProgress,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, downloadBookingPdf } from '../../redux/actions/bookingProcess';
 import { fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
 import { formatNumber, extractRouteInfo, formatDate, formatDateTime } from '../utils';
@@ -18,6 +29,22 @@ const Completion = () => {
 	const dispatch = useDispatch();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 	const payment = useSelector((state) => state.payment.current);
+
+	const handleDownloadPdf = async () => {
+		try {
+			const data = await dispatch(downloadBookingPdf(publicId)).unwrap();
+			const url = window.URL.createObjectURL(new Blob([data]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `${booking.booking_number}.pdf`;
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (e) {
+			// ignore
+		}
+	};
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -62,24 +89,28 @@ const Completion = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='completion' />
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
-				<Grid item xs={12} md={9} lg={9}>
-					<Card sx={{ mb: 2 }}>
-						<CardContent>
-							<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
-								{UI_LABELS.BOOKING.completion.title}
-							</Typography>
-							{booking?.booking_number && (
-								<Typography variant='subtitle1'>
-									{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number}
-								</Typography>
-							)}
-						</CardContent>
-					</Card>
 
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
+				<Grid item xs={12} md={9} lg={9}>
+					<Card sx={{ p: { xs: 2, md: 3 } }}>
+						<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
+							{UI_LABELS.BOOKING.completion.title}
+						</Typography>
+
+						<Typography variant='subtitle1'>
+							{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number || '—'}
+						</Typography>
+
+						<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
+							{UI_LABELS.BOOKING.completion.download_pdf}
+						</Button>
+					</Card>
+				</Grid>
+
+				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								{outboundRouteInfo && (
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
@@ -117,7 +148,7 @@ const Completion = () => {
 
 					{/* Price Details */}
 					{booking && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Box
 									sx={{
@@ -150,7 +181,7 @@ const Completion = () => {
 
 					{/* Payment details */}
 					{payment && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
 									{UI_LABELS.BOOKING.completion.payment_details}
@@ -181,26 +212,26 @@ const Completion = () => {
 								</Box>
 
 								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.method}</Typography>
+									<Typography>{FIELD_LABELS.PAYMENT.payment_method}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method}
 									</Typography>
 								</Box>
 								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.status}</Typography>
+									<Typography>{FIELD_LABELS.PAYMENT.payment_status}</Typography>
 									<Typography>
 										{ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status}
 									</Typography>
 								</Box>
 								{payment.provider_payment_id && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.transaction_id}</Typography>
+										<Typography>{FIELD_LABELS.PAYMENT.provider_payment_id}</Typography>
 										<Typography>{payment.provider_payment_id}</Typography>
 									</Box>
 								)}
 								{payment.paid_at && (
 									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.payment_date}</Typography>
+										<Typography>{FIELD_LABELS.PAYMENT.paid_at}</Typography>
 										<Typography>{formatDate(payment.paid_at)}</Typography>
 									</Box>
 								)}

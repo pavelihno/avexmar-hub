@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Box, Typography, Card, CardContent, Grid, CardActionArea } from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid, CardActionArea, Divider } from '@mui/material';
 import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
@@ -19,6 +19,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 import Base from '../Base';
 
@@ -27,7 +28,7 @@ import { UI_LABELS } from '../../constants';
 const iconSX = { fontSize: 50 };
 
 const AdminPanel = () => {
-	const adminModules = [
+	const dataTables = [
 		{
 			title: UI_LABELS.ADMIN.modules.countries.title,
 			description: UI_LABELS.ADMIN.modules.countries.description,
@@ -106,12 +107,12 @@ const AdminPanel = () => {
 			icon: <PaymentIcon sx={iconSX} />,
 			path: '/admin/payments',
 		},
-		{
-			title: UI_LABELS.ADMIN.modules.tickets.title,
-			description: UI_LABELS.ADMIN.modules.tickets.description,
-			icon: <AirplaneTicketIcon sx={iconSX} />,
-			path: '/admin/tickets',
-		},
+		// {
+		// 	title: UI_LABELS.ADMIN.modules.tickets.title,
+		// 	description: UI_LABELS.ADMIN.modules.tickets.description,
+		// 	icon: <AirplaneTicketIcon sx={iconSX} />,
+		// 	path: '/admin/tickets',
+		// },
 		{
 			title: UI_LABELS.ADMIN.modules.users.title,
 			description: UI_LABELS.ADMIN.modules.users.description,
@@ -132,6 +133,15 @@ const AdminPanel = () => {
 		},
 	];
 
+	const exportTools = [
+		{
+			title: UI_LABELS.ADMIN.exports.flightPassengers.title,
+			description: UI_LABELS.ADMIN.exports.flightPassengers.description,
+			icon: <FileDownloadIcon sx={iconSX} />,
+			path: '/admin/exports/flight-passengers',
+		},
+	];
+
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
@@ -140,12 +150,12 @@ const AdminPanel = () => {
 				</Typography>
 
 				<Grid container spacing={3}>
-					{adminModules.map((module, index) => (
+					{dataTables.map((dataTable, index) => (
 						<Grid item xs={12} sm={6} md={3} key={index}>
 							<Card sx={{ height: '100%' }}>
 								<CardActionArea
 									component={Link}
-									to={module.path}
+									to={dataTable.path}
 									sx={{
 										height: '100%',
 										display: 'flex',
@@ -154,12 +164,43 @@ const AdminPanel = () => {
 									}}
 								>
 									<CardContent sx={{ textAlign: 'center' }}>
-										{module.icon}
+										{dataTable.icon}
 										<Typography variant='h6' sx={{ mt: 2 }}>
-											{module.title}
+											{dataTable.title}
 										</Typography>
 										<Typography variant='body2' color='text.secondary'>
-											{module.description}
+											{dataTable.description}
+										</Typography>
+									</CardContent>
+								</CardActionArea>
+							</Card>
+						</Grid>
+					))}
+				</Grid>
+
+				<Divider sx={{ my: 4 }} />
+
+				<Grid container spacing={3}>
+					{exportTools.map((tool, index) => (
+						<Grid item xs={12} sm={6} md={3} key={index}>
+							<Card sx={{ height: '100%' }}>
+								<CardActionArea
+									component={Link}
+									to={tool.path}
+									sx={{
+										height: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+									}}
+								>
+									<CardContent sx={{ textAlign: 'center' }}>
+										{tool.icon}
+										<Typography variant='h6' sx={{ mt: 2 }}>
+											{tool.title}
+										</Typography>
+										<Typography variant='body2' color='text.secondary'>
+											{tool.description}
 										</Typography>
 									</CardContent>
 								</CardActionArea>

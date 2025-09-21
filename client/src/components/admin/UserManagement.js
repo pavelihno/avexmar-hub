@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../redux/actions/user';
+import { fetchUsers, createUser, updateUser, deleteUser, deleteAllUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
@@ -22,8 +22,7 @@ const UserManagement = () => {
 			key: 'email',
 			apiKey: 'email',
 			label: FIELD_LABELS.USER.email,
-			type: FIELD_TYPES.TEXT,
-			fullWidth: true,
+			type: FIELD_TYPES.EMAIL,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.USER.email.REQUIRED : null),
 		},
 		role: {
@@ -41,6 +40,20 @@ const UserManagement = () => {
 			type: FIELD_TYPES.BOOLEAN,
 			formatter: (value) => ENUM_LABELS.BOOLEAN[value] || value,
 		},
+		isLocked: {
+			key: 'isLocked',
+			apiKey: 'is_locked',
+			label: FIELD_LABELS.USER.is_locked,
+			type: FIELD_TYPES.BOOLEAN,
+			formatter: (value) => ENUM_LABELS.BOOLEAN[value] || value,
+		},
+		failedLoginAttempts: {
+			key: 'failedLoginAttempts',
+			apiKey: 'failed_login_attempts',
+			label: FIELD_LABELS.USER.failed_login_attempts,
+			type: FIELD_TYPES.NUMBER,
+			excludeFromForm: true,
+		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {
@@ -49,8 +62,19 @@ const UserManagement = () => {
 	});
 
 	const handleAddUser = (data) => dispatch(createUser(adminManager.toApiFormat(data))).unwrap();
-	const handleEditUser = (data) => dispatch(updateUser(adminManager.toApiFormat(data))).unwrap();
+	const handleEditUser = (data) => {
+		const updated = { ...data };
+		if (updated.isLocked === false) {
+			updated.failedLoginAttempts = 0;
+		}
+		return dispatch(updateUser(adminManager.toApiFormat(updated))).unwrap();
+	};
 	const handleDeleteUser = (id) => dispatch(deleteUser(id)).unwrap();
+
+	const handleDeleteAllUsers = async () => {
+		await dispatch(deleteAllUsers()).unwrap();
+		dispatch(fetchUsers());
+	};
 
 	const formattedUsers = users.map(adminManager.toUiFormat);
 
@@ -62,6 +86,7 @@ const UserManagement = () => {
 			onAdd={handleAddUser}
 			onEdit={handleEditUser}
 			onDelete={handleDeleteUser}
+			onDeleteAll={handleDeleteAllUsers}
 			renderForm={adminManager.renderForm}
 			isLoading={isLoading}
 			error={errors}

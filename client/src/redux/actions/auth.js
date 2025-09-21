@@ -2,14 +2,20 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { serverApi, setAuthToken } from '../../api';
 import { getErrorData } from '../utils';
-import { setCurrentUser } from '../reducers/auth';
 
 export const register = createAsyncThunk('auth/register', async (formData, { rejectWithValue }) => {
 	try {
-		const res = await serverApi.post('/register', formData);
-		const { token, user } = res.data;
-		setAuthToken(token);
-		return user;
+		const res = await serverApi.post('/register', { ...formData, email: formData.email.toLowerCase() });
+		return res.data;
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
+});
+
+export const activateAccount = createAsyncThunk('auth/activateAccount', async (data, { rejectWithValue }) => {
+	try {
+		const res = await serverApi.post('/activate', data);
+		return res.data;
 	} catch (err) {
 		return rejectWithValue(getErrorData(err));
 	}
@@ -17,7 +23,21 @@ export const register = createAsyncThunk('auth/register', async (formData, { rej
 
 export const login = createAsyncThunk('auth/login', async (formData, { rejectWithValue }) => {
 	try {
-		const res = await serverApi.post('/login', formData);
+		const res = await serverApi.post('/login', { ...formData, email: formData.email.toLowerCase() });
+		const { token, user } = res.data;
+		if (token) {
+			setAuthToken(token);
+			return user;
+		}
+		return rejectWithValue(res.data);
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
+});
+
+export const verifyTwoFactor = createAsyncThunk('auth/verifyTwoFactor', async (data, { rejectWithValue }) => {
+	try {
+		const res = await serverApi.post('/verify_2fa', { ...data, email: data.email.toLowerCase() });
 		const { token, user } = res.data;
 		setAuthToken(token);
 		return user;

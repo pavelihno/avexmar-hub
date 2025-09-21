@@ -1,87 +1,21 @@
-import { formatDate } from '../components/utils';
+import { formatDate, formatTime } from '../components/utils';
 
 export const UI_LABELS = {
-	APP_TITLE: 'АВЕКСМАР - Авиаперевозки',
-	BUTTONS: {
-		save: 'Сохранить',
-		save_changes: 'Сохранить изменения',
-		close: 'Закрыть',
-		login: 'Войти',
-		exit: 'Выйти',
-		register: 'Зарегистрироваться',
-		copy: 'Копировать',
-		add: 'Добавить',
-		edit: 'Редактировать',
-		delete: 'Удалить',
-		cancel: 'Отмена',
-		back: 'Назад',
-		delete_all: 'Удалить все',
-		close: 'Закрыть',
-		confirm: 'Подтвердить',
-		send: 'Отправить',
-		continue: 'Продолжить',
-		download: 'Скачать',
-		pagination: {
-			rows_per_page: 'Записей на странице',
-			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
-			},
-		},
-	},
-	TITLES: {
-		login: 'Вход',
-		register: 'Регистрация',
-		settings: 'Настройки',
-		forgot_password: 'Восстановление пароля',
-	},
-	MESSAGES: {
-		confirm_action: 'Подтвердите действие',
-		confirm_delete: 'Вы уверены, что хотите удалить запись?',
-		confirm_delete_all: 'Вы уверены, что хотите удалить все записи?',
-		loading: 'Загрузка...',
-		required_field: 'Это поле обязательно',
-	},
-	SUCCESS: {
-		add: 'Запись успешно добавлена',
-		upload: 'Файл успешно загружен',
-		update: 'Запись успешно обновлена',
-		delete: 'Запись успешно удалена',
-		delete_all: 'Все записи успешно удалены',
-		login: 'Вход выполнен успешно',
-		register: 'Регистрация выполнена успешно',
-		password_reset: 'Инструкция отправлена на электронную почту',
-	},
-	WARNINGS: {
-		upload: 'Некоторые записи не были созданы. Подробнее в файле',
-	},
-	ERRORS: {
-		unknown: 'Неизвестная ошибка',
-		copy: 'Ошибка при копировании',
-		save: 'Ошибка при сохранении',
-		delete: 'Ошибка при удалении',
-	},
+	APP_TITLE: 'АВЕКСМАР — Авиаперевозки',
 	ABOUT: {
 		company_name: 'АВЕКСМАР',
-		company_full_name: 'Общество с ограниченной ответственностью «АВЕКСМАР»',
-		contact_email: 'contact@avexmar.com',
-		contact_phone: '+7 (123) 456-78-90',
-		legal_address_value: 'г. Москва, ул. Примерная, д. 1',
-		about_us: 'О нас',
-		copied: 'Скопировано',
-		company_details: 'Реквизиты компании',
 		full_name: 'Наименование организации',
+		company_full_name: 'Общество с ограниченной ответственностью «АВЕКСМАР»',
 		ogrn: 'ОГРН',
-		ogrn_value: '1234567890123',
+		ogrn_value: '1167746881279',
 		inn: 'ИНН',
-		inn_value: '1234567890',
+		inn_value: '9701049956',
 		legal_address: 'Юридический адрес',
+		legal_address_value: '105082, г. Москва, ул. Бакунинская, д. 69, строение 1, помещение 1, офис 16',
 		phone: 'Контактный телефон',
+		contact_phone: '+7 495 363-59-11',
 		email_address: 'Адрес электронной почты',
-		legal_info: 'Правовая информация',
-		privacy_policy_agreement: 'Согласие на обработку персональных данных',
-		public_offer: 'Публичная оферта',
-		marketing_consent: 'Согласие на получение рекламной рассылки',
-		all_rights_reserved: 'Все права защищены',
+		contact_email: 'mail@avexmar.ru',
 		company_description: 'Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года',
 		cards: [
 			{
@@ -106,6 +40,75 @@ export const UI_LABELS = {
 				icon: 'airplane',
 			},
 		],
+		about_us: 'О нас',
+		company_details: 'Реквизиты компании',
+		legal_info: 'Правовая информация',
+		privacy_policy_agreement: 'Согласие на обработку персональных данных',
+		public_offer: 'Публичная оферта',
+		marketing_consent: 'Согласие на получение рекламной рассылки',
+		all_rights_reserved: 'Все права защищены',
+		copied: 'Скопировано',
+	},
+	BUTTONS: {
+		save: 'Сохранить',
+		save_changes: 'Сохранить изменения',
+		change_password: 'Сохранить новый пароль',
+		close: 'Закрыть',
+		login: 'Войти',
+		exit: 'Выйти',
+		register: 'Зарегистрироваться',
+		copy: 'Копировать',
+		add: 'Добавить',
+		edit: 'Редактировать',
+		delete: 'Удалить',
+		cancel: 'Отмена',
+		back: 'Назад',
+		delete_all: 'Удалить все',
+		close: 'Закрыть',
+		confirm: 'Подтвердить',
+		send: 'Отправить',
+		continue: 'Продолжить',
+		download: 'Скачать',
+		pagination: {
+			rows_per_page: 'Записей на странице',
+			displayed_rows: ({ from, to, count }) => {
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+			},
+		},
+	},
+	TITLES: {
+		login: 'Вход',
+		register: 'Регистрация',
+		profile: 'Личный кабинет',
+		forgot_password: 'Восстановление пароля',
+		activate_account: 'Активация аккаунта',
+	},
+	MESSAGES: {
+		confirm_action: 'Подтвердите действие',
+		confirm_delete: 'Вы уверены, что хотите удалить запись?',
+		confirm_delete_all: 'Вы уверены, что хотите удалить все записи?',
+		loading: 'Загрузка...',
+		required_field: 'Это поле обязательно',
+	},
+	SUCCESS: {
+		add: 'Запись успешно добавлена',
+		upload: 'Файл успешно загружен',
+		update: 'Запись успешно обновлена',
+		delete: 'Запись успешно удалена',
+		delete_all: 'Все записи успешно удалены',
+		login: 'Вход выполнен успешно',
+		register: 'Инструкции по активации отправлены на электронную почту',
+		account_activated: 'Аккаунт успешно активирован',
+		password_reset: 'Инструкция отправлена на электронную почту',
+	},
+	WARNINGS: {
+		upload: 'Некоторые записи не были созданы. Подробнее в файле',
+	},
+	ERRORS: {
+		unknown: 'Неизвестная ошибка',
+		copy: 'Ошибка при копировании',
+		save: 'Ошибка при сохранении',
+		delete: 'Ошибка при удалении',
 	},
 	DOC: {
 		version: 'Версия',
@@ -264,6 +267,17 @@ export const UI_LABELS = {
 				edit_button: 'Редактировать событие',
 			},
 		},
+		exports: {
+			title: 'Экспорт',
+			description: 'Загрузка данных для сторонних систем',
+			flightPassengers: {
+				link: 'Список пассажиров по рейсу',
+				title: 'Выгрузка пассажиров',
+				description: 'Формирование списка пассажиров по рейсу',
+				route: 'Маршрут',
+				flight: 'Рейс',
+			},
+		},
 	},
 	AUTH: {
 		old_password: 'Текущий пароль',
@@ -273,14 +287,68 @@ export const UI_LABELS = {
 		have_account: 'Уже есть аккаунт?',
 		or: 'или',
 		forgot_password: 'Забыли пароль?',
+		two_factor_prompt: (email) => {
+			if (!email || email.length < 5) return `Введите код, отправленный на ${email}`;
+			const [local, domain] = email.split('@');
+			if (!domain) return `Введите код, отправленный на ${email}`;
+
+			const maskedLocal =
+				local.length > 4
+					? `${local.slice(0, 2)}****${local.slice(-2)}`
+					: `${local.slice(0, 1)}**${local.slice(-1)}`;
+
+			return `Введите код, отправленный на ${maskedLocal}@${domain}`;
+		},
+		two_factor_code_label: 'Код',
 	},
 	PROFILE: {
-		profile: 'Профиль',
-		settings: 'Настройки профиля',
-		maintenance: 'Скоро здесь будет личный кабинет',
+		profile: 'Личный кабинет',
+		to_profile: 'Перейти в личный кабинет',
 		change_password: 'Сменить пароль',
+		verification_code_sent: 'Код подтверждения отправлен на вашу электронную почту',
+		user_info_changed: 'Личные данные успешно изменены',
 		password_changed: 'Пароль успешно изменен',
 		passwords_dont_match: 'Пароли не совпадают',
+		user_info: 'Личные данные',
+		email: 'Электронная почта',
+		role: 'Роль',
+		bookings: 'Мои бронирования',
+		passengers: 'Пассажиры',
+		no_passengers: 'Пассажиры отсутствуют',
+		no_bookings: 'Бронирования отсутствуют',
+		booking_number: 'Номер',
+		status: 'Статус',
+		route: 'Маршрут',
+		open_link: 'Открыть бронирование',
+		segmentBuilder: (f) => {
+			if (!f) return { key: undefined, routeText: '', timeText: '' };
+			const route = f.route || {};
+			const o = route.origin_airport || {};
+			const d = route.destination_airport || {};
+			const from = `${o.city_name || ''}${o.iata_code ? ` (${o.iata_code})` : ''}`.trim();
+			const to = `${d.city_name || ''}${d.iata_code ? ` (${d.iata_code})` : ''}`.trim();
+			const depDate = formatDate(f.scheduled_departure, 'dd.MM.yyyy');
+			const depTime = formatTime(f.scheduled_departure_time);
+			const arrDate = formatDate(f.scheduled_arrival, 'dd.MM.yyyy');
+			const arrTime = formatTime(f.scheduled_arrival_time);
+			return {
+				key: f.id,
+				routeText: from && to ? `${from} → ${to}` : '',
+				timeText:
+					depDate || depTime || arrDate || arrTime
+						? `${depDate} ${depTime || ''} — ${arrDate} ${arrTime || ''}`.trim()
+						: '',
+			};
+		},
+		last_name: 'Фамилия',
+		first_name: 'Имя',
+		birth_date: 'Дата рождения',
+		gender: 'Пол',
+		document: 'Документ',
+		passenger_details: 'Данные пассажира',
+		more_details: 'Подробнее',
+		passenger_added: 'Пассажир успешно добавлен',
+		personal_data: 'Личные данные',
 	},
 	HOME: {},
 	BOOKING: {
@@ -343,6 +411,7 @@ export const UI_LABELS = {
 				final_price: 'Итого',
 			},
 			payment_button: 'Перейти к оплате',
+			invoice_button: 'Выставить счет',
 			passenger_categories: {
 				adults: 'Взрослые',
 				children: 'Дети',
@@ -362,17 +431,20 @@ export const UI_LABELS = {
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
+			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
 		},
 		payment_form: {
-			title: (timeLeft) => `${timeLeft} для оплаты`,
+			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,
 			total: 'К оплате',
 			payment_failed: 'Оплата не прошла',
 			retry_payment: 'Повторить оплату',
 			loading: 'Загрузка формы оплаты...',
 			waiting: 'Ожидание токена оплаты...',
 			load_error: 'Не удалось загрузить виджет оплаты',
+			invoice_waiting: 'Счет отправлен клиенту. Ожидаем оплату...',
 		},
 		completion: {
+			download_pdf: 'Скачать PDF-подтверждение',
 			title: 'Бронирование завершено',
 			price_title: 'Оплачено',
 			payment_details: 'Детали платежа',
@@ -395,7 +467,7 @@ export const UI_LABELS = {
 		pagination: {
 			rows_per_page: 'Рейсов на странице',
 			displayed_rows: ({ from, to, count }) => {
-				return `${from}-${to} из ${count !== -1 ? count : `более чем ${to}`}`;
+				return `${from}—${to} из ${count !== -1 ? count : `более чем ${to}`}`;
 			},
 		},
 	},
@@ -444,15 +516,16 @@ export const UI_LABELS = {
 		no_results: 'Рейсы не найдены',
 		from_to_date: (from, to, date_from, date_to) => {
 			if (!from || !to) return '';
-			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} - ${formatDate(date_to, 'dd.MM')}`;
-			else return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			if (date_to) return `${from} ⇄ ${to}, ${formatDate(date_from, 'dd.MM')} — ${formatDate(date_to, 'dd.MM')}`;
+			if (date_from) return `${from} → ${to}, ${formatDate(date_from, 'dd.MM')}`;
+			else return `${from} → ${to}`;
 		},
 		flight_details: {
 			select_tariff_title: 'Выберите тариф',
 			select_tariff: 'Перейти к оформлению',
 			airline: 'Авиакомпания',
-			from_to: 'Отправление - Прибытие',
-			departure_arrival: 'Время отправления - Время прибытия',
+			from_to: 'Отправление — Прибытие',
+			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			price_from: 'От',
@@ -476,11 +549,19 @@ export const UI_LABELS = {
 			duration: 'Время в пути',
 		},
 		nearby_dates: {
-			title: 'Ближайшие даты',
+			title: (from, to) => `Ближайшие даты: ${from} → ${to}`,
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
 		show_more: 'Показать еще варианты',
+	},
+	BOOKING_SEARCH: {
+		link: 'Найти бронирование',
+		title: 'Найти бронирование',
+		booking_number: 'Номер бронирования',
+		first_name: 'Имя пассажира',
+		last_name: 'Фамилия пассажира',
+		button: 'Найти',
 	},
 };
 

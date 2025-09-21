@@ -5,6 +5,7 @@ from flask import jsonify, current_app
 from werkzeug.exceptions import HTTPException
 
 from app.models._base_model import ModelValidationError, NotFoundError
+from app.utils.email import EmailError
 from app.database import db
 
 
@@ -19,6 +20,8 @@ def handle_exceptions(f: Callable[..., Any]) -> Callable[..., Any]:
             return jsonify({'errors': e.errors}), 400
         except NotFoundError as e:
             return jsonify({'message': str(e)}), 404
+        except EmailError:
+            return jsonify({'message': 'Failed to send email'}), 500
         except Exception as e:  # unexpected errors
             if isinstance(e, HTTPException):
                 # Let Flask handle built-in HTTP exceptions
@@ -42,6 +45,11 @@ def register_error_handlers(app):
     def _handle_not_found_error(e):
         db.session.rollback()
         return jsonify({'message': str(e)}), 404
+
+    @app.errorhandler(EmailError)
+    def _handle_email_error(_):
+        db.session.rollback()
+        return jsonify({'message': 'Failed to send email'}), 500
 
     @app.errorhandler(Exception)
     def _handle_unexpected_error(e):

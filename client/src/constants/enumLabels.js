@@ -62,6 +62,11 @@ export const ENUM_LABELS = {
 	PAYMENT_METHOD: {
 		yookassa: 'ЮKassa',
 	},
+	PAYMENT_TYPE: {
+		payment: 'Платёж',
+		invoice: 'Счёт',
+		refund: 'Возврат',
+	},
 	FEE_APPLICATION: {
 		booking: 'Бронирование',
 		cancellation: 'Отмена бронирования',

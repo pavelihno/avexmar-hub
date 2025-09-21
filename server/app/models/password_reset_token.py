@@ -1,9 +1,9 @@
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
+from app.config import Config
 from app.models._base_model import BaseModel
 from app.models.user import User
 
@@ -24,12 +24,11 @@ class PasswordResetToken(BaseModel):
         session: Session | None = None,
         *,
         commit: bool = False,
-        expires_in_hours=1,
     ):
         session = session or db.session
 
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(hours=expires_in_hours)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=Config.PASSWORD_RESET_EXP_HOURS)
 
         return super().create(
             session=session,
@@ -49,8 +48,10 @@ class PasswordResetToken(BaseModel):
         if not instance:
             return None
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         expires_at = instance.expires_at
+        if expires_at is None:
+            return None
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)
         if expires_at < now:

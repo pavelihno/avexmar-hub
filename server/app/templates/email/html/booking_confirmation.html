@@ -1,0 +1,52 @@
+{% extends 'email/html/_base.html' %}
+
+{% block subject %}Бронирование № {{ booking_number }} подтверждено — {{ brand_name }}{% endblock %}
+{% block preheader %}Ваше бронирование подтверждено{% endblock %}
+
+{% block title %}
+  <h1 style="margin:0 0 12px; font-size:20px; line-height:1.3;">Бронирование № {{ booking_number }} подтверждено</h1>
+{% endblock %}
+
+{% block content %}
+  <p style="margin:0 0 16px;">Ваше бронирование успешно завершено.</p>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse; margin:12px 0;">
+    <thead>
+      <tr style="background:#f0f4f8; text-align:left;">
+        <th style="padding:8px; border:1px solid #dddddd;">Рейс</th>
+        <th style="padding:8px; border:1px solid #dddddd;">Отправление</th>
+        <th style="padding:8px; border:1px solid #dddddd;">Прибытие</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in flights %}
+      <tr>
+        <td style="padding:8px; border:1px solid #dddddd;">{{ f.number }}</td>
+        <td style="padding:8px; border:1px solid #dddddd;">{{ f.from }}<br>{{ f.departure }}</td>
+        <td style="padding:8px; border:1px solid #dddddd;">{{ f.to }}<br>{{ f.arrival }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p style="margin:16px 0 8px; font-weight:bold;">Пассажиры:</p>
+  <ul style="margin:0 0 16px; padding-left:18px;">
+    {% for p in passengers %}
+      <li style="margin:4px 0;">{{ p.name }} — {{ p.category }}</li>
+    {% endfor %}
+  </ul>
+
+  <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:16px auto 0;">
+    <tr>
+      <td style="background:#0084FF; border-radius:6px; text-align:center;">
+        <a href="{{ booking_url }}" style="display:inline-block; padding:12px 20px; color:#ffffff; text-decoration:none; font-weight:bold;">
+          Посмотреть детали бронирования
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:8px 0 0; font-size:12px; color:#717280;">Если кнопка не работает, скопируйте и вставьте ссылку в адресную строку браузера:
+    <a href="{{ booking_url }}" style="color:#0084FF; word-break:break-all;">{{ booking_url }}</a>
+  </p>
+{% endblock %}

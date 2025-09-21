@@ -102,7 +102,7 @@ class ConsentEvent(BaseModel):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     type = db.Column(db.Enum(CONSENT_EVENT_TYPE), nullable=False)
     granter_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
+    booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=True)
     doc_id = db.Column(UUID(as_uuid=True), db.ForeignKey('consent_docs.id'), nullable=False)
     action = db.Column(db.Enum(CONSENT_ACTION), nullable=False)
     ip = db.Column(INET, nullable=True)
@@ -152,7 +152,6 @@ class ConsentEvent(BaseModel):
         session = session or db.session
         event = super().update(event_id, session=session, commit=False, **data)
         if subject_ids is not None:
-            session.query(ConsentEventSubject).filter_by(consent_event_id=event.id).delete()
             for sid in subject_ids:
                 ConsentEventSubject.create(
                     session=session, commit=False, consent_event_id=event.id, subject_id=sid

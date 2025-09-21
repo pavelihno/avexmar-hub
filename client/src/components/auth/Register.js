@@ -21,13 +21,12 @@ import { authIconContainer, authIcon, authLink } from '../../theme/styles';
 import Base from '../Base';
 
 import { register } from '../../redux/actions/auth';
-import { selectIsAuth } from '../../redux/reducers/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { FIELD_LABELS, UI_LABELS } from '../../constants';
 
 const Register = ({ isModal = false }) => {
 	const dispatch = useDispatch();
-	const isAuth = useSelector(selectIsAuth);
+	const isLoading = useSelector((state) => state.auth.isLoading);
 	const { closeAuthModal, openLoginModal } = useAuthModal();
 
 	const [formData, setFormData] = useState({
@@ -41,7 +40,13 @@ const Register = ({ isModal = false }) => {
 
 	const { email, password, password2 } = formData;
 
-	const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+	const onChange = (e) => {
+		const { name, value } = e.target;
+		setFormData({
+			...formData,
+			[name]: name === 'email' ? value.toLowerCase() : value,
+		});
+	};
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
@@ -57,7 +62,7 @@ const Register = ({ isModal = false }) => {
 			.then(() => {
 				setSuccessMessage(UI_LABELS.SUCCESS.register);
 				if (isModal) {
-					setTimeout(() => closeAuthModal(), 1500);
+					setTimeout(() => closeAuthModal(), 3000);
 				}
 			})
 			.catch((res) => setErrors(res));
@@ -72,9 +77,10 @@ const Register = ({ isModal = false }) => {
 		<Fade in={true} timeout={500}>
 			<Paper
 				sx={{
-					p: 4,
+					p: { xs: 3, sm: 4 },
 					position: 'relative',
-					maxWidth: '300px',
+					width: { xs: '100%', sm: 'auto' },
+					maxWidth: { xs: '100%', sm: 300 },
 					mx: 'auto',
 					outline: 'none',
 				}}
@@ -126,12 +132,14 @@ const Register = ({ isModal = false }) => {
 							id='email'
 							label={FIELD_LABELS.USER.email}
 							name='email'
+							type='email'
 							autoComplete='email'
 							autoFocus
 							value={email}
 							onChange={onChange}
 							error={!!errors.email}
 							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -145,7 +153,8 @@ const Register = ({ isModal = false }) => {
 							value={password}
 							onChange={onChange}
 							error={!!errors.password}
-							helperText={errors.password ? errors.password : ''}
+							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<TextField
 							margin='dense'
@@ -159,11 +168,12 @@ const Register = ({ isModal = false }) => {
 							value={password2}
 							onChange={onChange}
 							error={!!errors.password2}
-							helperText={errors.password2 ? errors.password2 : ''}
+							helperText={errors.email ? errors.email : ''}
+							disabled={isLoading}
 						/>
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained'>
-							{UI_LABELS.BUTTONS.register}
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.register}
 						</Button>
 					</Box>
 				) : (
@@ -212,6 +222,7 @@ const Register = ({ isModal = false }) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				px: 2,
 			}}
 		>
 			<Container maxWidth='sm'>{content}</Container>

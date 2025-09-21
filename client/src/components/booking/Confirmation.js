@@ -15,19 +15,22 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
-import { createPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, extractRouteInfo } from '../utils';
+import { formatNumber, extractRouteInfo, useExpiryCountdown } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
+import { selectIsAdmin } from '../../redux/reducers/auth';
 
 const Confirmation = () => {
 	const { publicId } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
+	const expiresAt = booking?.expires_at;
+	const timeLeft = useExpiryCountdown(expiresAt);
 	const [loading, setLoading] = useState(false);
+	const isAdmin = useSelector(selectIsAdmin);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails(publicId));
@@ -58,13 +61,10 @@ const Confirmation = () => {
 
 	const currencySymbol = booking ? ENUM_LABELS.CURRENCY_SYMBOL[booking.currency] || '' : '';
 
-	const handlePayment = async () => {
+	const handlePayment = async (isPayment = true) => {
 		setLoading(true);
 		try {
-			if (booking.status === 'passengers_added') {
-				await dispatch(confirmBooking(publicId)).unwrap();
-			}
-			await dispatch(createPayment({ public_id: publicId })).unwrap();
+			await dispatch(confirmBooking({ publicId, isPayment })).unwrap();
 			await dispatch(fetchBookingAccess(publicId)).unwrap();
 			navigate(`/booking/${publicId}/payment`);
 		} catch (e) {
@@ -87,11 +87,21 @@ const Confirmation = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
-			<Grid container justifyContent='center' spacing={2} sx={{ mb: 2 }}>
+
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
+				<Grid item xs={12} md={9} lg={9}>
+					{expiresAt && (
+						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<Typography variant='h6' sx={{ fontWeight: 600 }}>
+								{timeLeft}
+							</Typography>
+						</Box>
+					)}
+				</Grid>
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								{outboundRouteInfo && (
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
@@ -115,7 +125,7 @@ const Confirmation = () => {
 
 					{/* Passengers */}
 					{Array.isArray(booking?.passengers) && booking.passengers.length > 0 && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
 									{UI_LABELS.BOOKING.confirmation.passengers_title}
@@ -139,7 +149,7 @@ const Confirmation = () => {
 
 					{/* Price Details */}
 					{booking && (
-						<Accordion variant='outlined' sx={{ mb: 2 }}>
+						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Box
 									sx={{
@@ -171,9 +181,37 @@ const Confirmation = () => {
 						</Accordion>
 					)}
 
-					{/* Payment button */}
-					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-						<Button variant='contained' color='orange' onClick={handlePayment} disabled={loading}>
+					{/* Payment buttons */}
+					<Box
+						sx={{
+							display: 'flex',
+							justifyContent: 'flex-end',
+							gap: 2,
+							flexDirection: { xs: 'column', sm: 'row' },
+						}}
+					>
+						{isAdmin && (
+							<Button
+								variant='outlined'
+								color='secondary'
+								onClick={() => handlePayment(false)}
+								disabled={loading}
+								sx={{ width: { xs: '100%', sm: 'auto' } }}
+							>
+								{loading ? (
+									<CircularProgress size={24} color='inherit' />
+								) : (
+									UI_LABELS.BOOKING.confirmation.invoice_button
+								)}
+							</Button>
+						)}
+						<Button
+							variant='contained'
+							color='orange'
+							onClick={() => handlePayment(true)}
+							disabled={loading}
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{loading ? (
 								<CircularProgress size={24} color='inherit' />
 							) : (
