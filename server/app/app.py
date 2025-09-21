@@ -2,6 +2,7 @@ import os
 import importlib
 from flask import Flask
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 from app.config import Config
 from app.database import db
@@ -50,6 +51,9 @@ def __import_models():
 def __create_app(_config_class, _db):
     app = Flask(__name__)
     app.config.from_object(_config_class)
+
+    # Enable CORS for all routes
+    CORS(app, resources={r"/*": {'origins': Config.CORS_ORIGINS}})
 
     # Required for tracking migrations
     __import_models()
