@@ -1,0 +1,12 @@
+README.md merge=ours
+
+docker-compose.yml merge=ours
+client/Dockerfile merge=ours
+server/Dockerfile merge=ours
+
+client/nginx.conf merge=ours
+
+db/.example.env merge=ours
+redis/.example.env merge=ours
+server/.example.env merge=ours
+client/.example.env merge=ours
