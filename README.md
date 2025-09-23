@@ -1,12 +1,19 @@
+# Avexmar Hub
+
+
 # Avexmar Hub Guide
 
-## Production Setup
+## Development Setup
 
-Follow these steps for the production setup of the application:
+Follow these steps for the development setup of the application:
 
 ### 1. Environment Configuration
 
 Create a new file named `.env` by copying the contents from the `.env.example` file.
+
+```bash
+cp .env.example .env
+```
 
 Edit the `.env` file with your specific configuration values.
 
@@ -128,7 +135,7 @@ Server App:
 cloudflared tunnel --url http://localhost:8000 --protocol http2
 ```
 
-### Merge into prod/main branch
+### Merge into _prod/main_ branch
 
 ```bash
 git checkout <target_branch>
