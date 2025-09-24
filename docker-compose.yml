@@ -1,46 +1,75 @@
 services:
+  reverse-proxy:
+    container_name: caddy
+    image: caddy:2
+    restart: unless-stopped
+    env_file:
+      - ./caddy/.env
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      server-app:
+        condition: service_healthy
+      client-app:
+        condition: service_healthy
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
   server-app:
     container_name: server-app
     build: ./server
-    ports:
-      - 8000:8000
+    restart: unless-stopped
     env_file:
       - ./server/.env
     depends_on:
-      - postgres
-      - redis
+      redis:
+        condition: service_healthy
     volumes:
       - ./server:/app
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\""]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   client-app:
     container_name: client-app
     build: ./client
-    ports:
-      - 80:80
+    restart: unless-stopped
     env_file:
       - ./client/.env
     depends_on:
-      - server-app
-
-  postgres:
-    container_name: postgres
-    image: postgres:15
-    ports:
-      - 5432:5432
-    env_file:
-      - ./db/.env
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      server-app:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   redis:
     container_name: redis
     image: redis:7.2.1-alpine
-    ports:
-      - 6379:6379
+    restart: unless-stopped
     env_file:
       - ./redis/.env
-    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
 volumes:
+  caddy_data:
+  caddy_config:
+  redis_data:
   postgres_data:

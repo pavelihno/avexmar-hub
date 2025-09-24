@@ -1,6 +1,7 @@
 README.md merge=ours
 
 docker-compose.yml merge=ours
+caddy/Caddyfile merge=ours
 client/Dockerfile merge=ours
 server/Dockerfile merge=ours
 

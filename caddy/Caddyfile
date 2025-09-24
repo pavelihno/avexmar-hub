@@ -1,0 +1,8 @@
+{$CADDY_DOMAIN} {
+    @backend {
+        path /api* /auth* /admin* /docs* /static* /media* /ws*
+    }
+
+    reverse_proxy @backend server-app:8000
+    reverse_proxy client-app:80
+}
