@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 
 from app.config import Config
+from app.logging_config import configure_logging
 from app.database import db
 from app.utils.email import init_mail
 from app.utils.limiter import init_limiter, limiter
@@ -13,6 +14,7 @@ from app.middlewares.session_middleware import register_session_handler
 
 from app.controllers._dev_controller import *
 from app.controllers.auth_controller import *
+from app.controllers.health_controller import *
 from app.controllers.user_controller import *
 from app.controllers.airport_controller import *
 from app.controllers.aircraft_controller import *
@@ -63,6 +65,10 @@ def __create_app(_config_class, _db):
     init_limiter(app)
     register_error_handlers(app)
     register_session_handler(app)
+
+    # health
+    app.route('/health/live', methods=['GET'])(health_live)
+    app.route('/health/ready', methods=['GET'])(health_ready)
 
     # auth
     app.route('/register', methods=['POST'])(register)
@@ -256,5 +262,7 @@ def __create_app(_config_class, _db):
 
     return app
 
+
+configure_logging()
 
 app = __create_app(Config, db)

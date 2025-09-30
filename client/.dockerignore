@@ -1,1 +1,13 @@
 .example.env
+.env
+.env.*
+node_modules/
+build/
+.cache/
+.eslintcache
+coverage/
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+.git
+*.swp

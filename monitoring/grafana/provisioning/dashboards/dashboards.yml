@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: AvexmarDashboards
+    orgId: 1
+    folder: Avexmar Hub
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
+    updateIntervalSeconds: 30
+    allowUiUpdates: false

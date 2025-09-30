@@ -1,2 +1,16 @@
 .example.env
 .env
+.env.*
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+logs/
+*.log
+supervisord.pid
+.idea/
+.vscode/
+.git
+.DS_Store
+*.swp

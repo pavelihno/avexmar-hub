@@ -106,20 +106,6 @@ with app.app_context():
 sudo chown -R $USER:$USER server/migrations/versions
 ```
 
-### Run Server Tests
-
-Start the core services:
-
-```bash
-docker-compose up -d
-```
-
-Execute the test suite:
-
-```bash
-docker-compose run --rm server-app pytest -sv tests
-```
-
 ### Cloudflare Tunnel Setup
 
 Client App:
@@ -137,10 +123,12 @@ cloudflared tunnel --url http://localhost:8000 --protocol http2
 ### Merge `main` into `prod`
 
 ```bash
-git checkout main
+git checkout prod
 git fetch origin
-git merge --no-commit --no-ff prod
+git merge --no-commit --no-ff main 
 ```
+
+Manually resolve all the merge conflicts.
 
 ## Deployment Guide
 

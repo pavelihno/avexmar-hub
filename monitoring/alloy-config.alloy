@@ -1,0 +1,44 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+local.file_match "app_logs" {
+  path_targets = [
+    {
+      "__path__"  = "/var/log/app/supervisord/*.log",
+      "job"       = "avexmar-hub-supervisord",
+      "service"   = "avexmar-hub",
+      "component" = "supervisord",
+    },
+    {
+      "__path__"  = "/var/log/app/gunicorn/*.log",
+      "job"       = "avexmar-hub-gunicorn",
+      "service"   = "avexmar-hub",
+      "component" = "gunicorn",
+    },
+    {
+      "__path__"  = "/var/log/app/celery/*.log",
+      "job"       = "avexmar-hub-celery",
+      "service"   = "avexmar-hub",
+      "component" = "celery",
+    },
+    {
+      "__path__"  = "/var/log/app/caddy/*.log",
+      "job"       = "avexmar-hub-caddy",
+      "service"   = "avexmar-hub",
+      "component" = "caddy",
+    },
+  ]
+}
+
+loki.source.file "app_logs" {
+  targets    = local.file_match.app_logs.targets
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

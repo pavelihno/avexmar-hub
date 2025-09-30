@@ -12,6 +12,7 @@ services:
       - redis
     volumes:
       - ./server:/app
+      - app_logs:/app/logs
 
   client-app:
     container_name: client-app
@@ -44,7 +45,9 @@ services:
       - 6379:6379
     env_file:
       - ./redis/.env
-    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redis_data:/data
+    command: [ "sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\"" ]
 
   adminer:
     container_name: adminer
@@ -54,5 +57,51 @@ services:
     depends_on:
       - postgres
 
+  loki:
+    container_name: loki
+    image: grafana/loki:3.5.5
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  alloy:
+    container_name: alloy
+    image: grafana/alloy:v1.10.2
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    volumes:
+      - ./monitoring/alloy-config.alloy:/etc/alloy/config.alloy:ro
+      - alloy_data:/var/lib/alloy
+      - app_logs:/var/log/app:ro
+    depends_on:
+      - loki
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:12.2.0
+    env_file:
+      - ./monitoring/grafana/.env
+    ports:
+      - 3001:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - loki
+      - alloy
+
 volumes:
+  app_logs:
+  redis_data:
   postgres_data:
+  loki_data:
+  grafana_data:
+  alloy_data:
