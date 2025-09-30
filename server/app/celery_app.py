@@ -1,7 +1,9 @@
 from celery import Celery
+from celery.signals import setup_logging
 
 from app.app import app
 from app.config import Config
+from app.logging_config import configure_logging
 
 
 celery = Celery(
@@ -10,6 +12,11 @@ celery = Celery(
 )
 celery.config_from_object(Config)
 celery.conf.update(task_track_started=True)
+
+
+@setup_logging.connect
+def init_celery_logging(**_kwargs):
+    configure_logging(force=True)
 
 
 class AppContextTask(celery.Task):

@@ -36,16 +36,5 @@
         max_size 10MB
     }
 
-    log_append @mutating_methods client_ip {remote_ip}
-    log_append @mutating_methods request_method {http.request.method}
-    log_append @mutating_methods request_path {http.request.uri}
-    log_append @mutating_methods request_query {http.request.uri.query}
-    log_append @mutating_methods request_headers {http.request.headers}
-    log_append @mutating_methods request_body {http.request.body}
-    log_append @mutating_methods response_status {http.response.status}
-    log_append @mutating_methods response_headers {http.response.headers}
-    log_append @mutating_methods response_body {http.response.body}
-    log_append @mutating_methods latency_ms {duration_ms}
-
     reverse_proxy client-app:80
 }

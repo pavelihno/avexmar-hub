@@ -4,6 +4,7 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from app.config import Config
+from app.logging_config import configure_logging
 from app.database import db
 from app.utils.email import init_mail
 from app.utils.limiter import init_limiter, limiter
@@ -257,5 +258,7 @@ def __create_app(_config_class, _db):
 
     return app
 
+
+configure_logging()
 
 app = __create_app(Config, db)
