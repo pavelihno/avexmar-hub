@@ -137,8 +137,9 @@ cloudflared tunnel --url http://localhost:8000 --protocol http2
 ### Merge `main` into `prod`
 
 ```bash
-git checkout <target_branch>
-git merge --no-commit --no-ff <source_branch>
+git checkout main
+git fetch origin
+git merge --no-commit --no-ff prod
 ```
 
 ## Deployment Guide
