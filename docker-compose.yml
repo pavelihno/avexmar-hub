@@ -16,7 +16,7 @@ services:
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
-      - caddy_config:/config
+      - app_logs:/var/log/app
 
   server-app:
     container_name: server-app
@@ -29,6 +29,7 @@ services:
         condition: service_healthy
     volumes:
       - ./server:/app
+      - app_logs:/app/logs
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\""]
       interval: 30s
@@ -68,8 +69,56 @@ services:
       retries: 10
       start_period: 10s
 
+  loki:
+    container_name: loki
+    image: grafana/loki:3.5.5
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  alloy:
+    container_name: alloy
+    image: grafana/alloy:v1.10.2
+    restart: unless-stopped
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    volumes:
+      - ./monitoring/alloy-config.alloy:/etc/alloy/config.alloy:ro
+      - alloy_data:/var/lib/alloy
+      - app_logs:/var/log/app:ro
+    depends_on:
+      loki:
+        condition: service_started
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:12.2.0
+    restart: unless-stopped
+    env_file:
+      - ./monitoring/grafana/.env
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      loki:
+        condition: service_started
+      alloy:
+        condition: service_started
+
 volumes:
+  app_logs:
   caddy_data:
-  caddy_config:
   redis_data:
   postgres_data:
+  loki_data:
+  grafana_data:
+  alloy_data:
