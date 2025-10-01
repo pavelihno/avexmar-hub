@@ -25,7 +25,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-The development stack launches the Flask API (`server-app`), React client (`client-app`), Postgres, Redis, and Adminer (database UI on `http://localhost:8082`).
+The development stack exposes the Flask API (`server-app`) at `http://localhost:8000`, the React client (`client-app`) at `http://localhost` (port `80`), Postgres on `localhost:5432`, Redis on `localhost:6379`, and Adminer (database UI) on `http://localhost:8082`.
 
 ### 3. Initialize the Database
 
@@ -111,7 +111,7 @@ sudo chown -R $USER:$USER server/migrations/versions
 Client App:
 
 ```bash
-cloudflared tunnel --url http://localhost:3000 --protocol http2
+cloudflared tunnel --url http://localhost:80 --protocol http2
 ```
 
 Server App:
@@ -125,7 +125,7 @@ cloudflared tunnel --url http://localhost:8000 --protocol http2
 ```bash
 git checkout prod
 git fetch origin
-git merge --no-commit --no-ff main 
+git merge --no-commit --no-ff main
 ```
 
 Manually resolve all the merge conflicts.
