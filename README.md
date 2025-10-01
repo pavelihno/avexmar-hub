@@ -176,6 +176,26 @@ docker-compose build
 docker-compose up -d
 ```
 
+This command starts the core application services **without** the monitoring stack.
+
+**To include monitoring services**, use the `--profile` flag:
+
+```bash
+docker-compose --profile monitoring up -d
+```
+
+You can also start just the monitoring services separately after the main stack is running:
+
+```bash
+docker-compose up -d loki alloy grafana
+```
+
+**To stop only the monitoring services** without affecting the core application:
+
+```bash
+docker-compose stop loki alloy grafana
+```
+
 Caddy will request HTTPS certificates once the domain resolves to your host and ports 80/443 are reachable.
 
 ### 4. Apply Database Migrations and Bootstrap an Admin
