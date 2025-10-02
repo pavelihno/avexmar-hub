@@ -167,16 +167,36 @@ The production-ready Docker Compose stack includes:
 2. Provide production credentials for Grafana by editing `monitoring/grafana/.env` (the repository version is for local use only):
     - Set `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD` to per-environment credentials.
 
-### 3. Build and Start the Stack
+### 3. Build Application Images and Push to a Registry
+
+Build production images on a workstation or in CI and push them to your container registry so the target VM only needs to pull immutable tags:
+
+```bash
+# Backend image
+docker build -f server/Dockerfile -t pavelihno/avexmar-hub-server:<tag> server
+docker push pavelihno/avexmar-hub-server:<tag>
+
+# Frontend image
+docker build -f client/Dockerfile -t pavelihno/avexmar-hub-client:<tag> client
+docker push pavelihno/avexmar-hub-client:<tag>
+```
+
+-   Replace `<tag>` with your version tag (for example `v1.0.0`, `latest`).
+-   Update `docker-compose.yml` so each service references the pushed tags.
+-   When you promote a new release, push the updated images and rerun `docker-compose pull` on the VM before restarting services.
+
+Building images on the deployment host is discouraged because it prolongs maintenance windows and increases the risk of failures caused by limited resources or missing toolchains.
+
+### 4. Start the Stack
 
 Check out the production configuration (for example, the `prod` branch) that defines the reverse proxy and monitoring services, then run:
 
 ```bash
-docker-compose build
+docker-compose pull
 docker-compose up -d
 ```
 
-This command starts the core application services **without** the monitoring stack.
+This command starts the core application services **without** the monitoring stack using the images you published to the registry.
 
 **To include monitoring services**, use the `--profile` flag:
 
@@ -198,7 +218,7 @@ docker-compose stop loki alloy grafana
 
 Caddy will request HTTPS certificates once the domain resolves to your host and ports 80/443 are reachable.
 
-### 4. Apply Database Migrations and Bootstrap an Admin
+### 5. Apply Database Migrations and Bootstrap an Admin
 
 Run migrations inside the backend container after it reports healthy:
 
@@ -231,7 +251,7 @@ with app.app_context():
 "
 ```
 
-### 5. Monitor Health, Logs, and Dashboards
+### 6. Monitor Health, Logs, and Dashboards
 
 -   Check container status:
     ```bash
@@ -246,13 +266,13 @@ with app.app_context():
 -   Grafana Alloy exposes its admin UI on port `12345` if you need to verify log pipelines.
 -   The backend exposes `/health`, proxied by Caddy at `https://<your-domain>/health` for external monitoring.
 
-### 6. Deployment Checklist for Cloud Environments
+### 7. Deployment Checklist for Cloud Environments
 
 1. Provision the host and ensure inbound ports 80, 443, and any monitoring ports you need are open.
 2. Install Docker Engine and docker-compose.
 3. Pull the production branch (or copy `docker-compose.yml`, `Caddyfile`, monitoring config, and populated `.env` files) onto the host. Persist named volumes (`caddy_data`, `caddy_config`, `redis_data`, `loki_data`, `grafana_data`, `alloy_data`, `app_logs`) on durable storage if you require backups.
 4. Update DNS so `CADDY_DOMAIN` resolves to the host. Wait for propagation before starting the stack.
-5. (Optional) Build images locally and push to a registry, or build directly on the host with `docker-compose build --pull`.
+5. Build the images in CI or on a workstation and push them to your registry; avoid building on the host to keep deployments fast and reproducible. Run `docker-compose pull` on the VM to fetch the new tags before restarting services.
 6. Launch the stack with `docker-compose up -d` and monitor logs until Caddy reports `serving initial configuration`.
 7. Schedule database backups using your managed PostgreSQL provider and monitor `docker-compose ps` for automatic restarts triggered by failed health checks.
 
