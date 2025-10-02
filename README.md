@@ -173,12 +173,12 @@ Build production images on a workstation or in CI and push them to your containe
 
 ```bash
 # Backend image
-docker build -f server/Dockerfile -t pavelihno/avexmar-hub-server:<tag> server
-docker push pavelihno/avexmar-hub-server:<tag>
+docker build -f server/Dockerfile -t pavelihno/avexmar-hub:server-<tag> server
+docker push pavelihno/avexmar-hub:server-<tag>
 
 # Frontend image
-docker build -f client/Dockerfile -t pavelihno/avexmar-hub-client:<tag> client
-docker push pavelihno/avexmar-hub-client:<tag>
+docker build -f client/Dockerfile -t pavelihno/avexmar-hub:client-<tag> client
+docker push pavelihno/avexmar-hub:client-<tag>
 ```
 
 -   Replace `<tag>` with your version tag (for example `v1.0.0`, `latest`).
