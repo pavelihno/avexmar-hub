@@ -1,6 +1,7 @@
 {
 	"name": "client",
 	"version": "1.0.0",
+	"description": "Avexmar Hub is a platform for searching flights, booking tickets, and managing passenger air transportation",
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
