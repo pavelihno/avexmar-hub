@@ -1,6 +1,7 @@
 {
   "short_name": "Avexmar",
   "name": "Avexmar Hub 1.0",
+  "description": "Avexmar Hub is a platform for searching flights, booking tickets, and managing passenger air transportation",
   "icons": [
     {
       "src": "/favicon.ico",
