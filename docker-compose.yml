@@ -20,7 +20,7 @@ services:
 
   server-app:
     container_name: server-app
-    build: ./server
+    image: pavelihno/avexmar-hub:server-v1.0.0
     restart: unless-stopped
     env_file:
       - ./server/.env
@@ -31,7 +31,7 @@ services:
       - ./server:/app
       - app_logs:/app/logs
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\""]
+      test: [ "CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\"" ]
       interval: 30s
       timeout: 3s
       retries: 5
@@ -39,7 +39,7 @@ services:
 
   client-app:
     container_name: client-app
-    build: ./client
+    image: pavelihno/avexmar-hub:client-v1.0.0
     restart: unless-stopped
     env_file:
       - ./client/.env
@@ -47,7 +47,7 @@ services:
       server-app:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz > /dev/null || exit 1"]
+      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1/healthz > /dev/null || exit 1" ]
       interval: 30s
       timeout: 3s
       retries: 5
@@ -59,11 +59,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./redis/.env
-    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes"]
+    command: [ "sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes" ]
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      test: [ "CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG" ]
       interval: 15s
       timeout: 3s
       retries: 10
