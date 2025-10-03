@@ -28,7 +28,6 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./server:/app
       - app_logs:/app/logs
     healthcheck:
       test: [ "CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\"" ]
