@@ -1,5 +1,17 @@
 # Avexmar Hub
 
+This repository hosts the services and client for Avexmar Hub along with the assets that support local development, packaging, and deployment.
+
+## Branching Strategy
+
+- **`prod`** holds the complete codebase used to build production-ready container images for both the server and client applications.
+- **`main`** operates as the development branch where active feature work and iteration on the codebase takes place before promotion to `prod`.
+- **`deploy`** is a minimal branch tailored for cloud deployments; it only keeps the `.env.example` template and the `docker-compose.yml` required to launch the stack in the target environment.
+
+## Deployment Notes
+
+When deploying the server or client using the provided compose file, ensure that only the required environment variable files (`server/.env`, `client/.env`, and any other service-specific env files) are supplied. The application images carry all necessary source code, so no additional host-side mounts are needed.
+
 ## Development Setup
 
 Follow these steps to prepare a local development environment with Docker Compose:
