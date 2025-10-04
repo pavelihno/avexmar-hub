@@ -52,14 +52,24 @@ services:
       retries: 5
       start_period: 10s
 
-  postgres:
-    container_name: postgres
-    image: postgres:15
+  # postgres:
+  #   container_name: postgres
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./db/.env
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  pgbouncer:
+    container_name: pgbouncer
+    image: edoburu/pgbouncer:latest
     restart: unless-stopped
-    env_file:
-      - ./db/.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./db/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./db/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - 6432:6432
 
   redis:
     container_name: redis
@@ -113,6 +123,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./monitoring/grafana/.env
+    ports:
+      - 3000:3000
     profiles:
       - monitoring
     volumes:
