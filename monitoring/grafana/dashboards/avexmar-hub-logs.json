@@ -60,10 +60,12 @@
         "dedupStrategy": "none",
         "enableLogDetails": true,
         "prettifyLogMessage": true,
-        "showCommonLabels": false,
-        "showLabels": true,
+        "rowHeight": 1.35,
+        "showCommonLabels": true,
+        "showLabels": false,
         "showTime": true,
-        "sortOrder": "Descending"
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
       },
       "targets": [
         {

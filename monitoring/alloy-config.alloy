@@ -29,6 +29,12 @@ local.file_match "app_logs" {
       "service"   = "avexmar-hub",
       "component" = "caddy",
     },
+    {
+      "__path__"  = "/var/log/app/app/*.log",
+      "job"       = "avexmar-hub-application",
+      "service"   = "avexmar-hub",
+      "component" = "app",
+    },
   ]
 }
 
