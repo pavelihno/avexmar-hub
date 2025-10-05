@@ -38,6 +38,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  pgbouncer:
+    container_name: pgbouncer
+    image: edoburu/pgbouncer:latest
+    restart: unless-stopped
+    volumes:
+      - ./db/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./db/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    ports:
+      - 6432:6432
+
   redis:
     container_name: redis
     image: redis:7.2.1-alpine
@@ -91,10 +101,10 @@ services:
     image: grafana/grafana:12.2.0
     env_file:
       - ./monitoring/grafana/.env
-    profiles:
-      - monitoring
     ports:
       - 3000:3000
+    profiles:
+      - monitoring
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro

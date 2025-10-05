@@ -310,7 +310,7 @@ def create_invoice(booking: Booking) -> Payment:
         raise e
 
 
-def handle_webhook(payload: Dict[str, Any]) -> None:
+def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
     """Process YooKassa webhook notifications"""
     event = payload.get('event')
 

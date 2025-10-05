@@ -13,7 +13,7 @@ from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import calculate_price_details, get_booking_details
-from app.utils.yookassa import create_payment, create_invoice, handle_webhook
+from app.utils.yookassa import create_payment, create_invoice, handle_yookassa_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
     PASSENGER_PLURAL_CATEGORY,
@@ -288,5 +288,5 @@ def get_booking_process_payment(current_user, public_id):
 
 def yookassa_webhook():
     payload = request.json or {}
-    handle_webhook(payload)
+    handle_yookassa_webhook(payload)
     return jsonify({'status': 'ok'}), 200
