@@ -25,16 +25,27 @@ query_range:
 
 limits_config:
   allow_structured_metadata: false
+  retention_period: 30d
+  max_query_length: 0h
+  max_query_lookback: 0h
 
 schema_config:
   configs:
     - from: 2020-10-24
-      store: boltdb-shipper
+      store: tsdb
       object_store: filesystem
-      schema: v11
+      schema: v13
       index:
         prefix: loki_index_
         period: 24h
+
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  delete_request_store: filesystem
 
 ruler:
   rule_path: /loki/rules-temp

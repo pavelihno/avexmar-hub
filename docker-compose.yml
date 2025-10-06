@@ -114,8 +114,6 @@ services:
     restart: unless-stopped
     env_file:
       - ./monitoring/grafana/.env
-    ports:
-      - 3000:3000
     profiles:
       - monitoring
     volumes:
