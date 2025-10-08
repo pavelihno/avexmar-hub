@@ -12,13 +12,14 @@ services:
       - redis
     volumes:
       - ./server:/app
+      - app_storage:/app/storage
       - app_logs:/app/logs
 
   client-app:
     container_name: client-app
     build: ./client
     ports:
-      - 80:3000
+      - 3000:3000
     tty: true
     env_file:
       - ./client/.env
@@ -102,7 +103,7 @@ services:
     env_file:
       - ./monitoring/grafana/.env
     ports:
-      - 3000:3000
+      - 3001:3000
     profiles:
       - monitoring
     volumes:
@@ -115,6 +116,7 @@ services:
       - alloy
 
 volumes:
+  app_storage:
   app_logs:
   redis_data:
   postgres_data:

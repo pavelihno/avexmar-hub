@@ -7,8 +7,6 @@ from datetime import datetime
 from sqlalchemy.orm import Session, Mapped
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
-from werkzeug.exceptions import NotFound
-
 from app.database import db
 from app.models._base_model import BaseModel
 from app.utils.enum import (
