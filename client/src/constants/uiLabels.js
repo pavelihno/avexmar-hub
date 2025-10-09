@@ -1,4 +1,5 @@
-import { formatDate, formatTime } from '../components/utils';
+import { formatDate, formatTime, formatNumber } from '../components/utils';
+import ENUM_LABELS from './enumLabels';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР — Авиаперевозки',
@@ -350,7 +351,12 @@ export const UI_LABELS = {
 		passenger_added: 'Пассажир успешно добавлен',
 		personal_data: 'Личные данные',
 	},
-	HOME: {},
+	HOME: {
+		poster_carousel: {
+			price_from: (price, currency) =>
+				`от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+		},
+	},
 	BOOKING: {
 		progress_steps: {
 			passengers: 'Пассажиры',
@@ -528,8 +534,11 @@ export const UI_LABELS = {
 			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
-			price_from: 'От',
-			price_per_passenger: 'За 1 пассажира',
+			price_from: (price, currency) =>
+				`от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+			price_exact: (price, currency) =>
+				`${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+			price_per_passenger: 'за 1 пассажира',
 			seats_available: 'Свободных мест',
 			seats_unavailable: 'Недостаточно свободных мест',
 			tickets: 'Стоимость перевозки',
@@ -550,6 +559,8 @@ export const UI_LABELS = {
 		},
 		nearby_dates: {
 			title: (from, to) => `Ближайшие даты: ${from} → ${to}`,
+			price_date: (date, price, currency) =>
+				`${formatDate(date, 'dd.MM')} - ${formatNumber(price)} ${ENUM_LABELS.CURRENCY_SYMBOL[currency] || ''}`,
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
