@@ -23,7 +23,7 @@ class CarouselSlide(BaseModel):
     display_order = db.Column(db.Integer, nullable=False, default=0)
     badge = db.Column(db.String, nullable=True)
     description = db.Column(db.Text, nullable=True)
-    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
 
     route: Mapped['Route'] = db.relationship('Route', back_populates='carousel_slides')
 
@@ -79,4 +79,3 @@ class CarouselSlide(BaseModel):
         ImageManager().delete_file(cls.get_or_404(_id).image_path)
 
         return super().delete(_id, session, commit=commit)
-

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DialogTitle, DialogContent, DialogActions, Button, Grid, Alert, Fade, Box } from '@mui/material';
 
 import { UI_LABELS } from '../../constants';
+import { validateFormFields, extractErrorMessage } from './utils';
 
 const AdminEntityForm = ({
 	fields,
@@ -53,26 +54,15 @@ const AdminEntityForm = ({
 		}
 	};
 
-	const validateForm = () => {
-		const errors = {};
-		let isValid = true;
-
-		fields.forEach((field) => {
-			if (field.validate) {
-				const error = field.validate(formData[field.name]);
-				if (error) {
-					errors[field.name] = error;
-					isValid = false;
-				}
-			}
-		});
-
-		setValidationErrors(errors);
-		return isValid;
-	};
-
 	const handleSubmit = async () => {
-		if (!validateForm()) return;
+		setValidationErrors({});
+		const errors = validateFormFields(fields, formData);
+		if (Object.keys(errors).length > 0) {
+			setValidationErrors(errors);
+			return;
+		}
+
+		setValidationErrors({});
 
 		try {
 			await onSave(formData);
@@ -81,19 +71,7 @@ const AdminEntityForm = ({
 
 			setTimeout(() => onClose(), 1000);
 		} catch (error) {
-			if (typeof error === 'string') {
-				setErrorMessage(error);
-			} else if (error?.message) {
-				setErrorMessage(error.message);
-			} else if (typeof error === 'object') {
-				setErrorMessage(
-					Object.entries(error)
-						.map(([field, msg]) => `${field}: ${msg}`)
-						.join('; ')
-				);
-			} else {
-				setErrorMessage(UI_LABELS.ERRORS.unknown);
-			}
+			setErrorMessage(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
 			setSuccessMessage('');
 		}
 	};

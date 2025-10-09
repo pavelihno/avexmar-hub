@@ -11,8 +11,13 @@ import { fetchCarouselSlides } from '../../redux/actions/carouselSlide';
 const AUTO_SCROLL_DELAY = 6000;
 const SWIPE_THRESHOLD = 50;
 
-function transformSlides(items = []) {
+export function transformSlides(items = [], { includeInactive = false } = {}) {
 	return items
+		.filter((item) => {
+			if (!item) return false;
+			if (!includeInactive && item.is_active === false) return false;
+			return true;
+		})
 		.slice()
 		.sort((a, b) => {
 			const orderA = a?.display_order ?? 0;
@@ -39,11 +44,18 @@ function transformSlides(items = []) {
 		.filter(Boolean);
 }
 
-const PosterCarousel = () => {
+const PosterCarousel = ({
+	slides: externalSlides = null,
+	autoFetch = true,
+	autoPlay = true,
+	includeInactive = false,
+	sx = null,
+}) => {
 	const dispatch = useDispatch();
 
 	const { carouselSlides: carouselSlidesData } = useSelector((state) => state.carouselSlides);
-	const slides = useMemo(() => transformSlides(carouselSlidesData), [carouselSlidesData]);
+	const sourceSlides = externalSlides ?? carouselSlidesData;
+	const slides = useMemo(() => transformSlides(sourceSlides, { includeInactive }), [sourceSlides, includeInactive]);
 	const slidesCount = slides.length;
 
 	const [index, setIndex] = useState(0);
@@ -55,8 +67,9 @@ const PosterCarousel = () => {
 	const theme = useTheme();
 
 	useEffect(() => {
+		if (!autoFetch || externalSlides) return;
 		dispatch(fetchCarouselSlides());
-	}, [dispatch]);
+	}, [dispatch, autoFetch, externalSlides]);
 
 	useEffect(() => {
 		setIndex(0);
@@ -70,7 +83,7 @@ const PosterCarousel = () => {
 	}, [slidesCount, index]);
 
 	useEffect(() => {
-		if (slidesCount === 0 || isPaused) return;
+		if (!autoPlay || slidesCount === 0 || isPaused) return;
 		timerRef.current = setInterval(() => {
 			setIndex((prev) => (prev + 1) % slidesCount);
 		}, AUTO_SCROLL_DELAY);
@@ -80,7 +93,7 @@ const PosterCarousel = () => {
 				timerRef.current = null;
 			}
 		};
-	}, [isPaused, slidesCount]);
+	}, [autoPlay, isPaused, slidesCount]);
 
 	const handleChange = (newIndex) => {
 		if (slidesCount === 0) return;
@@ -108,6 +121,10 @@ const PosterCarousel = () => {
 		touchStartX.current = null;
 	};
 
+	if (slidesCount === 0) {
+		return null;
+	}
+
 	return (
 		<Box
 			onMouseEnter={() => setPaused(true)}
@@ -125,6 +142,7 @@ const PosterCarousel = () => {
 				backgroundColor: 'background.paper',
 				boxShadow: `0 24px 60px ${alpha(theme.palette.common.black, 0.28)}`,
 				'&:hover .carouselNav': { opacity: 1, transform: 'translateY(-50%) scale(1)' },
+				...(sx || {}),
 			}}
 		>
 			<Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -253,87 +271,91 @@ const PosterCarousel = () => {
 				})}
 			</Box>
 
-			<IconButton
-				onClick={() => handleChange(index - 1)}
-				className='carouselNav'
-				sx={{
-					position: 'absolute',
-					top: '50%',
-					left: 12,
-					transform: 'translateY(-50%) scale(0.92)',
-					color: '#fff',
-					backgroundColor: alpha('#0d1a2a', 0.6),
-					border: `1px solid ${alpha('#ffffff', 0.18)}`,
-					transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
-					opacity: 0,
-					display: { xs: 'none', sm: 'inline-flex' },
-					'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
-				}}
-				size='small'
-			>
-				<ArrowBackIosNew fontSize='inherit' />
-			</IconButton>
-			<IconButton
-				onClick={() => handleChange(index + 1)}
-				className='carouselNav'
-				sx={{
-					position: 'absolute',
-					top: '50%',
-					right: 12,
-					transform: 'translateY(-50%) scale(0.92)',
-					color: '#fff',
-					backgroundColor: alpha('#0d1a2a', 0.6),
-					border: `1px solid ${alpha('#ffffff', 0.18)}`,
-					transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
-					opacity: 0,
-					display: { xs: 'none', sm: 'inline-flex' },
-					'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
-				}}
-				size='small'
-			>
-				<ArrowForwardIos fontSize='inherit' />
-			</IconButton>
+			{slidesCount > 1 && (
+				<>
+					<IconButton
+						onClick={() => handleChange(index - 1)}
+						className='carouselNav'
+						sx={{
+							position: 'absolute',
+							top: '50%',
+							left: 12,
+							transform: 'translateY(-50%) scale(0.92)',
+							color: '#fff',
+							backgroundColor: alpha('#0d1a2a', 0.6),
+							border: `1px solid ${alpha('#ffffff', 0.18)}`,
+							transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
+							opacity: 0,
+							display: { xs: 'none', sm: 'inline-flex' },
+							'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
+						}}
+						size='small'
+					>
+						<ArrowBackIosNew fontSize='inherit' />
+					</IconButton>
+					<IconButton
+						onClick={() => handleChange(index + 1)}
+						className='carouselNav'
+						sx={{
+							position: 'absolute',
+							top: '50%',
+							right: 12,
+							transform: 'translateY(-50%) scale(0.92)',
+							color: '#fff',
+							backgroundColor: alpha('#0d1a2a', 0.6),
+							border: `1px solid ${alpha('#ffffff', 0.18)}`,
+							transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
+							opacity: 0,
+							display: { xs: 'none', sm: 'inline-flex' },
+							'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
+						}}
+						size='small'
+					>
+						<ArrowForwardIos fontSize='inherit' />
+					</IconButton>
 
-			<Stack
-				direction='row'
-				spacing={{ xs: 0.5, sm: 0.75 }}
-				sx={{
-					position: 'absolute',
-					bottom: { xs: 12, sm: 14 },
-					left: '50%',
-					transform: 'translateX(-50%)',
-					alignItems: 'center',
-					px: 2,
-				}}
-			>
-				{slides.map((item, i) => {
-					const active = i === index;
-					return (
-						<Box
-							key={item.id}
-							onClick={() => handleChange(i)}
-							role='button'
-							aria-label={`Перейти к слайду ${i + 1}`}
-							tabIndex={0}
-							onKeyDown={(event) => {
-								if (event.key === 'Enter' || event.key === ' ') {
-									event.preventDefault();
-									handleChange(i);
-								}
-							}}
-							sx={{
-								width: active ? { xs: 20, sm: 26 } : { xs: 10, sm: 12 },
-								height: { xs: 5, sm: 6 },
-								borderRadius: 999,
-								cursor: 'pointer',
-								transition: 'width .4s ease, background-color .3s ease',
-								backgroundColor: active ? alpha('#ffffff', 0.9) : alpha('#ffffff', 0.4),
-								minWidth: { xs: 10, sm: 12 },
-							}}
-						/>
-					);
-				})}
-			</Stack>
+					<Stack
+						direction='row'
+						spacing={{ xs: 0.5, sm: 0.75 }}
+						sx={{
+							position: 'absolute',
+							bottom: { xs: 12, sm: 14 },
+							left: '50%',
+							transform: 'translateX(-50%)',
+							alignItems: 'center',
+							px: 2,
+						}}
+					>
+						{slides.map((item, i) => {
+							const active = i === index;
+							return (
+								<Box
+									key={item.id}
+									onClick={() => handleChange(i)}
+									role='button'
+									aria-label={`Перейти к слайду ${i + 1}`}
+									tabIndex={0}
+									onKeyDown={(event) => {
+										if (event.key === 'Enter' || event.key === ' ') {
+											event.preventDefault();
+											handleChange(i);
+										}
+									}}
+									sx={{
+										width: active ? { xs: 20, sm: 26 } : { xs: 10, sm: 12 },
+										height: { xs: 5, sm: 6 },
+										borderRadius: 999,
+										cursor: 'pointer',
+										transition: 'width .4s ease, background-color .3s ease',
+										backgroundColor: active ? alpha('#ffffff', 0.9) : alpha('#ffffff', 0.4),
+										minWidth: { xs: 10, sm: 12 },
+									}}
+								/>
+							);
+						})}
+					</Stack>
+				</>
+			)}
 		</Box>
 	);
 };

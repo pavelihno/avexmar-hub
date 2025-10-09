@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Box, Tabs, Tab, Paper, Typography, Grid, Stack } from '@mui/material';
+import { Box, Tabs, Tab, Paper, Typography, Grid, Stack, Divider } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FlightIcon from '@mui/icons-material/Flight';
 import GroupIcon from '@mui/icons-material/Group';
@@ -70,6 +70,8 @@ const Profile = () => {
 								)}
 							</Box>
 						</Stack>
+
+						<Divider sx={{ my: 2 }} />
 
 						<Box sx={{ width: '100%' }}>
 							<Tabs

@@ -128,14 +128,14 @@ export const FIELD_LABELS = {
 		tariff_id: 'Тариф',
 		seats_number: 'Количество мест',
 	},
-        USER: {
-                email: 'Электронная почта',
-                password: 'Пароль',
-                role: 'Роль пользователя',
-                is_active: 'Активен',
-                failed_login_attempts: 'Неудачные входы',
-                is_locked: 'Заблокирован',
-        },
+	USER: {
+		email: 'Электронная почта',
+		password: 'Пароль',
+		role: 'Роль пользователя',
+		is_active: 'Активен',
+		failed_login_attempts: 'Неудачные входы',
+		is_locked: 'Заблокирован',
+	},
 	TIMEZONE: {
 		name: 'Часовой пояс',
 	},
@@ -154,6 +154,16 @@ export const FIELD_LABELS = {
 		user_agent: 'User-Agent',
 		device_fingerprint: 'Отпечаток устройства',
 		subject_ids: 'Субъекты согласия',
+	},
+	CAROUSEL_SLIDE: {
+		title: 'Заголовок',
+		badge: 'Бейдж',
+		description: 'Описание',
+		route_id: 'Маршрут',
+		alt: 'Альтернативный текст',
+		display_order: 'Порядок отображения',
+		is_active: 'Активен',
+		image: 'Изображение',
 	},
 };
 

@@ -5,8 +5,9 @@ import {
 	createCarouselSlide,
 	updateCarouselSlide,
 	deleteCarouselSlide,
+	uploadCarouselSlideImage,
 } from '../actions/carouselSlide';
-import { addCrudCases } from '../utils';
+import { addCrudCases, handlePending, handleRejected } from '../utils';
 
 const initialState = {
 	carouselSlides: [],
@@ -32,6 +33,21 @@ const carouselSlideSlice = createSlice({
 			'carouselSlides',
 			'carouselSlide'
 		);
+
+		builder
+			.addCase(uploadCarouselSlideImage.pending, handlePending)
+			.addCase(uploadCarouselSlideImage.fulfilled, (state, action) => {
+				const updatedSlide = action.payload;
+
+				state.carouselSlides = state.carouselSlides.map((item) =>
+					item.id === updatedSlide.id ? updatedSlide : item
+				);
+				if (state.carouselSlide?.id === updatedSlide.id) {
+					state.carouselSlide = updatedSlide;
+				}
+				state.isLoading = false;
+			})
+			.addCase(uploadCarouselSlideImage.rejected, handleRejected);
 	},
 });
 

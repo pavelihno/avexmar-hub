@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Box, Typography, TextField, Autocomplete } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -22,8 +22,8 @@ import { fetchPassengers } from '../../redux/actions/passenger';
 import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
-import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../constants';
+import { formatDate } from '../utils';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();

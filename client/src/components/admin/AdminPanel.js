@@ -20,15 +20,51 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import SlideshowIcon from '@mui/icons-material/Slideshow';
 
 import Base from '../Base';
 
 import { UI_LABELS } from '../../constants';
 
+const ToolGrid = ({ items }) => {
+	if (!items || items.length === 0) return null;
+
+	return (
+		<Grid container spacing={3}>
+			{items.map((tool, index) => (
+				<Grid item xs={12} sm={6} md={3} key={`${tool.path}-${index}`}>
+					<Card sx={{ height: '100%' }}>
+						<CardActionArea
+							component={Link}
+							to={tool.path}
+							sx={{
+								height: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+							}}
+						>
+							<CardContent sx={{ textAlign: 'center' }}>
+								{tool.icon}
+								<Typography variant='h6' sx={{ mt: 2 }}>
+									{tool.title}
+								</Typography>
+								<Typography variant='body2' color='text.secondary'>
+									{tool.description}
+								</Typography>
+							</CardContent>
+						</CardActionArea>
+					</Card>
+				</Grid>
+			))}
+		</Grid>
+	);
+};
+
 const iconSX = { fontSize: 50 };
 
 const AdminPanel = () => {
-	const dataTables = [
+	const tableManagementTools = [
 		{
 			title: UI_LABELS.ADMIN.modules.countries.title,
 			description: UI_LABELS.ADMIN.modules.countries.description,
@@ -142,72 +178,35 @@ const AdminPanel = () => {
 		},
 	];
 
+	const otherTools = [
+		{
+			title: UI_LABELS.ADMIN.carousel_slides.title,
+			description: UI_LABELS.ADMIN.carousel_slides.description,
+			icon: <SlideshowIcon sx={iconSX} />,
+			path: '/admin/carousel-slides',
+		},
+	];
+
+	const sections = [
+		{ key: 'tables', items: tableManagementTools },
+		{ key: 'exports', items: exportTools },
+		{ key: 'others', items: otherTools },
+	];
+
+	const activeSections = sections.filter((section) => section.items && section.items.length > 0);
+
 	return (
 		<Base>
 			<Box sx={{ p: 3 }}>
 				<Typography variant='h3' sx={{ mb: 4 }}>
 					{UI_LABELS.ADMIN.panel}
 				</Typography>
-
-				<Grid container spacing={3}>
-					{dataTables.map((dataTable, index) => (
-						<Grid item xs={12} sm={6} md={3} key={index}>
-							<Card sx={{ height: '100%' }}>
-								<CardActionArea
-									component={Link}
-									to={dataTable.path}
-									sx={{
-										height: '100%',
-										display: 'flex',
-										flexDirection: 'column',
-										alignItems: 'center',
-									}}
-								>
-									<CardContent sx={{ textAlign: 'center' }}>
-										{dataTable.icon}
-										<Typography variant='h6' sx={{ mt: 2 }}>
-											{dataTable.title}
-										</Typography>
-										<Typography variant='body2' color='text.secondary'>
-											{dataTable.description}
-										</Typography>
-									</CardContent>
-								</CardActionArea>
-							</Card>
-						</Grid>
-					))}
-				</Grid>
-
-				<Divider sx={{ my: 4 }} />
-
-				<Grid container spacing={3}>
-					{exportTools.map((tool, index) => (
-						<Grid item xs={12} sm={6} md={3} key={index}>
-							<Card sx={{ height: '100%' }}>
-								<CardActionArea
-									component={Link}
-									to={tool.path}
-									sx={{
-										height: '100%',
-										display: 'flex',
-										flexDirection: 'column',
-										alignItems: 'center',
-									}}
-								>
-									<CardContent sx={{ textAlign: 'center' }}>
-										{tool.icon}
-										<Typography variant='h6' sx={{ mt: 2 }}>
-											{tool.title}
-										</Typography>
-										<Typography variant='body2' color='text.secondary'>
-											{tool.description}
-										</Typography>
-									</CardContent>
-								</CardActionArea>
-							</Card>
-						</Grid>
-					))}
-				</Grid>
+				{activeSections.map((section, index) => (
+					<Box key={section.key} sx={{ mt: index === 0 ? 0 : 4 }}>
+						{index !== 0 && <Divider sx={{ mb: 4 }} />}
+						<ToolGrid items={section.items} />
+					</Box>
+				))}
 			</Box>
 		</Base>
 	);
