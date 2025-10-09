@@ -152,9 +152,7 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 								{!isMdDown && <TableCell>{formatTime(row.scheduledDepartureTime)}</TableCell>}
 								{!isSmDown && <TableCell>{row.airlineName}</TableCell>}
 								<TableCell>
-									{`${UI_LABELS.SEARCH.flight_details.price_from.toLowerCase()} ${formatNumber(
-										row.price
-									)} ${ENUM_LABELS.CURRENCY_SYMBOL[row.currency] || ''}`}
+									{UI_LABELS.SEARCH.flight_details.price_from(row.price, row.currency)}
 								</TableCell>
 								{!isSmDown && (
 									<TableCell padding='checkbox' onClick={(e) => e.stopPropagation()}>

@@ -534,6 +534,7 @@ export const UI_LABELS = {
 			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
+			flight_note: 'Примечание',
 			price_from: (price, currency) =>
 				`от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
 			price_exact: (price, currency) =>
@@ -569,10 +570,13 @@ export const UI_LABELS = {
 	BOOKING_SEARCH: {
 		link: 'Найти бронирование',
 		title: 'Найти бронирование',
+		subtitle: 'Укажите данные пассажира и номер бронирования, чтобы продолжить оформление.',
 		booking_number: 'Номер бронирования',
 		first_name: 'Имя пассажира',
 		last_name: 'Фамилия пассажира',
 		button: 'Найти',
+		hint_title: 'Где найти номер бронирования?',
+		hint_text: 'Он указан в письме-подтверждении и в электронном билете.',
 	},
 };
 
