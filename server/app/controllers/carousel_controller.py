@@ -1,7 +1,6 @@
 from flask import jsonify, request
 
 from app.models.carousel_slide import CarouselSlide
-from app.models.route import Route
 from app.middlewares.auth_middleware import admin_required
 from app.utils.storage import ImageManager
 
