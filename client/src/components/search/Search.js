@@ -302,13 +302,18 @@ const Search = () => {
 								<Box
 									sx={{
 										display: 'flex',
-										flexDirection: 'row',
-										justifyContent: { sm: 'flex-start', xs: 'center' },
 										alignItems: 'center',
 										flexWrap: 'nowrap',
 										overflowX: 'auto',
 										columnGap: 1,
 										width: '100%',
+										justifyContent: 'flex-start',
+										scrollbarWidth: 'none',
+										WebkitOverflowScrolling: 'touch',
+										px: 0.5,
+										'&::-webkit-scrollbar': {
+											display: 'none',
+										},
 									}}
 								>
 									{nearDatesOutbound.map((d) => (
@@ -360,12 +365,18 @@ const Search = () => {
 										<Box
 											sx={{
 												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
 												flexWrap: 'nowrap',
 												overflowX: 'auto',
 												columnGap: 1,
 												width: '100%',
+												alignItems: 'center',
+												justifyContent: 'flex-start',
+												scrollbarWidth: 'none',
+												WebkitOverflowScrolling: 'touch',
+												px: 0.5,
+												'&::-webkit-scrollbar': {
+													display: 'none',
+												},
 											}}
 										>
 											{nearDatesReturn.map((d) => (

@@ -62,7 +62,13 @@ const BookingsTab = () => {
 	if (isLoading) {
 		return (
 			<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
-				<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+				<Paper
+					sx={{
+						p: { xs: 2, md: 3 },
+						width: '100%',
+						borderRadius: 3
+					}}
+				>
 					<Box
 						sx={{
 							minHeight: 200,
@@ -87,7 +93,13 @@ const BookingsTab = () => {
 
 	return (
 		<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
-			<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+			<Paper
+				sx={{
+					p: { xs: 2, md: 3 },
+					width: '100%',
+					borderRadius: 3
+				}}
+			>
 				<Typography variant='h4'>{UI_LABELS.PROFILE.bookings}</Typography>
 
 				{(!bookings || bookings.length === 0) && (

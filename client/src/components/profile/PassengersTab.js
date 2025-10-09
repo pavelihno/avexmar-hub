@@ -93,7 +93,13 @@ const PassengersTab = () => {
 
 	return (
 		<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
-			<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+			<Paper
+				sx={{
+					p: { xs: 2, md: 3 },
+					width: '100%',
+					borderRadius: 3,
+				}}
+			>
 				<Typography variant='h4'>{UI_LABELS.PROFILE.passengers}</Typography>
 
 				<Box
@@ -215,7 +221,7 @@ const PassengersTab = () => {
 					)}
 
 					{showForm ? (
-						<Paper elevation={1} sx={{ p: 2 }}>
+						<Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
 							{errors.message && (
 								<Alert severity='error' sx={{ mb: 2 }}>
 									{errors.message}

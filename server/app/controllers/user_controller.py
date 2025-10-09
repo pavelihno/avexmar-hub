@@ -10,7 +10,7 @@ from app.models.flight import Flight
 from app.models.passenger import Passenger
 
 from app.utils.enum import BOOKING_STATUS, USER_ROLE, CONSENT_EVENT_TYPE, CONSENT_DOC_TYPE
-from app.middlewares.auth_middleware import admin_required, login_required
+from app.middlewares.auth_middleware import admin_required, login_required, current_user
 from app.utils.consent import create_user_consent
 from app.utils.email import send_email, EMAIL_TYPE
 from app.config import Config
@@ -39,11 +39,8 @@ def get_user(current_user, user_id):
     return jsonify(user.to_dict())
 
 
-@login_required
+@current_user
 def update_user(current_user, user_id):
-    if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': 'Forbidden'}), 403
-
     body = request.json or {}
 
     session = db.session
