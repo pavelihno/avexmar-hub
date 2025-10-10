@@ -28,6 +28,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
@@ -47,6 +48,7 @@ const AdminDataTable = ({
 	onEdit,
 	onDelete,
 	onDeleteAll = null,
+	onDeleteFiltered = null,
 	renderForm,
 	getUploadTemplate = () => {},
 	onUpload = () => Promise.resolve(),
@@ -62,6 +64,7 @@ const AdminDataTable = ({
 	});
 	const [showFilters, setShowFilters] = useState(false);
 	const [deleteAllDialog, setDeleteAllDialog] = useState(false);
+	const [deleteFilteredDialog, setDeleteFilteredDialog] = useState(false);
 	const [currentItem, setCurrentItem] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 
@@ -79,6 +82,7 @@ const AdminDataTable = ({
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const theme = useTheme();
+	const devMode = isDev();
 
 	const [uploadDialog, setUploadDialog] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -159,6 +163,19 @@ const AdminDataTable = ({
 		setDeleteAllDialog(false);
 	};
 
+	const handleOpenDeleteFilteredDialog = () => {
+		setDeleteFilteredDialog(true);
+	};
+
+	const handleCloseDeleteFilteredDialog = () => {
+		setDeleteFilteredDialog(false);
+	};
+
+	const confirmDeleteFiltered = (ids) => {
+		handleDeleteFiltered(ids);
+		setDeleteFilteredDialog(false);
+	};
+
 	const handleSort = (field) => {
 		const column = columns.find((c) => c.field === field);
 		if (!column || column.type === FIELD_TYPES.CUSTOM) return;
@@ -216,6 +233,22 @@ const AdminDataTable = ({
 			result
 				.then(() => {
 					showNotification(UI_LABELS.SUCCESS.delete_all, 'success');
+				})
+				.catch((error) => {
+					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+				});
+		} catch (error) {
+			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+		}
+	};
+
+	const handleDeleteFiltered = (ids) => {
+		if (!onDeleteFiltered || !Array.isArray(ids) || ids.length === 0) return;
+		try {
+			const result = onDeleteFiltered(ids);
+			result
+				.then(() => {
+					showNotification(UI_LABELS.SUCCESS.delete_filtered || UI_LABELS.SUCCESS.delete, 'success');
 				})
 				.catch((error) => {
 					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
@@ -309,6 +342,10 @@ const AdminDataTable = ({
 	};
 
 	const filteredData = applyFilters(data);
+	const filteredIds = Array.from(new Set(filteredData.map((item) => item?.id).filter((id) => id != null)));
+	const hasActiveFilters =
+		Object.keys(filters).length > 0 &&
+		Object.values(filters).some((value) => value !== '' && value !== null && value !== undefined);
 	const sortedData = applySorting(filteredData);
 	const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -322,62 +359,100 @@ const AdminDataTable = ({
 					<Typography variant='h4'>{title}</Typography>
 				</Box>
 
-				{addButtonText && (
-					<Button
-						variant='contained'
-						color='primary'
-						startIcon={<AddIcon />}
-						onClick={(e) => {
-							e.currentTarget.blur();
-							handleOpenDialog();
-						}}
-					>
-						{addButtonText}
-					</Button>
-				)}
+				<Box
+					sx={{
+						display: 'flex',
+						flexWrap: 'wrap',
+						gap: 2,
+						mb: 2,
+						alignItems: 'center',
+					}}
+				>
+					{addButtonText && (
+						<Button
+							variant='contained'
+							color='primary'
+							startIcon={<AddIcon />}
+							onClick={(e) => {
+								e.currentTarget.blur();
+								handleOpenDialog();
+							}}
+							sx={{
+								flexShrink: 0,
+							}}
+						>
+							{addButtonText}
+						</Button>
+					)}
 
-				{uploadButtonText && uploadTemplateButtonText && (
-					<>
+					{uploadButtonText && uploadTemplateButtonText && (
+						<>
+							<Button
+								variant='outlined'
+								startIcon={<DownloadIcon />}
+								onClick={() => getUploadTemplate()}
+								sx={{
+									flexShrink: 0,
+								}}
+							>
+								{uploadTemplateButtonText}
+							</Button>
+
+							<Button
+								variant='outlined'
+								color='secondary'
+								startIcon={<UploadIcon />}
+								onClick={() => openUploadDialog()}
+								sx={{
+									flexShrink: 0,
+								}}
+							>
+								{uploadButtonText}
+							</Button>
+						</>
+					)}
+
+					{onDeleteAll && (
 						<Button
 							variant='outlined'
-							startIcon={<DownloadIcon />}
-							onClick={() => getUploadTemplate()}
-							sx={{ ml: 2 }}
+							color='error'
+							size='small'
+							startIcon={<DeleteIcon />}
+							onClick={handleOpenDeleteAllDialog}
+							disabled={hasActiveFilters || data.length === 0}
+							sx={{
+								fontSize: '0.75rem',
+								fontWeight: 400,
+								minHeight: 28,
+								px: 1.5,
+								py: 0.5,
+								flexShrink: 0,
+							}}
 						>
-							{uploadTemplateButtonText}
+							{UI_LABELS.BUTTONS.delete_all}
 						</Button>
-
+					)}
+					{onDeleteFiltered && (
 						<Button
 							variant='outlined'
-							color='secondary'
-							startIcon={<UploadIcon />}
-							onClick={() => openUploadDialog()}
-							sx={{ ml: 2 }}
+							color='error'
+							size='small'
+							startIcon={<DeleteSweepIcon />}
+							onClick={handleOpenDeleteFilteredDialog}
+							disabled={!hasActiveFilters || filteredIds.length === 0}
+							sx={{
+								fontSize: '0.75rem',
+								fontWeight: 400,
+								minHeight: 28,
+								px: 1.5,
+								py: 0.5,
+								flexShrink: 0,
+							}}
 						>
-							{uploadButtonText}
+							{UI_LABELS.BUTTONS.delete_filtered}
 						</Button>
-					</>
-				)}
-
-				{isDev && onDeleteAll && (
-					<Button
-						variant='outlined'
-						color='error'
-						size='small'
-						startIcon={<DeleteIcon />}
-						onClick={handleOpenDeleteAllDialog}
-						sx={{
-							ml: 2,
-							fontSize: '0.75rem',
-							fontWeight: 400,
-							minHeight: 28,
-							px: 1.5,
-							py: 0.5,
-						}}
-					>
-						{UI_LABELS.BUTTONS.delete_all}
-					</Button>
-				)}
+					)}
+				</Box>
 				<Box sx={{ position: 'relative' }}>
 					<Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
 						<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
@@ -644,6 +719,29 @@ const AdminDataTable = ({
 							{UI_LABELS.BUTTONS.cancel}
 						</Button>
 						<Button onClick={confirmDeleteAll} color='error' variant='contained'>
+							{UI_LABELS.BUTTONS.delete}
+						</Button>
+					</DialogActions>
+				</Dialog>
+
+				{/* Delete filtered dialog */}
+				<Dialog open={deleteFilteredDialog} onClose={handleCloseDeleteFilteredDialog}>
+					<DialogTitle id='delete-filtered-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogContent>
+						<Typography id='delete-filtered-dialog-description'>
+							{UI_LABELS.MESSAGES.confirm_delete_filtered}
+						</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={handleCloseDeleteFilteredDialog} color='primary'>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
+						<Button
+							onClick={() => confirmDeleteFiltered(filteredIds)}
+							color='error'
+							variant='contained'
+							disabled={!filteredIds.length}
+						>
 							{UI_LABELS.BUTTONS.delete}
 						</Button>
 					</DialogActions>

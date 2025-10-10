@@ -9,6 +9,7 @@ import {
 	updateDiscount,
 	deleteDiscount,
 	deleteAllDiscounts,
+	deleteFilteredDiscounts,
 } from '../../redux/actions/discount';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatNumber } from '../utils';
@@ -75,6 +76,11 @@ const DiscountManagement = () => {
 		await dispatch(deleteAllDiscounts()).unwrap();
 		dispatch(fetchDiscounts());
 	};
+	const handleDeleteFilteredDiscounts = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredDiscounts(ids)).unwrap();
+		dispatch(fetchDiscounts());
+	};
 
 	const formattedDiscounts = discounts.map(adminManager.toUiFormat);
 
@@ -87,6 +93,7 @@ const DiscountManagement = () => {
 			onEdit={handleEditDiscount}
 			onDelete={handleDeleteDiscount}
 			onDeleteAll={handleDeleteAllDiscounts}
+			onDeleteFiltered={handleDeleteFilteredDiscounts}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.discounts.add_button}
 			isLoading={isLoading}

@@ -11,6 +11,7 @@ import {
 	updateConsentEvent,
 	deleteConsentEvent,
 	deleteAllConsentEvents,
+	deleteFilteredConsentEvents,
 } from '../../redux/actions/consentEvent';
 import { fetchUsers } from '../../redux/actions/user';
 import { fetchBookings } from '../../redux/actions/booking';
@@ -189,6 +190,11 @@ const ConsentEventManagement = () => {
 		await dispatch(deleteAllConsentEvents()).unwrap();
 		dispatch(fetchConsentEvents());
 	};
+	const handleDeleteFiltered = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredConsentEvents(ids)).unwrap();
+		dispatch(fetchConsentEvents());
+	};
 
 	const formattedEvents = consentEvents.map(adminManager.toUiFormat);
 
@@ -201,6 +207,7 @@ const ConsentEventManagement = () => {
 			onEdit={handleEdit}
 			onDelete={handleDelete}
 			onDeleteAll={handleDeleteAll}
+			onDeleteFiltered={handleDeleteFiltered}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.consentEvents.add_button}
 			isLoading={isLoading || usersLoading || bookingsLoading || docsLoading || passengersLoading}

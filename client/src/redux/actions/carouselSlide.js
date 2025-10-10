@@ -10,6 +10,7 @@ export const {
 	update: updateCarouselSlide,
 	remove: deleteCarouselSlide,
 	removeAll: deleteAllCarouselSlides,
+	removeFiltered: deleteFilteredCarouselSlides,
 } = createCrudActions('carousel_slides');
 
 export const uploadCarouselSlideImage = createAsyncThunk(

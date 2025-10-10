@@ -8,6 +8,7 @@ import {
 	updateConsentDoc,
 	deleteConsentDoc,
 	deleteAllConsentDocs,
+	deleteFilteredConsentDocs,
 } from '../../redux/actions/consentDoc';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -57,32 +58,38 @@ const ConsentDocManagement = () => {
 
 	const handleAdd = (data) => dispatch(createConsentDoc(adminManager.toApiFormat(data))).unwrap();
 	const handleEdit = async (data) => {
-	await dispatch(updateConsentDoc(adminManager.toApiFormat(data))).unwrap();
-	dispatch(fetchConsentDocs());
+		await dispatch(updateConsentDoc(adminManager.toApiFormat(data))).unwrap();
+		dispatch(fetchConsentDocs());
 	};
 	const handleDelete = (id) => dispatch(deleteConsentDoc(id)).unwrap();
-	
+
 	const handleDeleteAll = async () => {
-	await dispatch(deleteAllConsentDocs()).unwrap();
-	dispatch(fetchConsentDocs());
+		await dispatch(deleteAllConsentDocs()).unwrap();
+		dispatch(fetchConsentDocs());
+	};
+	const handleDeleteFiltered = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredConsentDocs(ids)).unwrap();
+		dispatch(fetchConsentDocs());
 	};
 
 	const formattedDocs = consentDocs.map(adminManager.toUiFormat);
 
 	return (
-	<AdminDataTable
-	title={UI_LABELS.ADMIN.modules.consentDocs.management}
-	data={formattedDocs}
-	columns={adminManager.columns}
-	onAdd={handleAdd}
-	onEdit={handleEdit}
-	onDelete={handleDelete}
-	onDeleteAll={handleDeleteAll}
-	renderForm={adminManager.renderForm}
-	addButtonText={UI_LABELS.ADMIN.modules.consentDocs.add_button}
-	isLoading={isLoading}
-	error={errors}
-	/>
+		<AdminDataTable
+			title={UI_LABELS.ADMIN.modules.consentDocs.management}
+			data={formattedDocs}
+			columns={adminManager.columns}
+			onAdd={handleAdd}
+			onEdit={handleEdit}
+			onDelete={handleDelete}
+			onDeleteAll={handleDeleteAll}
+			onDeleteFiltered={handleDeleteFiltered}
+			renderForm={adminManager.renderForm}
+			addButtonText={UI_LABELS.ADMIN.modules.consentDocs.add_button}
+			isLoading={isLoading}
+			error={errors}
+		/>
 	);
 };
 

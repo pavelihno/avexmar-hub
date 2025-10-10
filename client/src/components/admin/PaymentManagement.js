@@ -9,6 +9,7 @@ import {
 	updatePayment,
 	deletePayment,
 	deleteAllPayments,
+	deleteFilteredPayments,
 } from '../../redux/actions/payment';
 import { fetchBookings } from '../../redux/actions/booking';
 import { createAdminManager } from './utils';
@@ -143,6 +144,11 @@ const PaymentManagement = () => {
 		await dispatch(deleteAllPayments()).unwrap();
 		dispatch(fetchPayments());
 	};
+	const handleDeleteFilteredPayments = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredPayments(ids)).unwrap();
+		dispatch(fetchPayments());
+	};
 
 	const formattedPayments = payments.map(adminManager.toUiFormat);
 
@@ -155,6 +161,7 @@ const PaymentManagement = () => {
 			onEdit={handleEditPayment}
 			onDelete={handleDeletePayment}
 			onDeleteAll={handleDeleteAllPayments}
+			onDeleteFiltered={handleDeleteFilteredPayments}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.payments.add_button}
 			isLoading={isLoading}

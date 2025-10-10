@@ -9,6 +9,7 @@ export const {
 	update: updatePassenger,
 	remove: deletePassenger,
 	removeAll: deleteAllPassengers,
+	removeFiltered: deleteFilteredPassengers,
 } = createCrudActions('passengers');
 
 export const fetchUserPassengers = createAsyncThunk(
@@ -20,7 +21,7 @@ export const fetchUserPassengers = createAsyncThunk(
 		} catch (err) {
 			return rejectWithValue(getErrorData(err));
 		}
-	},
+	}
 );
 
 export const createUserPassenger = createAsyncThunk(
@@ -32,5 +33,5 @@ export const createUserPassenger = createAsyncThunk(
 		} catch (err) {
 			return rejectWithValue(getErrorData(err));
 		}
-	},
+	}
 );

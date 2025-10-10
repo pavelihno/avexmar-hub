@@ -1,5 +1,6 @@
 import os
 import importlib
+
 from flask import Flask
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -268,6 +269,7 @@ def __create_app(_config_class, _db):
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
+    app.route('/dev/clear_filtered/<string:table_name>', methods=['DELETE'])(clear_filtered_table)
 
     # external
     app.route('/webhooks/yookassa', methods=['POST'])(yookassa_webhook)

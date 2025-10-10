@@ -7,4 +7,5 @@ export const {
 	update: updateRoute,
 	remove: deleteRoute,
 	removeAll: deleteAllRoutes,
+	removeFiltered: deleteFilteredRoutes,
 } = createCrudActions('routes');

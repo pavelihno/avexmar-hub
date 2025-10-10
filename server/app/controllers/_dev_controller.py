@@ -1,6 +1,9 @@
-from flask import jsonify
+from typing import Type, Dict
+
+from flask import jsonify, request
 
 from app.middlewares.auth_middleware import dev_tool
+from app.models._base_model import BaseModel, ModelValidationError
 from app.models.airport import Airport
 from app.models.airline import Airline
 from app.models.aircraft import Aircraft
@@ -19,7 +22,7 @@ from app.models.timezone import Timezone
 from app.models.consent import ConsentDoc, ConsentEvent
 
 
-MODEL_MAP = {
+MODEL_MAP: Dict[str, Type[BaseModel]] = {
     'airports': Airport,
     'airlines': Airline,
     'aircrafts': Aircraft,
@@ -48,5 +51,22 @@ def clear_table(current_user, table_name: str):
         return jsonify({'message': 'Invalid table name'}), 404
 
     deleted = model.delete_all(commit=True)
+
+    return jsonify({'deleted': deleted})
+
+
+@dev_tool
+def clear_filtered_table(current_user, table_name: str):
+    model = MODEL_MAP.get(table_name)
+    if not model:
+        return jsonify({'message': 'Invalid table name'}), 404
+
+    payload = request.get_json(silent=True) or {}
+    ids = payload.get('ids')
+
+    try:
+        deleted = model.delete_many(ids, commit=True)
+    except ModelValidationError as exc:
+        return jsonify(exc.errors), 400
 
     return jsonify({'deleted': deleted})

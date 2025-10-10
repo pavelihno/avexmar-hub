@@ -9,6 +9,7 @@ import {
 	updateAirline,
 	deleteAirline,
 	deleteAllAirlines,
+	deleteFilteredAirlines,
 } from '../../redux/actions/airline';
 import { fetchCountries } from '../../redux/actions/country';
 import { createAdminManager } from './utils';
@@ -95,6 +96,11 @@ const AirlineManagement = () => {
 		await dispatch(deleteAllAirlines()).unwrap();
 		dispatch(fetchAirlines());
 	};
+	const handleDeleteFilteredAirlines = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredAirlines(ids)).unwrap();
+		dispatch(fetchAirlines());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airlines', file);
@@ -117,6 +123,7 @@ const AirlineManagement = () => {
 			onEdit={handleEditAirline}
 			onDelete={handleDeleteAirline}
 			onDeleteAll={handleDeleteAllAirlines}
+			onDeleteFiltered={handleDeleteFilteredAirlines}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airlines.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airlines.upload_button}

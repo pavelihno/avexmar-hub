@@ -21,7 +21,14 @@ import FlightTariffManagement from './FlightTariffManagement';
 
 import { downloadTemplate, uploadFile } from '../../api';
 
-import { fetchFlights, createFlight, updateFlight, deleteFlight, deleteAllFlights } from '../../redux/actions/flight';
+import {
+	fetchFlights,
+	createFlight,
+	updateFlight,
+	deleteFlight,
+	deleteAllFlights,
+	deleteFilteredFlights,
+} from '../../redux/actions/flight';
 import { fetchAircrafts } from '../../redux/actions/aircraft';
 import { fetchTariffs } from '../../redux/actions/tariff';
 import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
@@ -407,6 +414,11 @@ const FlightManagement = () => {
 		await dispatch(deleteAllFlights()).unwrap();
 		dispatch(fetchFlights());
 	};
+	const handleDeleteFilteredFlights = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredFlights(ids)).unwrap();
+		dispatch(fetchFlights());
+	};
 
 	const formattedFlights = flights.map(adminManager.toUiFormat);
 
@@ -420,6 +432,7 @@ const FlightManagement = () => {
 				onEdit={handleEditFlight}
 				onDelete={handleDeleteFlight}
 				onDeleteAll={handleDeleteAllFlights}
+				onDeleteFiltered={handleDeleteFilteredFlights}
 				renderForm={adminManager.renderForm}
 				addButtonText={UI_LABELS.ADMIN.modules.flights.add_button}
 				uploadButtonText={UI_LABELS.ADMIN.modules.flights.upload_button}

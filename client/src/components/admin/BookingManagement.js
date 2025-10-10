@@ -12,6 +12,7 @@ import {
 	updateBooking,
 	deleteBooking,
 	deleteAllBookings,
+	deleteFilteredBookings,
 } from '../../redux/actions/booking';
 import {
 	fetchBookingPassengers,
@@ -284,6 +285,11 @@ const BookingManagement = () => {
 		await dispatch(deleteAllBookings()).unwrap();
 		dispatch(fetchBookings());
 	};
+	const handleDeleteFilteredBookings = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredBookings(ids)).unwrap();
+		dispatch(fetchBookings());
+	};
 
 	const formattedBookings = bookings.map((b) => {
 		const ui = adminManager.toUiFormat(b);
@@ -301,6 +307,7 @@ const BookingManagement = () => {
 			onEdit={handleEditBooking}
 			onDelete={handleDeleteBooking}
 			onDeleteAll={handleDeleteAllBookings}
+			onDeleteFiltered={handleDeleteFilteredBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
 			isLoading={isLoading || bookingPassengersLoading || passengersLoading || usersLoading}

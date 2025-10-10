@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict, Callable, Any, Iterable, Tuple
+from collections.abc import Iterable as IterableABC
 
 from sqlalchemy import inspect, Enum as SAEnum
 from sqlalchemy.exc import IntegrityError
@@ -319,6 +320,38 @@ class BaseModel(db.Model):
         session = session or db.session
         try:
             count = session.query(cls).delete()
+            if commit:
+                session.commit()
+            else:
+                session.flush()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'message': str(e)}) from e
+        return count
+
+    @classmethod
+    def delete_many(
+        cls,
+        ids: Iterable[int] | None,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> int:
+        session = session or db.session
+        if not isinstance(ids, IterableABC) or isinstance(ids, (str, bytes)):
+            raise ModelValidationError({'message': 'List of ids is required'})
+        try:
+            cleaned_ids = {int(_id) for _id in ids if _id is not None}
+        except (TypeError, ValueError):
+            raise ModelValidationError({'message': 'Ids must be integers'})
+        if not cleaned_ids:
+            raise ModelValidationError({'message': 'List of ids is required'})
+        try:
+            count = (
+                session.query(cls)
+                .filter(cls.id.in_(list(cleaned_ids)))
+                .delete(synchronize_session=False)
+            )
             if commit:
                 session.commit()
             else:
