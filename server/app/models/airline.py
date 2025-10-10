@@ -44,7 +44,7 @@ class Airline(BaseModel):
     @classmethod
     def get_all(cls):
         return super().get_all(sort_by=['name'], descending=False)
-    
+
     @classmethod
     def get_by_code(cls, code):
         """Get airline by IATA code"""
@@ -70,33 +70,20 @@ class Airline(BaseModel):
             required_fields=['name', 'iata_code', 'icao_code', 'country_code'],
         )
 
-        airlines = []
-        error_rows = []
+        def process_row(row, row_session: Session):
+            from app.models.country import Country
 
-        for row in rows:
-            if not row.get('error'):
-                try:
-                    from app.models.country import Country
+            country = Country.get_by_code(row.get('country_code'))
+            if not country:
+                raise ValueError('Invalid country code')
 
-                    country = Country.get_by_code(row.get('country_code'))
-                    if not country:
-                        raise ValueError('Invalid country code')
+            return cls.create(
+                row_session,
+                iata_code=str(row.get('iata_code')),
+                icao_code=str(row.get('icao_code')),
+                name=str(row.get('name')),
+                country_id=country.id,
+                commit=False,
+            )
 
-                    airline = cls.create(
-                        session,
-                        iata_code=str(row.get('iata_code')),
-                        icao_code=str(row.get('icao_code')),
-                        name=str(row.get('name')),
-                        country_id=country.id,
-                        commit=False,
-                    )
-                    airlines.append(airline)
-                except Exception as e:
-                    row['error'] = str(e)
-
-            if row.get('error'):
-                error_rows.append(row)
-
-        session.commit()
-
-        return airlines, error_rows
+        return cls._process_upload_rows(rows, process_row, session=session)
