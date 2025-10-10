@@ -45,10 +45,12 @@ import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { FIELD_TYPES } from '../utils';
 import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
 
+const NO_ROUTE_VALUE = '__NO_ROUTE__';
+
 const createEmptyFormValues = () => ({
 	id: null,
 	title: '',
-	routeId: null,
+	routeId: NO_ROUTE_VALUE,
 	badge: '',
 	alt: '',
 	description: '',
@@ -183,9 +185,9 @@ const CarouselSlideManagement = () => {
 	});
 
 	const getRouteLabel = (routeId) => {
-		if (!routeId) return '';
+		if (!routeId || routeId === NO_ROUTE_VALUE) return UI_LABELS.ADMIN.carousel_slides.no_route_option;
 		const route = routesById[routeId];
-		if (!route) return '';
+		if (!route) return UI_LABELS.ADMIN.carousel_slides.no_route_option;
 
 		const from = formatAirportLabel(route.origin_airport_id);
 		const to = formatAirportLabel(route.destination_airport_id);
@@ -198,7 +200,16 @@ const CarouselSlideManagement = () => {
 			value: route.id,
 			label: getRouteLabel(route.id),
 		}))
-		.sort((a, b) => a.label.localeCompare(b.label, 'ru'));
+		.filter(
+			(option) =>
+				option.value != null && option.label && option.label !== UI_LABELS.ADMIN.carousel_slides.no_route_option
+		)
+		.sort((a, b) => a.label.localeCompare(b.label, 'ru', { sensitivity: 'base' }));
+
+	const routeSelectOptions = [
+		{ value: NO_ROUTE_VALUE, label: UI_LABELS.ADMIN.carousel_slides.no_route_option },
+		...routeOptions,
+	];
 
 	const fields = {
 		id: { key: 'id', apiKey: 'id' },
@@ -217,9 +228,12 @@ const CarouselSlideManagement = () => {
 			label: FIELD_LABELS.CAROUSEL_SLIDE.route_id,
 			type: FIELD_TYPES.SELECT,
 			fullWidth: true,
-			options: routeOptions,
-			toApi: (value) => value,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.CAROUSEL_SLIDE.route_id.REQUIRED : null),
+			options: routeSelectOptions,
+			displayEmpty: true,
+			simpleSelect: true,
+			defaultValue: NO_ROUTE_VALUE,
+			toApi: (value) => (value === NO_ROUTE_VALUE ? null : value),
+			toUi: (value) => (value == null ? NO_ROUTE_VALUE : value),
 		},
 		badge: {
 			key: 'badge',
@@ -405,6 +419,8 @@ const CarouselSlideManagement = () => {
 				await dispatch(uploadCarouselSlideImage({ id: targetId, file: imageFile })).unwrap();
 			}
 
+			await dispatch(fetchCarouselSlides()).unwrap();
+
 			showSuccess(formMode === 'create' ? UI_LABELS.SUCCESS.add : UI_LABELS.SUCCESS.update);
 			clearCloseTimer();
 			closeTimerRef.current = setTimeout(() => {
@@ -425,6 +441,7 @@ const CarouselSlideManagement = () => {
 		setProcessingSlideId(slide.id);
 		try {
 			await dispatch(updateCarouselSlide({ id: slide.id, is_active: !slide.is_active })).unwrap();
+			await dispatch(fetchCarouselSlides()).unwrap();
 			showSuccess(UI_LABELS.SUCCESS.update);
 		} catch (error) {
 			showError(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
@@ -468,6 +485,7 @@ const CarouselSlideManagement = () => {
 						dispatch(updateCarouselSlide({ id: item.id, display_order: item.display_order })).unwrap()
 					)
 				);
+				await dispatch(fetchCarouselSlides()).unwrap();
 			}
 
 			showSuccess(UI_LABELS.SUCCESS.update);

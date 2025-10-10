@@ -16,7 +16,7 @@ class CarouselSlide(BaseModel):
     __tablename__ = 'carousel_slides'
 
     title = db.Column(db.String, nullable=False)
-    route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)
+    route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=True)
     image_filename = db.Column(db.String, nullable=True)
     image_path = db.Column(db.String, nullable=True)
     alt = db.Column(db.String, nullable=False)
@@ -25,9 +25,14 @@ class CarouselSlide(BaseModel):
     description = db.Column(db.Text, nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
 
-    route: Mapped['Route'] = db.relationship('Route', back_populates='carousel_slides')
+    route: Mapped['Route'] = db.relationship(
+        'Route', back_populates='carousel_slides'
+    )
 
     def _compute_route_metrics(self) -> dict:
+        if not self.route_id:
+            return {}
+
         cheapest = (
             db.session.query(Tariff.price, Tariff.currency)
             .join(FlightTariff, FlightTariff.tariff_id == Tariff.id)
@@ -37,8 +42,12 @@ class CarouselSlide(BaseModel):
             .first()
         )
 
-        flights = db.session.query(Flight).filter(Flight.route_id == self.route_id).all()
-        durations = [flight.flight_duration for flight in flights if flight.flight_duration]
+        flights = db.session.query(Flight).filter(
+            Flight.route_id == self.route_id
+        ).all()
+        durations = [
+            flight.flight_duration for flight in flights if flight.flight_duration
+        ]
 
         return {
             'price_from': cheapest.price if cheapest else None,
@@ -57,11 +66,11 @@ class CarouselSlide(BaseModel):
             'description': self.description,
             'image_url': image_manager.get_file_url(self.image_filename, 'carousel') if self.image_filename else None,
             'alt': self.alt,
-            'route': self.route.to_dict() if return_children and self.route else None,
+            'route': self.route.to_dict(return_children=True) if self.route_id and return_children else {},
             'route_id': self.route_id,
+            'route_metrics': self._compute_route_metrics(),
             'is_active': self.is_active,
             'display_order': self.display_order,
-            'metrics': self._compute_route_metrics(),
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }

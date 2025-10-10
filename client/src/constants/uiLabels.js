@@ -288,6 +288,7 @@ export const UI_LABELS = {
 			preview_title: 'Предпросмотр карусели',
 			image_hint: 'Старайтесь использовать изображения не менее 1600×900 px',
 			activation_hint: 'Новый слайд создаётся неактивным. Активируйте его после предпросмотра.',
+			no_route_option: 'Без маршрута',
 		},
 	},
 	AUTH: {
@@ -364,7 +365,10 @@ export const UI_LABELS = {
 	HOME: {
 		poster_carousel: {
 			price_from: (price, currency) =>
-				`от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+				price != null
+					? `от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`
+					: '',
+			schedule_cta: (from, to) => `Расписание ${from} — ${to}`,
 			empty: 'Слайды карусели пока не опубликованы',
 		},
 	},

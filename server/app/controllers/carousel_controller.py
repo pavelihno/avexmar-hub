@@ -7,11 +7,11 @@ from app.utils.storage import ImageManager
 
 def get_carousel_slides():
     slides = CarouselSlide.get_all()
-    return jsonify([slide.to_dict() for slide in slides]), 200
+    return jsonify([slide.to_dict(return_children=True) for slide in slides]), 200
 
 def get_carousel_slide(slide_id):
     slide = CarouselSlide.get_or_404(slide_id)
-    return jsonify(slide.to_dict()), 200
+    return jsonify(slide.to_dict(return_children=True)), 200
 
 @admin_required
 def create_carousel_slide(current_user):

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, Chip, IconButton, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Chip, IconButton, Paper, Stack, Typography } from '@mui/material';
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -10,6 +11,22 @@ import { fetchCarouselSlides } from '../../redux/actions/carouselSlide';
 
 const AUTO_SCROLL_DELAY = 6000;
 const SWIPE_THRESHOLD = 50;
+
+const getAirportCode = (airport) => {
+	if (!airport) return '';
+	return airport.iata_code || '';
+};
+
+const getLocationLabel = (airport) => {
+	if (!airport) return '';
+	const parts = [];
+	if (airport.city_name) parts.push(airport.city_name);
+	else if (airport.name) parts.push(airport.name);
+
+	const code = getAirportCode(airport);
+	if (code) parts.push(`(${code})`);
+	return parts.join(' ').trim();
+};
 
 export function transformSlides(items = [], { includeInactive = false } = {}) {
 	return items
@@ -27,8 +44,29 @@ export function transformSlides(items = [], { includeInactive = false } = {}) {
 		.map((item, index) => {
 			const source = item ?? {};
 			const image = source.image_url;
-			const metrics = source.metrics || {};
+			const metrics = source.route_metrics || {};
 			if (!image) return null;
+
+			const routeDetails = source.route || {};
+			const originAirport = routeDetails.origin_airport || {};
+			const destinationAirport = routeDetails.destination_airport || {};
+			const originCode = getAirportCode(originAirport);
+			const destinationCode = getAirportCode(destinationAirport);
+			const originLabel = getLocationLabel(originAirport) || originCode;
+			const destinationLabel = getLocationLabel(destinationAirport) || destinationCode;
+
+			let routeInfo = null;
+			if (originCode && destinationCode) {
+				routeInfo = {
+					fromCode: originCode,
+					toCode: destinationCode,
+					originLabel,
+					destinationLabel,
+					summary: `${originLabel} → ${destinationLabel}`,
+					ctaText: UI_LABELS.HOME.poster_carousel.schedule_cta(originLabel, destinationLabel),
+					path: `/schedule?from=${encodeURIComponent(originCode)}&to=${encodeURIComponent(destinationCode)}`,
+				};
+			}
 
 			return {
 				id: source.id,
@@ -39,6 +77,7 @@ export function transformSlides(items = [], { includeInactive = false } = {}) {
 				alt: source.alt || '',
 				priceText: UI_LABELS.HOME.poster_carousel.price_from(metrics.price_from, metrics.currency),
 				durationText: formatDuration(metrics.duration_minutes),
+				routeInfo,
 			};
 		})
 		.filter(Boolean);
@@ -60,6 +99,7 @@ const PosterCarousel = ({
 
 	const [index, setIndex] = useState(0);
 	const [isPaused, setPaused] = useState(false);
+	const navigate = useNavigate();
 
 	const timerRef = useRef(null);
 	const touchStartX = useRef(null);
@@ -235,6 +275,33 @@ const PosterCarousel = ({
 										>
 											{item.description}
 										</Typography>
+									)}
+									{item.routeInfo && (
+										<Button
+											variant='outlined'
+											size='small'
+											color='inherit'
+											onClick={() => navigate(item.routeInfo.path)}
+											endIcon={<ArrowForwardIos sx={{ fontSize: '0.75rem' }} />}
+											sx={{
+												alignSelf: 'flex-start',
+												mt: { xs: 0.5, sm: 0.75 },
+												color: '#fff',
+												borderColor: alpha('#ffffff', 0.4),
+												bgcolor: alpha('#ffffff', 0.08),
+												fontWeight: 600,
+												textTransform: 'none',
+												borderRadius: 999,
+												px: 2,
+												'&:hover': {
+													bgcolor: alpha('#ffffff', 0.18),
+													borderColor: alpha('#ffffff', 0.6),
+												},
+												'& .MuiButton-endIcon': { ml: 1 },
+											}}
+										>
+											{item.routeInfo.ctaText}
+										</Button>
 									)}
 								</Stack>
 								<Stack
