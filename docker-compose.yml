@@ -28,6 +28,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - app_storage:/app/storage
       - app_logs:/app/logs
     healthcheck:
       test: [ "CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status != 200)\"" ]
@@ -35,6 +36,16 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+
+  storage-cdn:
+    container_name: storage-cdn
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    depends_on:
+      - server-app
+    volumes:
+      - ./storage-cdn/storage.conf:/etc/nginx/nginx.conf:ro
+      - app_storage:/var/www/storage:ro
 
   client-app:
     container_name: client-app
@@ -128,6 +139,7 @@ services:
         condition: service_started
 
 volumes:
+  app_storage:
   app_logs:
   caddy_data:
   redis_data:

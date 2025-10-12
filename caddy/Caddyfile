@@ -11,6 +11,19 @@
     reverse_proxy client-app:80
 }
 
+storage.{$CADDY_DOMAIN} {
+    log {
+        no_hostname
+        output file /var/log/app/caddy/storage.log {
+            roll_size 10MiB
+            roll_keep 2
+        }
+        format json
+    }
+
+    reverse_proxy storage-cdn:80
+}
+
 grafana.{$CADDY_DOMAIN} {
     log {
         no_hostname
