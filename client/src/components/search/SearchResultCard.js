@@ -282,7 +282,7 @@ const SearchResultCard = ({ outbound, returnFlight, isLoading }) => {
 							<Skeleton variant='rectangular' width={150} height={40} sx={{ mb: 1, mx: 'auto' }} />
 						) : (
 							<>
-								<Typography variant='h5' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+								<Typography variant='h4' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
 									{priceText}
 								</Typography>
 								<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>

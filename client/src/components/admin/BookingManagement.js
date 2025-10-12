@@ -178,7 +178,9 @@ const BookingManagement = () => {
 							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'flex-start',
-							minWidth: '200px',
+							minWidth: { xs: 0, md: '200px' },
+							width: { xs: '100%', md: 'auto' },
+							maxWidth: '100%',
 						}}
 					>
 						{linked.map((p) => {
@@ -193,7 +195,8 @@ const BookingManagement = () => {
 										backgroundColor: alpha(theme.palette.black, 0.04),
 										borderRadius: 1,
 										p: 0.5,
-										width: 'auto',
+										width: '100%',
+										maxWidth: '100%',
 									}}
 								>
 									<Typography

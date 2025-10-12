@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -22,6 +22,9 @@ import {
 	Alert,
 	Backdrop,
 	CircularProgress,
+	Stack,
+	Paper,
+	useMediaQuery,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -82,6 +85,8 @@ const AdminDataTable = ({
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const theme = useTheme();
+	const isMediumDown = useMediaQuery(theme.breakpoints.down('md'));
+	const isSmallDown = useMediaQuery(theme.breakpoints.down('sm'));
 	const devMode = isDev();
 
 	const [uploadDialog, setUploadDialog] = useState(false);
@@ -349,11 +354,37 @@ const AdminDataTable = ({
 	const sortedData = applySorting(filteredData);
 	const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+	const renderColumnValue = (column, item) => {
+		if (!column) return '—';
+		if (typeof column.render === 'function') {
+			return column.render(item);
+		}
+		if (typeof column.formatter === 'function') {
+			return column.formatter(item[column.field]);
+		}
+		const raw = item[column.field];
+		if (raw === undefined || raw === null || raw === '') {
+			return '—';
+		}
+		if (typeof raw === 'boolean') {
+			return raw ? ENUM_LABELS.BOOLEAN.true : ENUM_LABELS.BOOLEAN.false;
+		}
+		return raw;
+	};
+
 	return (
 		<Base maxWidth='xl'>
-			<Box sx={{ p: 3 }}>
-				<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-					<IconButton component={Link} to='/admin' sx={{ mr: 2 }}>
+			<Box sx={{ p: { xs: 2, md: 3 } }}>
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						flexWrap: 'wrap',
+						gap: 1.5,
+						mb: { xs: 2, md: 3 },
+					}}
+				>
+					<IconButton component={Link} to='/admin' sx={{ mr: { xs: 0, md: 2 } }}>
 						<ArrowBackIcon />
 					</IconButton>
 					<Typography variant='h4'>{title}</Typography>
@@ -362,10 +393,10 @@ const AdminDataTable = ({
 				<Box
 					sx={{
 						display: 'flex',
-						flexWrap: 'wrap',
-						gap: 2,
+						flexDirection: { xs: 'column', md: 'row' },
+						gap: 1.5,
 						mb: 2,
-						alignItems: 'center',
+						alignItems: { xs: 'stretch', md: 'center' },
 					}}
 				>
 					{addButtonText && (
@@ -379,6 +410,8 @@ const AdminDataTable = ({
 							}}
 							sx={{
 								flexShrink: 0,
+								width: { xs: '100%', md: 'auto' },
+								minHeight: 48,
 							}}
 						>
 							{addButtonText}
@@ -393,6 +426,8 @@ const AdminDataTable = ({
 								onClick={() => getUploadTemplate()}
 								sx={{
 									flexShrink: 0,
+									width: { xs: '100%', md: 'auto' },
+									minHeight: 48,
 								}}
 							>
 								{uploadTemplateButtonText}
@@ -405,6 +440,8 @@ const AdminDataTable = ({
 								onClick={() => openUploadDialog()}
 								sx={{
 									flexShrink: 0,
+									width: { xs: '100%', md: 'auto' },
+									minHeight: 48,
 								}}
 							>
 								{uploadButtonText}
@@ -423,10 +460,11 @@ const AdminDataTable = ({
 							sx={{
 								fontSize: '0.75rem',
 								fontWeight: 400,
-								minHeight: 28,
 								px: 1.5,
 								py: 0.5,
 								flexShrink: 0,
+								width: { xs: '100%', md: 'auto' },
+								minHeight: { xs: 40, md: 28 },
 							}}
 						>
 							{UI_LABELS.BUTTONS.delete_all}
@@ -443,10 +481,11 @@ const AdminDataTable = ({
 							sx={{
 								fontSize: '0.75rem',
 								fontWeight: 400,
-								minHeight: 28,
 								px: 1.5,
 								py: 0.5,
 								flexShrink: 0,
+								width: { xs: '100%', md: 'auto' },
+								minHeight: { xs: 40, md: 28 },
 							}}
 						>
 							{UI_LABELS.BUTTONS.delete_filtered}
@@ -455,31 +494,118 @@ const AdminDataTable = ({
 				</Box>
 				<Box sx={{ position: 'relative' }}>
 					<Box sx={{ visibility: isLoading ? 'hidden' : 'visible' }}>
-						<TableContainer sx={{ maxHeight: 800, mb: 2 }}>
-							<Box
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: { xs: 'stretch', md: 'flex-end' },
+								alignItems: 'center',
+								mb: 1.5,
+							}}
+						>
+							<Button
+								variant='contained'
+								color='action'
+								size='small'
+								startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
+								onClick={() => setShowFilters((prev) => !prev)}
 								sx={{
-									display: 'flex',
-									justifyContent: 'flex-end',
-									alignItems: 'center',
+									fontSize: '0.75rem',
+									fontWeight: 400,
+									minHeight: { xs: 40, md: 28 },
+									px: 1.5,
+									py: 0.5,
+									width: { xs: '100%', sm: 'auto' },
 								}}
 							>
+								{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+							</Button>
+						</Box>
+
+						{showFilters && isMediumDown && (
+							<Paper
+								variant='outlined'
+								sx={{
+									mb: 2,
+									p: 2,
+									borderRadius: 2,
+									display: { xs: 'block', md: 'none' },
+								}}
+							>
+								<Stack spacing={1.5}>
+									{columns
+										.filter((col) => col.type !== FIELD_TYPES.CUSTOM)
+										.map((col, idx) => {
+											let preparedColumn = col;
+											if (col.type === FIELD_TYPES.SELECT || col.type === FIELD_TYPES.BOOLEAN) {
+												const options = col.options
+													? [...col.options]
+													: [
+															{ value: true, label: ENUM_LABELS.BOOLEAN.true },
+															{ value: false, label: ENUM_LABELS.BOOLEAN.false },
+													  ];
+												options.sort((a, b) => a.label.localeCompare(b.label));
+												preparedColumn = {
+													...col,
+													options: [
+														{ value: '', label: UI_LABELS.ADMIN.filter.all },
+														...options,
+													],
+												};
+											}
+											const renderField = createFieldRenderer(preparedColumn);
+											return (
+												<Box key={`mobile-filter-${preparedColumn.field || idx}`}>
+													{renderField({
+														value: filters[preparedColumn.field] ?? '',
+														onChange: (val) =>
+															handleFilterChange(
+																preparedColumn.field,
+																val,
+																preparedColumn.type
+															),
+														size: 'small',
+														fullWidth: true,
+														sx: {
+															width: '100%',
+														},
+														inputProps: {
+															style: {
+																fontSize: '0.875rem',
+															},
+														},
+														displayEmpty: true,
+														simpleSelect: true,
+														MenuProps: preparedColumn.MenuProps,
+														MenuItemProps: preparedColumn.MenuItemProps,
+													})}
+												</Box>
+											);
+										})}
+								</Stack>
 								<Button
-									variant='contained'
-									color='action'
+									variant='outlined'
+									color='primary'
 									size='small'
-									startIcon={showFilters ? <FilterListOffIcon /> : <FilterListIcon />}
-									onClick={() => setShowFilters((prev) => !prev)}
+									startIcon={<ClearAllIcon />}
+									onClick={clearFilters}
 									sx={{
-										fontSize: '0.75rem',
-										fontWeight: 400,
-										minHeight: 28,
-										px: 1.5,
-										py: 0.5,
+										mt: 2,
+										width: '100%',
+										minHeight: 40,
 									}}
 								>
-									{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+									{UI_LABELS.ADMIN.filter.clear}
 								</Button>
-							</Box>
+							</Paper>
+						)}
+
+						<TableContainer
+							sx={{
+								maxHeight: 800,
+								mb: 2,
+								display: { xs: 'none', md: 'block' },
+							}}
+						>
 							<Table size='small' stickyHeader sx={{ tableLayout: 'auto' }}>
 								<TableHead>
 									<TableRow>
@@ -512,7 +638,11 @@ const AdminDataTable = ({
 										</TableCell>
 									</TableRow>
 									{showFilters && (
-										<TableRow>
+										<TableRow
+											sx={{
+												display: { xs: 'none', md: 'table-row' },
+											}}
+										>
 											{columns.map((col, idx) => {
 												if (col.type === FIELD_TYPES.CUSTOM)
 													return <TableCell key={idx} align={col.align || 'left'} />;
@@ -615,11 +745,7 @@ const AdminDataTable = ({
 										<TableRow key={item.id}>
 											{columns.map((column, index) => (
 												<TableCell key={index} align={column.align || 'left'}>
-													{column.render
-														? column.render(item)
-														: column.formatter
-														? column.formatter(item[column.field])
-														: item[column.field]}
+													{renderColumnValue(column, item)}
 												</TableCell>
 											))}
 											<TableCell align='right'>
@@ -644,6 +770,87 @@ const AdminDataTable = ({
 								</TableBody>
 							</Table>
 						</TableContainer>
+
+						<Box
+							sx={{
+								display: { xs: 'flex', md: 'none' },
+								flexDirection: 'column',
+								gap: 2,
+								mb: 2,
+							}}
+						>
+							{paginatedData.length === 0 ? (
+								<Paper variant='outlined' sx={{ p: 2, textAlign: 'center', borderRadius: 2 }}>
+									<Typography variant='body2' color='text.secondary'>
+										Нет записей
+									</Typography>
+								</Paper>
+							) : (
+								paginatedData.map((item, index) => (
+									<Paper
+										variant='outlined'
+										key={item.id ?? `mobile-row-${index}`}
+										sx={{ p: 2, borderRadius: 2 }}
+									>
+										<Stack spacing={1.5}>
+											{columns.map((column, colIndex) => {
+												const value = renderColumnValue(column, item);
+												const content = React.isValidElement(value) ? (
+													value
+												) : (
+													<Typography variant='body2' color='text.primary'>
+														{value}
+													</Typography>
+												);
+
+												return (
+													<Box
+														key={`${item.id ?? index}-${column.field || colIndex}`}
+														sx={{
+															display: 'flex',
+															flexDirection: 'column',
+															gap: 0.5,
+															width: '100%',
+															maxWidth: '100%',
+														}}
+													>
+														<Typography variant='caption' color='text.secondary'>
+															{column.header}
+														</Typography>
+														<Box sx={{ width: '100%', maxWidth: '100%' }}>{content}</Box>
+													</Box>
+												);
+											})}
+											<Stack
+												direction='row'
+												spacing={1}
+												justifyContent='flex-end'
+												sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider' }}
+											>
+												<IconButton
+													color='info'
+													size='small'
+													onClick={(e) => {
+														e.currentTarget.blur();
+														handleOpenDialog(item);
+													}}
+												>
+													<EditIcon fontSize='small' />
+												</IconButton>
+												<IconButton
+													color='error'
+													size='small'
+													onClick={() => handleOpenDeleteDialog(item.id)}
+												>
+													<DeleteIcon fontSize='small' />
+												</IconButton>
+											</Stack>
+										</Stack>
+									</Paper>
+								))
+							)}
+						</Box>
+
 						<TablePagination
 							component='div'
 							count={sortedData.length}
@@ -657,6 +864,17 @@ const AdminDataTable = ({
 							rowsPerPageOptions={[10, 25, 50, 100]}
 							labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
 							labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
+							sx={{
+								mt: 1,
+								'& .MuiTablePagination-toolbar': {
+									flexWrap: { xs: 'wrap', md: 'nowrap' },
+									justifyContent: { xs: 'center', md: 'flex-end' },
+									gap: { xs: 1, md: 0 },
+								},
+								'& .MuiTablePagination-displayedRows': {
+									marginTop: { xs: 0.5, md: 0 },
+								},
+							}}
 						/>
 					</Box>
 					{isLoading && (
@@ -680,7 +898,7 @@ const AdminDataTable = ({
 				</Box>
 
 				{/* Add/edit dialog */}
-				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
+				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth fullScreen={isSmallDown}>
 					{renderForm({
 						isEditing: isEditing,
 						currentItem: currentItem,
@@ -690,50 +908,96 @@ const AdminDataTable = ({
 				</Dialog>
 
 				{/* Delete dialog */}
-				<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog}>
+				<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
 
-					<DialogContent>
+					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Typography id='delete-dialog-description'>{UI_LABELS.MESSAGES.confirm_delete}</Typography>
 					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleCloseDeleteDialog} color='primary'>
+					<DialogActions
+						sx={{
+							flexDirection: { xs: 'column-reverse', sm: 'row' },
+							alignItems: { xs: 'stretch', sm: 'center' },
+							gap: { xs: 1, sm: 2 },
+							px: { xs: 2, sm: 3 },
+							pb: { xs: 2, sm: 3 },
+						}}
+					>
+						<Button
+							onClick={handleCloseDeleteDialog}
+							color='primary'
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{UI_LABELS.BUTTONS.cancel}
 						</Button>
-						<Button onClick={confirmDelete} color='error' variant='contained'>
+						<Button
+							onClick={confirmDelete}
+							color='error'
+							variant='contained'
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{UI_LABELS.BUTTONS.delete}
 						</Button>
 					</DialogActions>
 				</Dialog>
 
 				{/* Delete all dialog */}
-				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog}>
+				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
-					<DialogContent>
+					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Typography id='delete-all-dialog-description'>
 							{UI_LABELS.MESSAGES.confirm_delete_all}
 						</Typography>
 					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleCloseDeleteAllDialog} color='primary'>
+					<DialogActions
+						sx={{
+							flexDirection: { xs: 'column-reverse', sm: 'row' },
+							alignItems: { xs: 'stretch', sm: 'center' },
+							gap: { xs: 1, sm: 2 },
+							px: { xs: 2, sm: 3 },
+							pb: { xs: 2, sm: 3 },
+						}}
+					>
+						<Button
+							onClick={handleCloseDeleteAllDialog}
+							color='primary'
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{UI_LABELS.BUTTONS.cancel}
 						</Button>
-						<Button onClick={confirmDeleteAll} color='error' variant='contained'>
+						<Button
+							onClick={confirmDeleteAll}
+							color='error'
+							variant='contained'
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{UI_LABELS.BUTTONS.delete}
 						</Button>
 					</DialogActions>
 				</Dialog>
 
 				{/* Delete filtered dialog */}
-				<Dialog open={deleteFilteredDialog} onClose={handleCloseDeleteFilteredDialog}>
+				<Dialog open={deleteFilteredDialog} onClose={handleCloseDeleteFilteredDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-filtered-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
-					<DialogContent>
+					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Typography id='delete-filtered-dialog-description'>
 							{UI_LABELS.MESSAGES.confirm_delete_filtered}
 						</Typography>
 					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleCloseDeleteFilteredDialog} color='primary'>
+					<DialogActions
+						sx={{
+							flexDirection: { xs: 'column-reverse', sm: 'row' },
+							alignItems: { xs: 'stretch', sm: 'center' },
+							gap: { xs: 1, sm: 2 },
+							px: { xs: 2, sm: 3 },
+							pb: { xs: 2, sm: 3 },
+						}}
+					>
+						<Button
+							onClick={handleCloseDeleteFilteredDialog}
+							color='primary'
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
+						>
 							{UI_LABELS.BUTTONS.cancel}
 						</Button>
 						<Button
@@ -741,6 +1005,7 @@ const AdminDataTable = ({
 							color='error'
 							variant='contained'
 							disabled={!filteredIds.length}
+							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
 							{UI_LABELS.BUTTONS.delete}
 						</Button>
@@ -748,9 +1013,9 @@ const AdminDataTable = ({
 				</Dialog>
 
 				{/* Upload dialog */}
-				<Dialog open={uploadDialog} onClose={closeUploadDialog}>
+				<Dialog open={uploadDialog} onClose={closeUploadDialog} fullScreen={isSmallDown}>
 					<DialogTitle>{UI_LABELS.ADMIN.upload.title}</DialogTitle>
-					<DialogContent>
+					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Box
 							onDragOver={(e) => e.preventDefault()}
 							onDrop={(e) => {
@@ -761,7 +1026,7 @@ const AdminDataTable = ({
 							sx={{
 								border: '2px dashed',
 								borderColor: 'grey.400',
-								p: 4,
+								p: { xs: 3, sm: 4 },
 								textAlign: 'center',
 							}}
 						>
@@ -777,8 +1042,18 @@ const AdminDataTable = ({
 							/>
 						</Box>
 					</DialogContent>
-					<DialogActions>
-						<Button onClick={closeUploadDialog}>{UI_LABELS.BUTTONS.cancel}</Button>
+					<DialogActions
+						sx={{
+							flexDirection: { xs: 'column-reverse', sm: 'row' },
+							alignItems: { xs: 'stretch', sm: 'center' },
+							gap: { xs: 1, sm: 2 },
+							px: { xs: 2, sm: 3 },
+							pb: { xs: 2, sm: 3 },
+						}}
+					>
+						<Button onClick={closeUploadDialog} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+							{UI_LABELS.BUTTONS.cancel}
+						</Button>
 					</DialogActions>
 				</Dialog>
 

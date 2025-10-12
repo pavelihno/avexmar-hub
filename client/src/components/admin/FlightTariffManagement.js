@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Dialog, DialogContent } from '@mui/material';
+import { Typography, Dialog, DialogContent, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchTariffs } from '../../redux/actions/tariff';
@@ -12,6 +13,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const dispatch = useDispatch();
 	const { tariffs, isLoading: isLoadingTariffs } = useSelector((state) => state.tariffs);
 	const { flightTariff, isLoading: isLoadingFlightTariff } = useSelector((state) => state.flightTariffs);
+	const theme = useTheme();
+	const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const [seatClass, setSeatClass] = useState('');
 	const [formUpdates, setFormUpdates] = useState({});
@@ -136,8 +139,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 
 	if (isEditing && (isLoadingFlightTariff || isLoadingTariffs || !seatClass)) {
 		return (
-			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth>
-				<DialogContent>
+			<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='sm' fullWidth fullScreen={fullScreen}>
+				<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 					<Typography>{UI_LABELS.MESSAGES.loading}</Typography>
 				</DialogContent>
 			</Dialog>
@@ -145,8 +148,8 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	}
 
 	return (
-		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth>
-			<DialogContent>
+		<Dialog open={tariffDialogOpen} onClose={onClose} maxWidth='md' fullWidth fullScreen={fullScreen}>
+			<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 				{tariffManager.renderForm({
 					isEditing,
 					currentItem,

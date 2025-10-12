@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import {
 	Alert,
 	Avatar,
@@ -21,12 +22,14 @@ import {
 	Switch,
 	Tooltip,
 	Typography,
+	useMediaQuery,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ImageIcon from '@mui/icons-material/Image';
 import UploadIcon from '@mui/icons-material/Upload';
 
@@ -44,6 +47,7 @@ import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import { FIELD_TYPES } from '../utils';
 import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
+import { useTheme } from '@mui/material/styles';
 
 const NO_ROUTE_VALUE = '__NO_ROUTE__';
 
@@ -60,6 +64,9 @@ const createEmptyFormValues = () => ({
 
 const CarouselSlideManagement = () => {
 	const dispatch = useDispatch();
+	const theme = useTheme();
+	const isSmallDown = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMediumDown = useMediaQuery(theme.breakpoints.down('md'));
 
 	const { carouselSlides, isLoading: slidesLoading } = useSelector((state) => state.carouselSlides);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
@@ -523,250 +530,299 @@ const CarouselSlideManagement = () => {
 	};
 
 	return (
-		<Base>
-			<Box sx={{ p: 3 }}>
-				<Stack spacing={3}>
-					<Stack
-						direction={{ xs: 'column', md: 'row' }}
-						alignItems={{ xs: 'flex-start', md: 'center' }}
-						justifyContent='space-between'
-						spacing={2}
+		<Base maxWidth='xl'>
+			<Box sx={{ p: { xs: 2, md: 3 } }}>
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						flexWrap: 'wrap',
+						gap: 1.5,
+						mb: { xs: 2, md: 3 },
+					}}
+				>
+					<IconButton
+						component={Link}
+						to='/admin'
+						sx={{
+							mr: { xs: 0, md: 1 },
+							alignSelf: 'center',
+						}}
 					>
-						<Box>
-							<Typography variant='h3' sx={{ mb: 0.5 }}>
-								{UI_LABELS.ADMIN.carousel_slides.title}
-							</Typography>
-							<Typography variant='body1' color='text.secondary'>
-								{UI_LABELS.ADMIN.carousel_slides.description}
-							</Typography>
-						</Box>
-						<Button
-							variant='contained'
-							startIcon={<AddIcon />}
-							onClick={handleOpenCreate}
-							disabled={isSubmitting || slidesLoading}
-						>
-							{UI_LABELS.ADMIN.carousel_slides.add_button}
-						</Button>
-					</Stack>
+						<ArrowBackIcon />
+					</IconButton>
+					<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.title}</Typography>
+				</Box>
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: { xs: 'column', md: 'row' },
+						gap: 1.5,
+						mb: 2,
+						alignItems: { xs: 'stretch', md: 'center' },
+					}}
+				>
+					<Button
+						variant='contained'
+						startIcon={<AddIcon />}
+						onClick={handleOpenCreate}
+						disabled={isSubmitting || slidesLoading}
+						sx={{
+							flexShrink: 0,
+							width: { xs: '100%', md: 'auto' },
+							minHeight: 48,
+						}}
+					>
+						{UI_LABELS.ADMIN.carousel_slides.add_button}
+					</Button>
+				</Box>
 
-					<Grid container spacing={3}>
-						<Grid item xs={12}>
-							<Paper variant='outlined' sx={{ p: 3 }}>
-								<Stack spacing={2}>
-									<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.management}</Typography>
-									<Typography variant='body2' color='text.secondary'>
-										{UI_LABELS.ADMIN.carousel_slides.image_hint}
-									</Typography>
-									<Divider />
+				<Grid container spacing={isSmallDown ? 2 : 3} justifyContent='center'>
+					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+							<Stack spacing={isSmallDown ? 1.5 : 2} alignItems='flex-start'>
+								<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.management}</Typography>
+								<Typography variant='body2' color='text.secondary'>
+									{UI_LABELS.ADMIN.carousel_slides.image_hint}
+								</Typography>
+								<Divider />
 
-									{loadingInitialSlides ? (
-										<Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
-											<CircularProgress size={32} />
-										</Box>
-									) : !hasSlides ? (
-										<Stack spacing={1} alignItems='center' sx={{ py: 6 }}>
-											<ImageIcon color='disabled' fontSize='large' />
-											<Typography variant='body2' color='text.secondary' align='center'>
-												{UI_LABELS.HOME.poster_carousel.empty}
-											</Typography>
-										</Stack>
-									) : (
-										<Stack spacing={2}>
-											{localSlides.map((slide, index) => (
-												<Paper
-													variant='outlined'
-													key={slide.id}
+								{loadingInitialSlides ? (
+									<Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
+										<CircularProgress size={32} />
+									</Box>
+								) : !hasSlides ? (
+									<Stack spacing={1} alignItems='center' sx={{ py: 6 }}>
+										<ImageIcon color='disabled' fontSize='large' />
+										<Typography variant='body2' color='text.secondary' align='center'>
+											{UI_LABELS.HOME.poster_carousel.empty}
+										</Typography>
+									</Stack>
+								) : (
+									<Stack spacing={isSmallDown ? 1.5 : 2} sx={{ width: '100%' }}>
+										{localSlides.map((slide, index) => (
+											<Paper
+												variant='outlined'
+												key={slide.id}
+												sx={{
+													p: { xs: 2, md: 3 },
+													display: 'flex',
+													flexDirection: { xs: 'column', sm: 'row' },
+													gap: { xs: 2, sm: 3 },
+													alignItems: { xs: 'center', sm: 'stretch' },
+												}}
+											>
+												<Avatar
+													variant='rounded'
+													src={slide.image_url || undefined}
+													alt={slide.alt || slide.title || 'preview'}
 													sx={{
-														p: 2,
-														display: 'flex',
-														gap: 2,
-														alignItems: 'stretch',
+														width: { xs: '100%', sm: 128 },
+														height: { xs: 180, sm: 88 },
+														bgcolor: 'grey.100',
+														color: 'text.secondary',
+														flexShrink: 0,
+														alignSelf: 'center',
+														'& img': {
+															objectFit: 'cover',
+														},
 													}}
 												>
-													<Avatar
-														variant='rounded'
-														src={slide.image_url || undefined}
-														alt={slide.alt || slide.title || 'preview'}
-														sx={{
-															width: 96,
-															height: 72,
-															bgcolor: 'grey.100',
-															color: 'text.secondary',
-															flexShrink: 0,
-														}}
+													<ImageIcon fontSize='small' />
+												</Avatar>
+												<Stack
+													spacing={1}
+													sx={{
+														flexGrow: 1,
+														width: '100%',
+														alignItems: { xs: 'center', sm: 'stretch' },
+														textAlign: { xs: 'center', sm: 'left' },
+													}}
+												>
+													<Stack
+														direction={{ xs: 'column', sm: 'row' }}
+														alignItems={{ xs: 'center', sm: 'center' }}
+														justifyContent={{ xs: 'center', sm: 'space-between' }}
+														spacing={1}
+														sx={{ width: '100%' }}
 													>
-														<ImageIcon fontSize='small' />
-													</Avatar>
-													<Stack spacing={1} sx={{ flexGrow: 1 }}>
+														<Box sx={{ width: '100%' }}>
+															<Typography
+																variant={isSmallDown ? 'subtitle1' : 'h6'}
+																sx={{ wordBreak: 'break-word' }}
+															>
+																{slide.title}
+															</Typography>
+															<Typography variant='body2' color='text.secondary'>
+																{getRouteLabel(slide.route_id)}
+															</Typography>
+														</Box>
+														<Chip
+															size='small'
+															variant='outlined'
+															label={`#${(slide.display_order ?? index) + 1}`}
+															sx={{ alignSelf: { xs: 'center', sm: 'center' } }}
+														/>
+													</Stack>
+													{slide.badge && (
+														<Chip
+															size='small'
+															color='primary'
+															variant='outlined'
+															label={slide.badge}
+															sx={{ alignSelf: { xs: 'center', sm: 'flex-start' } }}
+														/>
+													)}
+													{slide.description && (
+														<Typography
+															variant='body2'
+															color='text.secondary'
+															sx={{
+																display: '-webkit-box',
+																WebkitLineClamp: 2,
+																WebkitBoxOrient: 'vertical',
+																overflow: 'hidden',
+															}}
+														>
+															{slide.description}
+														</Typography>
+													)}
+
+													<Stack
+														direction={{ xs: 'column', sm: 'row' }}
+														justifyContent={{ xs: 'center', sm: 'space-between' }}
+														alignItems={{ xs: 'center', sm: 'center' }}
+														spacing={1}
+														sx={{ width: '100%' }}
+													>
 														<Stack
 															direction='row'
-															alignItems='flex-start'
-															justifyContent='space-between'
 															spacing={1}
+															alignItems='center'
+															justifyContent={{ xs: 'center', sm: 'flex-start' }}
+															sx={{ width: '100%', flexWrap: 'wrap' }}
 														>
-															<Box>
-																<Typography
-																	variant='h6'
-																	sx={{ wordBreak: 'break-word' }}
-																>
-																	{slide.title}
-																</Typography>
-																<Typography variant='body2' color='text.secondary'>
-																	{getRouteLabel(slide.route_id)}
-																</Typography>
-															</Box>
 															<Chip
 																size='small'
-																variant='outlined'
-																label={`#${(slide.display_order ?? index) + 1}`}
+																color={slide.is_active ? 'success' : 'default'}
+																variant={slide.is_active ? 'filled' : 'outlined'}
+																label={UI_LABELS.ADMIN.carousel_slides.is_active(
+																	slide.is_active
+																)}
+															/>
+															<FormControlLabel
+																control={
+																	<Switch
+																		checked={!!slide.is_active}
+																		onChange={() => handleToggleActive(slide)}
+																		color='primary'
+																		disabled={
+																			isReordering ||
+																			processingSlideId === slide.id ||
+																			slidesLoading
+																		}
+																	/>
+																}
+																label={FIELD_LABELS.CAROUSEL_SLIDE.is_active}
 															/>
 														</Stack>
-														{slide.badge && (
-															<Chip
-																size='small'
-																color='primary'
-																variant='outlined'
-																label={slide.badge}
-																sx={{ alignSelf: 'flex-start' }}
-															/>
-														)}
-														{slide.description && (
-															<Typography
-																variant='body2'
-																color='text.secondary'
-																sx={{
-																	display: '-webkit-box',
-																	WebkitLineClamp: 2,
-																	WebkitBoxOrient: 'vertical',
-																	overflow: 'hidden',
-																}}
-															>
-																{slide.description}
-															</Typography>
-														)}
-
 														<Stack
-															direction={{ xs: 'column', sm: 'row' }}
-															alignItems={{ xs: 'flex-start', sm: 'center' }}
-															justifyContent='space-between'
+															direction='row'
 															spacing={1}
+															justifyContent={{ xs: 'center', sm: 'flex-end' }}
+															alignItems='center'
+															sx={{ width: '100%', flexWrap: 'wrap' }}
 														>
-															<Stack direction='row' spacing={1} alignItems='center'>
-																<Chip
-																	size='small'
-																	color={slide.is_active ? 'success' : 'default'}
-																	variant={slide.is_active ? 'filled' : 'outlined'}
-																	label={slide.is_active ? 'Активен' : 'Скрыт'}
-																/>
-																<FormControlLabel
-																	control={
-																		<Switch
-																			checked={!!slide.is_active}
-																			onChange={() => handleToggleActive(slide)}
-																			color='primary'
-																			disabled={
-																				isReordering ||
-																				processingSlideId === slide.id ||
-																				slidesLoading
-																			}
-																		/>
-																	}
-																	label={FIELD_LABELS.CAROUSEL_SLIDE.is_active}
-																/>
-															</Stack>
-															<Stack direction='row' spacing={1}>
-																<Tooltip title='Переместить вверх'>
-																	<span>
-																		<IconButton
-																			size='small'
-																			onClick={() =>
-																				handleMoveSlide(slide.id, -1)
-																			}
-																			disabled={isReordering || index === 0}
-																		>
-																			<ArrowUpwardIcon fontSize='small' />
-																		</IconButton>
-																	</span>
-																</Tooltip>
-																<Tooltip title='Переместить вниз'>
-																	<span>
-																		<IconButton
-																			size='small'
-																			onClick={() => handleMoveSlide(slide.id, 1)}
-																			disabled={
-																				isReordering ||
-																				index === localSlides.length - 1
-																			}
-																		>
-																			<ArrowDownwardIcon fontSize='small' />
-																		</IconButton>
-																	</span>
-																</Tooltip>
-																<Tooltip title={UI_LABELS.BUTTONS.edit}>
-																	<span>
-																		<IconButton
-																			size='small'
-																			onClick={() => handleOpenEdit(slide)}
-																			disabled={
-																				isReordering ||
-																				slidesLoading ||
-																				processingSlideId === slide.id
-																			}
-																		>
-																			<EditIcon fontSize='small' />
-																		</IconButton>
-																	</span>
-																</Tooltip>
-																<Tooltip title={UI_LABELS.BUTTONS.delete}>
-																	<span>
-																		<IconButton
-																			size='small'
-																			color='error'
-																			onClick={() =>
-																				handleOpenDeleteDialog(slide)
-																			}
-																			disabled={
-																				processingSlideId === slide.id ||
-																				isReordering
-																			}
-																		>
-																			<DeleteIcon fontSize='small' />
-																		</IconButton>
-																	</span>
-																</Tooltip>
-															</Stack>
+															<Tooltip title='Переместить вверх'>
+																<span>
+																	<IconButton
+																		size='small'
+																		onClick={() => handleMoveSlide(slide.id, -1)}
+																		disabled={isReordering || index === 0}
+																	>
+																		<ArrowUpwardIcon fontSize='small' />
+																	</IconButton>
+																</span>
+															</Tooltip>
+															<Tooltip title='Переместить вниз'>
+																<span>
+																	<IconButton
+																		size='small'
+																		onClick={() => handleMoveSlide(slide.id, 1)}
+																		disabled={
+																			isReordering ||
+																			index === localSlides.length - 1
+																		}
+																	>
+																		<ArrowDownwardIcon fontSize='small' />
+																	</IconButton>
+																</span>
+															</Tooltip>
+															<Tooltip title={UI_LABELS.BUTTONS.edit}>
+																<span>
+																	<IconButton
+																		size='small'
+																		onClick={() => handleOpenEdit(slide)}
+																		disabled={
+																			isReordering ||
+																			slidesLoading ||
+																			processingSlideId === slide.id
+																		}
+																	>
+																		<EditIcon fontSize='small' />
+																	</IconButton>
+																</span>
+															</Tooltip>
+															<Tooltip title={UI_LABELS.BUTTONS.delete}>
+																<span>
+																	<IconButton
+																		size='small'
+																		color='error'
+																		onClick={() => handleOpenDeleteDialog(slide)}
+																		disabled={
+																			processingSlideId === slide.id ||
+																			isReordering
+																		}
+																	>
+																		<DeleteIcon fontSize='small' />
+																	</IconButton>
+																</span>
+															</Tooltip>
 														</Stack>
 													</Stack>
-												</Paper>
-											))}
-										</Stack>
-									)}
-								</Stack>
-							</Paper>
-						</Grid>
-
-						<Grid item xs={12}>
-							<Paper variant='outlined' sx={{ p: 3 }}>
-								<Stack spacing={2}>
-									<Typography variant='h4'>
-										{UI_LABELS.ADMIN.carousel_slides.preview_title}
-									</Typography>
-									<PosterCarousel slides={localSlides} autoFetch={false} includeInactive />
-								</Stack>
-							</Paper>
-						</Grid>
+												</Stack>
+											</Paper>
+										))}
+									</Stack>
+								)}
+							</Stack>
+						</Paper>
 					</Grid>
-				</Stack>
+
+					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+							<Stack spacing={2} alignItems='flex-start'>
+								<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.preview_title}</Typography>
+								<PosterCarousel slides={localSlides} autoFetch={false} includeInactive />
+							</Stack>
+						</Paper>
+					</Grid>
+				</Grid>
 			</Box>
 
-			<Dialog open={formOpen} onClose={handleCloseForm} fullWidth maxWidth='md'>
+			<Dialog open={formOpen} onClose={handleCloseForm} fullWidth maxWidth='md' fullScreen={isSmallDown}>
 				<DialogTitle>
 					{formMode === 'create'
 						? UI_LABELS.ADMIN.carousel_slides.add_button
 						: UI_LABELS.ADMIN.carousel_slides.edit_button}
 				</DialogTitle>
-				<DialogContent dividers>
+				<DialogContent
+					dividers
+					sx={{
+						px: { xs: 2, sm: 3 },
+						py: { xs: 2, sm: 3 },
+					}}
+				>
 					<Box sx={{ mb: 3 }}>
 						<Fade in={!!errorMessage} timeout={300}>
 							<div>{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}</div>
@@ -776,7 +832,7 @@ const CarouselSlideManagement = () => {
 						</Fade>
 					</Box>
 
-					<Grid container spacing={2}>
+					<Grid container spacing={isSmallDown ? 1.5 : 2}>
 						{formFields.map((field) => {
 							const isActivationField = field.name === 'isActive';
 							return (
@@ -808,6 +864,10 @@ const CarouselSlideManagement = () => {
 									startIcon={<UploadIcon />}
 									component='label'
 									disabled={isSubmitting}
+									sx={{
+										alignSelf: { xs: 'stretch', sm: 'flex-start' },
+										minHeight: 48,
+									}}
 								>
 									{imagePreview ? 'Заменить изображение' : FIELD_LABELS.CAROUSEL_SLIDE.image}
 									<input
@@ -830,7 +890,7 @@ const CarouselSlideManagement = () => {
 										alt={formValues.alt || formValues.title || 'preview'}
 										sx={{
 											width: '100%',
-											maxHeight: '50vh',
+											maxHeight: { xs: '40vh', sm: '50vh' },
 											objectFit: 'contain',
 											borderRadius: 2,
 											border: '1px solid',
@@ -847,28 +907,47 @@ const CarouselSlideManagement = () => {
 						</Grid>
 					</Grid>
 				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleCloseForm} disabled={isSubmitting}>
+				<DialogActions
+					sx={{
+						flexDirection: { xs: 'column-reverse', sm: 'row' },
+						alignItems: { xs: 'stretch', sm: 'center' },
+						gap: { xs: 1, sm: 2 },
+						px: { xs: 2, sm: 3 },
+						pb: { xs: 2, sm: 3 },
+					}}
+				>
+					<Button
+						onClick={handleCloseForm}
+						disabled={isSubmitting}
+						sx={{ width: { xs: '100%', sm: 'auto' } }}
+					>
 						{UI_LABELS.BUTTONS.cancel}
 					</Button>
 					<Button
 						variant='contained'
 						onClick={handleSubmitForm}
 						disabled={isSubmitting || routeOptions.length === 0}
+						sx={{ width: { xs: '100%', sm: 'auto' }, minHeight: 48 }}
 					>
 						{formMode === 'create' ? UI_LABELS.BUTTONS.add : UI_LABELS.BUTTONS.save_changes}
 					</Button>
 				</DialogActions>
 			</Dialog>
 
-			<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog}>
+			<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
 				<DialogTitle>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
-				<DialogContent dividers>
+				<DialogContent
+					dividers
+					sx={{
+						px: { xs: 2, sm: 3 },
+						py: { xs: 2, sm: 3 },
+					}}
+				>
 					<Typography variant='body1' sx={{ mb: 2 }}>
 						{UI_LABELS.MESSAGES.confirm_delete}
 					</Typography>
 					{deleteDialog.slide && (
-						<Paper variant='outlined' sx={{ p: 2 }}>
+						<Paper variant='outlined' sx={{ p: { xs: 2, sm: 2 } }}>
 							<Typography variant='subtitle1'>{deleteDialog.slide.title}</Typography>
 							<Typography variant='body2' color='text.secondary'>
 								{getRouteLabel(deleteDialog.slide.route_id)}
@@ -876,11 +955,28 @@ const CarouselSlideManagement = () => {
 						</Paper>
 					)}
 				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleCloseDeleteDialog} disabled={processingSlideId !== null}>
+				<DialogActions
+					sx={{
+						flexDirection: { xs: 'column-reverse', sm: 'row' },
+						alignItems: { xs: 'stretch', sm: 'center' },
+						gap: { xs: 1, sm: 2 },
+						px: { xs: 2, sm: 3 },
+						pb: { xs: 2, sm: 3 },
+					}}
+				>
+					<Button
+						onClick={handleCloseDeleteDialog}
+						disabled={processingSlideId !== null}
+						sx={{ width: { xs: '100%', sm: 'auto' } }}
+					>
 						{UI_LABELS.BUTTONS.cancel}
 					</Button>
-					<Button color='error' onClick={handleDeleteSlide} disabled={processingSlideId !== null}>
+					<Button
+						color='error'
+						onClick={handleDeleteSlide}
+						disabled={processingSlideId !== null}
+						sx={{ width: { xs: '100%', sm: 'auto' } }}
+					>
 						{UI_LABELS.BUTTONS.delete}
 					</Button>
 				</DialogActions>

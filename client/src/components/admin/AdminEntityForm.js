@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { DialogTitle, DialogContent, DialogActions, Button, Grid, Alert, Fade, Box } from '@mui/material';
+import {
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button,
+	Grid,
+	Alert,
+	Fade,
+	Box,
+	useMediaQuery,
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { UI_LABELS } from '../../constants';
 import { validateFormFields, extractErrorMessage } from './utils';
@@ -15,6 +26,9 @@ const AdminEntityForm = ({
 	editButtonText,
 	externalUpdates = {},
 }) => {
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
 	const getInitialFormData = () => {
 		if (isEditing && initialData?.id) {
 			return initialData;
@@ -91,7 +105,7 @@ const AdminEntityForm = ({
 			</Box>
 
 			<DialogContent>
-				<Grid container spacing={2} sx={{ mt: 1 }}>
+				<Grid container spacing={isMobile ? 1.5 : 2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
 						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
 							{field.renderField({
@@ -105,9 +119,24 @@ const AdminEntityForm = ({
 					))}
 				</Grid>
 			</DialogContent>
-			<DialogActions>
-				<Button onClick={onClose}>{UI_LABELS.BUTTONS.cancel}</Button>
-				<Button onClick={handleSubmit} variant='contained' disabled={!!successMessage}>
+			<DialogActions
+				sx={{
+					flexDirection: { xs: 'column-reverse', sm: 'row' },
+					alignItems: { xs: 'stretch', sm: 'center' },
+					gap: { xs: 1, sm: 2 },
+					px: { xs: 3, sm: 3 },
+					pb: { xs: 3, sm: 3 },
+				}}
+			>
+				<Button onClick={onClose} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+					{UI_LABELS.BUTTONS.cancel}
+				</Button>
+				<Button
+					onClick={handleSubmit}
+					variant='contained'
+					disabled={!!successMessage}
+					sx={{ width: { xs: '100%', sm: 'auto' } }}
+				>
 					{UI_LABELS.BUTTONS.save}
 				</Button>
 			</DialogActions>
