@@ -1,5 +1,5 @@
-from typing import Optional, List, Dict
-import enum
+from typing import Optional, List, Dict, Callable, Any, Iterable, Tuple
+from collections.abc import Iterable as IterableABC
 
 from sqlalchemy import inspect, Enum as SAEnum
 from sqlalchemy.exc import IntegrityError
@@ -39,12 +39,17 @@ class BaseModel(db.Model):
 
     @classmethod
     def __prepare_for_save(cls, data: dict) -> dict:
-        """Remove empty values so they are not persisted"""
+        """Normalise payload values before persisting"""
+        if not data:
+            return data
+
+        mapper = inspect(cls)
+        nullable_columns = {column.key for column in mapper.columns if column.nullable}
+
         cleaned = {}
         for k, v in data.items():
-            if isinstance(v, str) and v.strip() == '':
-                continue
-            if isinstance(v, (list, tuple, set, dict)) and len(v) == 0:
+            if k in nullable_columns and isinstance(v, str) and v.strip() == '':
+                cleaned[k] = None
                 continue
             cleaned[k] = v
         return cleaned
@@ -63,7 +68,9 @@ class BaseModel(db.Model):
                         continue
                     if not isinstance(value, enum_cls):
                         try:
-                            data[key] = enum_cls(getattr(value, 'value', value))
+                            data[key] = enum_cls(
+                                getattr(value, 'value', value)
+                            )
                         except Exception:
                             data[key] = None
         return data
@@ -74,12 +81,53 @@ class BaseModel(db.Model):
         super().__init__(**kwargs)
 
     @classmethod
+    def upload_from_file(
+        cls,
+        file,
+        session: Session | None = None,
+    ):
+        """Upload records for the model from the provided file"""
+        raise NotImplementedError(f'{cls.__name__} does not support file uploads')
+
+    @classmethod
+    def _process_upload_rows(
+        cls,
+        rows: Iterable[Dict[str, Any]],
+        row_processor: Callable[[Dict[str, Any], Session], Optional[Any]],
+        *,
+        session: Session | None = None,
+    ) -> Tuple[List[Any], List[Dict[str, Any]]]:
+        """Run row processing for bulk uploads within a shared transaction"""
+        session = session or db.session
+        processed: List[Any] = []
+        error_rows: List[Dict[str, Any]] = []
+
+        for row in rows:
+            if row.get('error'):
+                error_rows.append(row)
+                continue
+
+            try:
+                result = row_processor(row, session)
+                if result is not None:
+                    processed.append(result)
+            except Exception as exc:
+                row['error'] = str(exc)
+                error_rows.append(row)
+            
+
+        return processed, error_rows
+
+    @classmethod
     def get_all(cls, sort_by: list = [], descending: bool = False) -> List['BaseModel']:
         query = cls.query
 
         if sort_by:
             mapper = inspect(cls)
-            valid_attrs = {col.key: getattr(cls, col.key) for col in mapper.columns}
+            valid_attrs = {
+                col.key: getattr(cls, col.key)
+                for col in mapper.columns
+            }
 
             order_cols = []
             for field in sort_by:
@@ -272,6 +320,38 @@ class BaseModel(db.Model):
         session = session or db.session
         try:
             count = session.query(cls).delete()
+            if commit:
+                session.commit()
+            else:
+                session.flush()
+        except IntegrityError as e:
+            session.rollback()
+            raise ModelValidationError({'message': str(e)}) from e
+        return count
+
+    @classmethod
+    def delete_many(
+        cls,
+        ids: Iterable[int] | None,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ) -> int:
+        session = session or db.session
+        if not isinstance(ids, IterableABC) or isinstance(ids, (str, bytes)):
+            raise ModelValidationError({'message': 'List of ids is required'})
+        try:
+            cleaned_ids = {int(_id) for _id in ids if _id is not None}
+        except (TypeError, ValueError):
+            raise ModelValidationError({'message': 'Ids must be integers'})
+        if not cleaned_ids:
+            raise ModelValidationError({'message': 'List of ids is required'})
+        try:
+            count = (
+                session.query(cls)
+                .filter(cls.id.in_(list(cleaned_ids)))
+                .delete(synchronize_session=False)
+            )
             if commit:
                 session.commit()
             else:

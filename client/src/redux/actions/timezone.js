@@ -7,4 +7,5 @@ export const {
 	update: updateTimezone,
 	remove: deleteTimezone,
 	removeAll: deleteAllTimezones,
+	removeFiltered: deleteFilteredTimezones,
 } = createCrudActions('timezones');

@@ -78,29 +78,19 @@ class Country(BaseModel):
     ):
         session = session or db.session
         rows = parse_xlsx(
-            file, cls.upload_fields,
-            required_fields=['name', 'code_a2', 'code_a3']
+            file,
+            cls.upload_fields,
+            required_fields=['name', 'code_a2', 'code_a3'],
         )
-        countries = []
-        error_rows = []
-        for row in rows:
-            if not row.get('error'):
-                try:
-                    country = cls.create(
-                        session,
-                        name=str(row.get('name')),
-                        name_en=str(row.get('name_en')),
-                        code_a2=str(row.get('code_a2')),
-                        code_a3=str(row.get('code_a3')),
-                        commit=False,
-                    )
-                    countries.append(country)
-                except Exception as e:
-                    row['error'] = str(e)
 
-            if row.get('error'):
-                error_rows.append(row)
+        def process_row(row, row_session: Session):
+            return cls.create(
+                row_session,
+                name=str(row.get('name')),
+                name_en=str(row.get('name_en')),
+                code_a2=str(row.get('code_a2')),
+                code_a3=str(row.get('code_a3')),
+                commit=False,
+            )
 
-        session.commit()
-
-        return countries, error_rows
+        return cls._process_upload_rows(rows, process_row, session=session)

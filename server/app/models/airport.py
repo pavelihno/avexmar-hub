@@ -100,40 +100,29 @@ class Airport(BaseModel):
             ],
         )
 
-        airports = []
-        error_rows = []
+        def process_row(row, row_session: Session):
+            country = Country.get_by_code(row.get('country_code'))
+            if not country:
+                raise ValueError('Invalid country code')
 
-        for row in rows:
-            if not row.get('error'):
-                try:
-                    country = Country.get_by_code(row.get('country_code'))
-                    if not country:
-                        raise ValueError('Invalid country code')
+            tz_name = row.get('timezone')
+            tz = None
+            if tz_name:
+                tz = Timezone.query.filter(
+                    Timezone.name == tz_name
+                ).one_or_none()
 
-                    tz_name = row.get('timezone')
-                    tz = None
-                    if tz_name:
-                        tz = Timezone.query.filter(Timezone.name == tz_name).one_or_none()
+            return cls.create(
+                row_session,
+                name=str(row.get('name')),
+                city_name=str(row.get('city_name')),
+                city_name_en=str(row.get('city_name_en')),
+                iata_code=str(row.get('iata_code')),
+                icao_code=str(row.get('icao_code')),
+                city_code=str(row.get('city_code')),
+                country_id=country.id,
+                timezone_id=tz.id if tz else None,
+                commit=False,
+            )
 
-                    airport = cls.create(
-                        session,
-                        name=str(row.get('name')),
-                        city_name=str(row.get('city_name')),
-                        city_name_en=str(row.get('city_name_en')),
-                        iata_code=str(row.get('iata_code')),
-                        icao_code=str(row.get('icao_code')),
-                        city_code=str(row.get('city_code')),
-                        country_id=country.id,
-                        timezone_id=tz.id if tz else None,
-                        commit=False,
-                    )
-                    airports.append(airport)
-                except Exception as e:
-                    row['error'] = str(e)
-
-            if row.get('error'):
-                error_rows.append(row)
-
-        session.commit()
-
-        return airports, error_rows
+        return cls._process_upload_rows(rows, process_row, session=session)

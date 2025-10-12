@@ -6,8 +6,11 @@ class Config:
     APP_ENV = os.environ.get('SERVER_APP_ENV')
 
     CLIENT_URL = os.environ.get('SERVER_CLIENT_URL')
+    STORAGE_URL = os.environ.get('SERVER_STORAGE_URL')
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    LOG_DIR = 'logs'
+    STORAGE_DIR = 'storage'
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 

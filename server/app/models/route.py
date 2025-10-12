@@ -7,6 +7,7 @@ from app.models.airport import Airport
 
 if TYPE_CHECKING:
     from app.models.flight import Flight
+    from app.models.carousel_slide import CarouselSlide
 
 
 class Route(BaseModel):
@@ -22,6 +23,7 @@ class Route(BaseModel):
         'Airport', foreign_keys=[destination_airport_id], back_populates='destination_routes'
     )
     flights: Mapped[List['Flight']] = db.relationship('Flight', back_populates='route', lazy='dynamic', cascade='all, delete-orphan')
+    carousel_slides: Mapped[List['CarouselSlide']] = db.relationship('CarouselSlide', back_populates='route', lazy='dynamic', cascade='all, delete-orphan')
 
     __table_args__ = (
         db.UniqueConstraint(

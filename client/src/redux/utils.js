@@ -87,6 +87,16 @@ export const createCrudActions = (endpoint) => {
 		}
 	});
 
+	// Delete by ids (client-side filtered selection)
+	const removeFiltered = createAsyncThunk(`${endpoint}/deleteFiltered`, async (ids, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.delete(`/dev/clear_filtered/${endpoint}`, { data: { ids } });
+			return { ids, data: res.data };
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	});
+
 	return {
 		fetchAll,
 		fetchOne,
@@ -94,6 +104,7 @@ export const createCrudActions = (endpoint) => {
 		update,
 		remove,
 		removeAll,
+		removeFiltered,
 	};
 };
 

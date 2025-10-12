@@ -10,6 +10,7 @@ import {
 	updateAirport,
 	deleteAirport,
 	deleteAllAirports,
+	deleteFilteredAirports,
 } from '../../redux/actions/airport';
 import { fetchCountries } from '../../redux/actions/country';
 import { fetchTimezones } from '../../redux/actions/timezone';
@@ -136,6 +137,11 @@ const AirportManagement = () => {
 		await dispatch(deleteAllAirports()).unwrap();
 		dispatch(fetchAirports());
 	};
+	const handleDeleteFilteredAirports = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredAirports(ids)).unwrap();
+		dispatch(fetchAirports());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('airports', file);
@@ -158,6 +164,7 @@ const AirportManagement = () => {
 			onEdit={handleEditAirport}
 			onDelete={handleDeleteAirport}
 			onDeleteAll={handleDeleteAllAirports}
+			onDeleteFiltered={handleDeleteFilteredAirports}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.airports.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.airports.upload_button}

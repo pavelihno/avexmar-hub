@@ -26,6 +26,7 @@ import consentDocReducer from './reducers/consentDoc';
 import consentEventReducer from './reducers/consentEvent';
 import exportReducer from './reducers/export';
 import bookingSearchReducer from './reducers/bookingSearch';
+import carouselSlideReducer from './reducers/carouselSlide';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const middleware = [thunk];
@@ -55,6 +56,7 @@ const rootReducer = combineReducers({
 	consentDocs: consentDocReducer,
 	consentEvents: consentEventReducer,
 	exports: exportReducer,
+	carouselSlides: carouselSlideReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(...middleware)));

@@ -7,4 +7,5 @@ export const {
 	update: updateConsentEvent,
 	remove: deleteConsentEvent,
 	removeAll: deleteAllConsentEvents,
+	removeFiltered: deleteFilteredConsentEvents,
 } = createCrudActions('consent_events');

@@ -12,14 +12,10 @@ import {
 	MenuItem,
 	Button,
 	CircularProgress,
-	Accordion,
-	AccordionSummary,
-	AccordionDetails,
 	useMediaQuery,
 	Stack,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTheme } from '@mui/material/styles';
 
 import Base from '../Base';
@@ -307,11 +303,17 @@ const Search = () => {
 									sx={{
 										display: 'flex',
 										alignItems: 'center',
-										justifyContent: 'center',
 										flexWrap: 'nowrap',
 										overflowX: 'auto',
 										columnGap: 1,
 										width: '100%',
+										justifyContent: 'flex-start',
+										scrollbarWidth: 'none',
+										WebkitOverflowScrolling: 'touch',
+										px: 0.5,
+										'&::-webkit-scrollbar': {
+											display: 'none',
+										},
 									}}
 								>
 									{nearDatesOutbound.map((d) => (
@@ -331,9 +333,7 @@ const Search = () => {
 												navigate(`/search?${newParams.toString()}`);
 											}}
 										>
-											{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-												ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-											}`}
+											{UI_LABELS.SEARCH.nearby_dates.price_date(d.date, d.price, d.currency)}
 										</Button>
 									))}
 								</Box>
@@ -365,12 +365,18 @@ const Search = () => {
 										<Box
 											sx={{
 												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
 												flexWrap: 'nowrap',
 												overflowX: 'auto',
 												columnGap: 1,
 												width: '100%',
+												alignItems: 'center',
+												justifyContent: 'flex-start',
+												scrollbarWidth: 'none',
+												WebkitOverflowScrolling: 'touch',
+												px: 0.5,
+												'&::-webkit-scrollbar': {
+													display: 'none',
+												},
 											}}
 										>
 											{nearDatesReturn.map((d) => (
@@ -393,9 +399,11 @@ const Search = () => {
 														navigate(`/search?${newParams.toString()}`);
 													}}
 												>
-													{`${formatDate(d.date, 'dd.MM')} - ${formatNumber(d.price)} ${
-														ENUM_LABELS.CURRENCY_SYMBOL[d.currency] || ''
-													}`}
+													{UI_LABELS.SEARCH.nearby_dates.price_date(
+														d.date,
+														d.price,
+														d.currency
+													)}
 												</Button>
 											))}
 										</Box>

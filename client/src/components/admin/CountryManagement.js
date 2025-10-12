@@ -9,6 +9,7 @@ import {
 	updateCountry,
 	deleteCountry,
 	deleteAllCountries,
+	deleteFilteredCountries,
 } from '../../redux/actions/country';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -78,6 +79,11 @@ const CountryManagement = () => {
 		await dispatch(deleteAllCountries()).unwrap();
 		dispatch(fetchCountries());
 	};
+	const handleDeleteFilteredCountries = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredCountries(ids)).unwrap();
+		dispatch(fetchCountries());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('countries', file);
@@ -100,6 +106,7 @@ const CountryManagement = () => {
 			onEdit={handleEditCountry}
 			onDelete={handleDeleteCountry}
 			onDeleteAll={handleDeleteAllCountries}
+			onDeleteFiltered={handleDeleteFilteredCountries}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.countries.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}

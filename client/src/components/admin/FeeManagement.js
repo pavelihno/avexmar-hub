@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchFees, createFee, updateFee, deleteFee, deleteAllFees } from '../../redux/actions/fee';
+import { fetchFees, createFee, updateFee, deleteFee, deleteAllFees, deleteFilteredFees } from '../../redux/actions/fee';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatNumber } from '../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
@@ -75,6 +75,11 @@ const FeeManagement = () => {
 		await dispatch(deleteAllFees()).unwrap();
 		dispatch(fetchFees());
 	};
+	const handleDeleteFilteredFees = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredFees(ids)).unwrap();
+		dispatch(fetchFees());
+	};
 
 	const formattedFees = fees.map(adminManager.toUiFormat);
 
@@ -87,6 +92,7 @@ const FeeManagement = () => {
 			onEdit={handleEditFee}
 			onDelete={handleDeleteFee}
 			onDeleteAll={handleDeleteAllFees}
+			onDeleteFiltered={handleDeleteFilteredFees}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.fees.add_button}
 			isLoading={isLoading}

@@ -7,4 +7,5 @@ export const {
 	update: updateFee,
 	remove: deleteFee,
 	removeAll: deleteAllFees,
+	removeFiltered: deleteFilteredFees,
 } = createCrudActions('fees');

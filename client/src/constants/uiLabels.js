@@ -1,4 +1,5 @@
-import { formatDate, formatTime } from '../components/utils';
+import { formatDate, formatTime, formatNumber } from '../components/utils';
+import ENUM_LABELS from './enumLabels';
 
 export const UI_LABELS = {
 	APP_TITLE: 'АВЕКСМАР — Авиаперевозки',
@@ -64,6 +65,7 @@ export const UI_LABELS = {
 		cancel: 'Отмена',
 		back: 'Назад',
 		delete_all: 'Удалить все',
+		delete_filtered: 'Удалить по фильтру',
 		close: 'Закрыть',
 		confirm: 'Подтвердить',
 		send: 'Отправить',
@@ -87,6 +89,7 @@ export const UI_LABELS = {
 		confirm_action: 'Подтвердите действие',
 		confirm_delete: 'Вы уверены, что хотите удалить запись?',
 		confirm_delete_all: 'Вы уверены, что хотите удалить все записи?',
+		confirm_delete_filtered: 'Вы уверены, что хотите удалить записи, соответствующие фильтру?',
 		loading: 'Загрузка...',
 		required_field: 'Это поле обязательно',
 	},
@@ -96,6 +99,7 @@ export const UI_LABELS = {
 		update: 'Запись успешно обновлена',
 		delete: 'Запись успешно удалена',
 		delete_all: 'Все записи успешно удалены',
+		delete_filtered: 'Отфильтрованные записи успешно удалены',
 		login: 'Вход выполнен успешно',
 		register: 'Инструкции по активации отправлены на электронную почту',
 		account_activated: 'Аккаунт успешно активирован',
@@ -278,6 +282,18 @@ export const UI_LABELS = {
 				flight: 'Рейс',
 			},
 		},
+		carousel_slides: {
+			title: 'Слайды карусели',
+			description: 'Управление контентом главного слайдера и его порядком отображения',
+			management: 'Управление слайдами карусели',
+			add_button: 'Добавить слайд',
+			edit_button: 'Редактировать слайд',
+			preview_title: 'Предпросмотр карусели',
+			image_hint: 'Старайтесь использовать изображения не менее 1600×900 px',
+			activation_hint: 'Новый слайд создаётся неактивным. Активируйте его после предпросмотра',
+			no_route_option: 'Без маршрута',
+			is_active: (isActive) => (isActive ? 'Активен' : 'Скрыт'),
+		},
 	},
 	AUTH: {
 		old_password: 'Текущий пароль',
@@ -350,7 +366,16 @@ export const UI_LABELS = {
 		passenger_added: 'Пассажир успешно добавлен',
 		personal_data: 'Личные данные',
 	},
-	HOME: {},
+	HOME: {
+		poster_carousel: {
+			price_from: (price, currency) =>
+				price != null
+					? `от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`
+					: '',
+			schedule_cta: (from, to) => `Расписание ${from} — ${to}`,
+			empty: 'Слайды карусели пока не опубликованы',
+		},
+	},
 	BOOKING: {
 		progress_steps: {
 			passengers: 'Пассажиры',
@@ -528,8 +553,12 @@ export const UI_LABELS = {
 			departure_arrival: 'Время отправления — Время прибытия',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
-			price_from: 'От',
-			price_per_passenger: 'За 1 пассажира',
+			flight_note: 'Примечание',
+			price_from: (price, currency) =>
+				`от ${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+			price_exact: (price, currency) =>
+				`${formatNumber(price)} ${currency ? ENUM_LABELS.CURRENCY_SYMBOL[currency] : ''}`,
+			price_per_passenger: 'за 1 пассажира',
 			seats_available: 'Свободных мест',
 			seats_unavailable: 'Недостаточно свободных мест',
 			tickets: 'Стоимость перевозки',
@@ -550,6 +579,8 @@ export const UI_LABELS = {
 		},
 		nearby_dates: {
 			title: (from, to) => `Ближайшие даты: ${from} → ${to}`,
+			price_date: (date, price, currency) =>
+				`${formatDate(date, 'dd.MM')} - ${formatNumber(price)} ${ENUM_LABELS.CURRENCY_SYMBOL[currency] || ''}`,
 			no_outbound: 'Нет ближайших рейсов в выбранном направлении',
 			no_return: 'Нет ближайших рейсов в обратном направлении',
 		},
@@ -558,10 +589,13 @@ export const UI_LABELS = {
 	BOOKING_SEARCH: {
 		link: 'Найти бронирование',
 		title: 'Найти бронирование',
+		subtitle: 'Укажите данные пассажира и номер бронирования, чтобы продолжить оформление',
 		booking_number: 'Номер бронирования',
 		first_name: 'Имя пассажира',
 		last_name: 'Фамилия пассажира',
 		button: 'Найти',
+		hint_title: 'Где найти номер бронирования?',
+		hint_text: 'Он указан в письме-подтверждении и в электронном билете',
 	},
 };
 

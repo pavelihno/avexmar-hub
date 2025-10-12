@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, Typography, IconButton, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, IconButton, Snackbar, Alert, CircularProgress, Stack } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -70,7 +70,7 @@ const FlightPassengerExport = () => {
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
-link.setAttribute('download', 'flight_passengers.xls');
+			link.setAttribute('download', 'flight_passengers.xls');
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
@@ -87,65 +87,91 @@ link.setAttribute('download', 'flight_passengers.xls');
 
 	return (
 		<Base maxWidth='xl'>
-			<Box sx={{ p: 3 }}>
-				<Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-					<IconButton component={Link} to='/admin' sx={{ mr: 2 }}>
+			<Box sx={{ p: { xs: 2, md: 3 } }}>
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						flexWrap: 'wrap',
+						gap: 1.5,
+						mb: { xs: 2, md: 3 },
+					}}
+				>
+					<IconButton
+						component={Link}
+						to='/admin'
+						sx={{
+							mr: { xs: 0, md: 1 },
+							alignSelf: 'center',
+						}}
+					>
 						<ArrowBackIcon />
 					</IconButton>
-					<Box>
-						<Typography variant='h4'>{UI_LABELS.ADMIN.exports.flightPassengers.title}</Typography>
-						<Typography variant='body1' color='text.secondary'>
-							{UI_LABELS.ADMIN.exports.flightPassengers.description}
-						</Typography>
-					</Box>
+					<Typography variant='h4'>{UI_LABELS.ADMIN.exports.flightPassengers.title}</Typography>
 				</Box>
 
 				<Box
 					sx={{
 						display: 'flex',
-						gap: 2,
-						p: 3,
-						alignItems: 'center',
-						flexWrap: 'wrap',
+						flexDirection: 'column',
+						gap: 3,
+						p: { xs: 2, md: 3 },
+						mb: { xs: 3, md: 4 },
 					}}
 				>
-					{createFieldRenderer({
-						label: UI_LABELS.ADMIN.exports.flightPassengers.route,
-						type: FIELD_TYPES.SELECT,
-					})({
-						value: routeId,
-						onChange: (val) => handleRouteChange({ target: { value: val } }),
-						fullWidth: false,
-						options: routes.map((r) => ({ value: r.id, label: r.name })),
-						sx: { minWidth: { md: 300, xs: 250 } },
-						size: 'medium',
-						disabled: isLoading,
-					})}
-
-					{createFieldRenderer({
-						label: UI_LABELS.ADMIN.exports.flightPassengers.flight,
-						type: FIELD_TYPES.SELECT,
-					})({
-						value: flightId,
-						onChange: (val) => setFlightId(val),
-						fullWidth: false,
-						options: flights.map((f) => ({
-							value: f.id,
-							label: `${f.airline_flight_number} — ${formatDate(f.scheduled_departure)}`,
-						})),
-						sx: { minWidth: { md: 300, xs: 250 } },
-						size: 'medium',
-						disabled: !routeId || isLoading,
-					})}
-
-					<Button
-						variant='contained'
-						startIcon={<FileDownloadIcon />}
-						onClick={handleDownload}
-						disabled={!flightId || isLoading}
+					<Typography variant='body1' color='text.secondary'>
+						{UI_LABELS.ADMIN.exports.flightPassengers.description}
+					</Typography>
+					<Stack
+						direction={{ xs: 'column', md: 'row' }}
+						spacing={2}
+						alignItems={{ xs: 'stretch', md: 'center' }}
 					>
-						{UI_LABELS.BUTTONS.download}
-					</Button>
+						{createFieldRenderer({
+							label: UI_LABELS.ADMIN.exports.flightPassengers.route,
+							type: FIELD_TYPES.SELECT,
+						})({
+							value: routeId,
+							onChange: (val) => handleRouteChange({ target: { value: val } }),
+							fullWidth: false,
+							options: routes.map((r) => ({ value: r.id, label: r.name })),
+							sx: {
+								minWidth: { md: 280 },
+								width: '100%',
+							},
+							size: 'medium',
+							disabled: isLoading,
+						})}
+
+						{createFieldRenderer({
+							label: UI_LABELS.ADMIN.exports.flightPassengers.flight,
+							type: FIELD_TYPES.SELECT,
+						})({
+							value: flightId,
+							onChange: (val) => setFlightId(val),
+							fullWidth: false,
+							options: flights.map((f) => ({
+								value: f.id,
+								label: `${f.airline_flight_number} — ${formatDate(f.scheduled_departure)}`,
+							})),
+							sx: {
+								minWidth: { md: 280 },
+								width: '100%',
+							},
+							size: 'medium',
+							disabled: !routeId || isLoading,
+						})}
+
+						<Button
+							variant='contained'
+							startIcon={<FileDownloadIcon />}
+							onClick={handleDownload}
+							disabled={!flightId || isLoading}
+							sx={{ width: { xs: '100%', md: 'auto' }, minHeight: 48 }}
+						>
+							{UI_LABELS.BUTTONS.download}
+						</Button>
+					</Stack>
 				</Box>
 
 				<Box sx={{ position: 'relative', mt: 4 }}>

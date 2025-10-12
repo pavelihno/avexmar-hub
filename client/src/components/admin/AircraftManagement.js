@@ -8,6 +8,7 @@ import {
 	updateAircraft,
 	deleteAircraft,
 	deleteAllAircrafts,
+	deleteFilteredAircrafts,
 } from '../../redux/actions/aircraft';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -45,6 +46,11 @@ const AircraftManagement = () => {
 		await dispatch(deleteAllAircrafts()).unwrap();
 		dispatch(fetchAircrafts());
 	};
+	const handleDeleteFilteredAircrafts = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredAircrafts(ids)).unwrap();
+		dispatch(fetchAircrafts());
+	};
 
 	const formatted = aircrafts.map(adminManager.toUiFormat);
 
@@ -57,6 +63,7 @@ const AircraftManagement = () => {
 			onEdit={handleEditAircraft}
 			onDelete={handleDeleteAircraft}
 			onDeleteAll={handleDeleteAllAircrafts}
+			onDeleteFiltered={handleDeleteFilteredAircrafts}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.aircrafts.add_button}
 			isLoading={isLoading}

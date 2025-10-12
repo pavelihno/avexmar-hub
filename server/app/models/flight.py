@@ -66,8 +66,14 @@ class Flight(BaseModel):
         if not (self.scheduled_departure and self.scheduled_arrival):
             return None
 
-        depart_dt = combine_date_time(self.scheduled_departure, self.scheduled_departure_time)
-        arrive_dt = combine_date_time(self.scheduled_arrival, self.scheduled_arrival_time)
+        depart_dt = combine_date_time(
+            self.scheduled_departure, 
+            self.scheduled_departure_time
+        )
+        arrive_dt = combine_date_time(
+            self.scheduled_arrival, 
+            self.scheduled_arrival_time
+        )
 
         if depart_dt is None or arrive_dt is None:
             return None
@@ -199,87 +205,85 @@ class Flight(BaseModel):
             time_fields=cls.get_upload_time_fields(),
         )
 
-        flights = []
-        error_rows = []
+        def process_row(row, row_session: Session):
+            airline = Airline.get_by_code(row.get('airline_code'))
+            if not airline:
+                raise ValueError('Invalid airline code')
 
-        for row in rows:
-            if not row.get('error'):
-                try:
-                    airline = Airline.get_by_code(row.get('airline_code'))
-                    if not airline:
-                        raise ValueError('Invalid airline code')
+            origin = Airport.get_by_code(row.get('origin_airport_code'))
+            if not origin:
+                raise ValueError('Invalid origin airport code')
 
-                    origin = Airport.get_by_code(row.get('origin_airport_code'))
-                    if not origin:
-                        raise ValueError('Invalid origin airport code')
+            destination = Airport.get_by_code(
+                row.get('destination_airport_code')
+            )
+            if not destination:
+                raise ValueError('Invalid destination airport code')
 
-                    destination = Airport.get_by_code(row.get('destination_airport_code'))
-                    if not destination:
-                        raise ValueError('Invalid destination airport code')
+            route = Route.query.filter(
+                Route.origin_airport_id == origin.id,
+                Route.destination_airport_id == destination.id,
+            ).one_or_none()
+            if not route:
+                raise ValueError('Route does not exist')
 
-                    route = Route.query.filter(
-                        Route.origin_airport_id == origin.id,
-                        Route.destination_airport_id == destination.id,
-                    ).one_or_none()
-                    if not route:
-                        raise ValueError('Route does not exist')
+            aircraft_id = None
+            aircraft_type = row.get('aircraft')
+            if aircraft_type:
+                aircraft = Aircraft.query.filter_by(
+                    type=aircraft_type
+                ).one_or_none()
+                aircraft_id = aircraft.id if aircraft else None
 
-                    aircraft_id = None
-                    aircraft_type = row.get('aircraft')
-                    if aircraft_type:
-                        aircraft = Aircraft.query.filter_by(type=aircraft_type).one_or_none()
-                        aircraft_id = aircraft.id if aircraft else None
+            flight = cls.create(
+                row_session,
+                flight_number=str(row.get('flight_number')),
+                airline_id=airline.id,
+                route_id=route.id,
+                aircraft_id=aircraft_id,
+                note=row.get('note'),
+                scheduled_departure=parse_date(row.get('scheduled_departure')),
+                scheduled_departure_time=parse_time(
+                    row.get('scheduled_departure_time')
+                ),
+                scheduled_arrival=parse_date(row.get('scheduled_arrival')),
+                scheduled_arrival_time=parse_time(
+                    row.get('scheduled_arrival_time')
+                ),
+                commit=False,
+            )
 
-                    flight = cls.create(
-                        session,
-                        flight_number=str(row.get('flight_number')),
-                        airline_id=airline.id,
-                        route_id=route.id,
-                        aircraft_id=aircraft_id,
-                        note=row.get('note'),
-                        scheduled_departure=parse_date(row.get('scheduled_departure')),
-                        scheduled_departure_time=parse_time(row.get('scheduled_departure_time')),
-                        scheduled_arrival=parse_date(row.get('scheduled_arrival')),
-                        scheduled_arrival_time=parse_time(row.get('scheduled_arrival_time')),
-                        commit=False,
+            used_tariffs = {}
+            for i in range(1, cls.MAX_TARIFFS + 1):
+                seat_class = row.get(f'seat_class_{i}')
+                seats_number = int(row.get(f'seats_number_{i}', 0) or 0)
+                tariff_number = int(row.get(f'tariff_number_{i}', 0) or 0)
+                if not (seat_class or seats_number or tariff_number):
+                    continue
+                if not (seat_class and seats_number >= 0 and tariff_number > 0):
+                    raise ValueError(f'Incomplete tariff data in group {i}')
+                if seat_class in used_tariffs and tariff_number in used_tariffs[seat_class]:
+                    raise ValueError('Duplicate tariff')
+                used_tariffs.setdefault(seat_class, set()).add(tariff_number)
+                tariff = Tariff.query.filter(
+                    Tariff.seat_class == seat_class,
+                    Tariff.order_number == tariff_number,
+                ).one_or_none()
+                if not tariff:
+                    raise ValueError(
+                        f'Invalid tariff number or class: {seat_class}, {tariff_number}'
                     )
+                FlightTariff.create(
+                    row_session,
+                    flight_id=flight.id,
+                    tariff_id=tariff.id,
+                    seats_number=seats_number,
+                    commit=False,
+                )
 
-                    used_tariffs = {}
-                    for i in range(1, cls.MAX_TARIFFS + 1):
-                        seat_class = row.get(f'seat_class_{i}')
-                        seats_number = int(row.get(f'seats_number_{i}', 0) or 0)
-                        tariff_number = int(row.get(f'tariff_number_{i}', 0) or 0)
-                        if not (seat_class or seats_number or tariff_number):
-                            continue
-                        if not (seat_class and seats_number >= 0 and tariff_number > 0):
-                            raise ValueError(f'Incomplete tariff data in group {i}')
-                        if seat_class in used_tariffs and tariff_number in used_tariffs[seat_class]:
-                            raise ValueError('Duplicate tariff')
-                        used_tariffs.setdefault(seat_class, set()).add(tariff_number)
-                        tariff = Tariff.query.filter(
-                            Tariff.seat_class == seat_class,
-                            Tariff.order_number == tariff_number
-                        ).one_or_none()
-                        if not tariff:
-                            raise ValueError(f'Invalid tariff number or class: {seat_class}, {tariff_number}')
-                        FlightTariff.create(
-                            session,
-                            flight_id=flight.id,
-                            tariff_id=tariff.id,
-                            seats_number=seats_number,
-                            commit=False,
-                        )
+            return flight
 
-                    flights.append(flight)
-                except Exception as e:
-                    row['error'] = str(e)
-
-            if row.get('error'):
-                error_rows.append(row)
-
-        session.commit()
-
-        return flights, error_rows
+        return cls._process_upload_rows(rows, process_row, session=session)
 
     @classmethod
     def get_all(cls):

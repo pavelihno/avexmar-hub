@@ -9,6 +9,7 @@ export const {
 	update: updateBooking,
 	remove: deleteBooking,
 	removeAll: deleteAllBookings,
+	removeFiltered: deleteFilteredBookings,
 } = createCrudActions('bookings');
 
 export const fetchUserBookings = createAsyncThunk('bookings/fetchUserBookings', async (userId, { rejectWithValue }) => {

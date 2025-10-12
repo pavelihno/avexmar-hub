@@ -18,4 +18,5 @@ export const {
 	update: updatePayment,
 	remove: deletePayment,
 	removeAll: deleteAllPayments,
+	removeFiltered: deleteFilteredPayments,
 } = createCrudActions('payments');

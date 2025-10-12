@@ -113,6 +113,21 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	CAROUSEL_SLIDE: {
+		title: {
+			REQUIRED: 'Заголовок обязателен',
+		},
+		route_id: {
+			REQUIRED: 'Выберите маршрут',
+		},
+		alt: {
+			REQUIRED: 'Альтернативный текст обязателен',
+		},
+		image: {
+			REQUIRED: 'Загрузите изображение слайда',
+		},
+	},
+
 	PASSENGER: {
 		first_name: {
 			REQUIRED: 'Введите имя',

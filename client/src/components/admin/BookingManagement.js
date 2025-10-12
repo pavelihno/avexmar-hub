@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Box, Typography, TextField, Autocomplete } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -12,6 +12,7 @@ import {
 	updateBooking,
 	deleteBooking,
 	deleteAllBookings,
+	deleteFilteredBookings,
 } from '../../redux/actions/booking';
 import {
 	fetchBookingPassengers,
@@ -22,8 +23,8 @@ import { fetchPassengers } from '../../redux/actions/passenger';
 import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
-import { formatDate, validateEmail, validatePhoneNumber } from '../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../constants';
+import { formatDate } from '../utils';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();
@@ -177,7 +178,9 @@ const BookingManagement = () => {
 							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'flex-start',
-							minWidth: '200px',
+							minWidth: { xs: 0, md: '200px' },
+							width: { xs: '100%', md: 'auto' },
+							maxWidth: '100%',
 						}}
 					>
 						{linked.map((p) => {
@@ -192,7 +195,8 @@ const BookingManagement = () => {
 										backgroundColor: alpha(theme.palette.black, 0.04),
 										borderRadius: 1,
 										p: 0.5,
-										width: 'auto',
+										width: '100%',
+										maxWidth: '100%',
 									}}
 								>
 									<Typography
@@ -284,6 +288,11 @@ const BookingManagement = () => {
 		await dispatch(deleteAllBookings()).unwrap();
 		dispatch(fetchBookings());
 	};
+	const handleDeleteFilteredBookings = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredBookings(ids)).unwrap();
+		dispatch(fetchBookings());
+	};
 
 	const formattedBookings = bookings.map((b) => {
 		const ui = adminManager.toUiFormat(b);
@@ -301,6 +310,7 @@ const BookingManagement = () => {
 			onEdit={handleEditBooking}
 			onDelete={handleDeleteBooking}
 			onDeleteAll={handleDeleteAllBookings}
+			onDeleteFiltered={handleDeleteFilteredBookings}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.bookings.add_button}
 			isLoading={isLoading || bookingPassengersLoading || passengersLoading || usersLoading}

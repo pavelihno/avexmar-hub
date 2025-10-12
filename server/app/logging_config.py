@@ -1,4 +1,3 @@
-import os
 import copy
 import json
 import logging
@@ -9,10 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
+from app.config import Config
 
-APP_LOG_DIR = Path(
-    os.getenv('APP_LOG_DIR',)
-)
+
+APP_LOG_DIR = Path(Config.LOG_DIR)
 
 _configured = False
 

@@ -122,7 +122,16 @@ const UserInfo = () => {
 	};
 
 	return (
-		<Paper sx={{ p: 2, width: '100%' }}>
+		<Paper
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				width: '100%',
+				p: { xs: 2, md: 3 },
+				borderRadius: 3,
+				gap: 2,
+			}}
+		>
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.user_info}
 			</Typography>

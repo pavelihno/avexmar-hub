@@ -16,6 +16,7 @@ import {
 	Button,
 	IconButton,
 	useMediaQuery,
+	CircularProgress,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -59,12 +60,46 @@ const BookingsTab = () => {
 	}, [bookings]);
 
 	if (isLoading) {
-		return <Typography>{UI_LABELS.MESSAGES.loading}</Typography>;
+		return (
+			<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
+				<Paper
+					sx={{
+						p: { xs: 2, md: 3 },
+						width: '100%',
+						borderRadius: 3
+					}}
+				>
+					<Box
+						sx={{
+							minHeight: 200,
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							justifyContent: 'center',
+							gap: 2,
+						}}
+						role='status'
+						aria-live='polite'
+					>
+						<CircularProgress color='primary' />
+						<Typography variant='subtitle1' color='text.secondary' sx={{ textAlign: 'center' }}>
+							{UI_LABELS.MESSAGES.loading}
+						</Typography>
+					</Box>
+				</Paper>
+			</Container>
+		);
 	}
 
 	return (
 		<Container maxWidth='md' sx={{ mt: { xs: 2, md: 4 }, px: { xs: 0, md: 2 } }}>
-			<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+			<Paper
+				sx={{
+					p: { xs: 2, md: 3 },
+					width: '100%',
+					borderRadius: 3
+				}}
+			>
 				<Typography variant='h4'>{UI_LABELS.PROFILE.bookings}</Typography>
 
 				{(!bookings || bookings.length === 0) && (

@@ -9,6 +9,7 @@ import {
 	updatePassenger,
 	deletePassenger,
 	deleteAllPassengers,
+	deleteFilteredPassengers,
 } from '../../redux/actions/passenger';
 import { fetchCountries } from '../../redux/actions/country';
 import { fetchUsers } from '../../redux/actions/user';
@@ -147,6 +148,11 @@ const PassengerManagement = () => {
 		await dispatch(deleteAllPassengers()).unwrap();
 		dispatch(fetchPassengers());
 	};
+	const handleDeleteFilteredPassengers = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredPassengers(ids)).unwrap();
+		dispatch(fetchPassengers());
+	};
 
 	const formattedPassengers = passengers.map(adminManager.toUiFormat);
 
@@ -159,6 +165,7 @@ const PassengerManagement = () => {
 			onEdit={handleEditPassenger}
 			onDelete={handleDeletePassenger}
 			onDeleteAll={handleDeleteAllPassengers}
+			onDeleteFiltered={handleDeleteFilteredPassengers}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.passengers.add_button}
 			isLoading={passengersLoading}

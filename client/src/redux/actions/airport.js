@@ -7,4 +7,5 @@ export const {
 	update: updateAirport,
 	remove: deleteAirport,
 	removeAll: deleteAllAirports,
+	removeFiltered: deleteFilteredAirports,
 } = createCrudActions('airports');

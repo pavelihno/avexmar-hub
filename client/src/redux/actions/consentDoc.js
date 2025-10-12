@@ -18,4 +18,5 @@ export const {
 	update: updateConsentDoc,
 	remove: deleteConsentDoc,
 	removeAll: deleteAllConsentDocs,
+	removeFiltered: deleteFilteredConsentDocs,
 } = createCrudActions('consent_docs');

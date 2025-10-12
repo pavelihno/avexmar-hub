@@ -101,7 +101,16 @@ const PasswordTab = () => {
 	};
 
 	return (
-		<Paper sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
+		<Paper
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				width: '100%',
+				p: { xs: 2, md: 3 },
+				borderRadius: 3,
+				gap: 2,
+			}}
+		>
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				{UI_LABELS.PROFILE.change_password}
 			</Typography>

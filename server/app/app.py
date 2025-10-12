@@ -1,5 +1,6 @@
 import os
 import importlib
+
 from flask import Flask
 from flask_migrate import Migrate
 
@@ -36,6 +37,7 @@ from app.controllers.fee_controller import *
 from app.controllers.consent_doc_controller import *
 from app.controllers.consent_event_controller import *
 from app.controllers.passenger_export_controller import *
+from app.controllers.carousel_controller import *
 
 
 def __import_models():
@@ -139,6 +141,14 @@ def __create_app(_config_class, _db):
     app.route('/routes/<int:route_id>', methods=['PUT'])(update_route)
     app.route('/routes/<int:route_id>', methods=['DELETE'])(delete_route)
 
+    # carousel slides
+    app.route('/carousel_slides', methods=['GET'])(get_carousel_slides)
+    app.route('/carousel_slides', methods=['POST'])(create_carousel_slide)
+    app.route('/carousel_slides/<int:slide_id>', methods=['GET'])(get_carousel_slide)
+    app.route('/carousel_slides/<int:slide_id>', methods=['PUT'])(update_carousel_slide)
+    app.route('/carousel_slides/<int:slide_id>', methods=['DELETE'])(delete_carousel_slide)
+    app.route('/carousel_slides/<int:slide_id>/upload', methods=['POST'])(upload_carousel_slide_image)
+
     # flights
     app.route('/flights', methods=['GET'])(get_flights)
     app.route('/flights', methods=['POST'])(create_flight)
@@ -184,6 +194,7 @@ def __create_app(_config_class, _db):
     app.route('/consent_docs/<uuid:doc_id>', methods=['DELETE'])(delete_consent_doc)
     app.route('/consent_docs/latest/<string:doc_type>', methods=['GET'])(get_latest_consent_doc)
 
+    # consent events
     app.route('/consent_events', methods=['GET'])(get_consent_events)
     app.route('/consent_events', methods=['POST'])(create_consent_event)
     app.route('/consent_events/<uuid:event_id>', methods=['GET'])(get_consent_event)
@@ -250,6 +261,7 @@ def __create_app(_config_class, _db):
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)
+    app.route('/dev/clear_filtered/<string:table_name>', methods=['DELETE'])(clear_filtered_table)
 
     # external
     app.route('/webhooks/yookassa', methods=['POST'])(yookassa_webhook)

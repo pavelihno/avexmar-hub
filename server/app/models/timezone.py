@@ -54,24 +54,11 @@ class Timezone(BaseModel):
             required_fields=['name'],
         )
 
-        timezones = []
-        error_rows = []
+        def process_row(row, row_session: Session):
+            return cls.create(
+                row_session,
+                name=str(row.get('name')),
+                commit=False,
+            )
 
-        for row in rows:
-            if not row.get('error'):
-                try:
-                    tz = cls.create(
-                        session,
-                        name=str(row.get('name')),
-                        commit=False,
-                    )
-                    timezones.append(tz)
-                except Exception as e:
-                    row['error'] = str(e)
-
-            if row.get('error'):
-                error_rows.append(row)
-
-        session.commit()
-
-        return timezones, error_rows
+        return cls._process_upload_rows(rows, process_row, session=session)

@@ -47,12 +47,12 @@ function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
-                        <AuthModalProvider>
-                                {routing}
-                                <AuthModal />
-                        </AuthModalProvider>
-                </ThemeProvider>
-        );
+			<AuthModalProvider>
+				{routing}
+				<AuthModal />
+			</AuthModalProvider>
+		</ThemeProvider>
+	);
 }
 
 export default App;

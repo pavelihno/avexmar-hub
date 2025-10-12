@@ -99,3 +99,37 @@ export const createAdminManager = (fields, options = {}) => {
 		),
 	};
 };
+
+export const validateFormFields = (formFields, values) => {
+	const errors = {};
+
+	formFields.forEach((field) => {
+		if (field.validate) {
+			const error = field.validate(values[field.name]);
+			if (error) {
+				errors[field.name] = error;
+			}
+		}
+	});
+
+	return errors;
+};
+
+export const extractErrorMessage = (error) => {
+	if (!error) return '';
+	if (typeof error === 'string') return error;
+	if (Array.isArray(error)) {
+		return error
+			.map((item) => extractErrorMessage(item))
+			.filter(Boolean)
+			.join(', ');
+	}
+	if (typeof error === 'object') {
+		if (error.message) return error.message;
+		return Object.values(error)
+			.map((value) => extractErrorMessage(value))
+			.filter(Boolean)
+			.join(', ');
+	}
+	return String(error);
+};

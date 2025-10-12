@@ -3,7 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchTariffs, createTariff, updateTariff, deleteTariff, deleteAllTariffs } from '../../redux/actions/tariff';
+import {
+	fetchTariffs,
+	createTariff,
+	updateTariff,
+	deleteTariff,
+	deleteAllTariffs,
+	deleteFilteredTariffs,
+} from '../../redux/actions/tariff';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatNumber } from '../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
@@ -121,6 +128,11 @@ const TariffManagement = () => {
 		await dispatch(deleteAllTariffs()).unwrap();
 		dispatch(fetchTariffs());
 	};
+	const handleDeleteFilteredTariffs = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredTariffs(ids)).unwrap();
+		dispatch(fetchTariffs());
+	};
 
 	const formattedTariffs = tariffs.map(adminManager.toUiFormat);
 
@@ -133,6 +145,7 @@ const TariffManagement = () => {
 			onEdit={handleEditTariff}
 			onDelete={handleDeleteTariff}
 			onDeleteAll={handleDeleteAllTariffs}
+			onDeleteFiltered={handleDeleteFilteredTariffs}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.tariffs.add_button}
 			isLoading={isLoading}

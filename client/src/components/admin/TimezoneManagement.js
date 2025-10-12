@@ -9,6 +9,7 @@ import {
 	updateTimezone,
 	deleteTimezone,
 	deleteAllTimezones,
+	deleteFilteredTimezones,
 } from '../../redux/actions/timezone';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
@@ -46,6 +47,11 @@ const TimezoneManagement = () => {
 		await dispatch(deleteAllTimezones()).unwrap();
 		dispatch(fetchTimezones());
 	};
+	const handleDeleteFilteredTimezones = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredTimezones(ids)).unwrap();
+		dispatch(fetchTimezones());
+	};
 
 	const handleUpload = async (file) => {
 		const res = await uploadFile('timezones', file);
@@ -68,6 +74,7 @@ const TimezoneManagement = () => {
 			onEdit={handleEditTimezone}
 			onDelete={handleDeleteTimezone}
 			onDeleteAll={handleDeleteAllTimezones}
+			onDeleteFiltered={handleDeleteFilteredTimezones}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.timezones.add_button}
 			uploadButtonText={UI_LABELS.ADMIN.modules.timezones.upload_button}

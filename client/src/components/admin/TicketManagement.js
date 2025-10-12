@@ -3,7 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from '../../components/admin/AdminDataTable';
 
-import { fetchTickets, createTicket, updateTicket, deleteTicket, deleteAllTickets } from '../../redux/actions/ticket';
+import {
+	fetchTickets,
+	createTicket,
+	updateTicket,
+	deleteTicket,
+	deleteAllTickets,
+	deleteFilteredTickets,
+} from '../../redux/actions/ticket';
 import { fetchFlights } from '../../redux/actions/flight';
 import { fetchBookings } from '../../redux/actions/booking';
 import { fetchPassengers } from '../../redux/actions/passenger';
@@ -97,6 +104,11 @@ const TicketManagement = () => {
 		await dispatch(deleteAllTickets()).unwrap();
 		dispatch(fetchTickets());
 	};
+	const handleDeleteFilteredTickets = async (ids) => {
+		if (!ids?.length) return;
+		await dispatch(deleteFilteredTickets(ids)).unwrap();
+		dispatch(fetchTickets());
+	};
 
 	const formattedTickets = tickets.map(adminManager.toUiFormat);
 
@@ -109,6 +121,7 @@ const TicketManagement = () => {
 			onEdit={handleEditTicket}
 			onDelete={handleDeleteTicket}
 			onDeleteAll={handleDeleteAllTickets}
+			onDeleteFiltered={handleDeleteFilteredTickets}
 			renderForm={adminManager.renderForm}
 			addButtonText={UI_LABELS.ADMIN.modules.tickets.add_button}
 			isLoading={isLoading || flightsLoading || bookingsLoading || passengersLoading || discountsLoading}
