@@ -68,21 +68,6 @@ class StorageManager:
 
         return full_path
 
-    def get_file_path(self, filename: str, subfolder_name: Optional[str] = None) -> Tuple[str, str]:
-        """Build and return (directory, filename) for a given file"""
-        if not filename:
-            raise ValueError('Filename is required')
-
-        parts = [
-            self.folder_name, 
-            subfolder_name,
-            filename
-        ] if subfolder_name else [self.folder_name, filename]
-        path = '/'.join(part.strip('/') for part in parts if part)
-        full_path = self.resolve_path(path)
-
-        return str(full_path.parent), full_path.name
-
     def get_file_url(self, filename: str, subfolder_name: Optional[str] = None) -> str:
         """Build a full URL for a file given its folder, subfolder, and filename"""
         if not filename:

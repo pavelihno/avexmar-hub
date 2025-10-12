@@ -15,6 +15,17 @@ services:
       - app_storage:/app/storage
       - app_logs:/app/logs
 
+  storage-cdn:
+    container_name: storage-cdn
+    image: nginx:1.28-alpine
+    ports:
+      - 8080:80
+    depends_on:
+      - server-app
+    volumes:
+      - ./storage-cdn/storage.conf:/etc/nginx/nginx.conf:ro
+      - app_storage:/var/www/storage:ro
+
   client-app:
     container_name: client-app
     build: ./client
