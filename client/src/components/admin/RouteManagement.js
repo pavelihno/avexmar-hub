@@ -31,7 +31,7 @@ const RouteManagement = () => {
 			? []
 			: airports.map((airport) => ({
 					value: airport.id,
-					label: `${airport.name} (${airport.iata_code}) - ${airport.city_code}`,
+					label: `${airport.name} (${airport.iata_code}) - ${airport.city_name}`,
 			  }));
 
 	const getAirportLabelById = (id) => {

@@ -16,7 +16,6 @@ import { fetchUsers } from '../../redux/actions/user';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatDate, validateDate } from '../utils';
 import {
-	DATE_API_FORMAT,
 	ENUM_LABELS,
 	FIELD_LABELS,
 	UI_LABELS,

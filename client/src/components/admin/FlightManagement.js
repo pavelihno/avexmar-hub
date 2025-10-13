@@ -34,7 +34,6 @@ import { fetchTariffs } from '../../redux/actions/tariff';
 import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirlines } from '../../redux/actions/airline';
-import { fetchAirports } from '../../redux/actions/airport';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES, formatNumber } from '../utils';
 import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
@@ -48,7 +47,6 @@ const FlightManagement = () => {
 	const { aircrafts, isLoading: aircraftsLoading } = useSelector((state) => state.aircrafts);
 	const { tariffs, isLoading: tariffsLoading } = useSelector((state) => state.tariffs);
 	const { flightTariffs, isLoading: flightTariffsLoading } = useSelector((state) => state.flightTariffs);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const theme = useTheme();
 
@@ -64,15 +62,7 @@ const FlightManagement = () => {
 		dispatch(fetchAircrafts());
 		dispatch(fetchTariffs());
 		dispatch(fetchFlightTariffs());
-		dispatch(fetchAirports());
 	}, [dispatch]);
-
-	const getAirportById = (id) => {
-		if (airportsLoading || !Array.isArray(airports)) {
-			return null;
-		}
-		return airports.find((airport) => airport.id === id);
-	};
 
 	const getTariffById = (id) => {
 		if (tariffsLoading || !Array.isArray(tariffs)) {
@@ -82,11 +72,11 @@ const FlightManagement = () => {
 	};
 
 	const routeOptions =
-		routesLoading || airportsLoading || !Array.isArray(routes) || !Array.isArray(airports)
+		routesLoading || !Array.isArray(routes)
 			? []
 			: routes.map((route) => {
-					const origin = getAirportById(route.origin_airport_id);
-					const dest = getAirportById(route.destination_airport_id);
+					const origin = route.origin_airport;
+					const dest = route.destination_airport;
 
 					return {
 						value: route.id,
@@ -448,8 +438,7 @@ const FlightManagement = () => {
 					airlinesLoading ||
 					aircraftsLoading ||
 					tariffsLoading ||
-					flightTariffsLoading ||
-					airportsLoading
+					flightTariffsLoading
 				}
 				error={errors}
 			/>
