@@ -31,7 +31,7 @@ def search_airports():
         .order_by(Airport.name.asc())
         .all()
     )
-    return jsonify([airport.to_dict() for airport in airports])
+    return jsonify([airport.to_dict() for airport in airports]), 200
 
 
 def __get_available_tariffs(flight_id):
@@ -250,11 +250,11 @@ def search_flights(is_nearby=False):
 
     if not is_nearby:
         if not is_outbound_found:
-            return jsonify([])
+            return jsonify([]), 200
         elif has_return and not is_return_found:
-            return jsonify([])
+            return jsonify([]), 200
 
-    return jsonify(outbound_flights + return_flights)
+    return jsonify(outbound_flights + return_flights), 200
 
 
 def search_nearby_flights():
@@ -263,7 +263,7 @@ def search_nearby_flights():
 
 def search_flight_tariffs(flight_id):
     tariffs = __get_available_tariffs(flight_id)
-    return jsonify(tariffs)
+    return jsonify(tariffs), 200
 
 
 def schedule_flights():
@@ -288,7 +288,7 @@ def schedule_flights():
         direction='return'
     )
 
-    return jsonify(flights)
+    return jsonify(flights), 200
 
 
 def calculate_price():
@@ -306,4 +306,4 @@ def calculate_price():
         return_tariff_id,
         passengers,
     )
-    return jsonify(result)
+    return jsonify(result), 200

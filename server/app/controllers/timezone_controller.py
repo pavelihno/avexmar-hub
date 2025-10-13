@@ -9,7 +9,7 @@ from app.utils.xlsx import is_xlsx_file, create_xlsx
 @admin_required
 def get_timezones(current_user):
     timezones = Timezone.get_all()
-    return jsonify([tz.to_dict() for tz in timezones])
+    return jsonify([tz.to_dict() for tz in timezones]), 200
 
 
 @admin_required
@@ -29,13 +29,13 @@ def create_timezone(current_user):
 def update_timezone(current_user, timezone_id):
     body = request.json
     updated = Timezone.update(timezone_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_timezone(current_user, timezone_id):
     deleted = Timezone.delete_or_404(timezone_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 @admin_required
@@ -47,7 +47,7 @@ def get_timezone_template(current_user):
         as_attachment=True,
         download_name='timezones_template.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    ), 200
 
 
 @admin_required

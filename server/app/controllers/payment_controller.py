@@ -8,7 +8,7 @@ from app.middlewares.auth_middleware import admin_required
 @admin_required
 def get_payments(current_user):
     payments = Payment.get_all()
-    return jsonify([p.to_dict() for p in payments])
+    return jsonify([p.to_dict() for p in payments]), 200
 
 
 @admin_required
@@ -28,10 +28,10 @@ def create_payment(current_user):
 def update_payment(current_user, payment_id):
     body = request.json
     updated = Payment.update(payment_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_payment(current_user, payment_id):
     deleted = Payment.delete_or_404(payment_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

@@ -8,7 +8,7 @@ from app.utils.xlsx import create_xlsx, is_xlsx_file
 
 def get_countries():
     countries = Country.get_all()
-    return jsonify([c.to_dict() for c in countries])
+    return jsonify([c.to_dict() for c in countries]), 200
 
 
 def get_country(country_id):
@@ -27,13 +27,13 @@ def create_country(current_user):
 def update_country(current_user, country_id):
     body = request.json
     updated = Country.update(country_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_country(current_user, country_id):
     deleted = Country.delete_or_404(country_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 @admin_required
@@ -45,7 +45,7 @@ def get_country_template(current_user):
         as_attachment=True,
         download_name='countries_template.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    ), 200
 
 
 @admin_required

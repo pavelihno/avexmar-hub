@@ -7,7 +7,7 @@ from app.middlewares.auth_middleware import admin_required
 
 def get_routes():
     routes = Route.get_all()
-    return jsonify([r.to_dict() for r in routes])
+    return jsonify([r.to_dict() for r in routes]), 200
 
 
 def get_route(route_id):
@@ -26,10 +26,10 @@ def create_route(current_user):
 def update_route(current_user, route_id):
     body = request.json
     updated = Route.update(route_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_route(current_user, route_id):
     deleted = Route.delete_or_404(route_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

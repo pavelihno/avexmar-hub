@@ -108,7 +108,7 @@ def get_flight_passenger_export(current_user):
         as_attachment=True,
         download_name='flight_passengers.xls',
         mimetype='application/vnd.ms-excel',
-    )
+    ), 200
 
 
 @admin_required
@@ -121,7 +121,7 @@ def get_passenger_export_routes(current_user):
         }
         for r in routes
     ]
-    return jsonify({'data': data})
+    return jsonify({'data': data}), 200
 
 
 @admin_required
@@ -141,4 +141,4 @@ def get_passenger_export_flights(current_user, route_id):
         }
         for f in flights
     ]
-    return jsonify({'data': data})
+    return jsonify({'data': data}), 200

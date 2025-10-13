@@ -31,13 +31,13 @@ def create_user(current_user):
 @admin_required
 def get_users(current_user):
     users = User.get_all()
-    return jsonify([user.to_dict() for user in users])
+    return jsonify([user.to_dict() for user in users]), 200
 
 
 @admin_required
 def get_user(current_user, user_id):
     user = User.get_or_404(user_id)
-    return jsonify(user.to_dict())
+    return jsonify(user.to_dict()), 200
 
 
 @current_user
@@ -64,19 +64,19 @@ def update_user(current_user, user_id):
 
     session.commit()
 
-    return jsonify(updated_user.to_dict())
+    return jsonify(updated_user.to_dict()), 200
 
 
 @admin_required
 def delete_user(current_user, user_id):
     deleted_user = User.delete_or_404(user_id, commit=True)
-    return jsonify(deleted_user)
+    return jsonify(deleted_user), 200
 
 
 def __set_user_activity(user_id, is_active):
     updated_user = User.update(user_id, commit=True, is_active=is_active)
     if updated_user:
-        return jsonify(updated_user.to_dict())
+        return jsonify(updated_user.to_dict()), 200
     return jsonify({'message': UserMessages.USER_NOT_FOUND}), 404
 
 
@@ -97,7 +97,7 @@ def get_user_bookings(current_user, user_id):
 
     bookings = Booking.query.filter_by(user_id=user_id).all()
     if not bookings:
-        return jsonify([])
+        return jsonify([]), 200
 
     booking_ids = [b.id for b in bookings]
 
@@ -132,7 +132,7 @@ def get_user_bookings(current_user, user_id):
         data['show_link'] = data.get('status') != BOOKING_STATUS.expired.value
         result.append(data)
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 
 @login_required
@@ -140,7 +140,7 @@ def get_user_passengers(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': UserMessages.FORBIDDEN}), 403
     passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
-    return jsonify([p.to_dict(return_children=True) for p in passengers])
+    return jsonify([p.to_dict(return_children=True) for p in passengers]), 200
 
 
 @login_required
@@ -185,7 +185,7 @@ def change_password(current_user):
         if not totp.verify(str(code)):
             return jsonify({'message': UserMessages.INVALID_OR_EXPIRED_CODE}), 400
         updated_user = User.change_password(current_user.id, password)
-        return jsonify(updated_user.to_dict())
+        return jsonify(updated_user.to_dict()), 200
 
     verification_code = totp.now()
     send_email(
@@ -195,4 +195,4 @@ def change_password(current_user):
         code=verification_code,
         expires_in_minutes=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS // 60,
     )
-    return jsonify({'message': UserMessages.VERIFICATION_CODE_SENT})
+    return jsonify({'message': UserMessages.VERIFICATION_CODE_SENT}), 200

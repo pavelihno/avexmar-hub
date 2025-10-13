@@ -271,7 +271,7 @@ def get_booking_process_pdf(current_user, public_id):
         mimetype='application/pdf',
         as_attachment=True,
         download_name=f'booking_{booking.booking_number}.pdf',
-    )
+    ), 200
 
 
 @current_user

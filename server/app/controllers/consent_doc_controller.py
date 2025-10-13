@@ -8,7 +8,7 @@ from app.utils.enum import CONSENT_DOC_TYPE
 
 def get_consent_docs():
     docs = ConsentDoc.get_all()
-    return jsonify([doc.to_dict() for doc in docs])
+    return jsonify([doc.to_dict() for doc in docs]), 200
 
 
 def get_consent_doc(doc_id):
@@ -38,10 +38,10 @@ def create_consent_doc(current_user):
 def update_consent_doc(current_user, doc_id):
     body = request.json or {}
     doc = ConsentDoc.update(doc_id, commit=True, **body)
-    return jsonify(doc.to_dict())
+    return jsonify(doc.to_dict()), 200
 
 
 @admin_required
 def delete_consent_doc(current_user, doc_id):
     deleted = ConsentDoc.delete_or_404(doc_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

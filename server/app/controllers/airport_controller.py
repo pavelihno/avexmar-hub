@@ -8,7 +8,7 @@ from app.utils.xlsx import is_xlsx_file, create_xlsx
 
 def get_airports():
     airports = Airport.get_all()
-    return jsonify([airport.to_dict() for airport in airports])
+    return jsonify([airport.to_dict() for airport in airports]), 200
 
 
 def get_airport(airport_id):
@@ -27,13 +27,13 @@ def create_airport(current_user):
 def update_airport(current_user, airport_id):
     body = request.json
     updated = Airport.update(airport_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_airport(current_user, airport_id):
     deleted = Airport.delete_or_404(airport_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 @admin_required
@@ -45,7 +45,7 @@ def get_airport_template(current_user):
         as_attachment=True,
         download_name='airports_template.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    ), 200
 
 
 @admin_required

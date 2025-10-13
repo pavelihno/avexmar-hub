@@ -13,7 +13,7 @@ from app.middlewares.auth_middleware import admin_required, login_required
 @admin_required
 def get_bookings(current_user):
     bookings = Booking.get_all()
-    return jsonify([booking.to_dict() for booking in bookings])
+    return jsonify([booking.to_dict() for booking in bookings]), 200
 
 
 @login_required
@@ -37,14 +37,14 @@ def update_booking(current_user, booking_id):
     session = db.session
     body = request.json
     updated = Booking.update(booking_id, session=session, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_booking(current_user, booking_id):
     session = db.session
     deleted = Booking.delete_or_404(booking_id, session=session, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 def search_booking():

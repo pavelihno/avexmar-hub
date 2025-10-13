@@ -6,12 +6,12 @@ from app.middlewares.auth_middleware import admin_required
 
 def get_fees():
     fees = Fee.get_all()
-    return jsonify([f.to_dict() for f in fees])
+    return jsonify([f.to_dict() for f in fees]), 200
 
 
 def get_fee(fee_id):
     fee = Fee.get_or_404(fee_id)
-    return jsonify(fee.to_dict())
+    return jsonify(fee.to_dict()), 200
 
 
 @admin_required
@@ -25,10 +25,10 @@ def create_fee(current_user):
 def update_fee(current_user, fee_id):
     data = request.get_json()
     updated = Fee.update(fee_id, commit=True, **data)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_fee(current_user, fee_id):
     deleted = Fee.delete_or_404(fee_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

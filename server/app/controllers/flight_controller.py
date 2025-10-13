@@ -8,7 +8,7 @@ from app.utils.xlsx import create_xlsx, is_xlsx_file
 
 def get_flights():
     flights = Flight.get_all()
-    return jsonify([flight.to_dict() for flight in flights])
+    return jsonify([flight.to_dict() for flight in flights]), 200
 
 
 def get_flight(flight_id):
@@ -27,13 +27,13 @@ def create_flight(current_user):
 def update_flight(current_user, flight_id):
     body = request.json
     updated = Flight.update(flight_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_flight(current_user, flight_id):
     deleted = Flight.delete_or_404(flight_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 @admin_required
@@ -45,7 +45,7 @@ def get_flight_template(current_user):
         as_attachment=True,
         download_name='flights_template.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    ), 200
 
 
 @admin_required

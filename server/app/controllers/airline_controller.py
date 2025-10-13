@@ -9,7 +9,7 @@ from app.utils.xlsx import is_xlsx_file, create_xlsx
 
 def get_airlines():
     airlines = Airline.get_all()
-    return jsonify([a.to_dict() for a in airlines])
+    return jsonify([a.to_dict() for a in airlines]), 200
 
 def get_airline(airline_id):
     airline = Airline.get_or_404(airline_id)
@@ -27,13 +27,13 @@ def create_airline(current_user):
 def update_airline(current_user, airline_id):
     body = request.json
     updated = Airline.update(airline_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_airline(current_user, airline_id):
     deleted = Airline.delete_or_404(airline_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200
 
 
 @admin_required
@@ -45,7 +45,7 @@ def get_airline_template(current_user):
         as_attachment=True,
         download_name='airlines_template.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    ), 200
 
 
 @admin_required

@@ -53,7 +53,7 @@ def clear_table(current_user, table_name: str):
 
     deleted = model.delete_all(commit=True)
 
-    return jsonify({'deleted': deleted})
+    return jsonify({'deleted': deleted}), 200
 
 
 @dev_tool
@@ -70,4 +70,4 @@ def clear_filtered_table(current_user, table_name: str):
     except ModelValidationError as exc:
         return jsonify(exc.errors), 400
 
-    return jsonify({'deleted': deleted})
+    return jsonify({'deleted': deleted}), 200
