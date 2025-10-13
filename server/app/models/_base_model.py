@@ -178,7 +178,7 @@ class BaseModel(db.Model):
                 query = query.filter(cls.id != instance_id)
             if query.one_or_none() is not None:
                 for col in columns:
-                    errors[col] = 'must be unique'
+                    errors[col] = ModelMessages.MUST_BE_UNIQUE
         return errors
 
     @classmethod
@@ -200,14 +200,14 @@ class BaseModel(db.Model):
                     None,
                 )
                 if target_cls is not None and session.get(target_cls, value) is None:
-                    raise NotFoundError(f"{target_cls.__name__} not found")
+                    raise NotFoundError(ModelMessages.not_found(target_cls.__name__))
 
     @classmethod
     def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
-            raise NotFoundError(f"{cls.__name__} not found")
+            raise NotFoundError(ModelMessages.not_found(cls.__name__))
         return instance
 
     @classmethod
