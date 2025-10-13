@@ -5,7 +5,7 @@ import { Box, Button, Chip, IconButton, Paper, Stack, Typography } from '@mui/ma
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { UI_LABELS } from '../../constants';
+import { HOME } from '../../constants';
 import { formatDuration } from '../utils';
 import { fetchCarouselSlides } from '../../redux/actions/carouselSlide';
 
@@ -63,7 +63,7 @@ export function transformSlides(items = [], { includeInactive = false } = {}) {
 					originLabel,
 					destinationLabel,
 					summary: `${originLabel} → ${destinationLabel}`,
-					ctaText: UI_LABELS.HOME.poster_carousel.schedule_cta(originLabel, destinationLabel),
+					ctaText: HOME.poster_carousel.schedule_cta(originLabel, destinationLabel),
 					path: `/schedule?from=${encodeURIComponent(originCode)}&to=${encodeURIComponent(destinationCode)}`,
 				};
 			}
@@ -75,7 +75,7 @@ export function transformSlides(items = [], { includeInactive = false } = {}) {
 				description: source.description || '',
 				image: image,
 				alt: source.alt || '',
-				priceText: UI_LABELS.HOME.poster_carousel.price_from(metrics.price_from, metrics.currency),
+				priceText: HOME.poster_carousel.price_from(metrics.price_from, metrics.currency),
 				durationText: formatDuration(metrics.duration_minutes),
 				routeInfo,
 			};
@@ -400,7 +400,7 @@ const PosterCarousel = ({
 									key={item.id}
 									onClick={() => handleChange(i)}
 									role='button'
-									aria-label={`Перейти к слайду ${i + 1}`}
+									aria-label={HOME.poster_carousel.go_to_slide(i + 1)}
 									tabIndex={0}
 									onKeyDown={(event) => {
 										if (event.key === 'Enter' || event.key === ' ') {

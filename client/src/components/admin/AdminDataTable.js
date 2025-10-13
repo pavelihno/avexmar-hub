@@ -38,7 +38,7 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
-import { UI_LABELS, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
+import { ADMIN, BUTTONS, SUCCESS, WARNINGS, ERRORS, MESSAGES, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
 import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate, parseDate } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 import { useTheme, alpha } from '@mui/material/styles';
@@ -123,12 +123,12 @@ const AdminDataTable = ({
 				link.click();
 				link.remove();
 
-				showNotification(UI_LABELS.WARNINGS.upload, 'warning');
+				showNotification(WARNINGS.upload, 'warning');
 			} else {
-				showNotification(UI_LABELS.SUCCESS.upload, 'success');
+				showNotification(SUCCESS.upload, 'success');
 			}
 		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.save}: ${error.message}`, 'error');
+			showNotification(`${ERRORS.save}: ${error.message}`, 'error');
 		}
 		setUploading(false);
 	};
@@ -222,13 +222,13 @@ const AdminDataTable = ({
 
 			result
 				.then(() => {
-					showNotification(UI_LABELS.SUCCESS.delete, 'success');
+					showNotification(SUCCESS.delete, 'success');
 				})
 				.catch((error) => {
-					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+					showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 				});
 		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+			showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 		}
 	};
 
@@ -237,13 +237,13 @@ const AdminDataTable = ({
 			const result = onDeleteAll();
 			result
 				.then(() => {
-					showNotification(UI_LABELS.SUCCESS.delete_all, 'success');
+					showNotification(SUCCESS.delete_all, 'success');
 				})
 				.catch((error) => {
-					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+					showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 				});
 		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+			showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 		}
 	};
 
@@ -253,13 +253,13 @@ const AdminDataTable = ({
 			const result = onDeleteFiltered(ids);
 			result
 				.then(() => {
-					showNotification(UI_LABELS.SUCCESS.delete_filtered || UI_LABELS.SUCCESS.delete, 'success');
+					showNotification(SUCCESS.delete_filtered || SUCCESS.delete, 'success');
 				})
 				.catch((error) => {
-					showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+					showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 				});
 		} catch (error) {
-			showNotification(`${UI_LABELS.ERRORS.delete}: ${error.message}`, 'error');
+			showNotification(`${ERRORS.delete}: ${error.message}`, 'error');
 		}
 	};
 
@@ -467,7 +467,7 @@ const AdminDataTable = ({
 								minHeight: { xs: 40, md: 28 },
 							}}
 						>
-							{UI_LABELS.BUTTONS.delete_all}
+							{BUTTONS.delete_all}
 						</Button>
 					)}
 					{onDeleteFiltered && (
@@ -488,7 +488,7 @@ const AdminDataTable = ({
 								minHeight: { xs: 40, md: 28 },
 							}}
 						>
-							{UI_LABELS.BUTTONS.delete_filtered}
+							{BUTTONS.delete_filtered}
 						</Button>
 					)}
 				</Box>
@@ -517,7 +517,7 @@ const AdminDataTable = ({
 									width: { xs: '100%', sm: 'auto' },
 								}}
 							>
-								{showFilters ? UI_LABELS.ADMIN.filter.hide : UI_LABELS.ADMIN.filter.show}
+								{showFilters ? ADMIN.filter.hide : ADMIN.filter.show}
 							</Button>
 						</Box>
 
@@ -546,10 +546,7 @@ const AdminDataTable = ({
 												options.sort((a, b) => a.label.localeCompare(b.label));
 												preparedColumn = {
 													...col,
-													options: [
-														{ value: '', label: UI_LABELS.ADMIN.filter.all },
-														...options,
-													],
+													options: [{ value: '', label: ADMIN.filter.all }, ...options],
 												};
 											}
 											const renderField = createFieldRenderer(preparedColumn);
@@ -594,7 +591,7 @@ const AdminDataTable = ({
 										minHeight: 40,
 									}}
 								>
-									{UI_LABELS.ADMIN.filter.clear}
+									{ADMIN.filter.clear}
 								</Button>
 							</Paper>
 						)}
@@ -634,7 +631,7 @@ const AdminDataTable = ({
 											</TableCell>
 										))}
 										<TableCell align='right' sx={{ fontWeight: 'bold' }}>
-											{UI_LABELS.ADMIN.actions}
+											{ADMIN.actions}
 										</TableCell>
 									</TableRow>
 									{showFilters && (
@@ -661,10 +658,7 @@ const AdminDataTable = ({
 													options.sort((a, b) => a.label.localeCompare(b.label));
 													col = {
 														...col,
-														options: [
-															{ value: '', label: UI_LABELS.ADMIN.filter.all },
-															...options,
-														],
+														options: [{ value: '', label: ADMIN.filter.all }, ...options],
 													};
 												}
 
@@ -734,7 +728,7 @@ const AdminDataTable = ({
 														py: 0.5,
 													}}
 												>
-													{UI_LABELS.ADMIN.filter.clear}
+													{ADMIN.filter.clear}
 												</Button>
 											</TableCell>
 										</TableRow>
@@ -782,7 +776,7 @@ const AdminDataTable = ({
 							{paginatedData.length === 0 ? (
 								<Paper variant='outlined' sx={{ p: 2, textAlign: 'center', borderRadius: 2 }}>
 									<Typography variant='body2' color='text.secondary'>
-										Нет записей
+										{ADMIN.empty.no_records}
 									</Typography>
 								</Paper>
 							) : (
@@ -862,8 +856,8 @@ const AdminDataTable = ({
 								setPage(0);
 							}}
 							rowsPerPageOptions={[10, 25, 50, 100]}
-							labelRowsPerPage={UI_LABELS.BUTTONS.pagination.rows_per_page}
-							labelDisplayedRows={UI_LABELS.BUTTONS.pagination.displayed_rows}
+							labelRowsPerPage={BUTTONS.pagination.rows_per_page}
+							labelDisplayedRows={BUTTONS.pagination.displayed_rows}
 							sx={{
 								mt: 1,
 								'& .MuiTablePagination-toolbar': {
@@ -909,10 +903,10 @@ const AdminDataTable = ({
 
 				{/* Delete dialog */}
 				<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
-					<DialogTitle id='delete-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogTitle id='delete-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
 
 					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
-						<Typography id='delete-dialog-description'>{UI_LABELS.MESSAGES.confirm_delete}</Typography>
+						<Typography id='delete-dialog-description'>{MESSAGES.confirm_delete}</Typography>
 					</DialogContent>
 					<DialogActions
 						sx={{
@@ -928,7 +922,7 @@ const AdminDataTable = ({
 							color='primary'
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.cancel}
+							{BUTTONS.cancel}
 						</Button>
 						<Button
 							onClick={confirmDelete}
@@ -936,18 +930,16 @@ const AdminDataTable = ({
 							variant='contained'
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.delete}
+							{BUTTONS.delete}
 						</Button>
 					</DialogActions>
 				</Dialog>
 
 				{/* Delete all dialog */}
 				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog} fullScreen={isSmallDown}>
-					<DialogTitle id='delete-all-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogTitle id='delete-all-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
 					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
-						<Typography id='delete-all-dialog-description'>
-							{UI_LABELS.MESSAGES.confirm_delete_all}
-						</Typography>
+						<Typography id='delete-all-dialog-description'>{MESSAGES.confirm_delete_all}</Typography>
 					</DialogContent>
 					<DialogActions
 						sx={{
@@ -963,7 +955,7 @@ const AdminDataTable = ({
 							color='primary'
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.cancel}
+							{BUTTONS.cancel}
 						</Button>
 						<Button
 							onClick={confirmDeleteAll}
@@ -971,17 +963,17 @@ const AdminDataTable = ({
 							variant='contained'
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.delete}
+							{BUTTONS.delete}
 						</Button>
 					</DialogActions>
 				</Dialog>
 
 				{/* Delete filtered dialog */}
 				<Dialog open={deleteFilteredDialog} onClose={handleCloseDeleteFilteredDialog} fullScreen={isSmallDown}>
-					<DialogTitle id='delete-filtered-dialog-title'>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+					<DialogTitle id='delete-filtered-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
 					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Typography id='delete-filtered-dialog-description'>
-							{UI_LABELS.MESSAGES.confirm_delete_filtered}
+							{MESSAGES.confirm_delete_filtered}
 						</Typography>
 					</DialogContent>
 					<DialogActions
@@ -998,7 +990,7 @@ const AdminDataTable = ({
 							color='primary'
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.cancel}
+							{BUTTONS.cancel}
 						</Button>
 						<Button
 							onClick={() => confirmDeleteFiltered(filteredIds)}
@@ -1007,14 +999,14 @@ const AdminDataTable = ({
 							disabled={!filteredIds.length}
 							sx={{ width: { xs: '100%', sm: 'auto' } }}
 						>
-							{UI_LABELS.BUTTONS.delete}
+							{BUTTONS.delete}
 						</Button>
 					</DialogActions>
 				</Dialog>
 
 				{/* Upload dialog */}
 				<Dialog open={uploadDialog} onClose={closeUploadDialog} fullScreen={isSmallDown}>
-					<DialogTitle>{UI_LABELS.ADMIN.upload.title}</DialogTitle>
+					<DialogTitle>{ADMIN.upload.title}</DialogTitle>
 					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
 						<Box
 							onDragOver={(e) => e.preventDefault()}
@@ -1030,9 +1022,9 @@ const AdminDataTable = ({
 								textAlign: 'center',
 							}}
 						>
-							<Typography sx={{ mb: 2 }}>{UI_LABELS.ADMIN.upload.drag}</Typography>
+							<Typography sx={{ mb: 2 }}>{ADMIN.upload.drag}</Typography>
 							<Button variant='outlined' onClick={() => fileInputRef.current?.click()}>
-								{UI_LABELS.ADMIN.upload.select}
+								{ADMIN.upload.select}
 							</Button>
 							<input
 								type='file'
@@ -1052,7 +1044,7 @@ const AdminDataTable = ({
 						}}
 					>
 						<Button onClick={closeUploadDialog} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-							{UI_LABELS.BUTTONS.cancel}
+							{BUTTONS.cancel}
 						</Button>
 					</DialogActions>
 				</Dialog>

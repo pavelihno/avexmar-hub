@@ -114,7 +114,7 @@ const AirportManagement = () => {
 		timezoneId: {
 			key: 'timezoneId',
 			apiKey: 'timezone_id',
-			label: FIELD_LABELS.AIRPORT.timezone_id || 'Часовой пояс',
+			label: FIELD_LABELS.AIRPORT.timezone_id,
 			type: FIELD_TYPES.SELECT,
 			options: timezoneOptions,
 			formatter: (value) => {
