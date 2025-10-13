@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Box,
@@ -22,7 +22,9 @@ import Base from '../Base';
 
 import { register } from '../../redux/actions/auth';
 import { useAuthModal } from '../../context/AuthModalContext';
-import { FIELD_LABELS, UI_LABELS } from '../../constants';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+import PasswordStrengthIndicator from '../shared/PasswordStrengthIndicator';
+import { evaluatePasswordStrength } from '../utils';
 
 const Register = ({ isModal = false }) => {
 	const dispatch = useDispatch();
@@ -39,6 +41,8 @@ const Register = ({ isModal = false }) => {
 	const [successMessage, setSuccessMessage] = useState('');
 
 	const { email, password, password2 } = formData;
+	const passwordStrength = useMemo(() => evaluatePasswordStrength(password), [password]);
+	const isWeakPassword = password.length > 0 && !passwordStrength.isAcceptable;
 
 	const onChange = (e) => {
 		const { name, value } = e.target;
@@ -46,10 +50,25 @@ const Register = ({ isModal = false }) => {
 			...formData,
 			[name]: name === 'email' ? value.toLowerCase() : value,
 		});
+		setErrors((prev) => {
+			if (prev && (prev[name] || prev.password)) {
+				const next = { ...prev, [name]: '', password: name === 'password' ? '' : prev.password };
+				if (!Object.values(next).some(Boolean)) {
+					return {};
+				}
+				return next;
+			}
+			return prev;
+		});
 	};
 
 	const onSubmit = async (e) => {
 		e.preventDefault();
+
+		if (!passwordStrength.isAcceptable) {
+			setErrors({ password: VALIDATION_MESSAGES.USER.password.WEAK });
+			return;
+		}
 
 		if (password !== password2) {
 			setErrors({ password2: UI_LABELS.PROFILE.passwords_dont_match });
@@ -152,8 +171,14 @@ const Register = ({ isModal = false }) => {
 							autoComplete='new-password'
 							value={password}
 							onChange={onChange}
-							error={!!errors.password}
-							helperText={errors.email ? errors.email : ''}
+							error={isWeakPassword || !!errors.password}
+							helperText={
+								errors.password
+									? errors.password
+									: isWeakPassword
+									? VALIDATION_MESSAGES.USER.password.WEAK
+									: ''
+							}
 							disabled={isLoading}
 						/>
 						<TextField
@@ -168,11 +193,12 @@ const Register = ({ isModal = false }) => {
 							value={password2}
 							onChange={onChange}
 							error={!!errors.password2}
-							helperText={errors.email ? errors.email : ''}
+							helperText={errors.password2 ? errors.password2 : ''}
 							disabled={isLoading}
 						/>
+						<PasswordStrengthIndicator password={password} />
 						<Divider sx={{ my: 1 }} />
-						<Button type='submit' fullWidth variant='contained' disabled={isLoading}>
+						<Button type='submit' fullWidth variant='contained' disabled={isLoading || isWeakPassword}>
 							{isLoading ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.register}
 						</Button>
 					</Box>
