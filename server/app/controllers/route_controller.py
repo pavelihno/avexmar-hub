@@ -7,12 +7,12 @@ from app.middlewares.auth_middleware import admin_required
 
 def get_routes():
     routes = Route.get_all()
-    return jsonify([r.to_dict() for r in routes]), 200
+    return jsonify([r.to_dict(return_children=True) for r in routes]), 200
 
 
 def get_route(route_id):
     route = Route.get_or_404(route_id)
-    return jsonify(route.to_dict()), 200
+    return jsonify(route.to_dict(return_children=True)), 200
 
 
 @admin_required

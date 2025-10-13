@@ -43,7 +43,6 @@ import {
 	uploadCarouselSlideImage,
 } from '../../redux/actions/carouselSlide';
 import { fetchRoutes } from '../../redux/actions/route';
-import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_LABELS, ADMIN, BUTTONS, SUCCESS, ERRORS, HOME, MESSAGES, VALIDATION_MESSAGES } from '../../constants';
 import { FIELD_TYPES, DragAndDropUploadField } from '../utils';
 import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
@@ -70,7 +69,6 @@ const CarouselSlideManagement = () => {
 
 	const { carouselSlides, isLoading: slidesLoading } = useSelector((state) => state.carouselSlides);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const [localSlides, setLocalSlides] = useState([]);
 	const [formMode, setFormMode] = useState('create');
@@ -110,7 +108,6 @@ const CarouselSlideManagement = () => {
 	useEffect(() => {
 		dispatch(fetchCarouselSlides());
 		dispatch(fetchRoutes());
-		dispatch(fetchAirports());
 	}, [dispatch]);
 
 	useEffect(() => () => clearCloseTimer(), []);
@@ -161,15 +158,7 @@ const CarouselSlideManagement = () => {
 		[imagePreview]
 	);
 
-	const airportsById = {};
-	(airports || []).forEach((airport) => {
-		if (airport && airport.id != null) {
-			airportsById[airport.id] = airport;
-		}
-	});
-
-	const formatAirportLabel = (airportId) => {
-		const airport = airportId ? airportsById[airportId] : null;
+	const formatAirportLabel = (airport) => {
 		if (!airport) return '';
 
 		const parts = [];
@@ -196,8 +185,8 @@ const CarouselSlideManagement = () => {
 		const route = routesById[routeId];
 		if (!route) return ADMIN.carousel_slides.no_route_option;
 
-		const from = formatAirportLabel(route.origin_airport_id);
-		const to = formatAirportLabel(route.destination_airport_id);
+		const from = formatAirportLabel(route.origin_airport);
+		const to = formatAirportLabel(route.destination_airport);
 
 		return `${from} → ${to}`;
 	};
