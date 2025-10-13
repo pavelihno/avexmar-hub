@@ -1,5 +1,6 @@
 from flask import request, jsonify
 
+from app.constants.messages import ConsentMessages
 from app.models.consent import ConsentDoc
 from app.middlewares.auth_middleware import admin_required
 from app.utils.enum import CONSENT_DOC_TYPE
@@ -19,7 +20,7 @@ def get_latest_consent_doc(doc_type):
     try:
         doc_enum = CONSENT_DOC_TYPE(doc_type)
     except ValueError:
-        return jsonify({'message': 'invalid type'}), 400
+        return jsonify({'message': ConsentMessages.INVALID_TYPE}), 400
 
     doc = ConsentDoc.get_latest(doc_enum)
 

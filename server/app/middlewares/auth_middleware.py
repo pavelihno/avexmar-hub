@@ -4,6 +4,7 @@ from flask import request, jsonify
 from jwt import InvalidTokenError
 
 from app.config import Config
+from app.constants.messages import ErrorMessages
 from app.models.user import User
 from app.utils.jwt import verifyJWT
 from app.utils.enum import USER_ROLE
@@ -41,10 +42,10 @@ def login_required(f):
     @wraps(f)
     def decorated(current_user, *args, **kwargs):
         if current_user is None:
-            return jsonify({'message': 'Authentication failed'}), 401
+            return jsonify({'message': ErrorMessages.AUTHENTICATION_FAILED}), 401
 
         if not current_user.is_active:
-            return jsonify({'message': 'Authentication failed'}), 403
+            return jsonify({'message': ErrorMessages.AUTHENTICATION_FAILED}), 403
 
         return f(current_user, *args, **kwargs)
 
@@ -57,7 +58,7 @@ def admin_required(f):
     def decorated(current_user, *args, **kwargs):
 
         if current_user.role != USER_ROLE.admin:
-            return jsonify({'message': 'Access denied'}), 403
+            return jsonify({'message': ErrorMessages.ACCESS_DENIED}), 403
 
         return f(current_user, *args, **kwargs)
 
@@ -69,7 +70,7 @@ def dev_tool(f):
     @wraps(f)
     def decorated(current_user, *args, **kwargs):
         if Config.APP_ENV not in ('dev', 'test'):
-            return jsonify({'message': 'Operation not permitted'}), 403
+            return jsonify({'message': ErrorMessages.OPERATION_NOT_PERMITTED}), 403
         return f(current_user, *args, **kwargs)
 
     return admin_required(decorated)

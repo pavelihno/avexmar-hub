@@ -5,6 +5,7 @@ from sqlalchemy import inspect, Enum as SAEnum
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.constants.messages import ModelMessages
 from app.database import db
 
 
@@ -339,13 +340,13 @@ class BaseModel(db.Model):
     ) -> int:
         session = session or db.session
         if not isinstance(ids, IterableABC) or isinstance(ids, (str, bytes)):
-            raise ModelValidationError({'message': 'List of ids is required'})
+            raise ModelValidationError({'message': ModelMessages.LIST_OF_IDS_REQUIRED})
         try:
             cleaned_ids = {int(_id) for _id in ids if _id is not None}
         except (TypeError, ValueError):
-            raise ModelValidationError({'message': 'Ids must be integers'})
+            raise ModelValidationError({'message': ModelMessages.IDS_MUST_BE_INTEGERS})
         if not cleaned_ids:
-            raise ModelValidationError({'message': 'List of ids is required'})
+            raise ModelValidationError({'message': ModelMessages.LIST_OF_IDS_REQUIRED})
         try:
             count = (
                 session.query(cls)

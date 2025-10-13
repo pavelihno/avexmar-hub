@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from sqlalchemy import func
 
+from app.constants.messages import UserMessages
 from app.database import db
 from app.models.user import User
 from app.models.booking import Booking
@@ -24,7 +25,7 @@ def create_user(current_user):
     new_user = User.create(commit=True, **body)
     if new_user:
         return jsonify(new_user.to_dict()), 201
-    return jsonify({'message': 'User not created'}), 400
+    return jsonify({'message': UserMessages.USER_NOT_CREATED}), 400
 
 
 @admin_required
@@ -49,7 +50,7 @@ def update_user(current_user, user_id):
     if current_user.id == user_id and personal_fields:
         consent = body.pop('consent', False)
         if not consent:
-            return jsonify({'message': 'Consent required'}), 400
+            return jsonify({'message': UserMessages.CONSENT_REQUIRED}), 400
 
         create_user_consent(
             current_user,
@@ -76,7 +77,7 @@ def __set_user_activity(user_id, is_active):
     updated_user = User.update(user_id, commit=True, is_active=is_active)
     if updated_user:
         return jsonify(updated_user.to_dict())
-    return jsonify({'message': 'User not found'}), 404
+    return jsonify({'message': UserMessages.USER_NOT_FOUND}), 404
 
 
 @admin_required
@@ -92,7 +93,7 @@ def deactivate_user(current_user, user_id):
 @login_required
 def get_user_bookings(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': 'Forbidden'}), 403
+        return jsonify({'message': UserMessages.FORBIDDEN}), 403
 
     bookings = Booking.query.filter_by(user_id=user_id).all()
     if not bookings:
@@ -137,7 +138,7 @@ def get_user_bookings(current_user, user_id):
 @login_required
 def get_user_passengers(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': 'Forbidden'}), 403
+        return jsonify({'message': UserMessages.FORBIDDEN}), 403
     passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
     return jsonify([p.to_dict(return_children=True) for p in passengers])
 
@@ -145,12 +146,12 @@ def get_user_passengers(current_user, user_id):
 @login_required
 def create_user_passenger(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': 'Forbidden'}), 403
+        return jsonify({'message': UserMessages.FORBIDDEN}), 403
     body = request.json or {}
 
     consent = body.pop('consent', False)
     if not consent:
-        return jsonify({'message': 'Consent required'}), 400
+        return jsonify({'message': UserMessages.CONSENT_REQUIRED}), 400
 
     session = db.session
 
@@ -176,13 +177,13 @@ def change_password(current_user):
     code = body.get('code')
 
     if not password:
-        return jsonify({'message': 'Invalid password'}), 400
+        return jsonify({'message': UserMessages.INVALID_PASSWORD}), 400
 
     totp = current_user.get_totp(Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS)
 
     if code:
         if not totp.verify(str(code)):
-            return jsonify({'message': 'Invalid or expired code'}), 400
+            return jsonify({'message': UserMessages.INVALID_OR_EXPIRED_CODE}), 400
         updated_user = User.change_password(current_user.id, password)
         return jsonify(updated_user.to_dict())
 
@@ -194,4 +195,4 @@ def change_password(current_user):
         code=verification_code,
         expires_in_minutes=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS // 60,
     )
-    return jsonify({'message': 'Verification code sent'})
+    return jsonify({'message': UserMessages.VERIFICATION_CODE_SENT})

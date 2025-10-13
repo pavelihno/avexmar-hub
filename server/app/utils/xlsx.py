@@ -4,6 +4,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, DEFAULT_FONT, Border, Side
 from openpyxl.utils import get_column_letter
 
+from app.constants.messages import XlsxMessages
 from app.utils.datetime import WRITE_DATE_FORMAT, WRITE_TIME_FORMAT, format_date, format_time, parse_date, parse_time
 
 
@@ -137,6 +138,6 @@ def parse_xlsx(file, fields: dict, required_fields: list = [], date_fields=[], t
         if required_fields:
             missing = [fields[f] for f in required_fields if not item.get(f)]
             if missing:
-                item['error'] = f"Missing required fields: {', '.join(missing)}"
+                item['error'] = XlsxMessages.missing_required_fields(missing)
         results.append(item)
     return results

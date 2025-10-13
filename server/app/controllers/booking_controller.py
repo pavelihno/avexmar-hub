@@ -1,6 +1,7 @@
 from flask import request, jsonify
 import uuid
 
+from app.constants.messages import BookingMessages
 from app.database import db
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
@@ -19,7 +20,7 @@ def get_bookings(current_user):
 def get_booking(current_user, booking_id):
     booking = Booking.get_or_404(booking_id)
     if current_user.role != USER_ROLE.admin and booking.user_id != current_user.id:
-        return jsonify({'message': 'Forbidden'}), 403
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
     return jsonify(booking.to_dict()), 200
 
 
@@ -53,7 +54,7 @@ def search_booking():
     last_name = data.get('last_name')
     if not all([booking_number, first_name, last_name]):
         return (
-            jsonify({'message': 'booking_number, first_name and last_name required'}),
+            jsonify({'message': BookingMessages.BOOKING_DETAILS_REQUIRED}),
             400,
         )
 
@@ -74,7 +75,7 @@ def search_booking():
     )
 
     if not booking:
-        return jsonify({'message': 'booking not found'}), 404
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     if not booking.access_token:
         booking = Booking.update(
@@ -87,7 +88,7 @@ def search_booking():
     return (
         jsonify(
             {
-                'message': 'booking found',
+                'message': BookingMessages.BOOKING_FOUND,
                 'data': {
                     'public_id': str(booking.public_id),
                     'access_token': str(booking.access_token),

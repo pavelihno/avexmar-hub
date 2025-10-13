@@ -1,4 +1,6 @@
 from flask import jsonify, request, send_file
+
+from app.constants.messages import FileMessages
 from app.models.timezone import Timezone
 from app.middlewares.auth_middleware import admin_required
 from app.utils.xlsx import is_xlsx_file, create_xlsx
@@ -52,9 +54,9 @@ def get_timezone_template(current_user):
 def upload_timezone(current_user):
     file = request.files.get('file')
     if not file:
-        return jsonify({'message': 'No file provided'}), 400
+        return jsonify({'message': FileMessages.NO_FILE_PROVIDED}), 400
     if not is_xlsx_file(file):
-        return jsonify({'message': 'Invalid file type'}), 400
+        return jsonify({'message': FileMessages.INVALID_FILE_TYPE}), 400
     timezones, error_rows = Timezone.upload_from_file(file)
 
     if error_rows:
@@ -67,4 +69,4 @@ def upload_timezone(current_user):
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ), 201
 
-    return jsonify({'message': 'Timezones created successfully'}), 201
+    return jsonify({'message': FileMessages.IMPORT_COMPLETED}), 201

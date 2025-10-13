@@ -1,6 +1,8 @@
 from datetime import datetime, date, time
 from numbers import Number
 
+from app.constants.messages import DateTimeMessages
+
 DATE_FORMATS = [
     '%d.%m.%Y',
     '%Y-%m-%d',
@@ -33,10 +35,10 @@ def parse_date(value) -> date | None:
                 return datetime.strptime(s, fmt).date()
             except ValueError:
                 continue
-        raise ValueError(f"'{value}' does not match any of {DATE_FORMATS}")
+        raise ValueError(DateTimeMessages.does_not_match_formats(value, DATE_FORMATS))
     if value is None:
         return None
-    raise TypeError(f'Unsupported date type {type(value)}')
+    raise TypeError(DateTimeMessages.unsupported_type('date', type(value)))
 
 
 def parse_time(value) -> time | None:
@@ -55,10 +57,10 @@ def parse_time(value) -> time | None:
                 return datetime.strptime(s, fmt).time()
             except ValueError:
                 continue
-        raise ValueError(f"'{value}' does not match any of {TIME_FORMATS}")
+        raise ValueError(DateTimeMessages.does_not_match_formats(value, TIME_FORMATS))
     if value is None:
         return None
-    raise TypeError(f'Unsupported time type {type(value)}')
+    raise TypeError(DateTimeMessages.unsupported_type('time', type(value)))
 
 
 def parse_datetime(value) -> datetime | None:
@@ -72,10 +74,10 @@ def parse_datetime(value) -> datetime | None:
             return datetime.fromisoformat(s.replace('Z', '+00:00'))
         except ValueError:
             pass
-        raise ValueError(f"'{value}' does not match ISO 8601 format")
+        raise ValueError(DateTimeMessages.invalid_iso_format(value))
     if value is None:
         return None
-    raise TypeError(f'Unsupported datetime type {type(value)}')
+    raise TypeError(DateTimeMessages.unsupported_type('datetime', type(value)))
 
 
 def combine_date_time(date_value, time_value=None) -> datetime | None:

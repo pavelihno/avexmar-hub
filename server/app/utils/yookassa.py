@@ -5,6 +5,11 @@ from datetime import datetime, timedelta
 from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 from app.config import Config
+from app.constants.branding import (
+    PASSENGER_CATEGORY_LABELS,
+    SEAT_CLASS_LABELS,
+)
+from app.constants.yookassa import YooKassaMessages, YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
@@ -23,13 +28,12 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
     """Form receipt object with detailed breakdown"""
     details = calculate_receipt_details(booking)
     currency = details.get('currency', booking.currency.value).upper()
-    seat_class_map = {'economy': 'Эконом', 'business': 'Бизнес'}
     items = []
     for direction in details.get('directions', []):
         route = direction.get('route') or {}
         origin = (route.get('origin_airport') or {}).get('city_name', '')
         dest = (route.get('destination_airport') or {}).get('city_name', '')
-        seat_class = seat_class_map.get(
+        seat_class = SEAT_CLASS_LABELS.get(
             direction.get('seat_class', ''), direction.get('seat_class', '')
         )
         date = direction.get('date')
@@ -38,9 +42,12 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
         for passenger in direction.get('passengers', []):
             price = passenger.get('price', 0.0)
             full_name = passenger.get('full_name', '')
-            description = (
-                f'Организация авиаперевозки пассажиров и багажа по маршруту '
-                f'{origin} — {dest}. {seat_class} класс. {date_str}. {full_name}'
+            description = YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE.format(
+                origin=origin,
+                destination=dest,
+                seat_class=seat_class,
+                date=date_str,
+                passenger=full_name,
             )
             items.append(
                 {
@@ -123,19 +130,18 @@ def __send_confirmation_email(booking: Booking) -> bool:
         )
     flights.sort(key=lambda x: x['departure'])
 
-    category_labels = {
-        'adult': 'Взрослый',
-        'child': 'Ребёнок',
-        'infant': 'Младенец',
-        'infant_seat': 'Младенец с местом',
-    }
     passengers = []
     for p in details.get('passengers', []):
         name = ' '.join(
             filter(None, [p.get('last_name'), p.get('first_name')])
         ).strip()
         passengers.append(
-            {'name': name, 'category': category_labels.get(p.get('category'), p.get('category'))}
+            {
+                'name': name,
+                'category': PASSENGER_CATEGORY_LABELS.get(
+                    p.get('category'), p.get('category')
+                ),
+            }
         )
 
     pdf_data = generate_booking_pdf(booking, details=details)
@@ -205,7 +211,8 @@ def create_payment(booking: Booking) -> Payment:
         yoo_payment = YooPayment.create(body, uuid.uuid4())
         yookassa_payment_id = getattr(yoo_payment, 'id', None)
         confirmation_token = getattr(
-            getattr(yoo_payment, 'confirmation', None), 'confirmation_token', None
+            getattr(yoo_payment, 'confirmation', None),
+            'confirmation_token', None
         )
 
         session = db.session
@@ -325,7 +332,10 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
 
     payment = Payment.get_by_provider_payment_id(provider_id)
 
-    status_map = {'issued': PAYMENT_STATUS.pending, 'paid': PAYMENT_STATUS.succeeded}
+    status_map = {
+        'issued': PAYMENT_STATUS.pending,
+        'paid': PAYMENT_STATUS.succeeded
+    }
     mapped_status = status_map.get(status, status)
 
     updates = {'payment_status': mapped_status, 'last_webhook': payload}
@@ -334,7 +344,9 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
         updates['paid_at'] = captured_at
 
     session = db.session
-    payment = Payment.update(payment.id, session=session, commit=False, **updates)
+    payment = Payment.update(
+        payment.id, session=session, commit=False, **updates
+    )
     booking = payment.booking
 
     send_confirmation = False
@@ -379,7 +391,7 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
         send_confirmation = True
 
     else:
-        raise ValueError(f'Unknown event type: {event}')
+        raise ValueError(YooKassaMessages.unknown_event_type(event))
 
     session.commit()
 
