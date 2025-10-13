@@ -2,6 +2,7 @@ class ModelMessages:
     LIST_OF_IDS_REQUIRED = 'List of ids is required'
     IDS_MUST_BE_INTEGERS = 'Ids must be integers'
 
+
 class AuthMessages:
     EMAIL_PASSWORD_REQUIRED = 'Email and password are required'
     USER_ALREADY_EXISTS = 'User already exists'
@@ -41,18 +42,13 @@ class ConsentMessages:
     INVALID_TYPE = 'invalid type'
 
 
-class FileMessages:
-    NO_FILE_PROVIDED = 'No file provided'
-    INVALID_FILE_TYPE = 'Invalid file type'
-    FILE_REQUIRED = 'file is required'
-    INVALID_PATH = 'Invalid path'
-    FILE_NOT_FOUND = 'File not found'
-    IMPORT_COMPLETED = 'Import completed successfully'
-
-
 class PassengerMessages:
     FLIGHT_AND_DATE_REQUIRED = 'flight_id and date are required'
     FLIGHT_DATE_MISMATCH = 'Flight date mismatch'
+
+
+class CountryMessages:
+    INVALID_COUNTRY_CODE = 'Invalid country code'
 
 
 class ExportMessages:
@@ -61,6 +57,15 @@ class ExportMessages:
 
 class DevMessages:
     INVALID_TABLE_NAME = 'Invalid table name'
+
+
+class FileMessages:
+    NO_FILE_PROVIDED = 'No file provided'
+    INVALID_FILE_TYPE = 'Invalid file type'
+    FILE_REQUIRED = 'file is required'
+    INVALID_PATH = 'Invalid path'
+    FILE_NOT_FOUND = 'File not found'
+    IMPORT_COMPLETED = 'Import completed successfully'
 
 
 class ErrorMessages:
@@ -90,5 +95,3 @@ class XlsxMessages:
     def missing_required_fields(field_names) -> str:
         formatted = ', '.join(field_names)
         return f'Missing required fields: {formatted}'
-
-

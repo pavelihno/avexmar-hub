@@ -1,6 +1,7 @@
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 
+from app.constants.messages import CountryMessages
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
@@ -103,7 +104,7 @@ class Airport(BaseModel):
         def process_row(row, row_session: Session):
             country = Country.get_by_code(row.get('country_code'))
             if not country:
-                raise ValueError('Invalid country code')
+                raise ValueError(CountryMessages.INVALID_COUNTRY_CODE)
 
             tz_name = row.get('timezone')
             tz = None
