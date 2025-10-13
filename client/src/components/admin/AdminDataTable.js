@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -39,7 +39,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
 import { ADMIN, BUTTONS, SUCCESS, WARNINGS, ERRORS, MESSAGES, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
-import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate, parseDate } from '../utils';
+import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate, parseDate, DragAndDropUploadField } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 import { useTheme, alpha } from '@mui/material/styles';
 
@@ -98,8 +98,6 @@ const AdminDataTable = ({
 		setOpenDialog(true);
 	};
 
-	const fileInputRef = useRef();
-
 	const openUploadDialog = () => {
 		setUploadDialog(true);
 	};
@@ -133,9 +131,9 @@ const AdminDataTable = ({
 		setUploading(false);
 	};
 
-	const handleFileChange = async (e) => {
-		const file = e.target.files[0];
-		await processFile(file);
+	const handleUploadSelection = async (selected) => {
+		if (!selected) return;
+		await processFile(selected);
 		closeUploadDialog();
 	};
 
@@ -1008,31 +1006,11 @@ const AdminDataTable = ({
 				<Dialog open={uploadDialog} onClose={closeUploadDialog} fullScreen={isSmallDown}>
 					<DialogTitle>{ADMIN.upload.title}</DialogTitle>
 					<DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
-						<Box
-							onDragOver={(e) => e.preventDefault()}
-							onDrop={(e) => {
-								e.preventDefault();
-								processFile(e.dataTransfer.files[0]);
-								closeUploadDialog();
-							}}
-							sx={{
-								border: '2px dashed',
-								borderColor: 'grey.400',
-								p: { xs: 3, sm: 4 },
-								textAlign: 'center',
-							}}
-						>
-							<Typography sx={{ mb: 2 }}>{ADMIN.upload.drag}</Typography>
-							<Button variant='outlined' onClick={() => fileInputRef.current?.click()}>
-								{ADMIN.upload.select}
-							</Button>
-							<input
-								type='file'
-								ref={fileInputRef}
-								style={{ display: 'none' }}
-								onChange={handleFileChange}
-							/>
-						</Box>
+						<DragAndDropUploadField
+							dragText={ADMIN.upload.drag}
+							buttonText={ADMIN.upload.select}
+							onFileSelect={handleUploadSelection}
+						/>
 					</DialogContent>
 					<DialogActions
 						sx={{

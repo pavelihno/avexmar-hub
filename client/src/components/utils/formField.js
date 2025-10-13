@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
 	TextField,
 	Select,
@@ -9,6 +10,8 @@ import {
 	FormHelperText,
 	Autocomplete,
 	Box,
+	Typography,
+	Button,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
@@ -438,6 +441,127 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 			}
 		}
 	};
+};
+
+export const DragAndDropUploadField = ({
+	onFileSelect,
+	dragText,
+	buttonText,
+	startIcon = null,
+	accept,
+	multiple = false,
+	disabled = false,
+	sx,
+	buttonProps,
+	inputProps,
+	inputRef: externalInputRef,
+	children,
+}) => {
+	const inputRef = useRef(null);
+	const { onClick: buttonOnClick, ...restButtonProps } = buttonProps || {};
+	const { onChange: inputOnChange, ...restInputProps } = inputProps || {};
+
+	const assignInputRef = (node) => {
+		inputRef.current = node;
+		if (!externalInputRef) return;
+		if (typeof externalInputRef === 'function') {
+			externalInputRef(node);
+		} else {
+			externalInputRef.current = node;
+		}
+	};
+
+	const handleFiles = (files) => {
+		if (!files?.length || typeof onFileSelect !== 'function') return;
+		const payload = multiple ? Array.from(files) : files[0];
+		onFileSelect(payload);
+	};
+
+	const handleDrop = (event) => {
+		event.preventDefault();
+		if (disabled) return;
+		handleFiles(event.dataTransfer.files);
+	};
+
+	const handleDragOver = (event) => {
+		event.preventDefault();
+		if (disabled) {
+			event.dataTransfer.dropEffect = 'none';
+			return;
+		}
+		event.dataTransfer.dropEffect = 'copy';
+	};
+
+	const handleInputChange = (event) => {
+		if (disabled) return;
+		handleFiles(event.target.files);
+		if (inputOnChange) {
+			inputOnChange(event);
+		}
+		event.target.value = '';
+	};
+
+	const handleButtonClick = (event) => {
+		if (disabled) return;
+		if (buttonOnClick) {
+			buttonOnClick(event);
+			if (event.defaultPrevented) return;
+		}
+		inputRef.current?.click();
+	};
+
+	return (
+		<Box
+			onDragOver={handleDragOver}
+			onDrop={handleDrop}
+			sx={{
+				border: '2px dashed',
+				borderColor: 'grey.400',
+				p: { xs: 3, sm: 4 },
+				textAlign: 'center',
+				borderRadius: 2,
+				cursor: disabled ? 'not-allowed' : 'pointer',
+				opacity: disabled ? 0.5 : 1,
+				transition: 'background-color 0.2s ease, border-color 0.2s ease',
+				'&:hover': disabled
+					? undefined
+					: {
+							borderColor: 'primary.main',
+							backgroundColor: 'action.hover',
+					  },
+				...sx,
+			}}
+		>
+			{dragText && (
+				<Typography sx={{ mb: 2 }} color='text.secondary'>
+					{dragText}
+				</Typography>
+			)}
+
+			<Button
+				variant='outlined'
+				onClick={handleButtonClick}
+				startIcon={startIcon}
+				disabled={disabled}
+				{...restButtonProps}
+			>
+				{buttonText}
+			</Button>
+
+			<input
+				type='file'
+				hidden
+				ref={assignInputRef}
+				accept={accept}
+				multiple={multiple}
+				disabled={disabled}
+				onChange={handleInputChange}
+				{...restInputProps}
+			/>
+
+			{children}
+		</Box>
+	);
 };
 
 export const createFormFields = (fields) => {

@@ -45,7 +45,7 @@ import {
 import { fetchRoutes } from '../../redux/actions/route';
 import { fetchAirports } from '../../redux/actions/airport';
 import { FIELD_LABELS, ADMIN, BUTTONS, SUCCESS, ERRORS, HOME, MESSAGES, VALIDATION_MESSAGES } from '../../constants';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_TYPES, DragAndDropUploadField } from '../utils';
 import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
 import { useTheme } from '@mui/material/styles';
 
@@ -363,10 +363,8 @@ const CarouselSlideManagement = () => {
 		}
 	};
 
-	const handleSelectImage = (event) => {
-		const file = event.target.files?.[0];
+	const applySelectedImage = (file) => {
 		if (!file) return;
-
 		setImageFile(file);
 		const previewUrl = URL.createObjectURL(file);
 		setImagePreview((prev) => {
@@ -384,6 +382,18 @@ const CarouselSlideManagement = () => {
 				return rest;
 			});
 		}
+	};
+
+	const handleSelectImageFromInput = (event) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		applySelectedImage(file);
+	};
+
+	const handleSelectImage = (payload) => {
+		const file = Array.isArray(payload) ? payload[0] : payload;
+		if (!file) return;
+		applySelectedImage(file);
 	};
 
 	const handleSubmitForm = async () => {
@@ -854,27 +864,27 @@ const CarouselSlideManagement = () => {
 
 						<Grid item xs={12}>
 							<Stack spacing={1.5}>
-								<Button
-									variant='outlined'
+								<DragAndDropUploadField
+									dragText={ADMIN.upload.drag}
+									buttonText={
+										imagePreview
+											? ADMIN.carousel_slides.replace_image
+											: FIELD_LABELS.CAROUSEL_SLIDE.image
+									}
 									startIcon={<UploadIcon />}
-									component='label'
+									accept='image/*'
 									disabled={isSubmitting}
+									onFileSelect={handleSelectImage}
+									inputRef={fileInputRef}
+									inputProps={{ onChange: handleSelectImageFromInput }}
 									sx={{
 										alignSelf: { xs: 'stretch', sm: 'flex-start' },
-										minHeight: 48,
+										width: '100%',
 									}}
-								>
-									{imagePreview
-										? ADMIN.carousel_slides.replace_image
-										: FIELD_LABELS.CAROUSEL_SLIDE.image}
-									<input
-										type='file'
-										accept='image/*'
-										hidden
-										ref={fileInputRef}
-										onChange={handleSelectImage}
-									/>
-								</Button>
+									buttonProps={{
+										sx: { minHeight: 48 },
+									}}
+								/>
 								{formErrors.image && (
 									<Typography variant='caption' color='error'>
 										{formErrors.image}
