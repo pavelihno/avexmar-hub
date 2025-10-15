@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from app.constants.messages import FileMessages
 from app.models.carousel_slide import CarouselSlide
 from app.middlewares.auth_middleware import admin_required
 from app.utils.storage import ImageManager
@@ -37,7 +38,7 @@ def delete_carousel_slide(current_user, slide_id):
 def upload_carousel_slide_image(current_user, slide_id):
     file = request.files.get('file')
     if not file or not file.filename:
-        return jsonify({'message': 'file is required'}), 400
+        return jsonify({'message': FileMessages.FILE_REQUIRED}), 400
 
     image_manager = ImageManager()
 

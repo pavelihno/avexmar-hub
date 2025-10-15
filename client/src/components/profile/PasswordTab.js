@@ -6,7 +6,8 @@ import { Box, Button, Alert, Paper, Typography, CircularProgress } from '@mui/ma
 import { changePassword } from '../../redux/actions/user';
 import { UI_LABELS } from '../../constants/uiLabels';
 import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
-import { createFormFields, FIELD_TYPES } from '../utils';
+import { createFormFields, FIELD_TYPES, evaluatePasswordStrength } from '../utils';
+import PasswordStrengthIndicator from '../shared/PasswordStrengthIndicator';
 
 const PasswordTab = () => {
 	const dispatch = useDispatch();
@@ -20,6 +21,12 @@ const PasswordTab = () => {
 	const [codeSent, setCodeSent] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	const passwordStrength = useMemo(
+		() => evaluatePasswordStrength(passwordData.newPassword),
+		[passwordData.newPassword]
+	);
+	const isWeakPassword = passwordData.newPassword.length > 0 && !passwordStrength.isAcceptable;
+
 	const formFields = useMemo(() => {
 		const fields = {
 			newPassword: {
@@ -27,7 +34,11 @@ const PasswordTab = () => {
 				label: UI_LABELS.AUTH.new_password,
 				type: FIELD_TYPES.TEXT,
 				inputProps: { type: 'password' },
-				validate: (v) => (!v ? VALIDATION_MESSAGES.USER.password.REQUIRED : ''),
+				validate: (v) => {
+					if (!v) return VALIDATION_MESSAGES.USER.password.REQUIRED;
+					if (!evaluatePasswordStrength(v).isAcceptable) return VALIDATION_MESSAGES.USER.password.WEAK;
+					return '';
+				},
 			},
 			confirmPassword: {
 				key: 'confirmPassword',
@@ -133,13 +144,18 @@ const PasswordTab = () => {
 								value: passwordData[name],
 								onChange: (val) => handleFieldChange(name, val),
 								fullWidth: true,
-								error: !!errors[name],
-								helperText: errors[name] || '',
+								error: !!errors[name] || (name === 'newPassword' && isWeakPassword && !codeSent),
+								helperText:
+									errors[name] ||
+									(name === 'newPassword' && isWeakPassword && !codeSent
+										? VALIDATION_MESSAGES.USER.password.WEAK
+										: ''),
 								disabled: isSubmitting || codeSent,
 							})}
 						</Box>
 					);
 				})}
+				{!codeSent && <PasswordStrengthIndicator password={passwordData.newPassword} />}
 				{codeSent && (
 					<Box sx={{ mt: 1 }}>
 						{formFields.code.renderField({
@@ -157,7 +173,7 @@ const PasswordTab = () => {
 					fullWidth
 					variant='contained'
 					sx={{ mt: 2 }}
-					disabled={(codeSent && !passwordData.code) || isSubmitting}
+					disabled={(codeSent && !passwordData.code) || isSubmitting || (!codeSent && isWeakPassword)}
 				>
 					{isSubmitting ? <CircularProgress size={24} color='inherit' /> : UI_LABELS.BUTTONS.change_password}
 				</Button>

@@ -43,9 +43,8 @@ import {
 	uploadCarouselSlideImage,
 } from '../../redux/actions/carouselSlide';
 import { fetchRoutes } from '../../redux/actions/route';
-import { fetchAirports } from '../../redux/actions/airport';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
-import { FIELD_TYPES } from '../utils';
+import { FIELD_LABELS, ADMIN, BUTTONS, SUCCESS, ERRORS, HOME, MESSAGES, VALIDATION_MESSAGES } from '../../constants';
+import { FIELD_TYPES, DragAndDropUploadField } from '../utils';
 import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
 import { useTheme } from '@mui/material/styles';
 
@@ -70,7 +69,6 @@ const CarouselSlideManagement = () => {
 
 	const { carouselSlides, isLoading: slidesLoading } = useSelector((state) => state.carouselSlides);
 	const { routes, isLoading: routesLoading } = useSelector((state) => state.routes);
-	const { airports, isLoading: airportsLoading } = useSelector((state) => state.airports);
 
 	const [localSlides, setLocalSlides] = useState([]);
 	const [formMode, setFormMode] = useState('create');
@@ -96,7 +94,7 @@ const CarouselSlideManagement = () => {
 	};
 
 	const showError = (message) => {
-		setErrorMessage(message || UI_LABELS.ERRORS.unknown);
+		setErrorMessage(message || ERRORS.unknown);
 		setSuccessMessage('');
 	};
 
@@ -110,7 +108,6 @@ const CarouselSlideManagement = () => {
 	useEffect(() => {
 		dispatch(fetchCarouselSlides());
 		dispatch(fetchRoutes());
-		dispatch(fetchAirports());
 	}, [dispatch]);
 
 	useEffect(() => () => clearCloseTimer(), []);
@@ -161,15 +158,7 @@ const CarouselSlideManagement = () => {
 		[imagePreview]
 	);
 
-	const airportsById = {};
-	(airports || []).forEach((airport) => {
-		if (airport && airport.id != null) {
-			airportsById[airport.id] = airport;
-		}
-	});
-
-	const formatAirportLabel = (airportId) => {
-		const airport = airportId ? airportsById[airportId] : null;
+	const formatAirportLabel = (airport) => {
 		if (!airport) return '';
 
 		const parts = [];
@@ -192,12 +181,12 @@ const CarouselSlideManagement = () => {
 	});
 
 	const getRouteLabel = (routeId) => {
-		if (!routeId || routeId === NO_ROUTE_VALUE) return UI_LABELS.ADMIN.carousel_slides.no_route_option;
+		if (!routeId || routeId === NO_ROUTE_VALUE) return ADMIN.carousel_slides.no_route_option;
 		const route = routesById[routeId];
-		if (!route) return UI_LABELS.ADMIN.carousel_slides.no_route_option;
+		if (!route) return ADMIN.carousel_slides.no_route_option;
 
-		const from = formatAirportLabel(route.origin_airport_id);
-		const to = formatAirportLabel(route.destination_airport_id);
+		const from = formatAirportLabel(route.origin_airport);
+		const to = formatAirportLabel(route.destination_airport);
 
 		return `${from} → ${to}`;
 	};
@@ -208,13 +197,12 @@ const CarouselSlideManagement = () => {
 			label: getRouteLabel(route.id),
 		}))
 		.filter(
-			(option) =>
-				option.value != null && option.label && option.label !== UI_LABELS.ADMIN.carousel_slides.no_route_option
+			(option) => option.value != null && option.label && option.label !== ADMIN.carousel_slides.no_route_option
 		)
 		.sort((a, b) => a.label.localeCompare(b.label, 'ru', { sensitivity: 'base' }));
 
 	const routeSelectOptions = [
-		{ value: NO_ROUTE_VALUE, label: UI_LABELS.ADMIN.carousel_slides.no_route_option },
+		{ value: NO_ROUTE_VALUE, label: ADMIN.carousel_slides.no_route_option },
 		...routeOptions,
 	];
 
@@ -299,8 +287,8 @@ const CarouselSlideManagement = () => {
 	};
 
 	const { formFields, toApiFormat, toUiFormat } = createAdminManager(fields, {
-		addButtonText: () => UI_LABELS.ADMIN.carousel_slides.add_button,
-		editButtonText: () => UI_LABELS.ADMIN.carousel_slides.edit_button,
+		addButtonText: () => ADMIN.carousel_slides.add_button,
+		editButtonText: () => ADMIN.carousel_slides.edit_button,
 	});
 
 	const revokePreview = (preview) => {
@@ -364,10 +352,8 @@ const CarouselSlideManagement = () => {
 		}
 	};
 
-	const handleSelectImage = (event) => {
-		const file = event.target.files?.[0];
+	const applySelectedImage = (file) => {
 		if (!file) return;
-
 		setImageFile(file);
 		const previewUrl = URL.createObjectURL(file);
 		setImagePreview((prev) => {
@@ -385,6 +371,18 @@ const CarouselSlideManagement = () => {
 				return rest;
 			});
 		}
+	};
+
+	const handleSelectImageFromInput = (event) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		applySelectedImage(file);
+	};
+
+	const handleSelectImage = (payload) => {
+		const file = Array.isArray(payload) ? payload[0] : payload;
+		if (!file) return;
+		applySelectedImage(file);
 	};
 
 	const handleSubmitForm = async () => {
@@ -428,7 +426,7 @@ const CarouselSlideManagement = () => {
 
 			await dispatch(fetchCarouselSlides()).unwrap();
 
-			showSuccess(formMode === 'create' ? UI_LABELS.SUCCESS.add : UI_LABELS.SUCCESS.update);
+			showSuccess(formMode === 'create' ? SUCCESS.add : SUCCESS.update);
 			clearCloseTimer();
 			closeTimerRef.current = setTimeout(() => {
 				setFormOpen(false);
@@ -438,7 +436,7 @@ const CarouselSlideManagement = () => {
 			}, 1000);
 		} catch (error) {
 			clearCloseTimer();
-			showError(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
+			showError(extractErrorMessage(error) || ERRORS.unknown);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -449,9 +447,9 @@ const CarouselSlideManagement = () => {
 		try {
 			await dispatch(updateCarouselSlide({ id: slide.id, is_active: !slide.is_active })).unwrap();
 			await dispatch(fetchCarouselSlides()).unwrap();
-			showSuccess(UI_LABELS.SUCCESS.update);
+			showSuccess(SUCCESS.update);
 		} catch (error) {
-			showError(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
+			showError(extractErrorMessage(error) || ERRORS.unknown);
 		} finally {
 			setProcessingSlideId(null);
 		}
@@ -495,9 +493,9 @@ const CarouselSlideManagement = () => {
 				await dispatch(fetchCarouselSlides()).unwrap();
 			}
 
-			showSuccess(UI_LABELS.SUCCESS.update);
+			showSuccess(SUCCESS.update);
 		} catch (error) {
-			showError(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
+			showError(extractErrorMessage(error) || ERRORS.unknown);
 		} finally {
 			setIsReordering(false);
 		}
@@ -520,9 +518,9 @@ const CarouselSlideManagement = () => {
 		try {
 			setLocalSlides((prev) => prev.filter((item) => item.id !== slide.id));
 			await dispatch(deleteCarouselSlide(slide.id)).unwrap();
-			showSuccess(UI_LABELS.SUCCESS.delete);
+			showSuccess(SUCCESS.delete);
 		} catch (error) {
-			showError(extractErrorMessage(error) || UI_LABELS.ERRORS.unknown);
+			showError(extractErrorMessage(error) || ERRORS.unknown);
 		} finally {
 			setProcessingSlideId(null);
 			setDeleteDialog({ open: false, slide: null });
@@ -551,7 +549,7 @@ const CarouselSlideManagement = () => {
 					>
 						<ArrowBackIcon />
 					</IconButton>
-					<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.title}</Typography>
+					<Typography variant='h4'>{ADMIN.carousel_slides.title}</Typography>
 				</Box>
 				<Box
 					sx={{
@@ -573,7 +571,7 @@ const CarouselSlideManagement = () => {
 							minHeight: 48,
 						}}
 					>
-						{UI_LABELS.ADMIN.carousel_slides.add_button}
+						{ADMIN.carousel_slides.add_button}
 					</Button>
 				</Box>
 
@@ -581,9 +579,9 @@ const CarouselSlideManagement = () => {
 					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={isSmallDown ? 1.5 : 2} alignItems='flex-start'>
-								<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.management}</Typography>
+								<Typography variant='h4'>{ADMIN.carousel_slides.management}</Typography>
 								<Typography variant='body2' color='text.secondary'>
-									{UI_LABELS.ADMIN.carousel_slides.image_hint}
+									{ADMIN.carousel_slides.image_hint}
 								</Typography>
 								<Divider />
 
@@ -595,7 +593,7 @@ const CarouselSlideManagement = () => {
 									<Stack spacing={1} alignItems='center' sx={{ py: 6 }}>
 										<ImageIcon color='disabled' fontSize='large' />
 										<Typography variant='body2' color='text.secondary' align='center'>
-											{UI_LABELS.HOME.poster_carousel.empty}
+											{HOME.poster_carousel.empty}
 										</Typography>
 									</Stack>
 								) : (
@@ -706,9 +704,7 @@ const CarouselSlideManagement = () => {
 																size='small'
 																color={slide.is_active ? 'success' : 'default'}
 																variant={slide.is_active ? 'filled' : 'outlined'}
-																label={UI_LABELS.ADMIN.carousel_slides.is_active(
-																	slide.is_active
-																)}
+																label={ADMIN.carousel_slides.is_active(slide.is_active)}
 															/>
 															<FormControlLabel
 																control={
@@ -733,7 +729,7 @@ const CarouselSlideManagement = () => {
 															alignItems='center'
 															sx={{ width: '100%', flexWrap: 'wrap' }}
 														>
-															<Tooltip title='Переместить вверх'>
+															<Tooltip title={ADMIN.carousel_slides.move_up}>
 																<span>
 																	<IconButton
 																		size='small'
@@ -744,7 +740,7 @@ const CarouselSlideManagement = () => {
 																	</IconButton>
 																</span>
 															</Tooltip>
-															<Tooltip title='Переместить вниз'>
+															<Tooltip title={ADMIN.carousel_slides.move_down}>
 																<span>
 																	<IconButton
 																		size='small'
@@ -758,7 +754,7 @@ const CarouselSlideManagement = () => {
 																	</IconButton>
 																</span>
 															</Tooltip>
-															<Tooltip title={UI_LABELS.BUTTONS.edit}>
+															<Tooltip title={BUTTONS.edit}>
 																<span>
 																	<IconButton
 																		size='small'
@@ -773,7 +769,7 @@ const CarouselSlideManagement = () => {
 																	</IconButton>
 																</span>
 															</Tooltip>
-															<Tooltip title={UI_LABELS.BUTTONS.delete}>
+															<Tooltip title={BUTTONS.delete}>
 																<span>
 																	<IconButton
 																		size='small'
@@ -802,7 +798,7 @@ const CarouselSlideManagement = () => {
 					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={2} alignItems='flex-start'>
-								<Typography variant='h4'>{UI_LABELS.ADMIN.carousel_slides.preview_title}</Typography>
+								<Typography variant='h4'>{ADMIN.carousel_slides.preview_title}</Typography>
 								<PosterCarousel slides={localSlides} autoFetch={false} includeInactive />
 							</Stack>
 						</Paper>
@@ -812,9 +808,7 @@ const CarouselSlideManagement = () => {
 
 			<Dialog open={formOpen} onClose={handleCloseForm} fullWidth maxWidth='md' fullScreen={isSmallDown}>
 				<DialogTitle>
-					{formMode === 'create'
-						? UI_LABELS.ADMIN.carousel_slides.add_button
-						: UI_LABELS.ADMIN.carousel_slides.edit_button}
+					{formMode === 'create' ? ADMIN.carousel_slides.add_button : ADMIN.carousel_slides.edit_button}
 				</DialogTitle>
 				<DialogContent
 					dividers
@@ -849,7 +843,7 @@ const CarouselSlideManagement = () => {
 										})}
 										{isActivationField && formMode === 'create' && (
 											<Typography variant='caption' color='text.secondary'>
-												{UI_LABELS.ADMIN.carousel_slides.activation_hint}
+												{ADMIN.carousel_slides.activation_hint}
 											</Typography>
 										)}
 									</Stack>
@@ -859,25 +853,27 @@ const CarouselSlideManagement = () => {
 
 						<Grid item xs={12}>
 							<Stack spacing={1.5}>
-								<Button
-									variant='outlined'
+								<DragAndDropUploadField
+									dragText={ADMIN.upload.drag}
+									buttonText={
+										imagePreview
+											? ADMIN.carousel_slides.replace_image
+											: FIELD_LABELS.CAROUSEL_SLIDE.image
+									}
 									startIcon={<UploadIcon />}
-									component='label'
+									accept='image/*'
 									disabled={isSubmitting}
+									onFileSelect={handleSelectImage}
+									inputRef={fileInputRef}
+									inputProps={{ onChange: handleSelectImageFromInput }}
 									sx={{
 										alignSelf: { xs: 'stretch', sm: 'flex-start' },
-										minHeight: 48,
+										width: '100%',
 									}}
-								>
-									{imagePreview ? 'Заменить изображение' : FIELD_LABELS.CAROUSEL_SLIDE.image}
-									<input
-										type='file'
-										accept='image/*'
-										hidden
-										ref={fileInputRef}
-										onChange={handleSelectImage}
-									/>
-								</Button>
+									buttonProps={{
+										sx: { minHeight: 48 },
+									}}
+								/>
 								{formErrors.image && (
 									<Typography variant='caption' color='error'>
 										{formErrors.image}
@@ -901,7 +897,7 @@ const CarouselSlideManagement = () => {
 									/>
 								)}
 								<Typography variant='caption' color='text.secondary'>
-									{UI_LABELS.ADMIN.carousel_slides.image_hint}
+									{ADMIN.carousel_slides.image_hint}
 								</Typography>
 							</Stack>
 						</Grid>
@@ -921,7 +917,7 @@ const CarouselSlideManagement = () => {
 						disabled={isSubmitting}
 						sx={{ width: { xs: '100%', sm: 'auto' } }}
 					>
-						{UI_LABELS.BUTTONS.cancel}
+						{BUTTONS.cancel}
 					</Button>
 					<Button
 						variant='contained'
@@ -929,13 +925,13 @@ const CarouselSlideManagement = () => {
 						disabled={isSubmitting || routeOptions.length === 0}
 						sx={{ width: { xs: '100%', sm: 'auto' }, minHeight: 48 }}
 					>
-						{formMode === 'create' ? UI_LABELS.BUTTONS.add : UI_LABELS.BUTTONS.save_changes}
+						{formMode === 'create' ? BUTTONS.add : BUTTONS.save_changes}
 					</Button>
 				</DialogActions>
 			</Dialog>
 
 			<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
-				<DialogTitle>{UI_LABELS.MESSAGES.confirm_action}</DialogTitle>
+				<DialogTitle>{MESSAGES.confirm_action}</DialogTitle>
 				<DialogContent
 					dividers
 					sx={{
@@ -944,7 +940,7 @@ const CarouselSlideManagement = () => {
 					}}
 				>
 					<Typography variant='body1' sx={{ mb: 2 }}>
-						{UI_LABELS.MESSAGES.confirm_delete}
+						{MESSAGES.confirm_delete}
 					</Typography>
 					{deleteDialog.slide && (
 						<Paper variant='outlined' sx={{ p: { xs: 2, sm: 2 } }}>
@@ -969,7 +965,7 @@ const CarouselSlideManagement = () => {
 						disabled={processingSlideId !== null}
 						sx={{ width: { xs: '100%', sm: 'auto' } }}
 					>
-						{UI_LABELS.BUTTONS.cancel}
+						{BUTTONS.cancel}
 					</Button>
 					<Button
 						color='error'
@@ -977,7 +973,7 @@ const CarouselSlideManagement = () => {
 						disabled={processingSlideId !== null}
 						sx={{ width: { xs: '100%', sm: 'auto' } }}
 					>
-						{UI_LABELS.BUTTONS.delete}
+						{BUTTONS.delete}
 					</Button>
 				</DialogActions>
 			</Dialog>

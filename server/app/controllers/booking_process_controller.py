@@ -1,6 +1,7 @@
 from flask import request, jsonify, send_file
 from io import BytesIO
 
+from app.constants.messages import ExportMessages
 from app.database import db
 from app.config import Config
 from datetime import datetime, timedelta
@@ -110,7 +111,7 @@ def create_booking_process_passengers(current_user):
     consent = bool(buyer.pop('consent', False))
     passengers = data.get('passengers') or []
     if not public_id:
-        return jsonify({'message': 'public_id required'}), 400
+        return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
     token = data.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
 
@@ -215,7 +216,7 @@ def confirm_booking_process(current_user):
     is_payment = data.get('is_payment', True)
 
     if not public_id:
-        return jsonify({'message': 'public_id required'}), 400
+        return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
     token = data.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
 
@@ -270,7 +271,7 @@ def get_booking_process_pdf(current_user, public_id):
         mimetype='application/pdf',
         as_attachment=True,
         download_name=f'booking_{booking.booking_number}.pdf',
-    )
+    ), 200
 
 
 @current_user

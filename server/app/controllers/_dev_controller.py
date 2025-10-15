@@ -2,6 +2,7 @@ from typing import Type, Dict
 
 from flask import jsonify, request
 
+from app.constants.messages import DevMessages
 from app.middlewares.auth_middleware import dev_tool
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.airport import Airport
@@ -48,18 +49,18 @@ def clear_table(current_user, table_name: str):
 
     model = MODEL_MAP.get(table_name)
     if not model:
-        return jsonify({'message': 'Invalid table name'}), 404
+        return jsonify({'message': DevMessages.INVALID_TABLE_NAME}), 404
 
     deleted = model.delete_all(commit=True)
 
-    return jsonify({'deleted': deleted})
+    return jsonify({'deleted': deleted}), 200
 
 
 @dev_tool
 def clear_filtered_table(current_user, table_name: str):
     model = MODEL_MAP.get(table_name)
     if not model:
-        return jsonify({'message': 'Invalid table name'}), 404
+        return jsonify({'message': DevMessages.INVALID_TABLE_NAME}), 404
 
     payload = request.get_json(silent=True) or {}
     ids = payload.get('ids')
@@ -69,4 +70,4 @@ def clear_filtered_table(current_user, table_name: str):
     except ModelValidationError as exc:
         return jsonify(exc.errors), 400
 
-    return jsonify({'deleted': deleted})
+    return jsonify({'deleted': deleted}), 200

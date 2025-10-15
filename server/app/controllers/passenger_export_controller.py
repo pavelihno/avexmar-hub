@@ -3,6 +3,7 @@ from io import BytesIO
 from flask import request, jsonify, send_file
 from xlwt import Workbook, XFStyle
 
+from app.constants.messages import PassengerMessages
 from app.models.flight import Flight
 from app.models.booking_flight import BookingFlight
 from app.models.route import Route
@@ -13,13 +14,10 @@ from app.utils.enum import SEAT_CLASS, PASSENGER_CATEGORY
 @admin_required
 def get_flight_passenger_export(current_user):
     flight_id = request.args.get('flight_id', type=int)
-    flight_date = request.args.get('date')
-    if not flight_id or not flight_date:
-        return jsonify({'message': 'flight_id and date are required'}), 400
-
+    if not flight_id:
+        return jsonify({'message': PassengerMessages.FLIGHT_REQUIRED}), 400
+    
     flight = Flight.get_or_404(flight_id)
-    if format_date(flight.scheduled_departure) != format_date(flight_date):
-        return jsonify({'message': 'Flight date mismatch'}), 400
 
     wb = Workbook()
     ws = wb.add_sheet('Passengers')
@@ -107,7 +105,7 @@ def get_flight_passenger_export(current_user):
         as_attachment=True,
         download_name='flight_passengers.xls',
         mimetype='application/vnd.ms-excel',
-    )
+    ), 200
 
 
 @admin_required
@@ -120,7 +118,7 @@ def get_passenger_export_routes(current_user):
         }
         for r in routes
     ]
-    return jsonify({'data': data})
+    return jsonify({'data': data}), 200
 
 
 @admin_required
@@ -140,4 +138,4 @@ def get_passenger_export_flights(current_user, route_id):
         }
         for f in flights
     ]
-    return jsonify({'data': data})
+    return jsonify({'data': data}), 200

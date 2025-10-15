@@ -9,7 +9,7 @@ from app.middlewares.auth_middleware import admin_required
 @admin_required
 def get_flight_tariffs(current_user):
     flight_tariffs = FlightTariff.get_all()
-    return jsonify([ft.to_dict() for ft in flight_tariffs])
+    return jsonify([ft.to_dict() for ft in flight_tariffs]), 200
 
 
 @admin_required
@@ -29,10 +29,10 @@ def create_flight_tariff(current_user):
 def update_flight_tariff(current_user, flight_tariff_id):
     body = request.json
     updated = FlightTariff.update(flight_tariff_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_flight_tariff(current_user, flight_tariff_id):
     deleted = FlightTariff.delete_or_404(flight_tariff_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

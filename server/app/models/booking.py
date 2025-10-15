@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.messages import BookingMessages
 from app.utils.enum import (
     BOOKING_STATUS,
     CURRENCY,
@@ -297,7 +298,7 @@ class Booking(BaseModel):
             to_status not in cls.ALLOWED_TRANSITIONS.get(from_status, set())
         ):
             raise ValueError(
-                f'Illegal transition: {from_status.value} -> {to_status.value}'
+                BookingMessages.illegal_transition(from_status.value, to_status.value)
             )
 
         return cls.update(

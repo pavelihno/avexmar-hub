@@ -6,7 +6,7 @@ from app.middlewares.auth_middleware import admin_required
 
 def get_tariffs():
     tariffs = Tariff.get_all()
-    return jsonify([t.to_dict() for t in tariffs])
+    return jsonify([t.to_dict() for t in tariffs]), 200
 
 
 def get_tariff(tariff_id):
@@ -25,10 +25,10 @@ def create_tariff(current_user):
 def update_tariff(current_user, tariff_id):
     body = request.json
     updated = Tariff.update(tariff_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_tariff(current_user, tariff_id):
     deleted = Tariff.delete_or_404(tariff_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

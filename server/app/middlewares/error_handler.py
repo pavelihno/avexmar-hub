@@ -3,6 +3,7 @@ import logging
 from flask import current_app, jsonify
 from werkzeug.exceptions import HTTPException, NotFound
 
+from app.constants.messages import ErrorMessages
 from app.database import db
 from app.models._base_model import ModelValidationError, NotFoundError
 from app.utils.email import EmailError
@@ -44,7 +45,7 @@ def register_error_handlers(app):
     def _handle_email_error(e):
         db.session.rollback()
         _log_exception(f'Email error: {e}')
-        return jsonify({'message': 'Failed to send email'}), 500
+        return jsonify({'message': ErrorMessages.FAILED_TO_SEND_EMAIL}), 500
 
     @app.errorhandler(ValueError)
     def _handle_value_error(e):
@@ -65,4 +66,4 @@ def register_error_handlers(app):
             return e
         db.session.rollback()
         _log_exception(f'Unhandled exception: {e}')
-        return jsonify({'message': 'Internal server error'}), 500
+        return jsonify({'message': ErrorMessages.INTERNAL_SERVER_ERROR}), 500

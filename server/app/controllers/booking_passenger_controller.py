@@ -7,7 +7,7 @@ from app.middlewares.auth_middleware import admin_required
 @admin_required
 def get_booking_passengers(current_user):
     booking_passengers = BookingPassenger.get_all()
-    return jsonify([bp.to_dict() for bp in booking_passengers])
+    return jsonify([bp.to_dict() for bp in booking_passengers]), 200
 
 
 @admin_required
@@ -27,10 +27,10 @@ def create_booking_passenger(current_user):
 def update_booking_passenger(current_user, booking_passenger_id):
     body = request.json
     updated = BookingPassenger.update(booking_passenger_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_booking_passenger(current_user, booking_passenger_id):
     deleted = BookingPassenger.delete_or_404(booking_passenger_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

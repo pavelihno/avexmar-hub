@@ -23,9 +23,9 @@ const Home = () => {
 				<Box component='section'>
 					<PosterCarousel />
 				</Box>
-				<Box component='section'>
+				{/* <Box component='section'>
 					<RecommendationsShowcase />
-				</Box>
+				</Box> */}
 			</Box>
 		</Base>
 	);

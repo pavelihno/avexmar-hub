@@ -7,7 +7,7 @@ from app.middlewares.auth_middleware import admin_required
 @admin_required
 def get_discounts(current_user):
     discounts = Discount.get_all()
-    return jsonify([d.to_dict() for d in discounts])
+    return jsonify([d.to_dict() for d in discounts]), 200
 
 
 @admin_required
@@ -27,10 +27,10 @@ def create_discount(current_user):
 def update_discount(current_user, discount_id):
     body = request.json
     updated = Discount.update(discount_id, commit=True, **body)
-    return jsonify(updated.to_dict())
+    return jsonify(updated.to_dict()), 200
 
 
 @admin_required
 def delete_discount(current_user, discount_id):
     deleted = Discount.delete_or_404(discount_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from werkzeug.datastructures import FileStorage
 
 from app.config import Config
+from app.constants.messages import FileMessages
 
 
 class StorageManager:
@@ -17,7 +18,7 @@ class StorageManager:
         """Validate file extension and return it without the dot"""
         extension = Path(filename).suffix.lower()
         if self.allowed_extensions and extension not in self.allowed_extensions:
-            raise ValueError('Unsupported file type')
+            raise ValueError(FileMessages.INVALID_FILE_TYPE)
         return extension.lstrip('.')
 
     def _normalize_relative_dir(self, relative_dir: str) -> Path:
@@ -29,7 +30,7 @@ class StorageManager:
     def save_file(self, file: FileStorage, subfolder_name: Optional[str] = None) -> Tuple[str, str]:
         """Save a file to storage and return (relative_path, filename)"""
         if not file or not file.filename:
-            raise ValueError('File is required')
+            raise ValueError(FileMessages.FILE_REQUIRED)
 
         extension = self._validate_extension(file.filename)
 
@@ -61,10 +62,10 @@ class StorageManager:
 
         # Security check: ensure the path is within storage_root
         if not str(full_path).startswith(str(self.storage_root)):
-            raise ValueError('Invalid path')
+            raise ValueError(FileMessages.INVALID_PATH)
 
         if not full_path.exists():
-            raise ValueError('File not found')
+            raise ValueError(FileMessages.FILE_NOT_FOUND)
 
         return full_path
 

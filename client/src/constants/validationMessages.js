@@ -77,6 +77,7 @@ export const VALIDATION_MESSAGES = {
 		password: {
 			REQUIRED: 'Пароль обязателен',
 			MIN_LENGTH: 'Пароль должен содержать минимум 6 символов',
+			WEAK: 'Пароль слишком простой. Усложните комбинацию',
 		},
 		password2: {
 			REQUIRED: 'Подтверждение пароля обязательно',

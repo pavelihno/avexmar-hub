@@ -4,6 +4,13 @@ from app.config import Config
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
+from app.constants.branding import (
+    DEFAULT_EMAIL_CONTEXT,
+    EMAIL_SUBJECTS,
+    EMAIL_TEMPLATES,
+)
+from app.constants.messages import ErrorMessages
+
 
 mail = Mail()
 
@@ -15,28 +22,28 @@ class EmailError(Exception):
 
 class EMAIL_TYPE(enum.Enum):
     booking_confirmation = (
-        'booking_confirmation',
-        'Бронирование № {booking_number} подтверждено — {brand_name}',
+        EMAIL_TEMPLATES['booking_confirmation'],
+        EMAIL_SUBJECTS['booking_confirmation'],
     )
     invoice_payment = (
-        'invoice_payment',
-        'Оплата бронирования — {brand_name}',
+        EMAIL_TEMPLATES['invoice_payment'],
+        EMAIL_SUBJECTS['invoice_payment'],
     )
     password_reset = (
-        'forgot_password',
-        'Сброс пароля — {brand_name}',
+        EMAIL_TEMPLATES['password_reset'],
+        EMAIL_SUBJECTS['password_reset'],
     )
     account_activation = (
-        'account_activation',
-        'Активация аккаунта — {brand_name}',
+        EMAIL_TEMPLATES['account_activation'],
+        EMAIL_SUBJECTS['account_activation'],
     )
     two_factor = (
-        'two_factor',
-        'Код для входа —  {brand_name}',
+        EMAIL_TEMPLATES['two_factor'],
+        EMAIL_SUBJECTS['two_factor'],
     )
     password_change = (
-        'password_change',
-        'Изменение пароля — {brand_name}',
+        EMAIL_TEMPLATES['password_change'],
+        EMAIL_SUBJECTS['password_change'],
     )
 
     def __init__(self, template: str, subject: str):
@@ -72,12 +79,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
     if not recipients:
         return
 
-    context = {
-        'brand_name': 'Авексмар',
-        'support_email': 'mail@avexmar.com',
-        'site_url': 'https://avexmar.ru',
-        **context
-    }
+    context = {**DEFAULT_EMAIL_CONTEXT, **context}
     subject = email_type.subject.format(**context)
     template = email_type.template
 
@@ -97,7 +99,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
         msg.body = render_template(f'email/txt/{template}.txt', **context)
         msg.html = render_template(f'email/html/{template}.html', **context)
     except Exception as e:
-        raise EmailError('Failed to send email') from e
+        raise EmailError(ErrorMessages.FAILED_TO_SEND_EMAIL) from e
 
     for attachment in attachments:
         if isinstance(attachment, dict):
@@ -111,4 +113,4 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
     try:
         __send_email(app, msg, username, password)
     except Exception as e:
-        raise EmailError('Failed to send email') from e
+        raise EmailError(ErrorMessages.FAILED_TO_SEND_EMAIL) from e

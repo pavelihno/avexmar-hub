@@ -6,7 +6,7 @@ from app.middlewares.auth_middleware import admin_required
 
 def get_consent_events():
     events = ConsentEvent.get_all()
-    return jsonify([e.to_dict() for e in events])
+    return jsonify([e.to_dict() for e in events]), 200
 
 
 def get_consent_event(event_id):
@@ -25,10 +25,10 @@ def create_consent_event(current_user):
 def update_consent_event(current_user, event_id):
     body = request.json or {}
     event = ConsentEvent.update(event_id, commit=True, **body)
-    return jsonify(event.to_dict())
+    return jsonify(event.to_dict()), 200
 
 
 @admin_required
 def delete_consent_event(current_user, event_id):
     deleted = ConsentEvent.delete_or_404(event_id, commit=True)
-    return jsonify(deleted)
+    return jsonify(deleted), 200

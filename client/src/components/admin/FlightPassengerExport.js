@@ -62,7 +62,6 @@ const FlightPassengerExport = () => {
 					endpoint: '/exports/flight-passengers',
 					params: {
 						flight_id: selectedFlight.id,
-						date: formatDate(selectedFlight.scheduled_departure, DATE_API_FORMAT),
 					},
 				})
 			).unwrap();
