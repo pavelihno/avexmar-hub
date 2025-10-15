@@ -10,7 +10,7 @@ from app.models.timezone import Timezone
 if TYPE_CHECKING:
     from app.models.route import Route
 
-from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
 
 
 class Airport(BaseModel):
@@ -61,9 +61,7 @@ class Airport(BaseModel):
         'timezone': 'Часовой пояс'
     }
 
-    upload_text_fields = [
-        'name', 'city_name', 'city_name_en', 'iata_code', 'icao_code', 'city_code', 'country_code', 'timezone'
-    ]
+    upload_required_fields = ['name', 'iata_code', 'icao_code', 'city_name', 'city_code', 'country_code']
 
     @classmethod
     def get_all(cls):
@@ -71,15 +69,28 @@ class Airport(BaseModel):
 
     @classmethod
     def get_by_code(cls, code):
-        """Get airport by IATA code"""
         if not code:
             return None
         code = code.upper()
         return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
-    def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
+    def get_upload_xlsx_template(cls):
+        return get_upload_xlsx_template(
+            cls.upload_fields,
+            model_class=cls,
+            required_fields=cls.upload_required_fields,
+        )
+
+    @classmethod
+    def get_upload_xlsx_report(cls, error_rows):
+        return get_upload_xlsx_report(
+            cls.upload_fields,
+            cls,
+            cls.upload_required_fields,
+            [],
+            error_rows
+        )
 
     @classmethod
     def upload_from_file(
@@ -88,17 +99,11 @@ class Airport(BaseModel):
         session: Session | None = None,
     ):
         session = session or db.session
-        rows = parse_xlsx(
+        rows = parse_upload_xlsx_template(
             file,
             cls.upload_fields,
-            required_fields=[
-                'name',
-                'iata_code',
-                'icao_code',
-                'city_name',
-                'city_code',
-                'country_code',
-            ],
+            model_class=cls,
+            required_fields=cls.upload_required_fields,
         )
 
         def process_row(row, row_session: Session):
@@ -126,4 +131,4 @@ class Airport(BaseModel):
                 commit=False,
             )
 
-        return cls._process_upload_rows(rows, process_row, session=session)
+        return super()._process_upload_rows(rows, process_row, session=session)

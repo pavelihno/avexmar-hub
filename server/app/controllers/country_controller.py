@@ -3,7 +3,7 @@ from flask import request, jsonify, send_file
 from app.constants.messages import FileMessages
 from app.models.country import Country
 from app.middlewares.auth_middleware import admin_required
-from app.utils.xlsx import create_xlsx, is_xlsx_file
+from app.utils.xlsx import is_xlsx_file
 
 
 def get_countries():
@@ -38,7 +38,7 @@ def delete_country(current_user, country_id):
 
 @admin_required
 def get_country_template(current_user):
-    xlsx = Country.get_xlsx_template()
+    xlsx = Country.get_upload_xlsx_template()
     xlsx.seek(0)
     return send_file(
         xlsx,
@@ -58,7 +58,7 @@ def upload_country(current_user):
     countries, error_rows = Country.upload_from_file(file)
 
     if error_rows:
-        error_xlsx = create_xlsx(Country.upload_fields, error_rows)
+        error_xlsx = Country.get_upload_xlsx_report(error_rows)
         error_xlsx.seek(0)
         return send_file(
             error_xlsx,

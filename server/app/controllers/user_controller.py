@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from sqlalchemy import func
 
-from app.constants.messages import UserMessages
+from app.constants.messages import AuthMessages, UserMessages, BookingMessages
 from app.database import db
 from app.models.user import User
 from app.models.booking import Booking
@@ -77,7 +77,7 @@ def __set_user_activity(user_id, is_active):
     updated_user = User.update(user_id, commit=True, is_active=is_active)
     if updated_user:
         return jsonify(updated_user.to_dict()), 200
-    return jsonify({'message': UserMessages.USER_NOT_FOUND}), 404
+    return jsonify({'message': AuthMessages.USER_NOT_FOUND}), 404
 
 
 @admin_required
@@ -93,7 +93,7 @@ def deactivate_user(current_user, user_id):
 @login_required
 def get_user_bookings(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': UserMessages.FORBIDDEN}), 403
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
 
     bookings = Booking.query.filter_by(user_id=user_id).all()
     if not bookings:
@@ -138,7 +138,7 @@ def get_user_bookings(current_user, user_id):
 @login_required
 def get_user_passengers(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': UserMessages.FORBIDDEN}), 403
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
     passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
     return jsonify([p.to_dict(return_children=True) for p in passengers]), 200
 
@@ -146,7 +146,7 @@ def get_user_passengers(current_user, user_id):
 @login_required
 def create_user_passenger(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
-        return jsonify({'message': UserMessages.FORBIDDEN}), 403
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
     body = request.json or {}
 
     consent = body.pop('consent', False)
@@ -195,4 +195,4 @@ def change_password(current_user):
         code=verification_code,
         expires_in_minutes=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS // 60,
     )
-    return jsonify({'message': UserMessages.VERIFICATION_CODE_SENT}), 200
+    return jsonify({'message': AuthMessages.VERIFICATION_CODE_SENT}), 200

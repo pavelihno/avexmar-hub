@@ -2,7 +2,7 @@ class ModelMessages:
     LIST_OF_IDS_REQUIRED = 'Требуется список идентификаторов'
     IDS_MUST_BE_INTEGERS = 'Идентификаторы должны быть целыми числами'
     MUST_BE_UNIQUE = 'должно быть уникальным'
-    
+
     @staticmethod
     def not_found(model_name: str) -> str:
         return f'{model_name} не найден'
@@ -32,15 +32,16 @@ class BookingMessages:
     BOOKING_NOT_FOUND = 'Бронирование не найдено'
     BOOKING_FOUND = 'Бронирование найдено'
 
+    @staticmethod
+    def illegal_transition(from_status: str, to_status: str) -> str:
+        return f'Недопустимый переход статуса: {from_status} -> {to_status}'
+
 
 class UserMessages:
     USER_NOT_CREATED = 'Пользователь не создан'
     CONSENT_REQUIRED = 'Требуется согласие'
-    USER_NOT_FOUND = AuthMessages.USER_NOT_FOUND
-    FORBIDDEN = BookingMessages.FORBIDDEN
     INVALID_PASSWORD = 'Неверный пароль'
     INVALID_OR_EXPIRED_CODE = 'Недействительный или просроченный код'
-    VERIFICATION_CODE_SENT = AuthMessages.VERIFICATION_CODE_SENT
 
 
 class ConsentMessages:
@@ -54,6 +55,35 @@ class PassengerMessages:
 class CountryMessages:
     INVALID_COUNTRY_CODE = 'Неверный код страны'
 
+
+class AirlineMessages:
+    INVALID_AIRLINE_CODE = 'Неверный код авиакомпании'
+
+
+class AirportMessages:
+    INVALID_AIRPORT_CODE = 'Неверный код аэропорта'
+    INVALID_ORIGIN_AIRPORT_CODE = 'Неверный код аэропорта отправления'
+    INVALID_DESTINATION_AIRPORT_CODE = 'Неверный код аэропорта прибытия'
+
+
+class RouteMessages:
+    ROUTE_NOT_FOUND = 'Маршрут не найден'
+
+
+class FlightMessages:
+    FLIGHT_NUMBER_ALREADY_EXISTS = 'Рейс с таким номером уже существует для данной авиакомпании и маршрута'
+
+    @staticmethod
+    def incomplete_tariff_data(seat_class, seats_number, tariff_number) -> str:
+        return f'Неполные данные тарифа: Класс обслуживания `{seat_class}`, Количество мест `{seats_number}`, Номер тарифа `{tariff_number}`'
+
+    @staticmethod
+    def duplicate_tariff(seat_class, seats_number, tariff_number) -> str:
+        return f'Дублирующийся тариф: Класс обслуживания `{seat_class}`, Количество мест `{seats_number}`, Номер тарифа `{tariff_number}`'
+
+    @staticmethod
+    def invalid_tariff_number_or_class(seat_class, seats_number, tariff_number) -> str:
+        return f'Недействительный номер тарифа или класс: Класс обслуживания `{seat_class}`, Количество мест `{seats_number}`, Номер тарифа `{tariff_number}`'
 
 class ExportMessages:
     PUBLIC_ID_REQUIRED = 'Требуется идентификатор бронирования'
@@ -95,7 +125,28 @@ class DateTimeMessages:
 
 
 class XlsxMessages:
+    REQUIRED_FIELD = 'ОБЯЗАТЕЛЬНОЕ ПОЛЕ'
+    ALLOWED_VALUES = 'Допустимые значения'
+    DATE_FORMAT_LABEL = 'Формат даты'
+    DATE_FORMAT_EXAMPLE = 'например: 31.12.2025'
+    TIME_FORMAT_LABEL = 'Формат времени'
+    TIME_FORMAT_EXAMPLE = 'например: 14:30'
+    NUMERIC_VALUE = 'Числовое значение'
+    TEXT_VALUE = 'Текстовое значение'
+    FIELD_COLUMN_HEADER = 'Поле'
+    RULES_COLUMN_HEADER = 'Правила заполнения'
+    DATA_SHEET_NAME = 'Загрузка данных'
+    RULES_SHEET_NAME = 'Правила заполнения'
+
     @staticmethod
     def missing_required_fields(field_names) -> str:
         formatted = ', '.join(field_names)
         return f'Отсутствуют обязательные поля: {formatted}'
+
+    @staticmethod
+    def template_not_supported(model_name: str) -> str:
+        return f'{model_name} не поддерживает генерацию XLSX шаблона'
+
+    @staticmethod
+    def upload_not_supported(model_name: str) -> str:
+        return f'{model_name} не поддерживает загрузку из файла'

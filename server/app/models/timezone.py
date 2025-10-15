@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.utils.xlsx import parse_xlsx, generate_xlsx_template
+from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
 
 if TYPE_CHECKING:
     from app.models.airport import Airport
@@ -27,10 +27,9 @@ class Timezone(BaseModel):
         'name': 'Часовой пояс',
     }
 
-    upload_text_fields = ['name']
+    upload_required_fields = ['name']
 
     def get_tz(self):
-        """Return the timezone as a ZoneInfo object"""
         return ZoneInfo(self.name)
 
     @classmethod
@@ -38,8 +37,22 @@ class Timezone(BaseModel):
         return super().get_all(sort_by=['name'], descending=False)
 
     @classmethod
-    def get_xlsx_template(cls):
-        return generate_xlsx_template(cls.upload_fields, text_fields=cls.upload_text_fields)
+    def get_upload_xlsx_template(cls):
+        return get_upload_xlsx_template(
+            cls.upload_fields,
+            model_class=cls,
+            required_fields=cls.upload_required_fields,
+        )
+
+    @classmethod
+    def get_upload_xlsx_report(cls, error_rows):
+        return get_upload_xlsx_report(
+            cls.upload_fields,
+            cls,
+            cls.upload_required_fields,
+            [],
+            error_rows
+        )
 
     @classmethod
     def upload_from_file(
@@ -48,10 +61,11 @@ class Timezone(BaseModel):
         session: Session | None = None,
     ):
         session = session or db.session
-        rows = parse_xlsx(
+        rows = parse_upload_xlsx_template(
             file,
             cls.upload_fields,
-            required_fields=['name'],
+            model_class=cls,
+            required_fields=cls.upload_required_fields,
         )
 
         def process_row(row, row_session: Session):
@@ -61,4 +75,4 @@ class Timezone(BaseModel):
                 commit=False,
             )
 
-        return cls._process_upload_rows(rows, process_row, session=session)
+        return super()._process_upload_rows(rows, process_row, session=session)

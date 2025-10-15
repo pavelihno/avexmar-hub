@@ -4,7 +4,7 @@ from app.constants.messages import FileMessages
 from app.models.airline import Airline
 
 from app.middlewares.auth_middleware import admin_required
-from app.utils.xlsx import is_xlsx_file, create_xlsx
+from app.utils.xlsx import is_xlsx_file
 
 
 def get_airlines():
@@ -38,7 +38,7 @@ def delete_airline(current_user, airline_id):
 
 @admin_required
 def get_airline_template(current_user):
-    xlsx = Airline.get_xlsx_template()
+    xlsx = Airline.get_upload_xlsx_template()
     xlsx.seek(0)
     return send_file(
         xlsx,
@@ -57,7 +57,7 @@ def upload_airline(current_user):
         return jsonify({'message': FileMessages.INVALID_FILE_TYPE}), 400
     airlines, error_rows = Airline.upload_from_file(file)
     if error_rows:
-        error_xlsx = create_xlsx(Airline.upload_fields, error_rows)
+        error_xlsx = Airline.get_upload_xlsx_report(error_rows)
         error_xlsx.seek(0)
         return send_file(
             error_xlsx,

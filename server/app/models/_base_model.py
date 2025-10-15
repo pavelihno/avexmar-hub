@@ -45,7 +45,9 @@ class BaseModel(db.Model):
             return data
 
         mapper = inspect(cls)
-        nullable_columns = {column.key for column in mapper.columns if column.nullable}
+        nullable_columns = {
+            column.key for column in mapper.columns if column.nullable
+        }
 
         cleaned = {}
         for k, v in data.items():
@@ -82,13 +84,21 @@ class BaseModel(db.Model):
         super().__init__(**kwargs)
 
     @classmethod
+    def get_upload_xlsx_template(cls):
+        from app.constants.messages import XlsxMessages
+        raise NotImplementedError(
+            XlsxMessages.template_not_supported(cls.__name__))
+
+    @classmethod
     def upload_from_file(
         cls,
         file,
         session: Session | None = None,
     ):
-        """Upload records for the model from the provided file"""
-        raise NotImplementedError(f'{cls.__name__} does not support file uploads')
+        from app.constants.messages import XlsxMessages
+        raise NotImplementedError(
+            XlsxMessages.upload_not_supported(cls.__name__)
+        )
 
     @classmethod
     def _process_upload_rows(
@@ -115,7 +125,6 @@ class BaseModel(db.Model):
             except Exception as exc:
                 row['error'] = str(exc)
                 error_rows.append(row)
-            
 
         return processed, error_rows
 
@@ -200,7 +209,9 @@ class BaseModel(db.Model):
                     None,
                 )
                 if target_cls is not None and session.get(target_cls, value) is None:
-                    raise NotFoundError(ModelMessages.not_found(target_cls.__name__))
+                    raise NotFoundError(
+                        ModelMessages.not_found(target_cls.__name__)
+                    )
 
     @classmethod
     def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
@@ -340,13 +351,19 @@ class BaseModel(db.Model):
     ) -> int:
         session = session or db.session
         if not isinstance(ids, IterableABC) or isinstance(ids, (str, bytes)):
-            raise ModelValidationError({'message': ModelMessages.LIST_OF_IDS_REQUIRED})
+            raise ModelValidationError(
+                {'message': ModelMessages.LIST_OF_IDS_REQUIRED}
+            )
         try:
             cleaned_ids = {int(_id) for _id in ids if _id is not None}
         except (TypeError, ValueError):
-            raise ModelValidationError({'message': ModelMessages.IDS_MUST_BE_INTEGERS})
+            raise ModelValidationError(
+                {'message': ModelMessages.IDS_MUST_BE_INTEGERS}
+            )
         if not cleaned_ids:
-            raise ModelValidationError({'message': ModelMessages.LIST_OF_IDS_REQUIRED})
+            raise ModelValidationError(
+                {'message': ModelMessages.LIST_OF_IDS_REQUIRED}
+            )
         try:
             count = (
                 session.query(cls)

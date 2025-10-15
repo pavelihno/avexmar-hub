@@ -3,7 +3,7 @@ from flask import request, jsonify, send_file
 from app.constants.messages import FileMessages
 from app.models.airport import Airport
 from app.middlewares.auth_middleware import admin_required
-from app.utils.xlsx import is_xlsx_file, create_xlsx
+from app.utils.xlsx import is_xlsx_file
 
 
 def get_airports():
@@ -38,7 +38,7 @@ def delete_airport(current_user, airport_id):
 
 @admin_required
 def get_airport_template(current_user):
-    xlsx = Airport.get_xlsx_template()
+    xlsx = Airport.get_upload_xlsx_template()
     xlsx.seek(0)
     return send_file(
         xlsx,
@@ -57,7 +57,7 @@ def upload_airport(current_user):
         return jsonify({'message': FileMessages.INVALID_FILE_TYPE}), 400
     airports, error_rows = Airport.upload_from_file(file)
     if error_rows:
-        error_xlsx = create_xlsx(Airport.upload_fields, error_rows)
+        error_xlsx = Airport.get_upload_xlsx_report(error_rows)
         error_xlsx.seek(0)
         return send_file(
             error_xlsx,
