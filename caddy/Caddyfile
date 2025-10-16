@@ -67,7 +67,11 @@ yookassa.{$CADDY_DOMAIN} {
         max_size 2MiB
     }
 
-    reverse_proxy @yk_post server-app:8000
+    handle @yk_post {
+        reverse_proxy server-app:8000
+    }
 
-    respond 404
+    handle {
+        respond 404
+    }
 }
