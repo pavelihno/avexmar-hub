@@ -1,5 +1,5 @@
 {$CADDY_DOMAIN} {
-    log {
+    log client_log {
         no_hostname
         output file /var/log/app/caddy/out.log {
             roll_size 10MiB
@@ -8,11 +8,13 @@
         format json
     }
 
+    log_name client_log
+
     reverse_proxy client-app:80
 }
 
 storage.{$CADDY_DOMAIN} {
-    log {
+    log storage_log {
         no_hostname
         output file /var/log/app/caddy/storage.log {
             roll_size 10MiB
@@ -21,11 +23,13 @@ storage.{$CADDY_DOMAIN} {
         format json
     }
 
+    log_name storage_log
+
     reverse_proxy storage-cdn:80
 }
 
 grafana.{$CADDY_DOMAIN} {
-    log {
+    log grafana_log {
         no_hostname
         output file /var/log/app/caddy/grafana.log {
             roll_size 10MiB
@@ -34,11 +38,13 @@ grafana.{$CADDY_DOMAIN} {
         format json
     }
 
+    log_name grafana_log
+
     reverse_proxy grafana:3000
 }
 
 yookassa.{$CADDY_DOMAIN} {
-    log {
+    log yookassa_log {
         no_hostname
         output file /var/log/app/caddy/yookassa.log {
             roll_size 10MiB
@@ -46,6 +52,8 @@ yookassa.{$CADDY_DOMAIN} {
         }
         format json
     }
+
+    log_name yookassa_log
 
     @yk_post {
         method POST
