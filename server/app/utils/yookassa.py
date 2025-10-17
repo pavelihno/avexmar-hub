@@ -9,6 +9,7 @@ from app.constants.branding import (
     PASSENGER_CATEGORY_LABELS,
     SEAT_CLASS_LABELS,
 )
+from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
 from app.constants.yookassa import YooKassaMessages, YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE
 from app.database import db
 from app.models.booking import Booking
@@ -155,7 +156,9 @@ def __send_confirmation_email(booking: Booking) -> bool:
         flights=flights,
         passengers=passengers,
         attachments=[{
-            'filename': f'booking_{booking.booking_number}.pdf',
+            'filename': BOOKING_PDF_FILENAME_TEMPLATE.format(
+                booking_number=booking.booking_number
+            ),
             'content_type': 'application/pdf',
             'data': pdf_data,
         }],

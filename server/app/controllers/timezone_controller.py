@@ -1,5 +1,6 @@
 from flask import jsonify, request, send_file
 
+from app.constants.files import TIMEZONES_TEMPLATE_FILENAME, UPLOAD_ERRORS_FILENAME
 from app.constants.messages import FileMessages
 from app.models.timezone import Timezone
 from app.middlewares.auth_middleware import admin_required
@@ -45,7 +46,7 @@ def get_timezone_template(current_user):
     return send_file(
         xlsx,
         as_attachment=True,
-        download_name='timezones_template.xlsx',
+        download_name=TIMEZONES_TEMPLATE_FILENAME,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ), 200
 
@@ -65,7 +66,7 @@ def upload_timezone(current_user):
         return send_file(
             error_xlsx,
             as_attachment=True,
-            download_name='upload_errors.xlsx',
+            download_name=UPLOAD_ERRORS_FILENAME,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ), 201
 

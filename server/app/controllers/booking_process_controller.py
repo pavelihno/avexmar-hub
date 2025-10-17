@@ -2,6 +2,7 @@ from flask import request, jsonify, send_file
 from io import BytesIO
 import uuid
 
+from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
 from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
 from app.config import Config
@@ -289,7 +290,9 @@ def get_booking_process_pdf(current_user, public_id):
         BytesIO(pdf),
         mimetype='application/pdf',
         as_attachment=True,
-        download_name=f'booking_{booking.booking_number}.pdf',
+        download_name=BOOKING_PDF_FILENAME_TEMPLATE.format(
+            booking_number=booking.booking_number
+        ),
     ), 200
 
 
