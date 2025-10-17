@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
@@ -32,28 +32,31 @@ const Payment = () => {
 		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
 	}, [timeLeft]);
 
-	const isProcessing =
-		new URLSearchParams(location.search).has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
+	const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+	const accessToken = searchParams.get('access_token');
+
+	const isProcessing = searchParams.has('processing') && !['succeeded', 'canceled'].includes(paymentStatus);
 
 	useEffect(() => {
-		dispatch(fetchPayment(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchPayment({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	useEffect(() => {
 		if (!isProcessing || ['succeeded', 'canceled'].includes(paymentStatus)) return;
-		const id = setInterval(() => dispatch(fetchPayment(publicId)), 3000);
+		const id = setInterval(() => dispatch(fetchPayment({ publicId, accessToken })), 3000);
 		return () => clearInterval(id);
-	}, [isProcessing, paymentStatus, dispatch, publicId]);
+	}, [isProcessing, paymentStatus, dispatch, publicId, accessToken]);
 
 	useEffect(() => {
 		if (paymentStatus === 'succeeded') {
-			navigate(`/booking/${publicId}/completion`);
+			const query = accessToken ? `?access_token=${accessToken}` : '';
+			navigate(`/booking/${publicId}/completion${query}`);
 		}
-	}, [paymentStatus, navigate, publicId]);
+	}, [paymentStatus, navigate, publicId, accessToken]);
 
 	const handleError = useCallback(() => {
-		dispatch(fetchPayment(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchPayment({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	const returnUrl = `${window.location.origin}${window.location.pathname}?processing=1`;
 

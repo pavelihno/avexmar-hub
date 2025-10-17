@@ -1,7 +1,7 @@
 from flask import request, jsonify, send_file
 from io import BytesIO
 
-from app.constants.messages import ExportMessages
+from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
 from app.config import Config
 from datetime import datetime, timedelta
@@ -17,8 +17,6 @@ from app.utils.business_logic import calculate_price_details, get_booking_detail
 from app.utils.yookassa import create_payment, create_invoice, handle_yookassa_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
-    PASSENGER_PLURAL_CATEGORY,
-    CONSENT_ACTION,
     CONSENT_EVENT_TYPE,
     CONSENT_DOC_TYPE,
 )
@@ -112,8 +110,11 @@ def create_booking_process_passengers(current_user):
     passengers = data.get('passengers') or []
     if not public_id:
         return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
-    token = data.get('access_token')
-    booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    booking = Booking.get_if_has_access(current_user, public_id)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     session = db.session
 
@@ -156,7 +157,7 @@ def create_booking_process_passengers(current_user):
             passenger = Passenger.create(
                 session,
                 commit=False,
-                owner_user_id=current_user.id,
+                owner_user_id=current_user.id if current_user else None,
                 **passenger_fields,
             )
 
@@ -217,8 +218,11 @@ def confirm_booking_process(current_user):
 
     if not public_id:
         return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
-    token = data.get('access_token')
-    booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    booking = Booking.get_if_has_access(current_user, public_id)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     session = db.session
 
@@ -257,6 +261,10 @@ def confirm_booking_process(current_user):
 def get_booking_process_details(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
+
     result = get_booking_details(booking)
     return jsonify(result), 200
 
@@ -265,6 +273,10 @@ def get_booking_process_details(current_user, public_id):
 def get_booking_process_pdf(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
+
     pdf = generate_booking_pdf(booking)
     return send_file(
         BytesIO(pdf),
@@ -278,6 +290,9 @@ def get_booking_process_pdf(current_user, public_id):
 def get_booking_process_payment(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     payment = (
         Payment.query.filter_by(booking_id=booking.id)

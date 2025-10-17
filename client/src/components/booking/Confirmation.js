@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
 	Box,
 	Typography,
@@ -24,6 +24,7 @@ import { selectIsAdmin } from '../../redux/reducers/auth';
 
 const Confirmation = () => {
 	const { publicId } = useParams();
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
@@ -32,9 +33,11 @@ const Confirmation = () => {
 	const [loading, setLoading] = useState(false);
 	const isAdmin = useSelector(selectIsAdmin);
 
+	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
+
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchBookingDetails({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
@@ -65,8 +68,9 @@ const Confirmation = () => {
 		setLoading(true);
 		try {
 			await dispatch(confirmBooking({ publicId, isPayment })).unwrap();
-			await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/payment`);
+			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
+			const query = accessToken ? `?access_token=${accessToken}` : '';
+			navigate(`/booking/${publicId}/payment${query}`);
 		} catch (e) {
 			// errors handled via redux state
 			setLoading(false);

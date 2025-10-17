@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
 	Box,
 	Card,
@@ -26,13 +26,16 @@ import FlightDetailsCard from './FlightDetailsCard';
 
 const Completion = () => {
 	const { publicId } = useParams();
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
 	const payment = useSelector((state) => state.payment.current);
 
+	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
+
 	const handleDownloadPdf = async () => {
 		try {
-			const data = await dispatch(downloadBookingPdf(publicId)).unwrap();
+			const data = await dispatch(downloadBookingPdf({ publicId, accessToken })).unwrap();
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
@@ -47,9 +50,9 @@ const Completion = () => {
 	};
 
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-		dispatch(fetchPayment(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchBookingDetails({ publicId, accessToken }));
+		dispatch(fetchPayment({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 	const outboundRouteInfo = extractRouteInfo(outboundFlight);

@@ -133,8 +133,9 @@ class Booking(BaseModel):
         booking = cls.get_by_public_id(public_id)
 
         token = str(access_token) if access_token else None
+
         if booking.user_id:
-            if current_user and booking.user_id == getattr(current_user, 'id', None):
+            if current_user and booking.user_id == current_user.id:
                 return booking
             if token and str(booking.access_token) == token:
                 return booking
@@ -142,6 +143,7 @@ class Booking(BaseModel):
 
         if token and str(booking.access_token) != token:
             return None
+
         return booking
 
     @classmethod

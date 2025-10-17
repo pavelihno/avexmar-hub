@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Box,
@@ -44,6 +44,7 @@ import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
 const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const {
 		current: booking,
@@ -53,6 +54,8 @@ const Passengers = () => {
 	const { countries } = useSelector((state) => state.countries);
 	const { currentUser } = useSelector((state) => state.auth);
 	const userPassengers = useSelector((state) => state.passengers.passengers);
+
+	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
 
 	const expiresAt = booking?.expires_at;
 	const timeLeft = useExpiryCountdown(expiresAt);
@@ -104,8 +107,8 @@ const Passengers = () => {
 	}, [dispatch, currentUser]);
 
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchBookingDetails({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	useEffect(() => {
 		if (!countries || countries.length === 0) {
@@ -255,9 +258,10 @@ const Passengers = () => {
 					passengers: apiPassengers,
 				})
 			).unwrap();
-			await dispatch(fetchBookingDetails(publicId)).unwrap();
-			await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/confirmation`);
+			await dispatch(fetchBookingDetails({ publicId, accessToken })).unwrap();
+			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
+			const query = accessToken ? `?access_token=${accessToken}` : '';
+			navigate(`/booking/${publicId}/confirmation${query}`);
 		} catch (e) {
 			// errors handled via redux state
 		}

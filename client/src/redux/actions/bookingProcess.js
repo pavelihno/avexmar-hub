@@ -23,41 +23,40 @@ export const processBookingPassengers = createAsyncThunk(
 	}
 );
 
-export const fetchBookingDetails = createAsyncThunk(
-	'bookingProcess/fetchDetails',
-	async (publicId, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get(`/booking/${publicId}/details`);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(getErrorData(err));
-		}
-	}
-);
+const buildAccessParams = (accessToken) => (accessToken ? { params: { access_token: accessToken } } : {});
 
-export const fetchBookingAccess = createAsyncThunk(
-	'bookingProcess/fetchAccess',
-	async (publicId, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get(`/booking/${publicId}/access`);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(getErrorData(err));
-		}
+export const fetchBookingDetails = createAsyncThunk('bookingProcess/fetchDetails', async (arg, { rejectWithValue }) => {
+	try {
+		const { publicId, accessToken } = typeof arg === 'string' ? { publicId: arg } : arg || {};
+		const res = await serverApi.get(`/booking/${publicId}/details`, buildAccessParams(accessToken));
+		return res.data;
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
 	}
-);
+});
 
-export const downloadBookingPdf = createAsyncThunk(
-	'bookingProcess/downloadPdf',
-	async (publicId, { rejectWithValue }) => {
-		try {
-			const res = await serverApi.get(`/booking/${publicId}/pdf`, { responseType: 'blob' });
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(getErrorData(err));
-		}
+export const fetchBookingAccess = createAsyncThunk('bookingProcess/fetchAccess', async (arg, { rejectWithValue }) => {
+	try {
+		const { publicId, accessToken } = typeof arg === 'string' ? { publicId: arg } : arg || {};
+		const res = await serverApi.get(`/booking/${publicId}/access`, buildAccessParams(accessToken));
+		return res.data;
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
 	}
-);
+});
+
+export const downloadBookingPdf = createAsyncThunk('bookingProcess/downloadPdf', async (arg, { rejectWithValue }) => {
+	try {
+		const { publicId, accessToken } = typeof arg === 'string' ? { publicId: arg } : arg || {};
+		const res = await serverApi.get(`/booking/${publicId}/pdf`, {
+			responseType: 'blob',
+			...buildAccessParams(accessToken),
+		});
+		return res.data;
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
+});
 
 export const confirmBooking = createAsyncThunk(
 	'bookingProcess/confirm',
