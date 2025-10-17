@@ -93,7 +93,7 @@ const Completion = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='completion' />
 
-			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					<Card sx={{ p: { xs: 2, md: 3 } }}>
 						<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>

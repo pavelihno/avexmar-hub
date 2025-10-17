@@ -12,11 +12,12 @@ import {
 	CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, extractRouteInfo, useExpiryCountdown } from '../utils';
+import { formatNumber, extractRouteInfo } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
@@ -28,8 +29,6 @@ const Confirmation = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
-	const expiresAt = booking?.expires_at;
-	const timeLeft = useExpiryCountdown(expiresAt);
 	const [loading, setLoading] = useState(false);
 	const isAdmin = useSelector(selectIsAdmin);
 
@@ -92,16 +91,7 @@ const Confirmation = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
 
-			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
-				<Grid item xs={12} md={9} lg={9}>
-					{expiresAt && (
-						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-							<Typography variant='h6' sx={{ fontWeight: 600 }}>
-								{timeLeft}
-							</Typography>
-						</Box>
-					)}
-				</Grid>
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (

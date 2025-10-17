@@ -8,7 +8,7 @@ import BookingProgress from './BookingProgress';
 import PaymentForm from './PaymentForm';
 import { createPayment, fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, useExpiryCountdown } from '../utils';
+import { formatNumber } from '../utils';
 
 const Payment = () => {
 	const { publicId } = useParams();
@@ -24,13 +24,6 @@ const Payment = () => {
 	const confirmationToken = payment?.confirmation_token;
 	const paymentType = payment?.payment_type;
 	const isInvoice = paymentType === 'invoice';
-	const expiresAt = payment?.expires_at;
-
-	const timeLeft = useExpiryCountdown(expiresAt);
-
-	useEffect(() => {
-		document.title = UI_LABELS.BOOKING.payment_form.title(timeLeft);
-	}, [timeLeft]);
 
 	const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 	const accessToken = searchParams.get('access_token');
@@ -68,47 +61,33 @@ const Payment = () => {
 				<Box
 					sx={{
 						display: 'flex',
-						justifyContent: 'space-between',
+						justifyContent: 'flex-start',
 						mb: 2,
-						flexDirection: { xs: 'column', sm: 'row' },
-						alignItems: { xs: 'flex-start', sm: 'center' },
-						gap: { xs: 1, sm: 0 },
 					}}
 				>
-					<Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-						<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-							{`${UI_LABELS.BOOKING.payment_form.total}: `}
-						</Typography>
-						<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
-							{`${formatNumber(paymentAmount)} ${currencySymbol}`}
-						</Typography>
-					</Box>
-					{expiresAt && !['succeeded', 'canceled'].includes(paymentStatus) && (
-						<Typography variant='h6' sx={{ fontWeight: 600 }}>
-							{timeLeft}
-						</Typography>
-					)}
+					<Typography variant='h6' sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+						{`${UI_LABELS.BOOKING.payment_form.total}: `}
+					</Typography>
+					<Typography variant='h6' sx={{ ml: 1, fontWeight: 600 }}>
+						{`${formatNumber(paymentAmount)} ${currencySymbol}`}
+					</Typography>
 				</Box>
-
 				{paymentStatus === 'canceled' && (
 					<Alert severity='error' sx={{ mb: 2 }}>
 						{UI_LABELS.BOOKING.payment_form.payment_failed}
 					</Alert>
-				)}
-
+				)}{' '}
 				{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
 					<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
 						<CircularProgress />
 					</Box>
 				)}
-
 				{!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (
 					<PaymentForm confirmationToken={confirmationToken} returnUrl={returnUrl} onError={handleError} />
 				)}
 				{isInvoice && paymentStatus !== 'succeeded' && (
 					<Typography sx={{ mt: 2 }}>{UI_LABELS.BOOKING.payment_form.invoice_waiting}</Typography>
 				)}
-
 				{paymentStatus === 'canceled' && !isInvoice && (
 					<Button
 						variant='contained'

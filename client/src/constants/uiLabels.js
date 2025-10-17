@@ -535,6 +535,7 @@ export const UI_LABELS = {
 			payment: 'Оплата',
 			completion: 'Завершение',
 		},
+		timer_tooltip: 'Время для завершения бронирования',
 		step_placeholders: {
 			confirmation: 'Шаг подтверждения',
 			payment: 'Шаг оплаты',
