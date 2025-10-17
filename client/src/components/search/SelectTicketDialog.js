@@ -254,9 +254,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 			payload.return_id = returnFlight.id;
 			payload.return_tariff_id = returnTariffId;
 		}
-		const res = await dispatch(processBookingCreate(payload)).unwrap();
-		navigate(`/booking/${res.public_id}/passengers`);
-	};
+                const res = await dispatch(processBookingCreate(payload)).unwrap();
+                const query = res.access_token ? `?access_token=${res.access_token}` : '';
+                navigate(`/booking/${res.public_id}/passengers${query}`);
+        };
 
 	const [tariffDetails, setTariffDetails] = useState({ terms: '', hand_luggage: null, baggage: null });
 	const [showTariffDetails, setShowTariffDetails] = useState(false);

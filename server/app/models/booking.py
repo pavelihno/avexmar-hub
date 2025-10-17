@@ -132,19 +132,20 @@ class Booking(BaseModel):
         """Return booking if the user or token grants access, otherwise None"""
         booking = cls.get_by_public_id(public_id)
 
+        if not booking.access_token:
+            booking.access_token = uuid.uuid4()
+            db.session.commit()
+
         token = str(access_token) if access_token else None
+        booking_token = str(booking.access_token) if booking.access_token else None
 
-        if booking.user_id:
-            if current_user and booking.user_id == current_user.id:
-                return booking
-            if token and str(booking.access_token) == token:
-                return booking
-            return None
+        if token and booking_token and booking_token == token:
+            return booking
 
-        if token and str(booking.access_token) != token:
-            return None
+        if current_user and booking.user_id and booking.user_id == current_user.id:
+            return booking
 
-        return booking
+        return None
 
     @classmethod
     def generate_booking_number(
@@ -190,6 +191,7 @@ class Booking(BaseModel):
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
         history = [{'status': status.value, 'at': datetime.now().isoformat()}]
         kwargs['status_history'] = history
+        kwargs.setdefault('access_token', uuid.uuid4())
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
