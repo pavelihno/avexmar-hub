@@ -608,7 +608,7 @@ export const UI_LABELS = {
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
-			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
+			login_hint: 'Войдите, чтобы выбрать сохранённых пассажиров',
 		},
 		payment_form: {
 			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,

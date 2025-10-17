@@ -380,14 +380,6 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
             commit=False,
             to_status=BOOKING_STATUS.completed,
         )
-        booking = payment.booking
-        if not booking.access_token:
-            Booking.update(
-                booking.id,
-                session=session,
-                commit=False,
-                access_token=uuid.uuid4(),
-            )
         send_confirmation = True
 
     else:

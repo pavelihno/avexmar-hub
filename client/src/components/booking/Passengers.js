@@ -251,14 +251,14 @@ const Passengers = () => {
 		try {
 			const apiPassengers = (passengerData || []).map(toApiPassenger);
 			const apiBuyer = toApiBuyer(buyer);
-                        await dispatch(
-                                processBookingPassengers({
-                                        public_id: publicId,
-                                        buyer: apiBuyer,
-                                        passengers: apiPassengers,
-                                        accessToken,
-                                })
-                        ).unwrap();
+			await dispatch(
+				processBookingPassengers({
+					public_id: publicId,
+					buyer: apiBuyer,
+					passengers: apiPassengers,
+					accessToken,
+				})
+			).unwrap();
 			await dispatch(fetchBookingDetails({ publicId, accessToken })).unwrap();
 			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
 			const query = accessToken ? `?access_token=${accessToken}` : '';

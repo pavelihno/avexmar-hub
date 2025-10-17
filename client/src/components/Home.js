@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
+
 import Base from './Base';
 import SearchForm from './search/SearchForm';
 import PosterCarousel from './home/PosterCarousel';
 import RecommendationsShowcase from './home/RecommendationsShowcase';
+import { UI_LABELS } from '../constants';
 
 const Home = () => {
+	useEffect(() => {
+		document.title = UI_LABELS.APP_TITLE;
+	}, []);
+
 	return (
 		<Base>
 			<Box

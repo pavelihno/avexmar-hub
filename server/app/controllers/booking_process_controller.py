@@ -100,7 +100,7 @@ def create_booking_process(current_user):
 
     result = {
         'public_id': str(booking.public_id),
-        'access_token': str(booking.access_token) if booking.access_token else None,
+        'access_token': str(booking.access_token),
     }
 
     return jsonify(result), 201

@@ -3,25 +3,25 @@ import { serverApi } from '../../api';
 import { getErrorData } from '../utils';
 
 export const processBookingCreate = createAsyncThunk('bookingProcess/create', async (data, { rejectWithValue }) => {
-        try {
-                const res = await serverApi.post('/booking/create', data);
-                return { ...data, ...res.data };
-        } catch (err) {
-                return rejectWithValue(getErrorData(err));
-        }
+	try {
+		const res = await serverApi.post('/booking/create', data);
+		return { ...data, ...res.data };
+	} catch (err) {
+		return rejectWithValue(getErrorData(err));
+	}
 });
 
 export const processBookingPassengers = createAsyncThunk(
-        'bookingProcess/passengers',
-        async (arg, { rejectWithValue }) => {
-                try {
-                        const { accessToken, ...data } = arg || {};
-                        const res = await serverApi.post('/booking/passengers', data, buildAccessParams(accessToken));
-                        return res.data;
-                } catch (err) {
-                        return rejectWithValue(getErrorData(err));
-                }
-        }
+	'bookingProcess/passengers',
+	async (arg, { rejectWithValue }) => {
+		try {
+			const { accessToken, ...data } = arg || {};
+			const res = await serverApi.post('/booking/passengers', data, buildAccessParams(accessToken));
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
 );
 
 const buildAccessParams = (accessToken) => (accessToken ? { params: { access_token: accessToken } } : {});
@@ -60,17 +60,17 @@ export const downloadBookingPdf = createAsyncThunk('bookingProcess/downloadPdf',
 });
 
 export const confirmBooking = createAsyncThunk(
-        'bookingProcess/confirm',
-        async ({ publicId, isPayment = true, accessToken }, { rejectWithValue }) => {
-                try {
-                        const payload = {
-                                public_id: publicId,
-                                is_payment: isPayment,
-                        };
-                        const res = await serverApi.post('/booking/confirm', payload, buildAccessParams(accessToken));
-                        return res.data;
-                } catch (err) {
-                        return rejectWithValue(getErrorData(err));
-                }
-        }
+	'bookingProcess/confirm',
+	async ({ publicId, isPayment = true, accessToken }, { rejectWithValue }) => {
+		try {
+			const payload = {
+				public_id: publicId,
+				is_payment: isPayment,
+			};
+			const res = await serverApi.post('/booking/confirm', payload, buildAccessParams(accessToken));
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
 );

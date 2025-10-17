@@ -3,7 +3,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useBookingAccess } from '../../context/BookingAccessContext';
 import { UI_LABELS } from '../../constants';
@@ -26,6 +26,7 @@ const StepIcon = ({ icon, color }) => {
 const BookingProgress = ({ activeStep }) => {
 	const { accessiblePages = [] } = useBookingAccess();
 	const { publicId } = useParams();
+	const location = useLocation();
 	const navigate = useNavigate();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -38,6 +39,7 @@ const BookingProgress = ({ activeStep }) => {
 	];
 
 	const stepIndex = typeof activeStep === 'string' ? stepKeys.indexOf(activeStep) : activeStep;
+	const appendQuery = (path) => (location.search ? `${path}${location.search}` : path);
 
 	if (isMobile) {
 		return (
@@ -46,7 +48,7 @@ const BookingProgress = ({ activeStep }) => {
 					value={stepIndex}
 					onChange={(_e, val) => {
 						const key = stepKeys[val];
-						if (accessiblePages.includes(key)) navigate(routes[val]);
+						if (accessiblePages.includes(key)) navigate(appendQuery(routes[val]));
 					}}
 					variant='scrollable'
 					scrollButtons='auto'
@@ -96,7 +98,7 @@ const BookingProgress = ({ activeStep }) => {
 					>
 						<StepLabel
 							onClick={() => {
-								if (isAccessible) navigate(routes[index]);
+								if (isAccessible) navigate(appendQuery(routes[index]));
 							}}
 							StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}
 							sx={{ cursor: isAccessible ? 'pointer' : 'default' }}

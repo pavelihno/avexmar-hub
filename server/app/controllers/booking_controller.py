@@ -77,14 +77,6 @@ def search_booking():
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
-    if not booking.access_token:
-        booking = Booking.update(
-            booking.id,
-            session=db.session,
-            commit=True,
-            access_token=uuid.uuid4(),
-        )
-
     return (
         jsonify(
             {
