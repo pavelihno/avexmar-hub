@@ -67,7 +67,7 @@ const Confirmation = () => {
 	const handlePayment = async (isPayment = true) => {
 		setLoading(true);
 		try {
-			await dispatch(confirmBooking({ publicId, isPayment })).unwrap();
+                        await dispatch(confirmBooking({ publicId, isPayment, accessToken })).unwrap();
 			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
 			const query = accessToken ? `?access_token=${accessToken}` : '';
 			navigate(`/booking/${publicId}/payment${query}`);

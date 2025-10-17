@@ -1,5 +1,6 @@
 from flask import request, jsonify, send_file
 from io import BytesIO
+import uuid
 
 from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
@@ -69,6 +70,7 @@ def create_booking_process(current_user):
         total_price=price_details['final_price'],
         passenger_counts=passengers,
         user_id=current_user.id if current_user else None,
+        access_token=uuid.uuid4(),
     )
 
     if outbound_id:
@@ -96,7 +98,10 @@ def create_booking_process(current_user):
     )
     session.commit()
 
-    result = {'public_id': str(booking.public_id)}
+    result = {
+        'public_id': str(booking.public_id),
+        'access_token': str(booking.access_token) if booking.access_token else None,
+    }
 
     return jsonify(result), 201
 
@@ -111,7 +116,8 @@ def create_booking_process_passengers(current_user):
     if not public_id:
         return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
 
-    booking = Booking.get_if_has_access(current_user, public_id)
+    token = request.args.get('access_token')
+    booking = Booking.get_if_has_access(current_user, public_id, token)
 
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
@@ -219,7 +225,8 @@ def confirm_booking_process(current_user):
     if not public_id:
         return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
 
-    booking = Booking.get_if_has_access(current_user, public_id)
+    token = request.args.get('access_token')
+    booking = Booking.get_if_has_access(current_user, public_id, token)
 
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
