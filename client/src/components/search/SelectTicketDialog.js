@@ -112,10 +112,9 @@ const FlightTariffRow = ({ flight, tariffs, selectedId, onSelect, setTariffDetai
 											setShowTariffDetails(true);
 										}
 									}}
+									aria-label={UI_LABELS.SEARCH.flight_details.tariff_conditions}
 								>
-									<Tooltip title={UI_LABELS.SEARCH.flight_details.tariff_conditions}>
-										<InfoOutlinedIcon fontSize='small' />
-									</Tooltip>
+									<InfoOutlinedIcon fontSize='small' />
 								</IconButton>
 							</Box>
 
@@ -254,10 +253,10 @@ const SelectTicketDialog = ({ open, onClose, outbound, returnFlight }) => {
 			payload.return_id = returnFlight.id;
 			payload.return_tariff_id = returnTariffId;
 		}
-                const res = await dispatch(processBookingCreate(payload)).unwrap();
-                const query = res.access_token ? `?access_token=${res.access_token}` : '';
-                navigate(`/booking/${res.public_id}/passengers${query}`);
-        };
+		const res = await dispatch(processBookingCreate(payload)).unwrap();
+		const query = res.access_token ? `?access_token=${res.access_token}` : '';
+		navigate(`/booking/${res.public_id}/passengers${query}`);
+	};
 
 	const [tariffDetails, setTariffDetails] = useState({ terms: '', hand_luggage: null, baggage: null });
 	const [showTariffDetails, setShowTariffDetails] = useState(false);

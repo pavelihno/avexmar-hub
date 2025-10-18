@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
-import { Box, Grid, Typography, Tooltip, Chip } from '@mui/material';
+import { Box, Grid, Typography, Tooltip, Chip, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
@@ -248,8 +248,20 @@ const PassengerForm = (
 			<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
 				<Typography variant='h4'>{typeLabels[data.category]}</Typography>
 				{showAgeWarning && (
-					<Tooltip title={UI_LABELS.BOOKING.passenger_form.age_warning_tooltip} placement='right' arrow>
-						<InfoOutlinedIcon sx={{ fontSize: 20, color: theme.palette.info.main, cursor: 'help' }} />
+					<Tooltip
+						title={UI_LABELS.BOOKING.passenger_form.age_warning_tooltip}
+						placement='right'
+						arrow
+						enterTouchDelay={0}
+						leaveTouchDelay={3000}
+					>
+						<IconButton
+							size='small'
+							sx={{ p: 0.5 }}
+							aria-label={UI_LABELS.BOOKING.passenger_form.age_warning_tooltip}
+						>
+							<InfoOutlinedIcon sx={{ fontSize: 20, color: theme.palette.info.main }} />
+						</IconButton>
 					</Tooltip>
 				)}
 			</Box>

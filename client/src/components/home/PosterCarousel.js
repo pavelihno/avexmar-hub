@@ -182,6 +182,10 @@ const PosterCarousel = ({
 				backgroundColor: 'background.paper',
 				boxShadow: `0 24px 60px ${alpha(theme.palette.common.black, 0.28)}`,
 				'&:hover .carouselNav': { opacity: 1, transform: 'translateY(-50%) scale(1)' },
+				'& .carouselNav': {
+					opacity: { xs: 0.85, sm: 0 },
+					transform: { xs: 'translateY(-50%) scale(1)', sm: 'translateY(-50%) scale(0.92)' },
+				},
 				...(sx || {}),
 			}}
 		>
@@ -347,16 +351,14 @@ const PosterCarousel = ({
 							position: 'absolute',
 							top: '50%',
 							left: 12,
-							transform: 'translateY(-50%) scale(0.92)',
 							color: '#fff',
 							backgroundColor: alpha('#0d1a2a', 0.6),
 							border: `1px solid ${alpha('#ffffff', 0.18)}`,
 							transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
-							opacity: 0,
-							display: { xs: 'none', sm: 'inline-flex' },
 							'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
 						}}
 						size='small'
+						aria-label='Previous slide'
 					>
 						<ArrowBackIosNew fontSize='inherit' />
 					</IconButton>
@@ -367,16 +369,14 @@ const PosterCarousel = ({
 							position: 'absolute',
 							top: '50%',
 							right: 12,
-							transform: 'translateY(-50%) scale(0.92)',
 							color: '#fff',
 							backgroundColor: alpha('#0d1a2a', 0.6),
 							border: `1px solid ${alpha('#ffffff', 0.18)}`,
 							transition: 'background-color .25s ease, opacity .3s ease, transform .3s ease',
-							opacity: 0,
-							display: { xs: 'none', sm: 'inline-flex' },
 							'&:hover': { backgroundColor: alpha('#0d1a2a', 0.82) },
 						}}
 						size='small'
+						aria-label='Next slide'
 					>
 						<ArrowForwardIos fontSize='inherit' />
 					</IconButton>

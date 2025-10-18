@@ -64,6 +64,8 @@ const BookingProgress = ({ activeStep }) => {
 							title={UI_LABELS.BOOKING.timer_tooltip}
 							arrow
 							placement='left'
+							enterTouchDelay={0}
+							leaveTouchDelay={3000}
 							slotProps={{
 								tooltip: {
 									sx: {
@@ -75,7 +77,7 @@ const BookingProgress = ({ activeStep }) => {
 								},
 							}}
 						>
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
 								<AccessTimeIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
 								<Typography variant='h6' sx={{ fontWeight: 600, color: 'text.primary' }}>
 									{timeLeft}
@@ -124,6 +126,8 @@ const BookingProgress = ({ activeStep }) => {
 						title={UI_LABELS.BOOKING.timer_tooltip}
 						arrow
 						placement='left'
+						enterTouchDelay={0}
+						leaveTouchDelay={3000}
 						slotProps={{
 							tooltip: {
 								sx: {
@@ -135,7 +139,7 @@ const BookingProgress = ({ activeStep }) => {
 							},
 						}}
 					>
-						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'help' }}>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
 							<AccessTimeIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
 							<Typography variant='h6' sx={{ fontWeight: 600, color: 'text.primary' }}>
 								{timeLeft}

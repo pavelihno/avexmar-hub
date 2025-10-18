@@ -223,16 +223,14 @@ const About = () => {
 												</Typography>
 											)}
 										</Box>
-										<Tooltip title={UI_LABELS.BUTTONS.copy}>
-											<IconButton
-												size='small'
-												onClick={() => handleCopy(value, label)}
-												aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
-												edge='end'
-											>
-												<ContentCopy fontSize='small' />
-											</IconButton>
-										</Tooltip>
+										<IconButton
+											size='small'
+											onClick={() => handleCopy(value, label)}
+											aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+											edge='end'
+										>
+											<ContentCopy fontSize='small' />
+										</IconButton>
 									</ListItem>
 								))}
 							</List>
@@ -275,15 +273,13 @@ const About = () => {
 												)}
 											</TableCell>
 											<TableCell align='right' sx={{ width: 40 }}>
-												<Tooltip title={UI_LABELS.BUTTONS.copy}>
-													<IconButton
-														size='small'
-														onClick={() => handleCopy(value, label)}
-														aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
-													>
-														<ContentCopy fontSize='small' />
-													</IconButton>
-												</Tooltip>
+												<IconButton
+													size='small'
+													onClick={() => handleCopy(value, label)}
+													aria-label={`${UI_LABELS.BUTTONS.copy} ${label}`}
+												>
+													<ContentCopy fontSize='small' />
+												</IconButton>
 											</TableCell>
 										</TableRow>
 									))}
