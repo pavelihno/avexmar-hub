@@ -5,10 +5,8 @@ from datetime import datetime, timedelta
 from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
 
 from app.config import Config
-from app.constants.branding import (
-    PASSENGER_CATEGORY_LABELS,
-    SEAT_CLASS_LABELS,
-)
+from app.constants.branding import SEAT_CLASS_LABELS
+from app.utils.passenger_categories import PASSENGER_CATEGORY_LABELS
 from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
 from app.constants.yookassa import YooKassaMessages, YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE
 from app.database import db

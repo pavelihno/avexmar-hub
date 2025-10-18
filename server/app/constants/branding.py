@@ -1,3 +1,8 @@
+from app.utils.passenger_categories import (
+    PASSENGER_CATEGORY_LABELS,
+    PASSENGERS_LABELS,
+)
+
 BRAND_NAME = 'Авексмар'
 BRAND_NAME_DISPLAY = 'АВЕКСМАР'
 SUPPORT_EMAIL = 'mail@avexmar.com'
@@ -30,20 +35,6 @@ DEFAULT_EMAIL_CONTEXT = {
 STATUS_LABELS = {
     'completed': 'Завершено',
     'cancelled': 'Отменено',
-}
-
-PASSENGER_CATEGORY_LABELS = {
-    'adult': 'Взрослый',
-    'child': 'Ребёнок',
-    'infant': 'Младенец',
-    'infant_seat': 'Младенец с местом',
-}
-
-PASSENGERS_LABELS = {
-    'adults': 'Взрослые',
-    'children': 'Дети',
-    'infants': 'Младенцы',
-    'infants_seat': 'Младенцы с местом',
 }
 
 DOCUMENT_LABELS = {

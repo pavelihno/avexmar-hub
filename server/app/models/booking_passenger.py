@@ -3,11 +3,17 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
-from app.utils.enum import PASSENGER_CATEGORY, DEFAULT_PASSENGER_CATEGORY, PASSENGER_PLURAL_CATEGORY
+from app.utils.enum import PASSENGER_CATEGORY, PASSENGER_PLURAL_CATEGORY
+from app.utils.passenger_categories import (
+    DEFAULT_PASSENGER_CATEGORY,
+    get_category_from_plural as resolve_category_from_plural,
+    get_plural_category as resolve_plural_category,
+)
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
     from app.models.passenger import Passenger
+
 
 class BookingPassenger(BaseModel):
     __tablename__ = 'booking_passengers'
@@ -30,22 +36,19 @@ class BookingPassenger(BaseModel):
         ),
     )
 
-    PASSENGER_CATEGORY_PAIRS = [
-        (PASSENGER_CATEGORY.adult, PASSENGER_PLURAL_CATEGORY.adults),
-        (PASSENGER_CATEGORY.child, PASSENGER_PLURAL_CATEGORY.children),
-        (PASSENGER_CATEGORY.infant, PASSENGER_PLURAL_CATEGORY.infants),
-        (PASSENGER_CATEGORY.infant_seat, PASSENGER_PLURAL_CATEGORY.infants_seat),
-    ]
-
     @classmethod
-    def get_plural_category(cls, category: PASSENGER_CATEGORY) -> PASSENGER_PLURAL_CATEGORY:
+    def get_plural_category(
+        cls, category: PASSENGER_CATEGORY
+    ) -> PASSENGER_PLURAL_CATEGORY | None:
         """Return the plural form of the passenger category"""
-        return dict((k, v) for k, v in cls.PASSENGER_CATEGORY_PAIRS).get(category, None)
+        return resolve_plural_category(category)
 
     @classmethod
-    def get_category_from_plural(cls, plural: PASSENGER_PLURAL_CATEGORY) -> PASSENGER_CATEGORY:
+    def get_category_from_plural(
+        cls, plural: PASSENGER_PLURAL_CATEGORY
+    ) -> PASSENGER_CATEGORY | None:
         """Return the passenger category from its plural form"""
-        return dict((v, k) for k, v in cls.PASSENGER_CATEGORY_PAIRS).get(plural, None)
+        return resolve_category_from_plural(plural)
 
     def to_dict(self, return_children=False):
         return {

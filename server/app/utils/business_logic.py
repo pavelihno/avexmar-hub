@@ -1,11 +1,12 @@
 from app.utils.enum import (
-    PASSENGER_CATEGORY,
     PASSENGER_PLURAL_CATEGORY,
-    SEAT_CLASS,
-    DISCOUNT_TYPE,
     FEE_APPLICATION,
     CONSENT_ACTION,
     CONSENT_EVENT_TYPE,
+)
+from app.utils.passenger_categories import (
+    PASSENGER_WITH_SEAT_CATEGORIES,
+    get_category_discount_multiplier,
 )
 from app.models.tariff import Tariff
 from app.models.flight_tariff import FlightTariff
@@ -15,13 +16,6 @@ from app.models.flight import Flight
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
 from app.models.payment import Payment
-
-
-PASSENGER_WITH_SEAT_CATEGORIES = [
-    PASSENGER_CATEGORY.adult,
-    PASSENGER_CATEGORY.child,
-    PASSENGER_CATEGORY.infant_seat
-]
 
 
 def get_seats_number(params):
@@ -82,6 +76,8 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             category = BookingPassenger.get_category_from_plural(
                 PASSENGER_PLURAL_CATEGORY(category_value)
             )
+            if category is None:
+                continue
             seats_number = passenger_number \
                 if category in PASSENGER_WITH_SEAT_CATEGORIES \
                 else 0
@@ -89,32 +85,13 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             if not passenger_number:
                 continue
 
-            tariff_multiplier = 1.0
-            applied_discounts = []
-
-            # Discounts based on passenger category and tariff
-            if category == PASSENGER_CATEGORY.infant:
-                infant_key = DISCOUNT_TYPE.infant.value
-                pct = discount_pct.get(infant_key, 0.0)
-                tariff_multiplier *= (1.0 - pct)
-                if infant_key in discount_names_map:
-                    applied_discounts.append(
-                        discount_names_map[infant_key])
-            if tariff.seat_class == SEAT_CLASS.economy:
-                if category in [PASSENGER_CATEGORY.child, PASSENGER_CATEGORY.infant_seat]:
-                    child_key = DISCOUNT_TYPE.child.value
-                    pct = discount_pct.get(child_key, 0.0)
-                    tariff_multiplier *= (1.0 - pct)
-                    if child_key in discount_names_map:
-                        applied_discounts.append(discount_names_map[child_key])
-                if is_round_trip:
-                    rt_key = DISCOUNT_TYPE.round_trip.value
-                    pct_rt = discount_pct.get(rt_key, 0.0)
-                    tariff_multiplier *= (1.0 - pct_rt)
-                    if rt_key in discount_names_map:
-                        applied_discounts.append(
-                            discount_names_map[rt_key]
-                        )
+            tariff_multiplier, applied_discounts = get_category_discount_multiplier(
+                category,
+                tariff.seat_class,
+                is_round_trip,
+                discount_pct,
+                discount_names_map,
+            )
 
             # Price/discount/fees per one passenger/seat of the category
             unit_fare_price = tariff.price
@@ -305,7 +282,10 @@ def get_booking_details(booking):
 
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
-    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking.booking_flights}
+    tariffs_map = {
+        bf.flight_id: bf.tariff_id
+        for bf in booking.booking_flights
+    }
     outbound_tariff_id = tariffs_map.get(outbound_id)
     return_tariff_id = tariffs_map.get(return_id)
 

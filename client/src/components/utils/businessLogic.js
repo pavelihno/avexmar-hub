@@ -1,20 +1,15 @@
-import { differenceInYears } from 'date-fns';
-
-import { MAX_PASSENGERS, DATE_API_FORMAT, VALIDATION_MESSAGES } from '../../constants';
+import { DATE_API_FORMAT } from '../../constants';
 import { formatDate, parseDate } from '../utils';
+import {
+	disabledPassengerChange as disabledPassengerChangeUtil,
+	getAgeError as getAgeErrorUtil,
+	getSeatsNumber as getSeatsNumberUtil,
+	getTotalPassengers as getTotalPassengersUtil,
+} from './passengerCategories';
 
-export const getTotalPassengers = (passengers) => {
-	return (
-		(passengers.adults || 0) +
-		(passengers.children || 0) +
-		(passengers.infants || 0) +
-		(passengers.infants_seat || 0)
-	);
-};
+export const getTotalPassengers = getTotalPassengersUtil;
 
-export const getSeatsNumber = (passengers) => {
-	return (passengers.adults || 0) + (passengers.children || 0) + (passengers.infants_seat || 0);
-};
+export const getSeatsNumber = getSeatsNumberUtil;
 
 export const hasAvailableSeats = (tariff, totalSeats) => {
 	if (!tariff || tariff.seats_left === undefined) return true;
@@ -23,7 +18,7 @@ export const hasAvailableSeats = (tariff, totalSeats) => {
 
 export const handlePassengerChange = (setPassengers, key, delta) => {
 	setPassengers((prev) => {
-		if (disabledPassengerChange(prev, key, delta)) {
+		if (disabledPassengerChangeUtil(prev, key, delta)) {
 			return prev;
 		}
 		return {
@@ -33,49 +28,9 @@ export const handlePassengerChange = (setPassengers, key, delta) => {
 	});
 };
 
-export const disabledPassengerChange = (passengers, key, delta) => {
-	const nextValue = passengers[key] + delta;
-	const minValue = key === 'adults' ? 1 : 0;
+export const disabledPassengerChange = disabledPassengerChangeUtil;
 
-	// 1) no negatives (and at least one adult)
-	if (nextValue < minValue) {
-		return true;
-	}
-
-	// 2) overall max passengers
-	const newTotal = getTotalPassengers(passengers) + delta;
-	if (newTotal > MAX_PASSENGERS) {
-		return true;
-	}
-
-	// 3) infants without seat must never exceed adult count
-	if (key === 'infants') {
-		// when adding an infant
-		if (delta === 1 && nextValue > passengers.adults) {
-			return true;
-		}
-	}
-
-	// prevent removing an adult if that would leave more infants than adults
-	if (key === 'adults' && delta === -1) {
-		const nextAdults = nextValue;
-		if (passengers.infants > nextAdults) {
-			return true;
-		}
-	}
-
-	return false;
-};
-
-export const getAgeError = (passengerCategory, birthDate, flightDate) => {
-	if (!birthDate) return VALIDATION_MESSAGES.PASSENGER.birth_date.REQUIRED;
-	const age = differenceInYears(parseDate(flightDate), parseDate(birthDate));
-	if (passengerCategory === 'adult' && age < 12) return VALIDATION_MESSAGES.PASSENGER.birth_date.ADULT;
-	if (passengerCategory === 'child' && (age < 2 || age > 12)) return VALIDATION_MESSAGES.PASSENGER.birth_date.CHILD;
-	if (['infant', 'infant_seat'].includes(passengerCategory) && age >= 2)
-		return VALIDATION_MESSAGES.PASSENGER.birth_date.INFANT;
-	return '';
-};
+export const getAgeError = getAgeErrorUtil;
 
 export const getExistingPassenger = (passengers, passengerData) => {
 	return passengers.find(
