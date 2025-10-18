@@ -1,15 +1,6 @@
 import { DATE_API_FORMAT } from '../../constants';
-import { formatDate, parseDate } from '../utils';
-import {
-	disabledPassengerChange as disabledPassengerChangeUtil,
-	getAgeError as getAgeErrorUtil,
-	getSeatsNumber as getSeatsNumberUtil,
-	getTotalPassengers as getTotalPassengersUtil,
-} from './passengerCategories';
-
-export const getTotalPassengers = getTotalPassengersUtil;
-
-export const getSeatsNumber = getSeatsNumberUtil;
+import { formatDate, parseDate } from './format';
+import { disabledPassengerChange } from './passengerCategories';
 
 export const hasAvailableSeats = (tariff, totalSeats) => {
 	if (!tariff || tariff.seats_left === undefined) return true;
@@ -18,7 +9,7 @@ export const hasAvailableSeats = (tariff, totalSeats) => {
 
 export const handlePassengerChange = (setPassengers, key, delta) => {
 	setPassengers((prev) => {
-		if (disabledPassengerChangeUtil(prev, key, delta)) {
+		if (disabledPassengerChange(prev, key, delta)) {
 			return prev;
 		}
 		return {
@@ -27,10 +18,6 @@ export const handlePassengerChange = (setPassengers, key, delta) => {
 		};
 	});
 };
-
-export const disabledPassengerChange = disabledPassengerChangeUtil;
-
-export const getAgeError = getAgeErrorUtil;
 
 export const getExistingPassenger = (passengers, passengerData) => {
 	return passengers.find(

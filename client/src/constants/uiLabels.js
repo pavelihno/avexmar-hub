@@ -610,6 +610,8 @@ export const UI_LABELS = {
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
 			login_hint: 'Войдите, чтобы выбрать сохранённых пассажиров',
+			age_warning_tooltip:
+				'Возраст проверяется при регистрации; при несоответствии — доплата до тарифа "Взрослый"',
 		},
 		payment_form: {
 			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,

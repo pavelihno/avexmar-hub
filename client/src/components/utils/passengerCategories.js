@@ -1,4 +1,4 @@
-import { differenceInYears } from 'date-fns';
+import { differenceInYears, subYears } from 'date-fns';
 
 import { MAX_PASSENGERS, VALIDATION_MESSAGES } from '../../constants';
 import { parseDate } from './format';
@@ -20,24 +20,28 @@ export const PASSENGER_CATEGORIES = [
 		plural: ADULTS_KEY,
 		requiresSeat: true,
 		ageValidation: [AGE_RULE('ADULT', (age) => age < 12)],
+		showAgeWarning: false,
 	},
 	{
 		category: CHILD_KEY,
 		plural: CHILDREN_KEY,
 		requiresSeat: true,
 		ageValidation: [AGE_RULE('CHILD', (age) => age < 2), AGE_RULE('CHILD', (age) => age > 12)],
+		showAgeWarning: true,
 	},
 	{
 		category: INFANT_KEY,
 		plural: INFANTS_KEY,
 		requiresSeat: false,
 		ageValidation: [AGE_RULE('INFANT', (age) => age >= 2)],
+		showAgeWarning: true,
 	},
 	{
 		category: INFANT_SEAT_KEY,
 		plural: INFANTS_SEAT_KEY,
 		requiresSeat: true,
 		ageValidation: [AGE_RULE('INFANT', (age) => age >= 2)],
+		showAgeWarning: true,
 	},
 ];
 
@@ -140,4 +144,42 @@ export const getAgeError = (passengerCategory, birthDate, flightDate) => {
 	}
 
 	return '';
+};
+
+/**
+ * Calculate valid birth date range for a passenger category based on flight dates
+ * @param {string} category - Passenger category (adult, child, infant, infant_seat)
+ * @param {Date} minFlightDate - Earliest flight date
+ * @param {Date} maxFlightDate - Latest flight date
+ * @returns {{birthMin: Date|undefined, birthMax: Date|undefined}}
+ */
+export const getBirthDateRange = (category, minFlightDate, maxFlightDate) => {
+	if (!category) {
+		return { birthMin: undefined, birthMax: undefined };
+	}
+
+	let birthMin;
+	let birthMax;
+
+	const firstFlight = minFlightDate || new Date();
+	const lastFlight = maxFlightDate || firstFlight;
+
+	if (category === ADULT_KEY) {
+		// ≥ 12 on ALL flights → must be ≥12 already on the earliest segment
+		birthMax = subYears(firstFlight, 12);
+	} else if (category === CHILD_KEY) {
+		// 2–11 on ALL flights
+		// ≥2 on earliest segment → born on/before (earliest - 2y)
+		// <12 on latest segment → born AFTER (latest - 12y)
+		birthMin = subYears(lastFlight, 12);
+		birthMax = subYears(firstFlight, 2);
+	} else if ([INFANT_KEY, INFANT_SEAT_KEY].includes(category)) {
+		// <2 on ALL flights
+		// <2 on latest segment → born AFTER (latest - 2y)
+		// also cannot be born after the first flight date
+		birthMin = subYears(lastFlight, 2);
+		birthMax = firstFlight;
+	}
+
+	return { birthMin, birthMax };
 };

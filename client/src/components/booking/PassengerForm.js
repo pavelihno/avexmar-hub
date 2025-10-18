@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImpera
 
 import { Box, Grid, Typography, Tooltip, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import { FIELD_LABELS, getEnumOptions, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
 import {
@@ -15,8 +16,9 @@ import {
 	validateDate,
 	parseDate,
 	formatDate,
+	getBirthDateRange,
+	getPassengerCategoryInfo,
 } from '../utils';
-import { addYears, subYears } from 'date-fns';
 
 const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 
@@ -77,29 +79,14 @@ const PassengerForm = (
 		let birthMin;
 		let birthMax;
 
-		const today = new Date();
-		const firstFlight = minFlightDate ?? today;
-		const lastFlight = maxFlightDate ?? firstFlight;
-
-		if (useCategory) {
-			if (data.category === 'adult') {
-				// ≥ 12 on ALL flights → must be ≥12 already on the earliest segment
-				birthMax = subYears(firstFlight, 12);
-			} else if (data.category === 'child') {
-				// 2–11 on ALL flights
-				// ≥2 on earliest segment → born on/before (earliest - 2y)
-				// <12 on latest segment → born AFTER (latest - 12y)
-				birthMin = subYears(lastFlight, 12);
-				birthMax = subYears(firstFlight, 2);
-			} else if (['infant', 'infant_seat'].includes(data.category)) {
-				// <2 on ALL flights
-				// <2 on latest segment → born AFTER (latest - 2y)
-				// also cannot be born after the first flight date
-				birthMin = subYears(lastFlight, 2);
-				birthMax = firstFlight;
-			}
+		if (useCategory && data.category) {
+			const range = getBirthDateRange(data.category, minFlightDate, maxFlightDate);
+			birthMin = range.birthMin;
+			birthMax = range.birthMax;
 		}
 
+		const today = new Date();
+		const firstFlight = minFlightDate ?? today;
 		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
 
 		const allFields = {
@@ -247,6 +234,9 @@ const PassengerForm = (
 
 	const showFields = formConfig.show || [];
 
+	const categoryInfo = getPassengerCategoryInfo(data.category);
+	const showAgeWarning = categoryInfo?.showAgeWarning ?? false;
+
 	return (
 		<Box
 			sx={{
@@ -255,9 +245,14 @@ const PassengerForm = (
 				borderRadius: 2,
 			}}
 		>
-			<Typography variant='h4' sx={{ mb: 2 }}>
-				{typeLabels[data.category]}
-			</Typography>
+			<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+				<Typography variant='h4'>{typeLabels[data.category]}</Typography>
+				{showAgeWarning && (
+					<Tooltip title={UI_LABELS.BOOKING.passenger_form.age_warning_tooltip} placement='right' arrow>
+						<InfoOutlinedIcon sx={{ fontSize: 20, color: theme.palette.info.main, cursor: 'help' }} />
+					</Tooltip>
+				)}
+			</Box>
 
 			{Array.isArray(prefillOptions) && prefillOptions.length > 0 && (
 				<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
