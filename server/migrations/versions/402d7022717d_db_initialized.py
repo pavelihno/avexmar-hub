@@ -28,7 +28,7 @@ def upgrade():
     )
     op.create_table('consent_docs',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('type', sa.Enum('offer', 'pd_policy', name='consent_doc_type'), nullable=False),
+    sa.Column('type', sa.Enum('public_offer', 'pd_policy', 'pd_agreement', name='consent_doc_type'), nullable=False),
     sa.Column('version', sa.Integer(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('hash_sha256', sa.String(length=64), nullable=False),
@@ -235,7 +235,7 @@ def upgrade():
     )
     op.create_table('consent_events',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('type', sa.Enum('offer_acceptance', 'pd_processing', name='consent_event_type'), nullable=False),
+    sa.Column('type', sa.Enum('public_offer_acceptance', 'pd_agreement_acceptance', name='consent_event_type'), nullable=False),
     sa.Column('granter_user_id', sa.Integer(), nullable=True),
     sa.Column('booking_id', sa.Integer(), nullable=True),
     sa.Column('doc_id', sa.UUID(), nullable=False),

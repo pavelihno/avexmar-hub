@@ -39,7 +39,7 @@ import {
 	extractRouteInfo,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
-import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
+import PDAgreementCheckbox from './PDAgreementCheckbox';
 
 const Passengers = () => {
 	const { publicId } = useParams();
@@ -552,7 +552,7 @@ const Passengers = () => {
 
 							<Divider sx={{ my: 2 }} />
 
-							<PrivacyConsentCheckbox
+							<PDAgreementCheckbox
 								value={buyer.consent}
 								onChange={(val) => handleBuyerChange('consent', val)}
 								error={buyerErrors.consent}

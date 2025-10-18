@@ -326,7 +326,7 @@ def get_booking_details(booking):
 
     consent_exists = (
         booking.consent_events.filter_by(
-            type=CONSENT_EVENT_TYPE.pd_processing,
+            type=CONSENT_EVENT_TYPE.pd_agreement_acceptance,
             action=CONSENT_ACTION.agree,
         ).count()
         > 0

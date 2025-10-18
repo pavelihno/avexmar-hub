@@ -12,7 +12,7 @@ import {
 } from '../../redux/actions/consentDoc';
 import { createAdminManager } from './utils';
 import { FIELD_TYPES } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
 
 const ConsentDocManagement = () => {
 	const dispatch = useDispatch();
@@ -32,6 +32,7 @@ const ConsentDocManagement = () => {
 			label: FIELD_LABELS.CONSENT_DOC.type,
 			type: FIELD_TYPES.SELECT,
 			options: typeOptions,
+			formatter: (value) => ENUM_LABELS.CONSENT_DOC_TYPE[value] || value,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.CONSENT_DOC.type.REQUIRED : null),
 		},
 		version: {

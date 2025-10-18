@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { Checkbox, FormControl, FormControlLabel, FormHelperText, Typography } from '@mui/material';
 import { UI_LABELS } from '../../constants/uiLabels';
 
-export const PrivacyConsentCheckbox = ({ value, onChange, error, required = true, sx, disabled = false }) => (
+export const PDAgreementCheckbox = ({ value, onChange, error, required = true, sx, disabled = false }) => (
 	<FormControl required={required} error={!!error} sx={sx} disabled={disabled}>
 		<FormControlLabel
 			control={<Checkbox checked={!!value} onChange={(e) => onChange?.(e.target.checked)} />}
 			label={
 				<Typography variant='subtitle2' color='textSecondary'>
-					{UI_LABELS.BOOKING.buyer_form.privacy_policy((text) => (
-						<Link to='/privacy_policy' target='_blank'>
+					{UI_LABELS.BOOKING.buyer_form.pd_agreement((text) => (
+						<Link to='/pd_agreement' target='_blank'>
 							{text}
 						</Link>
 					))}
@@ -21,4 +21,4 @@ export const PrivacyConsentCheckbox = ({ value, onChange, error, required = true
 	</FormControl>
 );
 
-export default PrivacyConsentCheckbox;
+export default PDAgreementCheckbox;

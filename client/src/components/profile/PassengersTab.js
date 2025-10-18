@@ -21,7 +21,7 @@ import { useTheme } from '@mui/material/styles';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import PassengerForm from '../booking/PassengerForm';
-import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
+import PDAgreementCheckbox from '../booking/PDAgreementCheckbox';
 import PassengerDetailsModal from './PassengerDetailsModal';
 
 import { fetchUserPassengers, createUserPassenger } from '../../redux/actions/passenger';
@@ -243,7 +243,7 @@ const PassengersTab = () => {
 									mx: 2,
 								}}
 							>
-								<PrivacyConsentCheckbox
+								<PDAgreementCheckbox
 									value={consent}
 									onChange={(val) => {
 										setConsent(val);

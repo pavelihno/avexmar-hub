@@ -197,16 +197,16 @@ def create_booking_process_passengers(current_user):
     if consent:
         create_booking_consent(
             booking,
-            CONSENT_EVENT_TYPE.pd_processing,
-            CONSENT_DOC_TYPE.pd_policy,
+            CONSENT_EVENT_TYPE.pd_agreement_acceptance,
+            CONSENT_DOC_TYPE.pd_agreement,
             current_user.id if current_user else None,
             list(processed_ids),
             session=session,
         )
         create_booking_consent(
             booking,
-            CONSENT_EVENT_TYPE.offer_acceptance,
-            CONSENT_DOC_TYPE.offer,
+            CONSENT_EVENT_TYPE.public_offer_acceptance,
+            CONSENT_DOC_TYPE.public_offer,
             current_user.id if current_user else None,
             [],
             session=session,

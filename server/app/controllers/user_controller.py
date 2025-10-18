@@ -54,8 +54,8 @@ def update_user(current_user, user_id):
 
         create_user_consent(
             current_user,
-            CONSENT_EVENT_TYPE.pd_processing,
-            CONSENT_DOC_TYPE.pd_policy,
+            CONSENT_EVENT_TYPE.pd_agreement_acceptance,
+            CONSENT_DOC_TYPE.pd_agreement,
             subject_ids=[],
             session=session,
         )
@@ -159,8 +159,8 @@ def create_user_passenger(current_user, user_id):
 
     create_user_consent(
         current_user,
-        CONSENT_EVENT_TYPE.pd_processing,
-        CONSENT_DOC_TYPE.pd_policy,
+        CONSENT_EVENT_TYPE.pd_agreement_acceptance,
+        CONSENT_DOC_TYPE.pd_agreement,
         subject_ids=[passenger.id],
         session=session,
     )

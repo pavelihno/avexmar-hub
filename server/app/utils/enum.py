@@ -89,13 +89,14 @@ class FEE_TERM(enum.Enum):
 
 
 class CONSENT_DOC_TYPE(enum.Enum):
-    offer = 'offer'
+    public_offer = 'public_offer'
     pd_policy = 'pd_policy'
+    pd_agreement = 'pd_agreement'
 
 
 class CONSENT_EVENT_TYPE(enum.Enum):
-    offer_acceptance = 'offer_acceptance'
-    pd_processing = 'pd_processing'
+    public_offer_acceptance = 'public_offer_acceptance'
+    pd_agreement_acceptance = 'pd_agreement_acceptance'
 
 
 class CONSENT_ACTION(enum.Enum):
