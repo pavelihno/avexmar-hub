@@ -10,8 +10,7 @@ const Footer = () => {
 	const currentYear = new Date().getFullYear();
 
 	const links = [
-		{ to: '/privacy_policy', label: UI_LABELS.ABOUT.privacy_policy_agreement },
-		{ to: '/public_offer', label: UI_LABELS.ABOUT.public_offer },
+		{ to: '/pd_policy', label: UI_LABELS.ABOUT.pd_policy },
 		{ to: '/about', label: UI_LABELS.ABOUT.about_us },
 	];
 

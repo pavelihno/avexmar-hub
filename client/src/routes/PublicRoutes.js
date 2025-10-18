@@ -2,7 +2,8 @@ import React from 'react';
 
 import Home from '../components/Home';
 import About from '../components/About';
-import PrivacyPolicy from '../components/PrivacyPolicy';
+import PDPolicy from '../components/PDPolicy';
+import PDAgreement from '../components/PDAgreement';
 import PublicOffer from '../components/PublicOffer';
 import ResetPassword from '../components/auth/ResetPassword';
 import ActivateAccount from '../components/auth/ActivateAccount';
@@ -20,10 +21,11 @@ import Profile from '../components/profile/Profile';
 const PublicRoutes = ({ isAuth }) => [
 	{ path: '/', element: <Home /> },
 	{ path: '/about', element: <About /> },
-	{ path: '/privacy_policy', element: <PrivacyPolicy /> },
+	{ path: '/pd_policy', element: <PDPolicy /> },
+	{ path: '/pd_agreement', element: <PDAgreement /> },
 	{ path: '/public_offer', element: <PublicOffer /> },
 	{ path: '/reset_password', element: <ResetPassword /> },
-  { path: '/activate', element: <ActivateAccount /> },
+	{ path: '/activate', element: <ActivateAccount /> },
 	{ path: '/search', element: <Search /> },
 	{ path: '/schedule', element: <Schedule /> },
 	{ path: '/search/booking', element: <BookingSearch /> },

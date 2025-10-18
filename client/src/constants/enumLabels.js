@@ -78,12 +78,13 @@ export const ENUM_LABELS = {
 		after_departure: 'После вылета рейса',
 	},
 	CONSENT_DOC_TYPE: {
-		offer: 'Оферта',
+		public_offer: 'Публичная оферта',
 		pd_policy: 'Политика обработки персональных данных',
+		pd_agreement: 'Согласие на обработку персональных данных',
 	},
 	CONSENT_EVENT_TYPE: {
-		offer_acceptance: 'Акцепт оферты',
-		pd_processing: 'Согласие на обработку персональных данных',
+		public_offer_acceptance: 'Акцепт оферты',
+		pd_agreement_acceptance: 'Согласие на обработку персональных данных',
 	},
 	CONSENT_ACTION: {
 		agree: 'Согласие',

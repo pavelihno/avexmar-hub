@@ -3,6 +3,7 @@ from io import BytesIO
 from flask import request, jsonify, send_file
 from xlwt import Workbook, XFStyle
 
+from app.constants.files import FLIGHT_PASSENGERS_EXPORT_FILENAME
 from app.constants.messages import PassengerMessages
 from app.models.flight import Flight
 from app.models.booking_flight import BookingFlight
@@ -103,7 +104,7 @@ def get_flight_passenger_export(current_user):
     return send_file(
         output,
         as_attachment=True,
-        download_name='flight_passengers.xls',
+        download_name=FLIGHT_PASSENGERS_EXPORT_FILENAME,
         mimetype='application/vnd.ms-excel',
     ), 200
 

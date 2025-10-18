@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Box,
@@ -17,6 +17,7 @@ import {
 	Stack,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import PassengerForm from './PassengerForm';
@@ -36,14 +37,14 @@ import {
 	formatDuration,
 	findBookingPassengerDuplicates,
 	extractRouteInfo,
-	useExpiryCountdown,
 } from '../utils';
 import { mapFromApi, mapToApi, mappingConfigs } from '../utils/mappers';
-import PrivacyConsentCheckbox from './PrivacyConsentCheckbox';
+import PDAgreementCheckbox from './PDAgreementCheckbox';
 
 const Passengers = () => {
 	const { publicId } = useParams();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const {
 		current: booking,
@@ -54,8 +55,7 @@ const Passengers = () => {
 	const { currentUser } = useSelector((state) => state.auth);
 	const userPassengers = useSelector((state) => state.passengers.passengers);
 
-	const expiresAt = booking?.expires_at;
-	const timeLeft = useExpiryCountdown(expiresAt);
+	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
 
 	const existingPassengerData = booking?.passengers;
 	const passengersExist = booking?.passengersExist;
@@ -104,8 +104,8 @@ const Passengers = () => {
 	}, [dispatch, currentUser]);
 
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchBookingDetails({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	useEffect(() => {
 		if (!countries || countries.length === 0) {
@@ -253,11 +253,13 @@ const Passengers = () => {
 					public_id: publicId,
 					buyer: apiBuyer,
 					passengers: apiPassengers,
+					accessToken,
 				})
 			).unwrap();
-			await dispatch(fetchBookingDetails(publicId)).unwrap();
-			await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/confirmation`);
+			await dispatch(fetchBookingDetails({ publicId, accessToken })).unwrap();
+			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
+			const query = accessToken ? `?access_token=${accessToken}` : '';
+			navigate(`/booking/${publicId}/confirmation${query}`);
 		} catch (e) {
 			// errors handled via redux state
 		}
@@ -295,20 +297,13 @@ const Passengers = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='passengers' />
-			{expiresAt && (
-				<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-					<Typography variant='h6' sx={{ fontWeight: 600 }}>
-						{timeLeft}
-					</Typography>
-				</Box>
-			)}
-			<Grid container spacing={{ xs: 2, md: 4 }}>
+			<Grid container spacing={{ xs: 2, md: 4 }} sx={{ mt: 2 }}>
 				<Grid
 					item
 					xs={12}
 					md={8}
 					sx={{
-						maxHeight: { md: 'calc(100vh - 200px)' },
+						maxHeight: { md: 'calc(100vh - 100px)' },
 						overflowY: { xs: 'visible', md: 'auto' },
 						pr: { md: 2 },
 					}}
@@ -390,8 +385,8 @@ const Passengers = () => {
 						</Grid>
 					</Box>
 				</Grid>
-				<Grid item xs={12} md={4} sx={{ position: 'sticky', top: 16 }}>
-					<Card>
+				<Grid item xs={12} md={4}>
+					<Card sx={{ position: { md: 'sticky' }, top: { md: 16 } }}>
 						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>
@@ -557,7 +552,7 @@ const Passengers = () => {
 
 							<Divider sx={{ my: 2 }} />
 
-							<PrivacyConsentCheckbox
+							<PDAgreementCheckbox
 								value={buyer.consent}
 								onChange={(val) => handleBuyerChange('consent', val)}
 								error={buyerErrors.consent}
@@ -570,7 +565,7 @@ const Passengers = () => {
 							</Button>
 						</CardContent>
 					</Card>
-					<Typography variant='body2' color='textSecondary' sx={{ ml: 1, mt: 1 }}>
+					<Typography variant='body2' color='textSecondary' sx={{ ml: 1, mt: 1, mb: 2 }}>
 						{UI_LABELS.BOOKING.buyer_form.public_offer((text) => (
 							<Link to='/public_offer' target='_blank'>
 								{text}

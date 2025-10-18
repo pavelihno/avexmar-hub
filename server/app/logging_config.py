@@ -1,3 +1,4 @@
+import os
 import copy
 import json
 import logging
@@ -11,7 +12,7 @@ from typing import Any, Dict
 from app.config import Config
 
 
-APP_LOG_DIR = Path(Config.LOG_DIR)
+APP_LOG_DIR = Path(Config.LOG_DIR or 'logs')
 
 _configured = False
 

@@ -6,14 +6,16 @@ from app.constants.branding import (
     BRAND_NAME_DISPLAY,
     DOCUMENT_LABELS,
     GENDER_LABELS,
-    PASSENGER_CATEGORY_LABELS,
-    PASSENGERS_LABELS,
     PAYMENT_METHOD_LABELS,
     PAYMENT_STATUS_LABELS,
     SEAT_CLASS_LABELS,
     SITE_URL,
     STATUS_LABELS,
     SUPPORT_EMAIL,
+)
+from app.utils.passenger_categories import (
+    PASSENGER_CATEGORY_LABELS,
+    PASSENGERS_LABELS,
 )
 from app.utils.business_logic import get_booking_details
 from app.utils.datetime import format_date, format_time, format_datetime

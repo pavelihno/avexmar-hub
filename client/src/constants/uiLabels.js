@@ -44,9 +44,9 @@ export const UI_LABELS = {
 		about_us: 'О нас',
 		company_details: 'Реквизиты компании',
 		legal_info: 'Правовая информация',
-		privacy_policy_agreement: 'Согласие на обработку персональных данных',
+		pd_policy: 'Политика обработки персональных данных',
+		pd_agreement: 'Согласие на обработку персональных данных',
 		public_offer: 'Публичная оферта',
-		marketing_consent: 'Согласие на получение рекламной рассылки',
 		all_rights_reserved: 'Все права защищены',
 		copied: 'Скопировано',
 	},
@@ -535,6 +535,7 @@ export const UI_LABELS = {
 			payment: 'Оплата',
 			completion: 'Завершение',
 		},
+		timer_tooltip: 'Время для завершения бронирования',
 		step_placeholders: {
 			confirmation: 'Шаг подтверждения',
 			payment: 'Шаг оплаты',
@@ -553,7 +554,7 @@ export const UI_LABELS = {
 		},
 		buyer_form: {
 			title: 'Покупатель',
-			privacy_policy: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
+			pd_agreement: (link) => <>Даю {link('согласие')} на обработку персональных данных</>,
 			public_offer: (link) => (
 				<>Нажимая «Продолжить», Вы принимаете условия {link('публичной оферты')} ООО «АВЕКСМАР»</>
 			),
@@ -608,7 +609,9 @@ export const UI_LABELS = {
 			first_name: 'Имя',
 			patronymic_name: 'Отчество (при наличии)',
 			name_hint: (requiresCyrillic) => `${requiresCyrillic ? 'Кириллицей' : 'Латиницей'}, как в документе`,
-			login_hint: 'Войдите, чтобы заполнить данные пассажиров автоматически',
+			login_hint: 'Войдите, чтобы выбрать сохранённых пассажиров',
+			age_warning_tooltip:
+				'Возраст проверяется при регистрации; при несоответствии — доплата до тарифа "Взрослый"',
 		},
 		payment_form: {
 			title: (timeLeft) => `Оплатите бронирование: ${timeLeft}`,
@@ -741,7 +744,7 @@ export const UI_LABELS = {
 	BOOKING_SEARCH: {
 		link: 'Найти бронирование',
 		title: 'Найти бронирование',
-		subtitle: 'Укажите данные пассажира и номер бронирования, чтобы продолжить оформление',
+		subtitle: 'Укажите номер бронирования и данные пассажира, чтобы найти завершенное бронирование',
 		booking_number: 'Номер бронирования',
 		first_name: 'Имя пассажира',
 		last_name: 'Фамилия пассажира',

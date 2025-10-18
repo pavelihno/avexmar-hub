@@ -9,7 +9,7 @@ import { VALIDATION_MESSAGES } from '../../constants/validationMessages';
 import { updateUser } from '../../redux/actions/user';
 import { setCurrentUser } from '../../redux/reducers/auth';
 import { createFormFields, FIELD_TYPES } from '../utils';
-import PrivacyConsentCheckbox from '../booking/PrivacyConsentCheckbox';
+import PDAgreementCheckbox from '../booking/PDAgreementCheckbox';
 
 const UserInfo = () => {
 	const dispatch = useDispatch();
@@ -160,7 +160,7 @@ const UserInfo = () => {
 						</Box>
 					);
 				})}
-				<PrivacyConsentCheckbox
+				<PDAgreementCheckbox
 					value={formData.consent}
 					onChange={(val) => handleFieldChange('consent', val)}
 					error={errors.consent}

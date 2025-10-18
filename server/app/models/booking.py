@@ -133,16 +133,20 @@ class Booking(BaseModel):
         booking = cls.get_by_public_id(public_id)
 
         token = str(access_token) if access_token else None
-        if booking.user_id:
-            if current_user and booking.user_id == getattr(current_user, 'id', None):
-                return booking
-            if token and str(booking.access_token) == token:
-                return booking
-            return None
+        booking_token = str(booking.access_token)
 
-        if token and str(booking.access_token) != token:
-            return None
-        return booking
+        if current_user:
+            if booking.user_id:
+                if booking.user_id == current_user.id:
+                    return booking
+                else:
+                    return None
+
+        if token:
+            if booking_token == token:
+                return booking
+
+        return None
 
     @classmethod
     def generate_booking_number(
@@ -188,6 +192,7 @@ class Booking(BaseModel):
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
         history = [{'status': status.value, 'at': datetime.now().isoformat()}]
         kwargs['status_history'] = history
+        kwargs.setdefault('access_token', uuid.uuid4())
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod

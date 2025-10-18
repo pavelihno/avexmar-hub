@@ -50,6 +50,7 @@ class PASSENGER_PLURAL_CATEGORY(enum.Enum):
     infants = 'infants'
     infants_seat = 'infants_seat'
 
+
 class CURRENCY(enum.Enum):
     rub = 'rub'
 
@@ -89,13 +90,14 @@ class FEE_TERM(enum.Enum):
 
 
 class CONSENT_DOC_TYPE(enum.Enum):
-    offer = 'offer'
+    public_offer = 'public_offer'
     pd_policy = 'pd_policy'
+    pd_agreement = 'pd_agreement'
 
 
 class CONSENT_EVENT_TYPE(enum.Enum):
-    offer_acceptance = 'offer_acceptance'
-    pd_processing = 'pd_processing'
+    public_offer_acceptance = 'public_offer_acceptance'
+    pd_agreement_acceptance = 'pd_agreement_acceptance'
 
 
 class CONSENT_ACTION(enum.Enum):
@@ -109,7 +111,6 @@ DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
 DEFAULT_CURRENCY = CURRENCY.rub
 DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
 DEFAULT_PAYMENT_TYPE = PAYMENT_TYPE.payment
-DEFAULT_PASSENGER_CATEGORY = PASSENGER_CATEGORY.adult
 DEFAULT_FEE_APPLICATION = FEE_APPLICATION.booking
 DEFAULT_FEE_TERM = FEE_TERM.none
 

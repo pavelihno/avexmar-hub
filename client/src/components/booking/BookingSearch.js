@@ -53,7 +53,7 @@ const BookingSearch = () => {
 					sx={{
 						p: { xs: 3, md: 4 },
 						borderRadius: 3,
-						boxShadow: { xs: theme.shadows[2], md: theme.shadows[4] }
+						boxShadow: { xs: theme.shadows[2], md: theme.shadows[4] },
 					}}
 				>
 					<Stack spacing={{ xs: 3, md: 4 }}>

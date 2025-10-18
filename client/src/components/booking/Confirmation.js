@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
 	Box,
 	Typography,
@@ -12,11 +12,12 @@ import {
 	CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, confirmBooking, fetchBookingAccess } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS } from '../../constants';
-import { formatNumber, extractRouteInfo, useExpiryCountdown } from '../utils';
+import { formatNumber, extractRouteInfo } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
@@ -24,17 +25,18 @@ import { selectIsAdmin } from '../../redux/reducers/auth';
 
 const Confirmation = () => {
 	const { publicId } = useParams();
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
-	const expiresAt = booking?.expires_at;
-	const timeLeft = useExpiryCountdown(expiresAt);
 	const [loading, setLoading] = useState(false);
 	const isAdmin = useSelector(selectIsAdmin);
 
+	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
+
 	useEffect(() => {
-		dispatch(fetchBookingDetails(publicId));
-	}, [dispatch, publicId]);
+		dispatch(fetchBookingDetails({ publicId, accessToken }));
+	}, [dispatch, publicId, accessToken]);
 
 	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
 
@@ -64,9 +66,10 @@ const Confirmation = () => {
 	const handlePayment = async (isPayment = true) => {
 		setLoading(true);
 		try {
-			await dispatch(confirmBooking({ publicId, isPayment })).unwrap();
-			await dispatch(fetchBookingAccess(publicId)).unwrap();
-			navigate(`/booking/${publicId}/payment`);
+			await dispatch(confirmBooking({ publicId, isPayment, accessToken })).unwrap();
+			await dispatch(fetchBookingAccess({ publicId, accessToken })).unwrap();
+			const query = accessToken ? `?access_token=${accessToken}` : '';
+			navigate(`/booking/${publicId}/payment${query}`);
 		} catch (e) {
 			// errors handled via redux state
 			setLoading(false);
@@ -88,16 +91,7 @@ const Confirmation = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
 
-			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2 }}>
-				<Grid item xs={12} md={9} lg={9}>
-					{expiresAt && (
-						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-							<Typography variant='h6' sx={{ fontWeight: 600 }}>
-								{timeLeft}
-							</Typography>
-						</Box>
-					)}
-				</Grid>
+			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
 				<Grid item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (

@@ -9,8 +9,8 @@ class Config:
     STORAGE_URL = os.environ.get('SERVER_STORAGE_URL')
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    LOG_DIR = 'logs'
-    STORAGE_DIR = 'storage'
+    LOG_DIR = os.environ.get('APP_LOG_DIR')
+    STORAGE_DIR = os.environ.get('STORAGE_DIR')
 
     SECRET_KEY = os.environ.get('SERVER_SECRET_KEY')
 

@@ -281,18 +281,17 @@ const FlightManagement = () => {
 						}}
 					>
 						{flightTariffsForFlight.length === 0 ? (
-							<Tooltip title={UI_LABELS.ADMIN.modules.tariffs.add_button} placement='top'>
-								<IconButton
-									size='small'
-									color='primary'
-									onClick={(e) => {
-										e.stopPropagation();
-										handleAddFlightTariff(item.id);
-									}}
-								>
-									<AddCircleIcon />
-								</IconButton>
-							</Tooltip>
+							<IconButton
+								size='small'
+								color='primary'
+								onClick={(e) => {
+									e.stopPropagation();
+									handleAddFlightTariff(item.id);
+								}}
+								aria-label={UI_LABELS.ADMIN.modules.tariffs.add_button}
+							>
+								<AddCircleIcon />
+							</IconButton>
 						) : (
 							<>
 								{flightTariffsForFlight.map((ft) => {
@@ -336,38 +335,30 @@ const FlightManagement = () => {
 												{tariffLabel}
 											</Typography>
 											<Box sx={{ display: 'flex', flexShrink: 0 }}>
-												<Tooltip
-													title={UI_LABELS.ADMIN.modules.tariffs.edit_button}
-													placement='top'
+												<IconButton
+													size='small'
+													color='primary'
+													onClick={(e) => {
+														e.stopPropagation();
+														e.currentTarget.blur();
+														handleEditFlightTariff(item.id, ft.id);
+													}}
+													aria-label={UI_LABELS.ADMIN.modules.tariffs.edit_button}
 												>
-													<IconButton
-														size='small'
-														color='primary'
-														onClick={(e) => {
-															e.stopPropagation();
-															e.currentTarget.blur();
-															handleEditFlightTariff(item.id, ft.id);
-														}}
-													>
-														<EditIcon fontSize='small' />
-													</IconButton>
-												</Tooltip>
-												<Tooltip
-													title={UI_LABELS.ADMIN.modules.tariffs.delete_button}
-													placement='top'
+													<EditIcon fontSize='small' />
+												</IconButton>
+												<IconButton
+													size='small'
+													color='error'
+													onClick={(e) => {
+														e.stopPropagation();
+														e.currentTarget.blur();
+														handleOpenDeleteFlightTariffDialog(ft.id);
+													}}
+													aria-label={UI_LABELS.ADMIN.modules.tariffs.delete_button}
 												>
-													<IconButton
-														size='small'
-														color='error'
-														onClick={(e) => {
-															e.stopPropagation();
-															e.currentTarget.blur();
-															handleOpenDeleteFlightTariffDialog(ft.id);
-														}}
-													>
-														<DeleteIcon fontSize='small' />
-													</IconButton>
-												</Tooltip>
+													<DeleteIcon fontSize='small' />
+												</IconButton>
 											</Box>
 										</Box>
 									);
