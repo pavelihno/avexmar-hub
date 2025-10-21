@@ -622,6 +622,11 @@ export const UI_LABELS = {
 			waiting: 'Ожидание токена оплаты...',
 			load_error: 'Не удалось загрузить виджет оплаты',
 			invoice_waiting: 'Счет отправлен клиенту. Ожидаем оплату...',
+			processing_statuses: {
+				pending: 'Обрабатываем платёж...',
+				waiting_for_capture: 'Ожидаем подтверждения от платёжной системы...',
+				default: 'Проверяем статус платежа...',
+			},
 		},
 		completion: {
 			download_pdf: 'Скачать PDF-подтверждение',
