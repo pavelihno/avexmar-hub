@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
+import { FILE_NAMES } from '../../constants/files';
 import {
 	fetchCountries,
 	createCountry,
@@ -92,7 +93,7 @@ const CountryManagement = () => {
 	};
 
 	const handleGetTemplate = async () => {
-		await downloadTemplate('countries', 'countries_template.xlsx');
+		await downloadTemplate('countries', FILE_NAMES.COUNTRIES_TEMPLATE);
 	};
 
 	const formatted = countries.map(adminManager.toUiFormat);

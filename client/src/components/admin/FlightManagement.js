@@ -20,6 +20,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
 import { downloadTemplate, uploadFile } from '../../api';
+import { FILE_NAMES } from '../../constants/files';
 
 import {
 	fetchFlights,
@@ -148,7 +149,7 @@ const FlightManagement = () => {
 	};
 
 	const handleGetTemplate = async () => {
-		await downloadTemplate('flights', 'flights_template.xlsx');
+		await downloadTemplate('flights', FILE_NAMES.FLIGHTS_TEMPLATE);
 	};
 
 	const FIELDS = {

@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Base from '../Base';
 import { formatDate, createFieldRenderer, FIELD_TYPES } from '../utils';
-import { UI_LABELS, DATE_API_FORMAT } from '../../constants';
+import { UI_LABELS, FILE_NAME_TEMPLATES } from '../../constants';
 import { fetchExportData, downloadExport } from '../../redux/actions/export';
 
 const FlightPassengerExport = () => {
@@ -66,13 +66,18 @@ const FlightPassengerExport = () => {
 				})
 			).unwrap();
 
+			const flightNumber = selectedFlight.airline_flight_number;
+			const flightDate = formatDate(selectedFlight.scheduled_departure);
+			const filename = FILE_NAME_TEMPLATES.FLIGHT_PASSENGERS_EXPORT(flightNumber, flightDate);
+
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
-			link.setAttribute('download', 'flight_passengers.xls');
+			link.setAttribute('download', filename);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
+			window.URL.revokeObjectURL(url);
 		} catch (err) {
 			setNotification({
 				open: true,

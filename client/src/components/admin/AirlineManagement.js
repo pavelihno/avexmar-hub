@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
+import { FILE_NAMES } from '../../constants/files';
 import {
 	fetchAirlines,
 	createAirline,
@@ -109,7 +110,7 @@ const AirlineManagement = () => {
 	};
 
 	const handleGetTemplate = async () => {
-		await downloadTemplate('airlines', 'airlines_template.xlsx');
+		await downloadTemplate('airlines', FILE_NAMES.AIRLINES_TEMPLATE);
 	};
 
 	const formatted = airlines.map(adminManager.toUiFormat);

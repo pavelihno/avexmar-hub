@@ -34,6 +34,7 @@ export const downloadTemplate = async (endpoint, filename) => {
 	document.body.appendChild(link);
 	link.click();
 	link.remove();
+	window.URL.revokeObjectURL(url);
 };
 
 export const uploadFile = async (endpoint, file) => {

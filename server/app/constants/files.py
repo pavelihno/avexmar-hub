@@ -8,4 +8,4 @@ UPLOAD_ERRORS_FILENAME = 'Ошибки загрузки.xlsx'
 
 BOOKING_PDF_FILENAME_TEMPLATE = 'Бронирование {booking_number}.pdf'
 
-FLIGHT_PASSENGERS_EXPORT_FILENAME = 'Пассажиры рейса.xls'
+FLIGHT_PASSENGERS_EXPORT_FILENAME_TEMPLATE = 'Пассажиры рейса {flight_number} {date}.xls'

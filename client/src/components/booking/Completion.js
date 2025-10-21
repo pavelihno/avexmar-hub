@@ -18,7 +18,7 @@ import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, downloadBookingPdf } from '../../redux/actions/bookingProcess';
 import { fetchPayment } from '../../redux/actions/payment';
-import { ENUM_LABELS, UI_LABELS, FIELD_LABELS } from '../../constants';
+import { ENUM_LABELS, UI_LABELS, FIELD_LABELS, FILE_NAME_TEMPLATES } from '../../constants';
 import { formatNumber, extractRouteInfo, formatDate, formatDateTime } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
@@ -39,7 +39,7 @@ const Completion = () => {
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
 			link.href = url;
-			link.download = `${booking.booking_number}.pdf`;
+			link.download = FILE_NAME_TEMPLATES.BOOKING_PDF(booking.booking_number);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
