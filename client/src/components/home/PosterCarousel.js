@@ -223,8 +223,6 @@ const PosterCarousel = ({
 								sx={{
 									position: 'absolute',
 									inset: 0,
-									background:
-										'linear-gradient(135deg, rgba(2,6,24,0.82) 0%, rgba(8,21,62,0.55) 55%, rgba(13,53,90,0.6) 100%)',
 								}}
 							/>
 							<Stack
@@ -238,6 +236,30 @@ const PosterCarousel = ({
 									gap: { xs: 2, sm: 3, md: 4 },
 									p: { xs: 2.5, sm: 3, md: 4 },
 									color: '#fff',
+									'&::before': {
+										content: '""',
+										position: 'absolute',
+										top: 0,
+										left: 0,
+										right: 0,
+										height: '65%',
+										background:
+											'linear-gradient(to bottom, rgba(2,6,24,0.75) 0%, rgba(2,6,24,0.45) 40%, transparent 100%)',
+										pointerEvents: 'none',
+										zIndex: -1,
+									},
+									'&::after': {
+										content: '""',
+										position: 'absolute',
+										bottom: 0,
+										left: 0,
+										right: 0,
+										height: '35%',
+										background:
+											'linear-gradient(to top, rgba(2,6,24,0.65) 0%, rgba(2,6,24,0.35) 50%, transparent 100%)',
+										pointerEvents: 'none',
+										zIndex: -1,
+									},
 								}}
 							>
 								<Stack spacing={{ xs: 1.5, sm: 2 }}>
