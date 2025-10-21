@@ -123,7 +123,7 @@ const FlightPassengerExport = () => {
 						mb: { xs: 3, md: 4 },
 					}}
 				>
-					<Typography variant='body1' color='text.secondary'>
+					<Typography variant='subtitle1'>
 						{UI_LABELS.ADMIN.exports.flightPassengers.description}
 					</Typography>
 					<Stack
