@@ -147,8 +147,6 @@ const PassengerForm = (
 					if (!validateDate(v)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					const birth = parseDate(v);
 					if (!(birth instanceof Date) || isNaN(+birth)) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					if (birthMin && birth < birthMin) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
-					if (birthMax && birth > birthMax) return VALIDATION_MESSAGES.GENERAL.INVALID_DATE;
 					if (birth > new Date()) return VALIDATION_MESSAGES.PASSENGER.birth_date.FUTURE;
 					if (useCategory && data.category)
 						return getAgeError(data.category, v, firstFlight ? formatDate(firstFlight) : undefined);
