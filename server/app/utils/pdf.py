@@ -3,11 +3,16 @@ from weasyprint import HTML
 from flask import current_app, render_template
 
 from app.constants.branding import (
-    BRAND_NAME_DISPLAY,
+    BRAND_FULL_NAME,
+    BRAND_NAME,
     DOCUMENT_LABELS,
     GENDER_LABELS,
+    INN,
+    LEGAL_ADDRESS,
+    OGRN,
     PAYMENT_METHOD_LABELS,
     PAYMENT_STATUS_LABELS,
+    PHONE_NUMBER,
     SEAT_CLASS_LABELS,
     SITE_URL,
     STATUS_LABELS,
@@ -49,12 +54,18 @@ def generate_booking_pdf(booking, *, details=None) -> bytes:
         'payment_method_labels': PAYMENT_METHOD_LABELS,
         'seat_class_labels': SEAT_CLASS_LABELS,
         'direction_tariffs': direction_tariffs,
+        'format_float': lambda v: f'{v:,.2f}'.replace(',', ' '),
         'format_date': format_date,
         'format_time': format_time,
         'format_datetime': format_datetime,
-        'brand_name': BRAND_NAME_DISPLAY,
+        'brand_name': BRAND_NAME,
+        'brand_full_name': BRAND_FULL_NAME,
         'site_url': SITE_URL,
         'support_email': SUPPORT_EMAIL,
+        'phone_number': PHONE_NUMBER,
+        'legal_address': LEGAL_ADDRESS,
+        'inn': INN,
+        'ogrn': OGRN,
     }
 
     html = render_template('pdf/booking.html', **context)
