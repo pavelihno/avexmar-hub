@@ -96,7 +96,7 @@
 
   {% set price = details.price_details or {} %}
   {% if price %}
-    {% set currency = (details.currency or booking.currency.value).upper() %}
+    {% set currency = (details.currency or booking.currency.value) %}
     {% for direction in price.directions or [] %}
       {% set route = direction.route or {} %}
       {% set origin = route.origin_airport or {} %}
@@ -125,15 +125,15 @@
           <tr>
             <td>{{ cat }}</td>
             <td>{{ p.count }}</td>
-            <td>{{ format_float(p.unit_fare_price or 0) }} {{ currency }}</td>
+            <td>{{ format_float(p.unit_fare_price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
             <td>
               {% if p.unit_discount and (p.unit_discount > 0) %}
-                - {{ format_float(p.unit_discount) }} {{ currency }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
+                - {{ format_float(p.unit_discount) }} {{ currency_labels.get(currency, currency) }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
               {% else %}
                 —
               {% endif %}
             </td>
-            <td>{{ format_float(p.price or 0) }} {{ currency }}</td>
+            <td>{{ format_float(p.price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -142,41 +142,36 @@
     <table>
       <tr>
         <td>Стоимость перевозки</td>
-        <td>{{ format_float(price.fare_price or 0) }} {{ currency }}</td>
+        <td>{{ format_float(price.fare_price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
       </tr>
       {% for fee in price.fees or [] %}
         <tr>
           <td>{{ fee.name }}</td>
-          <td>{{ format_float(fee.total or 0) }} {{ currency }}</td>
+          <td>{{ format_float(fee.total or 0) }} {{ currency_labels.get(currency, currency) }}</td>
         </tr>
       {% endfor %}
       {% if (price.total_discounts or 0) > 0 %}
         <tr>
           <td>Скидка</td>
-          <td>- {{ format_float(price.total_discounts) }} {{ currency }}</td>
+          <td>- {{ format_float(price.total_discounts) }} {{ currency_labels.get(currency, currency) }}</td>
         </tr>
       {% endif %}
       <tr>
         <td><strong>Итого</strong></td>
-        <td><strong>{{ format_float(price.final_price or 0) }} {{ currency }}</strong></td>
+        <td><strong>{{ format_float(price.final_price or 0) }} {{ currency_labels.get(currency, currency) }}</strong></td>
       </tr>
     </table>
   {% endif %}
-
-  <p style="margin-top: 16px; padding: 12px; background-color: #f9f9f9; border-left: 4px solid #333; font-weight: bold;">
-    Маршрут-квитанции на забронированные места будут направлены на электронную почту, указанную при бронировании, в течение 24 часов с момента подтверждения этой брони
-  </p>
 
   {% set payment = details.payment %}
   {% if payment %}
     {% set status = payment_status_labels.get(payment.payment_status, payment.payment_status) %}
     {% set method = payment_method_labels.get(payment.payment_method, payment.payment_method) %}
-    {% set pay_currency = (payment.currency or currency).upper() %}
     <h4>Платёж</h4>
     <ul>
       <li>Статус: {{ status }}</li>
       <li>Метод: {{ method }}</li>
-      <li>Сумма: {{ format_float(payment.amount or 0) }} {{ pay_currency }}</li>
+      <li>Сумма: {{ format_float(payment.amount or 0) }} {{ currency_labels.get(payment.currency, payment.currency) }}</li>
       {% if payment.paid_at %}
         <li>Оплачен: {{ format_datetime(payment.paid_at) }}</li>
       {% endif %}
@@ -185,6 +180,10 @@
       {% endif %}
       </ul>
     {% endif %}
+
+    <p style="margin-top: 16px; padding: 12px; background-color: #f9f9f9; border-left: 4px solid #333; font-weight: bold;">
+      Маршрут-квитанции на забронированные места будут направлены на электронную почту, указанную при бронировании, в течение 24 часов с момента подтверждения этой брони
+    </p>
 
     <footer>
       <hr />

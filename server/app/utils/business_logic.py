@@ -180,7 +180,7 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
 
 
 def calculate_receipt_details(booking):
-    """Prepare detailed data for fiscal receipt items."""
+    """Prepare detailed data for fiscal receipt items"""
     flights = booking.booking_flights.order_by(BookingFlight.id).all()
     outbound_id = flights[0].flight_id if len(flights) > 0 else None
     return_id = flights[1].flight_id if len(flights) > 1 else None
@@ -244,8 +244,8 @@ def calculate_receipt_details(booking):
     }
 
 
-def get_booking_details(booking):
-    """Assemble comprehensive booking details for emails and PDFs."""
+def get_booking_details(booking) -> dict:
+    """Assemble comprehensive booking details for emails and PDFs"""
     result = booking.to_dict()
 
     passengers = []
@@ -314,3 +314,126 @@ def get_booking_details(booking):
     result['consent'] = consent_exists
 
     return result
+
+
+def get_booking_pdf_details(booking) -> dict:
+    """Compose a compact snapshot with only the data required for the booking PDF"""
+
+    full_details = get_booking_details(booking)
+
+    passengers = []
+    for p in full_details.get('passengers', []):
+        citizenship = p.get('citizenship', {})
+        passengers.append({
+            'first_name': p.get('first_name'),
+            'last_name': p.get('last_name'),
+            'patronymic_name': p.get('patronymic_name'),
+            'gender': p.get('gender'),
+            'birth_date': p.get('birth_date'),
+            'document_type': p.get('document_type'),
+            'document_number': p.get('document_number'),
+            'citizenship': {'name': citizenship.get('name')} if citizenship else {},
+            'category': p.get('category'),
+        })
+
+    flights = []
+    for f in full_details.get('flights', []):
+        route = f.get('route', {})
+        origin = route.get('origin_airport', {})
+        destination = route.get('destination_airport', {})
+        airline = f.get('airline', {})
+
+        flights.append({
+            'id': f.get('id'),
+            'airline_flight_number': f.get('airline_flight_number'),
+            'scheduled_departure': f.get('scheduled_departure'),
+            'scheduled_departure_time': f.get('scheduled_departure_time'),
+            'scheduled_arrival': f.get('scheduled_arrival'),
+            'scheduled_arrival_time': f.get('scheduled_arrival_time'),
+            'route': {
+                'origin_airport': {
+                    'city_name': origin.get('city_name'),
+                    'iata_code': origin.get('iata_code'),
+                },
+                'destination_airport': {
+                    'city_name': destination.get('city_name'),
+                    'iata_code': destination.get('iata_code'),
+                },
+            },
+            'airline': {'name': airline.get('name')},
+        })
+
+    routes_map = {}
+    tariffs_map = {}
+    for f in flights:
+        routes_map[f['id']] = f['route']
+
+    for bf in booking.booking_flights.order_by(BookingFlight.id).all():
+        tariff = bf.tariff
+        if tariff:
+            tariffs_map[bf.flight_id] = {
+                'id': tariff.id,
+                'title': tariff.title,
+                'seat_class': tariff.seat_class.value if tariff.seat_class else None,
+                'hand_luggage': tariff.hand_luggage,
+                'baggage': tariff.baggage,
+            }
+
+    price_details_full = full_details.get('price_details', {})
+    price_directions = []
+    for direction in price_details_full.get('directions', []):
+        flight_id = direction.get('flight_id')
+        price_directions.append({
+            'direction': direction.get('direction'),
+            'flight_id': flight_id,
+            'route': routes_map.get(flight_id, {}),
+            'tariff': tariffs_map.get(flight_id, {}),
+            'passengers': [
+                {
+                    'category': p.get('category'),
+                    'count': p.get('count'),
+                    'unit_fare_price': p.get('unit_fare_price'),
+                    'unit_discount': p.get('unit_discount'),
+                    'discount_name': p.get('discount_name'),
+                    'price': p.get('price'),
+                }
+                for p in direction.get('passengers', [])
+            ],
+        })
+
+    price_details = {
+        'currency': price_details_full.get('currency'),
+        'directions': price_directions,
+        'fees': [
+            {'name': fee.get('name'), 'total': fee.get('total')}
+            for fee in price_details_full.get('fees', [])
+        ],
+        'fare_price': price_details_full.get('fare_price'),
+        'total_fees': price_details_full.get('total_fees'),
+        'total_discounts': price_details_full.get('total_discounts'),
+        'final_price': price_details_full.get('final_price'),
+    }
+
+    payment_info = None
+    payment_full = full_details.get('payment')
+    if payment_full:
+        payment_info = {
+            'payment_status': payment_full.get('payment_status'),
+            'payment_method': payment_full.get('payment_method'),
+            'amount': payment_full.get('amount'),
+            'currency': payment_full.get('currency'),
+            'paid_at': payment_full.get('paid_at'),
+            'provider_payment_id': payment_full.get('provider_payment_id'),
+        }
+
+    return {
+        'buyer_last_name': full_details.get('buyer_last_name'),
+        'buyer_first_name': full_details.get('buyer_first_name'),
+        'email_address': full_details.get('email_address'),
+        'phone_number': full_details.get('phone_number'),
+        'currency': full_details.get('currency'),
+        'flights': flights,
+        'passengers': passengers,
+        'price_details': price_details,
+        'payment': payment_info,
+    }

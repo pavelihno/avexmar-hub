@@ -68,3 +68,7 @@ SEAT_CLASS_LABELS = {
     'economy': 'Эконом',
     'business': 'Бизнес',
 }
+
+CURRENCY_LABELS = {
+    'rub': 'РУБ',
+}

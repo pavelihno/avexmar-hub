@@ -5,6 +5,7 @@ from flask import current_app, render_template
 from app.constants.branding import (
     BRAND_FULL_NAME,
     BRAND_NAME,
+    CURRENCY_LABELS,
     DOCUMENT_LABELS,
     GENDER_LABELS,
     INN,
@@ -22,7 +23,7 @@ from app.utils.passenger_categories import (
     PASSENGER_CATEGORY_LABELS,
     PASSENGERS_LABELS,
 )
-from app.utils.business_logic import get_booking_details
+from app.utils.business_logic import get_booking_pdf_details
 from app.utils.datetime import format_date, format_time, format_datetime
 from app.utils.enum import BOOKING_STATUS
 
@@ -34,10 +35,10 @@ STATUS_LABELS_BY_BOOKING_STATUS = {
 }
 
 
-def generate_booking_pdf(booking, *, details=None) -> bytes:
-    details = details or get_booking_details(booking)
+def generate_booking_pdf(booking) -> bytes:
+    details = booking.pdf_details or get_booking_pdf_details(booking)
 
-    directions = (details or {}).get('price_details', {}).get('directions', [])
+    directions = details.get('price_details', {}).get('directions', [])
     direction_tariffs = {
         d.get('direction'): d.get('tariff') for d in directions if isinstance(d, dict)
     }
@@ -53,6 +54,7 @@ def generate_booking_pdf(booking, *, details=None) -> bytes:
         'payment_status_labels': PAYMENT_STATUS_LABELS,
         'payment_method_labels': PAYMENT_METHOD_LABELS,
         'seat_class_labels': SEAT_CLASS_LABELS,
+        'currency_labels': CURRENCY_LABELS,
         'direction_tariffs': direction_tariffs,
         'format_float': lambda v: f'{v:,.2f}'.replace(',', ' '),
         'format_date': format_date,
