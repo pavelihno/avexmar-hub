@@ -68,9 +68,9 @@ def login():
                 code=code,
                 expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
             )
-            return jsonify({'message': AuthMessages.TWO_FACTOR_REQUIRED, 'email': user.email}), 200
+            return jsonify({'message': AuthMessages.TWO_FACTOR_REQUIRED, 'email': user.email, 'is_2fa_required': True}), 200
         token = signJWT(user.email)
-        return jsonify({'token': token, 'user': user.to_dict()}), 200
+        return jsonify({'token': token, 'user': user.to_dict(), 'is_2fa_required': False}), 200
     return jsonify({'message': AuthMessages.INVALID_EMAIL_OR_PASSWORD}), 401
 
 

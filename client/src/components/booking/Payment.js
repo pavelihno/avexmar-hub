@@ -78,8 +78,13 @@ const Payment = () => {
 					</Alert>
 				)}{' '}
 				{isProcessing && paymentStatus !== 'succeeded' && paymentStatus !== 'canceled' && (
-					<Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+					<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 2 }}>
 						<CircularProgress />
+						<Typography sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+							{paymentStatus && UI_LABELS.BOOKING.payment_form.processing_statuses[paymentStatus]
+								? UI_LABELS.BOOKING.payment_form.processing_statuses[paymentStatus]
+								: UI_LABELS.BOOKING.payment_form.processing_statuses.default}
+						</Typography>
 					</Box>
 				)}
 				{!isProcessing && paymentStatus !== 'succeeded' && !isInvoice && (

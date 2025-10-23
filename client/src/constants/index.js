@@ -24,3 +24,4 @@ export {
 export { default as VALIDATION_MESSAGES } from './validationMessages';
 export * from './formats';
 export { default as PASSWORD_STRENGTH } from './passwordStrength';
+export * from './files';

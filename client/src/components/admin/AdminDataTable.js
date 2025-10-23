@@ -39,6 +39,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 
 import Base from '../Base';
 import { ADMIN, BUTTONS, SUCCESS, WARNINGS, ERRORS, MESSAGES, ENUM_LABELS, DATE_API_FORMAT } from '../../constants';
+import { FILE_NAMES } from '../../constants/files';
 import { createFieldRenderer, FIELD_TYPES, parseTime, formatDate, parseDate, DragAndDropUploadField } from '../utils';
 import { isDev } from '../../redux/reducers/auth';
 import { useTheme, alpha } from '@mui/material/styles';
@@ -116,10 +117,11 @@ const AdminDataTable = ({
 				const url = window.URL.createObjectURL(result.errorFile);
 				const link = document.createElement('a');
 				link.href = url;
-				link.setAttribute('download', 'upload_errors.xlsx');
+				link.setAttribute('download', FILE_NAMES.UPLOAD_ERRORS);
 				document.body.appendChild(link);
 				link.click();
 				link.remove();
+				window.URL.revokeObjectURL(url);
 
 				showNotification(WARNINGS.upload, 'warning');
 			} else {

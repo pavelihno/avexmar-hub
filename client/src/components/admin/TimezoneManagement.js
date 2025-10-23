@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
 import { downloadTemplate, uploadFile } from '../../api';
+import { FILE_NAMES } from '../../constants/files';
 import {
 	fetchTimezones,
 	createTimezone,
@@ -60,7 +61,7 @@ const TimezoneManagement = () => {
 	};
 
 	const handleGetTemplate = async () => {
-		await downloadTemplate('timezones', 'timezones_template.xlsx');
+		await downloadTemplate('timezones', FILE_NAMES.TIMEZONES_TEMPLATE);
 	};
 
 	const formatted = timezones.map(adminManager.toUiFormat);

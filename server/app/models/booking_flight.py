@@ -18,6 +18,8 @@ class BookingFlight(BaseModel):
     tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id'), nullable=False)
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_flights')
+    # flight_tariff: Mapped['FlightTariff'] = db.relationship('FlightTariff')
+    # should be instead of separate flight and tariff relationships
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='booking_flights')
     tariff: Mapped['Tariff'] = db.relationship('Tariff')
 
