@@ -79,9 +79,9 @@ const Login = ({ isModal = false }) => {
 				}
 			})
 			.catch((res) => {
-				if (res && res.message === 'Two-factor authentication required') {
+				if (res && res.is_2fa_required) {
 					setTwoFactorRequired(true);
-					setTwoFactorEmail(res.email || email);
+					setTwoFactorEmail(res.email);
 				} else {
 					setErrors(res);
 				}
