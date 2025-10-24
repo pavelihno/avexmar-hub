@@ -244,10 +244,8 @@ def calculate_receipt_details(booking):
     }
 
 
-def get_booking_details(booking) -> dict:
-    """Assemble comprehensive booking details for emails and PDFs"""
-    result = booking.to_dict()
-
+def _extract_passengers_data(booking):
+    """Extract and normalize passenger data from booking"""
     passengers = []
     for bp in booking.booking_passengers:
         p = bp.passenger.to_dict(return_children=True)
@@ -268,11 +266,14 @@ def get_booking_details(booking) -> dict:
             for _ in range(count):
                 passengers.append({'category': category.value})
 
-    passenger_counts = dict(booking.passenger_counts or {})
+    return passengers, passengers_exist
 
-    flights = [
-        bf.flight.to_dict(return_children=True) for bf in booking.booking_flights
-    ]
+
+def _extract_flights_and_tariffs(booking):
+    """Extract flights and tariff mappings from booking"""
+    booking_flights = list(booking.booking_flights.order_by(BookingFlight.id).all())
+    
+    flights = [bf.flight.to_dict(return_children=True) for bf in booking_flights]
     flights.sort(
         key=lambda f: (
             f.get('scheduled_departure'),
@@ -280,19 +281,47 @@ def get_booking_details(booking) -> dict:
         )
     )
 
+    tariffs_map = {bf.flight_id: bf.tariff_id for bf in booking_flights}
+    
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
-    tariffs_map = {
-        bf.flight_id: bf.tariff_id
-        for bf in booking.booking_flights
-    }
     outbound_tariff_id = tariffs_map.get(outbound_id)
     return_tariff_id = tariffs_map.get(return_id)
+    
+    return flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id
 
-    result['passengers'] = passengers
-    result['passengers_exist'] = passengers_exist
-    result['flights'] = flights
-    result['price_details'] = calculate_price_details(
+
+def _extract_payment_data(booking):
+    """Extract latest payment information from booking"""
+    payment = booking.payments.order_by(Payment.id.desc()).first()
+    if payment:
+        return payment.to_dict()
+    return None
+
+
+def _check_consent(booking):
+    """Check if booking has consent agreement"""
+    return (
+        booking.consent_events.filter_by(
+            type=CONSENT_EVENT_TYPE.pd_agreement_acceptance,
+            action=CONSENT_ACTION.agree,
+        ).count()
+        > 0
+    )
+
+
+def build_booking_snapshot(booking) -> dict:
+    """Build a reusable snapshot of booking details for documents and UI"""
+
+    # Extract base data using helper functions
+    passengers_full, passengers_exist = _extract_passengers_data(booking)
+    flights_full, booking_flights_list, outbound_id, outbound_tariff_id, return_id, return_tariff_id = _extract_flights_and_tariffs(booking)
+    payment_full = _extract_payment_data(booking)
+    consent_exists = _check_consent(booking)
+
+    # Calculate price details
+    passenger_counts = dict(booking.passenger_counts or {})
+    price_details_full = calculate_price_details(
         outbound_id,
         outbound_tariff_id,
         return_id,
@@ -300,29 +329,9 @@ def get_booking_details(booking) -> dict:
         passenger_counts,
     )
 
-    payment = booking.payments.order_by(Payment.id.desc()).first()
-    if payment:
-        result['payment'] = payment.to_dict()
-
-    consent_exists = (
-        booking.consent_events.filter_by(
-            type=CONSENT_EVENT_TYPE.pd_agreement_acceptance,
-            action=CONSENT_ACTION.agree,
-        ).count()
-        > 0
-    )
-    result['consent'] = consent_exists
-
-    return result
-
-
-def get_booking_pdf_details(booking) -> dict:
-    """Compose a compact snapshot with only the data required for the booking PDF"""
-
-    full_details = get_booking_details(booking)
-
+    # Transform passengers to snapshot format
     passengers = []
-    for p in full_details.get('passengers', []):
+    for p in passengers_full:
         citizenship = p.get('citizenship', {})
         passengers.append({
             'first_name': p.get('first_name'),
@@ -336,8 +345,9 @@ def get_booking_pdf_details(booking) -> dict:
             'category': p.get('category'),
         })
 
+    # Transform flights to snapshot format
     flights = []
-    for f in full_details.get('flights', []):
+    for f in flights_full:
         route = f.get('route', {})
         origin = route.get('origin_airport', {})
         destination = route.get('destination_airport', {})
@@ -363,12 +373,10 @@ def get_booking_pdf_details(booking) -> dict:
             'airline': {'name': airline.get('name')},
         })
 
-    routes_map = {}
+    # Build routes and tariffs maps
+    routes_map = {f['id']: f['route'] for f in flights}
     tariffs_map = {}
-    for f in flights:
-        routes_map[f['id']] = f['route']
-
-    for bf in booking.booking_flights.order_by(BookingFlight.id).all():
+    for bf in booking_flights_list:
         tariff = bf.tariff
         if tariff:
             tariffs_map[bf.flight_id] = {
@@ -379,7 +387,7 @@ def get_booking_pdf_details(booking) -> dict:
                 'baggage': tariff.baggage,
             }
 
-    price_details_full = full_details.get('price_details', {})
+    # Transform price details to snapshot format
     price_directions = []
     for direction in price_details_full.get('directions', []):
         flight_id = direction.get('flight_id')
@@ -414,8 +422,8 @@ def get_booking_pdf_details(booking) -> dict:
         'final_price': price_details_full.get('final_price'),
     }
 
+    # Transform payment data to snapshot format
     payment_info = None
-    payment_full = full_details.get('payment')
     if payment_full:
         payment_info = {
             'payment_status': payment_full.get('payment_status'),
@@ -426,14 +434,39 @@ def get_booking_pdf_details(booking) -> dict:
             'provider_payment_id': payment_full.get('provider_payment_id'),
         }
 
-    return {
-        'buyer_last_name': full_details.get('buyer_last_name'),
-        'buyer_first_name': full_details.get('buyer_first_name'),
-        'email_address': full_details.get('email_address'),
-        'phone_number': full_details.get('phone_number'),
-        'currency': full_details.get('currency'),
+    # Build final snapshot
+    snapshot = {
+        **booking.to_dict(),
+        'buyer_last_name': booking.buyer_last_name,
+        'buyer_first_name': booking.buyer_first_name,
+        'email_address': booking.email_address,
+        'phone_number': booking.phone_number,
+        'currency': booking.currency.value,
+        'passengers_exist': passengers_exist,
+        'consent': consent_exists,
+        'passenger_counts': passenger_counts,
         'flights': flights,
         'passengers': passengers,
         'price_details': price_details,
         'payment': payment_info,
     }
+
+    return snapshot
+
+
+def get_booking_snapshot(booking) -> dict:
+    """Return a stored snapshot if possible, otherwise build a fresh one"""
+
+    snapshot = booking.details_snapshot or {}
+    required_keys = {
+        'booking_number',
+        'flights',
+        'passengers',
+        'price_details',
+        'currency',
+    }
+
+    if not snapshot or any(key not in snapshot for key in required_keys):
+        snapshot = build_booking_snapshot(booking)
+
+    return snapshot
