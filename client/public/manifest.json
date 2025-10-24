@@ -1,7 +1,20 @@
 {
-  "short_name": "Avexmar",
-  "name": "Avexmar Hub 1.0",
-  "description": "Avexmar Hub is a platform for searching flights, booking tickets, and managing passenger air transportation",
+  "short_name": "АВЕКСМАР",
+  "name": "АВЕКСМАР — Авиаперевозки",
+  "description": "Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года. Поиск и бронирование авиабилетов онлайн.",
+  "lang": "ru",
+  "dir": "ltr",
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#2196f3",
+  "background_color": "#ffffff",
+  "categories": [
+    "travel",
+    "business",
+    "transportation"
+  ],
   "icons": [
     {
       "src": "/favicon.ico",
@@ -11,12 +24,14 @@
     {
       "src": "images/logo/icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "images/logo/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "images/logo/icon-192-maskable.png",
@@ -31,8 +46,7 @@
       "purpose": "maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "screenshots": [],
+  "shortcuts": [],
+  "prefer_related_applications": false
 }

@@ -1,47 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/images/logo/apple-touch-icon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Avexmar Hub is a platform for searching flights, booking tickets, and managing passenger air transportation"
-    />
-    <meta
-      property="og:description"
-      content="Avexmar Hub is a platform for searching flights, booking tickets, and managing passenger air transportation"
-    />
-    <!--
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+		<link rel="apple-touch-icon" href="%PUBLIC_URL%/images/logo/apple-touch-icon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#000000" />
+
+		<!-- Primary Meta Tags -->
+		<meta name="title" content="АВЕКСМАР — Авиаперевозки | Поиск и бронирование авиабилетов" />
+		<meta
+			name="description"
+			content="ООО «АВЕКСМАР» — надежный партнер в организации пассажирских и грузовых авиаперевозок с 1995 года. Поиск авиабилетов, онлайн бронирование рейсов по маршруту Москва-Якутск-Певек. Более 500 рейсов и 55 000 довольных пассажиров."
+		/>
+		<meta
+			name="keywords"
+			content="авиабилеты, бронирование билетов, авиаперевозки, рейсы Москва Певек, рейсы Москва Якутск, купить авиабилет онлайн, дешевые авиабилеты, АВЕКСМАР, билеты на самолет, пассажирские авиаперевозки, грузовые авиаперевозки, Чукотка, авиакомпания Якутия"
+		/>
+		<meta name="author" content="ООО «АВЕКСМАР»" />
+		<meta name="robots" content="index, follow" />
+		<meta name="language" content="Russian" />
+		<meta name="revisit-after" content="7 days" />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://avexmar.ru/" />
+		<meta property="og:title" content="АВЕКСМАР — Авиаперевозки | Поиск и бронирование авиабилетов" />
+		<meta
+			property="og:description"
+			content="Надежный партнер в организации пассажирских и грузовых авиаперевозок с 1995 года. Регулярные рейсы Москва-Якутск-Певек. Более 55 000 перевезенных пассажиров."
+		/>
+		<meta property="og:image" content="%PUBLIC_URL%/images/logo/apple-touch-icon.png" />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:site_name" content="АВЕКСМАР" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://avexmar.ru/" />
+		<meta property="twitter:title" content="АВЕКСМАР — Авиаперевозки | Поиск и бронирование авиабилетов" />
+		<meta
+			property="twitter:description"
+			content="Надежный партнер в организации пассажирских и грузовых авиаперевозок с 1995 года. Регулярные рейсы Москва-Якутск-Певек."
+		/>
+		<meta property="twitter:image" content="%PUBLIC_URL%/images/logo/apple-touch-icon.png" />
+
+		<!-- Schema.org markup -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "Organization",
+				"name": "ООО «АВЕКСМАР»",
+				"alternateName": "АВЕКСМАР",
+				"url": "https://avexmar.ru",
+				"logo": "%PUBLIC_URL%/images/logo/apple-touch-icon.png",
+				"description": "Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года",
+				"address": {
+					"@type": "PostalAddress",
+					"streetAddress": "ул. Бакунинская, д. 69, стр. 1, помещение 1, офис 16",
+					"addressLocality": "Москва",
+					"postalCode": "105082",
+					"addressCountry": "RU"
+				},
+				"contactPoint": {
+					"@type": "ContactPoint",
+					"telephone": "+7-495-363-59-11",
+					"contactType": "Customer Service",
+					"email": "mail@avexmar.ru",
+					"availableLanguage": "Russian"
+				},
+				"foundingDate": "1995",
+				"sameAs": []
+			}
+		</script>
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://avexmar.ru/" />
+		<!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>АВЕКСМАР - Авиаперевозки</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+		<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+		<title>АВЕКСМАР - Авиаперевозки</title>
+	</head>
+	<body>
+		<noscript>You need to enable JavaScript to run this app.</noscript>
+		<div id="root"></div>
+	</body>
 </html>
