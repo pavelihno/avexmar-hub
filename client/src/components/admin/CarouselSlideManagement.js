@@ -576,7 +576,7 @@ const CarouselSlideManagement = () => {
 				</Box>
 
 				<Grid2 container spacing={isSmallDown ? 2 : 3} justifyContent='center'>
-					<Grid2 item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+					<Grid2 sx={{ display: 'flex', justifyContent: 'center' }} size={12}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={isSmallDown ? 1.5 : 2} alignItems='flex-start'>
 								<Typography variant='h4'>{ADMIN.carousel_slides.management}</Typography>
@@ -795,7 +795,7 @@ const CarouselSlideManagement = () => {
 						</Paper>
 					</Grid2>
 
-					<Grid2 item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+					<Grid2 sx={{ display: 'flex', justifyContent: 'center' }} size={12}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={2} alignItems='flex-start'>
 								<Typography variant='h4'>{ADMIN.carousel_slides.preview_title}</Typography>
@@ -805,7 +805,6 @@ const CarouselSlideManagement = () => {
 					</Grid2>
 				</Grid2>
 			</Box>
-
 			<Dialog open={formOpen} onClose={handleCloseForm} fullWidth maxWidth='md' fullScreen={isSmallDown}>
 				<DialogTitle>
 					{formMode === 'create' ? ADMIN.carousel_slides.add_button : ADMIN.carousel_slides.edit_button}
@@ -830,7 +829,13 @@ const CarouselSlideManagement = () => {
 						{formFields.map((field) => {
 							const isActivationField = field.name === 'isActive';
 							return (
-								<Grid2 item xs={12} sm={field.fullWidth ? 12 : 6} key={field.name}>
+								<Grid2
+									key={field.name}
+									size={{
+										xs: 12,
+										sm: field.fullWidth ? 12 : 6,
+									}}
+								>
 									<Stack spacing={isActivationField && formMode === 'create' ? 0.5 : 0}>
 										{field.renderField({
 											value: formValues[field.name],
@@ -851,7 +856,7 @@ const CarouselSlideManagement = () => {
 							);
 						})}
 
-						<Grid2 item xs={12}>
+						<Grid2 size={12}>
 							<Stack spacing={1.5}>
 								<DragAndDropUploadField
 									dragText={ADMIN.upload.drag}
@@ -929,7 +934,6 @@ const CarouselSlideManagement = () => {
 					</Button>
 				</DialogActions>
 			</Dialog>
-
 			<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
 				<DialogTitle>{MESSAGES.confirm_action}</DialogTitle>
 				<DialogContent

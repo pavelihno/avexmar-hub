@@ -66,7 +66,7 @@ const BookingsTab = () => {
 					sx={{
 						p: { xs: 2, md: 3 },
 						width: '100%',
-						borderRadius: 3
+						borderRadius: 3,
 					}}
 				>
 					<Box
@@ -97,7 +97,7 @@ const BookingsTab = () => {
 				sx={{
 					p: { xs: 2, md: 3 },
 					width: '100%',
-					borderRadius: 3
+					borderRadius: 3,
 				}}
 			>
 				<Typography variant='h4'>{UI_LABELS.PROFILE.bookings}</Typography>

@@ -25,7 +25,13 @@ const FlightDetailsCard = ({ flights = [], tariffMap = {} }) => {
 				const tariff = tariffMap[direction];
 
 				return (
-					<Grid2 item xs={12} md={6} key={f.id || idx}>
+					<Grid2
+						key={f.id || idx}
+						size={{
+							xs: 12,
+							md: 6,
+						}}
+					>
 						<Card>
 							<CardContent>
 								<Box
@@ -97,7 +103,14 @@ const FlightDetailsCard = ({ flights = [], tariffMap = {} }) => {
 					</Grid2>
 				);
 			})}
-			{flights.length === 1 && <Grid2 item xs={12} md={6} />}
+			{flights.length === 1 && (
+				<Grid2
+					size={{
+						xs: 12,
+						md: 6,
+					}}
+				/>
+			)}
 		</Grid2>
 	);
 };

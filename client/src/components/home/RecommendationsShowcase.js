@@ -63,7 +63,14 @@ const RecommendationsShowcase = () => {
 				</Stack>
 				<Grid2 container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
 					{currentItems.map((item) => (
-						<Grid2 item xs={12} sm={6} md={3} key={item.id}>
+						<Grid2
+							key={item.id}
+							size={{
+								xs: 12,
+								sm: 6,
+								md: 3,
+							}}
+						>
 							<Paper
 								elevation={0}
 								sx={{

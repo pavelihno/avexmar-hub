@@ -93,7 +93,6 @@ const AdminEntityForm = ({
 	return (
 		<>
 			<DialogTitle>{isEditing ? editButtonText : addButtonText}</DialogTitle>
-
 			<Box sx={{ px: 3 }}>
 				<Fade in={!!errorMessage} timeout={300}>
 					<div>{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}</div>
@@ -103,11 +102,16 @@ const AdminEntityForm = ({
 					<div>{successMessage && <Alert severity='success'>{successMessage}</Alert>}</div>
 				</Fade>
 			</Box>
-
 			<DialogContent>
 				<Grid2 container spacing={isMobile ? 1.5 : 2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
-						<Grid2 item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
+						<Grid2
+							key={index}
+							size={{
+								xs: 12,
+								sm: field.fullWidth ? 12 : 6,
+							}}
+						>
 							{field.renderField({
 								value: formData[field.name] ?? '',
 								onChange: (value) => handleChange(field.name, value),

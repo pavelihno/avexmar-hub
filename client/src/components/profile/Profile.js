@@ -122,10 +122,20 @@ const Profile = () => {
 						<Grid2 container spacing={{ xs: 2, md: 4 }} justifyContent='center'>
 							{tab === 0 && (
 								<>
-									<Grid2 item xs={12} md={6}>
+									<Grid2
+										size={{
+											xs: 12,
+											md: 6,
+										}}
+									>
 										<UserInfo />
 									</Grid2>
-									<Grid2 item xs={12} md={4}>
+									<Grid2
+										size={{
+											xs: 12,
+											md: 4,
+										}}
+									>
 										<PasswordTab />
 									</Grid2>
 								</>

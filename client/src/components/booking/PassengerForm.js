@@ -263,7 +263,6 @@ const PassengerForm = (
 					</Tooltip>
 				)}
 			</Box>
-
 			{Array.isArray(prefillOptions) && prefillOptions.length > 0 && (
 				<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 					{prefillOptions.map((opt) => (
@@ -289,7 +288,6 @@ const PassengerForm = (
 					))}
 				</Box>
 			)}
-
 			<Grid2 container spacing={2}>
 				{showFields.map((fieldName) => {
 					const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
@@ -306,7 +304,13 @@ const PassengerForm = (
 					});
 
 					return (
-						<Grid2 item xs={12} sm={4} key={fieldName}>
+						<Grid2
+							key={fieldName}
+							size={{
+								xs: 12,
+								sm: 4,
+							}}
+						>
 							{isNameField ? (
 								<Box
 									onFocusCapture={() => setFocusedField(fieldName)}

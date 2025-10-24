@@ -94,7 +94,13 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 							</Box>
 							<Grid2 container spacing={2}>
 								{personalFields.map(({ key, label, value }) => (
-									<Grid2 item xs={12} sm={6} key={key}>
+									<Grid2
+										key={key}
+										size={{
+											xs: 12,
+											sm: 6,
+										}}
+									>
 										<Typography
 											variant='subtitle2'
 											sx={{ fontWeight: 'bold', color: 'text.secondary' }}
@@ -119,7 +125,13 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 							</Box>
 							<Grid2 container spacing={2}>
 								{documentFields.map(({ key, label, value }) => (
-									<Grid2 item xs={12} sm={6} key={key}>
+									<Grid2
+										key={key}
+										size={{
+											xs: 12,
+											sm: 6,
+										}}
+									>
 										<Typography
 											variant='subtitle2'
 											sx={{ fontWeight: 'bold', color: 'text.secondary' }}

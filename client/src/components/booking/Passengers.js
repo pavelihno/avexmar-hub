@@ -299,13 +299,14 @@ const Passengers = () => {
 			<BookingProgress activeStep='passengers' />
 			<Grid2 container spacing={{ xs: 2, md: 4 }} sx={{ mt: 2 }}>
 				<Grid2
-					item
-					xs={12}
-					md={8}
 					sx={{
 						maxHeight: { md: 'calc(100vh - 100px)' },
 						overflowY: { xs: 'visible', md: 'auto' },
 						pr: { md: 2 },
+					}}
+					size={{
+						xs: 12,
+						md: 8,
 					}}
 				>
 					{errorMessages.length > 0 && (
@@ -371,7 +372,13 @@ const Passengers = () => {
 						)}
 						<Grid2 container spacing={2}>
 							{Object.values(buyerFormFields).map((field) => (
-								<Grid2 item xs={12} sm={6} key={field.name}>
+								<Grid2
+									key={field.name}
+									size={{
+										xs: 12,
+										sm: 6,
+									}}
+								>
 									{field.renderField({
 										value: buyer[field.name],
 										onChange: (value) => handleBuyerChange(field.name, value),
@@ -385,7 +392,12 @@ const Passengers = () => {
 						</Grid2>
 					</Box>
 				</Grid2>
-				<Grid2 item xs={12} md={4}>
+				<Grid2
+					size={{
+						xs: 12,
+						md: 4,
+					}}
+				>
 					<Card sx={{ position: { md: 'sticky' }, top: { md: 16 } }}>
 						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
