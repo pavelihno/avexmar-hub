@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Box, Tabs, Tab, Paper, Typography, Grid, Stack, Divider } from '@mui/material';
+import { Box, Tabs, Tab, Paper, Typography, Grid2, Stack, Divider } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FlightIcon from '@mui/icons-material/Flight';
 import GroupIcon from '@mui/icons-material/Group';
@@ -119,21 +119,21 @@ const Profile = () => {
 							</Tabs>
 						</Box>
 
-						<Grid container spacing={{ xs: 2, md: 4 }} justifyContent='center'>
+						<Grid2 container spacing={{ xs: 2, md: 4 }} justifyContent='center'>
 							{tab === 0 && (
 								<>
-									<Grid item xs={12} md={6}>
+									<Grid2 item xs={12} md={6}>
 										<UserInfo />
-									</Grid>
-									<Grid item xs={12} md={4}>
+									</Grid2>
+									<Grid2 item xs={12} md={4}>
 										<PasswordTab />
-									</Grid>
+									</Grid2>
 								</>
 							)}
 
 							{tab === 1 && <BookingsTab />}
 							{tab === 2 && <PassengersTab />}
-						</Grid>
+						</Grid2>
 					</Stack>
 				</Paper>
 			</Box>

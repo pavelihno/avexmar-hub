@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { alpha, useTheme } from '@mui/material/styles';
-import { Box, Chip, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Box, Chip, Grid2, Paper, Stack, Typography } from '@mui/material';
 import { HOME } from '../../constants';
 
 const HOME_RECOMMENDATIONS = HOME?.recommendations ?? { default_filters: [], default_items: {} };
@@ -61,9 +61,9 @@ const RecommendationsShowcase = () => {
 						);
 					})}
 				</Stack>
-				<Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+				<Grid2 container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
 					{currentItems.map((item) => (
-						<Grid item xs={12} sm={6} md={3} key={item.id}>
+						<Grid2 item xs={12} sm={6} md={3} key={item.id}>
 							<Paper
 								elevation={0}
 								sx={{
@@ -134,9 +134,9 @@ const RecommendationsShowcase = () => {
 									</Typography>
 								</Stack>
 							</Paper>
-						</Grid>
+						</Grid2>
 					))}
-				</Grid>
+				</Grid2>
 			</Stack>
 		</Box>
 	);

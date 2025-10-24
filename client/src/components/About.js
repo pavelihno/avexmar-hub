@@ -15,7 +15,7 @@ import {
 	Container,
 	Avatar,
 	Snackbar,
-	Grid,
+	Grid2,
 	List,
 	ListItem,
 	useMediaQuery,
@@ -102,9 +102,9 @@ const About = () => {
 				</Box>
 
 				<Box mb={{ xs: 4, sm: 5 }}>
-					<Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
+					<Grid2 container spacing={{ xs: 2, sm: 3, md: 3 }}>
 						{cardsData.map((card, index) => (
-							<Grid item xs={12} sm={6} md={4} key={index}>
+							<Grid2 item xs={12} sm={6} md={4} key={index}>
 								<Card
 									elevation={0}
 									sx={{
@@ -220,9 +220,9 @@ const About = () => {
 										</Typography>
 									</CardContent>
 								</Card>
-							</Grid>
+							</Grid2>
 						))}
-					</Grid>
+					</Grid2>
 				</Box>
 
 				<Box mb={{ xs: 3, sm: 4 }}>

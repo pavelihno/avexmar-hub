@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Box,
-	Grid,
+	Grid2,
 	Typography,
 	Card,
 	CardContent,
@@ -297,8 +297,8 @@ const Passengers = () => {
 	return (
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='passengers' />
-			<Grid container spacing={{ xs: 2, md: 4 }} sx={{ mt: 2 }}>
-				<Grid
+			<Grid2 container spacing={{ xs: 2, md: 4 }} sx={{ mt: 2 }}>
+				<Grid2
 					item
 					xs={12}
 					md={8}
@@ -369,9 +369,9 @@ const Passengers = () => {
 								))}
 							</Box>
 						)}
-						<Grid container spacing={2}>
+						<Grid2 container spacing={2}>
 							{Object.values(buyerFormFields).map((field) => (
-								<Grid item xs={12} sm={6} key={field.name}>
+								<Grid2 item xs={12} sm={6} key={field.name}>
 									{field.renderField({
 										value: buyer[field.name],
 										onChange: (value) => handleBuyerChange(field.name, value),
@@ -380,12 +380,12 @@ const Passengers = () => {
 										error: !!buyerErrors[field.name],
 										helperText: buyerErrors[field.name],
 									})}
-								</Grid>
+								</Grid2>
 							))}
-						</Grid>
+						</Grid2>
 					</Box>
-				</Grid>
-				<Grid item xs={12} md={4}>
+				</Grid2>
+				<Grid2 item xs={12} md={4}>
 					<Card sx={{ position: { md: 'sticky' }, top: { md: 16 } }}>
 						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
@@ -572,8 +572,8 @@ const Passengers = () => {
 							</Link>
 						))}
 					</Typography>
-				</Grid>
-			</Grid>
+				</Grid2>
+			</Grid2>
 		</Base>
 	);
 };

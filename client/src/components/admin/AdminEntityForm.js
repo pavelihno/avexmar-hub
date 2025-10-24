@@ -4,7 +4,7 @@ import {
 	DialogContent,
 	DialogActions,
 	Button,
-	Grid,
+	Grid2,
 	Alert,
 	Fade,
 	Box,
@@ -105,9 +105,9 @@ const AdminEntityForm = ({
 			</Box>
 
 			<DialogContent>
-				<Grid container spacing={isMobile ? 1.5 : 2} sx={{ mt: 1 }}>
+				<Grid2 container spacing={isMobile ? 1.5 : 2} sx={{ mt: 1 }}>
 					{fields.map((field, index) => (
-						<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
+						<Grid2 item xs={12} sm={field.fullWidth ? 12 : 6} key={index}>
 							{field.renderField({
 								value: formData[field.name] ?? '',
 								onChange: (value) => handleChange(field.name, value),
@@ -115,9 +115,9 @@ const AdminEntityForm = ({
 								error: !!validationErrors[field.name],
 								helperText: validationErrors[field.name],
 							})}
-						</Grid>
+						</Grid2>
 					))}
-				</Grid>
+				</Grid2>
 			</DialogContent>
 			<DialogActions
 				sx={{

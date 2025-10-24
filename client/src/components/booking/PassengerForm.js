@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 
-import { Box, Grid, Typography, Tooltip, Chip, IconButton } from '@mui/material';
+import { Box, Grid2, Typography, Tooltip, Chip, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
@@ -290,7 +290,7 @@ const PassengerForm = (
 				</Box>
 			)}
 
-			<Grid container spacing={2}>
+			<Grid2 container spacing={2}>
 				{showFields.map((fieldName) => {
 					const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(fieldName);
 					const fieldDef = formFields[fieldName];
@@ -306,7 +306,7 @@ const PassengerForm = (
 					});
 
 					return (
-						<Grid item xs={12} sm={4} key={fieldName}>
+						<Grid2 item xs={12} sm={4} key={fieldName}>
 							{isNameField ? (
 								<Box
 									onFocusCapture={() => setFocusedField(fieldName)}
@@ -325,10 +325,10 @@ const PassengerForm = (
 							) : (
 								control
 							)}
-						</Grid>
+						</Grid2>
 					);
 				})}
-			</Grid>
+			</Grid2>
 		</Box>
 	);
 };

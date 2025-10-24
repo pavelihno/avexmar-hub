@@ -5,7 +5,7 @@ import {
 	Box,
 	Typography,
 	Button,
-	Grid,
+	Grid2,
 	Accordion,
 	AccordionSummary,
 	AccordionDetails,
@@ -91,8 +91,8 @@ const Confirmation = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='confirmation' />
 
-			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
-				<Grid item xs={12} md={9} lg={9}>
+			<Grid2 container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
+				<Grid2 item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
@@ -213,8 +213,8 @@ const Confirmation = () => {
 							)}
 						</Button>
 					</Box>
-				</Grid>
-			</Grid>
+				</Grid2>
+			</Grid2>
 		</Base>
 	);
 };

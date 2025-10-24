@@ -4,9 +4,8 @@ import { useParams, useLocation } from 'react-router-dom';
 import {
 	Box,
 	Card,
-	CardContent,
 	Typography,
-	Grid,
+	Grid2,
 	Accordion,
 	AccordionSummary,
 	AccordionDetails,
@@ -93,8 +92,8 @@ const Completion = () => {
 		<Base maxWidth='lg'>
 			<BookingProgress activeStep='completion' />
 
-			<Grid container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
-				<Grid item xs={12} md={9} lg={9}>
+			<Grid2 container justifyContent='center' spacing={{ xs: 2, md: 4 }} sx={{ mb: 2, mt: 1 }}>
+				<Grid2 item xs={12} md={9} lg={9}>
 					<Card sx={{ p: { xs: 2, md: 3 } }}>
 						<Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
 							{UI_LABELS.BOOKING.completion.title}
@@ -108,9 +107,9 @@ const Completion = () => {
 							{UI_LABELS.BOOKING.completion.download_pdf}
 						</Button>
 					</Card>
-				</Grid>
+				</Grid2>
 
-				<Grid item xs={12} md={9} lg={9}>
+				<Grid2 item xs={12} md={9} lg={9}>
 					{/* Flights */}
 					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
@@ -241,8 +240,8 @@ const Completion = () => {
 							</AccordionDetails>
 						</Accordion>
 					)}
-				</Grid>
-			</Grid>
+				</Grid2>
+			</Grid2>
 		</Base>
 	);
 };

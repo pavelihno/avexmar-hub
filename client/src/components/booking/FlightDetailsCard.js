@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Card, CardContent, Typography, Box, Divider } from '@mui/material';
+import { Grid2, Card, CardContent, Typography, Box, Divider } from '@mui/material';
 import { ENUM_LABELS } from '../../constants';
 import { formatDate, formatTime, formatDuration } from '../utils';
 
@@ -9,7 +9,7 @@ const FlightDetailsCard = ({ flights = [], tariffMap = {} }) => {
 	}
 
 	return (
-		<Grid container spacing={1}>
+		<Grid2 container spacing={1}>
 			{flights.map((f, idx) => {
 				const origin = f.route?.origin_airport || {};
 				const dest = f.route?.destination_airport || {};
@@ -25,7 +25,7 @@ const FlightDetailsCard = ({ flights = [], tariffMap = {} }) => {
 				const tariff = tariffMap[direction];
 
 				return (
-					<Grid item xs={12} md={6} key={f.id || idx}>
+					<Grid2 item xs={12} md={6} key={f.id || idx}>
 						<Card>
 							<CardContent>
 								<Box
@@ -94,11 +94,11 @@ const FlightDetailsCard = ({ flights = [], tariffMap = {} }) => {
 								)}
 							</CardContent>
 						</Card>
-					</Grid>
+					</Grid2>
 				);
 			})}
-			{flights.length === 1 && <Grid item xs={12} md={6} />}
-		</Grid>
+			{flights.length === 1 && <Grid2 item xs={12} md={6} />}
+		</Grid2>
 	);
 };
 
