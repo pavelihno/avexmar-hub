@@ -1,6 +1,3 @@
-"""Utilities for working with passenger categories across the application."""
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
