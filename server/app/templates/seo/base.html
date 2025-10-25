@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{{ title }}</title>
+		<meta name="description" content="{{ description }}" />
+		<link rel="canonical" href="{{ canonical }}" />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="{{ title }}" />
+		<meta property="og:description" content="{{ description }}" />
+		<meta property="og:url" content="{{ canonical }}" />
+		{% if structured_data %}
+		<script type="application/ld+json">
+			{{ structured_data|tojson }}
+		</script>
+		{% endif %}
+		<style>
+			:root {
+				color-scheme: light;
+				font-family: 'Inter', 'Segoe UI', sans-serif;
+			}
+			body {
+				margin: 0 auto;
+				padding: 2rem 1.5rem 3rem;
+				max-width: 960px;
+				background-color: #f5f7fb;
+				color: #1f2432;
+			}
+			header {
+				margin-bottom: 2rem;
+			}
+			h1 {
+				font-size: 2rem;
+				margin: 0 0 0.5rem 0;
+			}
+			p.subtitle {
+				margin: 0;
+				color: #52606d;
+			}
+			ul.flight-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: grid;
+				gap: 1rem;
+			}
+			li.flight-card {
+				background: #fff;
+				border-radius: 12px;
+				padding: 1.5rem;
+				box-shadow: 0 12px 24px rgba(31, 36, 50, 0.08);
+			}
+			.flight-card h2 {
+				margin: 0 0 0.75rem 0;
+				font-size: 1.25rem;
+			}
+			.flight-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1.25rem;
+				font-size: 0.95rem;
+				color: #374151;
+			}
+			.price {
+				margin-top: 1rem;
+				font-weight: 600;
+				font-size: 1.1rem;
+				color: #0065ff;
+			}
+			.empty-state {
+				text-align: center;
+				padding: 3rem 1rem;
+				background: #fff;
+				border-radius: 16px;
+				box-shadow: inset 0 0 0 1px rgba(0, 101, 255, 0.12);
+			}
+			footer {
+				margin-top: 3rem;
+				font-size: 0.85rem;
+				color: #6b7280;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>{{ page_heading }}</h1>
+			<p class="subtitle">{{ description }}</p>
+		</header>
+		<main>{% block content %}{% endblock %}</main>
+		<footer>&copy; {{ current_year }} {{ brand_name }}. Актуальные данные обновляются ежедневно.</footer>
+	</body>
+</html>

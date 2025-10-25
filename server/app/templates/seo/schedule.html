@@ -1,0 +1,34 @@
+{% extends "seo/base.html" %} {% block content %} {% if flights %}
+<ul class="flight-list">
+	{% for flight in flights %}
+	<li class="flight-card">
+		<h2>{{ flight.airline.name }} · {{ flight.airline_flight_number }}</h2>
+		<div class="flight-meta">
+			<div>
+				<strong>Вылет:</strong>
+				{{ flight.route.origin_airport.city_name }} ({{ flight.route.origin_airport.iata_code }}) · {{
+				flight.scheduled_departure }} {{ flight.scheduled_departure_time or "" }}
+			</div>
+			<div>
+				<strong>Прилёт:</strong>
+				{{ flight.route.destination_airport.city_name }} ({{ flight.route.destination_airport.iata_code }}) · {{
+				flight.scheduled_arrival }} {{ flight.scheduled_arrival_time or "" }}
+			</div>
+			{% if flight.seats_left %}
+			<div><strong>Свободных мест:</strong> {{ flight.seats_left }}</div>
+			{% endif %}
+		</div>
+		{% if flight.min_price %}
+		<div class="price">Билеты от {{ flight.min_price }} {{ flight.currency }}</div>
+		{% elif flight.price %}
+		<div class="price">Текущая стоимость {{ flight.price }} {{ flight.currency }}</div>
+		{% endif %}
+	</li>
+	{% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+	<h2>Нет доступных рейсов</h2>
+	<p>Мы обновляем расписание ежедневно. Попробуйте выбрать другую дату или направление.</p>
+</div>
+{% endif %} {% endblock %}

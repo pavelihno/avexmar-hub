@@ -21,6 +21,8 @@ STORAGE_DIR="$SCRIPT_DIR/storage"
 STORAGE_SUBDIRS=(
   "images"
   "images/carousel"
+  "seo"
+  "seo/prerender"
 )
 
 mkdir -p "$SCHEDULE_DIR"

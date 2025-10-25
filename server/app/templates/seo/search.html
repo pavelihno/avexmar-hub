@@ -1,0 +1,30 @@
+{% extends "seo/base.html" %} {% block content %} {% if flights %}
+<ul class="flight-list">
+	{% for flight in flights %}
+	<li class="flight-card">
+		<h2>{{ flight.airline.name }} · {{ flight.airline_flight_number }}</h2>
+		<div class="flight-meta">
+			<div>
+				<strong>Маршрут:</strong>
+				{{ flight.route.origin_airport.city_name }} — {{ flight.route.destination_airport.city_name }}
+			</div>
+			<div>
+				<strong>Вылет:</strong> {{ flight.scheduled_departure }} {{ flight.scheduled_departure_time or "" }}
+			</div>
+			<div><strong>Прилёт:</strong> {{ flight.scheduled_arrival }} {{ flight.scheduled_arrival_time or "" }}</div>
+		</div>
+		{% if flight.tariffs %}
+		<div class="price">
+			Доступные тарифы: {% for tariff in flight.tariffs[:3] %} {{ tariff.title }} — {{ tariff.price }} {{
+			tariff.currency }}{% if not loop.last %}, {% endif %} {% endfor %}
+		</div>
+		{% endif %}
+	</li>
+	{% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+	<h2>Подходящих рейсов не найдено</h2>
+	<p>Проверьте введённые даты или выберите альтернативные аэропорты отправления и прибытия.</p>
+</div>
+{% endif %} {% endblock %}

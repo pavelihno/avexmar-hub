@@ -70,6 +70,11 @@ class RouteMessages:
     ROUTE_NOT_FOUND = 'Маршрут не найден'
 
 
+class SearchMessages:
+    UNKNOWN_ORIGIN_OR_DESTINATION = 'Неизвестный аэропорт отправления или назначения'
+    ORIGIN_AND_DESTINATION_REQUIRED = 'Требуются аэропорт отправления и назначения'
+
+
 class FlightMessages:
     FLIGHT_NUMBER_ALREADY_EXISTS = 'Рейс с таким номером уже существует для данной авиакомпании и маршрута'
 
@@ -100,6 +105,11 @@ class FileMessages:
     INVALID_PATH = 'Неверный путь'
     FILE_NOT_FOUND = 'Файл не найден'
     IMPORT_COMPLETED = 'Импорт успешно завершен'
+    FILENAME_REQUIRED = 'Требуется указать имя файла'
+
+    @staticmethod
+    def unsupported_content_type(content_type) -> str:
+        return f'Неподдерживаемый тип содержимого: {content_type}'
 
 
 class ErrorMessages:
