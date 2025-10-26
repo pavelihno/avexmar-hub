@@ -258,6 +258,9 @@ export const VALIDATION_MESSAGES = {
 		seats_number: {
 			REQUIRED: 'Количество мест обязательно',
 		},
+		available_seats: {
+			REQUIRED: 'Количество свободных мест обязательно',
+		},
 		currency: {
 			REQUIRED: 'Валюта обязательна',
 		},

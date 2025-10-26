@@ -20,6 +20,12 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const [formUpdates, setFormUpdates] = useState({});
 
 	const isEditing = action === 'edit';
+	const baseTakenSeats = isEditing && flightTariff ? Number(flightTariff.taken_seats || 0) : 0;
+	const [effectiveTakenSeats, setEffectiveTakenSeats] = useState(baseTakenSeats);
+
+	useEffect(() => {
+		setEffectiveTakenSeats(baseTakenSeats);
+	}, [baseTakenSeats]);
 
 	useEffect(() => {
 		if (!tariffs || tariffs.length === 0) {
@@ -73,19 +79,30 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 			label: FIELD_LABELS.TARIFF.seat_class,
 			type: FIELD_TYPES.SELECT,
 			options: seatClassOptions,
+			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TARIFF.seat_class.REQUIRED : null),
 		},
-		seatsNumber: {
-			key: 'seatsNumber',
-			apiKey: 'seats_number',
-			label: FIELD_LABELS.FLIGHT_TARIFF.seats_number,
+		availableSeats: {
+			key: 'availableSeats',
+			label: FIELD_LABELS.FLIGHT_TARIFF.available_seats,
 			type: FIELD_TYPES.NUMBER,
 			inputProps: { min: 0, step: 1 },
 			defaultValue: 0,
 			validate: (value) =>
 				value === '' || value === null || value === undefined
-					? VALIDATION_MESSAGES.TARIFF.seats_number.REQUIRED
+					? VALIDATION_MESSAGES.TARIFF.available_seats.REQUIRED
 					: null,
+		},
+		totalSeats: {
+			key: 'totalSeats',
+			apiKey: 'seats_number',
+			label: FIELD_LABELS.FLIGHT_TARIFF.seats_number,
+			type: FIELD_TYPES.NUMBER,
+			inputProps: { min: 0, step: 1, readOnly: true },
+			defaultValue: 0,
+			disabled: true,
+			toApi: (value) => Number(value ?? 0),
+			toUi: (value) => Number(value ?? 0),
 		},
 		flightTariffId: {
 			key: 'flightTariffId',
@@ -109,23 +126,44 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 				const tariff = tariffs.find((t) => t.id === flightTariff.tariff_id);
 				const originalSeatClass = tariff ? tariff.seat_class : '';
 
+				const seatsNumber = Number(flightTariff.seats_number || 0);
+				const seatsAvailable = Number(
+					flightTariff.available_seats ?? Math.max(seatsNumber - baseTakenSeats, 0)
+				);
+
 				return {
 					id: flightTariffId,
 					flightId: flightId,
 					seatClass: seatClass || originalSeatClass,
-					seatsNumber: flightTariff.seats_number,
+					availableSeats: seatsAvailable,
+					totalSeats: seatsNumber,
 					flightTariffId: seatClass && seatClass !== originalSeatClass ? '' : flightTariff.tariff_id,
 				};
 			}
 		}
-		return { flightId, seatClass, seatsNumber: 0, flightTariffId: '' };
+		return {
+			flightId,
+			seatClass,
+			availableSeats: 0,
+			totalSeats: 0,
+			flightTariffId: '',
+		};
 	})();
 
 	const handleSaveTariff = (tariffData) => {
-		const formattedData = tariffManager.toApiFormat({
+		const availableSeats = Math.max(Number(tariffData[FIELDS.availableSeats.key] ?? 0) || 0, 0);
+		const totalSeats = Math.max(Number(tariffData[FIELDS.totalSeats.key] ?? 0) || 0, 0);
+
+		const payload = {
 			...tariffData,
+			[FIELDS.availableSeats.key]: availableSeats,
+			[FIELDS.totalSeats.key]: totalSeats,
+			takenSeats: effectiveTakenSeats,
 			flightId,
-		});
+		};
+
+		const formattedData = tariffManager.toApiFormat(payload);
+		formattedData.available_seats = availableSeats;
 
 		return dispatch(isEditing ? updateFlightTariff(formattedData) : createFlightTariff(formattedData)).unwrap();
 	};
@@ -133,7 +171,24 @@ export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, ac
 	const handleChange = (field, value) => {
 		if (field === FIELDS.seatClass.key && value !== seatClass) {
 			setSeatClass(value);
-			setFormUpdates({ flightTariffId: '' });
+			setEffectiveTakenSeats(0);
+			setFormUpdates({
+				flightTariffId: '',
+				[FIELDS.availableSeats.key]: 0,
+				[FIELDS.totalSeats.key]: 0,
+			});
+			return;
+		}
+
+		if (field === FIELDS.availableSeats.key) {
+			const numericValue =
+				value === '' || value === null || value === undefined ? '' : Math.max(Number(value), 0);
+			if (numericValue === '') {
+				setFormUpdates((prev) => ({ ...prev, [FIELDS.totalSeats.key]: effectiveTakenSeats }));
+			} else {
+				const total = numericValue + effectiveTakenSeats;
+				setFormUpdates((prev) => ({ ...prev, [FIELDS.totalSeats.key]: total }));
+			}
 		}
 	};
 

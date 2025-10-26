@@ -205,6 +205,8 @@ export const UI_LABELS = {
 				title: 'Тарифы',
 				tariff: 'Тариф',
 				seats: 'Мест',
+				free_seats: 'Свободно',
+				total_seats: 'Всего',
 				description: 'Управление тарифами рейсов',
 				management: 'Управление тарифами',
 				add_button: 'Добавить тариф',

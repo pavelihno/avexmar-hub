@@ -301,13 +301,18 @@ const FlightManagement = () => {
 									const orderNumber = baseTariff.order_number;
 									const tariffPrice = baseTariff.price;
 									const currency = ENUM_LABELS.CURRENCY[baseTariff.currency];
-									const seatsNumber = ft.seats_number;
+									const totalSeats = Number(ft.seats_number ?? 0);
+									const availableSeats = Number(
+										ft.available_seats ?? Math.max(totalSeats - Number(ft.taken_seats ?? 0), 0)
+									);
 
 									const tariffLabel = `${seatClass} - ${
 										UI_LABELS.ADMIN.modules.tariffs.tariff
-									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${formatNumber(
-										seatsNumber
-									)} ${UI_LABELS.ADMIN.modules.tariffs.seats.toLowerCase()}`;
+									} ${orderNumber} - ${formatNumber(tariffPrice)} ${currency} - ${
+										UI_LABELS.ADMIN.modules.tariffs.free_seats
+									}: ${formatNumber(availableSeats)} / ${
+										UI_LABELS.ADMIN.modules.tariffs.total_seats
+									}: ${formatNumber(totalSeats)}`;
 
 									return (
 										<Box
