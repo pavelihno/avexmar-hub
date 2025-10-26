@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
+
 from sqlalchemy.orm import Mapped, Session
 
+from app.constants.messages import FlightTariffMessages
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.tariff import Tariff
@@ -24,25 +26,28 @@ class FlightTariff(BaseModel):
     )
 
     def to_dict(self, return_children=False):
+        from app.utils.search import get_flight_seat_availability
+
+        availability_map = get_flight_seat_availability(
+            self.flight_id, self.tariff_id
+        )
+
+        availability = availability_map.get(self.tariff_id, {}) if availability_map else {}
+
+        total_seats = availability.get('total', self.seats_number or 0)
+        taken_seats = availability.get('taken', 0)
+        available_seats = availability.get('available', max(total_seats - taken_seats, 0))
+
         return {
             'id': self.id,
             'flight': self.flight.to_dict(return_children) if return_children else {},
             'flight_id': self.flight_id,
             'tariff': self.tariff.to_dict(return_children) if return_children else {},
             'tariff_id': self.tariff_id,
-            'seats_number': self.seats_number
+            'seats_number': total_seats,
+            'taken_seats': taken_seats,
+            'available_seats': available_seats,
         }
-
-    @classmethod
-    def __check_seat_class_unique(cls, session, flight_id, tariff_id, instance_id=None):
-        """Ensure only one tariff per flight for the same seat class"""
-        tariff = Tariff.get_or_404(tariff_id, session)
-        query = session.query(cls).join(Tariff, cls.tariff_id == Tariff.id)
-        query = query.filter(cls.flight_id == flight_id, Tariff.seat_class == tariff.seat_class)
-        if instance_id is not None:
-            query = query.filter(cls.id != instance_id)
-        if query.one_or_none() is not None:
-            raise ModelValidationError({'seat_class': 'flight tariff for this class already exists'})
 
     @classmethod
     def create(
@@ -53,11 +58,20 @@ class FlightTariff(BaseModel):
         **kwargs,
     ):
         session = session or db.session
-        # Deprecated
-        # flight_id = kwargs.get('flight_id')
-        # tariff_id = kwargs.get('tariff_id')
-        # if flight_id is not None and tariff_id is not None:
-        #     cls.__check_seat_class_unique(session, flight_id, tariff_id)
+        available_seats = kwargs.pop('available_seats', None)
+        if available_seats is not None:
+            try:
+                seats_available_int = int(available_seats)
+            except (TypeError, ValueError) as exc:
+                raise ModelValidationError({
+                    'available_seats': FlightTariffMessages.INVALID_AVAILABLE_SEATS,
+                }) from exc
+            if seats_available_int < 0:
+                raise ModelValidationError({
+                    'available_seats': FlightTariffMessages.AVAILABLE_SEATS_MUST_BE_NON_NEGATIVE,
+                })
+            kwargs['seats_number'] = seats_available_int
+
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
@@ -71,10 +85,27 @@ class FlightTariff(BaseModel):
     ):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
-        # Deprecated
-        # flight_id = kwargs.get('flight_id', instance.flight_id)
-        # tariff_id = kwargs.get('tariff_id', instance.tariff_id)
-        # if flight_id is not None and tariff_id is not None:
-        #     cls.__check_seat_class_unique(session, flight_id, tariff_id, instance_id=_id)
+        available_seats = kwargs.pop('available_seats', None)
+        if available_seats is not None:
+            try:
+                seats_available_int = int(available_seats)
+            except (TypeError, ValueError) as exc:
+                raise ModelValidationError({
+                    'available_seats': FlightTariffMessages.INVALID_AVAILABLE_SEATS,
+                }) from exc
+            if seats_available_int < 0:
+                raise ModelValidationError({
+                    'available_seats': FlightTariffMessages.AVAILABLE_SEATS_MUST_BE_NON_NEGATIVE,
+                })
+
+            from app.utils.search import get_flight_seat_availability
+            
+            availability_map = get_flight_seat_availability(
+                instance.flight_id,
+                session=session,
+                flight_tariffs=[instance],
+            )
+            taken = availability_map.get(instance.tariff_id, {}).get('taken', 0)
+            kwargs['seats_number'] = seats_available_int + taken
 
         return super().update(_id, session, commit=commit, **kwargs)

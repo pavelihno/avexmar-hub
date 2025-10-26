@@ -1,24 +1,88 @@
 from collections.abc import Iterable
 from datetime import date
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from sqlalchemy import and_, false, or_
-from sqlalchemy.orm import aliased
+from sqlalchemy import and_, or_, false, true
+from sqlalchemy.orm import aliased, Session
 from sqlalchemy.sql import func
 
 from app.database import db
 from app.models.airline import Airline
 from app.models.airport import Airport
-from app.models.booking import Booking
-from app.models.booking_flight import BookingFlight
-from app.models.booking_hold import BookingHold
 from app.models.flight import Flight
 from app.models.flight_tariff import FlightTariff
 from app.models.route import Route
 from app.models.tariff import Tariff
-from app.utils.enum import BOOKING_STATUS
 from app.models._base_model import NotFoundError
 from app.constants.messages import SearchMessages
+
+if TYPE_CHECKING:
+    from app.models.flight_tariff import FlightTariff
+
+
+def get_flight_seat_availability(
+    flight_id: int,
+    tariff_id: int | None = None,
+    session: Session | None = None,
+    *,
+    flight_tariffs: Iterable['FlightTariff'] | None = None,
+) -> dict[int, dict[str, int]]:
+    """Calculate seat availability for a flight's tariffs or a specific tariff"""
+    from app.models.booking import Booking
+    from app.models.booking_hold import BookingHold
+    from app.models.booking_flight import BookingFlight
+    from app.utils.enum import BOOKING_STATUS
+
+    session = session or db.session
+
+    active_hold_exists = session.query(BookingHold.id).filter(
+        BookingHold.booking_id == Booking.id,
+        BookingHold.expires_at != None,
+        BookingHold.expires_at > func.now(),
+    ).exists()
+
+    taken_rows = (
+        session.query(
+            BookingFlight.tariff_id.label('tariff_id'),
+            func.coalesce(func.sum(Booking.seats_number), 0).label('taken'),
+        )
+        .join(Booking, BookingFlight.booking_id == Booking.id)
+        .filter(
+            BookingFlight.flight_id == flight_id,
+            (BookingFlight.tariff_id == tariff_id if tariff_id is not None else true()),
+            or_(
+                Booking.status == BOOKING_STATUS.completed,
+                and_(
+                    ~Booking.status.in_([BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]),
+                    active_hold_exists,
+                ),
+            ),
+        )
+        .group_by(BookingFlight.tariff_id)
+        .all()
+    )
+
+    taken_map = {row.tariff_id: int(row.taken or 0) for row in taken_rows}
+
+    if flight_tariffs is None:
+        flight_tariffs = (
+            session.query(FlightTariff)
+            .filter(FlightTariff.flight_id == flight_id)
+            .all()
+        )
+
+    availability: dict[int, dict[str, int]] = {}
+    for ft in flight_tariffs:
+        total = int(ft.seats_number or 0)
+        taken = taken_map.get(ft.tariff_id, 0)
+        available = max(total - taken, 0)
+        availability[ft.tariff_id] = {
+            'total': total,
+            'taken': taken,
+            'available': available,
+        }
+
+    return availability
 
 
 def get_route_airports(origin_code: str | None, dest_code: str | None) -> tuple[Airport, Airport]:
@@ -33,42 +97,8 @@ def get_route_airports(origin_code: str | None, dest_code: str | None) -> tuple[
     return origin, dest
 
 
-def _active_hold_exists_subquery() -> Any:
-    return db.session.query(BookingHold.id).filter(
-        BookingHold.booking_id == Booking.id,
-        BookingHold.expires_at != None,
-        BookingHold.expires_at > func.now(),
-    ).exists()
-
-
 def get_available_tariffs(flight_id: int) -> list[dict[str, Any]]:
     """Return list of available tariffs for a flight ordered by price"""
-
-    active_hold_exists = _active_hold_exists_subquery()
-
-    taken_rows = (
-        db.session.query(
-            BookingFlight.tariff_id.label('tariff_id'),
-            func.coalesce(func.sum(Booking.seats_number), 0).label('taken'),
-        )
-        .select_from(BookingFlight)
-        .join(Booking, BookingFlight.booking_id == Booking.id)
-        .filter(
-            BookingFlight.flight_id == flight_id,
-            or_(
-                Booking.status == BOOKING_STATUS.completed,
-                and_(
-                    ~Booking.status.in_(
-                        [BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]),
-                    active_hold_exists,
-                ),
-            ),
-        )
-        .group_by(BookingFlight.tariff_id)
-        .all()
-    )
-
-    taken_map = {row.tariff_id: row.taken for row in taken_rows}
 
     tariff_query = (
         db.session.query(FlightTariff, Tariff)
@@ -76,11 +106,17 @@ def get_available_tariffs(flight_id: int) -> list[dict[str, Any]]:
         .filter(FlightTariff.flight_id == flight_id)
     )
 
+    flight_tariffs = [ft for ft, _ in tariff_query.all()]
+    availability_map = get_flight_seat_availability(
+        flight_id,
+        session=db.session,
+        flight_tariffs=flight_tariffs,
+    )
+
     result: list[dict[str, Any]] = []
     for flight_tariff, tariff in tariff_query:
-        seats_total = flight_tariff.seats_number or 0
-        seats_left = max(
-            seats_total - taken_map.get(flight_tariff.tariff_id, 0), 0)
+        availability = availability_map.get(flight_tariff.tariff_id, {})
+        seats_left = availability.get('available', 0)
 
         if seats_left <= 0 or tariff.price is None:
             continue

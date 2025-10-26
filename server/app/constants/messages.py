@@ -90,6 +90,12 @@ class FlightMessages:
     def invalid_tariff_number_or_class(seat_class, seats_number, tariff_number) -> str:
         return f'Недействительный номер тарифа или класс: Класс обслуживания `{seat_class}`, Количество мест `{seats_number}`, Номер тарифа `{tariff_number}`'
 
+
+class FlightTariffMessages:
+    INVALID_AVAILABLE_SEATS = 'Некорректное значение свободных мест'
+    AVAILABLE_SEATS_MUST_BE_NON_NEGATIVE = 'Количество свободных мест должно быть неотрицательным'
+
+
 class ExportMessages:
     PUBLIC_ID_REQUIRED = 'Требуется идентификатор бронирования'
 
