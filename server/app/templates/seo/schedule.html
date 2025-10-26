@@ -19,9 +19,9 @@
 			{% endif %}
 		</div>
 		{% if flight.min_price %}
-		<div class="price">Билеты от {{ flight.min_price }} {{ flight.currency }}</div>
+		<div class="price">Билеты от {{ format_float(flight.min_price) }} {{ currency_labels.get(flight.currency, flight.currency) }}</div>
 		{% elif flight.price %}
-		<div class="price">Текущая стоимость {{ flight.price }} {{ flight.currency }}</div>
+		<div class="price">Текущая стоимость {{ format_float(flight.price) }} {{ currency_labels.get(flight.currency, flight.currency) }}</div>
 		{% endif %}
 	</li>
 	{% endfor %}

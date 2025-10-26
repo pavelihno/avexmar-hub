@@ -265,8 +265,8 @@ def __create_app(_config_class, _db):
     app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
 
     # seo
-    app.route('/schedule', methods=['GET'])(render_schedule_page)
-    app.route('/search', methods=['GET'])(render_search_page)
+    app.route('/seo/schedule', methods=['GET'])(render_schedule_page)
+    app.route('/seo/search', methods=['GET'])(render_search_page)
 
     # dev
     app.route('/dev/clear/<string:table_name>', methods=['DELETE'])(clear_table)

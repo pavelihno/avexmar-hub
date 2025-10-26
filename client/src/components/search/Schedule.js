@@ -26,8 +26,6 @@ const Schedule = () => {
 	useEffect(() => {
 		if (from && to) {
 			const p = { ...paramObj };
-			// Show schedule starting from today
-			p.when = formatDate(new Date(), DATE_API_FORMAT);
 			dispatch(fetchScheduleFlights(p));
 		}
 	}, [dispatch, paramStr, from, to]);

@@ -6,7 +6,7 @@ from flask import render_template
 
 from app.celery_app import celery
 from app.config import Config
-from app.constants.branding import BRAND_NAME
+from app.constants.branding import BRAND_NAME, CURRENCY_LABELS
 from app.models._base_model import NotFoundError
 from app.utils.seo import build_seo_schedule_context
 from app.utils.search import upcoming_routes
@@ -17,7 +17,6 @@ def _render_schedule(origin_code: str, dest_code: str) -> Mapping[str, object]:
     context = build_seo_schedule_context(
         origin_code=origin_code,
         dest_code=dest_code,
-        when=None,
         base_url=Config.CLIENT_URL.rstrip('/'),
     )
     context.update(
@@ -25,6 +24,8 @@ def _render_schedule(origin_code: str, dest_code: str) -> Mapping[str, object]:
             'page_heading': context['title'],
             'current_year': datetime.now(timezone.utc).year,
             'brand_name': BRAND_NAME,
+            'currency_labels': CURRENCY_LABELS,
+            'format_float': lambda v: f'{v:,.2f}'.replace(',', ' '),
         }
     )
     html = render_template('seo/schedule.html', **context)
@@ -45,14 +46,10 @@ def _write_index(seo_manager: SEOManager, payload: Iterable[Mapping[str, object]
 
 
 @celery.task
-def generate_prerender(limit: int | None = None) -> int:
+def generate_prerender() -> int:
     """Generate prerendered schedule pages for popular routes."""
 
-    try:
-        route_limit = int(
-            limit) if limit is not None else Config.SEO_PRERENDER_ROUTE_LIMIT
-    except (TypeError, ValueError):
-        route_limit = Config.SEO_PRERENDER_ROUTE_LIMIT
+    route_limit = Config.SEO_PRERENDER_ROUTE_LIMIT
 
     seo_manager = SEOManager()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -67,8 +64,8 @@ def generate_prerender(limit: int | None = None) -> int:
 
         filename = _prerender_filename(origin_code, dest_code)
         relative_path = seo_manager.save_file(
-            rendered['html'], 
-            filename, 
+            rendered['html'],
+            filename,
             'prerender'
         )
 

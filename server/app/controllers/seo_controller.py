@@ -43,7 +43,6 @@ def render_schedule_page():
         context = build_seo_schedule_context(
             origin_code=origin_code,
             dest_code=dest_code,
-            when=when,
             base_url=_build_base_url(),
         )
     except NotFoundError:

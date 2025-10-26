@@ -104,9 +104,8 @@ def schedule_flights():
 
     origin_code = params.get('from')
     dest_code = params.get('to')
-    depart_date = params.get('when')
 
-    flights = build_schedule(origin_code, dest_code, depart_date)
+    flights = build_schedule(origin_code, dest_code)
 
     return jsonify(flights), 200
 

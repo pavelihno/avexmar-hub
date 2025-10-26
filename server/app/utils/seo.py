@@ -12,21 +12,7 @@ from app.utils.search import (
 from app.utils.business_logic import get_seats_number
 from app.constants.messages import SearchMessages
 from app.constants.seo import SEOText
-
-
-def _parse_date(value: str | None) -> date | None:
-    if not value:
-        return None
-    try:
-        return date.fromisoformat(value)
-    except ValueError:
-        return None
-
-
-def _format_human_date(value: date | None) -> str:
-    if not value:
-        return ''
-    return value.strftime(SEOText.DATE_FORMAT)
+from app.utils.datetime import format_date
 
 
 def _flight_offers_jsonld(flight: dict) -> list[dict[str, object]]:
@@ -118,13 +104,11 @@ def build_seo_schedule_context(
     *,
     origin_code: str,
     dest_code: str,
-    when: str | None,
     base_url: str,
 ) -> dict[str, object]:
     origin, dest = get_route_airports(origin_code, dest_code)
-    schedule = build_schedule(origin_code, dest_code, when)
+    schedule = build_schedule(origin_code, dest_code)
 
-    human_date = _format_human_date(_parse_date(when))
     route_title = _route_name(origin, dest)
     lowest_price = None
     for flight in schedule:
@@ -135,14 +119,16 @@ def build_seo_schedule_context(
             lowest_price = candidate
 
     description_parts = [
-        SEOText.SCHEDULE_FLIGHTS.format(route_title=route_title)]
-    if human_date:
-        description_parts.append(SEOText.ON_DATE.format(human_date=human_date))
+        SEOText.SCHEDULE_FLIGHTS.format(route_title=route_title),
+        SEOText.ON_DATE.format(human_date=format_date(date.today()))
+    ]
     if lowest_price is not None:
         description_parts.append(
-            SEOText.PRICES_FROM.format(lowest_price=lowest_price))
+            SEOText.PRICES_FROM.format(lowest_price=lowest_price)
+        )
     description = SEOText.DESCRIPTION_SEPARATOR.join(
-        description_parts) + SEOText.DESCRIPTION_END
+        description_parts
+    ) + SEOText.DESCRIPTION_END
 
     canonical = _canonical(
         base_url,
@@ -150,7 +136,6 @@ def build_seo_schedule_context(
         {
             'from': origin_code,
             'to': dest_code,
-            **({'when': when} if when else {}),
         },
     )
 
@@ -199,7 +184,8 @@ def build_seo_search_context(
         direction='outbound',
     )
 
-    return_from = params.get('return') if is_exact else params.get('return_from')
+    return_from = params.get(
+        'return') if is_exact else params.get('return_from')
     return_to = None if is_exact else params.get('return_to')
     return_airline = params.get('return_airline')
     return_flight_number = params.get('return_flight')
@@ -220,7 +206,6 @@ def build_seo_search_context(
             )
         )
 
-    human_date = _format_human_date(_parse_date(depart_from))
     route_title = _route_name(origin, dest)
 
     if flights:
@@ -237,13 +222,17 @@ def build_seo_search_context(
         cheapest = None
 
     description_parts = [
-        SEOText.FLIGHT_TICKETS.format(route_title=route_title)]
-    if human_date:
-        description_parts.append(SEOText.ON_DATE.format(human_date=human_date))
+        SEOText.FLIGHT_TICKETS.format(route_title=route_title)
+    ]
+    if depart_from:
+        description_parts.append(SEOText.ON_DATE.format(
+            human_date=format_date(depart_from))
+        )
     if cheapest is not None:
         description_parts.append(SEOText.FROM_PRICE.format(cheapest=cheapest))
     description = SEOText.DESCRIPTION_SEPARATOR.join(
-        description_parts) + SEOText.DESCRIPTION_END
+        description_parts
+    ) + SEOText.DESCRIPTION_END
 
     canonical_params = {k: v for k, v in params.items() if v}
     canonical = _canonical(base_url, '/search', canonical_params)

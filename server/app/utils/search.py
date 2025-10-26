@@ -246,16 +246,18 @@ def query_flights(
     return results
 
 
-def build_schedule(origin_code: str, dest_code: str, depart_date: date | str | None) -> list[dict[str, Any]]:
+def build_schedule(origin_code: str, dest_code: str) -> list[dict[str, Any]]:
     """Return schedule flights for both directions for a date"""
 
+    today = date.today()
+    
     flights: list[dict[str, Any]] = []
 
     flights.extend(
         query_flights(
             origin_code=origin_code,
             dest_code=dest_code,
-            date_from=depart_date,
+            date_from=today,
             is_exact=False,
             direction='outbound',
         )
@@ -265,7 +267,7 @@ def build_schedule(origin_code: str, dest_code: str, depart_date: date | str | N
         query_flights(
             origin_code=dest_code,
             dest_code=origin_code,
-            date_from=depart_date,
+            date_from=today,
             is_exact=False,
             direction='return',
         )

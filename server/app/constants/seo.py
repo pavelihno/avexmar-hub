@@ -1,8 +1,5 @@
 class SEOText:
-    """Text templates for SEO pages."""
-
-    # Date format
-    DATE_FORMAT = '%d.%m.%Y'
+    """Text templates for SEO pages"""
 
     # Schema.org constants
     SCHEMA_CONTEXT = 'https://schema.org'
@@ -12,13 +9,13 @@ class SEOText:
     # Default time value
     DEFAULT_TIME = '00:00'
 
-    # Description templates (Russian)
+    # Description templates
     SCHEDULE_FLIGHTS = 'Расписание рейсов {route_title}'
     ON_DATE = 'на {human_date}'
-    PRICES_FROM = 'цены от {lowest_price} ₽'
+    PRICES_FROM = 'цены от {lowest_price} РУБ'
 
     FLIGHT_TICKETS = 'Авиабилеты {route_title}'
-    FROM_PRICE = 'от {cheapest} ₽'
+    FROM_PRICE = 'от {cheapest} РУБ'
 
     # Title templates
     SCHEDULE_TITLE = '{route_title} — расписание и билеты'
