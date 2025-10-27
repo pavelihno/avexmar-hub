@@ -255,7 +255,7 @@ const PassengerForm = (
 			isNameField && typeof value === 'string'
 				? value.toUpperCase()
 				: isDocumentNumberField && typeof value === 'string'
-				? value.replace(/\s+/g, '')
+				? value.replace(/\s+/g, '').toUpperCase()
 				: value;
 		const next = { ...data, [field]: normalizedValue };
 		setData(next);
