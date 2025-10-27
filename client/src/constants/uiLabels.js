@@ -759,6 +759,11 @@ export const UI_LABELS = {
 		hint_title: 'Где найти номер бронирования?',
 		hint_text: 'Он указан в письме-подтверждении',
 	},
+	SEO: {
+		discovery_links: {
+			schedule_text: (from, to) => `Расписание ${from} — ${to}`,
+		},
+	},
 };
 
 export const APP_TITLE = UI_LABELS.APP_TITLE;
@@ -779,5 +784,6 @@ export const SCHEDULE = UI_LABELS.SCHEDULE;
 export const SEARCH = UI_LABELS.SEARCH;
 export const BOOKING_SEARCH = UI_LABELS.BOOKING_SEARCH;
 export const ADMIN = UI_LABELS.ADMIN;
+export const SEO = UI_LABELS.SEO;
 
 export default UI_LABELS;

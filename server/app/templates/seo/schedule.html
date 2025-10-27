@@ -4,24 +4,63 @@
 	<li class="flight-card">
 		<h2>{{ flight.airline.name }} · {{ flight.airline_flight_number }}</h2>
 		<div class="flight-meta">
-			<div>
-				<strong>Вылет:</strong>
-				{{ flight.route.origin_airport.city_name }} ({{ flight.route.origin_airport.iata_code }}) · {{
-				flight.scheduled_departure }} {{ flight.scheduled_departure_time or "" }}
+			<div class="route-info">
+				<div class="airport-details">
+					<strong>Вылет:</strong>
+					<div class="airport-name">
+						{{ flight.route.origin_airport.name }} ({{ flight.route.origin_airport.iata_code }})
+					</div>
+					<div class="airport-location">{{ flight.route.origin_airport.city_name }}</div>
+				</div>
+				<div class="airport-details">
+					<strong>Прилёт:</strong>
+					<div class="airport-name">
+						{{ flight.route.destination_airport.name }} ({{ flight.route.destination_airport.iata_code }})
+					</div>
+					<div class="airport-location">{{ flight.route.destination_airport.city_name }}</div>
+				</div>
 			</div>
 			<div>
-				<strong>Прилёт:</strong>
-				{{ flight.route.destination_airport.city_name }} ({{ flight.route.destination_airport.iata_code }}) · {{
-				flight.scheduled_arrival }} {{ flight.scheduled_arrival_time or "" }}
+				<strong>Дата и время вылета:</strong>
+				{{ flight.scheduled_departure }} {{ flight.scheduled_departure_time or "" }}
+			</div>
+			<div>
+				<strong>Дата и время прилёта:</strong>
+				{{ flight.scheduled_arrival }} {{ flight.scheduled_arrival_time or "" }}
 			</div>
 			{% if flight.seats_left %}
-			<div><strong>Свободных мест:</strong> {{ flight.seats_left }}</div>
+			<div><strong>Свободных мест суммарно:</strong> {{ flight.seats_left }}</div>
 			{% endif %}
 		</div>
-		{% if flight.min_price %}
-		<div class="price">Билеты от {{ format_float(flight.min_price) }} {{ currency_labels.get(flight.currency, flight.currency) }}</div>
-		{% elif flight.price %}
-		<div class="price">Текущая стоимость {{ format_float(flight.price) }} {{ currency_labels.get(flight.currency, flight.currency) }}</div>
+		{% if flight.min_price or flight.price %}
+		<div class="price">
+			{% if flight.min_price %} Билеты от {{ format_float(flight.min_price) }} {{
+			currency_labels.get(flight.currency, flight.currency) }} {% else %} Текущая стоимость {{
+			format_float(flight.price) }} {{ currency_labels.get(flight.currency, flight.currency) }} {% endif %}
+		</div>
+		{% endif %} {% if flight.tariffs %}
+		<div class="tariff-section">
+			<div class="tariff-heading">Доступные тарифы</div>
+			<ul class="tariff-list">
+				{% for tariff in flight.tariffs %}
+				<li class="tariff-item">
+					<div class="tariff-title">{{ tariff.title }}</div>
+					<div class="tariff-meta">
+						<span class="tariff-price"
+							>{{ format_float(tariff.price) }} {{ currency_labels.get(tariff.currency, tariff.currency)
+							}}</span
+						>
+						<span class="tariff-seats">Свободно мест: {{ tariff.seats_left }}</span>
+						{% if tariff.seat_class %}
+						<span class="tariff-class"
+							>Класс: {{ seat_class_labels.get(tariff.seat_class, tariff.seat_class) }}</span
+						>
+						{% endif %}
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
 		{% endif %}
 	</li>
 	{% endfor %}
@@ -29,6 +68,6 @@
 {% else %}
 <div class="empty-state">
 	<h2>Нет доступных рейсов</h2>
-	<p>Мы обновляем расписание ежедневно. Попробуйте выбрать другую дату или направление.</p>
+	<p>Мы обновляем расписание ежедневно. Попробуйте выбрать другое направление.</p>
 </div>
 {% endif %} {% endblock %}

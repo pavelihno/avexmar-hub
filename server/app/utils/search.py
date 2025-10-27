@@ -53,7 +53,9 @@ def get_flight_seat_availability(
             or_(
                 Booking.status == BOOKING_STATUS.completed,
                 and_(
-                    ~Booking.status.in_([BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]),
+                    ~Booking.status.in_(
+                        [BOOKING_STATUS.expired, BOOKING_STATUS.cancelled]
+                    ),
                     active_hold_exists,
                 ),
             ),
@@ -229,13 +231,13 @@ def query_flights(
         if tariff is not None:
             flight_dict['price'] = tariff['price']
             flight_dict['currency'] = tariff['currency']
-            flight_dict['seats_left'] = tariff['seats_left']
 
         if min_tariff is not None:
             flight_dict['min_price'] = min_tariff['price']
             flight_dict['currency'] = min_tariff['currency']
-            if 'seats_left' not in flight_dict:
-                flight_dict['seats_left'] = min_tariff['seats_left']
+
+        total_seats_left = sum(t['seats_left'] for t in all_tariffs)
+        flight_dict['seats_left'] = total_seats_left
 
         if direction:
             flight_dict['direction'] = direction
@@ -246,11 +248,11 @@ def query_flights(
     return results
 
 
-def build_schedule(origin_code: str, dest_code: str) -> list[dict[str, Any]]:
+def build_schedule(origin_code: str, dest_code: str, include_return: bool = True) -> list[dict[str, Any]]:
     """Return schedule flights for both directions for a date"""
 
     today = date.today()
-    
+
     flights: list[dict[str, Any]] = []
 
     flights.extend(
@@ -263,26 +265,27 @@ def build_schedule(origin_code: str, dest_code: str) -> list[dict[str, Any]]:
         )
     )
 
-    flights.extend(
-        query_flights(
-            origin_code=dest_code,
-            dest_code=origin_code,
-            date_from=today,
-            is_exact=False,
-            direction='return',
+    if include_return:
+        flights.extend(
+            query_flights(
+                origin_code=dest_code,
+                dest_code=origin_code,
+                date_from=today,
+                is_exact=False,
+                direction='return',
+            )
         )
-    )
 
     return flights
 
 
-def upcoming_routes(limit: int = 10) -> Iterable[tuple[str, str]]:
+def upcoming_routes(limit: int | None = None) -> Iterable[tuple[str, str]]:
     """Return origin/destination IATA pairs that have upcoming flights"""
 
     origin = aliased(Airport)
     dest = aliased(Airport)
 
-    rows = (
+    query = (
         db.session.query(origin.iata_code, dest.iata_code)
         .select_from(Flight)
         .join(Route, Flight.route_id == Route.id)
@@ -291,9 +294,11 @@ def upcoming_routes(limit: int = 10) -> Iterable[tuple[str, str]]:
         .filter(Flight.scheduled_departure >= func.current_date())
         .group_by(origin.iata_code, dest.iata_code)
         .order_by(func.min(Flight.scheduled_departure))
-        .limit(limit)
-        .all()
     )
 
-    for row in rows:
-        yield row[0], row[1]
+    if limit is not None:
+        query = query.limit(limit)
+
+    rows = query.all()
+
+    return [(row[0], row[1]) for row in rows]

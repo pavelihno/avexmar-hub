@@ -10,10 +10,12 @@ import AuthModal from './components/auth/AuthModal';
 
 import AdminRoutes from './routes/AdminRoutes';
 import PublicRoutes from './routes/PublicRoutes';
+import SeoRoutes from './routes/SeoRoutes';
 
 import { selectIsAuth } from './redux/reducers/auth';
 import { auth } from './redux/actions/auth';
 import theme from './theme';
+import SeoDiscoveryLinks from './components/seo/SeoDiscoveryLinks';
 
 function App() {
 	const dispatch = useDispatch();
@@ -24,14 +26,14 @@ function App() {
 
 	useEffect(() => {
 		const initAuth = async () => {
-			await dispatch(auth());
+			dispatch(auth());
 			setIsLoading(false);
 		};
 
 		initAuth();
 	}, [dispatch]);
 
-	const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ currentUser })];
+	const routes = [...PublicRoutes({ isAuth }), ...AdminRoutes({ currentUser }), ...SeoRoutes()];
 	const routing = useRoutes(routes);
 
 	// Show loading indicator while authenticating
@@ -47,6 +49,7 @@ function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
+			<SeoDiscoveryLinks />
 			<AuthModalProvider>
 				{routing}
 				<AuthModal />

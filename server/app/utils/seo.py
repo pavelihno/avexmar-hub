@@ -1,34 +1,156 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Iterable, Mapping
 from urllib.parse import urlencode, urljoin
 
+from flask import g, render_template
+from sqlalchemy import func
+from sqlalchemy.orm import aliased
+
+from app.database import db
 from app.models.airport import Airport
-from app.models._base_model import NotFoundError
+from app.models.flight import Flight
+from app.models.route import Route
 from app.utils.search import (
     build_schedule,
     get_route_airports,
-    query_flights,
 )
-from app.utils.business_logic import get_seats_number
-from app.constants.messages import SearchMessages
+from app.constants.branding import BRAND_NAME, CURRENCY_LABELS, SEAT_CLASS_LABELS
 from app.constants.seo import SEOText
 from app.utils.datetime import format_date
 
 
-def _flight_offers_jsonld(flight: dict) -> list[dict[str, object]]:
-    offers = []
-    for tariff in flight.get('tariffs', [])[:3]:
-        offers.append(
+def prerender_filename(origin_code: str, dest_code: str) -> str:
+    """Generate filename for prerendered schedule page"""
+    return SEOText.PRERENDER_FILENAME.format(
+        origin_code=origin_code.upper(),
+        dest_code=dest_code.upper()
+    )
+
+
+def static_route_cache() -> list[dict]:
+    """Cache static routes with full airport information"""
+    routes: list[dict] | None = getattr(g, '_static_seo_routes', None)
+
+    if routes is not None:
+        return routes
+
+    origin = aliased(Airport)
+    dest = aliased(Airport)
+
+    rows = (
+        db.session.query(
+            func.upper(origin.iata_code).label('origin_code'),
+            func.upper(dest.iata_code).label('dest_code'),
+            origin.name.label('origin_name'),
+            dest.name.label('dest_name'),
+            origin.city_name.label('origin_city'),
+            dest.city_name.label('dest_city'),
+        )
+        .select_from(Flight)
+        .join(Route, Flight.route_id == Route.id)
+        .join(origin, Route.origin_airport_id == origin.id)
+        .join(dest, Route.destination_airport_id == dest.id)
+        .filter(Flight.scheduled_departure >= func.current_date())
+        .group_by(
+            origin.iata_code,
+            dest.iata_code,
+            origin.name,
+            dest.name,
+            origin.city_name,
+            dest.city_name,
+        )
+        .order_by('origin_code', 'dest_code')
+        .all()
+    )
+
+    routes = [
+        {
+            'origin': {
+                'name': origin_name or origin_code,
+                'code': origin_code,
+                'city': origin_city or origin_code,
+            },
+            'destination': {
+                'name': dest_name or dest_code,
+                'code': dest_code,
+                'city': dest_city or dest_code,
+            },
+        }
+        for origin_code, dest_code, origin_name, dest_name, origin_city, dest_city in rows
+        if origin_code and dest_code
+    ]
+
+    g._static_seo_routes = routes
+
+    return routes
+
+
+def get_schedule_static_path(origin_code: str, dest_code: str) -> str:
+    """Get URL path for static SEO schedule page"""
+    slug = SEOText.SCHEDULE_SLUG.format(
+        origin_code=origin_code.lower(),
+        dest_code=dest_code.lower()
+    )
+    return SEOText.SCHEDULE_PATH.format(slug=slug)
+
+
+def get_schedule_static_url(base_url: str, origin_code: str, dest_code: str) -> str:
+    """Get full URL for static SEO schedule page"""
+    return urljoin(base_url, get_schedule_static_path(origin_code, dest_code))
+
+
+def build_navigation_links(base_url: str) -> dict[str, object] | None:
+    """Build navigation links for SEO discovery"""
+    routes = static_route_cache()
+    if not routes:
+        return None
+
+    links: list[dict[str, str]] = []
+    navigation_items: list[dict[str, object]] = []
+
+    for position, route in enumerate(routes, start=1):
+        schedule_url = get_schedule_static_url(
+            base_url, route['origin']['code'], route['destination']['code']
+        )
+
+        schedule_label = SEOText.NAVIGATION_SCHEDULE_LABEL.format(
+            origin_city=route['origin']['city'],
+            dest_city=route['destination']['city']
+        )
+
+        links.append({'href': schedule_url, 'text': schedule_label})
+        navigation_items.append(
             {
-                '@type': 'Offer',
-                'name': tariff.get('title'),
-                'price': tariff.get('price'),
-                'priceCurrency': tariff.get('currency'),
-                'availability': SEOText.SCHEMA_IN_STOCK
-                if tariff.get('seats_left', 0) > 0
-                else SEOText.SCHEMA_SOLD_OUT,
+                '@type': SEOText.SCHEMA_TYPE_SITE_NAVIGATION,
+                'position': position,
+                'name': schedule_label,
+                'url': schedule_url,
             }
         )
+
+    return {
+        'links': links,
+        'navigation_jsonld': {
+            '@context': SEOText.SCHEMA_CONTEXT,
+            '@type': SEOText.SCHEMA_TYPE_ITEM_LIST,
+            'itemListElement': navigation_items,
+        },
+    }
+
+
+def _flight_offers_jsonld(flight: dict) -> list[dict[str, object]]:
+    offers = []
+    for tariff in flight.get('tariffs', []):
+        if tariff.get('seats_left', 0) > 0:
+            offers.append(
+                {
+                    '@type': SEOText.SCHEMA_TYPE_OFFER,
+                    'name': tariff.get('title'),
+                    'price': tariff.get('price'),
+                    'priceCurrency': tariff.get('currency'),
+                    'availability': SEOText.SCHEMA_IN_STOCK
+                }
+            )
     return offers
 
 
@@ -46,7 +168,7 @@ def _airport_jsonld(airport: Mapping[str, object] | Airport) -> dict[str, object
             'address': airport.get('city_name'),
         }
     return {
-        '@type': 'Airport',
+        '@type': SEOText.SCHEMA_TYPE_AIRPORT,
         **airport_dict,
     }
 
@@ -69,11 +191,11 @@ def _flight_jsonld(flight: dict) -> dict[str, object]:
     )
 
     return {
-        '@type': 'Flight',
+        '@type': SEOText.SCHEMA_TYPE_FLIGHT,
         'name': flight_number,
         'flightNumber': flight.get('flight_number'),
         'airline': {
-            '@type': 'Airline',
+            '@type': SEOText.SCHEMA_TYPE_AIRLINE,
             'name': airline.get('name'),
             'iataCode': airline.get('iata_code'),
         },
@@ -100,6 +222,10 @@ def _canonical(base_url: str, path: str, query: dict[str, str]) -> str:
     return urljoin(base_url, f'{path}?{urlencode(query)}')
 
 
+def _format_float(value: float) -> str:
+    return f'{value:,.2f}'.replace(',', ' ')
+
+
 def build_seo_schedule_context(
     *,
     origin_code: str,
@@ -107,7 +233,7 @@ def build_seo_schedule_context(
     base_url: str,
 ) -> dict[str, object]:
     origin, dest = get_route_airports(origin_code, dest_code)
-    schedule = build_schedule(origin_code, dest_code)
+    schedule = build_schedule(origin_code, dest_code, include_return=False)
 
     route_title = _route_name(origin, dest)
     lowest_price = None
@@ -120,11 +246,12 @@ def build_seo_schedule_context(
 
     description_parts = [
         SEOText.SCHEDULE_FLIGHTS.format(route_title=route_title),
-        SEOText.ON_DATE.format(human_date=format_date(date.today()))
+        SEOText.ON_DATE.format(date=format_date(date.today()))
     ]
     if lowest_price is not None:
         description_parts.append(
-            SEOText.PRICES_FROM.format(lowest_price=lowest_price)
+            SEOText.PRICES_FROM.format(
+                lowest_price=_format_float(lowest_price))
         )
     description = SEOText.DESCRIPTION_SEPARATOR.join(
         description_parts
@@ -141,108 +268,30 @@ def build_seo_schedule_context(
 
     return {
         'title': SEOText.SCHEDULE_TITLE.format(route_title=route_title),
+        'brand_name': BRAND_NAME,
+        'current_year': datetime.now(timezone.utc).year,
         'description': description,
         'canonical': canonical,
         'origin': origin,
         'destination': dest,
         'flights': schedule,
         'structured_data': _jsonld_graph(schedule),
+        'seo_discovery_links': build_navigation_links(base_url),
+        'currency_labels': CURRENCY_LABELS,
+        'seat_class_labels': SEAT_CLASS_LABELS,
+        'format_float': _format_float,
     }
 
 
-def build_seo_search_context(
-    params: Mapping[str, str],
-    *,
-    base_url: str,
-) -> dict[str, object]:
-    origin_code = params.get('from')
-    dest_code = params.get('to')
-    if not origin_code or not dest_code:
-        raise NotFoundError(SearchMessages.ORIGIN_AND_DESTINATION_REQUIRED)
-
-    origin, dest = get_route_airports(origin_code, dest_code)
-
-    is_exact = params.get('date_mode') == 'exact'
-    seat_class = params.get('class')
-    seats_number = get_seats_number(params)
-
-    depart_from = params.get('when') if is_exact else params.get('when_from')
-    depart_to = None if is_exact else params.get('when_to')
-    airline_code = params.get('outbound_airline')
-    flight_number = params.get('outbound_flight')
-
-    flights = query_flights(
+def render_schedule(origin_code: str, dest_code: str, base_url: str) -> Mapping[str, object]:
+    """Render schedule page for given route"""
+    context = build_seo_schedule_context(
         origin_code=origin_code,
         dest_code=dest_code,
-        date_from=depart_from,
-        date_to=depart_to,
-        airline_iata_code=airline_code,
-        flight_number=flight_number,
-        is_exact=is_exact,
-        seat_class=seat_class,
-        seats_number=seats_number,
-        direction='outbound',
+        base_url=base_url,
     )
-
-    return_from = params.get(
-        'return') if is_exact else params.get('return_from')
-    return_to = None if is_exact else params.get('return_to')
-    return_airline = params.get('return_airline')
-    return_flight_number = params.get('return_flight')
-
-    if return_from:
-        flights.extend(
-            query_flights(
-                origin_code=dest_code,
-                dest_code=origin_code,
-                date_from=return_from,
-                date_to=return_to,
-                airline_iata_code=return_airline,
-                flight_number=return_flight_number,
-                is_exact=is_exact,
-                seat_class=seat_class,
-                seats_number=seats_number,
-                direction='return',
-            )
-        )
-
-    route_title = _route_name(origin, dest)
-
-    if flights:
-        cheapest = min(
-            (
-                flight.get('min_price')
-                or flight.get('price')
-                for flight in flights
-                if flight.get('min_price') or flight.get('price')
-            ),
-            default=None,
-        )
-    else:
-        cheapest = None
-
-    description_parts = [
-        SEOText.FLIGHT_TICKETS.format(route_title=route_title)
-    ]
-    if depart_from:
-        description_parts.append(SEOText.ON_DATE.format(
-            human_date=format_date(depart_from))
-        )
-    if cheapest is not None:
-        description_parts.append(SEOText.FROM_PRICE.format(cheapest=cheapest))
-    description = SEOText.DESCRIPTION_SEPARATOR.join(
-        description_parts
-    ) + SEOText.DESCRIPTION_END
-
-    canonical_params = {k: v for k, v in params.items() if v}
-    canonical = _canonical(base_url, '/search', canonical_params)
-
+    html = render_template('seo/schedule.html', **context)
     return {
-        'title': SEOText.SEARCH_TITLE.format(route_title=route_title),
-        'description': description,
-        'canonical': canonical,
-        'origin': origin,
-        'destination': dest,
-        'flights': flights,
-        'structured_data': _jsonld_graph(flights),
+        'context': context,
+        'html': html,
     }
