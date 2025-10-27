@@ -30,53 +30,84 @@
 			property="og:description"
 			content="Надежный партнер в организации пассажирских и грузовых авиаперевозок с 1995 года. Регулярные рейсы Москва — Якутск — Певек. С 2017 года обслуживаем более 6 000 пассажиров ежегодно."
 		/>
-		<meta property="og:image" content="%PUBLIC_URL%/images/logo/apple-touch-icon.png" />
+		<meta property="og:image" content="https://avexmar.ru/images/logo/icon-512.png" />
+		<meta property="og:image:secure_url" content="https://avexmar.ru/images/logo/icon-512.png" />
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="512" />
+		<meta property="og:image:height" content="512" />
+		<meta property="og:image:alt" content="Логотип авиакомпании «АВЕКСМАР»" />
 		<meta property="og:locale" content="ru_RU" />
 		<meta property="og:site_name" content="АВЕКСМАР" />
 
 		<!-- Twitter -->
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content="https://avexmar.ru/" />
-		<meta property="twitter:title" content="АВЕКСМАР — Авиаперевозки | Поиск и бронирование авиабилетов" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:url" content="https://avexmar.ru/" />
+		<meta name="twitter:title" content="АВЕКСМАР — Авиаперевозки | Поиск и бронирование авиабилетов" />
 		<meta
-			property="twitter:description"
+			name="twitter:description"
 			content="Надежный партнер в организации пассажирских и грузовых авиаперевозок с 1995 года. Регулярные рейсы Москва — Якутск — Певек."
 		/>
-		<meta property="twitter:image" content="%PUBLIC_URL%/images/logo/apple-touch-icon.png" />
+		<meta name="twitter:image" content="https://avexmar.ru/images/logo/icon-512.png" />
+		<meta name="twitter:image:alt" content="Логотип авиакомпании «АВЕКСМАР»" />
 
 		<!-- Schema.org markup -->
 		<script type="application/ld+json">
 			{
 				"@context": "https://schema.org",
-				"@type": "Organization",
+				"@type": "TravelAgency",
+				"@id": "https://avexmar.ru/#organization",
 				"name": "Общество с ограниченной ответственностью «АВЕКСМАР»",
 				"alternateName": "АВЕКСМАР",
 				"legalName": "ООО «АВЕКСМАР»",
 				"url": "https://avexmar.ru",
-				"logo": "%PUBLIC_URL%/images/logo/apple-touch-icon.png",
+				"logo": "https://avexmar.ru/images/logo/icon-512.png",
 				"description": "Надежный партнер в сфере организации пассажирских и грузовых авиаперевозок с 1995 года",
 				"address": {
 					"@type": "PostalAddress",
 					"streetAddress": "ул. Бакунинская, д. 69, стр. 1, помещение 1, офис 16",
 					"addressLocality": "Москва",
+					"addressRegion": "Москва",
 					"postalCode": "105082",
 					"addressCountry": "RU"
+				},
+				"areaServed": {
+					"@type": "Country",
+					"name": "Россия"
 				},
 				"contactPoint": {
 					"@type": "ContactPoint",
 					"telephone": "+7-495-363-59-11",
 					"contactType": "Customer Service",
 					"email": "mail@avexmar.ru",
-					"availableLanguage": "Russian"
+					"availableLanguage": ["Russian"]
 				},
 				"foundingDate": "1995",
 				"taxID": "9701049956",
 				"sameAs": []
 			}
 		</script>
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebSite",
+				"@id": "https://avexmar.ru/#website",
+				"url": "https://avexmar.ru/",
+				"name": "АВЕКСМАР",
+				"description": "Поиск авиабилетов и расписание рейсов по маршрутам Москва — Якутск — Певек.",
+				"publisher": {
+					"@id": "https://avexmar.ru/#organization"
+				},
+				"potentialAction": {
+					"@type": "SearchAction",
+					"target": "https://avexmar.ru/search?from={origin}&to={destination}&when={date}",
+					"query-input": ["required name=origin", "required name=destination", "optional name=date"]
+				}
+			}
+		</script>
 
 		<!-- Canonical URL -->
 		<link rel="canonical" href="https://avexmar.ru/" />
+		<link rel="alternate" href="https://avexmar.ru/" hreflang="ru" />
 		<!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
