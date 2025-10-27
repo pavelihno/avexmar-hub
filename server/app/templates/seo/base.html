@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{{ title }}</title>
+		<meta name="description" content="{{ description }}" />
+		<link rel="canonical" href="{{ canonical }}" />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="{{ title }}" />
+		<meta property="og:description" content="{{ description }}" />
+		<meta property="og:url" content="{{ canonical }}" />
+		{% if structured_data %}
+		<script type="application/ld+json">
+			{{ structured_data|tojson }}
+		</script>
+		{% endif %} {% if seo_discovery_links and seo_discovery_links.navigation_jsonld %}
+		<script type="application/ld+json">
+			{{ seo_discovery_links.navigation_jsonld|tojson }}
+		</script>
+		{% endif %}
+		<style>
+			:root {
+				color-scheme: light;
+				font-family: 'Inter', 'Segoe UI', sans-serif;
+			}
+			body {
+				margin: 0 auto;
+				padding: 2rem 1.5rem 3rem;
+				max-width: 960px;
+				background-color: #f5f7fb;
+				color: #1f2432;
+			}
+			header {
+				margin-bottom: 2rem;
+			}
+			h1 {
+				font-size: 2rem;
+				margin: 0 0 0.5rem 0;
+			}
+			p.subtitle {
+				margin: 0;
+				color: #52606d;
+			}
+			ul.flight-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: grid;
+				gap: 1rem;
+			}
+			li.flight-card {
+				background: #fff;
+				border-radius: 12px;
+				padding: 1.5rem;
+				box-shadow: 0 12px 24px rgba(31, 36, 50, 0.08);
+			}
+			.flight-card h2 {
+				margin: 0 0 0.75rem 0;
+				font-size: 1.25rem;
+			}
+			.tariff-section {
+				margin-top: 1.5rem;
+			}
+			.tariff-heading {
+				font-weight: 600;
+				margin-bottom: 0.75rem;
+				color: #1f2432;
+			}
+			.tariff-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+			.tariff-item {
+				background: #f8fafc;
+				border: 1px solid #e5e7eb;
+				border-radius: 10px;
+				padding: 0.75rem 1rem;
+			}
+			.tariff-title {
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+				color: #111827;
+			}
+			.tariff-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1rem;
+				font-size: 0.9rem;
+				color: #4b5563;
+			}
+			.tariff-price {
+				color: #0065ff;
+				font-weight: 600;
+			}
+			.tariff-seats {
+				font-weight: 500;
+			}
+			.flight-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1.25rem;
+				font-size: 0.95rem;
+				color: #374151;
+			}
+			.price {
+				margin-top: 1rem;
+				font-weight: 600;
+				font-size: 1.1rem;
+				color: #0065ff;
+			}
+			.empty-state {
+				text-align: center;
+				padding: 3rem 1rem;
+				background: #fff;
+				border-radius: 16px;
+				box-shadow: inset 0 0 0 1px rgba(0, 101, 255, 0.12);
+			}
+			footer {
+				margin-top: 3rem;
+				font-size: 0.85rem;
+				color: #6b7280;
+			}
+			.seo-discovery {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				clip-path: inset(50%);
+				border: 0;
+			}
+			.seo-discovery ul {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>{{ title }}</h1>
+			<p class="subtitle">{{ description }}</p>
+		</header>
+		{% if seo_discovery_links %}
+		<nav class="seo-discovery" aria-hidden="true">
+			<ul>
+				{% for link in seo_discovery_links.links %}
+				<li><a href="{{ link.href }}">{{ link.text }}</a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+		{% endif %}
+		<main>{% block content %}{% endblock %}</main>
+		<footer>&copy; {{ current_year }} {{ brand_name }}. Актуальные данные обновляются ежедневно.</footer>
+	</body>
+</html>

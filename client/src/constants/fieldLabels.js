@@ -126,7 +126,8 @@ export const FIELD_LABELS = {
 	FLIGHT_TARIFF: {
 		flight_id: 'Рейс',
 		tariff_id: 'Тариф',
-		seats_number: 'Количество мест',
+		seats_number: 'Общее количество мест',
+		available_seats: 'Свободных мест',
 	},
 	USER: {
 		email: 'Электронная почта',

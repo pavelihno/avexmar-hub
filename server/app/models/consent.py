@@ -151,11 +151,13 @@ class ConsentEvent(BaseModel):
     def update(cls, event_id, *, session=None, commit=False, subject_ids=None, **data):
         session = session or db.session
         event = super().update(event_id, session=session, commit=False, **data)
+        existing_subject_ids = {s.subject_id for s in event.subjects}
         if subject_ids is not None:
             for sid in subject_ids:
-                ConsentEventSubject.create(
-                    session=session, commit=False, consent_event_id=event.id, subject_id=sid
-                )
+                if sid not in existing_subject_ids:
+                    ConsentEventSubject.create(
+                        session=session, commit=False, consent_event_id=event.id, subject_id=sid
+                    )
         if commit:
             session.commit()
         else:

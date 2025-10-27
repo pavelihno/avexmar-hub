@@ -1,10 +1,11 @@
 from io import BytesIO
 
 from flask import request, jsonify, send_file
-from xlwt import Workbook, XFStyle
+from xlwt import Workbook, XFStyle, Font
 
 from app.constants.files import FLIGHT_PASSENGERS_EXPORT_FILENAME_TEMPLATE
 from app.constants.messages import PassengerMessages
+from app.constants.branding import GENDER_LABELS
 from app.models.flight import Flight
 from app.models.booking_flight import BookingFlight
 from app.models.route import Route
@@ -12,29 +13,14 @@ from app.utils.datetime import format_date
 from app.middlewares.auth_middleware import admin_required
 from app.utils.enum import SEAT_CLASS, PASSENGER_CATEGORY
 
+
 @admin_required
 def get_flight_passenger_export(current_user):
     flight_id = request.args.get('flight_id', type=int)
     if not flight_id:
         return jsonify({'message': PassengerMessages.FLIGHT_REQUIRED}), 400
-    
+
     flight = Flight.get_or_404(flight_id)
-
-    wb = Workbook()
-    ws = wb.add_sheet('Passengers')
-
-    text_style = XFStyle()
-    text_style.num_format_str = '@'
-
-    ws.write(0, 0, 'Рейс:', text_style)
-    ws.write(0, 1, flight.airline_flight_number, text_style)
-    ws.write(1, 0, 'Дата рейса:', text_style)
-    ws.write(1, 1, format_date(flight.scheduled_departure), text_style)
-    route = flight.route
-    origin = route.origin_airport.city_name
-    dest = route.destination_airport.city_name
-    ws.write(2, 0, 'Маршрут:', text_style)
-    ws.write(2, 1, f'{origin} - {dest}', text_style)
 
     headers = [
         '№',
@@ -53,12 +39,11 @@ def get_flight_passenger_export(current_user):
         'E-mail',
     ]
 
-    for col, header in enumerate(headers):
-        ws.write(7, col, header, text_style)
+    seat_class_code = {
+        SEAT_CLASS.economy: 'Y',
+        SEAT_CLASS.business: 'C',
+    }
 
-    booking_flights = BookingFlight.query.filter_by(flight_id=flight_id).all()
-    row = 8
-    counter = 1
     category_order = {
         PASSENGER_CATEGORY.adult: 0,
         PASSENGER_CATEGORY.infant_seat: 1,
@@ -66,37 +51,125 @@ def get_flight_passenger_export(current_user):
         PASSENGER_CATEGORY.infant: 3,
     }
 
+    wb = Workbook()
+    ws = wb.add_sheet('Пассажиры')
+
+    text_style = XFStyle()
+    text_style.num_format_str = '@'
+
+    bold_style = XFStyle()
+    bold_style.num_format_str = '@'
+    bold_font = Font()
+    bold_font.bold = True
+    bold_style.font = bold_font
+
+    col_widths = [3] * len(headers)
+
+    ws.write(0, 0, 'Рейс:', bold_style)
+    ws.write(0, 1, flight.airline_flight_number, text_style)
+    ws.write(1, 0, 'Дата рейса:', bold_style)
+    ws.write(1, 1, format_date(flight.scheduled_departure), text_style)
+    route = flight.route
+    origin = route.origin_airport.city_name
+    dest = route.destination_airport.city_name
+    ws.write(2, 0, 'Маршрут:', bold_style)
+    ws.write(2, 1, f'{origin} - {dest}', text_style)
+
+    for col, header in enumerate(headers):
+        ws.write(7, col, header, bold_style)
+        col_widths[col] = max(col_widths[col], len(str(header)))
+
+    booking_flights = BookingFlight.query.filter_by(flight_id=flight_id).all()
+    row = 8
+    counter = 1
+
     for bf in booking_flights:
         booking = bf.booking
         passengers = sorted(
             booking.booking_passengers,
             key=lambda bp: category_order.get(bp.category, 0),
         )
+        adult_passenger_idx = next(
+            (
+                i for i, bp in enumerate(passengers, start=counter)
+                if bp.category == PASSENGER_CATEGORY.adult
+            ), None
+        )
         for bp in passengers:
             p = bp.passenger
-            ws.write(row, 0, str(counter), text_style)
-            ws.write(row, 1, f'{p.last_name} {p.first_name}', text_style)
-            ws.write(row, 2, p.gender.value, text_style)
-            ws.write(row, 3, format_date(p.birth_date), text_style)
-            ws.write(row, 4, (p.document_number or '').replace(' ', ''), text_style)
-            seat_class = 'Y' if bf.tariff.seat_class == SEAT_CLASS.economy else 'C'
-            ws.write(row, 5, seat_class, text_style)
-            citizenship = (p.citizenship.code_a2 if p.citizenship else '')
-            if not citizenship or (
-                getattr(p.citizenship, 'name', '').lower() == 'russia'
-            ):
-                citizenship = 'RU'
-            ws.write(row, 6, citizenship, text_style)
-            ws.write(row, 7, format_date(p.document_expiry_date), text_style)
-            seat_count = '1' if bp.category == PASSENGER_CATEGORY.infant_seat else ''
-            ws.write(row, 8, seat_count, text_style)
-            ws.write(row, 9, '', text_style)
+
+            # Column 0: Counter
+            value = str(counter)
+            ws.write(row, 0, value, text_style)
+            col_widths[0] = max(col_widths[0], len(value))
+
+            # Column 1: Full name
+            value = f'{p.last_name} {p.first_name} {p.patronymic_name if p.patronymic_name else ""}'.strip()
+            ws.write(row, 1, value, text_style)
+            col_widths[1] = max(col_widths[1], len(value))
+
+            # Column 2: Gender
+            value = GENDER_LABELS[p.gender.value]
+            ws.write(row, 2, value, text_style)
+            col_widths[2] = max(col_widths[2], len(str(value)))
+
+            # Column 3: Birth date
+            value = format_date(p.birth_date)
+            ws.write(row, 3, value, text_style)
+            col_widths[3] = max(col_widths[3], len(str(value)))
+
+            # Column 4: Document number
+            value = p.document_number
+            ws.write(row, 4, value, text_style)
+            col_widths[4] = max(col_widths[4], len(str(value)))
+
+            # Column 5: Seat class
+            value = seat_class_code.get(bf.tariff.seat_class, '')
+            ws.write(row, 5, value, text_style)
+            col_widths[5] = max(col_widths[5], len(str(value)))
+
+            # Column 6: Citizenship
+            value = p.citizenship.code_a2
+            ws.write(row, 6, value, text_style)
+            col_widths[6] = max(col_widths[6], len(str(value)))
+
+            # Column 7: Document expiry
+            value = format_date(p.document_expiry_date)
+            ws.write(row, 7, value, text_style)
+            col_widths[7] = max(col_widths[7], len(str(value)))
+
+            # Column 8: Seat count
+            value = 1 if bp.category == PASSENGER_CATEGORY.infant_seat else ''
+            ws.write(row, 8, value, text_style)
+            col_widths[8] = max(col_widths[8], len(str(value)))
+
+            # Column 9: Child of passenger
+            value = adult_passenger_idx if bp.category in [
+                PASSENGER_CATEGORY.child, PASSENGER_CATEGORY.infant, PASSENGER_CATEGORY.infant_seat
+            ] else ''
+            ws.write(row, 9, value, text_style)
+            col_widths[9] = max(col_widths[9], len(str(value)))
+
+            # Column 10-11: SSR, Group
             ws.write(row, 10, '', text_style)
             ws.write(row, 11, '', text_style)
-            ws.write(row, 12, booking.phone_number or '', text_style)
-            ws.write(row, 13, booking.email_address or '', text_style)
+
+            # Column 12: Phone
+            value = booking.phone_number or ''
+            ws.write(row, 12, value, text_style)
+            col_widths[12] = max(col_widths[12], len(str(value)))
+
+            # Column 13: Email
+            value = booking.email_address or ''
+            ws.write(row, 13, value, text_style)
+            col_widths[13] = max(col_widths[13], len(str(value)))
+
             row += 1
             counter += 1
+
+    # Adjust column widths
+    for col, width in enumerate(col_widths):
+        ws.col(col).width = min((width + 10) * 256, 65535)
 
     output = BytesIO()
     wb.save(output)
@@ -121,7 +194,7 @@ def get_passenger_export_routes(current_user):
     data = [
         {
             'id': r.id,
-            'name': f'{r.origin_airport.city_name} - {r.destination_airport.city_name}',
+            'name': f'{r.origin_airport.city_name} — {r.destination_airport.city_name}',
         }
         for r in routes
     ]

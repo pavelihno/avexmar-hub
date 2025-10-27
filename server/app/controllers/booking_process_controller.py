@@ -15,7 +15,7 @@ from app.models.passenger import Passenger
 from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
-from app.utils.business_logic import calculate_price_details, get_booking_details
+from app.utils.business_logic import calculate_price_details, get_booking_snapshot
 from app.utils.yookassa import create_payment, create_invoice, handle_yookassa_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
@@ -273,7 +273,7 @@ def get_booking_process_details(current_user, public_id):
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
-    result = get_booking_details(booking)
+    result = get_booking_snapshot(booking)
     return jsonify(result), 200
 
 

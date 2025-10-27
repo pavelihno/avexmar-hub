@@ -15,7 +15,7 @@ import {
 	Divider,
 	Fade,
 	FormControlLabel,
-	Grid,
+	Grid2,
 	IconButton,
 	Paper,
 	Stack,
@@ -575,8 +575,8 @@ const CarouselSlideManagement = () => {
 					</Button>
 				</Box>
 
-				<Grid container spacing={isSmallDown ? 2 : 3} justifyContent='center'>
-					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+				<Grid2 container spacing={isSmallDown ? 2 : 3} justifyContent='center'>
+					<Grid2 sx={{ display: 'flex', justifyContent: 'center' }} size={12}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={isSmallDown ? 1.5 : 2} alignItems='flex-start'>
 								<Typography variant='h4'>{ADMIN.carousel_slides.management}</Typography>
@@ -793,19 +793,18 @@ const CarouselSlideManagement = () => {
 								)}
 							</Stack>
 						</Paper>
-					</Grid>
+					</Grid2>
 
-					<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+					<Grid2 sx={{ display: 'flex', justifyContent: 'center' }} size={12}>
 						<Paper variant='outlined' sx={{ p: { xs: 2, md: 3 }, width: '100%' }}>
 							<Stack spacing={2} alignItems='flex-start'>
 								<Typography variant='h4'>{ADMIN.carousel_slides.preview_title}</Typography>
 								<PosterCarousel slides={localSlides} autoFetch={false} includeInactive />
 							</Stack>
 						</Paper>
-					</Grid>
-				</Grid>
+					</Grid2>
+				</Grid2>
 			</Box>
-
 			<Dialog open={formOpen} onClose={handleCloseForm} fullWidth maxWidth='md' fullScreen={isSmallDown}>
 				<DialogTitle>
 					{formMode === 'create' ? ADMIN.carousel_slides.add_button : ADMIN.carousel_slides.edit_button}
@@ -826,11 +825,17 @@ const CarouselSlideManagement = () => {
 						</Fade>
 					</Box>
 
-					<Grid container spacing={isSmallDown ? 1.5 : 2}>
+					<Grid2 container spacing={isSmallDown ? 1.5 : 2}>
 						{formFields.map((field) => {
 							const isActivationField = field.name === 'isActive';
 							return (
-								<Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={field.name}>
+								<Grid2
+									key={field.name}
+									size={{
+										xs: 12,
+										sm: field.fullWidth ? 12 : 6,
+									}}
+								>
 									<Stack spacing={isActivationField && formMode === 'create' ? 0.5 : 0}>
 										{field.renderField({
 											value: formValues[field.name],
@@ -847,11 +852,11 @@ const CarouselSlideManagement = () => {
 											</Typography>
 										)}
 									</Stack>
-								</Grid>
+								</Grid2>
 							);
 						})}
 
-						<Grid item xs={12}>
+						<Grid2 size={12}>
 							<Stack spacing={1.5}>
 								<DragAndDropUploadField
 									dragText={ADMIN.upload.drag}
@@ -900,8 +905,8 @@ const CarouselSlideManagement = () => {
 									{ADMIN.carousel_slides.image_hint}
 								</Typography>
 							</Stack>
-						</Grid>
-					</Grid>
+						</Grid2>
+					</Grid2>
 				</DialogContent>
 				<DialogActions
 					sx={{
@@ -929,7 +934,6 @@ const CarouselSlideManagement = () => {
 					</Button>
 				</DialogActions>
 			</Dialog>
-
 			<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
 				<DialogTitle>{MESSAGES.confirm_action}</DialogTitle>
 				<DialogContent

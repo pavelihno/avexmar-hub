@@ -571,7 +571,7 @@ export const createFormFields = (fields) => {
 			name: field.key,
 			fullWidth: field.fullWidth || false,
 			defaultValue: field.defaultValue,
-			renderField: createFieldRenderer(field),
+			renderField: createFieldRenderer(field, { disabled: field.disabled }),
 			validate: field.validate,
 			minDate: field.minDate,
 			maxDate: field.maxDate,

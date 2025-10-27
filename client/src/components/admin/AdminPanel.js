@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Box, Typography, Card, CardContent, Grid, CardActionArea, Divider } from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid2, CardActionArea, Divider } from '@mui/material';
 import AirportIcon from '@mui/icons-material/LocalAirport';
 import RouteIcon from '@mui/icons-material/Route';
 import DiscountIcon from '@mui/icons-material/Discount';
@@ -30,9 +30,16 @@ const ToolGrid = ({ items }) => {
 	if (!items || items.length === 0) return null;
 
 	return (
-		<Grid container spacing={3}>
+		<Grid2 container spacing={3}>
 			{items.map((tool, index) => (
-				<Grid item xs={12} sm={6} md={3} key={`${tool.path}-${index}`}>
+				<Grid2
+					key={`${tool.path}-${index}`}
+					size={{
+						xs: 12,
+						sm: 6,
+						md: 3,
+					}}
+				>
 					<Card sx={{ height: '100%' }}>
 						<CardActionArea
 							component={Link}
@@ -55,9 +62,9 @@ const ToolGrid = ({ items }) => {
 							</CardContent>
 						</CardActionArea>
 					</Card>
-				</Grid>
+				</Grid2>
 			))}
-		</Grid>
+		</Grid2>
 	);
 };
 

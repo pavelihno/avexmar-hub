@@ -27,7 +27,6 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 	return (
 		<Box sx={{ mb: 4 }}>
 			<Divider sx={{ mb: 2 }} />
-
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 				<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>
 					{UI_LABELS.BOOKING.buyer_form.summary.tickets}
@@ -51,7 +50,6 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 					<Typography>{`- ${formatNumber(priceDetails.total_discounts)} ${currencySymbol}`}</Typography>
 				</Box>
 			)}
-
 			{showDetails && (
 				<>
 					<Divider sx={{ my: 2 }} />
@@ -79,7 +77,6 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 										</Typography>
 									)}
 								</Box>
-
 								{isXs ? (
 									// Mobile: cards per passenger category
 									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

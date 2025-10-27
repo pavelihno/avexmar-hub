@@ -3,11 +3,17 @@ from weasyprint import HTML
 from flask import current_app, render_template
 
 from app.constants.branding import (
-    BRAND_NAME_DISPLAY,
+    BRAND_FULL_NAME,
+    BRAND_NAME,
+    CURRENCY_LABELS,
     DOCUMENT_LABELS,
     GENDER_LABELS,
+    INN,
+    LEGAL_ADDRESS,
+    OGRN,
     PAYMENT_METHOD_LABELS,
     PAYMENT_STATUS_LABELS,
+    PHONE_NUMBER,
     SEAT_CLASS_LABELS,
     SITE_URL,
     STATUS_LABELS,
@@ -17,7 +23,7 @@ from app.utils.passenger_categories import (
     PASSENGER_CATEGORY_LABELS,
     PASSENGERS_LABELS,
 )
-from app.utils.business_logic import get_booking_details
+from app.utils.business_logic import get_booking_snapshot
 from app.utils.datetime import format_date, format_time, format_datetime
 from app.utils.enum import BOOKING_STATUS
 
@@ -29,10 +35,10 @@ STATUS_LABELS_BY_BOOKING_STATUS = {
 }
 
 
-def generate_booking_pdf(booking, *, details=None) -> bytes:
-    details = details or get_booking_details(booking)
+def generate_booking_pdf(booking) -> bytes:
+    details = get_booking_snapshot(booking)
 
-    directions = (details or {}).get('price_details', {}).get('directions', [])
+    directions = details.get('price_details', {}).get('directions', [])
     direction_tariffs = {
         d.get('direction'): d.get('tariff') for d in directions if isinstance(d, dict)
     }
@@ -48,13 +54,20 @@ def generate_booking_pdf(booking, *, details=None) -> bytes:
         'payment_status_labels': PAYMENT_STATUS_LABELS,
         'payment_method_labels': PAYMENT_METHOD_LABELS,
         'seat_class_labels': SEAT_CLASS_LABELS,
+        'currency_labels': CURRENCY_LABELS,
         'direction_tariffs': direction_tariffs,
+        'format_float': lambda v: f'{v:,.2f}'.replace(',', ' '),
         'format_date': format_date,
         'format_time': format_time,
         'format_datetime': format_datetime,
-        'brand_name': BRAND_NAME_DISPLAY,
+        'brand_name': BRAND_NAME,
+        'brand_full_name': BRAND_FULL_NAME,
         'site_url': SITE_URL,
         'support_email': SUPPORT_EMAIL,
+        'phone_number': PHONE_NUMBER,
+        'legal_address': LEGAL_ADDRESS,
+        'inn': INN,
+        'ogrn': OGRN,
     }
 
     html = render_template('pdf/booking.html', **context)

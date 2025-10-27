@@ -15,7 +15,7 @@ import {
 	Container,
 	Avatar,
 	Snackbar,
-	Grid,
+	Grid2,
 	List,
 	ListItem,
 	useMediaQuery,
@@ -42,10 +42,7 @@ const aboutLinks = [
 const About = () => {
 	const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-	const cardsData = UI_LABELS.ABOUT.cards.map((card, _) => ({
-		...card,
-		icon: `images/icons/${card.icon}.svg`,
-	}));
+	const cardsData = UI_LABELS.ABOUT.cards;
 
 	const companyDescription = UI_LABELS.ABOUT.company_description;
 
@@ -105,71 +102,134 @@ const About = () => {
 				</Box>
 
 				<Box mb={{ xs: 4, sm: 5 }}>
-					<Grid container spacing={{ xs: 2, sm: 3 }}>
+					<Grid2 container spacing={{ xs: 2, sm: 3, md: 3 }}>
 						{cardsData.map((card, index) => (
-							<Grid item xs={12} sm={6} md={4} key={index}>
+							<Grid2
+								key={index}
+								size={{
+									xs: 12,
+									sm: 6,
+									md: 4,
+								}}
+							>
 								<Card
-									variant='outlined'
+									elevation={0}
 									sx={{
-										position: 'relative',
-										borderRadius: 3,
-										display: 'flex',
-										flexDirection: 'column',
 										height: '100%',
-										p: 0.5,
+										borderRadius: 3,
+										border: '1px solid',
+										borderColor: 'divider',
+										background: (theme) =>
+											theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
+										transition: 'all 0.3s ease-in-out',
+										position: 'relative',
+										overflow: 'hidden',
+										'&::before': {
+											content: '""',
+											position: 'absolute',
+											top: 0,
+											left: 0,
+											right: 0,
+											height: '3px',
+											background: (theme) =>
+												`linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+											transform: 'scaleX(0)',
+											transformOrigin: 'left',
+											transition: 'transform 0.3s ease-in-out',
+										},
+										'&:hover': {
+											transform: 'translateY(-6px)',
+											borderColor: 'primary.main',
+											boxShadow: (theme) =>
+												theme.palette.mode === 'dark'
+													? '0 16px 32px rgba(0, 0, 0, 0.5)'
+													: '0 16px 32px rgba(0, 0, 0, 0.1)',
+											'&::before': {
+												transform: 'scaleX(1)',
+											},
+											'& .card-icon': {
+												transform: 'scale(1.1) rotate(5deg)',
+												filter: (theme) =>
+													theme.palette.mode === 'dark'
+														? 'brightness(1.2)'
+														: 'brightness(1.1)',
+											},
+										},
 									}}
 								>
-									<Box
+									<CardContent
 										sx={{
+											p: { xs: 2.5, sm: 3 },
+											height: '100%',
 											display: 'flex',
 											flexDirection: 'column',
-											alignItems: 'center',
-											justifyContent: 'flex-start',
-											height: '100%',
-											px: { xs: 2.5, sm: 3 },
-											pt: { xs: 4, sm: 5 },
-											pb: { xs: 3, sm: 4 },
 										}}
 									>
-										<Avatar
-											src={card.icon}
-											alt={card.alt}
+										<Box
 											sx={{
-												width: { xs: 64, sm: 72 },
-												height: { xs: 64, sm: 72 },
-												mb: { xs: 2, sm: 2.5 },
-												p: 1.5,
-											}}
-										/>
-										<CardContent
-											sx={{
-												p: 0,
-												textAlign: 'center',
 												display: 'flex',
-												flexDirection: 'column',
+												alignItems: 'center',
+												mb: 2,
+											}}
+										>
+											<Box
+												className='card-icon'
+												sx={{
+													width: 48,
+													height: 48,
+													borderRadius: 2,
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													background: (theme) =>
+														theme.palette.mode === 'dark'
+															? 'rgba(33, 150, 243, 0.15)'
+															: 'rgba(33, 150, 243, 0.08)',
+													transition: 'all 0.3s ease-in-out',
+												}}
+											>
+												<Avatar
+													src={`images/icons/${card.icon}.svg`}
+													alt={card.alt}
+													sx={{
+														width: 28,
+														height: 28,
+														bgcolor: 'transparent',
+													}}
+												/>
+											</Box>
+										</Box>
+
+										<Typography
+											variant='h6'
+											component='h3'
+											sx={{
+												fontWeight: 700,
+												fontSize: { xs: '1rem', sm: '1.1rem' },
+												lineHeight: 1.4,
+												mb: 1.5,
+												color: 'text.primary',
+											}}
+										>
+											{card.title}
+										</Typography>
+
+										<Typography
+											variant='body2'
+											color='text.secondary'
+											sx={{
+												lineHeight: 1.7,
+												fontSize: { xs: '0.875rem', sm: '0.9rem' },
 												flexGrow: 1,
 											}}
 										>
-											<Typography
-												variant='h6'
-												component='h3'
-												gutterBottom
-												sx={{
-													fontWeight: 600,
-													letterSpacing: 0.3,
-												}}
-											>
-												{card.title}
-											</Typography>
-											<Typography variant='body2' color='text.secondary' sx={{ flexGrow: 1 }}>
-												{card.content}
-											</Typography>
-										</CardContent>
-									</Box>
+											{card.content}
+										</Typography>
+									</CardContent>
 								</Card>
-							</Grid>
+							</Grid2>
 						))}
-					</Grid>
+					</Grid2>
 				</Box>
 
 				<Box mb={{ xs: 3, sm: 4 }}>

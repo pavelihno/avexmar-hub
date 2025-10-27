@@ -9,5 +9,5 @@ export const FILE_NAMES = {
 
 export const FILE_NAME_TEMPLATES = {
 	BOOKING_PDF: (bookingNumber) => `Бронирование ${bookingNumber}.pdf`,
-	FLIGHT_PASSENGERS_EXPORT: (flightNumber, date) => `Пассажиры рейса ${flightNumber || ''} ${date || ''}.xls`,
+	FLIGHT_PASSENGERS_EXPORT: (flightNumber, date) => `Пассажиры рейса ${flightNumber || ''}_${date || ''}.xls`,
 };

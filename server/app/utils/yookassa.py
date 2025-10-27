@@ -12,7 +12,7 @@ from app.constants.yookassa import YooKassaMessages, YOOKASSA_RECEIPT_DESCRIPTIO
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
-from app.utils.business_logic import calculate_receipt_details, get_booking_details
+from app.utils.business_logic import calculate_receipt_details, get_booking_snapshot
 from app.utils.datetime import format_date, format_time
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
 from app.utils.pdf import generate_booking_pdf
@@ -111,7 +111,7 @@ def __send_confirmation_email(booking: Booking) -> bool:
         f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
         f'?access_token={booking.access_token}'
     )
-    details = get_booking_details(booking)
+    details = get_booking_snapshot(booking)
 
     flights = []
     for f in details.get('flights', []):
@@ -143,7 +143,7 @@ def __send_confirmation_email(booking: Booking) -> bool:
             }
         )
 
-    pdf_data = generate_booking_pdf(booking, details=details)
+    pdf_data = generate_booking_pdf(booking)
 
     send_email(
         EMAIL_TYPE.booking_confirmation,
@@ -380,6 +380,11 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
             session=session,
             commit=False,
             to_status=BOOKING_STATUS.completed,
+        )
+        Booking.save_details_snapshot(
+            id=booking.id,
+            session=session,
+            commit=False,
         )
         send_confirmation = True
 

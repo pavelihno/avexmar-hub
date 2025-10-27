@@ -16,7 +16,7 @@ from app.utils.enum import (
     DEFAULT_BOOKING_STATUS,
     DEFAULT_CURRENCY,
 )
-from app.utils.business_logic import get_seats_number
+from app.utils.business_logic import build_booking_snapshot, get_seats_number
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -55,6 +55,7 @@ class Booking(BaseModel):
     # Metadata
     passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    details_snapshot = db.Column(JSONB, nullable=True)
 
     # Relationships
     user: Mapped['User'] = db.relationship('User', back_populates='bookings')
@@ -175,6 +176,23 @@ class Booking(BaseModel):
 
         return cls.update(
             id, session=session, commit=commit, booking_number=booking_number
+        )
+
+    @classmethod
+    def save_details_snapshot(
+        cls,
+        id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ):
+        """Generates and saves a reusable booking snapshot"""
+        session = session or db.session
+        booking = cls.get_or_404(id, session)
+        snapshot = build_booking_snapshot(booking)
+
+        return cls.update(
+            id, session=session, commit=commit, details_snapshot=snapshot
         )
 
     @classmethod

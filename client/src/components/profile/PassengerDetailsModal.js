@@ -4,7 +4,7 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogActions,
-	Grid,
+	Grid2,
 	Typography,
 	Box,
 	Chip,
@@ -92,9 +92,15 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 									{UI_LABELS.PROFILE.personal_data}
 								</Typography>
 							</Box>
-							<Grid container spacing={2}>
+							<Grid2 container spacing={2}>
 								{personalFields.map(({ key, label, value }) => (
-									<Grid item xs={12} sm={6} key={key}>
+									<Grid2
+										key={key}
+										size={{
+											xs: 12,
+											sm: 6,
+										}}
+									>
 										<Typography
 											variant='subtitle2'
 											sx={{ fontWeight: 'bold', color: 'text.secondary' }}
@@ -102,9 +108,9 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 											{label}
 										</Typography>
 										<Typography variant='body2'>{value || '—'}</Typography>
-									</Grid>
+									</Grid2>
 								))}
-							</Grid>
+							</Grid2>
 						</Box>
 					)}
 
@@ -117,9 +123,15 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 									{UI_LABELS.PROFILE.document}
 								</Typography>
 							</Box>
-							<Grid container spacing={2}>
+							<Grid2 container spacing={2}>
 								{documentFields.map(({ key, label, value }) => (
-									<Grid item xs={12} sm={6} key={key}>
+									<Grid2
+										key={key}
+										size={{
+											xs: 12,
+											sm: 6,
+										}}
+									>
 										<Typography
 											variant='subtitle2'
 											sx={{ fontWeight: 'bold', color: 'text.secondary' }}
@@ -127,9 +139,9 @@ const PassengerDetailsModal = ({ passenger, onClose }) => {
 											{label}
 										</Typography>
 										<Typography variant='body2'>{value || '—'}</Typography>
-									</Grid>
+									</Grid2>
 								))}
-							</Grid>
+							</Grid2>
 						</Box>
 					)}
 				</Box>

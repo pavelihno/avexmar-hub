@@ -6,7 +6,8 @@
     <style>
       body { font-family: Arial, sans-serif; font-size: 12px; margin: 0; }
       header, footer { text-align: center; }
-      h2 { font-size: 24px; margin: 0 0 16px; }
+      h1 { font-size: 22px; margin: 16px 0; }
+      h2 { font-size: 20px; margin: 0 0 16px; }
       h3 { font-size: 18px; margin: 16px 0 8px; }
       h4 { font-size: 14px; margin: 16px 0 8px; }
       p { margin: 0 0 8px; }
@@ -19,7 +20,8 @@
 </head>
 <body>
   <header>
-    <h2>{{ brand_name }}</h2>
+    <h1>{{ brand_name|upper }}</h1>
+    <h2>ВАУЧЕР‑ПОДТВЕРЖДЕНИЕ БРОНИРОВАНИЯ АВИАПЕРЕВОЗКИ</h2>
   </header>
 
   <h3>Бронирование № {{ booking.booking_number }} — {{ status_labels[booking.status] }}</h3>
@@ -94,7 +96,7 @@
 
   {% set price = details.price_details or {} %}
   {% if price %}
-    {% set currency = (details.currency or booking.currency.value).upper() %}
+    {% set currency = (details.currency or booking.currency.value) %}
     {% for direction in price.directions or [] %}
       {% set route = direction.route or {} %}
       {% set origin = route.origin_airport or {} %}
@@ -123,15 +125,15 @@
           <tr>
             <td>{{ cat }}</td>
             <td>{{ p.count }}</td>
-            <td>{{ '%.2f'|format(p.unit_fare_price or 0) }} {{ currency }}</td>
+            <td>{{ format_float(p.unit_fare_price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
             <td>
               {% if p.unit_discount and (p.unit_discount > 0) %}
-                - {{ '%.2f'|format(p.unit_discount) }} {{ currency }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
+                - {{ format_float(p.unit_discount) }} {{ currency_labels.get(currency, currency) }}{% if p.discount_name %} ({{ p.discount_name }}){% endif %}
               {% else %}
                 —
               {% endif %}
             </td>
-            <td>{{ '%.2f'|format(p.price or 0) }} {{ currency }}</td>
+            <td>{{ format_float(p.price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -140,23 +142,23 @@
     <table>
       <tr>
         <td>Стоимость перевозки</td>
-        <td>{{ '%.2f'|format(price.fare_price or 0) }} {{ currency }}</td>
+        <td>{{ format_float(price.fare_price or 0) }} {{ currency_labels.get(currency, currency) }}</td>
       </tr>
       {% for fee in price.fees or [] %}
         <tr>
           <td>{{ fee.name }}</td>
-          <td>{{ '%.2f'|format(fee.total or 0) }} {{ currency }}</td>
+          <td>{{ format_float(fee.total or 0) }} {{ currency_labels.get(currency, currency) }}</td>
         </tr>
       {% endfor %}
       {% if (price.total_discounts or 0) > 0 %}
         <tr>
           <td>Скидка</td>
-          <td>- {{ '%.2f'|format(price.total_discounts or 0) }} {{ currency }}</td>
+          <td>- {{ format_float(price.total_discounts) }} {{ currency_labels.get(currency, currency) }}</td>
         </tr>
       {% endif %}
       <tr>
         <td><strong>Итого</strong></td>
-        <td><strong>{{ '%.2f'|format(price.final_price or 0) }} {{ currency }}</strong></td>
+        <td><strong>{{ format_float(price.final_price or 0) }} {{ currency_labels.get(currency, currency) }}</strong></td>
       </tr>
     </table>
   {% endif %}
@@ -165,14 +167,11 @@
   {% if payment %}
     {% set status = payment_status_labels.get(payment.payment_status, payment.payment_status) %}
     {% set method = payment_method_labels.get(payment.payment_method, payment.payment_method) %}
-    {% set pay_currency = (payment.currency or currency).upper() %}
     <h4>Платёж</h4>
     <ul>
       <li>Статус: {{ status }}</li>
       <li>Метод: {{ method }}</li>
-      {% if payment.amount is not none %}
-        <li>Сумма: {{ '%.2f'|format(payment.amount|float) }} {{ pay_currency }}</li>
-      {% endif %}
+      <li>Сумма: {{ format_float(payment.amount or 0) }} {{ currency_labels.get(payment.currency, payment.currency) }}</li>
       {% if payment.paid_at %}
         <li>Оплачен: {{ format_datetime(payment.paid_at) }}</li>
       {% endif %}
@@ -182,9 +181,15 @@
       </ul>
     {% endif %}
 
+    <p style="margin-top: 16px; padding: 12px; background-color: #f9f9f9; border-left: 4px solid #333; font-weight: bold;">
+      Маршрут-квитанции на забронированные места будут направлены на электронную почту, указанную при бронировании, в течение 24 часов с момента подтверждения этой брони
+    </p>
+
     <footer>
       <hr />
-      <p>© Авексмар · <a href="{{ site_url }}">{{ site_url|replace('https://','')|replace('http://','') }}</a> · {{ support_email }}</p>
+      <p>© {{ brand_full_name }} · <a href="{{ site_url }}">{{ site_url|replace('https://','')|replace('http://','') }}</a> · {{ support_email }}</p>
+      <p>{{ legal_address }}</p>
+      <p>ИНН {{ inn }} · ОГРН {{ ogrn }}</p>
     </footer>
   </body>
 </html>

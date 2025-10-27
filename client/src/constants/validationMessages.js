@@ -152,6 +152,9 @@ export const VALIDATION_MESSAGES = {
 		},
 		document_number: {
 			REQUIRED: 'Введите номер документа',
+			PASSPORT_RF: 'Номер паспорта РФ должен содержать 10 цифр',
+			INTERNATIONAL_PASSPORT_RF: 'Номер загранпаспорта РФ должен содержать 9 цифр',
+			BIRTH_CERTIFICATE: 'Номер свидетельства о рождении должен быть формата 12БА123456',
 		},
 		document_expiry_date: {
 			REQUIRED: 'Срок действия обязателен',
@@ -257,6 +260,9 @@ export const VALIDATION_MESSAGES = {
 		},
 		seats_number: {
 			REQUIRED: 'Количество мест обязательно',
+		},
+		available_seats: {
+			REQUIRED: 'Количество свободных мест обязательно',
 		},
 		currency: {
 			REQUIRED: 'Валюта обязательна',

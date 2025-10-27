@@ -67,8 +67,8 @@ const FlightPassengerExport = () => {
 			).unwrap();
 
 			const flightNumber = selectedFlight.airline_flight_number;
-			const flightDate = formatDate(selectedFlight.scheduled_departure);
-			const filename = FILE_NAME_TEMPLATES.FLIGHT_PASSENGERS_EXPORT(flightNumber, flightDate);
+			const flightDate = selectedFlight.scheduled_departure;
+			const filename = FILE_NAME_TEMPLATES.FLIGHT_PASSENGERS_EXPORT(flightNumber, formatDate(flightDate));
 
 			const url = window.URL.createObjectURL(new Blob([data]));
 			const link = document.createElement('a');
@@ -123,9 +123,7 @@ const FlightPassengerExport = () => {
 						mb: { xs: 3, md: 4 },
 					}}
 				>
-					<Typography variant='subtitle1'>
-						{UI_LABELS.ADMIN.exports.flightPassengers.description}
-					</Typography>
+					<Typography variant='subtitle1'>{UI_LABELS.ADMIN.exports.flightPassengers.description}</Typography>
 					<Stack
 						direction={{ xs: 'column', md: 'row' }}
 						spacing={2}
