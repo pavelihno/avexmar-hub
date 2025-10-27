@@ -25,6 +25,21 @@ const typeLabels = UI_LABELS.BOOKING.passenger_form.type_labels;
 const genderOptions = getEnumOptions('GENDER');
 const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 
+const DOCUMENT_NUMBER_RULES = {
+	passport: {
+		pattern: /^\d{10}$/,
+		message: VALIDATION_MESSAGES.PASSENGER.document_number.PASSPORT_RF,
+	},
+	international_passport: {
+		pattern: /^\d{9}$/,
+		message: VALIDATION_MESSAGES.PASSENGER.document_number.INTERNATIONAL_PASSPORT_RF,
+	},
+	birth_certificate: {
+		pattern: /^[0-9]{2}[А-ЯЁ]{2}[0-9]{6}$/iu,
+		message: VALIDATION_MESSAGES.PASSENGER.document_number.BIRTH_CERTIFICATE,
+	},
+};
+
 const normalizePassenger = (p = {}, useCategory = true) => ({
 	id: p.id || '',
 	category: useCategory ? p.category || 'adult' : p.category || '',
@@ -34,7 +49,7 @@ const normalizePassenger = (p = {}, useCategory = true) => ({
 	gender: p.gender || genderOptions[0]?.value || '',
 	birthDate: p.birthDate || '',
 	documentType: p.documentType || docTypeOptions[0]?.value || '',
-	documentNumber: p.documentNumber || '',
+	documentNumber: p.documentNumber ? String(p.documentNumber).replace(/\s+/g, '') : '',
 	documentExpiryDate: p.documentExpiryDate || '',
 	citizenshipId: p.citizenshipId || '',
 });
@@ -88,6 +103,19 @@ const PassengerForm = (
 		const today = new Date();
 		const firstFlight = minFlightDate ?? today;
 		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
+
+		const documentNumberInputProps = (() => {
+			switch (data.documentType) {
+				case 'passport':
+					return { inputMode: 'numeric', maxLength: 10 };
+				case 'international_passport':
+					return { inputMode: 'numeric', maxLength: 9 };
+				case 'birth_certificate':
+					return { maxLength: 10 };
+				default:
+					return {};
+			}
+		})();
 
 		const allFields = {
 			lastName: {
@@ -163,7 +191,18 @@ const PassengerForm = (
 			documentNumber: {
 				key: 'documentNumber',
 				label: FIELD_LABELS.PASSENGER.document_number,
-				validate: (v) => (!v ? VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED : ''),
+				inputProps: documentNumberInputProps,
+				validate: (v, formData = data) => {
+					const value = typeof v === 'string' ? v.replace(/\s+/g, '') : '';
+					if (!value) return VALIDATION_MESSAGES.PASSENGER.document_number.REQUIRED;
+
+					const docType = formData?.documentType || data.documentType;
+					const rule = DOCUMENT_NUMBER_RULES[docType];
+
+					if (!rule) return '';
+
+					return rule.pattern.test(value) ? '' : rule.message;
+				},
 			},
 			documentExpiryDate: {
 				key: 'documentExpiryDate',
@@ -199,15 +238,37 @@ const PassengerForm = (
 		);
 		const arr = createFormFields(visibleList);
 		return arr.reduce((acc, f) => ({ ...acc, [f.name]: f }), {});
-	}, [data.category, requiresCyrillic, citizenshipOptions, minFlightDate, maxFlightDate, formConfig?.show]);
+	}, [
+		data.category,
+		data.documentType,
+		requiresCyrillic,
+		citizenshipOptions,
+		minFlightDate,
+		maxFlightDate,
+		formConfig?.show,
+	]);
 
 	const handleFieldChange = (field, value) => {
 		const isNameField = ['lastName', 'firstName', 'patronymicName'].includes(field);
-		const normalizedValue = isNameField && typeof value === 'string' ? value.toUpperCase() : value;
+		const isDocumentNumberField = field === 'documentNumber';
+		const normalizedValue =
+			isNameField && typeof value === 'string'
+				? value.toUpperCase()
+				: isDocumentNumberField && typeof value === 'string'
+				? value.replace(/\s+/g, '')
+				: value;
 		const next = { ...data, [field]: normalizedValue };
 		setData(next);
 		if (onChange) onChange(field, normalizedValue, next);
 		if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
+		if (field === 'documentType' && formFields.documentNumber?.validate) {
+			setErrors((prev) => {
+				const nextError = formFields.documentNumber.validate(next.documentNumber, next);
+				if (nextError) return { ...prev, documentNumber: nextError };
+				const { documentNumber, ...rest } = prev || {};
+				return rest;
+			});
+		}
 	};
 
 	const validate = useCallback(
@@ -215,7 +276,7 @@ const PassengerForm = (
 			const errs = {};
 			Object.values(formFields).forEach((f) => {
 				if (f.validate) {
-					const err = f.validate(d[f.name]);
+					const err = f.validate(d[f.name], d);
 					if (err) errs[f.name] = err;
 				}
 			});
@@ -280,6 +341,9 @@ const PassengerForm = (
 								['lastName', 'firstName', 'patronymicName'].forEach((k) => {
 									if (merged[k]) merged[k] = String(merged[k]).toUpperCase();
 								});
+								if (merged.documentNumber) {
+									merged.documentNumber = String(merged.documentNumber).replace(/\s+/g, '');
+								}
 								setData(merged);
 								if (onChange) onChange('_prefill', null, merged);
 								if (onPrefill) onPrefill(opt);
