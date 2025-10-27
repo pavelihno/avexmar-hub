@@ -26,7 +26,7 @@ function App() {
 
 	useEffect(() => {
 		const initAuth = async () => {
-			dispatch(auth());
+			await dispatch(auth());
 			setIsLoading(false);
 		};
 
