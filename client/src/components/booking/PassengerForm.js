@@ -28,14 +28,20 @@ const docTypeOptions = getEnumOptions('DOCUMENT_TYPE');
 const DOCUMENT_NUMBER_RULES = {
 	passport: {
 		pattern: /^\d{10}$/,
+		placeholder: '1234567890',
+		inputProps: { inputMode: 'numeric', maxLength: 10 },
 		message: VALIDATION_MESSAGES.PASSENGER.document_number.PASSPORT_RF,
 	},
 	international_passport: {
 		pattern: /^\d{9}$/,
+		placeholder: '123456789',
+		inputProps: { inputMode: 'numeric', maxLength: 9 },
 		message: VALIDATION_MESSAGES.PASSENGER.document_number.INTERNATIONAL_PASSPORT_RF,
 	},
 	birth_certificate: {
 		pattern: /^[0-9]{2}[А-ЯЁ]{2}[0-9]{6}$/iu,
+		placeholder: '12АБ345678',
+		inputProps: { maxLength: 10 },
 		message: VALIDATION_MESSAGES.PASSENGER.document_number.BIRTH_CERTIFICATE,
 	},
 };
@@ -104,18 +110,11 @@ const PassengerForm = (
 		const firstFlight = minFlightDate ?? today;
 		const docMinDateDate = maxFlightDate && maxFlightDate > today ? maxFlightDate : today;
 
-		const documentNumberInputProps = (() => {
-			switch (data.documentType) {
-				case 'passport':
-					return { inputMode: 'numeric', maxLength: 10 };
-				case 'international_passport':
-					return { inputMode: 'numeric', maxLength: 9 };
-				case 'birth_certificate':
-					return { maxLength: 10 };
-				default:
-					return {};
-			}
-		})();
+		const documentRule = DOCUMENT_NUMBER_RULES[data.documentType];
+		const documentNumberInputProps = {
+			...(documentRule?.inputProps || {}),
+			...(documentRule?.placeholder ? { placeholder: documentRule.placeholder } : {}),
+		};
 
 		const allFields = {
 			lastName: {
