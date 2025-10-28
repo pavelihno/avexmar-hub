@@ -27,6 +27,7 @@ from app.controllers.discount_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
+from app.controllers.booking_flight_controller import *
 from app.controllers.booking_process_controller import *
 from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
@@ -226,6 +227,13 @@ def __create_app(_config_class, _db):
     app.route('/booking_passengers/<int:booking_passenger_id>', methods=['GET'])(get_booking_passenger)
     app.route('/booking_passengers/<int:booking_passenger_id>', methods=['PUT'])(update_booking_passenger)
     app.route('/booking_passengers/<int:booking_passenger_id>', methods=['DELETE'])(delete_booking_passenger)
+
+    # booking flights
+    app.route('/booking_flights', methods=['GET'])(get_booking_flights)
+    app.route('/booking_flights', methods=['POST'])(create_booking_flight)
+    app.route('/booking_flights/<int:booking_flight_id>', methods=['GET'])(get_booking_flight)
+    app.route('/booking_flights/<int:booking_flight_id>', methods=['PUT'])(update_booking_flight)
+    app.route('/booking_flights/<int:booking_flight_id>', methods=['DELETE'])(delete_booking_flight)
 
     # tickets
     app.route('/tickets', methods=['GET'])(get_tickets)

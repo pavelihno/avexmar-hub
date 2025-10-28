@@ -29,6 +29,7 @@ export const FIELD_LABELS = {
 		ticket_price: 'Цена билета',
 		user_id: 'Пользователь',
 		passengers: 'Пассажиры',
+		flights: 'Рейсы',
 	},
 	AIRPORT: {
 		name: 'Название аэропорта',

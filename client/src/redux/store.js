@@ -17,6 +17,7 @@ import userReducer from './reducers/user';
 import bookingReducer from './reducers/booking';
 import passengerReducer from './reducers/passenger';
 import bookingPassengerReducer from './reducers/bookingPassenger';
+import bookingFlightReducer from './reducers/bookingFlight';
 import searchReducer from './reducers/search';
 import timezoneReducer from './reducers/timezone';
 import priceReducer from './reducers/price';
@@ -46,6 +47,7 @@ const rootReducer = combineReducers({
 	bookings: bookingReducer,
 	passengers: passengerReducer,
 	bookingPassengers: bookingPassengerReducer,
+	bookingFlights: bookingFlightReducer,
 	users: userReducer,
 	timezones: timezoneReducer,
 	search: searchReducer,
