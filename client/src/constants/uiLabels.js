@@ -284,6 +284,16 @@ export const UI_LABELS = {
 				description: 'Формирование списка пассажиров по рейсу',
 				route: 'Маршрут',
 				flight: 'Рейс',
+				flightDate: 'Дата вылета',
+				resetFilters: 'Сбросить фильтры',
+				emptyState: 'По выбранным фильтрам рейсы не найдены',
+				selectRoutePrompt: 'Выберите маршрут, чтобы увидеть рейсы',
+				table: {
+					flight: 'Рейс',
+					date: 'Дата и время вылета',
+					airline: 'Авиакомпания',
+					select: 'Выбрать',
+				},
 			},
 		},
 		carousel_slides: {

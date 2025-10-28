@@ -2,6 +2,7 @@ from io import BytesIO
 
 from flask import request, jsonify, send_file
 from xlwt import Workbook, XFStyle, Font
+from sqlalchemy.orm import joinedload
 
 from app.constants.files import FLIGHT_PASSENGERS_EXPORT_FILENAME_TEMPLATE
 from app.constants.messages import PassengerMessages
@@ -204,7 +205,8 @@ def get_passenger_export_routes(current_user):
 @admin_required
 def get_passenger_export_flights(current_user, route_id):
     flights = (
-        Flight.query.filter_by(route_id=route_id)
+        Flight.query.options(joinedload(Flight.airline))
+        .filter_by(route_id=route_id)
         .order_by(Flight.scheduled_departure)
         .all()
     )
@@ -215,6 +217,12 @@ def get_passenger_export_flights(current_user, route_id):
             'scheduled_departure': f.scheduled_departure.isoformat()
             if f.scheduled_departure
             else None,
+            'airline': {
+                'id': f.airline.id if f.airline else None,
+                'name': f.airline.name if f.airline else '',
+                'iata_code': f.airline.iata_code if f.airline else '',
+            },
+            'airline_name': f.airline.name if f.airline else '',
         }
         for f in flights
     ]
