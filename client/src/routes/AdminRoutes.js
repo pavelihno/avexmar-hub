@@ -11,6 +11,7 @@ import DiscountManagement from '../components/admin/DiscountManagement';
 import FeeManagement from '../components/admin/FeeManagement';
 import FlightManagement from '../components/admin/FlightManagement';
 import FlightPassengerExport from '../components/admin/FlightPassengerExport';
+import BookingDashboard from '../components/admin/BookingDashboard';
 import TariffManagement from '../components/admin/TariffManagement';
 import BookingManagement from '../components/admin/BookingManagement';
 import TicketManagement from '../components/admin/TicketManagement';
@@ -101,6 +102,10 @@ const AdminRoutes = ({ currentUser }) => {
 		{
 			path: '/admin/exports/flight-passengers',
 			element: <ProtectedRoute children={<FlightPassengerExport />} condition={isAdmin} />,
+		},
+		{
+			path: '/admin/exports/booking-dashboard',
+			element: <ProtectedRoute children={<BookingDashboard />} condition={isAdmin} />,
 		},
 		{
 			path: '/admin/carousel-slides',

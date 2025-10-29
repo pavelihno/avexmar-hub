@@ -29,6 +29,7 @@ from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
 from app.controllers.booking_flight_controller import *
 from app.controllers.booking_process_controller import *
+from app.controllers.booking_dashboard_controller import *
 from app.controllers.ticket_controller import *
 from app.controllers.payment_controller import *
 from app.controllers.airline_controller import *
@@ -271,6 +272,7 @@ def __create_app(_config_class, _db):
     app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
     app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
     app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
+    app.route('/bookings/dashboard', methods=['GET'])(get_booking_dashboard)
 
     # seo
     app.route('/seo/static-routes', methods=['GET'])(list_static_seo_routes)
