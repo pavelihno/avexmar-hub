@@ -13,7 +13,13 @@ from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
 from app.utils.datetime import combine_date_time, parse_date, parse_time
-from app.constants.messages import AirlineMessages, AirportMessages, FlightMessages, RouteMessages
+from app.constants.messages import (
+    AirlineMessages,
+    AirportMessages,
+    FlightMessages,
+    FlightTariffMessages,
+    RouteMessages,
+)
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
@@ -211,6 +217,7 @@ class Flight(BaseModel):
                     validation_errors.append(RouteMessages.ROUTE_NOT_FOUND)
 
             aircraft_id = None
+            aircraft = None
             aircraft_type = row.get('aircraft')
             if aircraft_type:
                 aircraft = Aircraft.query.filter_by(
@@ -223,6 +230,7 @@ class Flight(BaseModel):
             tariff_list = external_data[0] if external_data else []
             validated_tariffs = []
             used_tariffs = {}
+            seat_totals_by_class = {}
 
             for tariff_data in tariff_list:
                 seat_class = tariff_data.get('seat_class')
@@ -260,11 +268,27 @@ class Flight(BaseModel):
                     )
                     continue
 
+                seat_class_enum = tariff.seat_class
+                seat_totals_by_class[seat_class_enum] = seat_totals_by_class.get(seat_class_enum, 0) + seats_number
+
                 # Store validated tariff data
                 validated_tariffs.append({
                     'tariff_id': tariff.id,
                     'seats_number': seats_number,
                 })
+
+            if aircraft and seat_totals_by_class:
+                for seat_class_enum, total_requested in seat_totals_by_class.items():
+                    capacity = aircraft.get_capacity_for_seat_class(seat_class_enum)
+                    if capacity is not None and total_requested > capacity:
+                        validation_errors.append(
+                            FlightTariffMessages.seats_exceed_aircraft_capacity(
+                                seat_class_enum.value,
+                                aircraft.type,
+                                capacity,
+                                total_requested,
+                            )
+                        )
 
             # Raise all validation errors at once
             if validation_errors:

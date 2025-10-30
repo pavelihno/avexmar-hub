@@ -101,6 +101,8 @@ export const FIELD_LABELS = {
 	},
 	AIRCRAFT: {
 		type: 'Тип воздушного судна',
+		economy_seats: 'Количество мест эконом-класса',
+		business_seats: 'Количество мест бизнес-класса',
 	},
 	COUNTRY: {
 		name: 'Название',

@@ -212,8 +212,7 @@ const AdminDataTable = ({
 	};
 
 	const handleSave = (formData) => {
-		if (isEditing) return onEdit(formData);
-		else return onAdd(formData);
+		return isEditing ? onEdit(formData) : onAdd(formData);
 	};
 
 	const handleDelete = (id) => {
@@ -389,7 +388,6 @@ const AdminDataTable = ({
 					</IconButton>
 					<Typography variant='h4'>{title}</Typography>
 				</Box>
-
 				<Box
 					sx={{
 						display: 'flex',
@@ -890,17 +888,16 @@ const AdminDataTable = ({
 						</Box>
 					)}
 				</Box>
-
 				{/* Add/edit dialog */}
 				<Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth fullScreen={isSmallDown}>
 					{renderForm({
 						isEditing: isEditing,
 						currentItem: currentItem,
-						onClose: handleCloseDialog,
 						onSave: handleSave,
+						onClose: handleCloseDialog,
+						formKey: `form-${isEditing ? currentItem?.id : 'new'}`,
 					})}
 				</Dialog>
-
 				{/* Delete dialog */}
 				<Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
@@ -934,7 +931,6 @@ const AdminDataTable = ({
 						</Button>
 					</DialogActions>
 				</Dialog>
-
 				{/* Delete all dialog */}
 				<Dialog open={deleteAllDialog} onClose={handleCloseDeleteAllDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-all-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
@@ -967,7 +963,6 @@ const AdminDataTable = ({
 						</Button>
 					</DialogActions>
 				</Dialog>
-
 				{/* Delete filtered dialog */}
 				<Dialog open={deleteFilteredDialog} onClose={handleCloseDeleteFilteredDialog} fullScreen={isSmallDown}>
 					<DialogTitle id='delete-filtered-dialog-title'>{MESSAGES.confirm_action}</DialogTitle>
@@ -1003,7 +998,6 @@ const AdminDataTable = ({
 						</Button>
 					</DialogActions>
 				</Dialog>
-
 				{/* Upload dialog */}
 				<Dialog open={uploadDialog} onClose={closeUploadDialog} fullScreen={isSmallDown}>
 					<DialogTitle>{ADMIN.upload.title}</DialogTitle>
@@ -1028,7 +1022,6 @@ const AdminDataTable = ({
 						</Button>
 					</DialogActions>
 				</Dialog>
-
 				<Backdrop
 					open={uploading}
 					sx={{ color: theme.palette.white, zIndex: (theme) => theme.zIndex.drawer + 1 }}

@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy import func
 from sqlalchemy.orm import Mapped, Session
 
 from app.constants.messages import FlightTariffMessages
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.tariff import Tariff
+from app.utils.enum import SEAT_CLASS
 
 if TYPE_CHECKING:
     from app.models.flight import Flight
@@ -72,6 +74,22 @@ class FlightTariff(BaseModel):
                 })
             kwargs['seats_number'] = seats_available_int
 
+        seats_number = kwargs.get('seats_number')
+        seats_number_int = None
+        if seats_number is not None:
+            seats_number_int = cls._prepare_seats_number(seats_number)
+            kwargs['seats_number'] = seats_number_int
+
+        flight_id = kwargs.get('flight_id')
+        seat_class = cls._get_seat_class(session, kwargs)
+        if flight_id and seat_class and seats_number_int is not None:
+            cls._validate_aircraft_capacity(
+                session,
+                flight_id,
+                seat_class,
+                seats_number_int,
+            )
+
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
@@ -108,4 +126,94 @@ class FlightTariff(BaseModel):
             taken = availability_map.get(instance.tariff_id, {}).get('taken', 0)
             kwargs['seats_number'] = seats_available_int + taken
 
+        seats_number = kwargs.get('seats_number')
+        if seats_number is not None:
+            seats_number_int = cls._prepare_seats_number(seats_number)
+            kwargs['seats_number'] = seats_number_int
+        else:
+            seats_number_int = instance.seats_number
+
+        flight_id = kwargs.get('flight_id', instance.flight_id)
+        seat_class = cls._get_seat_class(session, kwargs, default=instance.tariff.seat_class if instance.tariff else None)
+        if flight_id and seat_class and seats_number_int is not None:
+            cls._validate_aircraft_capacity(
+                session,
+                flight_id,
+                seat_class,
+                seats_number_int,
+                exclude_id=_id,
+            )
+
         return super().update(_id, session, commit=commit, **kwargs)
+
+    @staticmethod
+    def _prepare_seats_number(value):
+        try:
+            seats_int = int(value)
+        except (TypeError, ValueError) as exc:
+            raise ModelValidationError({
+                'seats_number': FlightTariffMessages.INVALID_TOTAL_SEATS,
+            }) from exc
+        if seats_int < 0:
+            raise ModelValidationError({
+                'seats_number': FlightTariffMessages.TOTAL_SEATS_MUST_BE_NON_NEGATIVE,
+            })
+        return seats_int
+
+    @classmethod
+    def _get_seat_class(cls, session: Session, kwargs, default: SEAT_CLASS | None = None):
+        seat_class_value = kwargs.get('seat_class')
+        seat_class_enum = None
+        if seat_class_value is not None:
+            try:
+                seat_class_enum = SEAT_CLASS(seat_class_value)
+            except (TypeError, ValueError):
+                seat_class_enum = None
+        if 'tariff_id' in kwargs and kwargs.get('tariff_id') is not None:
+            tariff = session.get(Tariff, kwargs.get('tariff_id'))
+            if tariff:
+                seat_class_enum = tariff.seat_class
+        if seat_class_enum is None:
+            seat_class_enum = default
+        return seat_class_enum
+
+    @classmethod
+    def _validate_aircraft_capacity(
+        cls,
+        session: Session,
+        flight_id: int,
+        seat_class: SEAT_CLASS,
+        seats_number: int,
+        *,
+        exclude_id: int | None = None,
+    ) -> None:
+        from app.models.flight import Flight
+
+        flight = session.get(Flight, flight_id)
+        if not flight or not flight.aircraft:
+            return
+
+        aircraft = flight.aircraft
+        capacity = aircraft.get_capacity_for_seat_class(seat_class)
+        if capacity is None:
+            return
+
+        query = session.query(func.coalesce(func.sum(cls.seats_number), 0)).join(Tariff).filter(
+            cls.flight_id == flight_id,
+            Tariff.seat_class == seat_class,
+        )
+        if exclude_id is not None:
+            query = query.filter(cls.id != exclude_id)
+
+        allocated = query.scalar() or 0
+        total_requested = allocated + seats_number
+
+        if total_requested > capacity:
+            raise ModelValidationError({
+                'seats_number': FlightTariffMessages.seats_exceed_aircraft_capacity(
+                    seat_class.value if isinstance(seat_class, SEAT_CLASS) else str(seat_class),
+                    aircraft.type,
+                    capacity,
+                    total_requested,
+                )
+            })

@@ -29,7 +29,60 @@ const AircraftManagement = () => {
 			apiKey: 'type',
 			label: FIELD_LABELS.AIRCRAFT.type,
 			type: FIELD_TYPES.TEXT,
+			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.AIRCRAFT.type.REQUIRED : null),
+		},
+		economySeats: {
+			key: 'economySeats',
+			apiKey: 'economy_seats',
+			label: FIELD_LABELS.AIRCRAFT.economy_seats,
+			type: FIELD_TYPES.NUMBER,
+			inputProps: { min: 0, step: 1 },
+			defaultValue: 0,
+			toApi: (value) => {
+				if (value === '' || value === null || value === undefined) return 0;
+				return Number(value);
+			},
+			toUi: (value) => Number(value ?? 0),
+			validate: (value) => {
+				if (value === '' || value === null || value === undefined) {
+					return VALIDATION_MESSAGES.AIRCRAFT.economy_seats.REQUIRED;
+				}
+				const numericValue = Number(value);
+				if (Number.isNaN(numericValue)) {
+					return VALIDATION_MESSAGES.AIRCRAFT.economy_seats.INVALID;
+				}
+				if (numericValue < 0) {
+					return VALIDATION_MESSAGES.AIRCRAFT.economy_seats.NON_NEGATIVE;
+				}
+				return null;
+			},
+		},
+		businessSeats: {
+			key: 'businessSeats',
+			apiKey: 'business_seats',
+			label: FIELD_LABELS.AIRCRAFT.business_seats,
+			type: FIELD_TYPES.NUMBER,
+			inputProps: { min: 0, step: 1 },
+			defaultValue: 0,
+			toApi: (value) => {
+				if (value === '' || value === null || value === undefined) return 0;
+				return Number(value);
+			},
+			toUi: (value) => Number(value ?? 0),
+			validate: (value) => {
+				if (value === '' || value === null || value === undefined) {
+					return VALIDATION_MESSAGES.AIRCRAFT.business_seats.REQUIRED;
+				}
+				const numericValue = Number(value);
+				if (Number.isNaN(numericValue)) {
+					return VALIDATION_MESSAGES.AIRCRAFT.business_seats.INVALID;
+				}
+				if (numericValue < 0) {
+					return VALIDATION_MESSAGES.AIRCRAFT.business_seats.NON_NEGATIVE;
+				}
+				return null;
+			},
 		},
 	};
 
