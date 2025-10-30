@@ -10,9 +10,11 @@ def get_carousel_slides():
     slides = CarouselSlide.get_all()
     return jsonify([slide.to_dict(return_children=True) for slide in slides]), 200
 
+
 def get_carousel_slide(slide_id):
     slide = CarouselSlide.get_or_404(slide_id)
     return jsonify(slide.to_dict(return_children=True)), 200
+
 
 @admin_required
 def create_carousel_slide(current_user):
@@ -43,13 +45,18 @@ def upload_carousel_slide_image(current_user, slide_id):
     image_manager = ImageManager()
 
     try:
-        image_path, image_filename = image_manager.save_file(file, 'carousel')
+        image_path, image_filename = image_manager.save_file(
+            file,
+            subfolder_name='carousel'
+        )
     except Exception as exc:
         return jsonify({'message': str(exc)}), 500
 
     updated = CarouselSlide.update(
-        slide_id, commit=True, 
-        image_path=image_path, image_filename=image_filename
+        slide_id,
+        image_path=image_path,
+        image_filename=image_filename,
+        commit=True,
     )
 
     return jsonify(updated.to_dict()), 201
