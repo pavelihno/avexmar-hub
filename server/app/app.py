@@ -267,12 +267,12 @@ def __create_app(_config_class, _db):
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
+    app.route('/booking/dashboard', methods=['GET'])(get_booking_dashboard)
 
     # exports
     app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
     app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
     app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
-    app.route('/bookings/dashboard', methods=['GET'])(get_booking_dashboard)
 
     # seo
     app.route('/seo/static-routes', methods=['GET'])(list_static_seo_routes)
