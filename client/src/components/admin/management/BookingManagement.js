@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchBookings,
@@ -13,18 +13,18 @@ import {
 	deleteBooking,
 	deleteAllBookings,
 	deleteFilteredBookings,
-} from '../../redux/actions/booking';
+} from '../../../redux/actions/booking';
 import {
 	fetchBookingPassengers,
 	createBookingPassenger,
 	deleteBookingPassenger,
-} from '../../redux/actions/bookingPassenger';
-import { fetchBookingFlights } from '../../redux/actions/bookingFlight';
-import { fetchUsers } from '../../redux/actions/user';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../constants';
-import { formatDate, formatTime } from '../utils';
+} from '../../../redux/actions/bookingPassenger';
+import { fetchBookingFlights } from '../../../redux/actions/bookingFlight';
+import { fetchUsers } from '../../../redux/actions/user';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../../constants';
+import { formatDate, formatTime } from '../../utils';
 
 const BookingManagement = () => {
 	const dispatch = useDispatch();

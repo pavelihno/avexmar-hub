@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchTariffs,
@@ -10,10 +10,10 @@ import {
 	deleteTariff,
 	deleteAllTariffs,
 	deleteFilteredTariffs,
-} from '../../redux/actions/tariff';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatNumber } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+} from '../../../redux/actions/tariff';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const TariffManagement = () => {
 	const dispatch = useDispatch();

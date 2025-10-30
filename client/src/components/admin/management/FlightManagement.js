@@ -16,11 +16,11 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
-import { downloadTemplate, uploadFile } from '../../api';
-import { FILE_NAMES } from '../../constants/files';
+import { downloadTemplate, uploadFile } from '../../../api';
+import { FILE_NAMES } from '../../../constants/files';
 
 import {
 	fetchFlights,
@@ -29,16 +29,16 @@ import {
 	deleteFlight,
 	deleteAllFlights,
 	deleteFilteredFlights,
-} from '../../redux/actions/flight';
-import { fetchAircrafts } from '../../redux/actions/aircraft';
-import { fetchTariffs } from '../../redux/actions/tariff';
-import { fetchFlightTariffs, deleteFlightTariff } from '../../redux/actions/flightTariff';
-import { fetchRoutes } from '../../redux/actions/route';
-import { fetchAirlines } from '../../redux/actions/airline';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatNumber } from '../utils';
-import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, DEFAULT_TIME } from '../../constants';
+} from '../../../redux/actions/flight';
+import { fetchAircrafts } from '../../../redux/actions/aircraft';
+import { fetchTariffs } from '../../../redux/actions/tariff';
+import { fetchFlightTariffs, deleteFlightTariff } from '../../../redux/actions/flightTariff';
+import { fetchRoutes } from '../../../redux/actions/route';
+import { fetchAirlines } from '../../../redux/actions/airline';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../../utils';
+import { formatDate, formatTime, formatTimeToAPI, formatTimeToUI, validateDate, validateTime } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, DEFAULT_TIME } from '../../../constants';
 
 const FlightManagement = () => {
 	const dispatch = useDispatch();

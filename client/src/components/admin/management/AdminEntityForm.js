@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { UI_LABELS } from '../../constants';
-import { validateFormFields, extractErrorMessage } from './utils';
+import { UI_LABELS } from '../../../constants';
+import { validateFormFields, extractErrorMessage } from '../utils';
 
 const AdminEntityForm = ({
 	fields,

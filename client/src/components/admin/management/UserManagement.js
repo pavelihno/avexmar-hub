@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchUsers,
@@ -10,10 +10,10 @@ import {
 	deleteUser,
 	deleteAllUsers,
 	deleteFilteredUsers,
-} from '../../redux/actions/user';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+} from '../../../redux/actions/user';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const UserManagement = () => {
 	const dispatch = useDispatch();

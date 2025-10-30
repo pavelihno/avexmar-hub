@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Typography, Dialog, DialogContent, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../redux/actions/flightTariff';
-import { fetchTariffs } from '../../redux/actions/tariff';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../constants';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatNumber } from '../utils';
+import { createFlightTariff, updateFlightTariff, fetchFlightTariff } from '../../../redux/actions/flightTariff';
+import { fetchTariffs } from '../../../redux/actions/tariff';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, ENUM_LABELS, getEnumOptions } from '../../../constants';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../../utils';
 
 export const FlightTariffManagement = ({ flightId, tariffDialogOpen, onClose, action = 'add', flightTariffId }) => {
 	const dispatch = useDispatch();

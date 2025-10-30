@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchPassengers,
@@ -10,18 +10,12 @@ import {
 	deletePassenger,
 	deleteAllPassengers,
 	deleteFilteredPassengers,
-} from '../../redux/actions/passenger';
-import { fetchCountries } from '../../redux/actions/country';
-import { fetchUsers } from '../../redux/actions/user';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatDate, validateDate } from '../utils';
-import {
-	ENUM_LABELS,
-	FIELD_LABELS,
-	UI_LABELS,
-	VALIDATION_MESSAGES,
-	getEnumOptions,
-} from '../../constants';
+} from '../../../redux/actions/passenger';
+import { fetchCountries } from '../../../redux/actions/country';
+import { fetchUsers } from '../../../redux/actions/user';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatDate, validateDate } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const PassengerManagement = () => {
 	const dispatch = useDispatch();

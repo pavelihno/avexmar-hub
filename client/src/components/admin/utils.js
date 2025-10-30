@@ -1,4 +1,4 @@
-import AdminEntityForm from './AdminEntityForm';
+import AdminEntityForm from './management/AdminEntityForm';
 import { createFormFields } from '../utils';
 
 /**

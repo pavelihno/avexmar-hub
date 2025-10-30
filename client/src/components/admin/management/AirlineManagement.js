@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { downloadTemplate, uploadFile } from '../../api';
-import { FILE_NAMES } from '../../constants/files';
+import { downloadTemplate, uploadFile } from '../../../api';
+import { FILE_NAMES } from '../../../constants/files';
 import {
 	fetchAirlines,
 	createAirline,
@@ -11,11 +11,11 @@ import {
 	deleteAirline,
 	deleteAllAirlines,
 	deleteFilteredAirlines,
-} from '../../redux/actions/airline';
-import { fetchCountries } from '../../redux/actions/country';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+} from '../../../redux/actions/airline';
+import { fetchCountries } from '../../../redux/actions/country';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants';
 
 const AirlineManagement = () => {
 	const dispatch = useDispatch();

@@ -9,10 +9,10 @@ import {
 	deleteAircraft,
 	deleteAllAircrafts,
 	deleteFilteredAircrafts,
-} from '../../redux/actions/aircraft';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+} from '../../../redux/actions/aircraft';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants';
 
 const AircraftManagement = () => {
 	const dispatch = useDispatch();

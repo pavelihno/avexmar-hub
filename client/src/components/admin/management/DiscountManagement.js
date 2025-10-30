@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchDiscounts,
@@ -10,10 +10,10 @@ import {
 	deleteDiscount,
 	deleteAllDiscounts,
 	deleteFilteredDiscounts,
-} from '../../redux/actions/discount';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatNumber } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+} from '../../../redux/actions/discount';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const DiscountManagement = () => {
 	const dispatch = useDispatch();

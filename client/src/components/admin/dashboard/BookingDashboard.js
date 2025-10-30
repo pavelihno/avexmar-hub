@@ -35,11 +35,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SearchIcon from '@mui/icons-material/Search';
 
-import Base from '../Base';
-import { UI_LABELS, ENUM_LABELS, BUTTONS } from '../../constants';
-import { formatDate, formatDateTime, formatNumber, createFieldRenderer, FIELD_TYPES } from '../utils';
-import { fetchBookingDashboard } from '../../redux/actions/bookingDashboard';
-import { serverApi } from '../../api';
+import Base from '../../Base';
+import { UI_LABELS, ENUM_LABELS, BUTTONS } from '../../../constants';
+import { formatDate, formatDateTime, formatNumber, createFieldRenderer, FIELD_TYPES } from '../../utils';
+import { fetchBookingDashboard } from '../../../redux/actions/bookingDashboard';
+import { serverApi } from '../../../api';
 
 const LABELS = UI_LABELS.ADMIN.exports.bookingDashboard;
 

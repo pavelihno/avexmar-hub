@@ -9,10 +9,10 @@ import {
 	deleteConsentDoc,
 	deleteAllConsentDocs,
 	deleteFilteredConsentDocs,
-} from '../../redux/actions/consentDoc';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+} from '../../../redux/actions/consentDoc';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const ConsentDocManagement = () => {
 	const dispatch = useDispatch();

@@ -12,14 +12,14 @@ import {
 	deleteConsentEvent,
 	deleteAllConsentEvents,
 	deleteFilteredConsentEvents,
-} from '../../redux/actions/consentEvent';
-import { fetchUsers } from '../../redux/actions/user';
-import { fetchBookings } from '../../redux/actions/booking';
-import { fetchConsentDocs } from '../../redux/actions/consentDoc';
-import { fetchPassengers } from '../../redux/actions/passenger';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatDate } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../constants';
+} from '../../../redux/actions/consentEvent';
+import { fetchUsers } from '../../../redux/actions/user';
+import { fetchBookings } from '../../../redux/actions/booking';
+import { fetchConsentDocs } from '../../../redux/actions/consentDoc';
+import { fetchPassengers } from '../../../redux/actions/passenger';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatDate } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
 
 const ConsentEventManagement = () => {
 	const dispatch = useDispatch();
