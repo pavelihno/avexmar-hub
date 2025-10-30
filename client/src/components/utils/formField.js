@@ -63,15 +63,17 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						disabled={disabled}
-						inputProps={{
-							placeholder: DEFAULT_EMAIL,
-							type: 'email',
-							autoComplete: 'email',
-							...field.inputProps,
-							...inputProps,
-						}}
 						size={size}
 						sx={{ ...sx }}
+						slotProps={{
+							htmlInput: {
+								placeholder: DEFAULT_EMAIL,
+								type: 'email',
+								autoComplete: 'email',
+								...field.inputProps,
+								...inputProps,
+							},
+						}}
 					/>
 				);
 			}
@@ -87,15 +89,17 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						disabled={disabled}
-						inputProps={{
-							placeholder: DEFAULT_PHONE_NUMBER,
-							type: 'tel',
-							autoComplete: 'tel',
-							...field.inputProps,
-							...inputProps,
-						}}
 						size={size}
 						sx={{ ...sx }}
+						slotProps={{
+							htmlInput: {
+								placeholder: DEFAULT_PHONE_NUMBER,
+								type: 'tel',
+								autoComplete: 'tel',
+								...field.inputProps,
+								...inputProps,
+							},
+						}}
 					/>
 				);
 			}
@@ -111,9 +115,11 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						error={error}
 						helperText={error ? helperText : ''}
 						disabled={disabled}
-						inputProps={{ ...field.inputProps, ...inputProps }}
 						size={size}
 						sx={{ ...sx }}
+						slotProps={{
+							htmlInput: { ...field.inputProps, ...inputProps },
+						}}
 					/>
 				);
 			}
@@ -131,11 +137,13 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						disabled={disabled}
 						multiline
 						rows={field.rows || 5}
-						inputProps={{ ...field.inputProps, ...inputProps }}
 						size={size}
 						sx={{
 							'& .MuiInputBase-root': { padding: '4px' },
 							...sx,
+						}}
+						slotProps={{
+							htmlInput: { ...field.inputProps, ...inputProps },
 						}}
 					/>
 				);
@@ -215,14 +223,16 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 								onChange(rounded);
 							}
 						}}
-						inputProps={{
-							min,
-							step,
-							...field.inputProps,
-							...inputProps,
-						}}
 						size={size}
 						sx={{ ...sx }}
+						slotProps={{
+							htmlInput: {
+								min,
+								step,
+								...field.inputProps,
+								...inputProps,
+							},
+						}}
 					/>
 				);
 			}
@@ -432,10 +442,12 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 						fullWidth={fullWidth}
-						inputProps={{ ...field.inputProps, ...inputProps }}
 						size={size}
 						sx={{ ...sx }}
 						disabled={disabled}
+						slotProps={{
+							htmlInput: { ...field.inputProps, ...inputProps },
+						}}
 					/>
 				);
 			}
