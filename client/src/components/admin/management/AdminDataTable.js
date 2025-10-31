@@ -1013,6 +1013,7 @@ const AdminDataTable = ({
 							dragText={ADMIN.upload.drag}
 							buttonText={ADMIN.upload.select}
 							onFileSelect={handleUploadSelection}
+							disabled={uploading}
 						/>
 					</DialogContent>
 					<DialogActions
@@ -1031,7 +1032,7 @@ const AdminDataTable = ({
 				</Dialog>
 				<Backdrop
 					open={uploading}
-					sx={{ color: theme.palette.white, zIndex: (theme) => theme.zIndex.drawer + 1 }}
+					sx={{ color: theme.palette.white, zIndex: (theme) => theme.zIndex.modal + 1 }}
 				>
 					<CircularProgress color='inherit' />
 				</Backdrop>
