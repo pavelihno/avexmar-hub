@@ -159,9 +159,11 @@ def get_flight_passenger_export(current_user):
             ws.write(row, 9, value, text_style)
             col_widths[9] = max(col_widths[9], len(str(value)))
 
-            # Column 10-11: SSR, Group
+            # Column 10: SSR
             ws.write(row, 10, '', text_style)
-            ws.write(row, 11, '', text_style)
+
+            # Column 11: Group
+            ws.write(row, 11, booking.booking_number, text_style)
 
             # Column 12: Phone
             value = booking.phone_number or ''
