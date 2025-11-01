@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, Session
@@ -11,6 +11,7 @@ from app.utils.enum import SEAT_CLASS
 
 if TYPE_CHECKING:
     from app.models.flight import Flight
+    from app.models.booking_flight import BookingFlight
 
 
 class FlightTariff(BaseModel):
@@ -22,6 +23,12 @@ class FlightTariff(BaseModel):
 
     flight: Mapped['Flight'] = db.relationship('Flight', back_populates='tariffs')
     tariff: Mapped['Tariff'] = db.relationship('Tariff', back_populates='flight_tariffs')
+    booking_flights: Mapped[List['BookingFlight']] = db.relationship(
+        'BookingFlight',
+        back_populates='flight_tariff',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+    )
 
     __table_args__ = (
         db.UniqueConstraint('flight_id', 'tariff_id', name='uix_flight_tariff_flight_tariff'),
@@ -31,10 +38,11 @@ class FlightTariff(BaseModel):
         from app.utils.search import get_flight_seat_availability
 
         availability_map = get_flight_seat_availability(
-            self.flight_id, self.tariff_id
+            self.flight_id,
+            self.id,
         )
 
-        availability = availability_map.get(self.tariff_id, {}) if availability_map else {}
+        availability = availability_map.get(self.id, {}) if availability_map else {}
 
         total_seats = availability.get('total', self.seats_number or 0)
         taken_seats = availability.get('taken', 0)
@@ -123,7 +131,7 @@ class FlightTariff(BaseModel):
                 session=session,
                 flight_tariffs=[instance],
             )
-            taken = availability_map.get(instance.tariff_id, {}).get('taken', 0)
+            taken = availability_map.get(instance.id, {}).get('taken', 0)
             kwargs['seats_number'] = seats_available_int + taken
 
         seats_number = kwargs.get('seats_number')

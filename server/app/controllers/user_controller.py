@@ -6,6 +6,7 @@ from app.database import db
 from app.models.user import User
 from app.models.booking import Booking
 from app.models.booking_flight import BookingFlight
+from app.models.flight_tariff import FlightTariff
 from app.models.booking_passenger import BookingPassenger
 from app.models.flight import Flight
 from app.models.passenger import Passenger
@@ -103,7 +104,8 @@ def get_user_bookings(current_user, user_id):
 
     bf_rows = (
         db.session.query(BookingFlight.booking_id, Flight)
-        .join(Flight, Flight.id == BookingFlight.flight_id)
+        .join(FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id)
+        .join(Flight, Flight.id == FlightTariff.flight_id)
         .filter(BookingFlight.booking_id.in_(booking_ids))
         .all()
     )
@@ -149,13 +151,20 @@ def create_user_passenger(current_user, user_id):
         return jsonify({'message': BookingMessages.FORBIDDEN}), 403
     body = request.json or {}
 
+    body['owner_user_id'] = user_id
+
     consent = body.pop('consent', False)
     if not consent:
         return jsonify({'message': UserMessages.CONSENT_REQUIRED}), 400
 
     session = db.session
 
-    passenger = Passenger.create(owner_user_id=user_id, session=session, commit=False, **body)
+    passenger = Passenger.get_existing_passenger(session, body)
+
+    if passenger is not None:
+        return jsonify({'message': UserMessages.PASSENGER_ALREADY_EXISTS}), 400
+
+    passenger = Passenger.create(session=session, commit=False, **body)
 
     create_user_consent(
         current_user,

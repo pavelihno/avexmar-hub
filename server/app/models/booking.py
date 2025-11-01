@@ -1,6 +1,7 @@
 import random
 import string
 import uuid
+
 from uuid import UUID as UUID_cls
 from typing import List, TYPE_CHECKING
 from datetime import datetime
@@ -16,7 +17,7 @@ from app.utils.enum import (
     DEFAULT_BOOKING_STATUS,
     DEFAULT_CURRENCY,
 )
-from app.utils.business_logic import build_booking_snapshot, get_seats_number
+from app.utils.business_logic import build_booking_snapshot
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -36,7 +37,6 @@ class Booking(BaseModel):
     access_token = db.Column(UUID(as_uuid=True), unique=True, nullable=True)
     booking_number = db.Column(db.String, unique=True, nullable=True, index=True)
     status = db.Column(db.Enum(BOOKING_STATUS), nullable=False, default=DEFAULT_BOOKING_STATUS)
-    seats_number = db.Column(db.Integer, nullable=False, default=0)
     status_history = db.Column(JSONB, nullable=False, server_default='[]', default=list)
 
     # Customer details
@@ -87,10 +87,6 @@ class Booking(BaseModel):
         'ConsentEvent', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
 
-    @property
-    def flights(self):
-        return [bf.flight for bf in self.booking_flights]
-
     def to_dict(self, return_children=False):
         return {
             'id': self.id,
@@ -107,7 +103,6 @@ class Booking(BaseModel):
             'total_discounts': self.total_discounts,
             'fees': self.fees,
             'total_price': self.total_price,
-            'seats_number': self.seats_number,
             'user_id': self.user_id,
             'expires_at': (
                 self.booking_hold.expires_at.isoformat()
@@ -205,12 +200,13 @@ class Booking(BaseModel):
     ):
         session = session or db.session
         kwargs = cls.convert_enums(kwargs)
-        passenger_counts = kwargs.get('passenger_counts') or {}
-        kwargs['seats_number'] = get_seats_number(passenger_counts)
+
         status = kwargs.get('status', DEFAULT_BOOKING_STATUS)
-        history = [{'status': status.value, 'at': datetime.now().isoformat()}]
-        kwargs['status_history'] = history
+        timestamp = datetime.now().isoformat()
+        kwargs['status_history'] = [{'status': status.value, 'at': timestamp}]
+
         kwargs.setdefault('access_token', uuid.uuid4())
+
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
@@ -225,14 +221,16 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(booking_id, session)
         kwargs = cls.convert_enums(kwargs)
-        passenger_counts = kwargs.get('passenger_counts')
-        if passenger_counts is not None:
-            kwargs['seats_number'] = get_seats_number(passenger_counts)
+
         old_status = booking.status
         new_status = kwargs.get('status', old_status)
-        history = list(booking.status_history or [])
-        history.append({'status': new_status.value, 'at': datetime.now().isoformat()})
-        kwargs['status_history'] = history
+        timestamp = datetime.now().isoformat()
+
+        if old_status != new_status:
+            history = list(booking.status_history or [])
+            history.append({'status': new_status.value, 'at': timestamp})
+            kwargs['status_history'] = history
+
         return super().update(booking_id, session=session, commit=commit, **kwargs)
 
     @classmethod
@@ -279,12 +277,23 @@ class Booking(BaseModel):
             BOOKING_STATUS.completed,
             BOOKING_STATUS.cancelled,
         },
-        BOOKING_STATUS.completed: {BOOKING_STATUS.cancelled},
+        BOOKING_STATUS.completed: {
+            BOOKING_STATUS.ticketed,
+            BOOKING_STATUS.cancelled
+        },
+        BOOKING_STATUS.ticketed: {
+            BOOKING_STATUS.cancelled
+        },
         BOOKING_STATUS.expired: set(),
         BOOKING_STATUS.cancelled: set(),
     }
 
-    FINAL_STATUSES = {BOOKING_STATUS.completed, BOOKING_STATUS.expired, BOOKING_STATUS.cancelled}
+    FINAL_STATUSES = {
+        BOOKING_STATUS.completed,
+        BOOKING_STATUS.ticketed,
+        BOOKING_STATUS.expired,
+        BOOKING_STATUS.cancelled
+    }
 
     PAGE_FLOW = {
         BOOKING_STATUS.created: ['passengers'],

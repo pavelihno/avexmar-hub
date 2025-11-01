@@ -43,7 +43,7 @@ STATUS_LABELS = {
 
 DOCUMENT_LABELS = {
     'passport': 'Паспорт',
-    'foreign_passport': 'Загранпаспорт',
+    'foreign_passport': 'Иностранный документ',
     'international_passport': 'Загранпаспорт',
     'birth_certificate': 'Свидетельство о рождении',
 }

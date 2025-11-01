@@ -32,18 +32,19 @@ const PassengersTable = ({ passengers = [] }) => {
 						id,
 						last_name = '',
 						first_name = '',
-						birth_date,
+						patronymic_name = '',
 						gender: genderKey,
+						birth_date,
 						document_type: docType,
 						document_number: docNumber = '',
 						citizenship,
 					} = p;
 
-					const passengerName = `${last_name} ${first_name}`.trim() || '—';
+					const passengerName = `${last_name} ${first_name} ${patronymic_name}`.trim() || '—';
 					const birthDate = birth_date ? formatDate(birth_date) : '';
 					const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
 					const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
-					const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : undefined;
+					const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : null;
 					const documentDetails = [
 						docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel),
 						docNumber,
@@ -106,20 +107,19 @@ const PassengersTable = ({ passengers = [] }) => {
 							id,
 							last_name = '',
 							first_name = '',
-							birth_date,
+							patronymic_name = '',
 							gender: genderKey,
+							birth_date,
 							document_type: docType,
 							document_number: docNumber = '',
 							citizenship,
 						} = p;
 
-						const passengerName = `${last_name} ${first_name}`.trim();
+						const passengerName = `${last_name} ${first_name} ${patronymic_name}`.trim() || '—';
 						const birthDate = birth_date ? formatDate(birth_date) : '';
 						const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
-
 						const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
-						const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : undefined;
-
+						const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : null;
 						const documentDetails = [
 							docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel),
 							docNumber,

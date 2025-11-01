@@ -51,7 +51,12 @@ class Flight(BaseModel):
         'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
     )
     booking_flights: Mapped[List['BookingFlight']] = db.relationship(
-        'BookingFlight', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+        'BookingFlight',
+        secondary='flight_tariffs',
+        primaryjoin='Flight.id == FlightTariff.flight_id',
+        secondaryjoin='BookingFlight.flight_tariff_id == FlightTariff.id',
+        viewonly=True,
+        lazy='dynamic',
     )
 
     __table_args__ = (

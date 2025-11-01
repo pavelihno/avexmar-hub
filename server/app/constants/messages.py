@@ -42,6 +42,7 @@ class UserMessages:
     CONSENT_REQUIRED = 'Требуется согласие'
     INVALID_PASSWORD = 'Неверный пароль'
     INVALID_OR_EXPIRED_CODE = 'Недействительный или просроченный код'
+    PASSENGER_ALREADY_EXISTS = 'Пассажир с такими данными уже существует'
 
 
 class ConsentMessages:
@@ -49,7 +50,7 @@ class ConsentMessages:
 
 
 class PassengerMessages:
-    FLIGHT_REQUIRED = 'Требуются указать рейс'
+    FLIGHT_REQUIRED = 'Требуется указать рейс'
 
 
 class CountryMessages:

@@ -16,11 +16,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
 import { fetchBookingDetails, downloadBookingPdf } from '../../redux/actions/bookingProcess';
-import { fetchPayment } from '../../redux/actions/payment';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS, FILE_NAME_TEMPLATES } from '../../constants';
-import { formatNumber, extractRouteInfo, formatDate, formatDateTime } from '../utils';
+import { formatNumber, extractRouteInfo } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
+import PaymentDetailsTable from './PaymentDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
 
 const Completion = () => {
@@ -28,7 +28,6 @@ const Completion = () => {
 	const location = useLocation();
 	const dispatch = useDispatch();
 	const { current: booking, isLoading: bookingLoading } = useSelector((state) => state.bookingProcess);
-	const payment = useSelector((state) => state.payment.current);
 
 	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
 
@@ -50,7 +49,6 @@ const Completion = () => {
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails({ publicId, accessToken }));
-		dispatch(fetchPayment({ publicId, accessToken }));
 	}, [dispatch, publicId, accessToken]);
 
 	const [outboundFlight = null, returnFlight = null] = booking?.flights ?? [];
@@ -193,61 +191,15 @@ const Completion = () => {
 					)}
 
 					{/* Payment details */}
-					{payment && (
+					{Array.isArray(booking?.payments) && booking.payments.length > 0 && (
 						<Accordion variant='outlined' sx={{ mb: { xs: 1, md: 2 } }}>
 							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
 									{UI_LABELS.BOOKING.completion.payment_details}
 								</Typography>
 							</AccordionSummary>
-							<AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-									<Typography sx={{ fontWeight: 'bold' }}>{FIELD_LABELS.PAYMENT.amount}</Typography>
-									<Typography sx={{ fontWeight: 'bold' }}>{`${formatNumber(
-										payment.amount
-									)} ${currencySymbol}`}</Typography>
-								</Box>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{UI_LABELS.BOOKING.completion.buyer}</Typography>
-									<Typography>
-										{`${booking.buyer_last_name || ''} ${booking.buyer_first_name || ''}`}
-									</Typography>
-								</Box>
-
-								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.BOOKING.email_address}</Typography>
-									<Typography>{booking.email_address}</Typography>
-								</Box>
-
-								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.BOOKING.phone_number}</Typography>
-									<Typography>{booking.phone_number}</Typography>
-								</Box>
-
-								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.payment_method}</Typography>
-									<Typography>
-										{ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method}
-									</Typography>
-								</Box>
-								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-									<Typography>{FIELD_LABELS.PAYMENT.payment_status}</Typography>
-									<Typography>
-										{ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status}
-									</Typography>
-								</Box>
-								{payment.provider_payment_id && (
-									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.provider_payment_id}</Typography>
-										<Typography>{payment.provider_payment_id}</Typography>
-									</Box>
-								)}
-								{payment.paid_at && (
-									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-										<Typography>{FIELD_LABELS.PAYMENT.paid_at}</Typography>
-										<Typography>{formatDate(payment.paid_at)}</Typography>
-									</Box>
-								)}
+							<AccordionDetails>
+								<PaymentDetailsTable payments={booking.payments} />
 							</AccordionDetails>
 						</Accordion>
 					)}
