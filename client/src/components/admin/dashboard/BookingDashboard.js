@@ -54,9 +54,9 @@ const initialFilters = {
 const bookingStatusColors = {
 	created: 'default',
 	passengers_added: 'default',
-	confirmed: 'info',
-	payment_pending: 'warning',
-	payment_confirmed: 'primary',
+	confirmed: 'default',
+	payment_pending: 'default',
+	payment_confirmed: 'default',
 	payment_failed: 'error',
 	completed: 'success',
 	expired: 'warning',
@@ -68,23 +68,39 @@ const issueColors = {
 	failed_payment: 'error',
 };
 
+const getRouteLabel = (route) => {
+	if (!route) return '—';
+	if (route.label) return route.label;
+	const origin =
+		route.origin_airport?.city_name || route.origin_airport?.name || route.origin?.city || route.origin || null;
+	const destination =
+		route.destination_airport?.city_name ||
+		route.destination_airport?.name ||
+		route.destination?.city ||
+		route.destination ||
+		null;
+
+	const parts = [origin, destination].filter(Boolean);
+	return parts.length ? parts.join(' — ') : '—';
+};
+
 const formatNamePart = (value) => {
 	if (!value) return '';
 	const lower = String(value).toLowerCase();
 	return lower.replace(/(^|\s|-)([а-яa-z])/g, (match, prefix, char) => `${prefix}${char.toUpperCase()}`);
 };
 
-const buildPricingDetails = (price) => {
-	if (!price) return '';
+const formatPriceDetails = (priceDetails = {}) => {
+	if (!priceDetails) return '';
 	const parts = [];
-	if (price.fare_price != null) {
-		parts.push(`${LABELS.pricing.fare}: ${formatNumber(price.fare_price)}`);
+	if (priceDetails.fare_price != null) {
+		parts.push(`${LABELS.pricing.fare}: ${formatNumber(priceDetails.fare_price)}`);
 	}
-	if (price.total_discounts) {
-		parts.push(`${LABELS.pricing.discounts}: −${formatNumber(price.total_discounts)}`);
+	if (priceDetails.total_discounts) {
+		parts.push(`${LABELS.pricing.discounts}: −${formatNumber(priceDetails.total_discounts)}`);
 	}
-	if (price.fees) {
-		parts.push(`${LABELS.pricing.fees}: ${formatNumber(price.fees)}`);
+	if (priceDetails.total_fees != null) {
+		parts.push(`${LABELS.pricing.fees}: ${formatNumber(priceDetails.total_fees)}`);
 	}
 	return parts.join(' • ');
 };
@@ -152,16 +168,16 @@ const PAYMENTS_COLUMNS = [
 ];
 
 const mapFlightToRow = (flight) => {
-	const seatClassLabel = flight.tariff?.seat_class
-		? ENUM_LABELS.SEAT_CLASS[flight.tariff.seat_class] || flight.tariff.seat_class
-		: '—';
+	const seatClass = flight.tariff?.seat_class;
+	const seatClassLabel = seatClass ? ENUM_LABELS.SEAT_CLASS[seatClass] || seatClass : '—';
 	const departureLabel = flight.scheduled_departure ? formatDateTime(flight.scheduled_departure) : '—';
 	const arrivalLabel = flight.scheduled_arrival ? formatDateTime(flight.scheduled_arrival) : '—';
+	const airlineName = flight.airline?.name || flight.airline_name || flight.airline || '—';
 
 	return {
-		number: flight.number || '—',
-		route: flight.route?.label || '—',
-		airline: flight.airline || '—',
+		number: flight.airline_flight_number || flight.number || '—',
+		route: getRouteLabel(flight.route),
+		airline: airlineName,
 		departure: departureLabel,
 		arrival: arrivalLabel,
 		class: seatClassLabel,
@@ -187,28 +203,35 @@ const mapPassengerToRow = (passenger) => {
 	const documentParts = [documentTypeLabel, passenger.document_number, documentExpiryLabel].filter(Boolean);
 	const documentLabel = documentParts.length > 0 ? documentParts.join(' · ') : '—';
 	const birthDateLabel = passenger.birth_date ? formatDate(passenger.birth_date) : '—';
+	const citizenshipLabel =
+		passenger.citizenship?.code_a3 || passenger.citizenship?.name || passenger.citizenship || '—';
 
 	return {
 		name: fullName || '—',
 		category: categoryLabel,
 		document: documentLabel,
-		citizenship: passenger.citizenship || '—',
+		citizenship: citizenshipLabel,
 		birthDate: birthDateLabel,
 	};
 };
 
 const mapPaymentToRow = (payment) => {
-	const statusLabel = ENUM_LABELS.PAYMENT_STATUS[payment.status] || payment.status || '—';
-	const typeLabel = ENUM_LABELS.PAYMENT_TYPE?.[payment.type] || payment.type || '—';
-	const methodLabel = ENUM_LABELS.PAYMENT_METHOD?.[payment.method] || payment.method || '—';
+	const status = payment.payment_status || payment.status;
+	const type = payment.payment_type || payment.type;
+	const method = payment.payment_method || payment.method;
+	const statusLabel = ENUM_LABELS.PAYMENT_STATUS[status] || status || '—';
+	const typeLabel = ENUM_LABELS.PAYMENT_TYPE?.[type] || type || '—';
+	const methodLabel = ENUM_LABELS.PAYMENT_METHOD?.[method] || method || '—';
 	const amountLabel =
 		payment.amount != null
 			? `${formatNumber(payment.amount)} ${
 					ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || payment.currency || ''
 			  }`
 			: '—';
-	const paidAtLabel = payment.paid_at ? formatDateTime(payment.paid_at) : '—';
-	const expiresAtLabel = payment.expires_at ? formatDateTime(payment.expires_at) : '—';
+	const paidAt = payment.paid_at || payment.paidAt;
+	const expiresAt = payment.expires_at || payment.expiresAt;
+	const paidAtLabel = paidAt ? formatDateTime(paidAt) : '—';
+	const expiresAtLabel = expiresAt ? formatDateTime(expiresAt) : '—';
 
 	return {
 		providerId: payment.provider_payment_id || '—',
@@ -919,23 +942,50 @@ const BookingDashboard = () => {
 							</Paper>
 						) : (
 							paginatedBookings.map((booking) => {
+								const bookingSnapshot = booking.snapshot || {};
+								const bookingNumber =
+									bookingSnapshot.booking_number || LABELS.placeholders.noBookingNumber;
+								const bookingPublicId = bookingSnapshot.public_id;
+								const bookingTimestamp = booking.created_at;
+								const bookingDateLabel = bookingTimestamp
+									? formatDateTime(bookingTimestamp)
+									: bookingSnapshot.booking_date
+									? formatDate(bookingSnapshot.booking_date)
+									: null;
 								const buyerName = [
-									formatNamePart(booking.buyer?.last_name),
-									formatNamePart(booking.buyer?.first_name),
+									formatNamePart(bookingSnapshot.buyer_last_name),
+									formatNamePart(bookingSnapshot.buyer_first_name),
 								]
 									.filter(Boolean)
 									.join(' ');
 								const statusLabel = ENUM_LABELS.BOOKING_STATUS[booking.status] || booking.status;
-								const price = booking.pricing || {};
-								const passengerCountLabel = booking.seats_number
-									? `${LABELS.chips.seats}: ${booking.seats_number}`
-									: null;
+								const passengerCounts = bookingSnapshot.passenger_counts || {};
+								const seatsTotal = Object.values(passengerCounts).reduce(
+									(acc, rawCount) => acc + Number(rawCount || 0),
+									0
+								);
+								const passengerCountLabel = seatsTotal ? `${LABELS.chips.seats}: ${seatsTotal}` : null;
+								const flights = bookingSnapshot.flights || [];
+								const passengers = bookingSnapshot.passengers || [];
+								const payments = bookingSnapshot.payments || [];
 								const activeIssues = Object.entries(booking.issues || {}).filter(
 									([key, value]) => key !== 'hold_expired' && value
 								);
 								const hasActiveIssues = activeIssues.length > 0;
-								const bookingKey = `${booking.id}-${booking.booking_number}`;
+								const bookingKey = `${booking.id}-${
+									bookingSnapshot.booking_number || bookingSnapshot.public_id || booking.id
+								}`;
 								const isExpanded = expandedBookings[bookingKey] || false;
+								const priceDetails = bookingSnapshot.price_details || {};
+								const finalPrice =
+									priceDetails.final_price != null
+										? priceDetails.final_price
+										: bookingSnapshot.total_price;
+								const currencyCode = priceDetails.currency || bookingSnapshot.currency || '';
+								const buyerContacts = [
+									bookingSnapshot.email_address,
+									bookingSnapshot.phone_number,
+								].filter(Boolean);
 
 								return (
 									<Card
@@ -956,8 +1006,7 @@ const BookingDashboard = () => {
 												>
 													<Stack spacing={0.5}>
 														<Typography variant='h5' sx={{ fontWeight: 600 }}>
-															{booking.booking_number ||
-																LABELS.placeholders.noBookingNumber}
+															{bookingNumber}
 														</Typography>
 														<Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 															<Chip
@@ -967,9 +1016,9 @@ const BookingDashboard = () => {
 																color={bookingStatusColors[booking.status] || 'default'}
 																sx={chipBaseSx}
 															/>
-															{booking.booking_date && (
+															{bookingDateLabel && (
 																<Typography variant='body2' color='text.secondary'>
-																	{formatDateTime(booking.booking_date)}
+																	{bookingDateLabel}
 																</Typography>
 															)}
 															{passengerCountLabel && (
@@ -996,9 +1045,9 @@ const BookingDashboard = () => {
 																sx={chipBaseSx}
 															/>
 														)}
-														{booking.public_id && (
+														{bookingPublicId && (
 															<Chip
-																label={booking.public_id}
+																label={bookingPublicId}
 																size='small'
 																variant='outlined'
 																sx={chipBaseSx}
@@ -1035,21 +1084,23 @@ const BookingDashboard = () => {
 																		>
 																			{buyerName || LABELS.placeholders.noBuyer}
 																		</Typography>
-																		{booking.buyer?.email && (
+																		{buyerContacts.length === 0 ? (
 																			<Typography
 																				variant='body2'
 																				color='text.secondary'
 																			>
-																				{booking.buyer.email}
+																				—
 																			</Typography>
-																		)}
-																		{booking.buyer?.phone && (
-																			<Typography
-																				variant='body2'
-																				color='text.secondary'
-																			>
-																				{booking.buyer.phone}
-																			</Typography>
+																		) : (
+																			buyerContacts.map((value, index) => (
+																				<Typography
+																					key={`${bookingKey}-contact-${index}`}
+																					variant='body2'
+																					color='text.secondary'
+																				>
+																					{value}
+																				</Typography>
+																			))
 																		)}
 																	</Stack>
 																</Stack>
@@ -1067,13 +1118,16 @@ const BookingDashboard = () => {
 																		variant='body1'
 																		sx={{ fontWeight: 600 }}
 																	>
-																		{formatNumber(price.total_price)}{' '}
-																		{ENUM_LABELS.CURRENCY_SYMBOL[price.currency] ||
-																			price.currency ||
-																			''}
+																		{finalPrice != null
+																			? `${formatNumber(finalPrice)} ${
+																					ENUM_LABELS.CURRENCY_SYMBOL[
+																						currencyCode
+																					] || currencyCode
+																			  }`
+																			: LABELS.placeholders.noPricing}
 																	</Typography>
 																	<Typography variant='body2' color='text.secondary'>
-																		{buildPricingDetails(price) ||
+																		{formatPriceDetails(priceDetails) ||
 																			LABELS.placeholders.noPricing}
 																	</Typography>
 																</Stack>
@@ -1092,7 +1146,7 @@ const BookingDashboard = () => {
 															</Typography>
 															<DataTable
 																columns={FLIGHTS_COLUMNS}
-																data={booking.flights || []}
+																data={flights}
 																mapDataToRow={mapFlightToRow}
 																emptyMessage={LABELS.emptyTableMessages.flights}
 															/>
@@ -1108,7 +1162,7 @@ const BookingDashboard = () => {
 															</Typography>
 															<DataTable
 																columns={PASSENGERS_COLUMNS}
-																data={booking.passengers || []}
+																data={passengers}
 																mapDataToRow={mapPassengerToRow}
 																emptyMessage={LABELS.emptyTableMessages.passengers}
 															/>
@@ -1124,7 +1178,7 @@ const BookingDashboard = () => {
 															</Typography>
 															<DataTable
 																columns={PAYMENTS_COLUMNS}
-																data={booking.payments || []}
+																data={payments}
 																mapDataToRow={mapPaymentToRow}
 																emptyMessage={LABELS.emptyTableMessages.payments}
 															/>

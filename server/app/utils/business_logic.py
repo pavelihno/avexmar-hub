@@ -373,6 +373,7 @@ def build_booking_snapshot(booking) -> dict:
             'scheduled_arrival': f.get('scheduled_arrival'),
             'scheduled_arrival_time': f.get('scheduled_arrival_time'),
             'route': {
+                'id': route.get('id'),
                 'origin_airport': {
                     'city_name': origin.get('city_name'),
                     'iata_code': origin.get('iata_code'),
@@ -382,7 +383,10 @@ def build_booking_snapshot(booking) -> dict:
                     'iata_code': destination.get('iata_code'),
                 },
             },
-            'airline': {'name': airline.get('name')},
+            'airline': {
+                'name': airline.get('name'),
+                'iata_code': airline.get('iata_code'),
+            },
         })
 
     # Build routes and tariffs maps
