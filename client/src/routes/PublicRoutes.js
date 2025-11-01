@@ -2,9 +2,9 @@ import React from 'react';
 
 import Home from '../components/Home';
 import About from '../components/About';
-import PDPolicy from '../components/PDPolicy';
-import PDAgreement from '../components/PDAgreement';
-import PublicOffer from '../components/PublicOffer';
+import PDPolicy from '../components/consent/PDPolicy';
+import PDAgreement from '../components/consent/PDAgreement';
+import PublicOffer from '../components/consent/PublicOffer';
 import ResetPassword from '../components/auth/ResetPassword';
 import ActivateAccount from '../components/auth/ActivateAccount';
 import Search from '../components/search/Search';

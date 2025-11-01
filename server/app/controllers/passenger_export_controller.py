@@ -9,6 +9,7 @@ from app.constants.messages import PassengerMessages
 from app.constants.branding import GENDER_LABELS
 from app.models.flight import Flight
 from app.models.booking_flight import BookingFlight
+from app.models.flight_tariff import FlightTariff
 from app.models.route import Route
 from app.utils.datetime import format_date
 from app.middlewares.auth_middleware import admin_required
@@ -80,7 +81,13 @@ def get_flight_passenger_export(current_user):
         ws.write(7, col, header, bold_style)
         col_widths[col] = max(col_widths[col], len(str(header)))
 
-    booking_flights = BookingFlight.query.filter_by(flight_id=flight_id).all()
+    booking_flights = (
+        BookingFlight.query.join(
+            FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id
+        )
+        .filter(FlightTariff.flight_id == flight_id)
+        .all()
+    )
     row = 8
     counter = 1
 
@@ -125,7 +132,8 @@ def get_flight_passenger_export(current_user):
             col_widths[4] = max(col_widths[4], len(str(value)))
 
             # Column 5: Seat class
-            value = seat_class_code.get(bf.tariff.seat_class, '')
+            tariff = bf.flight_tariff.tariff if bf.flight_tariff else None
+            value = seat_class_code.get(tariff.seat_class, '') if tariff and tariff.seat_class else ''
             ws.write(row, 5, value, text_style)
             col_widths[5] = max(col_widths[5], len(str(value)))
 
@@ -151,9 +159,11 @@ def get_flight_passenger_export(current_user):
             ws.write(row, 9, value, text_style)
             col_widths[9] = max(col_widths[9], len(str(value)))
 
-            # Column 10-11: SSR, Group
+            # Column 10: SSR
             ws.write(row, 10, '', text_style)
-            ws.write(row, 11, '', text_style)
+
+            # Column 11: Group
+            ws.write(row, 11, booking.booking_number, text_style)
 
             # Column 12: Phone
             value = booking.phone_number or ''

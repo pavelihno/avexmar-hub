@@ -7,10 +7,10 @@ import DOMPurify from 'dompurify';
 import { DescriptionOutlined, DownloadOutlined } from '@mui/icons-material';
 import { Box, Button, Chip, Container, Divider, Paper, Stack, Typography } from '@mui/material';
 
-import Base from './Base';
-import { fetchLatestConsentDoc } from '../redux/actions/consentDoc';
-import { ENUM_LABELS, UI_LABELS } from '../constants';
-import { formatDate, formatDateTime } from './utils';
+import Base from '../Base';
+import { fetchLatestConsentDoc } from '../../redux/actions/consentDoc';
+import { ENUM_LABELS, UI_LABELS } from '../../constants';
+import { formatDate, formatDateTime } from '../utils';
 
 const proseSx = {
 	typography: 'body1',

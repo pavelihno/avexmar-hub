@@ -1,4 +1,4 @@
-import AdminEntityForm from './AdminEntityForm';
+import AdminEntityForm from './management/AdminEntityForm';
 import { createFormFields } from '../utils';
 
 /**
@@ -84,8 +84,9 @@ export const createAdminManager = (fields, options = {}) => {
 		columns,
 		toApiFormat,
 		toUiFormat,
-		renderForm: ({ isEditing, currentItem, onSave, onChange, onClose, externalUpdates }) => (
+		renderForm: ({ isEditing, currentItem, onSave, onChange, onClose, externalUpdates, formKey }) => (
 			<AdminEntityForm
+				key={formKey}
 				fields={formFields}
 				initialData={currentItem}
 				onSave={onSave}

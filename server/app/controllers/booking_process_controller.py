@@ -11,11 +11,12 @@ from datetime import datetime, timedelta
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
+from app.models.flight_tariff import FlightTariff
 from app.models.passenger import Passenger
 from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
 from app.middlewares.auth_middleware import current_user
-from app.utils.business_logic import calculate_price_details, get_booking_snapshot
+from app.utils.business_logic import calculate_price_details, get_booking_snapshot, get_seats_number
 from app.utils.yookassa import create_payment, create_invoice, handle_yookassa_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
@@ -44,21 +45,21 @@ def create_booking_process(current_user):
     return_tariff_id = int(data.get('return_tariff_id', 0))
     raw_passengers = data.get('passengers', {})
 
-    passengers = {}
+    passenger_counts = {}
     for key, value in (raw_passengers or {}).items():
         try:
             count = int(value)
         except (TypeError, ValueError):
             continue
         if count > 0:
-            passengers[key] = count
+            passenger_counts[key] = count
 
     price_details = calculate_price_details(
         outbound_id,
         outbound_tariff_id,
         return_id,
         return_tariff_id,
-        passengers,
+        passenger_counts,
     )
 
     booking = Booking.create(
@@ -69,26 +70,36 @@ def create_booking_process(current_user):
         total_discounts=price_details['total_discounts'],
         fees=price_details['total_fees'],
         total_price=price_details['final_price'],
-        passenger_counts=passengers,
+        passenger_counts=passenger_counts,
         user_id=current_user.id if current_user else None,
         access_token=uuid.uuid4(),
     )
 
-    if outbound_id:
-        BookingFlight.create(
-            session,
-            commit=False,
-            booking_id=booking.id,
+    seats_number = get_seats_number(passenger_counts)
+
+    if outbound_id and outbound_tariff_id:
+        outbound_ft = FlightTariff.query.filter_by(
             flight_id=outbound_id,
             tariff_id=outbound_tariff_id,
-        )
-    if return_id:
+        ).first_or_404()
         BookingFlight.create(
             session,
             commit=False,
             booking_id=booking.id,
+            flight_tariff_id=outbound_ft.id,
+            seats_number=seats_number,
+        )
+    if return_id and return_tariff_id:
+        return_ft = FlightTariff.query.filter_by(
             flight_id=return_id,
             tariff_id=return_tariff_id,
+        ).first_or_404()
+        BookingFlight.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            flight_tariff_id=return_ft.id,
+            seats_number=seats_number,
         )
     expires_at = datetime.now() + timedelta(hours=Config.BOOKING_CONFIRMATION_EXP_HOURS)
     BookingHold.set_hold(
@@ -114,6 +125,7 @@ def create_booking_process_passengers(current_user):
     buyer = data.get('buyer', {})
     consent = bool(buyer.pop('consent', False))
     passengers = data.get('passengers') or []
+
     if not public_id:
         return jsonify({'message': ExportMessages.PUBLIC_ID_REQUIRED}), 400
 
@@ -131,61 +143,38 @@ def create_booking_process_passengers(current_user):
         **buyer
     )
 
-    existing = {bp.passenger_id: bp for bp in booking.booking_passengers}
-    processed_ids = set()
+    # Delete existing booking_passengers entities
+    for bp in booking.booking_passengers:
+        BookingPassenger.delete(bp.id, session=session, commit=False)
+
+    # Link new passengers to booking
+    processed_passenger_ids = set()
     for pdata in passengers:
-        pid = pdata.get('id')
         category = pdata.get('category')
 
-        passenger_fields = {
-            k: v
-            for k, v in {
-                'first_name': pdata.get('first_name'),
-                'last_name': pdata.get('last_name'),
-                'patronymic_name': pdata.get('patronymic_name'),
-                'gender': pdata.get('gender'),
-                'birth_date': pdata.get('birth_date'),
-                'document_type': pdata.get('document_type'),
-                'document_number': pdata.get('document_number'),
-                'document_expiry_date': pdata.get('document_expiry_date'),
-                'citizenship_id': pdata.get('citizenship_id'),
-            }.items()
-            if v is not None and v != ''
-        }
+        pdata['owner_user_id'] = current_user.id if current_user else None
 
-        if pid:
-            passenger = Passenger.update(
-                pid,
-                session=session,
-                commit=False,
-                **passenger_fields,
-            )
-        else:
+        passenger = Passenger.get_existing_passenger(
+            session,
+            pdata,
+        )
+
+        if passenger is None:
             passenger = Passenger.create(
                 session,
                 commit=False,
-                owner_user_id=current_user.id if current_user else None,
-                **passenger_fields,
+                **pdata
             )
 
-        processed_ids.add(passenger.id)
-        bp = existing.get(passenger.id)
-        if bp:
-            BookingPassenger.update(
-                bp.id,
-                session=session,
-                commit=False,
-                passenger_id=passenger.id,
-                category=category,
-            )
-        else:
-            BookingPassenger.create(
-                session,
-                commit=False,
-                booking_id=booking.id,
-                passenger_id=passenger.id,
-                category=category,
-            )
+        bp = BookingPassenger.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            passenger_id=passenger.id,
+            category=category,
+        )
+
+        processed_passenger_ids.add(passenger.id)
 
     Booking.transition_status(
         id=booking.id,
@@ -200,7 +189,7 @@ def create_booking_process_passengers(current_user):
             CONSENT_EVENT_TYPE.pd_agreement_acceptance,
             CONSENT_DOC_TYPE.pd_agreement,
             current_user.id if current_user else None,
-            list(processed_ids),
+            list(processed_passenger_ids),
             session=session,
         )
         create_booking_consent(
@@ -274,6 +263,7 @@ def get_booking_process_details(current_user, public_id):
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     result = get_booking_snapshot(booking)
+
     return jsonify(result), 200
 
 
@@ -286,6 +276,7 @@ def get_booking_process_pdf(current_user, public_id):
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     pdf = generate_booking_pdf(booking)
+
     return send_file(
         BytesIO(pdf),
         mimetype='application/pdf',
@@ -305,8 +296,7 @@ def get_booking_process_payment(current_user, public_id):
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
     payment = (
-        Payment.query.filter_by(booking_id=booking.id)
-        .order_by(Payment.id.desc())
+        booking.payments.order_by(Payment.id.desc())
         .first_or_404()
     )
     return jsonify(payment.to_dict()), 200

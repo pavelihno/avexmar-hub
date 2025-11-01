@@ -168,6 +168,11 @@ _BASE_LOGGING_CONFIG: Dict[str, Any] = {
             'level': 'INFO',
             'propagate': False,
         },
+        'fontTools': {
+            'handlers': [],
+            'level': 'CRITICAL',
+            'propagate': False,
+        },
     },
     'root': {
         'handlers': ['stdout', 'app_file', 'error_file'],

@@ -135,11 +135,12 @@ class StorageManager:
     def delete_file(self, filename: str, subfolder_name: Optional[str] = None) -> bool:
         """Delete a file from storage and return success status"""
         try:
-            relative_path = self._build_relative_path(filename, subfolder_name)
-            file_path = self.resolve_path(relative_path)
-            if file_path.is_file():
-                file_path.unlink()
-                return True
+            if filename:
+                relative_path = self._build_relative_path(filename, subfolder_name)
+                file_path = self.resolve_path(relative_path)
+                if file_path.is_file():
+                    file_path.unlink()
+                    return True
             return False
         except (ValueError, OSError):
             return False

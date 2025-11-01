@@ -13,7 +13,7 @@ from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
 from app.utils.business_logic import calculate_receipt_details, get_booking_snapshot
-from app.utils.datetime import format_date, format_time
+from app.utils.datetime import format_date, format_time, parse_datetime
 from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
 from app.utils.pdf import generate_booking_pdf
 from app.utils.email import EMAIL_TYPE, send_email
@@ -342,7 +342,7 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
     updates = {'payment_status': mapped_status, 'last_webhook': payload}
     if is_paid:
         updates['is_paid'] = is_paid
-        updates['paid_at'] = captured_at
+        updates['paid_at'] = parse_datetime(captured_at)
 
     session = db.session
     payment = Payment.update(
@@ -350,7 +350,7 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
     )
     booking = payment.booking
 
-    send_confirmation = False
+    payment_succeeded = False
 
     if event in ('payment.waiting_for_capture', 'invoice.waiting_for_capture'):
         yoo_payment = YooPayment.find_one(provider_id)
@@ -384,16 +384,14 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
         Booking.save_details_snapshot(
             id=booking.id,
             session=session,
-            commit=False,
+            commit=True,
         )
-        send_confirmation = True
+        payment_succeeded = True
 
     else:
         raise ValueError(YooKassaMessages.unknown_event_type(event))
 
-    session.commit()
-
-    if send_confirmation:
+    if payment_succeeded:
         __send_confirmation_email(booking)
 
     return

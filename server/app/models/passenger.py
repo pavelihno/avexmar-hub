@@ -73,38 +73,12 @@ class Passenger(BaseModel):
     def get_all(cls):
         return super().get_all(sort_by=['last_name'], descending=False)
 
-    def is_infant(self, date=datetime.date.today()):
-        """Check if the passenger is an infant (under 1 year old)"""
-        years = date.year - self.birth_date.year - ((date.month, date.day) < (self.birth_date.month, self.birth_date.day))
-        return years < 1
-
-    def is_child(self, date=datetime.date.today()):
-        """Check if the passenger is a child (between 1 and 3 years old)"""
-        years = date.year - self.birth_date.year - ((date.month, date.day) < (self.birth_date.month, self.birth_date.day))
-        return 1 <= years < 3
-
-    @staticmethod
-    def __normalize_names(kwargs: dict) -> dict:
-        for key in ('first_name', 'last_name', 'patronymic_name'):
-            if key in kwargs and kwargs[key] is not None:
-                kwargs[key] = str(kwargs[key]).upper()
-        return kwargs
-
     @classmethod
-    def __prepare_for_save(
-        cls,
-        session: Session,
-        kwargs: dict,
-        *,
-        commit: bool,
-        current_id=None,
-    ):
-        """Apply defaults and reuse existing passenger if unique data matches"""
-        # Ensure names are stored in uppercase
-        kwargs = cls.__normalize_names(kwargs)
-        kwargs = cls.convert_enums(kwargs)
+    def __normalize_docs(cls, kwargs: dict) -> dict:
+        doc_type = kwargs.get('document_type', None)
 
-        if kwargs.get('document_type') in (
+        # Default citizenship
+        if doc_type in (
             DOCUMENT_TYPE.passport,
             DOCUMENT_TYPE.international_passport,
             DOCUMENT_TYPE.birth_certificate,
@@ -112,6 +86,34 @@ class Passenger(BaseModel):
             kwargs['citizenship_id'] = Country.get_by_code(
                 DEFAULT_CITIZENSHIP_CODE
             ).id
+        else:
+            kwargs['citizenship_id'] = kwargs.get('citizenship_id', None)
+
+        # Remove unnecessary fields
+        if doc_type in (
+            DOCUMENT_TYPE.passport,
+            DOCUMENT_TYPE.birth_certificate,
+        ):
+            kwargs['document_expiry_date'] = None
+
+        return kwargs
+
+    @classmethod
+    def __normalize_names(cls, kwargs: dict) -> dict:
+        """Ensure name fields are stored in uppercase"""
+        for key in ('first_name', 'last_name', 'patronymic_name'):
+            if key in kwargs and kwargs[key] is not None:
+                kwargs[key] = str(kwargs[key]).upper()
+        return kwargs
+
+    @classmethod
+    def get_existing_passenger(
+        cls,
+        session: Session,
+        kwargs: dict,
+    ):
+        """Get existing passenger with the same unique data, if any"""
+        kwargs = cls.convert_enums(kwargs)
 
         unique_fields = [
             'first_name',
@@ -123,7 +125,7 @@ class Passenger(BaseModel):
 
         owner_id = kwargs.get('owner_user_id', None)
         if owner_id is not None and all(field in kwargs for field in unique_fields):
-            existing = session.query(cls).filter(
+            return session.query(cls).filter(
                 cls.owner_user_id == owner_id,
                 cls.first_name == kwargs['first_name'],
                 cls.last_name == kwargs['last_name'],
@@ -131,9 +133,6 @@ class Passenger(BaseModel):
                 cls.document_type == kwargs['document_type'],
                 cls.document_number == kwargs['document_number'],
             ).one_or_none()
-            if existing and (current_id is None or existing.id != current_id):
-                super().update(existing.id, session, commit=commit, **kwargs)
-                return existing
 
         return None
 
@@ -147,12 +146,9 @@ class Passenger(BaseModel):
     ):
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs, commit=commit)
-        if existing:
-            return existing
-
-        # Ensure names are uppercase on direct create as well
+        kwargs = cls.__normalize_docs(kwargs)
         kwargs = cls.__normalize_names(kwargs)
+
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
@@ -164,13 +160,9 @@ class Passenger(BaseModel):
         commit: bool = False,
         **kwargs,
     ):
-        """Update passenger or reuse existing one with the same unique data."""
         session = session or db.session
 
-        existing = cls.__prepare_for_save(session, kwargs, commit=commit, current_id=_id)
-        if existing:
-            return existing
-
-        # Ensure names are uppercase on update
+        kwargs = cls.__normalize_docs(kwargs)
         kwargs = cls.__normalize_names(kwargs)
+
         return super().update(_id, session, commit=commit, **kwargs)

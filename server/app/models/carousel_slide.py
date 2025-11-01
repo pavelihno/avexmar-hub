@@ -76,6 +76,30 @@ class CarouselSlide(BaseModel):
         }
 
     @classmethod
+    def update(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+        **kwargs,
+    ):
+        session = session or db.session
+
+        slide = cls.get_or_404(_id, session)
+
+        if 'image_path' in kwargs and kwargs['image_path'] is not None:
+            # Delete old image file if a new one is uploaded
+            old_image_path = slide.image_path
+            if old_image_path and old_image_path != kwargs['image_path']:
+                ImageManager().delete_file(
+                    slide.image_filename,
+                    subfolder_name='carousel'
+                )
+
+        return super().update(_id, session, commit=commit, **kwargs)
+    
+    @classmethod
     def delete(
         cls,
         _id,
@@ -85,6 +109,11 @@ class CarouselSlide(BaseModel):
     ):
         session = session or db.session
 
-        ImageManager().delete_file(cls.get_or_404(_id).image_path)
+        slide = cls.get_or_404(_id, session)
+
+        ImageManager().delete_file(
+            slide.image_filename,
+            subfolder_name='carousel'
+        )
 
         return super().delete(_id, session, commit=commit)

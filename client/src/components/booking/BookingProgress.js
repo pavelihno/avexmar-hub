@@ -171,8 +171,10 @@ const BookingProgress = ({ activeStep }) => {
 								onClick={() => {
 									if (isAccessible) navigate(appendQuery(routes[index]));
 								}}
-								StepIconComponent={(props) => <StepIcon {...props} color={iconColor} />}
 								sx={{ cursor: isAccessible ? 'pointer' : 'default' }}
+								slots={{
+									stepIcon: (props) => <StepIcon {...props} color={iconColor} />,
+								}}
 							>
 								<Typography
 									variant='subtitle1'

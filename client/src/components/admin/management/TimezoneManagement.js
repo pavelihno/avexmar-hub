@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { downloadTemplate, uploadFile } from '../../api';
-import { FILE_NAMES } from '../../constants/files';
+import { downloadTemplate, uploadFile } from '../../../api';
+import { FILE_NAMES } from '../../../constants/files';
 import {
 	fetchTimezones,
 	createTimezone,
@@ -11,10 +11,10 @@ import {
 	deleteTimezone,
 	deleteAllTimezones,
 	deleteFilteredTimezones,
-} from '../../redux/actions/timezone';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+} from '../../../redux/actions/timezone';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants';
 
 const TimezoneManagement = () => {
 	const dispatch = useDispatch();

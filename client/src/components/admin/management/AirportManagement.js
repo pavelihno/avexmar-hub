@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
-import { downloadTemplate, uploadFile } from '../../api';
-import { FILE_NAMES } from '../../constants/files';
+import AdminDataTable from './AdminDataTable';
+import { downloadTemplate, uploadFile } from '../../../api';
+import { FILE_NAMES } from '../../../constants/files';
 
 import {
 	fetchAirports,
@@ -12,12 +12,12 @@ import {
 	deleteAirport,
 	deleteAllAirports,
 	deleteFilteredAirports,
-} from '../../redux/actions/airport';
-import { fetchCountries } from '../../redux/actions/country';
-import { fetchTimezones } from '../../redux/actions/timezone';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES } from '../utils';
-import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../constants';
+} from '../../../redux/actions/airport';
+import { fetchCountries } from '../../../redux/actions/country';
+import { fetchTimezones } from '../../../redux/actions/timezone';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES } from '../../utils';
+import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants';
 
 const AirportManagement = () => {
 	const dispatch = useDispatch();

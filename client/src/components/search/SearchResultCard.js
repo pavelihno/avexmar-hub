@@ -141,7 +141,6 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 								width: 36,
 								height: 36,
 								borderRadius: '50%',
-								border: `1px solid ${alpha(theme.palette.primary.main, isNoteOpen ? 0.4 : 0.3)}`,
 								color: isNoteOpen ? theme.palette.primary.main : theme.palette.text.secondary,
 								bgcolor: isNoteOpen ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
 								'&:hover': {

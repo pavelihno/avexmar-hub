@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import AdminDataTable from '../../components/admin/AdminDataTable';
+import AdminDataTable from './AdminDataTable';
 
 import {
 	fetchPayments,
@@ -10,12 +10,12 @@ import {
 	deletePayment,
 	deleteAllPayments,
 	deleteFilteredPayments,
-} from '../../redux/actions/payment';
-import { fetchBookings } from '../../redux/actions/booking';
-import { createAdminManager } from './utils';
-import { FIELD_TYPES, formatNumber } from '../utils';
-import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../constants';
-import { formatDate } from '../utils';
+} from '../../../redux/actions/payment';
+import { fetchBookings } from '../../../redux/actions/booking';
+import { createAdminManager } from '../utils';
+import { FIELD_TYPES, formatNumber } from '../../utils';
+import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, getEnumOptions } from '../../../constants';
+import { formatDate } from '../../utils';
 
 const PaymentManagement = () => {
 	const dispatch = useDispatch();

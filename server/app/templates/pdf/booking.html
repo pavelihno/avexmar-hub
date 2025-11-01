@@ -81,7 +81,7 @@
         {% set cat = passenger_labels.get(p.category, p.category) %}
         {% set gender = gender_labels.get(p.gender, p.gender) %}
         {% set doc_type = document_labels.get(p.document_type, p.document_type) %}
-        {% set country = (p.citizenship or {}).name %}
+        {% set country = p.citizenship.name %}
         <tr>
           <td>{{ full_name.strip() }}</td>
           <td>{{ cat }}</td>
@@ -110,7 +110,7 @@
       {% endif %}
       {% if t %}
         <p><u>{{ seat_class_labels.get(t.seat_class, t.seat_class) }} — {{ t.title }}</u></p>
-        <p>Ручная кладь: {% if t.hand_luggage %}{{ t.hand_luggage }}{% else %} — {% endif %} кг, Багаж: {% if t.baggage %}{{ t.baggage }}{% else %} — {% endif %} кг</p>
+        <p>Ручная кладь: {% if t.hand_luggage %}{{ t.hand_luggage }}{% else %} — {% endif %} кг, Багаж: {% if t.baggage %}{{ t.baggage }} кг{% else %} — {% endif %} </p>
       {% endif %}
       <table>
         <tr>
@@ -163,23 +163,30 @@
     </table>
   {% endif %}
 
-  {% set payment = details.payment %}
-  {% if payment %}
-    {% set status = payment_status_labels.get(payment.payment_status, payment.payment_status) %}
-    {% set method = payment_method_labels.get(payment.payment_method, payment.payment_method) %}
-    <h4>Платёж</h4>
-    <ul>
-      <li>Статус: {{ status }}</li>
-      <li>Метод: {{ method }}</li>
-      <li>Сумма: {{ format_float(payment.amount or 0) }} {{ currency_labels.get(payment.currency, payment.currency) }}</li>
-      {% if payment.paid_at %}
-        <li>Оплачен: {{ format_datetime(payment.paid_at) }}</li>
-      {% endif %}
-      {% if payment.provider_payment_id %}
-        <li>ID платежа провайдера: {{ payment.provider_payment_id }}</li>
-      {% endif %}
-      </ul>
-    {% endif %}
+  {% set payments = details.payments %}
+  {% if payments %}
+    <h4>Платежи</h4>
+    <table>
+      <tr>
+        <th>Метод</th>
+        <th>ID платежа провайдера</th>
+        <th>Статус</th>
+        <th>Сумма</th>
+        <th>Дата оплаты</th>
+      </tr>
+      {% for payment in payments %}
+        {% set status = payment_status_labels.get(payment.payment_status, payment.payment_status) %}
+        {% set method = payment_method_labels.get(payment.payment_method, payment.payment_method) %}
+        <tr>
+          <td>{{ method }}</td>
+          <td>{% if payment.provider_payment_id %}{{ payment.provider_payment_id }}{% else %}—{% endif %}</td>
+          <td>{{ status }}</td>
+          <td>{{ format_float(payment.amount or 0) }} {{ currency_labels.get(payment.currency, payment.currency) }}</td>
+          <td>{% if payment.paid_at %}{{ format_datetime(payment.paid_at) }}{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
 
     <p style="margin-top: 16px; padding: 12px; background-color: #f9f9f9; border-left: 4px solid #333; font-weight: bold;">
       Маршрут-квитанции на забронированные места будут направлены на электронную почту, указанную при бронировании, в течение 24 часов с момента подтверждения этой брони

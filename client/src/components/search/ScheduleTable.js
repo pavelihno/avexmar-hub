@@ -182,7 +182,9 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 				rowsPerPageOptions={[5, 10, 25]}
 				labelRowsPerPage=''
 				labelDisplayedRows={() => ''}
-				ActionsComponent={isSmDown ? EmptyActions : undefined}
+				slots={{
+					actions: isSmDown ? EmptyActions : undefined,
+				}}
 			/>
 		</Box>
 	);

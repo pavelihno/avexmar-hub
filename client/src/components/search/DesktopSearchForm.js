@@ -125,11 +125,9 @@ const DesktopSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => 
 					{UI_LABELS.SEARCH.form.date_modes.flexible}
 				</Typography>
 			</Box>
-
 			{/* Empty boxes */}
 			<Box sx={{ gridRow: 1, gridColumn: '3 / 4' }} />
 			<Box sx={{ gridRow: 1, gridColumn: '4 / 5' }} />
-
 			{/* From/To */}
 			<Box
 				sx={{
@@ -167,7 +165,6 @@ const DesktopSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => 
 					)}
 				</Box>
 			</Box>
-
 			{/* Date fields */}
 			<Box
 				sx={{ gridRow: 2, gridColumn: '2 / 3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
@@ -279,15 +276,16 @@ const DesktopSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => 
 					</Box>
 				)}
 			</Box>
-
 			{/* Passenger selection */}
 			<Box sx={{ gridRow: 2, gridColumn: '3 / 4', position: 'relative' }} ref={passengersRef}>
 				<TextField
 					label={UI_LABELS.SEARCH.form.passengers}
 					value={`${totalPassengers} ${passengerWord}, ${seatClassLabel}`}
 					onClick={() => form.setShowPassengers((p) => !p)}
-					InputProps={{ readOnly: true }}
 					sx={{ width: 200, cursor: 'pointer' }}
+					slotProps={{
+						input: { readOnly: true },
+					}}
 				/>
 				<Collapse in={form.showPassengers} sx={{ position: 'absolute', zIndex: 10, top: '100%', left: 0 }}>
 					<Paper sx={{ p: 2, minWidth: 220 }}>
@@ -345,7 +343,6 @@ const DesktopSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => 
 					</Paper>
 				</Collapse>
 			</Box>
-
 			{/* Schedule button */}
 			<Box
 				sx={{
@@ -366,7 +363,6 @@ const DesktopSearchForm = ({ initialParams = {}, loadLocalStorage = false }) => 
 					{UI_LABELS.SEARCH.form.show_schedule}
 				</Button>
 			</Box>
-
 			{/* Search Button */}
 			<Box
 				sx={{

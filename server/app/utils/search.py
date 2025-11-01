@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 def get_flight_seat_availability(
     flight_id: int,
-    tariff_id: int | None = None,
+    flight_tariff_id: int | None = None,
     session: Session | None = None,
     *,
     flight_tariffs: Iterable['FlightTariff'] | None = None,
@@ -43,13 +43,14 @@ def get_flight_seat_availability(
 
     taken_rows = (
         session.query(
-            BookingFlight.tariff_id.label('tariff_id'),
-            func.coalesce(func.sum(Booking.seats_number), 0).label('taken'),
+            BookingFlight.flight_tariff_id.label('flight_tariff_id'),
+            func.coalesce(func.sum(BookingFlight.seats_number), 0).label('taken'),
         )
         .join(Booking, BookingFlight.booking_id == Booking.id)
+        .join(FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id)
         .filter(
-            BookingFlight.flight_id == flight_id,
-            (BookingFlight.tariff_id == tariff_id if tariff_id is not None else true()),
+            FlightTariff.flight_id == flight_id,
+            (BookingFlight.flight_tariff_id == flight_tariff_id if flight_tariff_id is not None else true()),
             or_(
                 Booking.status == BOOKING_STATUS.completed,
                 and_(
@@ -60,11 +61,11 @@ def get_flight_seat_availability(
                 ),
             ),
         )
-        .group_by(BookingFlight.tariff_id)
+        .group_by(BookingFlight.flight_tariff_id)
         .all()
     )
 
-    taken_map = {row.tariff_id: int(row.taken or 0) for row in taken_rows}
+    taken_map = {row.flight_tariff_id: int(row.taken or 0) for row in taken_rows}
 
     if flight_tariffs is None:
         flight_tariffs = (
@@ -76,9 +77,10 @@ def get_flight_seat_availability(
     availability: dict[int, dict[str, int]] = {}
     for ft in flight_tariffs:
         total = int(ft.seats_number or 0)
-        taken = taken_map.get(ft.tariff_id, 0)
+        taken = taken_map.get(ft.id, 0)
         available = max(total - taken, 0)
-        availability[ft.tariff_id] = {
+        availability[ft.id] = {
+            'tariff_id': ft.tariff_id,
             'total': total,
             'taken': taken,
             'available': available,
@@ -117,7 +119,7 @@ def get_available_tariffs(flight_id: int) -> list[dict[str, Any]]:
 
     result: list[dict[str, Any]] = []
     for flight_tariff, tariff in tariff_query:
-        availability = availability_map.get(flight_tariff.tariff_id, {})
+        availability = availability_map.get(flight_tariff.id, {})
         seats_left = availability.get('available', 0)
 
         if seats_left <= 0 or tariff.price is None:
@@ -126,6 +128,7 @@ def get_available_tariffs(flight_id: int) -> list[dict[str, Any]]:
         result.append(
             {
                 'id': tariff.id,
+                'flight_tariff_id': flight_tariff.id,
                 'seat_class': tariff.seat_class.value,
                 'title': tariff.title,
                 'price': tariff.price,

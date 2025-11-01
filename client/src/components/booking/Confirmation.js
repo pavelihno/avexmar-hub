@@ -174,7 +174,6 @@ const Confirmation = () => {
 									priceDetails={booking.price_details}
 									currencySymbol={currencySymbol}
 									flightMap={flightMap}
-									showDetails={false}
 								/>
 							</AccordionDetails>
 						</Accordion>

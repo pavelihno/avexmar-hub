@@ -33,19 +33,19 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ImageIcon from '@mui/icons-material/Image';
 import UploadIcon from '@mui/icons-material/Upload';
 
-import Base from '../Base';
-import PosterCarousel from '../home/PosterCarousel';
+import Base from '../../Base';
+import PosterCarousel from '../../home/PosterCarousel';
 import {
 	fetchCarouselSlides,
 	createCarouselSlide,
 	updateCarouselSlide,
 	deleteCarouselSlide,
 	uploadCarouselSlideImage,
-} from '../../redux/actions/carouselSlide';
-import { fetchRoutes } from '../../redux/actions/route';
-import { FIELD_LABELS, ADMIN, BUTTONS, SUCCESS, ERRORS, HOME, MESSAGES, VALIDATION_MESSAGES } from '../../constants';
-import { FIELD_TYPES, DragAndDropUploadField } from '../utils';
-import { createAdminManager, extractErrorMessage, validateFormFields } from './utils';
+} from '../../../redux/actions/carouselSlide';
+import { fetchRoutes } from '../../../redux/actions/route';
+import { FIELD_LABELS, ADMIN, BUTTONS, SUCCESS, ERRORS, HOME, MESSAGES, VALIDATION_MESSAGES } from '../../../constants';
+import { FIELD_TYPES, DragAndDropUploadField } from '../../utils';
+import { createAdminManager, extractErrorMessage, validateFormFields } from '../utils';
 import { useTheme } from '@mui/material/styles';
 
 const NO_ROUTE_VALUE = '__NO_ROUTE__';

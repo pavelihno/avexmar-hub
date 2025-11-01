@@ -1,25 +1,25 @@
 import React from 'react';
 
 import AdminPanel from '../components/admin/AdminPanel';
-import AirportManagement from '../components/admin/AirportManagement';
-import AirlineManagement from '../components/admin/AirlineManagement';
-import AircraftManagement from '../components/admin/AircraftManagement';
-import CountryManagement from '../components/admin/CountryManagement';
-import TimezoneManagement from '../components/admin/TimezoneManagement';
-import RouteManagement from '../components/admin/RouteManagement';
-import DiscountManagement from '../components/admin/DiscountManagement';
-import FeeManagement from '../components/admin/FeeManagement';
-import FlightManagement from '../components/admin/FlightManagement';
-import FlightPassengerExport from '../components/admin/FlightPassengerExport';
-import TariffManagement from '../components/admin/TariffManagement';
-import BookingManagement from '../components/admin/BookingManagement';
-import TicketManagement from '../components/admin/TicketManagement';
-import PassengerManagement from '../components/admin/PassengerManagement';
-import UserManagement from '../components/admin/UserManagement';
-import PaymentManagement from '../components/admin/PaymentManagement';
-import ConsentDocManagement from '../components/admin/ConsentDocManagement';
-import ConsentEventManagement from '../components/admin/ConsentEventManagement';
-import CarouselSlideManagement from '../components/admin/CarouselSlideManagement';
+import AirportManagement from '../components/admin/management/AirportManagement';
+import AirlineManagement from '../components/admin/management/AirlineManagement';
+import AircraftManagement from '../components/admin/management/AircraftManagement';
+import CountryManagement from '../components/admin/management/CountryManagement';
+import TimezoneManagement from '../components/admin/management/TimezoneManagement';
+import RouteManagement from '../components/admin/management/RouteManagement';
+import DiscountManagement from '../components/admin/management/DiscountManagement';
+import FeeManagement from '../components/admin/management/FeeManagement';
+import FlightManagement from '../components/admin/management/FlightManagement';
+import FlightPassengerExport from '../components/admin/dashboard/FlightPassengerExport';
+import BookingDashboard from '../components/admin/dashboard/BookingDashboard';
+import TariffManagement from '../components/admin/management/TariffManagement';
+import BookingManagement from '../components/admin/management/BookingManagement';
+import PassengerManagement from '../components/admin/management/PassengerManagement';
+import UserManagement from '../components/admin/management/UserManagement';
+import PaymentManagement from '../components/admin/management/PaymentManagement';
+import ConsentDocManagement from '../components/admin/management/ConsentDocManagement';
+import ConsentEventManagement from '../components/admin/management/ConsentEventManagement';
+import CarouselSlideManagement from '../components/admin/management/CarouselSlideManagement';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -79,10 +79,6 @@ const AdminRoutes = ({ currentUser }) => {
 			element: <ProtectedRoute children={<PaymentManagement />} condition={isAdmin} />,
 		},
 		{
-			path: '/admin/tickets',
-			element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
-		},
-		{
 			path: '/admin/passengers',
 			element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,
 		},
@@ -99,12 +95,16 @@ const AdminRoutes = ({ currentUser }) => {
 			element: <ProtectedRoute children={<ConsentEventManagement />} condition={isAdmin} />,
 		},
 		{
-			path: '/admin/exports/flight-passengers',
+			path: '/admin/carousel-slides',
+			element: <ProtectedRoute children={<CarouselSlideManagement />} condition={isAdmin} />,
+		},
+		{
+			path: '/admin/dashboard/flight-passengers',
 			element: <ProtectedRoute children={<FlightPassengerExport />} condition={isAdmin} />,
 		},
 		{
-			path: '/admin/carousel-slides',
-			element: <ProtectedRoute children={<CarouselSlideManagement />} condition={isAdmin} />,
+			path: '/admin/dashboard/bookings',
+			element: <ProtectedRoute children={<BookingDashboard />} condition={isAdmin} />,
 		},
 	];
 };

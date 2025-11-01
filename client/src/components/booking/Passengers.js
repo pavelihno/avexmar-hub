@@ -46,6 +46,7 @@ const Passengers = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
+
 	const {
 		current: booking,
 		isLoading: bookingLoading,
@@ -135,11 +136,11 @@ const Passengers = () => {
 		if (passengersExist) {
 			const mapped = fromApiBuyer(booking);
 			setBuyer({
-				buyerLastName: mapped.buyerLastName || '',
-				buyerFirstName: mapped.buyerFirstName || '',
-				emailAddress: mapped.emailAddress || '',
-				phoneNumber: mapped.phoneNumber || '',
-				consent: mapped.consent || false,
+				buyerLastName: mapped.buyerLastName ?? '',
+				buyerFirstName: mapped.buyerFirstName ?? '',
+				emailAddress: mapped.emailAddress ?? '',
+				phoneNumber: mapped.phoneNumber ?? '',
+				consent: mapped.consent ?? false,
 			});
 		}
 	}, [booking, passengersExist]);
@@ -148,10 +149,10 @@ const Passengers = () => {
 		if (currentUser) {
 			setBuyer((prev) => ({
 				...prev,
-				buyerLastName: prev.buyerLastName || currentUser.last_name,
-				buyerFirstName: prev.buyerFirstName || currentUser.first_name,
-				emailAddress: prev.emailAddress || currentUser.email || '',
-				phoneNumber: prev.phoneNumber || currentUser.phone_number || '',
+				buyerLastName: prev.buyerLastName || (currentUser.last_name ?? ''),
+				buyerFirstName: prev.buyerFirstName || (currentUser.first_name ?? ''),
+				emailAddress: prev.emailAddress || (currentUser.email ?? ''),
+				phoneNumber: prev.phoneNumber || (currentUser.phone_number ?? ''),
 			}));
 		}
 	}, [currentUser]);
@@ -397,8 +398,12 @@ const Passengers = () => {
 						xs: 12,
 						md: 4,
 					}}
+					sx={{
+						position: { md: 'sticky' },
+						top: { md: 16 },
+					}}
 				>
-					<Card sx={{ position: { md: 'sticky' }, top: { md: 16 } }}>
+					<Card>
 						<CardContent sx={{ p: { xs: 2, md: 3 } }}>
 							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
 								<Accordion variant='outlined' sx={{ mb: 2 }}>

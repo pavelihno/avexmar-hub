@@ -20,6 +20,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import InsightsIcon from '@mui/icons-material/Insights';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
 
 import Base from '../Base';
@@ -71,7 +72,7 @@ const ToolGrid = ({ items }) => {
 const iconSX = { fontSize: 50 };
 
 const AdminPanel = () => {
-	const tableManagementTools = [
+	const managementTools = [
 		{
 			title: UI_LABELS.ADMIN.modules.countries.title,
 			description: UI_LABELS.ADMIN.modules.countries.description,
@@ -150,12 +151,6 @@ const AdminPanel = () => {
 			icon: <PaymentIcon sx={iconSX} />,
 			path: '/admin/payments',
 		},
-		// {
-		// 	title: UI_LABELS.ADMIN.modules.tickets.title,
-		// 	description: UI_LABELS.ADMIN.modules.tickets.description,
-		// 	icon: <AirplaneTicketIcon sx={iconSX} />,
-		// 	path: '/admin/tickets',
-		// },
 		{
 			title: UI_LABELS.ADMIN.modules.users.title,
 			description: UI_LABELS.ADMIN.modules.users.description,
@@ -174,18 +169,6 @@ const AdminPanel = () => {
 			icon: <HandshakeIcon sx={iconSX} />,
 			path: '/admin/consent-events',
 		},
-	];
-
-	const exportTools = [
-		{
-			title: UI_LABELS.ADMIN.exports.flightPassengers.title,
-			description: UI_LABELS.ADMIN.exports.flightPassengers.description,
-			icon: <FileDownloadIcon sx={iconSX} />,
-			path: '/admin/exports/flight-passengers',
-		},
-	];
-
-	const otherTools = [
 		{
 			title: UI_LABELS.ADMIN.carousel_slides.title,
 			description: UI_LABELS.ADMIN.carousel_slides.description,
@@ -194,10 +177,24 @@ const AdminPanel = () => {
 		},
 	];
 
+	const dashboardTools = [
+		{
+			title: UI_LABELS.ADMIN.exports.flightPassengers.title,
+			description: UI_LABELS.ADMIN.exports.flightPassengers.description,
+			icon: <FileDownloadIcon sx={iconSX} />,
+			path: '/admin/dashboard/flight-passengers',
+		},
+		{
+			title: UI_LABELS.ADMIN.exports.bookingDashboard.title,
+			description: UI_LABELS.ADMIN.exports.bookingDashboard.description,
+			icon: <InsightsIcon sx={iconSX} />,
+			path: '/admin/dashboard/bookings',
+		},
+	];
+
 	const sections = [
-		{ key: 'tables', items: tableManagementTools },
-		{ key: 'exports', items: exportTools },
-		{ key: 'others', items: otherTools },
+		{ key: 'managementTools', items: managementTools },
+		{ key: 'dashboardTools', items: dashboardTools },
 	];
 
 	const activeSections = sections.filter((section) => section.items && section.items.length > 0);

@@ -42,6 +42,7 @@ class UserMessages:
     CONSENT_REQUIRED = 'Требуется согласие'
     INVALID_PASSWORD = 'Неверный пароль'
     INVALID_OR_EXPIRED_CODE = 'Недействительный или просроченный код'
+    PASSENGER_ALREADY_EXISTS = 'Пассажир с такими данными уже существует'
 
 
 class ConsentMessages:
@@ -49,7 +50,7 @@ class ConsentMessages:
 
 
 class PassengerMessages:
-    FLIGHT_REQUIRED = 'Требуются указать рейс'
+    FLIGHT_REQUIRED = 'Требуется указать рейс'
 
 
 class CountryMessages:
@@ -58,6 +59,11 @@ class CountryMessages:
 
 class AirlineMessages:
     INVALID_AIRLINE_CODE = 'Неверный код авиакомпании'
+
+
+class AircraftMessages:
+    INVALID_SEAT_NUMBER = 'Некорректное значение количества мест'
+    SEATS_MUST_BE_NON_NEGATIVE = 'Количество мест должно быть неотрицательным'
 
 
 class AirportMessages:
@@ -94,6 +100,15 @@ class FlightMessages:
 class FlightTariffMessages:
     INVALID_AVAILABLE_SEATS = 'Некорректное значение свободных мест'
     AVAILABLE_SEATS_MUST_BE_NON_NEGATIVE = 'Количество свободных мест должно быть неотрицательным'
+    INVALID_TOTAL_SEATS = 'Некорректное значение общего количества мест'
+    TOTAL_SEATS_MUST_BE_NON_NEGATIVE = 'Общее количество мест должно быть неотрицательным'
+
+    @staticmethod
+    def seats_exceed_aircraft_capacity(seat_class, aircraft_type, capacity, requested):
+        return (
+            f'Общее количество мест ({requested}) для класса `{seat_class}` превышает вместимость '
+            f'воздушного судна `{aircraft_type}` ({capacity})'
+        )
 
 
 class ExportMessages:
