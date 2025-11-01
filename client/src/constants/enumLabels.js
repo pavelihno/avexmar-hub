@@ -16,6 +16,7 @@ export const ENUM_LABELS = {
 		payment_confirmed: 'Оплата подтверждена',
 		payment_failed: 'Ошибка оплаты',
 		completed: 'Завершено',
+
 		expired: 'Истекло',
 		cancelled: 'Отменено',
 	},

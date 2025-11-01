@@ -29,6 +29,7 @@ export const FIELD_LABELS = {
 		ticket_price: 'Цена билета',
 		user_id: 'Пользователь',
 		passengers: 'Пассажиры',
+		flights: 'Рейсы',
 	},
 	AIRPORT: {
 		name: 'Название аэропорта',
@@ -100,6 +101,8 @@ export const FIELD_LABELS = {
 	},
 	AIRCRAFT: {
 		type: 'Тип воздушного судна',
+		economy_seats: 'Количество мест эконом-класса',
+		business_seats: 'Количество мест бизнес-класса',
 	},
 	COUNTRY: {
 		name: 'Название',
