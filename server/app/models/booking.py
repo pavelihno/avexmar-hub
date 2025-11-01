@@ -278,10 +278,6 @@ class Booking(BaseModel):
             BOOKING_STATUS.cancelled,
         },
         BOOKING_STATUS.completed: {
-            BOOKING_STATUS.ticketed,
-            BOOKING_STATUS.cancelled
-        },
-        BOOKING_STATUS.ticketed: {
             BOOKING_STATUS.cancelled
         },
         BOOKING_STATUS.expired: set(),
@@ -290,7 +286,6 @@ class Booking(BaseModel):
 
     FINAL_STATUSES = {
         BOOKING_STATUS.completed,
-        BOOKING_STATUS.ticketed,
         BOOKING_STATUS.expired,
         BOOKING_STATUS.cancelled
     }

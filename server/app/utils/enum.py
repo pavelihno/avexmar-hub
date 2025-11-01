@@ -15,7 +15,6 @@ class BOOKING_STATUS(enum.Enum):
     payment_confirmed = 'payment_confirmed'
     payment_failed = 'payment_failed'
     completed = 'completed'
-    ticketed = 'ticketed'
     expired = 'expired'
     cancelled = 'cancelled'
 
