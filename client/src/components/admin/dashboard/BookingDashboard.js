@@ -39,6 +39,7 @@ import Base from '../../Base';
 import { UI_LABELS, ENUM_LABELS, BUTTONS } from '../../../constants';
 import { formatDate, formatDateTime, formatNumber, createFieldRenderer, FIELD_TYPES } from '../../utils';
 import { fetchBookingDashboard } from '../../../redux/actions/bookingDashboard';
+import { fetchExportData } from '../../../redux/actions/export';
 import { serverApi } from '../../../api';
 
 const LABELS = UI_LABELS.ADMIN.exports.bookingDashboard;
@@ -335,9 +336,13 @@ const BookingDashboard = () => {
 			setRoutesLoading(true);
 			setFiltersError(null);
 			try {
-				const response = await serverApi.get('/exports/flight-passengers/routes');
+				const { data: payload } = await dispatch(
+					fetchExportData({
+						key: 'routes',
+						endpoint: '/exports/flight-passengers/routes',
+					})
+				).unwrap();
 				if (!isMounted) return;
-				const payload = response?.data?.data || response?.data || [];
 				const items = Array.isArray(payload) ? payload : [];
 				const mapped = items.map((item) => ({
 					id: item.id,
@@ -360,7 +365,7 @@ const BookingDashboard = () => {
 		return () => {
 			isMounted = false;
 		};
-	}, []);
+	}, [dispatch]);
 
 	useEffect(() => {
 		let isMounted = true;
