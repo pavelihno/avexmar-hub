@@ -1004,6 +1004,42 @@ const BookingDashboard = () => {
 									bookingSnapshot.email_address,
 									bookingSnapshot.phone_number,
 								].filter(Boolean);
+								const flightTariffsById = Array.isArray(priceDetails.directions)
+									? priceDetails.directions.reduce((acc, direction) => {
+											const flightId = direction?.flight_id;
+											const tariff = direction?.tariff;
+											if (flightId && tariff) {
+												acc[flightId] = tariff;
+											}
+											return acc;
+									  }, {})
+									: {};
+								const flightsForTable = flights.map((flight) => {
+									const flightId = flight?.id;
+									if (!flightId) {
+										return flight;
+									}
+									const tariffFromPrice = flight.tariff || flightTariffsById[flightId];
+									if (flight.tariff || !tariffFromPrice) {
+										return flight;
+									}
+									return {
+										...flight,
+										tariff: tariffFromPrice,
+									};
+								});
+								const paymentsWithMeta = payments.map((payment) => {
+									const paymentType = payment?.payment_type ?? payment?.type ?? null;
+									const expiresAt = payment?.expires_at ?? payment?.expiresAt ?? null;
+									const additions = {};
+									if (payment.payment_type == null && paymentType != null) {
+										additions.payment_type = paymentType;
+									}
+									if (payment.expires_at == null && expiresAt != null) {
+										additions.expires_at = expiresAt;
+									}
+									return Object.keys(additions).length > 0 ? { ...payment, ...additions } : payment;
+								});
 
 								return (
 									<Card
@@ -1049,11 +1085,13 @@ const BookingDashboard = () => {
 															)}
 														</Box>
 													</Stack>
-													<Stack
-														direction='row'
-														spacing={1}
-														flexWrap='wrap'
-														alignItems='center'
+													<Box
+														sx={{
+															display: 'flex',
+															flexDirection: 'row',
+															gap: 1,
+															flexWrap: 'wrap',
+														}}
 													>
 														{booking.user?.email && (
 															<Chip
@@ -1078,7 +1116,7 @@ const BookingDashboard = () => {
 														>
 															{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
 														</IconButton>
-													</Stack>
+													</Box>
 												</Stack>
 
 												<Collapse in={isExpanded} timeout={200}>
@@ -1164,7 +1202,7 @@ const BookingDashboard = () => {
 															</Typography>
 															<DataTable
 																columns={FLIGHTS_COLUMNS}
-																data={flights}
+																data={flightsForTable}
 																mapDataToRow={mapFlightToRow}
 																emptyMessage={LABELS.emptyTableMessages.flights}
 															/>
@@ -1196,7 +1234,7 @@ const BookingDashboard = () => {
 															</Typography>
 															<DataTable
 																columns={PAYMENTS_COLUMNS}
-																data={payments}
+																data={paymentsWithMeta}
 																mapDataToRow={mapPaymentToRow}
 																emptyMessage={LABELS.emptyTableMessages.payments}
 															/>
@@ -1256,7 +1294,14 @@ const BookingDashboard = () => {
 																<Typography variant='subtitle2' color='text.secondary'>
 																	{LABELS.sections.issues}
 																</Typography>
-																<Stack direction='row' spacing={1} flexWrap='wrap'>
+																<Box
+																	sx={{
+																		display: 'flex',
+																		flexDirection: 'row',
+																		gap: 1,
+																		flexWrap: 'wrap',
+																	}}
+																>
 																	{activeIssues.map(([key]) => (
 																		<Chip
 																			key={`${booking.id}-issue-${key}`}
@@ -1266,14 +1311,21 @@ const BookingDashboard = () => {
 																			sx={chipBaseSx}
 																		/>
 																	))}
-																</Stack>
+																</Box>
 															</Stack>
 														)}
 
 														<Stack spacing={2}>
 															<Divider />
 
-															<Stack direction='row' spacing={1.5} flexWrap='wrap'>
+															<Box
+																sx={{
+																	display: 'flex',
+																	flexDirection: 'row',
+																	gap: 1.5,
+																	flexWrap: 'wrap',
+																}}
+															>
 																<Button
 																	variant='contained'
 																	color='error'
@@ -1288,7 +1340,7 @@ const BookingDashboard = () => {
 																>
 																	{LABELS.actions.download}
 																</Button>
-															</Stack>
+															</Box>
 														</Stack>
 													</Stack>
 												</Collapse>
