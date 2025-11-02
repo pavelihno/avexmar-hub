@@ -17,7 +17,7 @@ def _write_index(seo_manager: SEOManager, payload: Iterable[Mapping[str, object]
 
 
 @celery.task
-def generate_prerender() -> int:
+def generate_seo_prerender() -> int:
     """Generate prerendered schedule pages for popular routes"""
 
     route_limit = Config.SEO_PRERENDER_ROUTE_LIMIT
