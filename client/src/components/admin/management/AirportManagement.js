@@ -70,6 +70,15 @@ const AirportManagement = () => {
 					: null,
 			inputProps: { maxLength: 3 },
 		},
+		internalCode: {
+			key: 'internalCode',
+			apiKey: 'internal_code',
+			label: FIELD_LABELS.AIRPORT.internal_code,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				value && value.length !== 3 ? VALIDATION_MESSAGES.AIRPORT.internal_code.LENGTH : null,
+			inputProps: { maxLength: 3 },
+		},
 		icaoCode: {
 			key: 'icaoCode',
 			apiKey: 'icao_code',

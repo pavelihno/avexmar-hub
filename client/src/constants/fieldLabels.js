@@ -35,6 +35,7 @@ export const FIELD_LABELS = {
 		name: 'Название аэропорта',
 		iata_code: 'Код IATA',
 		icao_code: 'Код ICAO',
+		internal_code: 'Внутренний код',
 		city_name: 'Город',
 		city_name_en: 'Город (EN)',
 		city_code: 'Код города',
@@ -96,6 +97,7 @@ export const FIELD_LABELS = {
 	AIRLINE: {
 		iata_code: 'Код IATA',
 		icao_code: 'Код ICAO',
+		internal_code: 'Внутренний код',
 		name: 'Название авиакомпании',
 		country_id: 'Страна',
 	},
