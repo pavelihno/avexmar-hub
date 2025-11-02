@@ -819,6 +819,8 @@ export const UI_LABELS = {
 			airline: 'Авиакомпания',
 			from_to: 'Отправление — Прибытие',
 			departure_arrival: 'Время отправления — Время прибытия',
+			departure: 'Вылет',
+			arrival: 'Прилёт',
 			final_price: 'Итоговая стоимость',
 			price: 'Цена',
 			flight_note: 'Примечание',
