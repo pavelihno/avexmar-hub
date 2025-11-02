@@ -106,6 +106,20 @@ const formatPriceDetails = (priceDetails = {}) => {
 	return parts.join(' • ');
 };
 
+const formatCitizenshipLabel = (citizenship) => {
+	if (!citizenship) return '—';
+	if (typeof citizenship === 'string') {
+		return citizenship.trim() || '—';
+	}
+	if (typeof citizenship === 'object') {
+		const code = typeof citizenship.code_a3 === 'string' ? citizenship.code_a3.trim() : '';
+		const name = typeof citizenship.name === 'string' ? citizenship.name.trim() : '';
+		if (code) return code;
+		if (name) return name;
+	}
+	return '—';
+};
+
 const mapFiltersToParams = (filters) => {
 	const params = {};
 	if (filters.bookingNumber) params.booking_number = filters.bookingNumber.trim();
@@ -204,8 +218,7 @@ const mapPassengerToRow = (passenger) => {
 	const documentParts = [documentTypeLabel, passenger.document_number, documentExpiryLabel].filter(Boolean);
 	const documentLabel = documentParts.length > 0 ? documentParts.join(' · ') : '—';
 	const birthDateLabel = passenger.birth_date ? formatDate(passenger.birth_date) : '—';
-	const citizenshipLabel =
-		passenger.citizenship?.code_a3 || passenger.citizenship?.name || passenger.citizenship || '—';
+	const citizenshipLabel = formatCitizenshipLabel(passenger.citizenship);
 
 	return {
 		name: fullName || '—',
