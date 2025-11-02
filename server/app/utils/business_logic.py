@@ -447,9 +447,11 @@ def build_booking_snapshot(booking) -> dict:
         payments_details.append({
             'payment_status': payment.get('payment_status'),
             'payment_method': payment.get('payment_method'),
+            'payment_type': payment.get('payment_type'),
             'amount': payment.get('amount'),
             'currency': payment.get('currency'),
             'paid_at': payment.get('paid_at'),
+            'expires_at': payment.get('expires_at'),
             'provider_payment_id': payment.get('provider_payment_id'),
         })
 
