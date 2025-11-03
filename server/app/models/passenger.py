@@ -10,8 +10,8 @@ from app.utils.enum import GENDER, DOCUMENT_TYPE, DEFAULT_CITIZENSHIP_CODE
 
 if TYPE_CHECKING:
     from app.models.booking_passenger import BookingPassenger
-    from app.models.ticket import Ticket
     from app.models.user import User
+    from app.models.consent import ConsentEventSubject
 
 
 class Passenger(BaseModel):
@@ -34,8 +34,8 @@ class Passenger(BaseModel):
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
     )
-    tickets: Mapped[List['Ticket']] = db.relationship(
-        'Ticket', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
+    consent_event_subjects: Mapped[List['ConsentEventSubject']] = db.relationship(
+        'ConsentEventSubject', back_populates='subject', lazy='dynamic'
     )
 
     __table_args__ = (

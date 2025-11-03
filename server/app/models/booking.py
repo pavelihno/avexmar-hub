@@ -21,7 +21,6 @@ from app.utils.business_logic import build_booking_snapshot
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
-    from app.models.ticket import Ticket
     from app.models.booking_passenger import BookingPassenger
     from app.models.booking_flight import BookingFlight
     from app.models.user import User
@@ -64,9 +63,6 @@ class Booking(BaseModel):
         back_populates='booking',
         lazy='dynamic',
         cascade='all, delete-orphan',
-    )
-    tickets: Mapped[List['Ticket']] = db.relationship(
-        'Ticket', back_populates='booking', lazy='dynamic', cascade='all, delete-orphan'
     )
     booking_passengers: Mapped[List['BookingPassenger']] = db.relationship(
         'BookingPassenger',

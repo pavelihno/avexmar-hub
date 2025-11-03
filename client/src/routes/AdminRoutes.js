@@ -15,6 +15,7 @@ import BookingDashboard from '../components/admin/dashboard/BookingDashboard';
 import TariffManagement from '../components/admin/management/TariffManagement';
 import BookingManagement from '../components/admin/management/BookingManagement';
 import PassengerManagement from '../components/admin/management/PassengerManagement';
+import TicketManagement from '../components/admin/management/TicketManagement';
 import UserManagement from '../components/admin/management/UserManagement';
 import PaymentManagement from '../components/admin/management/PaymentManagement';
 import ConsentDocManagement from '../components/admin/management/ConsentDocManagement';
@@ -81,6 +82,10 @@ const AdminRoutes = ({ currentUser }) => {
 		{
 			path: '/admin/passengers',
 			element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,
+		},
+		{
+			path: '/admin/tickets',
+			element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
 		},
 		{
 			path: '/admin/users',

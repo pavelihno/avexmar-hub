@@ -152,6 +152,12 @@ const AdminPanel = () => {
 			path: '/admin/payments',
 		},
 		{
+			title: UI_LABELS.ADMIN.modules.tickets.title,
+			description: UI_LABELS.ADMIN.modules.tickets.description,
+			icon: <AirplaneTicketIcon sx={iconSX} />,
+			path: '/admin/tickets',
+		},
+		{
 			title: UI_LABELS.ADMIN.modules.users.title,
 			description: UI_LABELS.ADMIN.modules.users.description,
 			icon: <ManageAccountsIcon sx={iconSX} />,

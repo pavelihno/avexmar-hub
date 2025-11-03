@@ -177,7 +177,7 @@ class ConsentEventSubject(BaseModel):
     )
 
     event: Mapped['ConsentEvent'] = db.relationship('ConsentEvent', back_populates='subjects')
-    subject: Mapped['Passenger'] = db.relationship('Passenger')
+    subject: Mapped['Passenger'] = db.relationship('Passenger', back_populates='consent_event_subjects')
 
     __table_args__ = (
         db.UniqueConstraint('consent_event_id', 'subject_id', name='uix_consent_event_subject'),

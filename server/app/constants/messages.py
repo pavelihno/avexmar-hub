@@ -181,3 +181,8 @@ class XlsxMessages:
     @staticmethod
     def upload_not_supported(model_name: str) -> str:
         return f'{model_name} не поддерживает загрузку из файла'
+
+
+class TicketMessages:
+    BOOKING_REQUIRED = 'Необходимо указать бронирование'
+    PASSENGER_REQUIRED = 'Необходимо указать пассажира'
