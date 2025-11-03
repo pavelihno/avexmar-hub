@@ -126,7 +126,7 @@ def get_booking_dashboard(current_user):
 
     if booking_date_param:
         try:
-            booking_date = parse_date(booking_date_param)
+            booking_date = parse_date(booking_date_param, '%Y-%m-%d')
             start_of_day = combine_date_time(
                 booking_date,
                 datetime.min.time()

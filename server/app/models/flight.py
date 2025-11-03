@@ -12,7 +12,7 @@ from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
-from app.utils.datetime import combine_date_time, parse_date, parse_time
+from app.utils.datetime import combine_date_time, parse_date_formats, parse_time_formats
 from app.constants.messages import (
     AirlineMessages,
     AirportMessages,
@@ -307,12 +307,12 @@ class Flight(BaseModel):
                 route_id=route.id,
                 aircraft_id=aircraft_id,
                 note=row.get('note'),
-                scheduled_departure=parse_date(row.get('scheduled_departure')),
-                scheduled_departure_time=parse_time(
+                scheduled_departure=parse_date_formats(row.get('scheduled_departure')),
+                scheduled_departure_time=parse_time_formats(
                     row.get('scheduled_departure_time')
                 ),
-                scheduled_arrival=parse_date(row.get('scheduled_arrival')),
-                scheduled_arrival_time=parse_time(
+                scheduled_arrival=parse_date_formats(row.get('scheduled_arrival')),
+                scheduled_arrival_time=parse_time_formats(
                     row.get('scheduled_arrival_time')
                 ),
                 commit=False,
