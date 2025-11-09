@@ -85,12 +85,6 @@ const getRouteLabel = (route) => {
 	return parts.length ? parts.join(' — ') : '—';
 };
 
-const formatNamePart = (value) => {
-	if (!value) return '';
-	const lower = String(value).toLowerCase();
-	return lower.replace(/(^|\s|-)([а-яa-z])/g, (match, prefix, char) => `${prefix}${char.toUpperCase()}`);
-};
-
 const formatPriceDetails = (priceDetails = {}) => {
 	if (!priceDetails) return '';
 	const parts = [];
@@ -201,13 +195,7 @@ const mapFlightToRow = (flight) => {
 };
 
 const mapPassengerToRow = (passenger) => {
-	const fullName = [
-		formatNamePart(passenger.last_name),
-		formatNamePart(passenger.first_name),
-		formatNamePart(passenger.patronymic_name),
-	]
-		.filter(Boolean)
-		.join(' ');
+	const fullName = [passenger.last_name, passenger.first_name, passenger.patronymic_name].filter(Boolean).join(' ');
 	const categoryLabel = passenger.category
 		? ENUM_LABELS.PASSENGER_CATEGORY[passenger.category] || passenger.category
 		: '—';
@@ -971,8 +959,9 @@ const BookingDashboard = () => {
 									? formatDate(bookingSnapshot.booking_date)
 									: null;
 								const buyerName = [
-									formatNamePart(bookingSnapshot.buyer_last_name),
-									formatNamePart(bookingSnapshot.buyer_first_name),
+									bookingSnapshot.buyer_last_name,
+									bookingSnapshot.buyer_first_name,
+									bookingSnapshot.buyer_patronymic_name,
 								]
 									.filter(Boolean)
 									.join(' ');

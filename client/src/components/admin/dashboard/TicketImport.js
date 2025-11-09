@@ -5,6 +5,7 @@ import {
 	Box,
 	Button,
 	CircularProgress,
+	Divider,
 	IconButton,
 	Paper,
 	Snackbar,
@@ -14,12 +15,14 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
+	Tooltip,
 	Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import Base from '../../Base';
 import { ENUM_LABELS, UI_LABELS } from '../../../constants';
@@ -32,8 +35,6 @@ const TicketImport = () => {
 	const [spreadsheetFile, setSpreadsheetFile] = useState(null);
 	const [pdfFile, setPdfFile] = useState(null);
 	const [result, setResult] = useState(null);
-	const [selectedFlightId, setSelectedFlightId] = useState(null);
-	const [selectedBookingId, setSelectedBookingId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isConfirming, setIsConfirming] = useState(false);
 	const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
@@ -46,6 +47,14 @@ const TicketImport = () => {
 	const parsedFlight = useMemo(() => result?.parsed_flight || {}, [result]);
 	const matchedFlight = useMemo(() => result?.flight || null, [result]);
 	const matchedBooking = useMemo(() => result?.booking || null, [result]);
+	const hasReadyPassengers = useMemo(
+		() =>
+			passengers.some((passenger) => {
+				const ticketNumber = String(passenger.ticket_number || '').trim();
+				return passenger.is_matched && !passenger.ticketed_before && Boolean(ticketNumber);
+			}),
+		[passengers]
+	);
 
 	const handleSelectSpreadsheet = (file) => {
 		if (file) {
@@ -63,8 +72,6 @@ const TicketImport = () => {
 		setSpreadsheetFile(null);
 		setPdfFile(null);
 		setResult(null);
-		setSelectedFlightId(null);
-		setSelectedBookingId(null);
 		if (spreadsheetInputRef.current) spreadsheetInputRef.current.value = '';
 		if (pdfInputRef.current) pdfInputRef.current.value = '';
 	};
@@ -92,8 +99,6 @@ const TicketImport = () => {
 				headers: { 'Content-Type': 'multipart/form-data' },
 			});
 			setResult(response.data);
-			setSelectedFlightId(response.data.flight?.id || null);
-			setSelectedBookingId(response.data.booking?.id || null);
 			showMessage(LABELS.messages.success, 'success');
 		} catch (error) {
 			const message = error.response?.data?.message || error.message || UI_LABELS.ERRORS.unknown;
@@ -104,22 +109,30 @@ const TicketImport = () => {
 	};
 
 	const handleConfirmImport = async () => {
-		if (!pdfFile || !selectedFlightId || !selectedBookingId) {
+		if (!pdfFile) {
 			showMessage(LABELS.messages.insufficientData, 'warning');
+			return;
+		}
+		if (!hasReadyPassengers) {
+			showMessage(LABELS.messages.noReadyPassengers, 'warning');
 			return;
 		}
 
 		const formData = new FormData();
 		formData.append('itinerary', pdfFile);
-		formData.append('flight_id', selectedFlightId);
-		formData.append('booking_id', selectedBookingId);
+		formData.append('passengers', JSON.stringify(passengers));
 
 		setIsConfirming(true);
 		try {
 			const response = await serverApi.post('/imports/tickets/confirm', formData, {
 				headers: { 'Content-Type': 'multipart/form-data' },
 			});
-			showMessage(response.data.message || LABELS.messages.importSuccess, 'success');
+			const created = response.data.created_count || 0;
+			const skipped = response.data.skipped_count || 0;
+			const message = response.data.message || LABELS.messages.importSuccess;
+			const severity = skipped ? 'warning' : 'success';
+			const summaryText = `${message} (${LABELS.confirmSummary.created}: ${created}, ${LABELS.confirmSummary.skipped}: ${skipped})`;
+			showMessage(summaryText, severity);
 			setTimeout(handleReset, 2000);
 		} catch (error) {
 			const message = error.response?.data?.message || error.message || UI_LABELS.ERRORS.unknown;
@@ -131,10 +144,14 @@ const TicketImport = () => {
 
 	const handleCloseNotification = () => setNotification((prev) => ({ ...prev, open: false }));
 
-	const canConfirm = useMemo(
-		() => result && pdfFile && selectedFlightId && selectedBookingId,
-		[result, pdfFile, selectedFlightId, selectedBookingId]
-	);
+	const canConfirm = useMemo(() => result && pdfFile && hasReadyPassengers, [result, pdfFile, hasReadyPassengers]);
+
+	const confirmTooltip = useMemo(() => {
+		if (!result) return LABELS.tooltips.noAnalysis;
+		if (!pdfFile) return LABELS.tooltips.noPdf;
+		if (!hasReadyPassengers) return LABELS.tooltips.noReadyPassengers;
+		return '';
+	}, [result, pdfFile, hasReadyPassengers]);
 
 	return (
 		<Base>
@@ -165,8 +182,9 @@ const TicketImport = () => {
 					sx={{
 						display: 'flex',
 						flexDirection: 'column',
-						gap: 2,
-						mb: 3,
+						gap: 3,
+						p: { xs: 2, md: 3 },
+						mb: { xs: 1, md: 2 },
 					}}
 				>
 					<Typography variant='subtitle1' sx={{ px: { xs: 2, md: 3 } }}>
@@ -255,10 +273,10 @@ const TicketImport = () => {
 
 				{result && !isLoading && (
 					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-						<Typography variant='h5' sx={{ px: { xs: 2, md: 3 } }}>
+						<Divider />
+						<Typography variant='h3' sx={{ px: { xs: 2, md: 3 } }}>
 							{LABELS.results.title}
 						</Typography>
-
 						{warnings.length > 0 && (
 							<Alert severity='warning' sx={{ mx: { xs: 2, md: 3 } }}>
 								<strong>{LABELS.results.warnings}:</strong>
@@ -269,100 +287,197 @@ const TicketImport = () => {
 								</ul>
 							</Alert>
 						)}
+						<Paper sx={{ p: 2, mx: { xs: 2, md: 3 } }}>
+							<Stack spacing={2}>
+								{/* Parsed Flight Data Section */}
+								<Box>
+									<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 600 }}>
+										{LABELS.results.parsedData}
+									</Typography>
+									<Stack
+										direction={{ xs: 'column', sm: 'row' }}
+										spacing={1.5}
+										divider={<Divider orientation='vertical' flexItem />}
+										sx={{ flexWrap: 'wrap' }}
+									>
+										<Box sx={{ flex: 1, minWidth: 200 }}>
+											<Typography
+												variant='caption'
+												color='text.secondary'
+												sx={{ display: 'block', mb: 0.25 }}
+											>
+												{LABELS.results.fields.flight}
+											</Typography>
+											<Typography variant='body2' sx={{ fontWeight: 500 }}>
+												{parsedFlight.raw || '—'}
+											</Typography>
+										</Box>
+										<Box sx={{ flex: 1, minWidth: 150 }}>
+											<Typography
+												variant='caption'
+												color='text.secondary'
+												sx={{ display: 'block', mb: 0.25 }}
+											>
+												{LABELS.results.fields.date}
+											</Typography>
+											<Typography variant='body2' sx={{ fontWeight: 500 }}>
+												{parsedFlight.departure_date
+													? formatDate(parsedFlight.departure_date)
+													: '—'}
+											</Typography>
+										</Box>
+										<Box sx={{ flex: 1, minWidth: 150 }}>
+											<Typography
+												variant='caption'
+												color='text.secondary'
+												sx={{ display: 'block', mb: 0.25 }}
+											>
+												{LABELS.results.fields.route}
+											</Typography>
+											<Typography variant='body2' sx={{ fontWeight: 500 }}>
+												{parsedFlight.route || '—'}
+											</Typography>
+										</Box>
+										<Box sx={{ flex: 1, minWidth: 120 }}>
+											<Typography
+												variant='caption'
+												color='text.secondary'
+												sx={{ display: 'block', mb: 0.25 }}
+											>
+												{LABELS.results.fields.passengerCount}
+											</Typography>
+											<Typography variant='body2' sx={{ fontWeight: 500 }}>
+												{passengers.length}
+											</Typography>
+										</Box>
+									</Stack>
+								</Box>
 
-						<Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} sx={{ px: { xs: 2, md: 3 } }}>
-							<Paper sx={{ p: 2, flex: 1 }}>
-								<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 600 }}>
-									{LABELS.results.parsedData}
-								</Typography>
-								<Stack spacing={0.5}>
-									<Typography variant='body2'>
-										<strong>{LABELS.results.fields.flight}:</strong> {parsedFlight.raw || '—'}
-									</Typography>
-									<Typography variant='body2'>
-										<strong>{LABELS.results.fields.date}:</strong>{' '}
-										{parsedFlight.departure_date ? formatDate(parsedFlight.departure_date) : '—'}
-									</Typography>
-									<Typography variant='body2'>
-										<strong>{LABELS.results.fields.route}:</strong> {parsedFlight.route || '—'}
-									</Typography>
-									<Typography variant='body2'>
-										<strong>{LABELS.results.fields.passengerCount}:</strong> {passengers.length}
-									</Typography>
-								</Stack>
-							</Paper>
+								<Divider />
 
-							<Paper
-								sx={{
-									p: 2,
-									flex: 1,
-									bgcolor: matchedFlight ? 'success.50' : 'error.50',
-								}}
-							>
-								<Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 1 }}>
-									<CheckCircleIcon color={matchedFlight ? 'success' : 'error'} fontSize='small' />
-									<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
-										{matchedFlight ? LABELS.results.flightInSystem : LABELS.results.flightNotFound}
-									</Typography>
-								</Stack>
-								{matchedFlight ? (
-									<Stack spacing={0.5}>
-										<Typography variant='body2'>
-											<strong>{LABELS.results.fields.number}:</strong>{' '}
-											{matchedFlight.flight_number}
-										</Typography>
-										<Typography variant='body2'>
-											<strong>{LABELS.results.fields.date}:</strong>{' '}
-											{matchedFlight.scheduled_departure
-												? formatDate(matchedFlight.scheduled_departure)
-												: '—'}
+								{/* Flight in System Section */}
+								<Box>
+									<Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.75 }}>
+										{matchedFlight ? (
+											<CheckCircleIcon color='success' fontSize='small' />
+										) : (
+											<CancelIcon color='error' fontSize='small' />
+										)}
+										<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+											{matchedFlight
+												? LABELS.results.flightInSystem
+												: LABELS.results.flightNotFound}
 										</Typography>
 									</Stack>
-								) : (
-									<Typography variant='body2' color='text.secondary'>
-										{LABELS.results.flightNotFoundMessage}
-									</Typography>
-								)}
-							</Paper>
+									{matchedFlight ? (
+										<Stack
+											direction={{ xs: 'column', sm: 'row' }}
+											spacing={1.5}
+											divider={<Divider orientation='vertical' flexItem />}
+											sx={{ flexWrap: 'wrap' }}
+										>
+											<Box sx={{ flex: 1, minWidth: 200 }}>
+												<Typography
+													variant='caption'
+													color='text.secondary'
+													sx={{ display: 'block', mb: 0.25 }}
+												>
+													{LABELS.results.fields.number}
+												</Typography>
+												<Typography variant='body2' sx={{ fontWeight: 500 }}>
+													{matchedFlight.flight_number}
+												</Typography>
+											</Box>
+											<Box sx={{ flex: 1, minWidth: 150 }}>
+												<Typography
+													variant='caption'
+													color='text.secondary'
+													sx={{ display: 'block', mb: 0.25 }}
+												>
+													{LABELS.results.fields.date}
+												</Typography>
+												<Typography variant='body2' sx={{ fontWeight: 500 }}>
+													{matchedFlight.scheduled_departure
+														? formatDate(matchedFlight.scheduled_departure)
+														: '—'}
+												</Typography>
+											</Box>
+										</Stack>
+									) : (
+										<Typography variant='body2' color='text.secondary'>
+											{LABELS.results.flightNotFoundMessage}
+										</Typography>
+									)}
+								</Box>
 
-							<Paper
-								sx={{
-									p: 2,
-									flex: 1,
-									bgcolor: matchedBooking ? 'success.50' : 'error.50',
-								}}
-							>
-								<Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 1 }}>
-									<CheckCircleIcon color={matchedBooking ? 'success' : 'error'} fontSize='small' />
-									<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
-										{matchedBooking ? LABELS.results.booking : LABELS.results.bookingNotFound}
-									</Typography>
-								</Stack>
-								{matchedBooking ? (
-									<Stack spacing={0.5}>
-										<Typography variant='body2'>
-											<strong>{LABELS.results.fields.number}:</strong>{' '}
-											{matchedBooking.booking_number || '—'}
-										</Typography>
-										<Typography variant='body2'>
-											<strong>{LABELS.results.fields.email}:</strong>{' '}
-											{matchedBooking.email_address || '—'}
-										</Typography>
-										<Typography variant='body2'>
-											<strong>{LABELS.results.fields.status}:</strong>{' '}
-											{ENUM_LABELS.BOOKING_STATUS?.[matchedBooking.status] ||
-												matchedBooking.status ||
-												'—'}
+								<Divider />
+
+								{/* Booking Section */}
+								<Box>
+									<Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.75 }}>
+										{matchedBooking ? (
+											<CheckCircleIcon color='success' fontSize='small' />
+										) : (
+											<CancelIcon color='error' fontSize='small' />
+										)}
+										<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+											{matchedBooking ? LABELS.results.booking : LABELS.results.bookingNotFound}
 										</Typography>
 									</Stack>
-								) : (
-									<Typography variant='body2' color='text.secondary'>
-										{LABELS.results.bookingNotFoundMessage}
-									</Typography>
-								)}
-							</Paper>
-						</Stack>
-
+									{matchedBooking ? (
+										<Stack
+											direction={{ xs: 'column', sm: 'row' }}
+											spacing={1.5}
+											divider={<Divider orientation='vertical' flexItem />}
+											sx={{ flexWrap: 'wrap' }}
+										>
+											<Box sx={{ flex: 1, minWidth: 150 }}>
+												<Typography
+													variant='caption'
+													color='text.secondary'
+													sx={{ display: 'block', mb: 0.25 }}
+												>
+													{LABELS.results.fields.number}
+												</Typography>
+												<Typography variant='body2' sx={{ fontWeight: 500 }}>
+													{matchedBooking.booking_number || '—'}
+												</Typography>
+											</Box>
+											<Box sx={{ flex: 1, minWidth: 200 }}>
+												<Typography
+													variant='caption'
+													color='text.secondary'
+													sx={{ display: 'block', mb: 0.25 }}
+												>
+													{LABELS.results.fields.email}
+												</Typography>
+												<Typography variant='body2' sx={{ fontWeight: 500 }}>
+													{matchedBooking.email_address || '—'}
+												</Typography>
+											</Box>
+											<Box sx={{ flex: 1, minWidth: 150 }}>
+												<Typography
+													variant='caption'
+													color='text.secondary'
+													sx={{ display: 'block', mb: 0.25 }}
+												>
+													{LABELS.results.fields.status}
+												</Typography>
+												<Typography variant='body2' sx={{ fontWeight: 500 }}>
+													{ENUM_LABELS.BOOKING_STATUS?.[matchedBooking.status] ||
+														matchedBooking.status ||
+														'—'}
+												</Typography>
+											</Box>
+										</Stack>
+									) : (
+										<Typography variant='body2' color='text.secondary'>
+											{LABELS.results.bookingNotFoundMessage}
+										</Typography>
+									)}
+								</Box>
+							</Stack>
+						</Paper>
 						<Paper sx={{ p: 2, mx: { xs: 2, md: 3 } }}>
 							<Typography variant='subtitle1' sx={{ mb: 1.5, fontWeight: 600 }}>
 								{LABELS.results.passengers}
@@ -378,18 +493,19 @@ const TicketImport = () => {
 											<TableCell sx={{ py: 1 }}>{LABELS.results.table.ticketNumber}</TableCell>
 											<TableCell sx={{ py: 1 }}>{LABELS.results.table.pnr}</TableCell>
 											<TableCell sx={{ py: 1 }}>{LABELS.results.table.matched}</TableCell>
+											<TableCell sx={{ py: 1 }}>{LABELS.results.table.ticketed}</TableCell>
 										</TableRow>
 									</TableHead>
 									<TableBody>
 										{passengers.length === 0 ? (
 											<TableRow>
-												<TableCell colSpan={7} align='center' sx={{ py: 2 }}>
+												<TableCell colSpan={8} align='center' sx={{ py: 2 }}>
 													{LABELS.results.noPassengers}
 												</TableCell>
 											</TableRow>
 										) : (
 											passengers.map((passenger, idx) => (
-												<TableRow key={idx} hover>
+												<TableRow key={idx}>
 													<TableCell sx={{ py: 1 }}>{passenger.order || idx + 1}</TableCell>
 													<TableCell sx={{ py: 1 }}>{passenger.raw_name || '—'}</TableCell>
 													<TableCell sx={{ py: 1 }}>
@@ -403,11 +519,34 @@ const TicketImport = () => {
 													</TableCell>
 													<TableCell sx={{ py: 1 }}>{passenger.pnr || '—'}</TableCell>
 													<TableCell sx={{ py: 1 }}>
-														{passenger.is_matched ? (
-															<CheckCircleIcon color='success' fontSize='small' />
-														) : (
-															'—'
-														)}
+														<Typography
+															variant='body2'
+															sx={{
+																fontWeight: 500,
+																color: passenger.is_matched
+																	? 'success.main'
+																	: 'error.main',
+															}}
+														>
+															{passenger.is_matched
+																? LABELS.results.table.matchedYes
+																: LABELS.results.table.matchedNo}
+														</Typography>
+													</TableCell>
+													<TableCell sx={{ py: 1 }}>
+														<Typography
+															variant='body2'
+															sx={{
+																fontWeight: 500,
+																color: passenger.ticketed_before
+																	? 'success.main'
+																	: 'default.main',
+															}}
+														>
+															{passenger.ticketed_before
+																? LABELS.results.table.ticketedYes
+																: LABELS.results.table.ticketedNo}
+														</Typography>
 													</TableCell>
 												</TableRow>
 											))
@@ -416,7 +555,6 @@ const TicketImport = () => {
 								</Table>
 							</Box>
 						</Paper>
-
 						<Stack
 							direction={{ xs: 'column', sm: 'row' }}
 							spacing={2}
@@ -426,14 +564,24 @@ const TicketImport = () => {
 							<Button variant='outlined' color='secondary' onClick={handleReset}>
 								{LABELS.actions.cancel}
 							</Button>
-							<Button
-								variant='contained'
-								onClick={handleConfirmImport}
-								disabled={!canConfirm || isConfirming}
-								color='success'
+							<Tooltip
+								title={confirmTooltip || ''}
+								placement='top'
+								arrow
+								disableHoverListener={!confirmTooltip}
+								disableFocusListener={!confirmTooltip}
 							>
-								{isConfirming ? LABELS.actions.confirming : LABELS.actions.confirm}
-							</Button>
+								<span>
+									<Button
+										variant='contained'
+										onClick={handleConfirmImport}
+										disabled={!canConfirm || isConfirming}
+										color='success'
+									>
+										{isConfirming ? LABELS.actions.confirming : LABELS.actions.confirm}
+									</Button>
+								</span>
+							</Tooltip>
 						</Stack>
 					</Box>
 				)}

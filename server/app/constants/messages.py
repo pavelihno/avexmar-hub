@@ -197,5 +197,10 @@ class TicketMessages:
     IMPORT_BOOKINGS_NOT_FOUND = 'Не удалось найти бронирования по указанным пассажирам'
     IMPORT_PASSENGERS_NOT_MATCHED = 'Не удалось сопоставить пассажиров из файла с пассажирами в бронированиях'
     IMPORT_PASSENGERS_MULTIPLE_MATCHES = 'Найдено несколько бронирований по заданным пассажирам'
-    IMPORT_FLIGHT_REQUIRED = 'Требуется указать рейс для импорта билетов'
-    IMPORT_BOOKING_REQUIRED = 'Требуется указать бронирование для импорта билетов'
+
+    IMPORT_PASSENGERS_PAYLOAD_REQUIRED = 'Список пассажиров обязателен для подтверждения импорта'
+    IMPORT_TICKETS_DUPLICATE_NUMBER = 'Невозможно создать билет: номер уже используется'
+
+    @staticmethod
+    def import_summary(created: int, skipped: int) -> str:
+        return f'Создано билетов: {created}. Пропущено: {skipped}.'

@@ -1,12 +1,14 @@
+import json
 import re
 import unicodedata
 import xlrd
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from flask import jsonify, request
-from sqlalchemy import func, or_
+from sqlalchemy import and_, func, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 
 from app.constants.messages import FileMessages, TicketMessages
@@ -14,14 +16,14 @@ from app.database import db
 from app.middlewares.auth_middleware import admin_required
 from app.models.airline import Airline
 from app.models.booking import Booking
-from app.models.booking_flight import BookingFlight
+from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.booking_passenger import BookingPassenger
 from app.models.flight import Flight
-from app.models.flight_tariff import FlightTariff
 from app.models.passenger import Passenger
+from app.models.ticket import Ticket
 from app.utils.datetime import parse_date
 from app.utils.storage import TicketManager
-from app.utils.enum import BOOKING_STATUS
+from app.utils.enum import BOOKING_STATUS, BOOKING_FLIGHT_PASSENGER_STATUS
 
 
 def _clean_string(value) -> str:
@@ -133,8 +135,8 @@ def _extract_ticket_data(sheet: xlrd.sheet.Sheet) -> Dict[str, Any]:
                 'birth_date': birth_date,
                 'pnr': pnr,
                 'is_matched': False,
-                'booking_id': None,
-                'booking_passenger_id': None,
+                'booking_flight_passenger_id': None,
+                'ticketed_before': False,
             }
         )
 
@@ -171,7 +173,6 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
 
     session = db.session
 
-    # Response structure
     result = {
         'warnings': [],
         'flight_candidates': [],
@@ -186,8 +187,10 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
 
     # Search for matching flights
     query = Flight.query.join(Airline).filter(
-        Flight.flight_number == flight_number,
-        Flight.scheduled_departure == departure_date,
+        and_(
+            Flight.flight_number == flight_number,
+            Flight.scheduled_departure == departure_date,
+        )
     )
 
     if airline_code:
@@ -220,29 +223,37 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
         for flight in flights
     ]
 
-    # Search for bookings associated with the flights
-    bookings = (
-        session.query(Booking)
-        .join(BookingFlight, BookingFlight.booking_id == Booking.id)
-        .join(FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id)
-        .filter(FlightTariff.flight_id.in_(flight_ids))
-        .filter(Booking.status.in_([BOOKING_STATUS.completed]))
-        .all()
+    booking_flight_passengers = (
+        session.query(BookingFlightPassenger)
+        .join(BookingPassenger, BookingFlightPassenger.booking_passenger_id == BookingPassenger.id)
+        .join(Booking, BookingPassenger.booking_id == Booking.id)
+        .join(Passenger, BookingPassenger.passenger_id == Passenger.id)
+        .options(
+            joinedload(
+                BookingFlightPassenger.booking_passenger
+            ).joinedload(
+                BookingPassenger.passenger
+            ).joinedload(
+                Passenger.citizenship
+            ),
+            joinedload(
+                BookingFlightPassenger.booking_passenger
+            ).joinedload(
+                BookingPassenger.booking
+            ),
+        )
+        .filter(
+            and_(
+                BookingFlightPassenger.flight_id.in_(flight_ids),
+                Booking.status.in_([BOOKING_STATUS.completed]),
+            )
+        ).all()
     )
 
-    # No bookings found for the flights
-    if not bookings:
+    if not booking_flight_passengers:
         result['warnings'].append(TicketMessages.IMPORT_BOOKINGS_NOT_FOUND)
         return result
 
-    booking_ids = [b.id for b in bookings]
-
-    result['booking_candidates'] = [
-        _serialize_booking(booking)
-        for booking in bookings
-    ]
-
-    # Create a lookup dictionary for file passengers using unique key
     def _make_passenger_key(passenger_data: Dict[str, Any]) -> str:
         """Create a unique key from passenger data for matching"""
         last_name = (passenger_data.get('last_name') or '').upper().strip()
@@ -257,84 +268,63 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
 
         return f"{last_name}|{first_name}|{patronymic}|{document}|{birth_date}"
 
-    # Index file passengers by their unique key
-    file_passengers_by_key = {}
-    for passenger in passengers:
-        key = _make_passenger_key(passenger)
-        file_passengers_by_key[key] = passenger
+    bookings: Dict[int, Booking] = {}
+    matches_by_key: Dict[str, List[BookingFlightPassenger]] = {}
 
-    # Fetch all booking passengers that potentially match file passengers
-    booking_passengers_query = (
-        session.query(BookingPassenger)
-        .join(Passenger, BookingPassenger.passenger_id == Passenger.id)
-        .options(
-            joinedload(
-                BookingPassenger.passenger
-            ).joinedload(
-                Passenger.citizenship
-            )
-        )
-        .filter(BookingPassenger.booking_id.in_(booking_ids))
-    )
+    for bfp in booking_flight_passengers:
+        booking_passenger = bfp.booking_passenger
+        passenger_entity = booking_passenger.passenger if booking_passenger else None
+        booking = booking_passenger.booking if booking_passenger else None
 
-    booking_passengers = booking_passengers_query.all()
+        if booking:
+            bookings.setdefault(booking.id, booking)
 
-    booking_passengers_by_booking = {}
-
-    for bp in booking_passengers:
-        passenger_entity = bp.passenger
         if passenger_entity:
             db_key = _make_passenger_key({
-                'last_name': (passenger_entity.last_name or ''),
-                'first_name': (passenger_entity.first_name or ''),
-                'patronymic_name': (passenger_entity.patronymic_name or ''),
+                'last_name': passenger_entity.last_name or '',
+                'first_name': passenger_entity.first_name or '',
+                'patronymic_name': passenger_entity.patronymic_name or '',
                 'document_number': passenger_entity.document_number or '',
                 'birth_date': passenger_entity.birth_date.isoformat() if passenger_entity.birth_date else '',
             })
+            matches_by_key.setdefault(db_key, []).append(bfp)
 
-            if bp.booking_id not in booking_passengers_by_booking:
-                booking_passengers_by_booking[bp.booking_id] = {}
+    matched_booking_ids = set()
+    multiple_matches_detected = False
 
-            booking_passengers_by_booking[bp.booking_id][db_key] = bp
-
-    matched_bookings = []
-    matched_file_passengers = {}
-
-    for booking in bookings:
-        booking_passengers_dict = booking_passengers_by_booking.get(
-            booking.id, {}
-        )
-
-        match_counter = 0
-
-        for file_key, file_passenger in file_passengers_by_key.items():
-            if file_key in booking_passengers_dict:
-                bp = booking_passengers_dict[file_key]
-                matched_file_passengers[file_key] = {
-                    'booking_id': booking.id,
-                    'booking_passenger_id': bp.id
-                }
-                match_counter += 1
-
-        if match_counter > 0:
-            matched_bookings.append(_serialize_booking(booking))
-
-    # Check for multiple booking matches
-    if len(matched_bookings) > 1:
-        result['warnings'].append(
-            TicketMessages.IMPORT_PASSENGERS_MULTIPLE_MATCHES)
-
-    # Matched file passengers with booking passengers
     for passenger in passengers:
         key = _make_passenger_key(passenger)
-        if key in matched_file_passengers:
-            matched_file_passenger = matched_file_passengers[key]
+        matches = matches_by_key.get(key, [])
+
+        if len(matches) == 1:
+            bfp = matches[0]
+            booking_passenger = bfp.booking_passenger
+            booking = booking_passenger.booking if booking_passenger else None
+
             passenger['is_matched'] = True
-            passenger['booking_id'] = matched_file_passenger['booking_id']
-            passenger['booking_passenger_id'] = matched_file_passenger['booking_passenger_id']
+            passenger['booking_flight_passenger_id'] = bfp.id
+            passenger['ticketed_before'] = bfp.status == BOOKING_FLIGHT_PASSENGER_STATUS.ticketed
+
+            if booking:
+                matched_booking_ids.add(booking.id)
+
+        elif len(matches) > 1:
+            passenger['is_matched'] = False
+            multiple_matches_detected = True
+
         else:
             passenger['is_matched'] = False
 
+    if multiple_matches_detected or len(matched_booking_ids) > 1:
+        result['warnings'].append(
+            TicketMessages.IMPORT_PASSENGERS_MULTIPLE_MATCHES
+        )
+
+    result['booking_candidates'] = [
+        _serialize_booking(bookings[booking_id])
+        for booking_id in matched_booking_ids
+    ]
+    
     if any(not passenger['is_matched'] for passenger in result['passengers']):
         result['warnings'].append(TicketMessages.IMPORT_PASSENGERS_NOT_MATCHED)
 
@@ -380,30 +370,179 @@ def import_tickets(current_user):
 @admin_required
 def confirm_import_tickets(current_user):
     itinerary_pdf = request.files.get('itinerary')
-    flight_id = request.form.get('flight_id')
-    booking_id = request.form.get('booking_id')
+    passengers_payload_raw = request.form.get('passengers')
 
     if not itinerary_pdf:
         return jsonify({'message': FileMessages.NO_FILE_PROVIDED, 'field': 'itinerary'}), 400
 
-    if not flight_id:
-        return jsonify({'message': TicketMessages.IMPORT_FLIGHT_REQUIRED, 'field': 'flight_id'}), 400
-
-    if not booking_id:
-        return jsonify({'message': TicketMessages.IMPORT_BOOKING_REQUIRED, 'field': 'booking_id'}), 400
-
-    ticket_storage = TicketManager()
+    if not passengers_payload_raw:
+        return jsonify({'message': TicketMessages.IMPORT_PASSENGERS_PAYLOAD_REQUIRED, 'field': 'passengers'}), 400
 
     try:
-        pdf_relative_path, pdf_filename = ticket_storage.save_file(
-            itinerary_pdf, subfolder_name='imports'
-        )
+        passengers_payload = json.loads(passengers_payload_raw)
+    except (TypeError, ValueError):
+        return jsonify({'message': TicketMessages.IMPORT_PASSENGERS_PAYLOAD_REQUIRED, 'field': 'passengers'}), 400
 
+    if not isinstance(passengers_payload, list):
+        return jsonify({'message': TicketMessages.IMPORT_PASSENGERS_PAYLOAD_REQUIRED, 'field': 'passengers'}), 400
+
+    def _collect_candidate_map(payload: List[Dict[str, Any]]) -> Tuple[Dict[int, str], int]:
+        skipped = 0
+        mapping: Dict[int, str] = {}
+        seen_numbers: Set[str] = set()
+
+        for passenger in payload:
+            if not isinstance(passenger, dict):
+                skipped += 1
+                continue
+
+            if not passenger.get('is_matched') or passenger.get('ticketed_before'):
+                skipped += 1
+                continue
+
+            ticket_number = _clean_string(passenger.get('ticket_number')).upper()
+            if not ticket_number:
+                skipped += 1
+                continue
+
+            bfp_id_raw = passenger.get('booking_flight_passenger_id')
+            try:
+                bfp_id = int(bfp_id_raw)
+            except (TypeError, ValueError):
+                skipped += 1
+                continue
+
+            if bfp_id in mapping or ticket_number in seen_numbers:
+                skipped += 1
+                continue
+
+            mapping[bfp_id] = ticket_number
+            seen_numbers.add(ticket_number)
+
+        return mapping, skipped
+
+    def _load_valid_pairs(
+        mapping: Dict[int, str],
+        *,
+        skipped: int,
+    ) -> Tuple[List[Tuple[BookingFlightPassenger, str]], int]:
+        if not mapping:
+            return [], skipped
+
+        booking_flight_passengers = (
+            BookingFlightPassenger.query
+            .options(joinedload(BookingFlightPassenger.booking_passenger))
+            .filter(BookingFlightPassenger.id.in_(mapping.keys()))
+            .all()
+        )
+        bfp_by_id = {bfp.id: bfp for bfp in booking_flight_passengers}
+        valid: List[Tuple[BookingFlightPassenger, str]] = []
+
+        for bfp_id, ticket_number in mapping.items():
+            bfp = bfp_by_id.get(bfp_id)
+            if not bfp:
+                skipped += 1
+                continue
+
+            if bfp.status == BOOKING_FLIGHT_PASSENGER_STATUS.ticketed:
+                skipped += 1
+                continue
+
+            valid.append((bfp, ticket_number))
+
+        return valid, skipped
+
+    def _filter_existing_numbers(
+        pairs: List[Tuple[BookingFlightPassenger, str]],
+        skipped: int,
+    ) -> Tuple[List[Tuple[BookingFlightPassenger, str]], int]:
+        if not pairs:
+            return [], skipped
+
+        ticket_numbers = [ticket_number for _, ticket_number in pairs]
+        existing_numbers = set()
+        if ticket_numbers:
+            existing_numbers = {
+                value
+                for (value,) in db.session.query(Ticket.ticket_number).filter(
+                    Ticket.ticket_number.in_(ticket_numbers)
+                ).all()
+            }
+
+        final: List[Tuple[BookingFlightPassenger, str]] = []
+        for bfp, ticket_number in pairs:
+            if ticket_number in existing_numbers:
+                skipped += 1
+                continue
+            final.append((bfp, ticket_number))
+
+        return final, skipped
+
+    candidate_map, skipped_count = _collect_candidate_map(passengers_payload)
+
+    if not candidate_map:
+        summary_message = TicketMessages.import_summary(0, skipped_count)
         return jsonify({
-            'pdf_path': pdf_relative_path,
-            'flight_id': flight_id,
-            'booking_id': booking_id,
+            'message': summary_message,
+            'created_count': 0,
+            'skipped_count': skipped_count,
         }), 200
 
+    valid_pairs, skipped_count = _load_valid_pairs(
+        candidate_map,
+        skipped=skipped_count,
+    )
+
+    final_pairs, skipped_count = _filter_existing_numbers(valid_pairs, skipped_count)
+
+    if not final_pairs:
+        summary_message = TicketMessages.import_summary(0, skipped_count)
+        return jsonify({
+            'message': summary_message,
+            'created_count': 0,
+            'skipped_count': skipped_count,
+        }), 200
+
+    ticket_storage = TicketManager()
+    created_count = 0
+
+    try:
+        _pdf_path, pdf_filename = ticket_storage.save_file(
+            itinerary_pdf, subfolder_name='imports'
+        )
     except ValueError as exc:
         return jsonify({'message': str(exc)}), 400
+
+    session = db.session
+
+    try:
+        for booking_flight_passenger, ticket_number in final_pairs:
+            ticket = Ticket(
+                ticket_number=ticket_number,
+                booking_flight_passenger_id=booking_flight_passenger.id,
+            )
+            session.add(ticket)
+            booking_flight_passenger.status = BOOKING_FLIGHT_PASSENGER_STATUS.ticketed
+            created_count += 1
+
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        ticket_storage.delete_file(pdf_filename, subfolder_name='imports')
+        return jsonify({
+            'message': TicketMessages.IMPORT_TICKETS_DUPLICATE_NUMBER,
+            'created_count': created_count,
+            'skipped_count': skipped_count,
+        }), 400
+    except Exception as exc:
+        session.rollback()
+        ticket_storage.delete_file(pdf_filename, subfolder_name='imports')
+        return jsonify({'message': str(exc)}), 500
+
+    message = TicketMessages.import_summary(created_count, skipped_count)
+
+    return jsonify({
+        'message': message,
+        'created_count': created_count,
+        'skipped_count': skipped_count,
+    }), 200
