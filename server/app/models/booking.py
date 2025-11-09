@@ -188,6 +188,74 @@ class Booking(BaseModel):
         )
 
     @classmethod
+    def create_booking_flight_passengers(
+        cls,
+        booking_id: int,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ):
+        """Create BookingFlightPassenger rows for every passenger/flight pair"""
+        session = session or db.session
+        booking = cls.get_or_404(booking_id, session)
+
+        from app.models.booking_passenger import BookingPassenger
+        from app.models.booking_flight import BookingFlight
+        from app.models.flight_tariff import FlightTariff
+        from app.models.booking_flight_passenger import BookingFlightPassenger
+
+        booking_passengers = (
+            session.query(BookingPassenger)
+            .filter(BookingPassenger.booking_id == booking.id)
+            .all()
+        )
+        if not booking_passengers:
+            return []
+
+        booking_passenger_ids = [bp.id for bp in booking_passengers]
+
+        flight_rows = (
+            session.query(FlightTariff.flight_id)
+            .join(BookingFlight, BookingFlight.flight_tariff_id == FlightTariff.id)
+            .filter(BookingFlight.booking_id == booking.id)
+            .all()
+        )
+        flight_ids = {
+            row.flight_id for row in flight_rows if row.flight_id is not None
+        }
+        if not flight_ids:
+            return []
+
+        existing_pairs = set(
+            session.query(
+                BookingFlightPassenger.booking_passenger_id,
+                BookingFlightPassenger.flight_id,
+            )
+            .filter(BookingFlightPassenger.booking_passenger_id.in_(booking_passenger_ids))
+            .filter(BookingFlightPassenger.flight_id.in_(flight_ids))
+            .all()
+        )
+
+        created = []
+        for bp_id in booking_passenger_ids:
+            for flight_id in flight_ids:
+                if (bp_id, flight_id) in existing_pairs:
+                    continue
+                instance = BookingFlightPassenger.create(
+                    session=session,
+                    commit=False,
+                    booking_passenger_id=bp_id,
+                    flight_id=flight_id,
+                )
+                created.append(instance)
+                existing_pairs.add((bp_id, flight_id))
+
+        if commit:
+            session.commit()
+
+        return created
+
+    @classmethod
     def create(
         cls,
         session: Session | None = None,

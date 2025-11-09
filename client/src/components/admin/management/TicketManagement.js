@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
@@ -11,9 +11,7 @@ import {
 	deleteAllTickets,
 	deleteFilteredTickets,
 } from '../../../redux/actions/ticket';
-import { fetchFlights } from '../../../redux/actions/flight';
-import { fetchBookings } from '../../../redux/actions/booking';
-import { fetchPassengers } from '../../../redux/actions/passenger';
+import { fetchBookingFlightPassengers } from '../../../redux/actions/bookingFlightPassenger';
 import { createAdminManager } from '../utils';
 import { FIELD_TYPES, formatDate } from '../../utils';
 import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants';
@@ -21,67 +19,44 @@ import { FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES } from '../../../constants
 const TicketManagement = () => {
 	const dispatch = useDispatch();
 	const { tickets: ticketsData = [], isLoading, errors } = useSelector((state) => state.tickets);
-	const { flights: flightsData = [] } = useSelector((state) => state.flights);
-	const { bookings: bookingsData = [] } = useSelector((state) => state.bookings);
-	const { passengers: passengersData = [] } = useSelector((state) => state.passengers);
+	const { bookingFlightPassengers: bookingFlightPassengersData = [] } = useSelector(
+		(state) => state.bookingFlightPassengers
+	);
 
 	useEffect(() => {
 		dispatch(fetchTickets());
-		dispatch(fetchFlights());
-		dispatch(fetchBookings());
-		dispatch(fetchPassengers());
+		dispatch(fetchBookingFlightPassengers());
 	}, [dispatch]);
 
 	const tickets = Array.isArray(ticketsData) ? ticketsData : [];
-	const flights = Array.isArray(flightsData) ? flightsData : [];
-	const bookings = Array.isArray(bookingsData) ? bookingsData : [];
-	const passengers = Array.isArray(passengersData) ? passengersData : [];
-	const addPlaceholderOption = (options) => [{ value: '', label: '—' }, ...options];
+	const bookingFlightPassengers = Array.isArray(bookingFlightPassengersData) ? bookingFlightPassengersData : [];
 
-	const getOptionLabel = (options, value) => {
-		if (value === null || value === undefined || value === '') return '—';
-		const option = options.find((o) => o.value === value);
-		return option ? option.label : value;
-	};
+	const formatBookingFlightPassengerLabel = (bfp) => {
+		if (!bfp) return '—';
 
-	const formatBookingLabel = (booking) => {
-		if (!booking) return '—';
-		const bookingIdLabel = booking.booking_number || booking.public_id || booking.id;
-		const bookingDateLabel = formatDate(booking.booking_date);
-		return [bookingIdLabel, bookingDateLabel].filter(Boolean).join(' — ') || String(booking.id);
-	};
+		const booking = bfp.booking_passenger?.booking || {};
+		const passenger = bfp.booking_passenger?.passenger || {};
+		const flight = bfp.flight || {};
 
-	const formatPassengerLabel = (passenger) => {
-		if (!passenger) return '—';
-		const fullName = [passenger.last_name, passenger.first_name, passenger.patronymic_name]
-			.filter(Boolean)
-			.join(' ');
-		const document = passenger.document_number ? ` (${passenger.document_number})` : '';
-		const label = `${fullName}${document}`.trim();
-		return label || String(passenger.id);
-	};
-
-	const flightOptions = flights.map((flight) => {
+		const bookingLabel = booking.booking_number || booking.public_id || `#${booking.id || ''}`;
+		const passengerName = [passenger.last_name, passenger.first_name].join(' ');
 		const flightNumber = flight.airline_flight_number || '';
 		const flightDate = flight.scheduled_departure ? formatDate(flight.scheduled_departure) : '';
-		return {
-			value: flight.id,
-			label: [flightNumber, flightDate].filter(Boolean).join(' — ') || String(flight.id),
-		};
-	});
+		const flightLabel = [flightNumber, flightDate].filter(Boolean).join(' ');
 
-	const baseBookingOptions = bookings.map((booking) => ({
-		value: booking.id,
-		label: formatBookingLabel(booking),
-	}));
+		return [bookingLabel, flightLabel, passengerName].filter(Boolean).join(' • ') || String(bfp.id);
+	};
 
-	const basePassengerOptions = passengers.map((passenger) => ({
-		value: passenger.id,
-		label: formatPassengerLabel(passenger),
-	}));
-
-	const bookingOptions = addPlaceholderOption(baseBookingOptions);
-	const passengerOptions = addPlaceholderOption(basePassengerOptions);
+	const bookingFlightPassengerOptions = useMemo(
+		() =>
+			bookingFlightPassengers
+				.map((bfp) => ({
+					value: bfp.id,
+					label: formatBookingFlightPassengerLabel(bfp),
+				}))
+				.sort((a, b) => a.label.localeCompare(b.label)),
+		[bookingFlightPassengers]
+	);
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -90,28 +65,23 @@ const TicketManagement = () => {
 			apiKey: 'ticket_number',
 			label: FIELD_LABELS.TICKET.ticket_number,
 			type: FIELD_TYPES.TEXT,
+			fullWidth: true,
 			validate: (value) => (!value ? VALIDATION_MESSAGES.TICKET.ticket_number.REQUIRED : null),
 		},
-		flightId: {
-			key: 'flightId',
-			apiKey: 'flight_id',
-			label: FIELD_LABELS.TICKET.flight_id,
+		bookingFlightPassengerId: {
+			key: 'bookingFlightPassengerId',
+			apiKey: 'booking_flight_passenger_id',
+			label: FIELD_LABELS.TICKET.booking_flight_passenger_id,
 			type: FIELD_TYPES.SELECT,
-			options: flightOptions,
-			formatter: (value) => getOptionLabel(flightOptions, value),
-			validate: (value) => (!value ? VALIDATION_MESSAGES.TICKET.flight_id.REQUIRED : null),
-		},
-		bookingId: {
-			key: 'bookingId',
-			apiKey: 'booking_id',
-			label: FIELD_LABELS.TICKET.booking_id,
-			type: FIELD_TYPES.SELECT,
-			options: bookingOptions,
-			formatter: (value) => getOptionLabel(baseBookingOptions, value),
-			toApi: (value) => (value ? value : null),
-			toUi: (value) => value ?? '',
+			fullWidth: true,
 			excludeFromTable: true,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.TICKET.booking_id.REQUIRED : null),
+			options: bookingFlightPassengerOptions,
+			formatter: (value) => {
+				if (!value) return '—';
+				const bfp = bookingFlightPassengers.find((b) => b.id === value);
+				return formatBookingFlightPassengerLabel(bfp);
+			},
+			validate: (value) => (!value ? VALIDATION_MESSAGES.TICKET.booking_flight_passenger_id.REQUIRED : null),
 		},
 		bookingNumber: {
 			key: 'bookingNumber',
@@ -119,21 +89,15 @@ const TicketManagement = () => {
 			type: FIELD_TYPES.TEXT,
 			excludeFromForm: true,
 		},
-		passengerId: {
-			key: 'passengerId',
-			apiKey: 'passenger_id',
-			label: FIELD_LABELS.TICKET.passenger_id,
-			type: FIELD_TYPES.SELECT,
-			options: passengerOptions,
-			formatter: (value) => getOptionLabel(basePassengerOptions, value),
-			toApi: (value) => (value ? value : null),
-			toUi: (value) => value ?? '',
-			excludeFromTable: true,
-			validate: (value) => (!value ? VALIDATION_MESSAGES.TICKET.passenger_id.REQUIRED : null),
-		},
 		passengerName: {
 			key: 'passengerName',
 			label: FIELD_LABELS.TICKET.passenger_id,
+			type: FIELD_TYPES.TEXT,
+			excludeFromForm: true,
+		},
+		flightNumber: {
+			key: 'flightNumber',
+			label: FIELD_LABELS.TICKET.flight_id,
 			type: FIELD_TYPES.TEXT,
 			excludeFromForm: true,
 		},
@@ -159,22 +123,34 @@ const TicketManagement = () => {
 		dispatch(fetchTickets());
 	};
 
-	const bookingById = new Map(bookings.map((booking) => [booking.id, booking]));
-	const passengerById = new Map(passengers.map((passenger) => [passenger.id, passenger]));
+	const bookingFlightPassengerById = useMemo(
+		() => new Map(bookingFlightPassengers.map((bfp) => [bfp.id, bfp])),
+		[bookingFlightPassengers]
+	);
 
 	const formattedTickets = tickets.map((ticket) => {
 		const formatted = adminManager.toUiFormat(ticket);
 
-		const bookingIdFromTicket = ticket.booking_id;
-		const passengerIdFromTicket = ticket.passenger_id;
+		const bfp = bookingFlightPassengerById.get(ticket.booking_flight_passenger_id);
 
-		const booking = bookingById.get(bookingIdFromTicket);
-		formatted.bookingNumber = formatBookingLabel(booking);
-		formatted.bookingId = bookingIdFromTicket ?? '';
+		if (bfp) {
+			const booking = bfp.booking_passenger?.booking || {};
+			const passenger = bfp.booking_passenger?.passenger || {};
+			const flight = bfp.flight || {};
 
-		const passenger = passengerById.get(passengerIdFromTicket);
-		formatted.passengerName = formatPassengerLabel(passenger);
-		formatted.passengerId = passengerIdFromTicket ?? '';
+			formatted.bookingNumber = booking.booking_number || booking.public_id || `#${booking.id || ''}`;
+
+			formatted.passengerName =
+				[passenger.last_name, passenger.first_name, passenger.patronymic_name].filter(Boolean).join(' ') || '—';
+
+			const flightNumber = flight.airline_flight_number || '';
+			const flightDate = flight.scheduled_departure ? formatDate(flight.scheduled_departure) : '';
+			formatted.flightNumber = [flightNumber, flightDate].filter(Boolean).join(' — ') || '—';
+		} else {
+			formatted.bookingNumber = '—';
+			formatted.passengerName = '—';
+			formatted.flightNumber = '—';
+		}
 
 		return formatted;
 	});

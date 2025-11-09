@@ -187,6 +187,8 @@ class XlsxMessages:
 class TicketMessages:
     BOOKING_REQUIRED = 'Необходимо указать бронирование'
     PASSENGER_REQUIRED = 'Необходимо указать пассажира'
+    FLIGHT_REQUIRED = 'Необходимо указать рейс'
+    BOOKING_FLIGHT_PASSENGER_REQUIRED = 'Необходимо указать связь бронирование-рейс-пассажир'
 
     IMPORT_NO_HEADER = 'Не удалось найти таблицу пассажиров в файле'
     IMPORT_NO_PASSENGERS = 'В файле не найдено ни одного пассажира'

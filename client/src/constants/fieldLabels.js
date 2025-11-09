@@ -79,6 +79,7 @@ export const FIELD_LABELS = {
 		booking_id: 'Бронирование',
 		passenger_id: 'Пассажир',
 		flight_id: 'Рейс',
+		booking_flight_passenger_id: 'Пассажир на рейсе',
 	},
 	PAYMENT: {
 		booking_id: 'Бронирование',

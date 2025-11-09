@@ -19,6 +19,12 @@ class BOOKING_STATUS(enum.Enum):
     cancelled = 'cancelled'
 
 
+class BOOKING_FLIGHT_PASSENGER_STATUS(enum.Enum):
+    created = 'created'
+    ticket_in_progress = 'ticket_in_progress'
+    ticketed = 'ticketed'
+
+
 class DISCOUNT_TYPE(enum.Enum):
     round_trip = 'round_trip'
     infant = 'infant'
@@ -108,6 +114,7 @@ class CONSENT_ACTION(enum.Enum):
 # Default variables
 DEFAULT_USER_ROLE = USER_ROLE.standard
 DEFAULT_BOOKING_STATUS = BOOKING_STATUS.created
+DEFAULT_BOOKING_FLIGHT_PASSENGER_STATUS = BOOKING_FLIGHT_PASSENGER_STATUS.created
 DEFAULT_CURRENCY = CURRENCY.rub
 DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
 DEFAULT_PAYMENT_TYPE = PAYMENT_TYPE.payment

@@ -381,6 +381,11 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
             commit=False,
             to_status=BOOKING_STATUS.completed,
         )
+        Booking.create_booking_flight_passengers(
+            booking_id=booking.id,
+            session=session,
+            commit=False,
+        )
         Booking.save_details_snapshot(
             id=booking.id,
             session=session,

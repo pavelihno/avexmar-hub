@@ -186,6 +186,9 @@ export const VALIDATION_MESSAGES = {
 		passenger_id: {
 			REQUIRED: 'Пассажир обязателен',
 		},
+		booking_flight_passenger_id: {
+			REQUIRED: 'Необходимо выбрать пассажира на рейсе',
+		},
 	},
 
 	BOOKING: {
