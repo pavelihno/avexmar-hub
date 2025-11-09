@@ -23,6 +23,7 @@ import ConsentEventManagement from '../components/admin/management/ConsentEventM
 import CarouselSlideManagement from '../components/admin/management/CarouselSlideManagement';
 
 import ProtectedRoute from './ProtectedRoute';
+import TicketImport from '../components/admin/dashboard/TicketImport';
 
 const AdminRoutes = ({ currentUser }) => {
 	const isAdmin = currentUser?.role === 'admin';
@@ -106,6 +107,10 @@ const AdminRoutes = ({ currentUser }) => {
 		{
 			path: '/admin/dashboard/flight-passengers',
 			element: <ProtectedRoute children={<FlightPassengerExport />} condition={isAdmin} />,
+		},
+		{
+			path: '/admin/dashboard/tickets',
+			element: <ProtectedRoute children={<TicketImport />} condition={isAdmin} />,
 		},
 		{
 			path: '/admin/dashboard/bookings',

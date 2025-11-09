@@ -173,6 +173,21 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	TICKET: {
+		ticket_number: {
+			REQUIRED: 'Номер билета обязателен',
+		},
+		flight_id: {
+			REQUIRED: 'Рейс обязателен',
+		},
+		booking_id: {
+			REQUIRED: 'Бронирование обязательно',
+		},
+		passenger_id: {
+			REQUIRED: 'Пассажир обязателен',
+		},
+	},
+
 	BOOKING: {
 		email_address: {
 			REQUIRED: 'Введите электронную почту',

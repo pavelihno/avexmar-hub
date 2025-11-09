@@ -170,15 +170,15 @@ const FlightPassengerExport = () => {
 		() => [
 			{
 				id: 'airlineFlightNumber',
-				label: UI_LABELS.ADMIN.exports.flightPassengers.table.flight,
+				label: UI_LABELS.ADMIN.dashboard.flightPassengers.table.flight,
 			},
 			{
 				id: 'scheduledDeparture',
-				label: UI_LABELS.ADMIN.exports.flightPassengers.table.date,
+				label: UI_LABELS.ADMIN.dashboard.flightPassengers.table.date,
 			},
 			{
 				id: 'airlineName',
-				label: UI_LABELS.ADMIN.exports.flightPassengers.table.airline,
+				label: UI_LABELS.ADMIN.dashboard.flightPassengers.table.airline,
 			},
 		],
 		[]
@@ -224,7 +224,7 @@ const FlightPassengerExport = () => {
 		}));
 
 	return (
-		<Base maxWidth='xl'>
+		<Base>
 			<Box sx={{ p: { xs: 2, md: 3 } }}>
 				<Box
 					sx={{
@@ -245,7 +245,7 @@ const FlightPassengerExport = () => {
 					>
 						<ArrowBackIcon />
 					</IconButton>
-					<Typography variant='h4'>{UI_LABELS.ADMIN.exports.flightPassengers.title}</Typography>
+					<Typography variant='h4'>{UI_LABELS.ADMIN.dashboard.flightPassengers.title}</Typography>
 				</Box>
 
 				<Box
@@ -257,7 +257,7 @@ const FlightPassengerExport = () => {
 						mb: { xs: 3, md: 4 },
 					}}
 				>
-					<Typography variant='subtitle1'>{UI_LABELS.ADMIN.exports.flightPassengers.description}</Typography>
+					<Typography variant='subtitle1'>{UI_LABELS.ADMIN.dashboard.flightPassengers.description}</Typography>
 					<Stack spacing={2}>
 						<Stack
 							direction={{ xs: 'column', md: 'row' }}
@@ -266,7 +266,7 @@ const FlightPassengerExport = () => {
 						>
 							<Box sx={{ flex: { xs: '1 1 auto', md: '0 1 400px' } }}>
 								{createFieldRenderer({
-									label: UI_LABELS.ADMIN.exports.flightPassengers.route,
+									label: UI_LABELS.ADMIN.dashboard.flightPassengers.route,
 									type: FIELD_TYPES.SELECT,
 								})({
 									value: routeId,
@@ -280,7 +280,7 @@ const FlightPassengerExport = () => {
 
 							<Box sx={{ flex: { xs: '1 1 auto', md: '0 1 220px' } }}>
 								{createFieldRenderer({
-									label: UI_LABELS.ADMIN.exports.flightPassengers.flightDate,
+									label: UI_LABELS.ADMIN.dashboard.flightPassengers.flightDate,
 									type: FIELD_TYPES.DATE,
 								})({
 									value: flightDate,
@@ -304,7 +304,7 @@ const FlightPassengerExport = () => {
 										width: { xs: '100%', md: 'auto' },
 									}}
 								>
-									{UI_LABELS.ADMIN.exports.flightPassengers.resetFilters}
+									{UI_LABELS.ADMIN.dashboard.flightPassengers.resetFilters}
 								</Button>
 							</Box>
 						</Stack>
@@ -386,8 +386,8 @@ const FlightPassengerExport = () => {
 															align='center'
 														>
 															{routeId
-																? UI_LABELS.ADMIN.exports.flightPassengers.emptyState
-																: UI_LABELS.ADMIN.exports.flightPassengers
+																? UI_LABELS.ADMIN.dashboard.flightPassengers.emptyState
+																: UI_LABELS.ADMIN.dashboard.flightPassengers
 																		.selectRoutePrompt}
 														</Typography>
 													</TableCell>

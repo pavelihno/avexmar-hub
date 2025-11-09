@@ -76,10 +76,9 @@ export const FIELD_LABELS = {
 	},
 	TICKET: {
 		ticket_number: 'Номер билета',
-		booking_id: 'ID бронирования',
-		passenger_id: 'ID пассажира',
-		flight_id: 'ID рейса',
-		price: 'Цена',
+		booking_id: 'Бронирование',
+		passenger_id: 'Пассажир',
+		flight_id: 'Рейс',
 	},
 	PAYMENT: {
 		booking_id: 'Бронирование',

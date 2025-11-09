@@ -42,7 +42,7 @@ import { fetchBookingDashboard } from '../../../redux/actions/bookingDashboard';
 import { fetchExportData } from '../../../redux/actions/export';
 import { serverApi } from '../../../api';
 
-const LABELS = UI_LABELS.ADMIN.exports.bookingDashboard;
+const LABELS = UI_LABELS.ADMIN.dashboard.bookings;
 
 const initialFilters = {
 	bookingNumber: '',

@@ -42,6 +42,7 @@ from app.controllers.consent_event_controller import *
 from app.controllers.passenger_export_controller import *
 from app.controllers.carousel_controller import *
 from app.controllers.seo_controller import *
+from app.controllers.ticket_import_controller import *
 
 
 def __import_models():
@@ -273,6 +274,10 @@ def __create_app(_config_class, _db):
     app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
     app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
     app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
+
+    # imports
+    app.route('/imports/tickets', methods=['POST'])(import_tickets)
+    app.route('/imports/tickets/confirm', methods=['POST'])(confirm_import_tickets)
 
     # seo
     app.route('/seo/static-routes', methods=['GET'])(list_static_seo_routes)

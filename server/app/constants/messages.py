@@ -127,6 +127,7 @@ class FileMessages:
     FILE_NOT_FOUND = 'Файл не найден'
     IMPORT_COMPLETED = 'Импорт успешно завершен'
     FILENAME_REQUIRED = 'Требуется указать имя файла'
+    XLS_NOT_SUPPORTED = 'XLS файлы не поддерживаются'
 
     @staticmethod
     def unsupported_content_type(content_type) -> str:
@@ -186,3 +187,13 @@ class XlsxMessages:
 class TicketMessages:
     BOOKING_REQUIRED = 'Необходимо указать бронирование'
     PASSENGER_REQUIRED = 'Необходимо указать пассажира'
+
+    IMPORT_NO_HEADER = 'Не удалось найти таблицу пассажиров в файле'
+    IMPORT_NO_PASSENGERS = 'В файле не найдено ни одного пассажира'
+    IMPORT_FLIGHT_NOT_FOUND = 'Не удалось найти рейс по указанным данным'
+    IMPORT_MULTIPLE_FLIGHTS_FOUND = 'Найдено несколько рейсов по указанным данным'
+    IMPORT_BOOKINGS_NOT_FOUND = 'Не удалось найти бронирования по указанным пассажирам'
+    IMPORT_PASSENGERS_NOT_MATCHED = 'Не удалось сопоставить пассажиров из файла с пассажирами в бронированиях'
+    IMPORT_PASSENGERS_MULTIPLE_MATCHES = 'Найдено несколько бронирований по заданным пассажирам'
+    IMPORT_FLIGHT_REQUIRED = 'Требуется указать рейс для импорта билетов'
+    IMPORT_BOOKING_REQUIRED = 'Требуется указать бронирование для импорта билетов'

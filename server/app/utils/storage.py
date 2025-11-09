@@ -74,7 +74,7 @@ class StorageManager:
 
         target_dir = self._get_target_directory(subfolder_name)
         final_filename = self._generate_filename(
-            extension, 
+            extension,
             Path(source_filename).name if filename else None
         )
         target_path = target_dir / final_filename
@@ -136,7 +136,9 @@ class StorageManager:
         """Delete a file from storage and return success status"""
         try:
             if filename:
-                relative_path = self._build_relative_path(filename, subfolder_name)
+                relative_path = self._build_relative_path(
+                    filename, subfolder_name
+                )
                 file_path = self.resolve_path(relative_path)
                 if file_path.is_file():
                     file_path.unlink()
@@ -171,3 +173,12 @@ class SEOManager(StorageManager):
         super().__init__()
         self.allowed_extensions = {'.html', '.htm', '.json'}
         self.folder_name = 'seo'
+
+
+class TicketManager(StorageManager):
+    """Manager for handling ticket files"""
+
+    def __init__(self):
+        super().__init__()
+        self.allowed_extensions = {'.pdf'}
+        self.folder_name = 'tickets'

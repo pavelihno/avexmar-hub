@@ -20,6 +20,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
 
@@ -185,14 +186,20 @@ const AdminPanel = () => {
 
 	const dashboardTools = [
 		{
-			title: UI_LABELS.ADMIN.exports.flightPassengers.title,
-			description: UI_LABELS.ADMIN.exports.flightPassengers.description,
+			title: UI_LABELS.ADMIN.dashboard.flightPassengers.title,
+			description: UI_LABELS.ADMIN.dashboard.flightPassengers.description,
 			icon: <FileDownloadIcon sx={iconSX} />,
 			path: '/admin/dashboard/flight-passengers',
 		},
 		{
-			title: UI_LABELS.ADMIN.exports.bookingDashboard.title,
-			description: UI_LABELS.ADMIN.exports.bookingDashboard.description,
+			title: UI_LABELS.ADMIN.dashboard.tickets.title,
+			description: UI_LABELS.ADMIN.dashboard.tickets.description,
+			icon: <FileUploadIcon sx={iconSX} />,
+			path: '/admin/dashboard/tickets',
+		},
+		{
+			title: UI_LABELS.ADMIN.dashboard.bookings.title,
+			description: UI_LABELS.ADMIN.dashboard.bookings.description,
 			icon: <InsightsIcon sx={iconSX} />,
 			path: '/admin/dashboard/bookings',
 		},
