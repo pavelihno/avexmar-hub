@@ -29,7 +29,7 @@ EMAIL_SUBJECTS = {
     'account_activation': 'Активация аккаунта — {brand_name}',
     'two_factor': 'Код для входа — {brand_name}',
     'password_change': 'Изменение пароля — {brand_name}',
-    'ticket_issued': 'Билеты выпущены — Бронирование № {booking_number}, Рейс {flight_number} — {brand_name}',
+    'ticket_issued': 'Билеты выписаны — Бронирование № {booking_number}, Рейс {flight_number} — {brand_name}',
 }
 
 DEFAULT_EMAIL_CONTEXT = {

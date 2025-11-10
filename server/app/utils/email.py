@@ -8,6 +8,7 @@ from app.constants.branding import (
     DEFAULT_EMAIL_CONTEXT,
     EMAIL_SUBJECTS,
     EMAIL_TEMPLATES,
+    BRAND_NAME,
 )
 from app.constants.messages import ErrorMessages
 
@@ -95,7 +96,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
     msg = Message(
         subject=subject,
         recipients=recipients,
-        sender=username,
+        sender=(BRAND_NAME.upper(), username),
         reply_to=username
     )
 
