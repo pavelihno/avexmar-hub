@@ -45,6 +45,10 @@ class EMAIL_TYPE(enum.Enum):
         EMAIL_TEMPLATES['password_change'],
         EMAIL_SUBJECTS['password_change'],
     )
+    ticket_issued = (
+        EMAIL_TEMPLATES['ticket_issued'],
+        EMAIL_SUBJECTS['ticket_issued'],
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template

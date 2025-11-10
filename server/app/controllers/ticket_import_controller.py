@@ -12,18 +12,25 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 
 from app.constants.messages import FileMessages, TicketMessages
+from app.constants.files import ITINERARY_PDF_FILENAME_TEMPLATE
+from app.config import Config
 from app.database import db
 from app.middlewares.auth_middleware import admin_required
 from app.models.airline import Airline
 from app.models.booking import Booking
+from app.models.booking_flight import BookingFlight
 from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.booking_passenger import BookingPassenger
 from app.models.flight import Flight
+from app.models.flight_tariff import FlightTariff
 from app.models.passenger import Passenger
 from app.models.ticket import Ticket
-from app.utils.datetime import parse_date
+from app.utils.datetime import parse_date, format_date, format_time
+from app.utils.email import send_email, EMAIL_TYPE
 from app.utils.storage import TicketManager
 from app.utils.enum import BOOKING_STATUS, BOOKING_FLIGHT_PASSENGER_STATUS
+from app.utils.passenger_categories import PASSENGER_CATEGORY_LABELS
+from app.utils.business_logic import get_booking_snapshot
 
 
 def _clean_string(value) -> str:
@@ -324,7 +331,7 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
         _serialize_booking(bookings[booking_id])
         for booking_id in matched_booking_ids
     ]
-    
+
     if any(not passenger['is_matched'] for passenger in result['passengers']):
         result['warnings'].append(TicketMessages.IMPORT_PASSENGERS_NOT_MATCHED)
 
@@ -371,12 +378,20 @@ def import_tickets(current_user):
 def confirm_import_tickets(current_user):
     itinerary_pdf = request.files.get('itinerary')
     passengers_payload_raw = request.form.get('passengers')
+    booking_id = request.form.get('booking_id')
+    flight_id = request.form.get('flight_id')
 
     if not itinerary_pdf:
         return jsonify({'message': FileMessages.NO_FILE_PROVIDED, 'field': 'itinerary'}), 400
 
     if not passengers_payload_raw:
         return jsonify({'message': TicketMessages.IMPORT_PASSENGERS_PAYLOAD_REQUIRED, 'field': 'passengers'}), 400
+
+    if not booking_id:
+        return jsonify({'message': TicketMessages.IMPORT_BOOKING_REQUIRED, 'field': 'booking_id'}), 400
+
+    if not flight_id:
+        return jsonify({'message': TicketMessages.IMPORT_FLIGHT_REQUIRED, 'field': 'flight_id'}), 400
 
     try:
         passengers_payload = json.loads(passengers_payload_raw)
@@ -386,101 +401,46 @@ def confirm_import_tickets(current_user):
     if not isinstance(passengers_payload, list):
         return jsonify({'message': TicketMessages.IMPORT_PASSENGERS_PAYLOAD_REQUIRED, 'field': 'passengers'}), 400
 
-    def _collect_candidate_map(payload: List[Dict[str, Any]]) -> Tuple[Dict[int, str], int]:
-        skipped = 0
-        mapping: Dict[int, str] = {}
-        seen_numbers: Set[str] = set()
+    booking = Booking.get_or_404(booking_id)
+    flight = Flight.get_or_404(flight_id)
 
-        for passenger in payload:
-            if not isinstance(passenger, dict):
-                skipped += 1
-                continue
+    # Collect valid ticket data from passengers
+    skipped_count = 0
+    ticket_data = []  # List of (bfp_id, ticket_number)
+    seen_bfp_ids = set()
+    seen_ticket_numbers = set()
 
-            if not passenger.get('is_matched') or passenger.get('ticketed_before'):
-                skipped += 1
-                continue
+    for passenger in passengers_payload:
+        if not isinstance(passenger, dict):
+            skipped_count += 1
+            continue
 
-            ticket_number = _clean_string(passenger.get('ticket_number')).upper()
-            if not ticket_number:
-                skipped += 1
-                continue
+        # Skip if not matched or already ticketed
+        if not passenger.get('is_matched') or passenger.get('ticketed_before'):
+            skipped_count += 1
+            continue
 
-            bfp_id_raw = passenger.get('booking_flight_passenger_id')
-            try:
-                bfp_id = int(bfp_id_raw)
-            except (TypeError, ValueError):
-                skipped += 1
-                continue
+        ticket_number = _clean_string(passenger.get('ticket_number')).upper()
+        if not ticket_number:
+            skipped_count += 1
+            continue
 
-            if bfp_id in mapping or ticket_number in seen_numbers:
-                skipped += 1
-                continue
+        try:
+            bfp_id = int(passenger.get('booking_flight_passenger_id'))
+        except (TypeError, ValueError):
+            skipped_count += 1
+            continue
 
-            mapping[bfp_id] = ticket_number
-            seen_numbers.add(ticket_number)
+        # Skip duplicates in the payload
+        if bfp_id in seen_bfp_ids or ticket_number in seen_ticket_numbers:
+            skipped_count += 1
+            continue
 
-        return mapping, skipped
+        ticket_data.append((bfp_id, ticket_number))
+        seen_bfp_ids.add(bfp_id)
+        seen_ticket_numbers.add(ticket_number)
 
-    def _load_valid_pairs(
-        mapping: Dict[int, str],
-        *,
-        skipped: int,
-    ) -> Tuple[List[Tuple[BookingFlightPassenger, str]], int]:
-        if not mapping:
-            return [], skipped
-
-        booking_flight_passengers = (
-            BookingFlightPassenger.query
-            .options(joinedload(BookingFlightPassenger.booking_passenger))
-            .filter(BookingFlightPassenger.id.in_(mapping.keys()))
-            .all()
-        )
-        bfp_by_id = {bfp.id: bfp for bfp in booking_flight_passengers}
-        valid: List[Tuple[BookingFlightPassenger, str]] = []
-
-        for bfp_id, ticket_number in mapping.items():
-            bfp = bfp_by_id.get(bfp_id)
-            if not bfp:
-                skipped += 1
-                continue
-
-            if bfp.status == BOOKING_FLIGHT_PASSENGER_STATUS.ticketed:
-                skipped += 1
-                continue
-
-            valid.append((bfp, ticket_number))
-
-        return valid, skipped
-
-    def _filter_existing_numbers(
-        pairs: List[Tuple[BookingFlightPassenger, str]],
-        skipped: int,
-    ) -> Tuple[List[Tuple[BookingFlightPassenger, str]], int]:
-        if not pairs:
-            return [], skipped
-
-        ticket_numbers = [ticket_number for _, ticket_number in pairs]
-        existing_numbers = set()
-        if ticket_numbers:
-            existing_numbers = {
-                value
-                for (value,) in db.session.query(Ticket.ticket_number).filter(
-                    Ticket.ticket_number.in_(ticket_numbers)
-                ).all()
-            }
-
-        final: List[Tuple[BookingFlightPassenger, str]] = []
-        for bfp, ticket_number in pairs:
-            if ticket_number in existing_numbers:
-                skipped += 1
-                continue
-            final.append((bfp, ticket_number))
-
-        return final, skipped
-
-    candidate_map, skipped_count = _collect_candidate_map(passengers_payload)
-
-    if not candidate_map:
+    if not ticket_data:
         summary_message = TicketMessages.import_summary(0, skipped_count)
         return jsonify({
             'message': summary_message,
@@ -488,56 +448,169 @@ def confirm_import_tickets(current_user):
             'skipped_count': skipped_count,
         }), 200
 
-    valid_pairs, skipped_count = _load_valid_pairs(
-        candidate_map,
-        skipped=skipped_count,
+    # Load booking flight passengers
+    bfp_ids = [bfp_id for bfp_id, _ in ticket_data]
+    booking_flight_passengers = (
+        BookingFlightPassenger.query
+        .options(joinedload(BookingFlightPassenger.booking_passenger))
+        .filter(BookingFlightPassenger.id.in_(bfp_ids))
+        .all()
+    )
+    bfp_by_id = {bfp.id: bfp for bfp in booking_flight_passengers}
+
+    # Filter valid pairs and check for already ticketed
+    valid_pairs = []
+    for bfp_id, ticket_number in ticket_data:
+        bfp = bfp_by_id.get(bfp_id)
+        if not bfp or bfp.status == BOOKING_FLIGHT_PASSENGER_STATUS.ticketed:
+            skipped_count += 1
+            continue
+        valid_pairs.append((bfp, ticket_number))
+
+    if not valid_pairs:
+        summary_message = TicketMessages.import_summary(0, skipped_count)
+        return jsonify({
+            'message': summary_message,
+            'created_count': 0,
+            'skipped_count': skipped_count,
+        }), 200
+
+    # Find the BookingFlight for this booking and flight
+    session = db.session
+    booking_flight = (
+        session.query(BookingFlight)
+        .join(FlightTariff, BookingFlight.flight_tariff_id == FlightTariff.id)
+        .filter(
+            and_(
+                BookingFlight.booking_id == booking.id,
+                FlightTariff.flight_id == flight.id,
+            )
+        )
+        .first()
     )
 
-    final_pairs, skipped_count = _filter_existing_numbers(valid_pairs, skipped_count)
-
-    if not final_pairs:
-        summary_message = TicketMessages.import_summary(0, skipped_count)
+    if not booking_flight:
         return jsonify({
-            'message': summary_message,
+            'message': TicketMessages.IMPORT_BOOKING_FLIGHT_NOT_FOUND,
             'created_count': 0,
             'skipped_count': skipped_count,
-        }), 200
+        }), 400
 
+    # Save PDF file
     ticket_storage = TicketManager()
-    created_count = 0
-
     try:
-        _pdf_path, pdf_filename = ticket_storage.save_file(
+        _, pdf_filename = ticket_storage.save_file(
             itinerary_pdf, subfolder_name='imports'
         )
     except ValueError as exc:
         return jsonify({'message': str(exc)}), 400
 
-    session = db.session
+    # Create tickets and update statuses
+    created_count = 0
 
     try:
-        for booking_flight_passenger, ticket_number in final_pairs:
-            ticket = Ticket(
+        for booking_flight_passenger, ticket_number in valid_pairs:
+            Ticket.create(
+                session=session,
+                commit=False,
                 ticket_number=ticket_number,
                 booking_flight_passenger_id=booking_flight_passenger.id,
             )
-            session.add(ticket)
-            booking_flight_passenger.status = BOOKING_FLIGHT_PASSENGER_STATUS.ticketed
+            BookingFlightPassenger.update(
+                booking_flight_passenger.id,
+                session=session,
+                commit=False,
+                status=BOOKING_FLIGHT_PASSENGER_STATUS.ticketed,
+            )
             created_count += 1
 
+        BookingFlight.update(
+            booking_flight.id,
+            session=session,
+            commit=False,
+            itinerary_receipt_path=pdf_filename,
+        )
+
         session.commit()
+
     except IntegrityError:
         session.rollback()
+
         ticket_storage.delete_file(pdf_filename, subfolder_name='imports')
+
         return jsonify({
             'message': TicketMessages.IMPORT_TICKETS_DUPLICATE_NUMBER,
             'created_count': created_count,
             'skipped_count': skipped_count,
         }), 400
+
     except Exception as exc:
         session.rollback()
+
         ticket_storage.delete_file(pdf_filename, subfolder_name='imports')
+
         return jsonify({'message': str(exc)}), 500
+
+    pdf_data = ticket_storage.read_file(
+        pdf_filename, subfolder_name='imports'
+    )
+
+    # Prepare email information
+    booking_url = (
+        f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
+        f'?access_token={booking.access_token}'
+    )
+
+    flight_dict = flight.to_dict(return_children=True)
+    route = flight_dict.get('route') or {}
+    origin = route.get('origin_airport') or {}
+    dest = route.get('destination_airport') or {}
+
+    flight_info = {
+        'number': flight.airline_flight_number,
+        'from': f"{origin.get('city_name')} ({origin.get('iata_code')})",
+        'to': f"{dest.get('city_name')} ({dest.get('iata_code')})",
+        'departure': f"{format_date(flight.scheduled_departure)} {format_time(flight.scheduled_departure_time)}",
+        'arrival': f"{format_date(flight.scheduled_arrival)} {format_time(flight.scheduled_arrival_time)}",
+    }
+    details = get_booking_snapshot(booking)
+
+    passengers = []
+    for p in details.get('passengers', []):
+        name = ' '.join(
+            filter(None, [p.get('last_name'), p.get('first_name')])
+        ).strip()
+        passengers.append(
+            {
+                'name': name,
+                'category': PASSENGER_CATEGORY_LABELS.get(
+                    p.get('category'), p.get('category')
+                ),
+            }
+        )
+
+    # Format attachment filename
+    attachment_filename = ITINERARY_PDF_FILENAME_TEMPLATE.format(
+        booking_number=booking.booking_number,
+        flight_number=flight.airline_flight_number,
+        date=format_date(flight.scheduled_departure)
+    )
+
+    send_email(
+        EMAIL_TYPE.ticket_issued,
+        recipients=booking.email_address,
+        booking_number=booking.booking_number,
+        booking_url=booking_url,
+        ticket_count=created_count,
+        flight_number=flight_info['number'],
+        flight=flight_info,
+        passengers=passengers,
+        attachments=[{
+            'filename': attachment_filename,
+            'content_type': 'application/pdf',
+            'data': pdf_data,
+        }],
+    )
 
     message = TicketMessages.import_summary(created_count, skipped_count)
 

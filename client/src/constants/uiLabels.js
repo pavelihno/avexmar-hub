@@ -324,6 +324,8 @@ export const UI_LABELS = {
 				tooltips: {
 					noAnalysis: 'Сначала проанализируйте файл',
 					noPdf: 'Загрузите PDF маршрут-квитанцию',
+					noBooking: 'Бронирование не найдено',
+					noFlight: 'Рейс не найден',
 					noReadyPassengers: 'Нет пассажиров, готовых к импорту',
 				},
 				messages: {
@@ -332,12 +334,9 @@ export const UI_LABELS = {
 					missingSpreadsheet: 'Выберите файл со списком пассажиров',
 					missingPdf: 'Выберите PDF с маршрут-квитанцией',
 					insufficientData: 'Недостаточно данных для импорта',
+					noBookingId: 'Не удалось определить бронирование',
+					noFlightId: 'Не удалось определить рейс',
 					noReadyPassengers: 'Нет пассажиров, готовых к импорту',
-				},
-				confirmSummary: {
-					title: 'Результат импорта',
-					created: 'Создано билетов',
-					skipped: 'Пропущено',
 				},
 				results: {
 					title: 'Результаты обработки',

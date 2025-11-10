@@ -55,7 +55,6 @@ class Booking(BaseModel):
     passenger_counts = db.Column(JSONB, nullable=False, server_default='{}', default=dict)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     details_snapshot = db.Column(JSONB, nullable=True)
-    itinerary_receipt_path = db.Column(db.String, nullable=True) 
 
     # Relationships
     user: Mapped['User'] = db.relationship('User', back_populates='bookings')

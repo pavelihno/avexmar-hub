@@ -117,22 +117,30 @@ const TicketImport = () => {
 			showMessage(LABELS.messages.noReadyPassengers, 'warning');
 			return;
 		}
+		if (!matchedBooking?.id) {
+			showMessage(LABELS.messages.noBookingId, 'warning');
+			return;
+		}
+		if (!matchedFlight?.id) {
+			showMessage(LABELS.messages.noFlightId, 'warning');
+			return;
+		}
 
 		const formData = new FormData();
 		formData.append('itinerary', pdfFile);
 		formData.append('passengers', JSON.stringify(passengers));
+		formData.append('booking_id', matchedBooking.id);
+		formData.append('flight_id', matchedFlight.id);
 
 		setIsConfirming(true);
 		try {
 			const response = await serverApi.post('/imports/tickets/confirm', formData, {
 				headers: { 'Content-Type': 'multipart/form-data' },
 			});
-			const created = response.data.created_count || 0;
 			const skipped = response.data.skipped_count || 0;
 			const message = response.data.message || LABELS.messages.importSuccess;
-			const severity = skipped ? 'warning' : 'success';
-			const summaryText = `${message} (${LABELS.confirmSummary.created}: ${created}, ${LABELS.confirmSummary.skipped}: ${skipped})`;
-			showMessage(summaryText, severity);
+			const severity = skipped > 0 ? 'warning' : 'success';
+			showMessage(message, severity);
 			setTimeout(handleReset, 2000);
 		} catch (error) {
 			const message = error.response?.data?.message || error.message || UI_LABELS.ERRORS.unknown;
@@ -141,17 +149,21 @@ const TicketImport = () => {
 			setIsConfirming(false);
 		}
 	};
-
 	const handleCloseNotification = () => setNotification((prev) => ({ ...prev, open: false }));
 
-	const canConfirm = useMemo(() => result && pdfFile && hasReadyPassengers, [result, pdfFile, hasReadyPassengers]);
+	const canConfirm = useMemo(
+		() => result && pdfFile && hasReadyPassengers && matchedBooking && matchedFlight,
+		[result, pdfFile, hasReadyPassengers, matchedBooking, matchedFlight]
+	);
 
 	const confirmTooltip = useMemo(() => {
 		if (!result) return LABELS.tooltips.noAnalysis;
 		if (!pdfFile) return LABELS.tooltips.noPdf;
+		if (!matchedBooking) return LABELS.tooltips.noBooking;
+		if (!matchedFlight) return LABELS.tooltips.noFlight;
 		if (!hasReadyPassengers) return LABELS.tooltips.noReadyPassengers;
 		return '';
-	}, [result, pdfFile, hasReadyPassengers]);
+	}, [result, pdfFile, hasReadyPassengers, matchedBooking, matchedFlight]);
 
 	return (
 		<Base>
@@ -571,16 +583,18 @@ const TicketImport = () => {
 								disableHoverListener={!confirmTooltip}
 								disableFocusListener={!confirmTooltip}
 							>
-								<span>
+								<Box sx={{ display: 'flex', width: { xs: '100%', sm: 'auto' } }}>
 									<Button
 										variant='contained'
 										onClick={handleConfirmImport}
 										disabled={!canConfirm || isConfirming}
 										color='success'
+										fullWidth
+										sx={{ width: { xs: '100%', sm: 'auto' } }}
 									>
 										{isConfirming ? LABELS.actions.confirming : LABELS.actions.confirm}
 									</Button>
-								</span>
+								</Box>
 							</Tooltip>
 						</Stack>
 					</Box>

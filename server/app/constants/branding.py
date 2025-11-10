@@ -19,6 +19,7 @@ EMAIL_TEMPLATES = {
     'account_activation': 'account_activation',
     'two_factor': 'two_factor',
     'password_change': 'password_change',
+    'ticket_issued': 'ticket_issued',
 }
 
 EMAIL_SUBJECTS = {
@@ -28,6 +29,7 @@ EMAIL_SUBJECTS = {
     'account_activation': 'Активация аккаунта — {brand_name}',
     'two_factor': 'Код для входа — {brand_name}',
     'password_change': 'Изменение пароля — {brand_name}',
+    'ticket_issued': 'Билеты выпущены — Бронирование № {booking_number}, Рейс {flight_number} — {brand_name}',
 }
 
 DEFAULT_EMAIL_CONTEXT = {
