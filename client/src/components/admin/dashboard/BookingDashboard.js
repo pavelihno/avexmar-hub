@@ -36,10 +36,11 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SearchIcon from '@mui/icons-material/Search';
 
 import Base from '../../Base';
-import { UI_LABELS, ENUM_LABELS, BUTTONS } from '../../../constants';
+import { UI_LABELS, ENUM_LABELS, BUTTONS, FILE_NAME_TEMPLATES } from '../../../constants';
 import { formatDate, formatDateTime, formatNumber, createFieldRenderer, FIELD_TYPES } from '../../utils';
 import { fetchBookingDashboard } from '../../../redux/actions/bookingDashboard';
 import { fetchExportData } from '../../../redux/actions/export';
+import { downloadBookingPdf, downloadItineraryPdf } from '../../../redux/actions/bookingProcess';
 import { serverApi } from '../../../api';
 
 const LABELS = UI_LABELS.ADMIN.dashboard.bookings;
@@ -176,6 +177,12 @@ const PAYMENTS_COLUMNS = [
 	{ key: 'expiresAt', label: LABELS.table.payments.expiresAt },
 ];
 
+const TICKETS_COLUMNS = [
+	{ key: 'ticketNumber', label: LABELS.table.tickets.ticketNumber },
+	{ key: 'passenger', label: LABELS.table.tickets.passenger },
+	{ key: 'document', label: LABELS.table.tickets.document },
+];
+
 const mapFlightToRow = (flight) => {
 	const seatClass = flight.tariff?.seat_class;
 	const seatClassLabel = seatClass ? ENUM_LABELS.SEAT_CLASS[seatClass] || seatClass : '—';
@@ -246,6 +253,28 @@ const mapPaymentToRow = (payment) => {
 	};
 };
 
+const mapTicketToRow = (ticket) => {
+	const passenger = ticket?.passenger || {};
+	const fullName = [passenger.last_name, passenger.first_name, passenger.patronymic_name].filter(Boolean).join(' ');
+	const documentTypeLabel = passenger.document_type
+		? ENUM_LABELS.DOCUMENT_TYPE?.[passenger.document_type] || passenger.document_type
+		: null;
+	const documentLabel = [documentTypeLabel, passenger.document_number].filter(Boolean).join(' · ');
+
+	return {
+		ticketNumber: ticket?.ticket_number || '—',
+		passenger: fullName || '—',
+		document: documentLabel || '—',
+	};
+};
+
+const buildFlightTicketHeader = (flight) => {
+	if (!flight) return '—';
+	const flightNumber = flight.airline_flight_number || flight.number || '—';
+	const routeLabel = getRouteLabel(flight.route);
+	return [routeLabel, flightNumber].filter(Boolean).join(' • ');
+};
+
 const DataTable = ({ columns, data, mapDataToRow, emptyMessage }) => {
 	const rows = data.map(mapDataToRow);
 
@@ -305,6 +334,52 @@ const BookingDashboard = () => {
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [expandedBookings, setExpandedBookings] = useState({});
+
+	const triggerFileDownload = (fileData, filename) => {
+		if (!fileData) return;
+		const name = filename || 'booking.pdf';
+		const url = window.URL.createObjectURL(new Blob([fileData]));
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = name;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		window.URL.revokeObjectURL(url);
+	};
+
+	const handleDownloadBookingPdf = async (publicId, bookingNumber) => {
+		if (!publicId) return;
+		try {
+			const dataBlob = await dispatch(downloadBookingPdf({ publicId })).unwrap();
+			triggerFileDownload(dataBlob, FILE_NAME_TEMPLATES.BOOKING_PDF(bookingNumber || publicId));
+		} catch (err) {
+			// ignore download errors in UI
+		}
+	};
+
+	const handleDownloadItinerary = async (publicId, flight, bookingNumber) => {
+		const bookingFlightId = flight?.booking_flight_id;
+		if (!publicId || !bookingFlightId) return;
+		try {
+			const dataBlob = await dispatch(
+				downloadItineraryPdf({
+					publicId,
+					bookingFlightId,
+				})
+			).unwrap();
+			triggerFileDownload(
+				dataBlob,
+				FILE_NAME_TEMPLATES.ITINERARY_PDF(
+					bookingNumber || publicId,
+					flight?.airline_flight_number || flight?.number || bookingFlightId,
+					formatDate(flight?.scheduled_departure)
+				)
+			);
+		} catch (err) {
+			// ignore download errors in UI
+		}
+	};
 
 	const hasInputFilters = useMemo(() => {
 		const normalized = normalizeFilters(filters);
@@ -1219,6 +1294,181 @@ const BookingDashboard = () => {
 																color='text.secondary'
 																sx={{ fontWeight: 600 }}
 															>
+																{LABELS.sections.tickets}
+															</Typography>
+															{flights.length === 0 ? (
+																<Typography variant='body2' color='text.secondary'>
+																	{LABELS.placeholders.noFlights}
+																</Typography>
+															) : (
+																<TableContainer
+																	component={Paper}
+																	variant='outlined'
+																	sx={{ borderRadius: 0 }}
+																>
+																	<Table size='small'>
+																		<TableHead>
+																			<TableRow>
+																				{TICKETS_COLUMNS.map((col) => (
+																					<TableCell
+																						key={col.key}
+																						align={col.align || 'left'}
+																					>
+																						{col.label}
+																					</TableCell>
+																				))}
+																			</TableRow>
+																		</TableHead>
+																		<TableBody>
+																			{flights.map((flight, flightIdx) => {
+																				const tickets = flight.tickets || [];
+																				const canDownloadItinerary =
+																					bookingPublicId &&
+																					flight.booking_flight_id &&
+																					tickets.length > 0;
+																				const flightHeader =
+																					buildFlightTicketHeader(flight) ||
+																					LABELS.placeholders.noFlights;
+
+																				return (
+																					<React.Fragment
+																						key={`${bookingKey}-tickets-${
+																							flight.booking_flight_id ||
+																							flightIdx
+																						}`}
+																					>
+																						<TableRow>
+																							<TableCell
+																								colSpan={
+																									TICKETS_COLUMNS.length
+																								}
+																								sx={{
+																									py: 1,
+																									position:
+																										'relative',
+																								}}
+																							>
+																								<Typography
+																									variant='body2'
+																									color='text.secondary'
+																									sx={{
+																										fontWeight: 500,
+																										textDecoration:
+																											'underline',
+																									}}
+																								>
+																									{flightHeader}
+																								</Typography>
+																								{canDownloadItinerary && (
+																									<Typography
+																										component='span'
+																										variant='body2'
+																										color='primary'
+																										onClick={() =>
+																											handleDownloadItinerary(
+																												bookingPublicId,
+																												flight,
+																												bookingNumber
+																											)
+																										}
+																										sx={{
+																											cursor: 'pointer',
+																											textDecoration:
+																												'underline',
+																											'&:hover': {
+																												textDecoration:
+																													'none',
+																											},
+																											position:
+																												'absolute',
+																											right: 16,
+																											top: '50%',
+																											transform:
+																												'translateY(-50%)',
+																										}}
+																									>
+																										{
+																											LABELS
+																												.actions
+																												.downloadItinerary
+																										}
+																									</Typography>
+																								)}
+																							</TableCell>
+																						</TableRow>
+																						{tickets.length === 0 ? (
+																							<TableRow>
+																								<TableCell
+																									colSpan={
+																										TICKETS_COLUMNS.length
+																									}
+																									align='center'
+																								>
+																									<Typography
+																										variant='body2'
+																										color='text.secondary'
+																									>
+																										{
+																											LABELS
+																												.emptyTableMessages
+																												.tickets
+																										}
+																									</Typography>
+																								</TableCell>
+																							</TableRow>
+																						) : (
+																							tickets.map(
+																								(ticket, ticketIdx) => {
+																									const row =
+																										mapTicketToRow(
+																											ticket
+																										);
+																									return (
+																										<TableRow
+																											key={`${bookingKey}-ticket-${ticketIdx}`}
+																										>
+																											{TICKETS_COLUMNS.map(
+																												(
+																													col
+																												) => (
+																													<TableCell
+																														key={
+																															col.key
+																														}
+																														align={
+																															col.align ||
+																															'left'
+																														}
+																													>
+																														{
+																															row[
+																																col
+																																	.key
+																															]
+																														}
+																													</TableCell>
+																												)
+																											)}
+																										</TableRow>
+																									);
+																								}
+																							)
+																						)}
+																					</React.Fragment>
+																				);
+																			})}
+																		</TableBody>
+																	</Table>
+																</TableContainer>
+															)}
+														</Stack>
+
+														<Stack spacing={1}>
+															<Typography
+																variant='subtitle2'
+																color='text.secondary'
+																sx={{ fontWeight: 600 }}
+															>
 																{LABELS.sections.payments}
 															</Typography>
 															<DataTable
@@ -1325,7 +1575,28 @@ const BookingDashboard = () => {
 																<Button
 																	variant='outlined'
 																	color='primary'
-																	onClick={() => {}}
+																	component={Link}
+																	to={
+																		bookingPublicId
+																			? `/booking/${bookingPublicId}`
+																			: '#'
+																	}
+																	target='_blank'
+																	rel='noopener noreferrer'
+																	disabled={!bookingPublicId}
+																>
+																	{LABELS.actions.openBooking}
+																</Button>
+																<Button
+																	variant='contained'
+																	color='primary'
+																	onClick={() =>
+																		handleDownloadBookingPdf(
+																			bookingPublicId,
+																			bookingNumber
+																		)
+																	}
+																	disabled={!bookingPublicId}
 																>
 																	{LABELS.actions.download}
 																</Button>

@@ -386,6 +386,7 @@ export const UI_LABELS = {
 					flights: 'Нет данных о рейсах',
 					passengers: 'Нет данных о пассажирах',
 					payments: 'Нет данных о платежах',
+					tickets: 'Нет данных о билетах',
 				},
 				filters: {
 					title: 'Фильтры',
@@ -411,6 +412,7 @@ export const UI_LABELS = {
 					buyer: 'Покупатель',
 					flights: 'Рейсы',
 					passengers: 'Пассажиры',
+					tickets: 'Билеты',
 					payments: 'Платежи',
 					statusHistory: 'История статусов',
 					issues: 'Индикаторы',
@@ -442,6 +444,11 @@ export const UI_LABELS = {
 						paidAt: 'Оплачен',
 						expiresAt: 'Истекает',
 					},
+					tickets: {
+						ticketNumber: 'Номер билета',
+						passenger: 'Пассажир',
+						document: 'Документ',
+					},
 				},
 				pricing: {
 					fare: 'Тариф',
@@ -451,6 +458,8 @@ export const UI_LABELS = {
 				actions: {
 					cancel: 'Отменить бронирование',
 					download: 'Скачать PDF подтверждение',
+					downloadItinerary: 'Скачать маршрут-квитанцию',
+					openBooking: 'Открыть бронирование',
 				},
 				issues: {
 					pending_payment: 'Ожидает оплаты',
