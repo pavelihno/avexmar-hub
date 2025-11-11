@@ -280,9 +280,11 @@ def __create_app(_config_class, _db):
     app.route('/booking/dashboard', methods=['GET'])(get_booking_dashboard)
 
     # exports
-    app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
-    app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
-    app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
+    app.route('/exports/flight-passengers', methods=['POST'])(export_pending_ticket_passengers)
+    app.route('/exports/flight-passengers', methods=['GET'])(get_pending_ticket_passengers_flights)
+    app.route('/exports/flight-passengers/flight', methods=['POST'])(export_pending_ticket_passengers_by_flight)
+    app.route('/exports/flight-passengers/flight/routes', methods=['GET'])(get_pending_ticket_passengers_routes)
+    app.route('/exports/flight-passengers/flight/routes/<int:route_id>', methods=['GET'])(get_pending_ticket_passengers_flights_by_route)
 
     # imports
     app.route('/imports/tickets', methods=['POST'])(import_tickets)

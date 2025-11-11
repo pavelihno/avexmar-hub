@@ -415,7 +415,7 @@ const BookingDashboard = () => {
 				const { data: payload } = await dispatch(
 					fetchExportData({
 						key: 'routes',
-						endpoint: '/exports/flight-passengers/routes',
+						endpoint: '/exports/flight-passengers/flight/routes',
 					})
 				).unwrap();
 				if (!isMounted) return;
@@ -459,7 +459,7 @@ const BookingDashboard = () => {
 			setFlightsLoading(true);
 			setFiltersError(null);
 			try {
-				const response = await serverApi.get(`/exports/flight-passengers/routes/${selectedRouteId}/flights`);
+				const response = await serverApi.get(`/exports/flight-passengers/flight/routes/${selectedRouteId}`);
 				if (!isMounted) return;
 				const payload = response?.data?.data || response?.data || [];
 				const items = Array.isArray(payload) ? payload : [];

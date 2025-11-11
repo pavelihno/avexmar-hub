@@ -52,6 +52,9 @@ class ConsentMessages:
 
 class PassengerMessages:
     FLIGHT_REQUIRED = 'Требуется указать рейс'
+    INVALID_DATE_RANGE = 'Некорректный период дат'
+    INVALID_FLIGHT_IDS = 'Неверные идентификаторы рейсов'
+    NO_PENDING_PASSENGERS = 'Нет пассажиров для выгрузки'
 
 
 class CountryMessages:
