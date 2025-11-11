@@ -59,6 +59,22 @@ export const downloadBookingPdf = createAsyncThunk('bookingProcess/downloadPdf',
 	}
 });
 
+export const downloadItineraryPdf = createAsyncThunk(
+	'bookingProcess/downloadItineraryPdf',
+	async (arg, { rejectWithValue }) => {
+		try {
+			const { publicId, bookingFlightId, accessToken } = arg || {};
+			const res = await serverApi.get(`/booking/${publicId}/itinerary-pdf/${bookingFlightId}`, {
+				responseType: 'blob',
+				...buildAccessParams(accessToken),
+			});
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
 export const confirmBooking = createAsyncThunk(
 	'bookingProcess/confirm',
 	async ({ publicId, isPayment = true, accessToken }, { rejectWithValue }) => {

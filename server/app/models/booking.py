@@ -12,6 +12,7 @@ from app.database import db
 from app.models._base_model import BaseModel
 from app.constants.messages import BookingMessages
 from app.utils.enum import (
+    USER_ROLE,
     BOOKING_STATUS,
     CURRENCY,
     DEFAULT_BOOKING_STATUS,
@@ -128,6 +129,8 @@ class Booking(BaseModel):
         booking_token = str(booking.access_token)
 
         if current_user:
+            if current_user.role == USER_ROLE.admin:
+                return booking
             if booking.user_id:
                 if booking.user_id == current_user.id:
                     return booking

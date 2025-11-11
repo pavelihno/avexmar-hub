@@ -721,7 +721,7 @@ export const UI_LABELS = {
 			passengers: 'Пассажиры',
 			confirmation: 'Подтверждение',
 			payment: 'Оплата',
-			completion: 'Завершение',
+			completion: 'Бронирование завершено',
 		},
 		timer_tooltip: 'Время для завершения бронирования',
 		step_placeholders: {
@@ -818,7 +818,10 @@ export const UI_LABELS = {
 		},
 		completion: {
 			download_pdf: 'Скачать PDF-подтверждение',
+			download_itinerary_pdf: 'Скачать маршрут-квитанцию',
 			title: 'Бронирование завершено',
+			subtitle:
+				'Маршрут-квитанции на забронированные места будут направлены на электронную почту, указанную при бронировании, в течение 24 часов с момента подтверждения этой брони',
 			price_title: 'Оплачено',
 			payment_details: 'Детали платежа',
 			buyer: 'Покупатель',

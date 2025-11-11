@@ -31,6 +31,7 @@ class BookingMessages:
     BOOKING_DETAILS_REQUIRED = 'Требуются номер бронирования, фамилия и имя'
     BOOKING_NOT_FOUND = 'Бронирование не найдено'
     BOOKING_FOUND = 'Бронирование найдено'
+    ITINERARY_RECEIPT_NOT_FOUND = 'Маршрутная квитанция не найдена'
 
     @staticmethod
     def illegal_transition(from_status: str, to_status: str) -> str:

@@ -272,6 +272,7 @@ def __create_app(_config_class, _db):
     app.route('/booking/<public_id>/access', methods=['GET'])(get_booking_process_access)
     app.route('/booking/<public_id>/details', methods=['GET'])(get_booking_process_details)
     app.route('/booking/<public_id>/pdf', methods=['GET'])(get_booking_process_pdf)
+    app.route('/booking/<public_id>/itinerary-pdf/<int:booking_flight_id>', methods=['GET'])(get_booking_flight_itinerary_pdf)
     app.route('/booking/create', methods=['POST'])(create_booking_process)
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)

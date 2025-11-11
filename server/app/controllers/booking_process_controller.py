@@ -1,12 +1,12 @@
+import uuid
 from flask import request, jsonify, send_file
 from io import BytesIO
-import uuid
+from datetime import datetime, timedelta
 
-from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
+from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE, ITINERARY_PDF_FILENAME_TEMPLATE
 from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
 from app.config import Config
-from datetime import datetime, timedelta
 
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
@@ -23,8 +23,10 @@ from app.utils.enum import (
     CONSENT_EVENT_TYPE,
     CONSENT_DOC_TYPE,
 )
+from app.utils.storage import TicketManager
 from app.utils.consent import create_booking_consent
 from app.utils.pdf import generate_booking_pdf
+from app.utils.datetime import format_date
 
 
 @current_user
@@ -138,7 +140,7 @@ def create_booking_process_passengers(current_user):
     session = db.session
 
     booking = Booking.update(
-        booking.id, session=session, commit=False, 
+        booking.id, session=session, commit=False,
         user_id=current_user.id if current_user else None,
         **buyer
     )
@@ -284,6 +286,49 @@ def get_booking_process_pdf(current_user, public_id):
         download_name=BOOKING_PDF_FILENAME_TEMPLATE.format(
             booking_number=booking.booking_number
         ),
+    ), 200
+
+
+@current_user
+def get_booking_flight_itinerary_pdf(current_user, public_id, booking_flight_id):
+    token = request.args.get('access_token')
+
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
+
+    booking_flight = BookingFlight.query.filter_by(
+        id=booking_flight_id,
+        booking_id=booking.id
+    ).first_or_404()
+
+    if not booking_flight.itinerary_receipt_path:
+        return jsonify({'message': BookingMessages.ITINERARY_RECEIPT_NOT_FOUND}), 404
+
+    ticket_storage = TicketManager()
+
+    try:
+        pdf_data = ticket_storage.read_file(
+            booking_flight.itinerary_receipt_path,
+            subfolder_name='imports'
+        )
+    except (ValueError, OSError):
+        return jsonify({'message': BookingMessages.ITINERARY_RECEIPT_NOT_FOUND}), 404
+
+    flight = booking_flight.flight_tariff.flight
+
+    filename = ITINERARY_PDF_FILENAME_TEMPLATE.format(
+        booking_number=booking.booking_number,
+        flight_number=flight.airline_flight_number,
+        date=format_date(flight.scheduled_departure)
+    )
+
+    return send_file(
+        BytesIO(pdf_data),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename,
     ), 200
 
 

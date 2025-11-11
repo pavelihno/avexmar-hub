@@ -18,11 +18,12 @@ class Ticket(BaseModel):
     booking_flight_passenger_id = db.Column(
         db.Integer,
         db.ForeignKey('booking_flight_passengers.id', ondelete='CASCADE'),
+        unique=True,
         nullable=False,
     )
     booking_flight_passenger: Mapped['BookingFlightPassenger'] = db.relationship(
         'BookingFlightPassenger',
-        back_populates='tickets',
+        back_populates='ticket',
     )
 
     @property

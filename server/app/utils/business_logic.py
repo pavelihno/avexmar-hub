@@ -1,3 +1,5 @@
+from sqlalchemy.orm import joinedload
+
 from app.utils.enum import (
     PASSENGER_PLURAL_CATEGORY,
     FEE_APPLICATION,
@@ -14,6 +16,7 @@ from app.models.discount import Discount
 from app.models.flight import Flight
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
+from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.payment import Payment
 
 
@@ -69,7 +72,9 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
 
     for leg_key, flight_tariff in legs:
         leg_passengers = []
-        flight = flight_tariff.flight or Flight.get_or_404(flight_tariff.flight_id)
+        flight = flight_tariff.flight or Flight.get_or_404(
+            flight_tariff.flight_id
+        )
         tariff = flight_tariff.tariff
 
         for category_value, passenger_number in passenger_counts.items():
@@ -268,37 +273,39 @@ def _extract_passengers_data(booking):
 
 def _extract_flights_tariffs(booking):
     """Extract flights and tariff mappings from booking"""
-    booking_flights = list(booking.booking_flights.order_by(BookingFlight.id).all())
-    
-    flights = []
-    for bf in booking_flights:
+    flight_pairs = []
+    for bf in booking.booking_flights.all():
         ft = bf.flight_tariff
         if ft and ft.flight:
-            flights.append(ft.flight.to_dict(return_children=True))
-    flights.sort(
-        key=lambda f: (
-            f.get('scheduled_departure'),
-            f.get('scheduled_departure_time') or '',
+            flight_dict = ft.flight.to_dict(return_children=True)
+            flight_pairs.append((bf, flight_dict))
+
+    flight_pairs.sort(
+        key=lambda pair: (
+            pair[1].get('scheduled_departure'),
+            pair[1].get('scheduled_departure_time') or '',
         )
     )
+
+    booking_flights = [pair[0] for pair in flight_pairs]
+    flights = [pair[1] for pair in flight_pairs]
 
     tariffs_map = {}
     for bf in booking_flights:
         ft = bf.flight_tariff
-        if not ft:
-            continue
-        tariffs_map[ft.flight_id] = {
-            'tariff_id': ft.tariff_id,
-            'flight_tariff_id': ft.id,
-        }
-    
+        if ft:
+            tariffs_map[ft.flight_id] = {
+                'tariff_id': ft.tariff_id,
+                'flight_tariff_id': ft.id,
+            }
+
     outbound_id = flights[0]['id'] if len(flights) > 0 else 0
     return_id = flights[1]['id'] if len(flights) > 1 else 0
     outbound_tariff = tariffs_map.get(outbound_id, {})
     return_tariff = tariffs_map.get(return_id, {})
     outbound_tariff_id = outbound_tariff.get('tariff_id')
     return_tariff_id = return_tariff.get('tariff_id')
-    
+
     return flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id
 
 
@@ -324,7 +331,9 @@ def build_booking_snapshot(booking) -> dict:
 
     # Extract base data using helper functions
     passengers, passengers_exist = _extract_passengers_data(booking)
-    flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id = _extract_flights_tariffs(booking)
+    flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id = _extract_flights_tariffs(
+        booking
+    )
     payments = _extract_payment_data(booking)
     consent_exists = _check_consent(booking)
 
@@ -359,14 +368,16 @@ def build_booking_snapshot(booking) -> dict:
 
     # Transform flights to snapshot format
     flights_details = []
-    for f in flights:
+    for i, f in enumerate(flights):
         route = f.get('route', {})
         origin = route.get('origin_airport', {})
         destination = route.get('destination_airport', {})
         airline = f.get('airline', {})
+        booking_flight = booking_flights[i]
 
         flights_details.append({
             'id': f.get('id'),
+            'booking_flight_id': booking_flight.id,
             'airline_flight_number': f.get('airline_flight_number'),
             'scheduled_departure': f.get('scheduled_departure'),
             'scheduled_departure_time': f.get('scheduled_departure_time'),
@@ -483,5 +494,48 @@ def get_booking_snapshot(booking) -> dict:
 
     if not snapshot or any(key not in snapshot for key in required_keys):
         snapshot = build_booking_snapshot(booking)
+
+    # Extend flight details with tickets and itinerary info
+    booking_passenger_ids = [
+        bp.id for bp in booking.booking_passengers
+    ]
+
+    booking_flights = booking.booking_flights.order_by(BookingFlight.id).all()
+
+    flight_to_bf = {
+        bf.flight_tariff.flight_id: bf.id for bf in booking_flights}
+
+    booking_flight_passengers = BookingFlightPassenger.query.options(
+        joinedload(BookingFlightPassenger.ticket),
+        joinedload(BookingFlightPassenger.booking_passenger).joinedload(
+            BookingPassenger.passenger)
+    ).filter(
+        BookingFlightPassenger.booking_passenger_id.in_(booking_passenger_ids)
+    ).all()
+
+    booking_flights_tickets = {}
+    for bfp in booking_flight_passengers:
+        bf_id = flight_to_bf.get(bfp.flight_id)
+        if bf_id is None:
+            continue
+
+        if bf_id not in booking_flights_tickets:
+            booking_flights_tickets[bf_id] = []
+
+        ticket = bfp.ticket
+        if ticket:
+            booking_flights_tickets[bf_id].append({
+                'id': ticket.id,
+                'ticket_number': ticket.ticket_number,
+                'passenger': bfp.booking_passenger.passenger.to_dict()
+            })
+
+    snapshot['flights'] = [
+        {
+            **flight,
+            'tickets': booking_flights_tickets.get(flight.get('booking_flight_id'), []),
+        }
+        for flight in snapshot.get('flights', [])
+    ]
 
     return snapshot

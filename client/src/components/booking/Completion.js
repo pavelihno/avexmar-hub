@@ -15,9 +15,9 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Base from '../Base';
 import BookingProgress from './BookingProgress';
-import { fetchBookingDetails, downloadBookingPdf } from '../../redux/actions/bookingProcess';
+import { fetchBookingDetails, downloadBookingPdf, downloadItineraryPdf } from '../../redux/actions/bookingProcess';
 import { ENUM_LABELS, UI_LABELS, FIELD_LABELS, FILE_NAME_TEMPLATES } from '../../constants';
-import { formatNumber, extractRouteInfo } from '../utils';
+import { formatNumber, extractRouteInfo, formatDate } from '../utils';
 import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import PaymentDetailsTable from './PaymentDetailsTable';
@@ -38,6 +38,32 @@ const Completion = () => {
 			const link = document.createElement('a');
 			link.href = url;
 			link.download = FILE_NAME_TEMPLATES.BOOKING_PDF(booking.booking_number);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (e) {
+			// ignore
+		}
+	};
+
+	const handleDownloadItineraryPdf = async (flight) => {
+		try {
+			const data = await dispatch(
+				downloadItineraryPdf({
+					publicId,
+					bookingFlightId: flight.booking_flight_id,
+					accessToken,
+				})
+			).unwrap();
+			const url = window.URL.createObjectURL(new Blob([data]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = FILE_NAME_TEMPLATES.ITINERARY_PDF(
+				booking.booking_number,
+				flight.airline_flight_number,
+				formatDate(flight.scheduled_departure)
+			);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
@@ -106,9 +132,55 @@ const Completion = () => {
 							{FIELD_LABELS.BOOKING.booking_number}: {booking.booking_number || '—'}
 						</Typography>
 
-						<Button variant='outlined' sx={{ mt: 2 }} onClick={handleDownloadPdf}>
-							{UI_LABELS.BOOKING.completion.download_pdf}
-						</Button>
+						<Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+							<Box
+								sx={{
+									display: 'flex',
+									flexDirection: { xs: 'column', sm: 'row' },
+									gap: 1,
+									flexWrap: 'wrap',
+								}}
+							>
+								<Button variant='contained' onClick={handleDownloadPdf}>
+									{UI_LABELS.BOOKING.completion.download_pdf}
+								</Button>
+							</Box>
+
+							{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
+								<Box
+									sx={{
+										display: 'flex',
+										flexDirection: { xs: 'column', sm: 'row' },
+										gap: 1,
+										flexWrap: 'wrap',
+									}}
+								>
+									{booking.flights.map((flight, index) => {
+										const routeInfo = extractRouteInfo(flight);
+										const directionLabel = UI_LABELS.BOOKING.flight_details.from_to(
+											routeInfo.from,
+											routeInfo.to
+										);
+
+										return (
+											<Button
+												key={flight.id || index}
+												variant='outlined'
+												disabled={flight.tickets.length === 0}
+												onClick={() => handleDownloadItineraryPdf(flight)}
+											>
+												{UI_LABELS.BOOKING.completion.download_itinerary_pdf}{' '}
+												{directionLabel && `(${directionLabel})`}
+											</Button>
+										);
+									})}
+								</Box>
+							)}
+						</Box>
+
+						<Typography variant='body2' sx={{ mt: 2, color: 'text.secondary' }}>
+							{UI_LABELS.BOOKING.completion.subtitle}
+						</Typography>
 					</Card>
 				</Grid2>
 
