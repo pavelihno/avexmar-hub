@@ -22,6 +22,7 @@ import PassengersTable from './PassengersTable';
 import PriceDetailsTable from './PriceDetailsTable';
 import PaymentDetailsTable from './PaymentDetailsTable';
 import FlightDetailsCard from './FlightDetailsCard';
+import TicketsTable from './TicketsTable';
 
 const Completion = () => {
 	const { publicId } = useParams();
@@ -225,6 +226,20 @@ const Completion = () => {
 							</AccordionSummary>
 							<AccordionDetails>
 								<PassengersTable passengers={booking.passengers} />
+							</AccordionDetails>
+						</Accordion>
+					)}
+
+					{/* Tickets */}
+					{Array.isArray(booking?.flights) && booking.flights.length > 0 && (
+						<Accordion variant='outlined' sx={{ mb: 2 }}>
+							<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+								<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
+									{UI_LABELS.BOOKING.confirmation.tickets_title}
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<TicketsTable flights={booking.flights} />
 							</AccordionDetails>
 						</Accordion>
 					)}

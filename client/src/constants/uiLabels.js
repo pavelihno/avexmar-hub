@@ -811,6 +811,7 @@ export const UI_LABELS = {
 		},
 		confirmation: {
 			passengers_title: 'Пассажиры',
+			tickets_title: 'Билеты',
 			price_title: 'К оплате',
 			buyer_title: 'Покупатель',
 			passenger_columns: {
@@ -819,6 +820,13 @@ export const UI_LABELS = {
 				gender: 'Пол',
 				document: 'Документ',
 			},
+			ticket_columns: {
+				ticket_number: 'Номер билета',
+				passenger: 'Пассажир',
+				document: 'Документ',
+				refund: 'Возврат',
+			},
+			tickets_empty: 'Нет билетов для данного рейса',
 			price_details: {
 				passenger_category: 'Категория пассажиров',
 				quantity: 'Кол-во',
