@@ -69,12 +69,13 @@ export const ENUM_LABELS = {
 		refund: 'Возврат',
 	},
 	FEE_APPLICATION: {
-		booking: 'Бронирование',
-		cancellation: 'Отмена бронирования',
+		service_fee: 'Сервисный сбор',
+		ticket_return: 'Возврат билета',
 	},
 	FEE_TERM: {
 		none: 'Отсутствует',
-		before_24h: 'Более чем за 24 часа до рейса',
+		before_48h: 'Более чем за 48 часов до рейса',
+		before_24h: 'Менее чем за 48 часов, но более чем за 24 часа до рейса',
 		within_24h: 'Менее чем за 24 часа до рейса',
 		after_departure: 'После вылета рейса',
 	},

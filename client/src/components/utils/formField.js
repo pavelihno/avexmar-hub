@@ -40,6 +40,7 @@ export const FIELD_TYPES = {
 	DATE: 'date',
 	TIME: 'time',
 	SELECT: 'select',
+	MULTI_SELECT: 'multi_select',
 	BOOLEAN: 'boolean',
 	CUSTOM: 'custom',
 	RICH_TEXT: 'rich_text',
@@ -409,6 +410,52 @@ export const createFieldRenderer = (field, defaultProps = {}) => {
 						</Select>
 						{error && <FormHelperText>{helperText}</FormHelperText>}
 					</FormControl>
+				);
+			}
+
+			case FIELD_TYPES.MULTI_SELECT: {
+				const {
+					value = [],
+					onChange,
+					fullWidth,
+					error,
+					helperText,
+					options = field.options || [],
+					sx,
+					size,
+					disabled,
+					limitTags = 3,
+				} = allProps;
+
+				const safeValue = Array.isArray(value) ? value : [];
+
+				return (
+					<Autocomplete
+						multiple
+						options={options}
+						value={options.filter((option) => safeValue.includes(option.value))}
+						onChange={(e, selectedOptions) => {
+							const selectedValues = selectedOptions.map((option) => option.value);
+							onChange(selectedValues);
+						}}
+						getOptionLabel={(option) => option.label}
+						disabled={disabled}
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								label={field.label}
+								error={error}
+								helperText={error ? helperText : ''}
+								fullWidth={fullWidth}
+								size={size}
+								sx={{ ...sx }}
+								disabled={disabled}
+							/>
+						)}
+						disableCloseOnSelect
+						limitTags={limitTags}
+						sx={{ ...sx }}
+					/>
 				);
 			}
 

@@ -17,12 +17,15 @@ class BOOKING_STATUS(enum.Enum):
     completed = 'completed'
     expired = 'expired'
     cancelled = 'cancelled'
+    refunded = 'refunded'
 
 
 class BOOKING_FLIGHT_PASSENGER_STATUS(enum.Enum):
     created = 'created'
     ticket_in_progress = 'ticket_in_progress'
     ticketed = 'ticketed'
+    refund_in_progress = 'refund_in_progress'
+    refunded = 'refunded'
 
 
 class DISCOUNT_TYPE(enum.Enum):
@@ -84,12 +87,13 @@ class PAYMENT_TYPE(enum.Enum):
 
 
 class FEE_APPLICATION(enum.Enum):
-    booking = 'booking'
-    cancellation = 'cancellation'
+    service_fee = 'service_fee'
+    ticket_return = 'ticket_return'
 
 
 class FEE_TERM(enum.Enum):
     none = 'none'
+    before_48h = 'before_48h'
     before_24h = 'before_24h'
     within_24h = 'within_24h'
     after_departure = 'after_departure'
@@ -118,7 +122,7 @@ DEFAULT_BOOKING_FLIGHT_PASSENGER_STATUS = BOOKING_FLIGHT_PASSENGER_STATUS.create
 DEFAULT_CURRENCY = CURRENCY.rub
 DEFAULT_PAYMENT_STATUS = PAYMENT_STATUS.pending
 DEFAULT_PAYMENT_TYPE = PAYMENT_TYPE.payment
-DEFAULT_FEE_APPLICATION = FEE_APPLICATION.booking
+DEFAULT_FEE_APPLICATION = FEE_APPLICATION.service_fee
 DEFAULT_FEE_TERM = FEE_TERM.none
 
 # Other variables

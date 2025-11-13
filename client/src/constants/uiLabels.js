@@ -215,6 +215,7 @@ export const UI_LABELS = {
 				delete_button: 'Удалить тариф',
 				manage_tariffs: 'Изменить тарифы',
 				confirm_delete: 'Вы уверены, что хотите удалить тариф?',
+				not_specified: 'Не указаны',
 			},
 			flights: {
 				title: 'Рейсы',

@@ -11,6 +11,7 @@ import {
 	deleteAllTariffs,
 	deleteFilteredTariffs,
 } from '../../../redux/actions/tariff';
+import { fetchFees } from '../../../redux/actions/fee';
 import { createAdminManager } from '../utils';
 import { FIELD_TYPES, formatNumber } from '../../utils';
 import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptions } from '../../../constants';
@@ -18,13 +19,25 @@ import { ENUM_LABELS, FIELD_LABELS, UI_LABELS, VALIDATION_MESSAGES, getEnumOptio
 const TariffManagement = () => {
 	const dispatch = useDispatch();
 	const { tariffs, isLoading, errors } = useSelector((state) => state.tariffs);
+	const { fees, isLoading: feesLoading } = useSelector((state) => state.fees);
 
 	useEffect(() => {
 		dispatch(fetchTariffs());
+		dispatch(fetchFees());
 	}, [dispatch]);
 
 	const seatClassOptions = getEnumOptions('SEAT_CLASS');
 	const currencyOptions = getEnumOptions('CURRENCY');
+
+	const feeOptions =
+		feesLoading || !Array.isArray(fees)
+			? []
+			: fees
+					.filter((f) => f.application === 'ticket_return')
+					.map((f) => ({
+						value: f.id,
+						label: `${ENUM_LABELS.FEE_APPLICATION[f.application]} - ${f.name} - ${f.amount}`,
+					}));
 
 	const FIELDS = {
 		id: { key: 'id', apiKey: 'id' },
@@ -95,6 +108,31 @@ const TariffManagement = () => {
 				}
 				return null;
 			},
+		},
+		feeIds: {
+			key: 'feeIds',
+			apiKey: 'fee_ids',
+			label: FIELD_LABELS.TARIFF.fee_ids,
+			type: FIELD_TYPES.MULTI_SELECT,
+			options: feeOptions,
+			fullWidth: true,
+			excludeFromTable: true,
+			formatter: (values) => {
+				if (!values || !Array.isArray(values)) return UI_LABELS.ADMIN.modules.tariffs.not_specified;
+				const labels = values.map((value) => {
+					const opt = feeOptions.find((o) => o.value === value);
+					return opt ? opt.label : value;
+				});
+				return labels.length > 0 ? labels.join(', ') : UI_LABELS.ADMIN.modules.tariffs.not_specified;
+			},
+		},
+		ticketReturnAllowed: {
+			key: 'ticketReturnAllowed',
+			apiKey: 'ticket_return_allowed',
+			label: FIELD_LABELS.TARIFF.ticket_return_allowed,
+			type: FIELD_TYPES.BOOLEAN,
+			defaultValue: false,
+			formatter: (value) => ENUM_LABELS.BOOLEAN[value ? 'true' : 'false'],
 		},
 		conditions: {
 			key: 'conditions',

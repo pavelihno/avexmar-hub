@@ -7,6 +7,7 @@ from app.utils.enum import SEAT_CLASS, CURRENCY, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
     from app.models.flight_tariff import FlightTariff
+    from app.models.fee import Fee
 
 
 class Tariff(BaseModel):
@@ -20,10 +21,12 @@ class Tariff(BaseModel):
     conditions = db.Column(db.String, nullable=True)
     baggage = db.Column(db.Integer, nullable=False)
     hand_luggage = db.Column(db.Integer, nullable=False)
+    ticket_return_allowed = db.Column(db.Boolean, nullable=False, default=False)
 
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
     )
+    fees : Mapped[List['Fee']] = db.relationship('Fee', secondary='tariff_fees', back_populates='tariffs')
 
     def to_dict(self, return_children=False):
         return {
@@ -35,7 +38,9 @@ class Tariff(BaseModel):
             'price': self.price,
             'conditions': self.conditions,
             'baggage': self.baggage,
-            'hand_luggage': self.hand_luggage
+            'hand_luggage': self.hand_luggage,
+            'ticket_return_allowed': self.ticket_return_allowed,
+            'fee_ids': [f.id for f in self.fees] if self.fees else []
         }
 
     @classmethod

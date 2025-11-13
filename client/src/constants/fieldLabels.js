@@ -127,6 +127,8 @@ export const FIELD_LABELS = {
 		conditions: 'Условия применения тарифа',
 		baggage: 'Багаж (кг)',
 		hand_luggage: 'Ручная кладь (кг)',
+		ticket_return_allowed: 'Возврат билета',
+		fee_ids: 'Сборы',
 	},
 	FLIGHT_TARIFF: {
 		flight_id: 'Рейс',

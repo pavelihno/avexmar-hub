@@ -33,6 +33,7 @@ class BookingFlightPassenger(BaseModel):
         nullable=False,
         default=DEFAULT_BOOKING_FLIGHT_PASSENGER_STATUS,
     )
+    refund_date = db.Column(db.Date, nullable=True)
 
     booking_passenger: Mapped['BookingPassenger'] = db.relationship(
         'BookingPassenger',
