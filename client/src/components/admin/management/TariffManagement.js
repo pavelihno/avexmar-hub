@@ -126,10 +126,10 @@ const TariffManagement = () => {
 				return labels.length > 0 ? labels.join(', ') : UI_LABELS.ADMIN.modules.tariffs.not_specified;
 			},
 		},
-		ticketReturnAllowed: {
-			key: 'ticketReturnAllowed',
-			apiKey: 'ticket_return_allowed',
-			label: FIELD_LABELS.TARIFF.ticket_return_allowed,
+		refundAllowed: {
+			key: 'refundAllowed',
+			apiKey: 'refund_allowed',
+			label: FIELD_LABELS.TARIFF.refund_allowed,
 			type: FIELD_TYPES.BOOLEAN,
 			defaultValue: false,
 			formatter: (value) => ENUM_LABELS.BOOLEAN[value ? 'true' : 'false'],

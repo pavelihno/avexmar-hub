@@ -21,7 +21,7 @@ class Tariff(BaseModel):
     conditions = db.Column(db.String, nullable=True)
     baggage = db.Column(db.Integer, nullable=False)
     hand_luggage = db.Column(db.Integer, nullable=False)
-    ticket_return_allowed = db.Column(db.Boolean, nullable=False, default=False)
+    refund_allowed = db.Column(db.Boolean, nullable=False, default=False)
 
     flight_tariffs: Mapped[List['FlightTariff']] = db.relationship(
         'FlightTariff', back_populates='tariff', lazy='dynamic', cascade='all, delete-orphan'
@@ -39,7 +39,7 @@ class Tariff(BaseModel):
             'conditions': self.conditions,
             'baggage': self.baggage,
             'hand_luggage': self.hand_luggage,
-            'ticket_return_allowed': self.ticket_return_allowed,
+            'refund_allowed': self.refund_allowed,
             'fee_ids': [f.id for f in self.fees] if self.fees else []
         }
 
