@@ -44,6 +44,13 @@ export const ENUM_LABELS = {
 		infant: 'Младенец',
 		infant_seat: 'Младенец с местом',
 	},
+	BOOKING_FLIGHT_PASSENGER_STATUS: {
+		created: 'Создан',
+		ticket_in_progress: 'Оформляется',
+		ticketed: 'Оформлен',
+		refund_in_progress: 'Возврат обрабатывается',
+		refunded: 'Возврат выполнен',
+	},
 	CURRENCY: {
 		rub: 'РУБ',
 	},
@@ -70,7 +77,7 @@ export const ENUM_LABELS = {
 	},
 	FEE_APPLICATION: {
 		service_fee: 'Сервисный сбор',
-		ticket_return: 'Возврат билета',
+		ticket_refund: 'Возврат билета',
 	},
 	FEE_TERM: {
 		none: 'Отсутствует',

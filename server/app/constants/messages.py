@@ -31,8 +31,14 @@ class BookingMessages:
     BOOKING_DETAILS_REQUIRED = 'Требуются номер бронирования, фамилия и имя'
     BOOKING_NOT_FOUND = 'Бронирование не найдено'
     BOOKING_FOUND = 'Бронирование найдено'
+    TICKET_NOT_FOUND = 'Билет не найден'
     ITINERARY_RECEIPT_NOT_FOUND = 'Маршрутная квитанция не найдена'
-    REFUND_NOT_ALLOWED = 'Возврат возможен только для подтвержденных бронирований'
+    BOOKING_REFUND_NOT_ALLOWED = 'Возврат возможен только для подтвержденных бронирований'
+    TARIFF_REFUND_NOT_ALLOWED = 'Возврат запрещен условиями тарифа'
+    PERIOD_REFUND_NOT_ALLOWED = 'Возврат невозможен: истек период для возврата'
+    TICKET_REFUND_ALREADY_REQUESTED = 'Возврат уже запрошен по данному билету'
+    TICKET_ALREADY_REFUNDED = 'Возврат по билету уже выполнен'
+    TICKET_REFUND_STATUS_NOT_ALLOWED = 'Возврат доступен только для выписанных билетов'
 
     @staticmethod
     def illegal_transition(from_status: str, to_status: str) -> str:

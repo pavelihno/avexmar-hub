@@ -239,7 +239,12 @@ const Completion = () => {
 								</Typography>
 							</AccordionSummary>
 							<AccordionDetails>
-								<TicketsTable flights={booking.flights} />
+								<TicketsTable
+									flights={booking.flights}
+									publicId={publicId}
+									accessToken={accessToken}
+									currencySymbol={currencySymbol}
+								/>
 							</AccordionDetails>
 						</Accordion>
 					)}

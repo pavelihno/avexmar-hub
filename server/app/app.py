@@ -285,6 +285,8 @@ def __create_app(_config_class, _db):
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
+    app.route('/booking/<public_id>/<ticket_id>/refund', methods=['GET'])(get_request_refund_details)
+    app.route('/booking/<public_id>/<ticket_id>/refund', methods=['POST'])(request_refund)
     app.route('/booking/dashboard', methods=['GET'])(get_booking_dashboard)
 
     # exports

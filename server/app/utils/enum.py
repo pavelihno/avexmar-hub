@@ -88,7 +88,7 @@ class PAYMENT_TYPE(enum.Enum):
 
 class FEE_APPLICATION(enum.Enum):
     service_fee = 'service_fee'
-    ticket_return = 'ticket_return'
+    ticket_refund = 'ticket_refund'
 
 
 class FEE_TERM(enum.Enum):

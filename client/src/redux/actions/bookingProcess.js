@@ -90,3 +90,31 @@ export const confirmBooking = createAsyncThunk(
 		}
 	}
 );
+
+export const fetchTicketRefundDetails = createAsyncThunk(
+	'bookingProcess/fetchTicketRefundDetails',
+	async ({ publicId, ticketId, accessToken }, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.get(`/booking/${publicId}/${ticketId}/refund`, buildAccessParams(accessToken));
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
+export const requestTicketRefund = createAsyncThunk(
+	'bookingProcess/requestTicketRefund',
+	async ({ publicId, ticketId, accessToken }, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.post(
+				`/booking/${publicId}/${ticketId}/refund`,
+				{},
+				buildAccessParams(accessToken)
+			);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);

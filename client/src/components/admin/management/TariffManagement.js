@@ -33,7 +33,7 @@ const TariffManagement = () => {
 		feesLoading || !Array.isArray(fees)
 			? []
 			: fees
-					.filter((f) => f.application === 'ticket_return')
+					.filter((f) => f.application === 'ticket_refund')
 					.map((f) => ({
 						value: f.id,
 						label: `${ENUM_LABELS.FEE_APPLICATION[f.application]} - ${f.name} - ${f.amount}`,

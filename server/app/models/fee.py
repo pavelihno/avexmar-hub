@@ -36,17 +36,13 @@ class Fee(BaseModel):
         return super().get_all(sort_by=['name'], descending=False)
 
     @classmethod
-    def get_applicable_fees(cls, application, hours_before_departure=None, tariff_ids=None):
+    def get_applicable_fees(cls, application, hours_before_departure=None, tariff_id=None):
         from app.models.tariff_fee import TariffFee
 
         query = cls.query.filter_by(application=application)
 
-        if application == FEE_APPLICATION.service_fee:
-            # Service fees apply universally to all bookings
-            query = query.filter_by(application_term=FEE_TERM.none)
-
-        elif application in [FEE_APPLICATION.ticket_return]:
-            # Return fees are tariff-specific and time-based
+        if application == FEE_APPLICATION.ticket_refund:
+            # Refund fees are tariff-specific and time-based
             if hours_before_departure is None:
                 term = FEE_TERM.after_departure
             elif hours_before_departure > 48:
@@ -60,7 +56,7 @@ class Fee(BaseModel):
 
             query = query.filter_by(application_term=term)
 
-            if tariff_ids:
-                query = query.join(TariffFee).filter(TariffFee.tariff_id.in_(tariff_ids))
+            if tariff_id:
+                query = query.join(TariffFee).filter(TariffFee.tariff_id == tariff_id)
 
         return query.all()
