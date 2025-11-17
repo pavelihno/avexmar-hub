@@ -29,9 +29,6 @@ import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
 import { fetchTicketRefundDetails, requestTicketRefund, fetchBookingDetails } from '../../redux/actions/bookingProcess';
 
-const REFUND_IN_PROGRESS_STATUSES = new Set(['refund_in_progress']);
-const REFUND_COMPLETED_STATUSES = new Set(['refunded']);
-
 const createInitialRefundState = () => ({
 	open: false,
 	ticket: null,
@@ -198,38 +195,10 @@ const TicketsTable = ({ flights = [], publicId, accessToken, currencySymbol }) =
 	const renderRefundAction = (ticket) => {
 		const status = ticket?.status;
 
-		if (REFUND_COMPLETED_STATUSES.has(status)) {
+		if (status != 'ticketed') {
 			return (
 				<Typography variant='body2' color='text.secondary'>
-					{UI_LABELS.BOOKING.confirmation.refund.refunded}
-				</Typography>
-			);
-		}
-
-		if (REFUND_IN_PROGRESS_STATUSES.has(status)) {
-			return (
-				<Typography variant='body2' color='text.secondary'>
-					{UI_LABELS.BOOKING.confirmation.refund.requested}
-				</Typography>
-			);
-		}
-
-		if (status !== 'ticketed') {
-			const statusLabel = status
-				? ENUM_LABELS.BOOKING_FLIGHT_PASSENGER_STATUS?.[status] || status
-				: UI_LABELS.BOOKING.confirmation.refund.unavailable;
-
-			return (
-				<Typography variant='body2' color='text.secondary'>
-					{statusLabel}
-				</Typography>
-			);
-		}
-
-		if (!publicId) {
-			return (
-				<Typography variant='body2' color='text.secondary'>
-					{UI_LABELS.BOOKING.confirmation.refund.unavailable}
+					{ENUM_LABELS.BOOKING_FLIGHT_PASSENGER_STATUS[status] || status}
 				</Typography>
 			);
 		}
@@ -388,7 +357,6 @@ const TicketsTable = ({ flights = [], publicId, accessToken, currencySymbol }) =
 					</TableHead>
 					<TableBody>
 						{flights.map((flight, flightIdx) => {
-							const tickets = flight.tickets || [];
 							const flightKey = flight.id || flight.booking_flight_id || flightIdx;
 							const flightHeader = buildFlightTicketHeader(flight);
 
@@ -470,7 +438,7 @@ const TicketRefundDialog = ({ state, onClose, onSubmit, onAcceptChange, currency
 		>
 			<DialogTitle>{dialogLabels.title}</DialogTitle>
 
-			<Box sx={{ px: 3 }}>
+			<Box sx={{ px: 3, py: 1 }}>
 				<Fade in={!!error} timeout={300}>
 					<div>{error && <Alert severity='error'>{error}</Alert>}</div>
 				</Fade>

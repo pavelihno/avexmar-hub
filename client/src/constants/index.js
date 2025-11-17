@@ -7,7 +7,6 @@ export {
 	BUTTONS,
 	TITLES,
 	MESSAGES,
-	NAV,
 	AUTH,
 	PROFILE,
 	BOOKING,

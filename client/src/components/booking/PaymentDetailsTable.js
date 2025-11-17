@@ -24,16 +24,20 @@ const PaymentDetailsTable = ({ payments = [] }) => {
 	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const paymentsData = React.useMemo(() => {
-		return payments.map((payment, index) => ({
-			key: index,
-			paymentMethod: ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method,
-			providerPaymentId: payment.provider_payment_id || '—',
-			paymentStatus: ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status,
-			amount: `${formatNumber(payment.amount || 0)} ${
-				ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || payment.currency
-			}`,
-			paidAt: payment.paid_at ? formatDateTime(payment.paid_at) : '—',
-		}));
+		return payments.map((payment, index) => {
+			const type = payment.payment_type || payment.type;
+			return {
+				key: index,
+				paymentMethod: ENUM_LABELS.PAYMENT_METHOD[payment.payment_method] || payment.payment_method,
+				paymentType: ENUM_LABELS.PAYMENT_TYPE[type] || type || '—',
+				providerPaymentId: payment.provider_payment_id || '—',
+				paymentStatus: ENUM_LABELS.PAYMENT_STATUS[payment.payment_status] || payment.payment_status,
+				amount: `${formatNumber(payment.amount || 0)} ${
+					ENUM_LABELS.CURRENCY_SYMBOL[payment.currency] || payment.currency
+				}`,
+				paidAt: payment.paid_at ? formatDateTime(payment.paid_at) : '—',
+			};
+		});
 	}, [payments]);
 
 	return (
@@ -44,8 +48,8 @@ const PaymentDetailsTable = ({ payments = [] }) => {
 					{paymentsData.map((data) => (
 						<Paper key={data.key} variant='outlined' sx={{ p: 1.5 }}>
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-								<Typography color='text.secondary'>{FIELD_LABELS.PAYMENT.payment_method}</Typography>
-								<Typography>{data.paymentMethod}</Typography>
+								<Typography color='text.secondary'>{FIELD_LABELS.PAYMENT.payment_type}</Typography>
+								<Typography>{data.paymentType}</Typography>
 							</Box>
 							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 								<Typography color='text.secondary'>
@@ -74,7 +78,7 @@ const PaymentDetailsTable = ({ payments = [] }) => {
 					<Table size='small'>
 						<TableHead>
 							<TableRow>
-								<TableCell>{FIELD_LABELS.PAYMENT.payment_method}</TableCell>
+								<TableCell>{FIELD_LABELS.PAYMENT.payment_type}</TableCell>
 								<TableCell>{FIELD_LABELS.PAYMENT.provider_payment_id}</TableCell>
 								<TableCell>{FIELD_LABELS.PAYMENT.payment_status}</TableCell>
 								<TableCell>{FIELD_LABELS.PAYMENT.amount}</TableCell>
@@ -84,7 +88,7 @@ const PaymentDetailsTable = ({ payments = [] }) => {
 						<TableBody>
 							{paymentsData.map((data) => (
 								<TableRow key={data.key}>
-									<TableCell>{data.paymentMethod}</TableCell>
+									<TableCell>{data.paymentType}</TableCell>
 									<TableCell>{data.providerPaymentId}</TableCell>
 									<TableCell>{data.paymentStatus}</TableCell>
 									<TableCell>{data.amount}</TableCell>

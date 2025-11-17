@@ -50,6 +50,14 @@ class EMAIL_TYPE(enum.Enum):
         EMAIL_TEMPLATES['ticket_issued'],
         EMAIL_SUBJECTS['ticket_issued'],
     )
+    ticket_refund = (
+        EMAIL_TEMPLATES['ticket_refund'],
+        EMAIL_SUBJECTS['ticket_refund'],
+    )
+    ticket_refund_rejected = (
+        EMAIL_TEMPLATES['ticket_refund_rejected'],
+        EMAIL_SUBJECTS['ticket_refund_rejected'],
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template

@@ -29,6 +29,15 @@ def get_seats_number(params):
     )
 
 
+def __get_passenger_full_name(last_name, first_name, patronymic_name) -> str:
+    return ' '.join(
+        filter(
+            None,
+            [last_name, first_name, patronymic_name],
+        )
+    ).strip()
+
+
 def get_all_discounts():
     discounts = Discount.get_all()
     discount_pct = {
@@ -148,23 +157,21 @@ def calculate_price_details(outbound_id, outbound_tariff_id, return_id, return_t
             _fees = 0.0
 
             # Fees calculation
-            # Сомнительно. Уточнить возможно сервисный сбор взимается с каждого пассажира
-            if seats_number > 0:
-                for fee in service_fees:
-                    fee_id = fee.id
+            for fee in service_fees:
+                fee_id = fee.id
 
-                    # Fee per one seat
-                    _unit_fee = fee.amount
-                    unit_fees += _unit_fee
+                # Fee per one seat
+                _unit_fee = fee.amount
+                unit_fees += _unit_fee
 
-                    # Fee for all seats of the category
-                    fee_amount = _unit_fee * seats_number
-                    _fees += fee_amount
+                # Fee for all seats of the category
+                fee_amount = _unit_fee * passenger_number
+                _fees += fee_amount
 
-                    if fee_id in fees:
-                        fees[fee_id]['total'] += fee_amount
-                    else:
-                        fees[fee_id] = {'name': fee.name, 'total': fee_amount}
+                if fee_id in fees:
+                    fees[fee_id]['total'] += fee_amount
+                else:
+                    fees[fee_id] = {'name': fee.name, 'total': fee_amount}
 
             _unit_final_price = unit_price + unit_fees
             _final_price = _price + _fees
@@ -236,15 +243,10 @@ def calculate_receipt_details(booking):
     passengers_map = {}
     for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
         passenger = bp.passenger
-        full_name = ' '.join(
-            filter(
-                None,
-                [
-                    passenger.last_name,
-                    passenger.first_name,
-                    passenger.patronymic_name
-                ]
-            )
+        full_name = __get_passenger_full_name(
+            passenger.last_name,
+            passenger.first_name,
+            passenger.patronymic_name
         )
         passengers_map.setdefault(
             BookingPassenger.get_plural_category(bp.category).value,
@@ -564,7 +566,8 @@ def get_booking_snapshot(booking) -> dict:
                 'passenger': bfp.booking_passenger.passenger.to_dict(),
                 'booking_flight_passenger_id': bfp.id,
                 'status': bfp.status.value if bfp.status else None,
-                'refund_date': bfp.refund_date.isoformat() if bfp.refund_date else None,
+                'refund_request_at': bfp.refund_request_at.isoformat() if bfp.refund_request_at else None,
+                'refund_decision_at': bfp.refund_decision_at.isoformat() if bfp.refund_decision_at else None,
             })
 
     snapshot['flights'] = [
@@ -586,6 +589,7 @@ def calculate_refund_details(booking, ticket):
 
     bfp = ticket.booking_flight_passenger
     bp = bfp.booking_passenger
+    passenger = bp.passenger
 
     booking_flight_ids = BookingFlight.query.with_entities(BookingFlight.id).filter_by(
         booking_id=booking.id
@@ -601,15 +605,18 @@ def calculate_refund_details(booking, ticket):
 
     tariff = flight_tariff.tariff
     flight = flight_tariff.flight
+    route = flight.route
     is_round_trip = booking.booking_flights.count() > 1
 
     departure_dt = combine_date_time(
         flight.scheduled_departure,
         flight.scheduled_departure_time,
     )
-    now = datetime.now()
+
+    timestamp = bfp.refund_request_at or datetime.now()
+
     hours_before_departure = (
-        (departure_dt - now).total_seconds() / 3600.0
+        (departure_dt - timestamp).total_seconds() / 3600.0
         if departure_dt
         else 0.0
     )
@@ -635,7 +642,6 @@ def calculate_refund_details(booking, ticket):
         hours_before_departure=hours_before_departure,
         tariff_id=tariff.id,
     )
-
     penalty_fee_details = [
         {
             'id': fee.id,
@@ -653,12 +659,41 @@ def calculate_refund_details(booking, ticket):
     unit_price = price_details['unit_price']
     total_refund_amount = max(unit_price - total_penalty_fees, 0.0)
 
+    # Passenger details
+    passenger_details = {
+        'full_name': __get_passenger_full_name(
+            passenger.last_name,
+            passenger.first_name,
+            passenger.patronymic_name
+        ),
+    }
+
+    # Flight details
+    origin_airport = route.origin_airport
+    destination_airport = route.destination_airport
+    flight_details = {
+        'flight_number': flight.flight_number,
+        'departure_date': flight.scheduled_departure,
+        'arrival_date': flight.scheduled_arrival,
+        'origin': origin_airport.city_name,
+        'destination': destination_airport.city_name,
+        'seat_class': tariff.seat_class.value
+    }
+
+    # Ticket details
+    ticket_details = {
+        'ticket_number': ticket.ticket_number,
+    }
+
     refund_details = {
         'unit_price': unit_price,
         'penalty_fees': penalty_fee_details,
         'total_penalty_fees': total_penalty_fees,
         'refund_amount': total_refund_amount,
         'currency': booking.currency.value if booking.currency else None,
+        'passenger': passenger_details,
+        'flight': flight_details,
+        'ticket': ticket_details,
     }
 
     return (

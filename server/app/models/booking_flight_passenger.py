@@ -33,7 +33,8 @@ class BookingFlightPassenger(BaseModel):
         nullable=False,
         default=DEFAULT_BOOKING_FLIGHT_PASSENGER_STATUS,
     )
-    refund_date = db.Column(db.Date, nullable=True)
+    refund_request_at = db.Column(db.DateTime, nullable=True)
+    refund_decision_at = db.Column(db.DateTime, nullable=True)
 
     booking_passenger: Mapped['BookingPassenger'] = db.relationship(
         'BookingPassenger',
@@ -72,4 +73,14 @@ class BookingFlightPassenger(BaseModel):
                 else {}
             ),
             'status': self.status.value if self.status else None,
+            'refund_request_at': (
+                self.refund_request_at.isoformat()
+                if self.refund_request_at
+                else None
+            ),
+            'refund_decision_at': (
+                self.refund_decision_at.isoformat()
+                if self.refund_decision_at
+                else None
+            ),
         }

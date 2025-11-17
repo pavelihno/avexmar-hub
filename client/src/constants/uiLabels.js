@@ -450,7 +450,6 @@ export const UI_LABELS = {
 					emptyIssues: 'Нет критичных инцидентов',
 				},
 				sections: {
-					buyer: 'Покупатель',
 					flights: 'Рейсы',
 					passengers: 'Пассажиры',
 					tickets: 'Билеты',
@@ -489,6 +488,35 @@ export const UI_LABELS = {
 						ticketNumber: 'Номер билета',
 						passenger: 'Пассажир',
 						document: 'Документ',
+						action: 'Возврат',
+					},
+				},
+				refund: {
+					link: 'Подтвердить возврат билета',
+					dialog: {
+						title: 'Подтверждение возврата билета',
+						bookingNumber: 'Бронирование',
+						ticketNumber: 'Билет',
+						passenger: 'Пассажир',
+						document: 'Документ',
+						route: 'Маршрут',
+						flight: 'Рейс',
+						departure_time: 'Дата и время вылета',
+						requestedAt: 'Запрос на возврат',
+						decisionAt: 'Решение по возврату',
+						fetchError: 'Не удалось загрузить данные билета. Попробуйте позже.',
+						submitError: 'Не удалось отправить действие. Попробуйте позже.',
+						noData: 'Нет данных по билету',
+						loading: 'Загружаем данные билета...',
+						success: 'Решение направлено покупателю',
+						confirm: 'Подтвердить',
+						decline: 'Отклонить',
+						close: 'Закрыть',
+						rejectionReasonLabel: 'Причина отклонения',
+						rejectionReasonPlaceholder: 'Укажите причину отклонения возврата',
+						rejectionReasonRequired: 'Поле обязательно для заполнения',
+						back: 'Назад',
+						reject: 'Отклонить возврат',
 					},
 				},
 				pricing: {
@@ -497,7 +525,6 @@ export const UI_LABELS = {
 					fees: 'Сборы',
 				},
 				actions: {
-					cancel: 'Отменить бронирование',
 					download: 'Скачать PDF подтверждение',
 					downloadItinerary: 'Скачать маршрут-квитанцию',
 					openBooking: 'Открыть бронирование',
@@ -505,6 +532,8 @@ export const UI_LABELS = {
 				issues: {
 					pending_payment: 'Ожидает оплаты',
 					failed_payment: 'Ошибка оплаты',
+					ticket_refund: 'Возврат билета',
+					ticket_in_progress: 'Билет оформляется',
 				},
 				chips: {
 					user: 'Пользователь',
@@ -619,152 +648,6 @@ export const UI_LABELS = {
 			empty: 'Слайды карусели пока не опубликованы',
 			go_to_slide: (index) => `Перейти к слайду ${index}`,
 		},
-		recommendations: {
-			default_filters: [
-				{ key: 'popular', label: 'Популярные сейчас' },
-				{ key: 'weekend', label: 'На выходные' },
-				{ key: 'family', label: 'Для семьи' },
-				{ key: 'culture', label: 'Город и культура' },
-			],
-			default_items: {
-				popular: [
-					{
-						id: 'popular-istanbul',
-						city: 'Стамбул',
-						subtitle: 'Уикенд у Босфора',
-						price: 'от 13 500 ₽',
-						duration: '5 ч в пути',
-						image: 'https://images.unsplash.com/photo-1473957722956-b8e1d4e1f2c4?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'popular-tbilisi',
-						city: 'Тбилиси',
-						subtitle: 'Вино, гастрономия и термальные бани',
-						price: 'от 11 200 ₽',
-						duration: '3 ч 20 мин',
-						image: 'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'popular-dubai',
-						city: 'Дубай',
-						subtitle: 'Шопинг и небоскребы',
-						price: 'от 21 900 ₽',
-						duration: '5 ч 40 мин',
-						image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'popular-larnaca',
-						city: 'Ларнака',
-						subtitle: 'Мягкое море и солнце',
-						price: 'от 17 800 ₽',
-						duration: '4 ч 50 мин',
-						image: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=1200&q=80',
-					},
-				],
-				weekend: [
-					{
-						id: 'weekend-kazan',
-						city: 'Казань',
-						subtitle: 'Волга, панорамы и гастрономия',
-						price: 'от 4 900 ₽',
-						duration: '1 ч 25 мин',
-						image: 'https://images.unsplash.com/photo-1610429327123-9aa832895c0f?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'weekend-pskov',
-						city: 'Псков',
-						subtitle: 'История и неспешные прогулки',
-						price: 'от 3 700 ₽',
-						duration: '1 ч 40 мин',
-						image: 'https://images.unsplash.com/photo-1600343156924-21c26c9540ce?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'weekend-murmansk',
-						city: 'Мурманск',
-						subtitle: 'Фьорды, китовые сафари и тундра',
-						price: 'от 8 300 ₽',
-						duration: '2 ч 10 мин',
-						image: 'https://images.unsplash.com/photo-1437482078695-73f5ca6c96e3?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'weekend-baku',
-						city: 'Баку',
-						subtitle: 'Современность и восточная атмосфера',
-						price: 'от 9 600 ₽',
-						duration: '2 ч 50 мин',
-						image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80',
-					},
-				],
-				family: [
-					{
-						id: 'family-sochi',
-						city: 'Сочи',
-						subtitle: 'Парки, море и джазовые вечера',
-						price: 'от 6 400 ₽',
-						duration: '2 ч 25 мин',
-						image: 'https://images.unsplash.com/photo-1518552782250-3ca352ec62c5?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'family-minsk',
-						city: 'Минск',
-						subtitle: 'Парк развлечений и комфортные отели',
-						price: 'от 5 500 ₽',
-						duration: '1 ч 50 мин',
-						image: 'https://images.unsplash.com/photo-1573481047955-5491d09d79dd?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'family-tivat',
-						city: 'Тиват',
-						subtitle: 'Адриатика и зеленые бухты',
-						price: 'от 18 900 ₽',
-						duration: '4 ч 10 мин',
-						image: 'https://images.unsplash.com/photo-1505764706515-aa95265c5abc?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'family-bishkek',
-						city: 'Бишкек',
-						subtitle: 'Горы, озера и этно-кэмпы',
-						price: 'от 12 700 ₽',
-						duration: '3 ч 45 мин',
-						image: 'https://images.unsplash.com/photo-1572274408440-905f0f7c9cd5?auto=format&fit=crop&w=1200&q=80',
-					},
-				],
-				culture: [
-					{
-						id: 'culture-rome',
-						city: 'Рим',
-						subtitle: 'Колизей, музеи и кофе на террасах',
-						price: 'от 23 600 ₽',
-						duration: '5 ч 20 мин',
-						image: 'https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'culture-prague',
-						city: 'Прага',
-						subtitle: 'Готические улицы и джаз на барже',
-						price: 'от 18 100 ₽',
-						duration: '4 ч 40 мин',
-						image: 'https://images.unsplash.com/photo-1499510030009-4395efbf22c1?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'culture-samara',
-						city: 'Самара',
-						subtitle: 'Волга, модерн и архитектурные прогулки',
-						price: 'от 4 200 ₽',
-						duration: '1 ч 50 мин',
-						image: 'https://images.unsplash.com/photo-1514544250970-667a17d4d297?auto=format&fit=crop&w=1200&q=80',
-					},
-					{
-						id: 'culture-yerevan',
-						city: 'Ереван',
-						subtitle: 'Винодельни, арт-кафе и горные виды',
-						price: 'от 10 900 ₽',
-						duration: '3 ч 05 мин',
-						image: 'https://images.unsplash.com/photo-1613397645110-2a0473e14f28?auto=format&fit=crop&w=1200&q=80',
-					},
-				],
-			},
-		},
 	},
 	BOOKING: {
 		progress_steps: {
@@ -774,11 +657,6 @@ export const UI_LABELS = {
 			completion: 'Бронирование завершено',
 		},
 		timer_tooltip: 'Время для завершения бронирования',
-		step_placeholders: {
-			confirmation: 'Шаг подтверждения',
-			payment: 'Шаг оплаты',
-			completion: 'Шаг завершения',
-		},
 		flight_details: {
 			title: 'Детали рейса',
 			from_to: (from, to) => {
@@ -828,9 +706,6 @@ export const UI_LABELS = {
 			},
 			refund: {
 				link: 'Запросить возврат',
-				requested: 'Возврат обрабатывается',
-				refunded: 'Возврат выполнен',
-				unavailable: 'Недоступно',
 				dialog: {
 					title: 'Запрос на возврат билета',
 					ticket_info: 'Информация о билете',
@@ -844,7 +719,7 @@ export const UI_LABELS = {
 					refund_amount: 'Сумма к возврату',
 					accept_label: 'Я принимаю условия возврата',
 					submit: 'Отправить запрос',
-					success: 'Запрос на возврат отправлен. Мы уведомим вас о результате по электронной почте.',
+					success: 'Запрос на возврат отправлен. Мы уведомим вас о результате по электронной почте',
 					fetch_error: 'Не удалось получить детали возврата',
 					submit_error: 'Не удалось отправить запрос на возврат',
 					not_refundable: 'Возврат для этого билета невозможен',
@@ -1044,7 +919,6 @@ export const ABOUT = UI_LABELS.ABOUT;
 export const BUTTONS = UI_LABELS.BUTTONS;
 export const TITLES = UI_LABELS.TITLES;
 export const MESSAGES = UI_LABELS.MESSAGES;
-export const NAV = UI_LABELS.NAV;
 export const AUTH = UI_LABELS.AUTH;
 export const PROFILE = UI_LABELS.PROFILE;
 export const BOOKING = UI_LABELS.BOOKING;

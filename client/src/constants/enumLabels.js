@@ -50,6 +50,7 @@ export const ENUM_LABELS = {
 		ticketed: 'Оформлен',
 		refund_in_progress: 'Возврат обрабатывается',
 		refunded: 'Возврат выполнен',
+		refund_rejected: 'Возврат отклонён',
 	},
 	CURRENCY: {
 		rub: 'РУБ',

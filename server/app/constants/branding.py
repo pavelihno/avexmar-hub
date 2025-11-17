@@ -20,6 +20,8 @@ EMAIL_TEMPLATES = {
     'two_factor': 'two_factor',
     'password_change': 'password_change',
     'ticket_issued': 'ticket_issued',
+    'ticket_refund': 'ticket_refund',
+    'ticket_refund_rejected': 'ticket_refund_rejected',
 }
 
 EMAIL_SUBJECTS = {
@@ -30,6 +32,8 @@ EMAIL_SUBJECTS = {
     'two_factor': 'Код для входа — {brand_name}',
     'password_change': 'Изменение пароля — {brand_name}',
     'ticket_issued': 'Билеты выписаны — Бронирование № {booking_number}, Рейс {flight_number} — {brand_name}',
+    'ticket_refund': 'Возврат по билету № {ticket_number} — Бронирование № {booking_number} — {brand_name}',
+    'ticket_refund_rejected': 'Отказ в возврате средств — Билет № {ticket_number} — Бронирование № {booking_number} — {brand_name}',
 }
 
 DEFAULT_EMAIL_CONTEXT = {

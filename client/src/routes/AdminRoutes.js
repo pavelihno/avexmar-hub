@@ -11,7 +11,7 @@ import DiscountManagement from '../components/admin/management/DiscountManagemen
 import FeeManagement from '../components/admin/management/FeeManagement';
 import FlightManagement from '../components/admin/management/FlightManagement';
 import FlightPassengerExport from '../components/admin/dashboard/FlightPassengerExport';
-import BookingDashboard from '../components/admin/dashboard/BookingDashboard';
+import BookingDashboard from '../components/admin/dashboard/booking/BookingDashboard';
 import TariffManagement from '../components/admin/management/TariffManagement';
 import BookingManagement from '../components/admin/management/BookingManagement';
 import PassengerManagement from '../components/admin/management/PassengerManagement';

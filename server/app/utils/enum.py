@@ -26,6 +26,7 @@ class BOOKING_FLIGHT_PASSENGER_STATUS(enum.Enum):
     ticketed = 'ticketed'
     refund_in_progress = 'refund_in_progress'
     refunded = 'refunded'
+    refund_rejected = 'refund_rejected'
 
 
 class DISCOUNT_TYPE(enum.Enum):

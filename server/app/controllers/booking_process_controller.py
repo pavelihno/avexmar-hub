@@ -233,7 +233,6 @@ def confirm_booking_process(current_user):
 
     session = db.session
 
-    # Avoid unnecessary status history entries
     if booking.status == BOOKING_STATUS.passengers_added:
         Booking.transition_status(
             id=booking.id,
@@ -415,6 +414,7 @@ def _get_request_refund_details(current_user, public_id, ticket_id, send_request
         BookingFlightPassenger.update(
             ticket.booking_flight_passenger.id,
             status=BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress,
+            refund_request_at=datetime.now(),
             commit=True,
         )
 

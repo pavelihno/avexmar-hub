@@ -288,6 +288,9 @@ def __create_app(_config_class, _db):
     app.route('/booking/<public_id>/<ticket_id>/refund', methods=['GET'])(get_request_refund_details)
     app.route('/booking/<public_id>/<ticket_id>/refund', methods=['POST'])(request_refund)
     app.route('/booking/dashboard', methods=['GET'])(get_booking_dashboard)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund', methods=['GET'])(get_booking_ticket_refund_details)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund/confirm', methods=['POST'])(confirm_booking_ticket_refund)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund/reject', methods=['POST'])(reject_booking_ticket_refund)
 
     # exports
     app.route('/exports/flight-passengers', methods=['POST'])(export_pending_ticket_passengers)

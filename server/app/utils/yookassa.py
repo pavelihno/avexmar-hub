@@ -2,19 +2,25 @@ import uuid
 from typing import Any, Dict
 from datetime import datetime, timedelta
 
-from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice
+from yookassa import Configuration, Payment as YooPayment, Invoice as YooInvoice, Refund as YooRefund
 
 from app.config import Config
-from app.constants.branding import SEAT_CLASS_LABELS
+from app.constants.branding import SEAT_CLASS_LABELS, CURRENCY_LABELS
 from app.utils.passenger_categories import PASSENGER_CATEGORY_LABELS
 from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
 from app.constants.yookassa import YooKassaMessages, YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE
 from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
-from app.utils.business_logic import calculate_receipt_details, get_booking_snapshot
+from app.models.ticket import Ticket
+from app.utils.business_logic import calculate_receipt_details, calculate_refund_details, get_booking_snapshot
 from app.utils.datetime import format_date, format_time, parse_datetime
-from app.utils.enum import PAYMENT_METHOD, PAYMENT_STATUS, BOOKING_STATUS, PAYMENT_TYPE
+from app.utils.enum import (
+    PAYMENT_METHOD,
+    PAYMENT_STATUS,
+    BOOKING_STATUS,
+    PAYMENT_TYPE,
+)
 from app.utils.pdf import generate_booking_pdf
 from app.utils.email import EMAIL_TYPE, send_email
 
@@ -33,7 +39,8 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
         origin = (route.get('origin_airport') or {}).get('city_name', '')
         dest = (route.get('destination_airport') or {}).get('city_name', '')
         seat_class = SEAT_CLASS_LABELS.get(
-            direction.get('seat_class', ''), direction.get('seat_class', '')
+            direction.get('seat_class', ''),
+            direction.get('seat_class', '')
         )
         date = direction.get('date')
         date_str = format_date(date, '%d.%m.%y')
@@ -58,6 +65,51 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
                     'payment_subject': 'service',
                 }
             )
+
+    return {
+        'customer': {'email': booking.email_address},
+        'items': items,
+    }
+
+
+def __generate_refund_receipt(booking: Booking, refund_details: dict) -> Dict[str, Any]:
+    refund_amount = refund_details.get('refund_amount')
+    amount = {
+        'value': f'{refund_amount:.2f}',
+        'currency': refund_details.get('currency', '').upper(),
+    }
+
+    passenger = refund_details.get('passenger', {})
+    flight = refund_details.get('flight', {})
+
+    full_name = passenger.get('full_name', '')
+    seat_class = SEAT_CLASS_LABELS.get(
+        flight.get('seat_class', ''),
+        flight.get('seat_class', '')
+    )
+    origin = flight.get('origin')
+    dest = flight.get('destination')
+    date = flight.get('departure_date')
+    date_str = format_date(date, '%d.%m.%y')
+
+    description = YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE.format(
+        origin=origin,
+        destination=dest,
+        seat_class=seat_class,
+        date=date_str,
+        passenger=full_name,
+    )
+
+    items = [
+        {
+            'description': description,
+            'quantity': '1',
+            'amount': amount,
+            'vat_code': 7,
+            'payment_mode': 'full_payment',
+            'payment_subject': 'service',
+        }
+    ]
 
     return {
         'customer': {'email': booking.email_address},
@@ -175,6 +227,35 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
         hours=Config.BOOKING_INVOICE_EXP_HOURS,
     )
     return True
+
+
+def __send_refund_email(booking: Booking, refund_details: dict) -> bool:
+    recipient = booking.email_address
+    if not recipient:
+        return False
+
+    refund_amount = (refund_details or {}).get('refund_amount')
+    currency_code = (refund_details or {}).get('currency')
+    currency_label = CURRENCY_LABELS.get(
+        currency_code,
+        (currency_code or '').upper(),
+    )
+
+    passenger = refund_details.get('passenger', {})
+    passenger_name = passenger.get('full_name', '')
+
+    ticket = refund_details.get('ticket', {})
+    ticket_number = ticket.get('ticket_number', '')
+
+    send_email(
+        EMAIL_TYPE.ticket_refund,
+        recipients=[recipient],
+        booking_number=booking.booking_number,
+        ticket_number=ticket_number,
+        refund_amount=f"{refund_amount:.2f}",
+        currency_label=currency_label,
+        passenger_name=passenger_name,
+    )
 
 
 def create_payment(booking: Booking) -> Payment:
@@ -311,6 +392,68 @@ def create_invoice(booking: Booking) -> Payment:
         session.commit()
 
         __send_invoice_email(booking, payment_url)
+
+        return payment
+
+    except Exception as e:
+        raise e
+
+
+def refund_payment(booking: Booking, ticket: Ticket):
+    last_successful_payment = (
+        booking.payments.filter(
+            Payment.payment_status == PAYMENT_STATUS.succeeded,
+            Payment.payment_type.in_(
+                [PAYMENT_TYPE.payment, PAYMENT_TYPE.invoice]),
+        )
+        .order_by(Payment.id.desc())
+        .first_or_404()
+    )
+
+    _, _, _, refund_details = calculate_refund_details(
+        booking,
+        ticket,
+    )
+
+    refund_amount = refund_details.get('refund_amount')
+    amount = {
+        'value': f'{refund_amount:.2f}',
+        'currency': refund_details.get('currency', '').upper(),
+    }
+
+    body = {
+        'amount': amount,
+        'payment_id': last_successful_payment.provider_payment_id,
+        'receipt': __generate_refund_receipt(booking, refund_details),
+        'metadata': {
+            'public_id': str(booking.public_id),
+        },
+    }
+
+    try:
+        yoo_refund = YooRefund.create(body, uuid.uuid4())
+        yookassa_refund_id = getattr(yoo_refund, 'id', None)
+
+        session = db.session
+        payment = Payment.create(
+            session,
+            commit=False,
+            booking_id=booking.id,
+            payment_method=PAYMENT_METHOD.yookassa,
+            payment_status=PAYMENT_STATUS.pending,
+            payment_type=PAYMENT_TYPE.refund,
+            amount=refund_amount,
+            currency=booking.currency,
+            provider_payment_id=yookassa_refund_id,
+            expires_at=datetime.now(),
+        )
+
+        session.commit()
+
+        __send_refund_email(
+            booking,
+            refund_details
+        )
 
         return payment
 
