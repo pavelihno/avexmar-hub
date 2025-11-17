@@ -30,7 +30,7 @@ class Payment(BaseModel):
     payment_type = db.Column(db.Enum(PAYMENT_TYPE), nullable=False, default=DEFAULT_PAYMENT_TYPE)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.Enum(CURRENCY), nullable=False, default=DEFAULT_CURRENCY)
-    expires_at = db.Column(db.DateTime, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=True)
     paid_at = db.Column(db.DateTime, nullable=True)
 
     # Provider payment details

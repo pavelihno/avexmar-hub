@@ -715,7 +715,7 @@ export const UI_LABELS = {
 					status: 'Статус',
 					summary: 'Информация о возврате',
 					unit_price: 'Стоимость билета',
-					total_penalty_fees: 'Штрафы за возврат',
+					total_penalty_fees: 'Штраф за возврат',
 					refund_amount: 'Сумма к возврату',
 					accept_label: 'Я принимаю условия возврата',
 					submit: 'Отправить запрос',

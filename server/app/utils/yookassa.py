@@ -434,6 +434,8 @@ def refund_payment(booking: Booking, ticket: Ticket):
     try:
         yoo_refund = YooRefund.create(body, uuid.uuid4())
         yookassa_refund_id = getattr(yoo_refund, 'id', None)
+        is_paid = getattr(yoo_refund, 'status', '') == 'succeeded'
+        created_at = getattr(yoo_refund, 'created_at', None)
 
         session = db.session
         payment = Payment.create(
@@ -441,12 +443,13 @@ def refund_payment(booking: Booking, ticket: Ticket):
             commit=False,
             booking_id=booking.id,
             payment_method=PAYMENT_METHOD.yookassa,
-            payment_status=PAYMENT_STATUS.pending,
+            payment_status=PAYMENT_STATUS.succeeded if is_paid else PAYMENT_STATUS.canceled,
             payment_type=PAYMENT_TYPE.refund,
             amount=refund_amount,
             currency=booking.currency,
             provider_payment_id=yookassa_refund_id,
-            expires_at=datetime.now(),
+            is_paid=is_paid,
+            paid_at=parse_datetime(created_at),
         )
 
         session.commit()
