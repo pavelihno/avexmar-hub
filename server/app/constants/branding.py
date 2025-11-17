@@ -5,7 +5,7 @@ from app.utils.passenger_categories import (
 
 BRAND_NAME = 'Авексмар'
 BRAND_FULL_NAME = 'ООО Авексмар'
-SUPPORT_EMAIL = 'mail@avexmar.com'
+SUPPORT_EMAIL = 'support@avexmar.ru'
 SITE_URL = 'https://avexmar.ru'
 PHONE_NUMBER = '+7 495 363-59-11'
 LEGAL_ADDRESS = '105082, г. Москва, ул. Бакунинская, д. 69, стр. 1, помещение 1, офис 16'

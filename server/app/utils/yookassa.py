@@ -249,6 +249,7 @@ def __send_refund_email(booking: Booking, refund_details: dict) -> bool:
 
     send_email(
         EMAIL_TYPE.ticket_refund,
+        is_noreply=False,
         recipients=[recipient],
         booking_number=booking.booking_number,
         ticket_number=ticket_number,

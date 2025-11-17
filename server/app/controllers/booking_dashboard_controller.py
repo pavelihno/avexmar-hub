@@ -147,6 +147,7 @@ def _send_ticket_refund_rejected_email(booking, ticket, rejection_reason=None):
     try:
         send_email(
             EMAIL_TYPE.ticket_refund_rejected,
+            is_noreply=True,
             recipients=[booking.email_address],
             booking_number=booking.booking_number,
             ticket_number=ticket.ticket_number,
