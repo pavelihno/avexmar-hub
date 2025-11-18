@@ -65,7 +65,7 @@ export const ENUM_LABELS = {
 	PAYMENT_STATUS: {
 		pending: 'Создан',
 		waiting_for_capture: 'Ожидает подтверждения',
-		succeeded: 'Оплачен',
+		succeeded: 'Успешно завершен',
 		canceled: 'Отменён',
 	},
 	PAYMENT_METHOD: {

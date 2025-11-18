@@ -11,20 +11,23 @@
   <p style="margin:0 0 16px;">Добрый день!</p>
 
   <p style="margin:0 0 16px;">
-    Ваш запрос на возврат средств по бронированию <strong>№ {{ booking_number }}</strong> 
-    за билет <strong>№ {{ ticket_number }}</strong> был отклонён.
+    Ваш запрос на возврат средств по бронированию <strong>№ {{ booking_number }}</strong> за билет <strong>№ {{ ticket_number }}</strong> был отклонён.
   </p>
 
   {% if rejection_reason %}
-  <div style="margin:0 0 16px; padding:12px; background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:4px;">
-    <p style="margin:0; font-weight:500; color:#856404;">Причина отказа:</p>
-    <p style="margin:8px 0 0; color:#856404;">{{ rejection_reason }}</p>
+  <div style="margin:0 0 20px; padding:16px; background-color:#d1ecf1; border-radius:8px; border-left:4px solid #17a2b8;">
+    <p style="margin:0 0 8px; font-weight:600; color:#0c5460;">Причина отказа:</p>
+    <p style="margin:0; color:#0c5460; line-height:1.5;">{{ rejection_reason }}</p>
   </div>
   {% endif %}
 
-  <p style="margin:0 0 16px;">
-    Если у вас есть вопросы относительно данного решения или требуется дополнительная информация, 
-    свяжитесь с нами по адресу <a href="mailto:{{ support_email }}" style="color:#0084FF; text-decoration:none;">{{ support_email }}</a>.
-  </p>
+  <div style="margin:0 0 16px; padding:16px; background-color:#fff3cd; border-radius:8px; border-left:4px solid #ffc107;">
+    <p style="margin:0; color:#856404; line-height:1.5;">
+      Если у вас есть вопросы относительно данного решения или требуется дополнительная информация, 
+      свяжитесь с нами по адресу 
+      <a href="mailto:{{ support_email }}" style="color:#0084FF; text-decoration:none; font-weight:600;">{{ support_email }}</a>, 
+      с указанием номера бронирования и ФИО плательщика.
+    </p>
+  </div>
 
 {% endblock %}

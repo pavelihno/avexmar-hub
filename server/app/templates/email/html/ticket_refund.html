@@ -15,14 +15,24 @@
     <strong>№ {{ ticket_number }}</strong>.
   </p>
 
-  <p style="margin:0 0 16px;">
-    Сумма к возврату: <strong>{{ refund_amount }} {{ currency_label }}</strong>.
-    Запрос на перечисление средств передан в платёжный сервис.
-    Перевод будет выполнен автоматически на исходный способ оплаты в течение нескольких рабочих дней.
-  </p>
+  <div style="margin:0 0 20px; padding:16px; background-color:#f8f9fa; border-radius:8px; border-left:4px solid #28a745;">
+    <p style="margin:0 0 12px; font-weight:600; color:#155724;">Сумма к возврату:</p>
+    <p style="margin:0 0 16px; font-size:18px; font-weight:700; color:#155724;">{{ refund_amount }} {{ currency_label }}</p>
+    
+    <p style="margin:0 0 8px; color:#495057;">
+      Запрос на перечисление средств передан в платёжный сервис.
+    </p>
+    <p style="margin:0; color:#495057;">
+      Перевод будет выполнен автоматически на исходный способ оплаты в срок до 10 рабочих дней.
+    </p>
+  </div>
 
-  <p style="margin:0 0 16px;">
-    Если деньги не поступили в заявленные сроки, свяжитесь с нами по адресу <a href="mailto:{{ support_email }}" style="color:#0084FF; text-decoration:none;">{{ support_email }}</a>.
-  </p>
+  <div style="margin:0 0 16px; padding:16px; background-color:#fff3cd; border-radius:8px; border-left:4px solid #ffc107;">
+    <p style="margin:0; color:#856404; line-height:1.5;">
+      Если деньги не поступили в заявленные сроки, свяжитесь с нами по адресу 
+      <a href="mailto:{{ support_email }}" style="color:#0084FF; text-decoration:none; font-weight:600;">{{ support_email }}</a>, 
+      с указанием номера бронирования и ФИО плательщика.
+    </p>
+  </div>
 
 {% endblock %}

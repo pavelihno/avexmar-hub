@@ -90,6 +90,7 @@ class Booking(BaseModel):
             'public_id': str(self.public_id),
             'booking_number': self.booking_number,
             'booking_date': self.created_at.date().isoformat(),
+            'booking_time': self.created_at.time().isoformat(),
             'status': self.status.value,
             'buyer_last_name': self.buyer_last_name,
             'buyer_first_name': self.buyer_first_name,
