@@ -125,7 +125,7 @@ class FlightTariff(BaseModel):
                 })
 
             from app.utils.search import get_flight_seat_availability
-            
+
             availability_map = get_flight_seat_availability(
                 instance.flight_id,
                 session=session,

@@ -259,12 +259,6 @@ const BookingDashboardList = ({
 						.join(' ');
 					const status = booking.status;
 					const statusLabel = ENUM_LABELS.BOOKING_STATUS[status] || status;
-					const passengerCounts = bookingSnapshot.passenger_counts || {};
-					const seatsTotal = Object.values(passengerCounts).reduce(
-						(acc, rawCount) => acc + Number(rawCount || 0),
-						0
-					);
-					const passengerCountLabel = seatsTotal ? `${labels.chips.seats}: ${seatsTotal}` : null;
 					const flights = bookingSnapshot.flights || [];
 					const passengers = bookingSnapshot.passengers || [];
 					const payments = bookingSnapshot.payments || [];
@@ -361,14 +355,6 @@ const BookingDashboardList = ({
 													<Typography variant='body2' color='text.secondary'>
 														{bookingDateLabel}
 													</Typography>
-												)}
-												{passengerCountLabel && (
-													<Chip
-														label={passengerCountLabel}
-														size='small'
-														variant='outlined'
-														sx={chipBaseSx}
-													/>
 												)}
 											</Box>
 										</Box>
@@ -518,7 +504,10 @@ const BookingDashboardList = ({
 																	const canDownloadItinerary = Boolean(
 																		bookingSnapshot.public_id &&
 																			flight.booking_flight_id &&
-																			tickets.length > 0
+																			flight.tickets?.some(
+																				(ticket) =>
+																					ticket.can_download_itinerary
+																			)
 																	);
 																	const flightHeader =
 																		buildFlightTicketHeader(flight) ||
@@ -611,7 +600,7 @@ const BookingDashboardList = ({
 																				tickets.map((ticket, ticketIdx) => {
 																					const row = {
 																						...mapTicketToRow(ticket),
-																						action: renderTicketAction
+																						status: renderTicketAction
 																							? renderTicketAction(
 																									booking,
 																									ticket,

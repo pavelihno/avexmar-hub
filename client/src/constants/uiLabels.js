@@ -488,7 +488,7 @@ export const UI_LABELS = {
 						ticketNumber: 'Номер билета',
 						passenger: 'Пассажир',
 						document: 'Документ',
-						action: 'Возврат',
+						status: 'Статус',
 					},
 				},
 				refund: {

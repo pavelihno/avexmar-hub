@@ -301,8 +301,6 @@ const BookingDashboard = () => {
 					</Typography>
 				);
 			}
-		} else if (status == 'ticketed') {
-			return null;
 		} else {
 			return (
 				<Typography variant='body2' color='text.secondary'>

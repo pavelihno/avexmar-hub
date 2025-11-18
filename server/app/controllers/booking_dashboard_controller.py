@@ -22,6 +22,7 @@ from app.utils.enum import (
 )
 from app.utils.datetime import parse_date, combine_date_time
 from app.utils.yookassa import refund_payment
+from app.utils.passenger_categories import PASSENGER_WITH_SEAT_CATEGORIES
 
 
 def _calculate_booking_issues(booking, payments_snapshot):
@@ -72,7 +73,6 @@ def _calculate_ticket_issue_flags(booking_snapshot):
 
             if status in {
                 BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress.value,
-                BOOKING_FLIGHT_PASSENGER_STATUS.refunded.value,
             }:
                 refund_requested = True
 
@@ -96,8 +96,14 @@ def _get_booking_ticket_context(booking_id: int, ticket_id: int):
     ticket = Ticket.get_or_404(ticket_id)
 
     booking_flight_passenger = ticket.booking_flight_passenger
+    booking_flight = BookingFlight.query.join(
+        FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id
+    ).filter(
+        BookingFlight.booking_id == booking.id,
+        FlightTariff.flight_id == booking_flight_passenger.flight_id,
+    ).first_or_404()
 
-    return booking, ticket, booking_flight_passenger
+    return booking, ticket, booking_flight_passenger, booking_flight
 
 
 def _build_ticket_refund_payload(booking, ticket, booking_flight_passenger):
@@ -344,7 +350,7 @@ def get_booking_dashboard(current_user):
 
 @admin_required
 def get_booking_ticket_refund_details(current_user, booking_id, ticket_id):
-    booking, ticket, booking_flight_passenger = _get_booking_ticket_context(
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
         booking_id,
         ticket_id,
     )
@@ -360,7 +366,7 @@ def get_booking_ticket_refund_details(current_user, booking_id, ticket_id):
 
 @admin_required
 def confirm_booking_ticket_refund(current_user, booking_id, ticket_id):
-    booking, ticket, booking_flight_passenger = _get_booking_ticket_context(
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
         booking_id,
         ticket_id,
     )
@@ -379,8 +385,15 @@ def confirm_booking_ticket_refund(current_user, booking_id, ticket_id):
             booking_flight_passenger.id,
             status=BOOKING_FLIGHT_PASSENGER_STATUS.refunded,
             refund_decision_at=datetime.now(),
-            commit=True,
+            commit=False,
         )
+
+        if booking_flight_passenger.booking_passenger.category in PASSENGER_WITH_SEAT_CATEGORIES:
+            updated_bf = BookingFlight.update(
+                booking_flight.id,
+                seats_number=booking_flight.seats_number - 1,
+                commit=True,
+            )
 
     except ValueError as exc:
         return jsonify({'message': str(exc)}), 400
@@ -396,7 +409,7 @@ def confirm_booking_ticket_refund(current_user, booking_id, ticket_id):
 
 @admin_required
 def reject_booking_ticket_refund(current_user, booking_id, ticket_id):
-    booking, ticket, booking_flight_passenger = _get_booking_ticket_context(
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
         booking_id,
         ticket_id,
     )

@@ -305,10 +305,9 @@ def get_booking_flight_itinerary_pdf(current_user, public_id, booking_flight_id)
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
-    booking_flight = BookingFlight.query.filter_by(
-        id=booking_flight_id,
-        booking_id=booking.id
-    ).first_or_404()
+    booking_flight = BookingFlight.get_or_404(
+        booking_flight_id,
+    )
 
     if not booking_flight.itinerary_receipt_path:
         return jsonify({'message': BookingMessages.ITINERARY_RECEIPT_NOT_FOUND}), 404

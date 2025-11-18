@@ -730,19 +730,15 @@ const FlightPassengerExport = () => {
 								justifyContent: { xs: 'stretch', md: 'flex-end' },
 							}}
 						>
-							<Tooltip title={UI_LABELS.ADMIN.dashboard.flightPassengers.actions.exportTooltip}>
-								<span>
-									<Button
-										variant='contained'
-										startIcon={<FileDownloadIcon />}
-										onClick={handleDownload}
-										disabled={!selectedFlight || isLoading}
-										sx={{ width: { xs: '100%', md: 'auto' }, minHeight: 48 }}
-									>
-										{UI_LABELS.ADMIN.dashboard.flightPassengers.actions.export}
-									</Button>
-								</span>
-							</Tooltip>
+							<Button
+								variant='contained'
+								startIcon={<FileDownloadIcon />}
+								onClick={handleDownload}
+								disabled={!selectedFlight || isLoading}
+								sx={{ width: { xs: '100%', md: 'auto' }, minHeight: 48 }}
+							>
+								{UI_LABELS.ADMIN.dashboard.flightPassengers.actions.export}
+							</Button>
 						</Box>
 					</Stack>
 				</Box>

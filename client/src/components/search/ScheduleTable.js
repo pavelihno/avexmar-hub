@@ -102,8 +102,6 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 		];
 	}, [isSmDown, isMdDown, FIELD_LABELS]);
 
-	const EmptyActions = () => null;
-
 	return (
 		<Box>
 			<TableContainer sx={{ overflowX: { xs: 'auto', sm: 'auto', md: 'visible' } }}>
@@ -182,9 +180,6 @@ const ScheduleTable = ({ flights, selectedId = null, onSelect = () => {} }) => {
 				rowsPerPageOptions={[5, 10, 25]}
 				labelRowsPerPage=''
 				labelDisplayedRows={() => ''}
-				slots={{
-					actions: isSmDown ? EmptyActions : undefined,
-				}}
 			/>
 		</Box>
 	);

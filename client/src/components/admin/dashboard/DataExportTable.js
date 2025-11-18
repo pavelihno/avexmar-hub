@@ -100,7 +100,7 @@ const DataExportTable = ({
 								paginatedRows.map((row, index) => {
 									const isSelected = multiSelect
 										? selectedIds.includes(row.id)
-										: showSelection && selectedId && String(selectedId) === String(row.id);
+										: Boolean(showSelection && selectedId && String(selectedId) === String(row.id));
 
 									return (
 										<TableRow

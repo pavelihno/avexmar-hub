@@ -46,8 +46,8 @@ export const ENUM_LABELS = {
 	},
 	BOOKING_FLIGHT_PASSENGER_STATUS: {
 		created: 'Создан',
-		ticket_in_progress: 'Оформляется',
-		ticketed: 'Оформлен',
+		ticket_in_progress: 'Билет оформляется',
+		ticketed: 'Билет оформлен',
 		refund_in_progress: 'Возврат обрабатывается',
 		refunded: 'Возврат выполнен',
 		refund_rejected: 'Возврат отклонён',

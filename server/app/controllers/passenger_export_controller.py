@@ -31,14 +31,6 @@ from app.utils.enum import (
     SEAT_CLASS,
 )
 
-
-EXCLUDED_TICKET_STATUSES = {
-    BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress,
-    BOOKING_FLIGHT_PASSENGER_STATUS.ticketed,
-    # BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress,
-    # BOOKING_FLIGHT_PASSENGER_STATUS.refunded
-}
-
 SEAT_CLASS_CODES = {
     SEAT_CLASS.economy: 'Y',
     SEAT_CLASS.business: 'C',
@@ -110,7 +102,7 @@ def _query_pending_ticket_passengers(start_dt=None, end_dt=None):
         .join(Booking, Booking.id == BookingPassenger.booking_id)
         .filter(
             Booking.status == BOOKING_STATUS.completed,
-            BookingFlightPassenger.status.notin_(EXCLUDED_TICKET_STATUSES)
+            BookingFlightPassenger.status == BOOKING_FLIGHT_PASSENGER_STATUS.created
         )
     )
 
@@ -142,11 +134,13 @@ def _get_flight_passenger_counts(flight_id):
     unticketed_passenger_count = 0
 
     for record in all_records:
-        if record.booking_passenger and record.booking_passenger.booking_id:
-            total_bookings.add(record.booking_passenger.booking_id)
-            if record.status not in EXCLUDED_TICKET_STATUSES:
-                unticketed_bookings.add(record.booking_passenger.booking_id)
-                unticketed_passenger_count += 1
+        booking_id = record.booking_passenger.booking_id if record.booking_passenger else None
+        if booking_id:
+            total_bookings.add(booking_id)
+        if record.status == BOOKING_FLIGHT_PASSENGER_STATUS.created:
+            unticketed_passenger_count += 1
+            if booking_id:
+                unticketed_bookings.add(booking_id)
 
     return {
         'total_passenger_count': len(all_records),
@@ -203,7 +197,9 @@ def _group_pending_flights(unticketed_records):
         entry['total_passenger_count'] = counts['total_passenger_count']
         entry['booking_count'] = counts['booking_count']
         entry['unticketed_booking_count'] = len(
-            entry.pop('_unticketed_bookings', set()))
+            entry.pop('_unticketed_bookings', set())
+        )
+        entry.pop('_bookings', None)
 
     # Sort by departure date descending
     flights.sort(
@@ -431,25 +427,7 @@ def export_pending_ticket_passengers_by_flight(current_user):
     flight = Flight.get_or_404(flight_id)
     booking_flights = _fetch_booking_flights(flight.id)
 
-    # Get unticketed records for this flight
-    unticketed_records = (
-        BookingFlightPassenger.query
-        .join(BookingPassenger, BookingPassenger.id == BookingFlightPassenger.booking_passenger_id)
-        .join(Booking, Booking.id == BookingPassenger.booking_id)
-        .filter(
-            BookingFlightPassenger.flight_id == flight_id,
-            Booking.status == BOOKING_STATUS.completed,
-            BookingFlightPassenger.status.notin_(EXCLUDED_TICKET_STATUSES)
-        )
-        .all()
-    )
-
     workbook = _create_flight_passenger_workbook(flight, booking_flights)
-
-    _update_booking_flight_passenger_statuses(
-        unticketed_records,
-        BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress
-    )
 
     filename = FLIGHT_PASSENGERS_EXPORT_FILENAME_TEMPLATE.format(
         flight_number=flight.airline_flight_number,
@@ -479,20 +457,12 @@ def get_pending_ticket_passengers_routes(current_user):
 
 @admin_required
 def get_pending_ticket_passengers_flights_by_route(current_user, route_id):
-    flights_query = (
+    flights = (
         Flight.query.options(joinedload(Flight.airline))
-        .join(BookingFlightPassenger, BookingFlightPassenger.flight_id == Flight.id)
-        .join(BookingPassenger, BookingPassenger.id == BookingFlightPassenger.booking_passenger_id)
-        .join(Booking, Booking.id == BookingPassenger.booking_id)
-        .filter(
-            Flight.route_id == route_id,
-            Booking.status == BOOKING_STATUS.completed,
-            BookingFlightPassenger.status.notin_(EXCLUDED_TICKET_STATUSES)
-        )
+        .filter(Flight.route_id == route_id)
         .order_by(Flight.scheduled_departure)
+        .all()
     )
-
-    flights = flights_query.distinct().all()
 
     data = []
     for f in flights:
