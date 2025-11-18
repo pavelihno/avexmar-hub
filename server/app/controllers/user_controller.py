@@ -199,7 +199,6 @@ def change_password(current_user):
     verification_code = totp.now()
     send_email(
         EMAIL_TYPE.password_change,
-        is_noreply=True,
         recipients=[current_user.email],
         code=verification_code,
         expires_in_minutes=Config.PASSWORD_CHANGE_TOTP_INTERVAL_SECONDS // 60,

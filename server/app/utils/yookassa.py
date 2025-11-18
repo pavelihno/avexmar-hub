@@ -199,7 +199,6 @@ def __send_confirmation_email(booking: Booking) -> bool:
 
     send_email(
         EMAIL_TYPE.booking_confirmation,
-        is_noreply=False,
         recipients=[booking.email_address],
         booking_number=str(booking.booking_number),
         booking_url=booking_url,
@@ -221,7 +220,6 @@ def __send_invoice_email(booking: Booking, payment_url: str) -> bool:
         return False
     send_email(
         EMAIL_TYPE.invoice_payment,
-        is_noreply=False,
         recipients=[booking.email_address],
         payment_url=payment_url,
         hours=Config.BOOKING_INVOICE_EXP_HOURS,
@@ -249,7 +247,6 @@ def __send_refund_email(booking: Booking, refund_details: dict) -> bool:
 
     send_email(
         EMAIL_TYPE.ticket_refund,
-        is_noreply=False,
         recipients=[recipient],
         booking_number=booking.booking_number,
         ticket_number=ticket_number,

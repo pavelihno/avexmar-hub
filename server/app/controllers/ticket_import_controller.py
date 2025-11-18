@@ -598,7 +598,6 @@ def confirm_import_tickets(current_user):
 
     send_email(
         EMAIL_TYPE.ticket_issued,
-        is_noreply=True,
         recipients=booking.email_address,
         booking_number=booking.booking_number,
         booking_url=booking_url,

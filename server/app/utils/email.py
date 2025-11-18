@@ -86,7 +86,7 @@ def __select_mail_account(is_noreply: bool):
     return Config.MAIL_DEFAULT_USERNAME, Config.MAIL_DEFAULT_PASSWORD
 
 
-def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> None:
+def send_email(email_type: EMAIL_TYPE, is_noreply: bool = True, **context) -> None:
     recipients = context.pop('recipients', None)
     attachments = context.pop('attachments', [])
     if not recipients:
