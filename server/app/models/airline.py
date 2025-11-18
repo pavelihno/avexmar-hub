@@ -17,6 +17,7 @@ class Airline(BaseModel):
 
     iata_code = db.Column(db.String(2), unique=True, nullable=False)
     icao_code = db.Column(db.String(3), unique=True, nullable=False)
+    internal_code = db.Column(db.String(2), nullable=True)
     name = db.Column(db.String, nullable=False)
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id', ondelete='RESTRICT'), nullable=False)
 
@@ -28,6 +29,7 @@ class Airline(BaseModel):
             'id': self.id,
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
+            'internal_code': self.internal_code,
             'name': self.name,
             'country': self.country.to_dict(return_children) if return_children else {},
             'country_id': self.country_id
@@ -37,6 +39,7 @@ class Airline(BaseModel):
         'name': 'Авиакомпания',
         'iata_code': 'Код IATA',
         'icao_code': 'Код ICAO',
+        'internal_code': 'Внутренний код',
         'country_code': 'Код страны'
     }
 
@@ -96,6 +99,7 @@ class Airline(BaseModel):
                 row_session,
                 iata_code=str(row.get('iata_code')),
                 icao_code=str(row.get('icao_code')),
+                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
                 name=str(row.get('name')),
                 country_id=country.id,
                 commit=False,

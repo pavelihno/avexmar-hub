@@ -82,9 +82,7 @@ const SegmentSkeleton = () => {
 	);
 };
 
-const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) => {
-	if (!flight) return null;
-
+const MobileSegment = ({ flight, noteTooltip, onToggleNote }) => {
 	const airline = flight.airline || {};
 	const route = flight.route || {};
 	const originAirport = route.origin_airport || {};
@@ -95,12 +93,154 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 
 	return (
 		<Box sx={{ mb: 1 }}>
+			{/* Airline info */}
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					gap: 1,
+					mb: 0.5,
+				}}
+			>
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+					<Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+						{airline?.name ?? airline?.id}
+					</Typography>
+					<Typography variant='subtitle2' color='text.secondary'>
+						{flight.airline_flight_number}
+					</Typography>
+				</Box>
+				{hasNote && (
+					<IconButton
+						size='small'
+						onClick={(e) => {
+							e.stopPropagation();
+							onToggleNote(flight.id, flight.note);
+						}}
+						sx={{
+							width: 36,
+							height: 36,
+							borderRadius: '50%',
+							color: isNoteOpen ? theme.palette.primary.main : theme.palette.text.secondary,
+							bgcolor: isNoteOpen ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
+							'&:hover': {
+								bgcolor: alpha(theme.palette.primary.main, 0.16),
+							},
+						}}
+						aria-label={UI_LABELS.SEARCH.flight_details.flight_note}
+						aria-pressed={isNoteOpen}
+					>
+						<InfoOutlinedIcon fontSize='small' />
+					</IconButton>
+				)}
+			</Box>
+
+			{/* Duration */}
+			<Box sx={{ mb: 1 }}>
+				<Typography variant='body2' color='text.secondary'>
+					{formatDuration(flight.duration)}
+				</Typography>
+			</Box>
+
+			{/* Departure and Arrival */}
+			<Box sx={{ display: 'flex', gap: 2 }}>
+				<Box sx={{ flex: 1 }}>
+					<Typography
+						variant='caption'
+						color='text.secondary'
+						sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}
+					>
+						{UI_LABELS.SEARCH.flight_details.departure}
+					</Typography>
+					<Typography variant='h6' className='mono-nums'>
+						{formatTime(flight.scheduled_departure_time)}
+					</Typography>
+					<Typography variant='body2' color='text.secondary'>
+						{formatDate(flight.scheduled_departure, DATE_WEEKDAY_FORMAT)}
+					</Typography>
+					<Typography variant='body2' color='text.secondary'>
+						{originAirport?.name ?? originAirport?.id}
+					</Typography>
+				</Box>
+
+				<Box sx={{ flex: 1 }}>
+					<Typography
+						variant='caption'
+						color='text.secondary'
+						sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}
+					>
+						{UI_LABELS.SEARCH.flight_details.arrival}
+					</Typography>
+					<Typography variant='h6' className='mono-nums'>
+						{formatTime(flight.scheduled_arrival_time)}
+					</Typography>
+					<Typography variant='body2' color='text.secondary'>
+						{formatDate(flight.scheduled_arrival, DATE_WEEKDAY_FORMAT)}
+					</Typography>
+					<Typography variant='body2' color='text.secondary'>
+						{destinationAirport?.name ?? destinationAirport?.id}
+					</Typography>
+				</Box>
+			</Box>
+
+			{/* Note */}
+			<Collapse in={isNoteOpen} timeout='auto' unmountOnExit>
+				<Paper
+					variant='outlined'
+					onClick={(e) => e.stopPropagation()}
+					sx={{
+						mt: 1.5,
+						p: 1.5,
+						backgroundColor: alpha(theme.palette.primary.main, 0.05),
+						borderColor: alpha(theme.palette.primary.main, 0.25),
+					}}
+				>
+					<Typography
+						variant='subtitle2'
+						sx={{
+							fontWeight: 600,
+							mb: 0.75,
+							fontSize: '0.8rem',
+							textTransform: 'uppercase',
+							letterSpacing: 0.6,
+						}}
+					>
+						{UI_LABELS.SEARCH.flight_details.flight_note}
+					</Typography>
+					<Typography
+						variant='body2'
+						sx={{
+							whiteSpace: 'pre-wrap',
+							fontSize: '0.85rem',
+							lineHeight: 1.6,
+						}}
+					>
+						{flight.note}
+					</Typography>
+				</Paper>
+			</Collapse>
+		</Box>
+	);
+};
+
+const DesktopSegment = ({ flight, isOutbound, noteTooltip, onToggleNote }) => {
+	const airline = flight.airline || {};
+	const route = flight.route || {};
+	const originAirport = route.origin_airport || {};
+	const destinationAirport = route.destination_airport || {};
+	const hasNote = Boolean(flight.note);
+	const theme = useTheme();
+	const isNoteOpen = noteTooltip.open && noteTooltip.flightId === flight.id;
+
+	return (
+		<Box sx={{ mb: 1 }}>
+			{/* Airline info, duration and note button */}
 			<Box
 				sx={{
 					display: 'grid',
-					gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
-					alignItems: isMobile ? 'flex-start' : 'center',
-					rowGap: isMobile ? 1 : 0,
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
 					mb: 1,
 				}}
 			>
@@ -122,14 +262,7 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 					<Typography variant='subtitle2'>{formatDuration(flight.duration)}</Typography>
 				</Box>
 
-				<Box
-					sx={{
-						display: 'flex',
-						justifyContent: isMobile ? 'flex-start' : 'flex-end',
-						textAlign: isMobile ? 'left' : 'right',
-						mt: isMobile ? 1 : 0,
-					}}
-				>
+				<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 					{hasNote && (
 						<IconButton
 							size='small'
@@ -155,12 +288,13 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 					)}
 				</Box>
 			</Box>
+
+			{/* Departure, flight arrow and Arrival */}
 			<Box
 				sx={{
 					display: 'grid',
-					gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
-					alignItems: isMobile ? 'flex-start' : 'center',
-					rowGap: isMobile ? 1 : 0,
+					gridTemplateColumns: '1fr auto 1fr',
+					alignItems: 'center',
 				}}
 			>
 				<Box sx={{ textAlign: 'left' }}>
@@ -181,7 +315,7 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 					<Box sx={{ borderBottom: '1px dotted', width: 50 }} />
 				</Box>
 
-				<Box sx={{ textAlign: isMobile ? 'left' : 'right' }}>
+				<Box sx={{ textAlign: 'right' }}>
 					<Typography variant='h6' className='mono-nums'>
 						{formatTime(flight.scheduled_arrival_time)}
 					</Typography>
@@ -193,13 +327,15 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 					</Typography>
 				</Box>
 			</Box>
+
+			{/* Note */}
 			<Collapse in={isNoteOpen} timeout='auto' unmountOnExit>
 				<Paper
 					variant='outlined'
 					onClick={(e) => e.stopPropagation()}
 					sx={{
 						mt: 1.5,
-						p: { xs: 1.5, sm: 2 },
+						p: 2,
 						backgroundColor: alpha(theme.palette.primary.main, 0.05),
 						borderColor: alpha(theme.palette.primary.main, 0.25),
 					}}
@@ -209,7 +345,7 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 						sx={{
 							fontWeight: 600,
 							mb: 0.75,
-							fontSize: { xs: '0.8rem', sm: '0.875rem' },
+							fontSize: '0.875rem',
 							textTransform: 'uppercase',
 							letterSpacing: 0.6,
 						}}
@@ -220,7 +356,7 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 						variant='body2'
 						sx={{
 							whiteSpace: 'pre-wrap',
-							fontSize: { xs: '0.85rem', sm: '0.9rem' },
+							fontSize: '0.9rem',
 							lineHeight: 1.6,
 						}}
 					>
@@ -229,6 +365,16 @@ const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) =>
 				</Paper>
 			</Collapse>
 		</Box>
+	);
+};
+
+const Segment = ({ flight, isOutbound, noteTooltip, onToggleNote, isMobile }) => {
+	if (!flight) return null;
+
+	return isMobile ? (
+		<MobileSegment flight={flight} noteTooltip={noteTooltip} onToggleNote={onToggleNote} />
+	) : (
+		<DesktopSegment flight={flight} isOutbound={isOutbound} noteTooltip={noteTooltip} onToggleNote={onToggleNote} />
 	);
 };
 

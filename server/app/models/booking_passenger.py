@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlalchemy.orm import Mapped
 
 from app.database import db
@@ -13,6 +13,8 @@ from app.utils.passenger_categories import (
 if TYPE_CHECKING:
     from app.models.booking import Booking
     from app.models.passenger import Passenger
+    from app.models.ticket import Ticket
+    from app.models.booking_flight_passenger import BookingFlightPassenger
 
 
 class BookingPassenger(BaseModel):
@@ -28,6 +30,20 @@ class BookingPassenger(BaseModel):
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_passengers')
     passenger: Mapped['Passenger'] = db.relationship('Passenger', back_populates='booking_passengers')
+    booking_flight_passengers: Mapped[List['BookingFlightPassenger']] = db.relationship(
+        'BookingFlightPassenger',
+        back_populates='booking_passenger',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+    )
+    tickets: Mapped[List['Ticket']] = db.relationship(
+        'Ticket',
+        secondary='booking_flight_passengers',
+        primaryjoin='BookingPassenger.id == BookingFlightPassenger.booking_passenger_id',
+        secondaryjoin='Ticket.booking_flight_passenger_id == BookingFlightPassenger.id',
+        viewonly=True,
+        lazy='dynamic',
+    )
 
     __table_args__ = (
         db.UniqueConstraint(

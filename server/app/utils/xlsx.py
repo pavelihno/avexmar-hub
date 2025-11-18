@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from sqlalchemy import inspect, Enum as SAEnum, Integer, Float, Numeric, Date, Time, String, Text
 
 from app.constants.messages import XlsxMessages
-from app.utils.datetime import WRITE_DATE_FORMAT, WRITE_TIME_FORMAT, format_date, format_time, parse_date, parse_time
+from app.utils.datetime import WRITE_DATE_FORMAT, WRITE_TIME_FORMAT, format_date, format_time, parse_date_formats, parse_time_formats
 
 
 def is_xlsx_file(file) -> bool:
@@ -378,9 +378,9 @@ def parse_upload_xlsx_template(
                 base_key, item_index = (_extract_external_field(key)) if is_external else (key, 0)
 
                 if base_key in date_fields:
-                    value = parse_date(value)
+                    value = parse_date_formats(value)
                 elif base_key in time_fields:
-                    value = parse_time(value)
+                    value = parse_time_formats(value)
 
                 if is_external:
                     item['external_data'][external_fields_key_indices[key]][item_index - 1][base_key] = value

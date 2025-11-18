@@ -22,10 +22,12 @@ from app.controllers.route_controller import *
 from app.controllers.flight_controller import *
 from app.controllers.tariff_controller import *
 from app.controllers.flight_tariff_controller import *
+from app.controllers.tariff_fee_controller import *
 from app.controllers.discount_controller import *
 from app.controllers.passenger_controller import *
 from app.controllers.booking_controller import *
 from app.controllers.booking_passenger_controller import *
+from app.controllers.booking_flight_passenger_controller import *
 from app.controllers.booking_flight_controller import *
 from app.controllers.booking_process_controller import *
 from app.controllers.booking_dashboard_controller import *
@@ -41,6 +43,7 @@ from app.controllers.consent_event_controller import *
 from app.controllers.passenger_export_controller import *
 from app.controllers.carousel_controller import *
 from app.controllers.seo_controller import *
+from app.controllers.ticket_import_controller import *
 
 
 def __import_models():
@@ -175,6 +178,13 @@ def __create_app(_config_class, _db):
     app.route('/flight_tariffs/<int:flight_tariff_id>', methods=['PUT'])(update_flight_tariff)
     app.route('/flight_tariffs/<int:flight_tariff_id>', methods=['DELETE'])(delete_flight_tariff)
 
+    # tariff fees
+    app.route('/tariff_fees', methods=['GET'])(get_tariff_fees)
+    app.route('/tariff_fees', methods=['POST'])(create_tariff_fee)
+    app.route('/tariff_fees/<int:tariff_fee_id>', methods=['GET'])(get_tariff_fee)
+    app.route('/tariff_fees/<int:tariff_fee_id>', methods=['PUT'])(update_tariff_fee)
+    app.route('/tariff_fees/<int:tariff_fee_id>', methods=['DELETE'])(delete_tariff_fee)
+
     # discounts
     app.route('/discounts', methods=['GET'])(get_discounts)
     app.route('/discounts', methods=['POST'])(create_discount)
@@ -225,6 +235,13 @@ def __create_app(_config_class, _db):
     app.route('/booking_passengers/<int:booking_passenger_id>', methods=['PUT'])(update_booking_passenger)
     app.route('/booking_passengers/<int:booking_passenger_id>', methods=['DELETE'])(delete_booking_passenger)
 
+    # booking flight passengers
+    app.route('/booking_flight_passengers', methods=['GET'])(get_booking_flight_passengers)
+    app.route('/booking_flight_passengers', methods=['POST'])(create_booking_flight_passenger)
+    app.route('/booking_flight_passengers/<int:booking_flight_passenger_id>', methods=['GET'])(get_booking_flight_passenger)
+    app.route('/booking_flight_passengers/<int:booking_flight_passenger_id>', methods=['PUT'])(update_booking_flight_passenger)
+    app.route('/booking_flight_passengers/<int:booking_flight_passenger_id>', methods=['DELETE'])(delete_booking_flight_passenger)
+
     # booking flights
     app.route('/booking_flights', methods=['GET'])(get_booking_flights)
     app.route('/booking_flights', methods=['POST'])(create_booking_flight)
@@ -259,16 +276,28 @@ def __create_app(_config_class, _db):
     app.route('/booking/<public_id>/access', methods=['GET'])(get_booking_process_access)
     app.route('/booking/<public_id>/details', methods=['GET'])(get_booking_process_details)
     app.route('/booking/<public_id>/pdf', methods=['GET'])(get_booking_process_pdf)
+    app.route('/booking/<public_id>/itinerary-pdf/<int:booking_flight_id>', methods=['GET'])(get_booking_flight_itinerary_pdf)
     app.route('/booking/create', methods=['POST'])(create_booking_process)
     app.route('/booking/passengers', methods=['POST'])(create_booking_process_passengers)
     app.route('/booking/confirm', methods=['POST'])(confirm_booking_process)
     app.route('/booking/payment/<public_id>/details', methods=['GET'])(get_booking_process_payment)
+    app.route('/booking/<public_id>/<ticket_id>/refund', methods=['GET'])(get_request_refund_details)
+    app.route('/booking/<public_id>/<ticket_id>/refund', methods=['POST'])(request_refund)
     app.route('/booking/dashboard', methods=['GET'])(get_booking_dashboard)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund', methods=['GET'])(get_booking_ticket_refund_details)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund/confirm', methods=['POST'])(confirm_booking_ticket_refund)
+    app.route('/booking/dashboard/bookings/<int:booking_id>/tickets/<int:ticket_id>/refund/reject', methods=['POST'])(reject_booking_ticket_refund)
 
     # exports
-    app.route('/exports/flight-passengers', methods=['GET'])(get_flight_passenger_export)
-    app.route('/exports/flight-passengers/routes', methods=['GET'])(get_passenger_export_routes)
-    app.route('/exports/flight-passengers/routes/<int:route_id>/flights', methods=['GET'])(get_passenger_export_flights)
+    app.route('/exports/flight-passengers', methods=['POST'])(export_pending_ticket_passengers)
+    app.route('/exports/flight-passengers', methods=['GET'])(get_pending_ticket_passengers_flights)
+    app.route('/exports/flight-passengers/flight', methods=['POST'])(export_pending_ticket_passengers_by_flight)
+    app.route('/exports/flight-passengers/flight/routes', methods=['GET'])(get_pending_ticket_passengers_routes)
+    app.route('/exports/flight-passengers/flight/routes/<int:route_id>', methods=['GET'])(get_pending_ticket_passengers_flights_by_route)
+
+    # imports
+    app.route('/imports/tickets', methods=['POST'])(import_tickets)
+    app.route('/imports/tickets/confirm', methods=['POST'])(confirm_import_tickets)
 
     # seo
     app.route('/seo/static-routes', methods=['GET'])(list_static_seo_routes)

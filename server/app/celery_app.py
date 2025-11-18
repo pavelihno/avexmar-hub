@@ -33,17 +33,23 @@ celery.Task = AppContextTask
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    from app.tasks.booking import cleanup_expired_bookings
-    from app.tasks.seo import generate_prerender
+    from app.tasks.booking import set_expired_bookings, delete_expired_bookings
+    from app.tasks.seo import generate_seo_prerender
 
     sender.add_periodic_task(
         60.0,
-        cleanup_expired_bookings.s(),
-        name="cleanup-expired-bookings"
+        set_expired_bookings.s(),
+        name="set-expired-bookings"
+    )
+
+    sender.add_periodic_task(
+        crontab(hour=3, minute=0),
+        delete_expired_bookings.s(),
+        name="delete-expired-bookings"
     )
 
     sender.add_periodic_task(
         crontab(hour=2, minute=0),
-        generate_prerender.s(),
-        name="seo-prerender-daily",
+        generate_seo_prerender.s(),
+        name="generate-seo-prerender",
     )

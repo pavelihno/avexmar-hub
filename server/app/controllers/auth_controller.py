@@ -36,7 +36,6 @@ def register():
         activation_url = f"{Config.CLIENT_URL}/activate?token={token}"
         send_email(
             EMAIL_TYPE.account_activation,
-            is_noreply=True,
             recipients=[new_user.email],
             activation_url=activation_url,
             expires_in_hours=Config.ACCOUNT_ACTIVATION_EXP_HOURS,
@@ -63,7 +62,6 @@ def login():
             code = totp.now()
             send_email(
                 EMAIL_TYPE.two_factor,
-                is_noreply=True,
                 recipients=[user.email],
                 code=code,
                 expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
@@ -85,7 +83,6 @@ def setup_2fa():
     code = totp.now()
     send_email(
         EMAIL_TYPE.two_factor,
-        is_noreply=True,
         recipients=[user.email],
         code=code,
         expires_in_minutes=Config.LOGIN_TOTP_INTERVAL_SECONDS // 60,
@@ -125,7 +122,6 @@ def forgot_password():
     reset_url = f"{Config.CLIENT_URL}/reset_password?token={token.token}"
     send_email(
         EMAIL_TYPE.password_reset,
-        is_noreply=True,
         recipients=[user.email],
         reset_url=reset_url,
         expires_in_hours=Config.PASSWORD_RESET_EXP_HOURS,

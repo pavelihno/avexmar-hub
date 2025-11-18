@@ -8,6 +8,7 @@ from app.constants.branding import (
     DEFAULT_EMAIL_CONTEXT,
     EMAIL_SUBJECTS,
     EMAIL_TEMPLATES,
+    BRAND_NAME,
 )
 from app.constants.messages import ErrorMessages
 
@@ -45,6 +46,18 @@ class EMAIL_TYPE(enum.Enum):
         EMAIL_TEMPLATES['password_change'],
         EMAIL_SUBJECTS['password_change'],
     )
+    ticket_issued = (
+        EMAIL_TEMPLATES['ticket_issued'],
+        EMAIL_SUBJECTS['ticket_issued'],
+    )
+    ticket_refund = (
+        EMAIL_TEMPLATES['ticket_refund'],
+        EMAIL_SUBJECTS['ticket_refund'],
+    )
+    ticket_refund_rejected = (
+        EMAIL_TEMPLATES['ticket_refund_rejected'],
+        EMAIL_SUBJECTS['ticket_refund_rejected'],
+    )
 
     def __init__(self, template: str, subject: str):
         self.template = template
@@ -73,7 +86,7 @@ def __select_mail_account(is_noreply: bool):
     return Config.MAIL_DEFAULT_USERNAME, Config.MAIL_DEFAULT_PASSWORD
 
 
-def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> None:
+def send_email(email_type: EMAIL_TYPE, is_noreply: bool = True, **context) -> None:
     recipients = context.pop('recipients', None)
     attachments = context.pop('attachments', [])
     if not recipients:
@@ -91,7 +104,7 @@ def send_email(email_type: EMAIL_TYPE, is_noreply: bool = False, **context) -> N
     msg = Message(
         subject=subject,
         recipients=recipients,
-        sender=username,
+        sender=(BRAND_NAME.upper(), username),
         reply_to=username
     )
 

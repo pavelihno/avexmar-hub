@@ -5,7 +5,7 @@ from app.utils.passenger_categories import (
 
 BRAND_NAME = 'Авексмар'
 BRAND_FULL_NAME = 'ООО Авексмар'
-SUPPORT_EMAIL = 'mail@avexmar.com'
+SUPPORT_EMAIL = 'support@avexmar.ru'
 SITE_URL = 'https://avexmar.ru'
 PHONE_NUMBER = '+7 495 363-59-11'
 LEGAL_ADDRESS = '105082, г. Москва, ул. Бакунинская, д. 69, стр. 1, помещение 1, офис 16'
@@ -19,6 +19,9 @@ EMAIL_TEMPLATES = {
     'account_activation': 'account_activation',
     'two_factor': 'two_factor',
     'password_change': 'password_change',
+    'ticket_issued': 'ticket_issued',
+    'ticket_refund': 'ticket_refund',
+    'ticket_refund_rejected': 'ticket_refund_rejected',
 }
 
 EMAIL_SUBJECTS = {
@@ -28,6 +31,9 @@ EMAIL_SUBJECTS = {
     'account_activation': 'Активация аккаунта — {brand_name}',
     'two_factor': 'Код для входа — {brand_name}',
     'password_change': 'Изменение пароля — {brand_name}',
+    'ticket_issued': 'Билеты выписаны — Бронирование № {booking_number}, Рейс {flight_number} — {brand_name}',
+    'ticket_refund': 'Возврат по билету № {ticket_number} — Бронирование № {booking_number} — {brand_name}',
+    'ticket_refund_rejected': 'Отказ в возврате средств — Билет № {ticket_number} — Бронирование № {booking_number} — {brand_name}',
 }
 
 DEFAULT_EMAIL_CONTEXT = {

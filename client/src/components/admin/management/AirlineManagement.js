@@ -82,6 +82,15 @@ const AirlineManagement = () => {
 					: null,
 			inputProps: { maxLength: 3 },
 		},
+		internalCode: {
+			key: 'internalCode',
+			apiKey: 'internal_code',
+			label: FIELD_LABELS.AIRLINE.internal_code,
+			type: FIELD_TYPES.TEXT,
+			validate: (value) =>
+				value && value.length !== 2 ? VALIDATION_MESSAGES.AIRLINE.internal_code.LENGTH : null,
+			inputProps: { maxLength: 2 },
+		},
 	};
 
 	const adminManager = createAdminManager(FIELDS, {

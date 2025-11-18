@@ -12,7 +12,7 @@ from app.models._base_model import BaseModel, ModelValidationError
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
 from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
-from app.utils.datetime import combine_date_time, parse_date, parse_time
+from app.utils.datetime import combine_date_time, parse_date_formats, parse_time_formats
 from app.constants.messages import (
     AirlineMessages,
     AirportMessages,
@@ -24,6 +24,7 @@ from app.constants.messages import (
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
     from app.models.booking_flight import BookingFlight
+    from app.models.booking_flight_passenger import BookingFlightPassenger
 
 
 class Flight(BaseModel):
@@ -47,8 +48,19 @@ class Flight(BaseModel):
     route: Mapped['Route'] = db.relationship('Route', back_populates='flights')
     airline: Mapped['Airline'] = db.relationship('Airline', back_populates='flights')
     aircraft: Mapped['Aircraft'] = db.relationship('Aircraft', back_populates='flights')
+    booking_flight_passengers: Mapped[List['BookingFlightPassenger']] = db.relationship(
+        'BookingFlightPassenger',
+        back_populates='flight',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+    )
     tickets: Mapped[List['Ticket']] = db.relationship(
-        'Ticket', back_populates='flight', lazy='dynamic', cascade='all, delete-orphan'
+        'Ticket',
+        secondary='booking_flight_passengers',
+        primaryjoin='Flight.id == BookingFlightPassenger.flight_id',
+        secondaryjoin='Ticket.booking_flight_passenger_id == BookingFlightPassenger.id',
+        viewonly=True,
+        lazy='dynamic',
     )
     booking_flights: Mapped[List['BookingFlight']] = db.relationship(
         'BookingFlight',
@@ -70,7 +82,8 @@ class Flight(BaseModel):
     def airline_flight_number(self):
         """Return flight number prefixed with airline IATA code"""
         airline = self.airline
-        return f'{airline.iata_code}{self.flight_number}' if airline else self.flight_number
+        airline_code = airline.iata_code if airline and airline.iata_code else ''
+        return f'{airline_code} {self.flight_number}'
 
     @hybrid_property
     def flight_duration(self):
@@ -307,12 +320,12 @@ class Flight(BaseModel):
                 route_id=route.id,
                 aircraft_id=aircraft_id,
                 note=row.get('note'),
-                scheduled_departure=parse_date(row.get('scheduled_departure')),
-                scheduled_departure_time=parse_time(
+                scheduled_departure=parse_date_formats(row.get('scheduled_departure')),
+                scheduled_departure_time=parse_time_formats(
                     row.get('scheduled_departure_time')
                 ),
-                scheduled_arrival=parse_date(row.get('scheduled_arrival')),
-                scheduled_arrival_time=parse_time(
+                scheduled_arrival=parse_date_formats(row.get('scheduled_arrival')),
+                scheduled_arrival_time=parse_time_formats(
                     row.get('scheduled_arrival_time')
                 ),
                 commit=False,

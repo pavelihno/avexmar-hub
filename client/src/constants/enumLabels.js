@@ -44,6 +44,14 @@ export const ENUM_LABELS = {
 		infant: 'Младенец',
 		infant_seat: 'Младенец с местом',
 	},
+	BOOKING_FLIGHT_PASSENGER_STATUS: {
+		created: 'Создан',
+		ticket_in_progress: 'Билет оформляется',
+		ticketed: 'Билет оформлен',
+		refund_in_progress: 'Возврат обрабатывается',
+		refunded: 'Возврат выполнен',
+		refund_rejected: 'Возврат отклонён',
+	},
 	CURRENCY: {
 		rub: 'РУБ',
 	},
@@ -57,7 +65,7 @@ export const ENUM_LABELS = {
 	PAYMENT_STATUS: {
 		pending: 'Создан',
 		waiting_for_capture: 'Ожидает подтверждения',
-		succeeded: 'Оплачен',
+		succeeded: 'Успешно завершен',
 		canceled: 'Отменён',
 	},
 	PAYMENT_METHOD: {
@@ -69,12 +77,13 @@ export const ENUM_LABELS = {
 		refund: 'Возврат',
 	},
 	FEE_APPLICATION: {
-		booking: 'Бронирование',
-		cancellation: 'Отмена бронирования',
+		service_fee: 'Сервисный сбор',
+		ticket_refund: 'Возврат билета',
 	},
 	FEE_TERM: {
 		none: 'Отсутствует',
-		before_24h: 'Более чем за 24 часа до рейса',
+		before_48h: 'Более чем за 48 часов до рейса',
+		before_24h: 'Менее чем за 48 часов, но более чем за 24 часа до рейса',
 		within_24h: 'Менее чем за 24 часа до рейса',
 		after_departure: 'После вылета рейса',
 	},

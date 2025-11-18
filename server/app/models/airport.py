@@ -18,6 +18,7 @@ class Airport(BaseModel):
 
     iata_code = db.Column(db.String(3), unique=True, nullable=False)
     icao_code = db.Column(db.String(4), unique=True, nullable=False)
+    internal_code = db.Column(db.String(3), nullable=True)
     name = db.Column(db.String, nullable=False)
 
     city_name = db.Column(db.String, nullable=False)
@@ -40,6 +41,7 @@ class Airport(BaseModel):
             'id': self.id,
             'iata_code': self.iata_code,
             'icao_code': self.icao_code,
+            'internal_code': self.internal_code,
             'name': self.name,
             'city_name': self.city_name,
             'city_name_en': self.city_name_en,
@@ -56,6 +58,7 @@ class Airport(BaseModel):
         'city_name_en': 'Город (англ)',
         'iata_code': 'Код IATA',
         'icao_code': 'Код ICAO',
+        'internal_code': 'Внутренний код',
         'city_code': 'Код города',
         'country_code': 'Код страны',
         'timezone': 'Часовой пояс'
@@ -125,6 +128,7 @@ class Airport(BaseModel):
                 city_name_en=str(row.get('city_name_en')),
                 iata_code=str(row.get('iata_code')),
                 icao_code=str(row.get('icao_code')),
+                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
                 city_code=str(row.get('city_code')),
                 country_id=country.id,
                 timezone_id=tz.id if tz else None,

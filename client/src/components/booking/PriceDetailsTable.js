@@ -24,8 +24,40 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 
-	return (
-		<Box sx={{ mb: 4 }}>
+	const directionsData = React.useMemo(() => {
+		return (priceDetails.directions || []).map((dir) => {
+			const info = flightMap[dir.direction] || {};
+			const passengersData = dir.passengers.map((p) => ({
+				category: p.category,
+				categoryLabel: UI_LABELS.BOOKING.confirmation.passenger_categories[p.category],
+				count: p.count,
+				unitFare: `${formatNumber(p.unit_fare_price || 0)} ${currencySymbol}`,
+				unitDiscount:
+					p.unit_discount > 0
+						? `- ${formatNumber(p.unit_discount)} ${currencySymbol}${
+								p.discount_name ? ` (${p.discount_name})` : ''
+						  }`
+						: '-',
+				finalPrice: `${formatNumber(p.price)} ${currencySymbol}`,
+				rawUnitFare: p.unit_fare_price || 0,
+				rawUnitDiscount: p.unit_discount,
+				discountName: p.discount_name,
+				rawPrice: p.price,
+			}));
+
+			return {
+				direction: dir.direction,
+				fromTo: UI_LABELS.SCHEDULE.from_to(info.from, info.to),
+				tariffClass: `${ENUM_LABELS.SEAT_CLASS[dir.tariff.seat_class]} — ${dir.tariff.title}`,
+				handLuggage: dir.tariff.hand_luggage,
+				baggage: dir.tariff.baggage,
+				passengers: passengersData,
+			};
+		});
+	}, [priceDetails.directions, flightMap, currencySymbol]);
+
+	const summarySection = (
+		<>
 			<Divider sx={{ mb: 2 }} />
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
 				<Typography color='text.secondary' sx={{ fontWeight: 'bold' }}>
@@ -50,141 +82,139 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 					<Typography>{`- ${formatNumber(priceDetails.total_discounts)} ${currencySymbol}`}</Typography>
 				</Box>
 			)}
-			{showDetails && (
-				<>
-					<Divider sx={{ my: 2 }} />
+		</>
+	);
 
-					{(priceDetails.directions || []).map((dir) => {
-						const info = flightMap[dir.direction] || {};
-						return (
+	if (isXs) {
+		// Mobile card view
+		return (
+			<Box sx={{ mb: 4 }}>
+				{summarySection}
+				{showDetails && (
+					<>
+						<Divider sx={{ my: 2 }} />
+						{directionsData.map((dir) => (
 							<Box key={dir.direction} sx={{ mb: 3 }}>
 								<Box sx={{ mb: 1 }}>
 									<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mb: 1 }}>
-										{UI_LABELS.SCHEDULE.from_to(info.from, info.to)}
+										{dir.fromTo}
 									</Typography>
 									<Typography variant='subtitle2' color='text.secondary' sx={{ fontWeight: 600 }}>
-										{`${ENUM_LABELS.SEAT_CLASS[dir.tariff.seat_class]} — ${dir.tariff.title}`}
+										{dir.tariffClass}
 									</Typography>
-									{dir.tariff.hand_luggage > 0 && (
+									{dir.handLuggage > 0 && (
 										<Typography variant='body2' color='text.secondary'>
-											{`${UI_LABELS.SEARCH.flight_details.hand_luggage(dir.tariff.hand_luggage)}`}
+											{UI_LABELS.SEARCH.flight_details.hand_luggage(dir.handLuggage)}
 										</Typography>
 									)}
-
-									{dir.tariff.baggage > 0 && (
+									{dir.baggage > 0 && (
 										<Typography variant='body2' color='text.secondary'>
-											{`${UI_LABELS.SEARCH.flight_details.baggage(dir.tariff.baggage)}`}
+											{UI_LABELS.SEARCH.flight_details.baggage(dir.baggage)}
 										</Typography>
 									)}
 								</Box>
-								{isXs ? (
-									// Mobile: cards per passenger category
-									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-										{dir.passengers.map((p) => {
-											const categoryLabel =
-												UI_LABELS.BOOKING.confirmation.passenger_categories[p.category];
-											const unitFare = `${formatNumber(
-												p.unit_fare_price || 0
-											)} ${currencySymbol}`;
-											const unitDiscount =
-												p.unit_discount > 0
-													? `- ${formatNumber(p.unit_discount)} ${currencySymbol}${
-															p.discount_name ? ` (${p.discount_name})` : ''
-													  }`
-													: '-';
-											const finalPrice = `${formatNumber(p.price)} ${currencySymbol}`;
-											return (
-												<Paper key={p.category} variant='outlined' sx={{ p: 1.5 }}>
-													<Typography variant='subtitle2' sx={{ fontWeight: 700, mb: 0.5 }}>
-														{categoryLabel}
-													</Typography>
-													<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-														<Typography color='text.secondary'>
-															{UI_LABELS.BOOKING.confirmation.price_details.quantity}
-														</Typography>
-														<Typography>{p.count}</Typography>
-													</Box>
-													<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-														<Typography color='text.secondary'>
-															{
-																UI_LABELS.BOOKING.confirmation.price_details
-																	.unit_fare_price
-															}
-														</Typography>
-														<Typography>{unitFare}</Typography>
-													</Box>
-													<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-														<Typography color='text.secondary'>
-															{UI_LABELS.BOOKING.confirmation.price_details.unit_discount}
-														</Typography>
-														<Typography>{unitDiscount}</Typography>
-													</Box>
-													<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-														<Typography color='text.secondary'>
-															{UI_LABELS.BOOKING.confirmation.price_details.final_price}
-														</Typography>
-														<Typography>{finalPrice}</Typography>
-													</Box>
-												</Paper>
-											);
-										})}
-									</Box>
-								) : (
-									// Desktop: table view
-									<TableContainer sx={{ overflowX: 'auto' }}>
-										<Table size='small'>
-											<TableHead>
-												<TableRow>
-													<TableCell />
-													<TableCell align='right'>
-														{UI_LABELS.BOOKING.confirmation.price_details.quantity}
-													</TableCell>
-													<TableCell align='right'>
-														{UI_LABELS.BOOKING.confirmation.price_details.unit_fare_price}
-													</TableCell>
-													<TableCell align='right'>
-														{UI_LABELS.BOOKING.confirmation.price_details.unit_discount}
-													</TableCell>
-													<TableCell align='right'>
-														{UI_LABELS.BOOKING.confirmation.price_details.final_price}
-													</TableCell>
-												</TableRow>
-											</TableHead>
-											<TableBody>
-												{dir.passengers.map((p) => (
-													<TableRow key={p.category}>
-														<TableCell>
-															{
-																UI_LABELS.BOOKING.confirmation.passenger_categories[
-																	p.category
-																]
-															}
-														</TableCell>
-														<TableCell align='right'>{p.count}</TableCell>
-														<TableCell align='right'>{`${formatNumber(
-															p.unit_fare_price || 0
-														)} ${currencySymbol}`}</TableCell>
-														<TableCell align='right'>
-															{p.unit_discount > 0
-																? `- ${formatNumber(
-																		p.unit_discount
-																  )} ${currencySymbol}${
-																		p.discount_name ? ` (${p.discount_name})` : ''
-																  }`
-																: '-'}
-														</TableCell>
-														<TableCell align='right'>{`${formatNumber(
-															p.price
-														)} ${currencySymbol}`}</TableCell>
-													</TableRow>
-												))}
-											</TableBody>
-										</Table>
-									</TableContainer>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+									{dir.passengers.map((p) => (
+										<Paper key={p.category} variant='outlined' sx={{ p: 1.5 }}>
+											<Typography variant='subtitle2' sx={{ fontWeight: 700, mb: 0.5 }}>
+												{p.categoryLabel}
+											</Typography>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Typography color='text.secondary'>
+													{UI_LABELS.BOOKING.confirmation.price_details.quantity}
+												</Typography>
+												<Typography>{p.count}</Typography>
+											</Box>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Typography color='text.secondary'>
+													{UI_LABELS.BOOKING.confirmation.price_details.unit_fare_price}
+												</Typography>
+												<Typography>{p.unitFare}</Typography>
+											</Box>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Typography color='text.secondary'>
+													{UI_LABELS.BOOKING.confirmation.price_details.unit_discount}
+												</Typography>
+												<Typography>{p.unitDiscount}</Typography>
+											</Box>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Typography color='text.secondary'>
+													{UI_LABELS.BOOKING.confirmation.price_details.final_price}
+												</Typography>
+												<Typography>{p.finalPrice}</Typography>
+											</Box>
+										</Paper>
+									))}
+								</Box>
+							</Box>
+						))}
+					</>
+				)}
+			</Box>
+		);
+	}
+
+	// Desktop table view
+	return (
+		<Box sx={{ mb: 4 }}>
+			{summarySection}
+			{showDetails && (
+				<>
+					<Divider sx={{ my: 2 }} />
+					{directionsData.map((dir) => (
+						<Box key={dir.direction} sx={{ mb: 3 }}>
+							<Box sx={{ mb: 1 }}>
+								<Typography variant='subtitle1' sx={{ fontWeight: 'bold', mb: 1 }}>
+									{dir.fromTo}
+								</Typography>
+								<Typography variant='subtitle2' color='text.secondary' sx={{ fontWeight: 600 }}>
+									{dir.tariffClass}
+								</Typography>
+								{dir.handLuggage > 0 && (
+									<Typography variant='body2' color='text.secondary'>
+										{UI_LABELS.SEARCH.flight_details.hand_luggage(dir.handLuggage)}
+									</Typography>
+								)}
+								{dir.baggage > 0 && (
+									<Typography variant='body2' color='text.secondary'>
+										{UI_LABELS.SEARCH.flight_details.baggage(dir.baggage)}
+									</Typography>
 								)}
 							</Box>
-						);
-					})}
+							<TableContainer sx={{ overflowX: 'auto' }}>
+								<Table size='small'>
+									<TableHead>
+										<TableRow>
+											<TableCell />
+											<TableCell align='right'>
+												{UI_LABELS.BOOKING.confirmation.price_details.quantity}
+											</TableCell>
+											<TableCell align='right'>
+												{UI_LABELS.BOOKING.confirmation.price_details.unit_fare_price}
+											</TableCell>
+											<TableCell align='right'>
+												{UI_LABELS.BOOKING.confirmation.price_details.unit_discount}
+											</TableCell>
+											<TableCell align='right'>
+												{UI_LABELS.BOOKING.confirmation.price_details.final_price}
+											</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{dir.passengers.map((p) => (
+											<TableRow key={p.category}>
+												<TableCell>{p.categoryLabel}</TableCell>
+												<TableCell align='right'>{p.count}</TableCell>
+												<TableCell align='right'>{p.unitFare}</TableCell>
+												<TableCell align='right'>{p.unitDiscount}</TableCell>
+												<TableCell align='right'>{p.finalPrice}</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</TableContainer>
+						</Box>
+					))}
 				</>
 			)}
 		</Box>

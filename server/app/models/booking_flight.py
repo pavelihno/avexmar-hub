@@ -15,6 +15,7 @@ class BookingFlight(BaseModel):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     flight_tariff_id = db.Column(db.Integer, db.ForeignKey('flight_tariffs.id'), nullable=False)
     seats_number = db.Column(db.Integer, nullable=False, default=0)
+    itinerary_receipt_path = db.Column(db.String, nullable=True)
 
     booking: Mapped['Booking'] = db.relationship('Booking', back_populates='booking_flights')
     flight_tariff: Mapped['FlightTariff'] = db.relationship('FlightTariff', back_populates='booking_flights')

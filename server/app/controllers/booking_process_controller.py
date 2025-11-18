@@ -1,12 +1,12 @@
+import uuid
 from flask import request, jsonify, send_file
 from io import BytesIO
-import uuid
+from datetime import datetime, timedelta
 
-from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE
+from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE, ITINERARY_PDF_FILENAME_TEMPLATE
 from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
 from app.config import Config
-from datetime import datetime, timedelta
 
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
@@ -15,16 +15,26 @@ from app.models.flight_tariff import FlightTariff
 from app.models.passenger import Passenger
 from app.models.payment import Payment
 from app.models.booking_hold import BookingHold
+from app.models.booking_flight_passenger import BookingFlightPassenger
+from app.models.ticket import Ticket
 from app.middlewares.auth_middleware import current_user
-from app.utils.business_logic import calculate_price_details, get_booking_snapshot, get_seats_number
+from app.utils.business_logic import (
+    calculate_price_details,
+    get_booking_snapshot,
+    get_seats_number,
+    calculate_refund_details,
+)
 from app.utils.yookassa import create_payment, create_invoice, handle_yookassa_webhook
 from app.utils.enum import (
     BOOKING_STATUS,
     CONSENT_EVENT_TYPE,
     CONSENT_DOC_TYPE,
+    BOOKING_FLIGHT_PASSENGER_STATUS
 )
+from app.utils.storage import TicketManager
 from app.utils.consent import create_booking_consent
 from app.utils.pdf import generate_booking_pdf
+from app.utils.datetime import format_date
 
 
 @current_user
@@ -138,7 +148,7 @@ def create_booking_process_passengers(current_user):
     session = db.session
 
     booking = Booking.update(
-        booking.id, session=session, commit=False, 
+        booking.id, session=session, commit=False,
         user_id=current_user.id if current_user else None,
         **buyer
     )
@@ -223,7 +233,6 @@ def confirm_booking_process(current_user):
 
     session = db.session
 
-    # Avoid unnecessary status history entries
     if booking.status == BOOKING_STATUS.passengers_added:
         Booking.transition_status(
             id=booking.id,
@@ -288,6 +297,48 @@ def get_booking_process_pdf(current_user, public_id):
 
 
 @current_user
+def get_booking_flight_itinerary_pdf(current_user, public_id, booking_flight_id):
+    token = request.args.get('access_token')
+
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
+
+    booking_flight = BookingFlight.get_or_404(
+        booking_flight_id,
+    )
+
+    if not booking_flight.itinerary_receipt_path:
+        return jsonify({'message': BookingMessages.ITINERARY_RECEIPT_NOT_FOUND}), 404
+
+    ticket_storage = TicketManager()
+
+    try:
+        pdf_data = ticket_storage.read_file(
+            booking_flight.itinerary_receipt_path,
+            subfolder_name='imports'
+        )
+    except (ValueError, OSError):
+        return jsonify({'message': BookingMessages.ITINERARY_RECEIPT_NOT_FOUND}), 404
+
+    flight = booking_flight.flight_tariff.flight
+
+    filename = ITINERARY_PDF_FILENAME_TEMPLATE.format(
+        booking_number=booking.booking_number,
+        flight_number=flight.airline_flight_number,
+        date=format_date(flight.scheduled_departure)
+    )
+
+    return send_file(
+        BytesIO(pdf_data),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename,
+    ), 200
+
+
+@current_user
 def get_booking_process_payment(current_user, public_id):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
@@ -300,6 +351,91 @@ def get_booking_process_payment(current_user, public_id):
         .first_or_404()
     )
     return jsonify(payment.to_dict()), 200
+
+
+def _get_request_refund_details(current_user, public_id, ticket_id, send_request=False):
+    token = request.args.get('access_token')
+    booking = Booking.get_if_has_access(current_user, public_id, token)
+    ticket = Ticket.get_or_404(ticket_id)
+
+    if not booking:
+        return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
+
+    bfp = ticket.booking_flight_passenger
+    ticket_status = bfp.status if bfp else None
+
+    if not ticket or bfp.booking_passenger.booking_id != booking.id:
+        return jsonify({'message': BookingMessages.TICKET_NOT_FOUND}), 404
+
+    if booking.status != BOOKING_STATUS.completed:
+        return jsonify({
+            'success': False,
+            'message': BookingMessages.BOOKING_REFUND_NOT_ALLOWED
+        }), 400
+
+    if ticket_status == BOOKING_FLIGHT_PASSENGER_STATUS.refunded:
+        return jsonify({
+            'success': False,
+            'message': BookingMessages.TICKET_ALREADY_REFUNDED
+        }), 400
+
+    if ticket_status == BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress:
+        return jsonify({
+            'success': False,
+            'message': BookingMessages.TICKET_REFUND_ALREADY_REQUESTED
+        }), 400
+
+    if ticket_status != BOOKING_FLIGHT_PASSENGER_STATUS.ticketed:
+        return jsonify({
+            'success': False,
+            'message': BookingMessages.TICKET_REFUND_STATUS_NOT_ALLOWED
+        }), 400
+
+    is_refundable, is_refundable_tariff, is_refundable_period, refund_details = calculate_refund_details(
+        booking,
+        ticket
+    )
+
+    if not is_refundable:
+        error_message = None
+        if not is_refundable_tariff:
+            error_message = BookingMessages.TARIFF_REFUND_NOT_ALLOWED
+        elif not is_refundable_period:
+            error_message = BookingMessages.PERIOD_REFUND_NOT_ALLOWED
+
+        return jsonify({
+            'success': False,
+            'is_refundable': is_refundable,
+            'message': error_message
+        }), 400
+
+    if send_request:
+        BookingFlightPassenger.update(
+            ticket.booking_flight_passenger.id,
+            status=BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress,
+            refund_request_at=datetime.now(),
+            commit=True,
+        )
+
+    return jsonify({
+        'success': True,
+        'is_refundable': is_refundable,
+        'refund_details': refund_details
+    }), 200
+
+
+@current_user
+def get_request_refund_details(current_user, public_id, ticket_id):
+    return _get_request_refund_details(
+        current_user, public_id, ticket_id, send_request=False
+    )
+
+
+@current_user
+def request_refund(current_user, public_id, ticket_id):
+    return _get_request_refund_details(
+        current_user, public_id, ticket_id, send_request=True
+    )
 
 
 def yookassa_webhook():

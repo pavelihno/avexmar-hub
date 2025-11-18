@@ -23,68 +23,73 @@ const PassengersTable = ({ passengers = [] }) => {
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 
+	const passengersData = React.useMemo(() => {
+		return passengers.map((p, idx) => {
+			const {
+				id,
+				last_name: lastName = '',
+				first_name: firstName = '',
+				patronymic_name: patronymicName = '',
+				gender: genderKey,
+				birth_date,
+				document_type: docType,
+				document_number: docNumber = '',
+				citizenship,
+			} = p;
+
+			const passengerName = `${lastName || ''} ${firstName || ''} ${patronymicName || ''}`.trim() || '—';
+			const birthDate = birth_date ? formatDate(birth_date) : '';
+			const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
+			const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
+			const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : null;
+			const documentDetails = [docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel), docNumber]
+				.filter(Boolean)
+				.join(', ');
+
+			return {
+				key: id ?? idx,
+				passengerName,
+				birthDate,
+				gender,
+				documentDetails,
+				birthDateOrGender: [birthDate, gender].filter(Boolean).join(' · '),
+			};
+		});
+	}, [passengers]);
+
 	if (isXs) {
 		// Mobile card view
 		return (
 			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-				{passengers.map((p, idx) => {
-					const {
-						id,
-						last_name = '',
-						first_name = '',
-						patronymic_name = '',
-						gender: genderKey,
-						birth_date,
-						document_type: docType,
-						document_number: docNumber = '',
-						citizenship,
-					} = p;
+				{passengersData.map((data) => (
+					<Paper key={data.key} variant='outlined' sx={{ p: 1.5 }}>
+						<Box
+							sx={{
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								gap: 1,
+								mb: 0.5,
+								flexWrap: 'wrap',
+							}}
+						>
+							<Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
+								{data.passengerName}
+							</Typography>
+						</Box>
 
-					const passengerName = `${last_name} ${first_name} ${patronymic_name}`.trim() || '—';
-					const birthDate = birth_date ? formatDate(birth_date) : '';
-					const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
-					const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
-					const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : null;
-					const documentDetails = [
-						docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel),
-						docNumber,
-					]
-						.filter(Boolean)
-						.join(', ');
-
-					return (
-						<Paper key={id ?? idx} variant='outlined' sx={{ p: 1.5 }}>
-							<Box
-								sx={{
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'space-between',
-									gap: 1,
-									mb: 0.5,
-									flexWrap: 'wrap',
-								}}
-							>
-								<Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
-									{passengerName}
-								</Typography>
-							</Box>
-
-							{(birthDate || gender) && (
-								<Typography variant='body2' sx={{ color: 'text.secondary' }}>
-									{[birthDate, gender].filter(Boolean).join(' · ')}
-								</Typography>
-							)}
-							{documentDetails && (
-								<Typography
-									variant='caption'
-									sx={{ color: 'text.secondary', display: 'block', mt: 0.25 }}
-								>
-									{documentDetails}
-								</Typography>
-							)}
-						</Paper>
-					);
-				})}
+						{data.birthDateOrGender && (
+							<Typography variant='body2' sx={{ color: 'text.secondary' }}>
+								{data.birthDateOrGender}
+							</Typography>
+						)}
+						{data.documentDetails && (
+							<Typography variant='caption' sx={{ color: 'text.secondary', display: 'block', mt: 0.25 }}>
+								{data.documentDetails}
+							</Typography>
+						)}
+					</Paper>
+				))}
 			</Box>
 		);
 	}
@@ -102,40 +107,14 @@ const PassengersTable = ({ passengers = [] }) => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{passengers.map((p, idx) => {
-						const {
-							id,
-							last_name = '',
-							first_name = '',
-							patronymic_name = '',
-							gender: genderKey,
-							birth_date,
-							document_type: docType,
-							document_number: docNumber = '',
-							citizenship,
-						} = p;
-
-						const passengerName = `${last_name} ${first_name} ${patronymic_name}`.trim() || '—';
-						const birthDate = birth_date ? formatDate(birth_date) : '';
-						const gender = ENUM_LABELS.GENDER_SHORT?.[genderKey] ?? '';
-						const docTypeLabel = ENUM_LABELS.DOCUMENT_TYPE?.[docType] ?? '';
-						const codeA3 = docType === 'foreign_passport' ? citizenship?.code_a3 : null;
-						const documentDetails = [
-							docTypeLabel && (codeA3 ? `${docTypeLabel} (${codeA3})` : docTypeLabel),
-							docNumber,
-						]
-							.filter(Boolean)
-							.join(', ');
-
-						return (
-							<TableRow key={id ?? idx}>
-								<TableCell>{passengerName}</TableCell>
-								<TableCell>{birthDate}</TableCell>
-								<TableCell>{gender}</TableCell>
-								<TableCell>{documentDetails}</TableCell>
-							</TableRow>
-						);
-					})}
+					{passengersData.map((data) => (
+						<TableRow key={data.key}>
+							<TableCell>{data.passengerName}</TableCell>
+							<TableCell>{data.birthDate}</TableCell>
+							<TableCell>{data.gender}</TableCell>
+							<TableCell>{data.documentDetails}</TableCell>
+						</TableRow>
+					))}
 				</TableBody>
 			</Table>
 		</TableContainer>

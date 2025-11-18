@@ -5,14 +5,24 @@ from flask import request, jsonify
 from sqlalchemy import func, or_, cast, String
 from sqlalchemy.orm import joinedload
 
+from app.constants.messages import BookingMessages
 from app.middlewares.auth_middleware import admin_required
 from app.models.booking import Booking
 from app.models.booking_flight import BookingFlight
+from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.flight_tariff import FlightTariff
 from app.models.flight import Flight
+from app.models.ticket import Ticket
 from app.utils.business_logic import get_booking_snapshot
-from app.utils.enum import PAYMENT_STATUS, BOOKING_STATUS
+from app.utils.email import EMAIL_TYPE, send_email, EmailError
+from app.utils.enum import (
+    PAYMENT_STATUS,
+    BOOKING_STATUS,
+    BOOKING_FLIGHT_PASSENGER_STATUS,
+)
 from app.utils.datetime import parse_date, combine_date_time
+from app.utils.yookassa import refund_payment
+from app.utils.passenger_categories import PASSENGER_WITH_SEAT_CATEGORIES
 
 
 def _calculate_booking_issues(booking, payments_snapshot):
@@ -47,6 +57,110 @@ def _calculate_booking_issues(booking, payments_snapshot):
         'pending_payment': pending_payment,
         'failed_payment': failed_payment,
     }
+
+
+def _calculate_ticket_issue_flags(booking_snapshot):
+    flights = (booking_snapshot or {}).get('flights') or []
+    refund_requested = False
+    issuing_in_progress = False
+
+    for flight in flights:
+        tickets = (flight or {}).get('tickets') or []
+        for ticket in tickets:
+            status = (ticket or {}).get('status')
+            if not status:
+                continue
+
+            if status in {
+                BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress.value,
+            }:
+                refund_requested = True
+
+            if status in {
+                BOOKING_FLIGHT_PASSENGER_STATUS.created.value,
+                BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress.value,
+            }:
+                issuing_in_progress = True
+
+        if refund_requested and issuing_in_progress:
+            break
+
+    return {
+        'ticket_refund': refund_requested,
+        'ticket_in_progress': issuing_in_progress,
+    }
+
+
+def _get_booking_ticket_context(booking_id: int, ticket_id: int):
+    booking = Booking.get_or_404(booking_id)
+    ticket = Ticket.get_or_404(ticket_id)
+
+    booking_flight_passenger = ticket.booking_flight_passenger
+    booking_flight = BookingFlight.query.join(
+        FlightTariff, FlightTariff.id == BookingFlight.flight_tariff_id
+    ).filter(
+        BookingFlight.booking_id == booking.id,
+        FlightTariff.flight_id == booking_flight_passenger.flight_id,
+    ).first_or_404()
+
+    return booking, ticket, booking_flight_passenger, booking_flight
+
+
+def _build_ticket_refund_payload(booking, ticket, booking_flight_passenger):
+    passenger = (
+        booking_flight_passenger.booking_passenger.passenger
+        if booking_flight_passenger.booking_passenger
+        else None
+    )
+    flight = booking_flight_passenger.flight
+
+    return {
+        'booking': {
+            'id': booking.id,
+            'booking_number': booking.booking_number,
+            'public_id': str(booking.public_id) if booking.public_id else None,
+        },
+        'ticket': {
+            'id': ticket.id,
+            'ticket_number': ticket.ticket_number,
+            'status': (
+                booking_flight_passenger.status.value
+                if booking_flight_passenger.status
+                else None
+            ),
+            'refund_request_at': (
+                booking_flight_passenger.refund_request_at.isoformat()
+                if booking_flight_passenger.refund_request_at
+                else None
+            ),
+            'refund_decision_at': (
+                booking_flight_passenger.refund_decision_at.isoformat()
+                if booking_flight_passenger.refund_decision_at
+                else None
+            ),
+            'passenger': passenger.to_dict(return_children=True)
+            if passenger
+            else {},
+            'flight': flight.to_dict(return_children=True) if flight else {},
+        },
+    }
+
+
+def _send_ticket_refund_rejected_email(booking, ticket, rejection_reason=None):
+    if not booking.email_address:
+        return False
+
+    try:
+        send_email(
+            EMAIL_TYPE.ticket_refund_rejected,
+            recipients=[booking.email_address],
+            booking_number=booking.booking_number,
+            ticket_number=ticket.ticket_number,
+            rejection_reason=rejection_reason,
+        )
+    except EmailError:
+        return False
+    return True
 
 
 @admin_required
@@ -126,7 +240,7 @@ def get_booking_dashboard(current_user):
 
     if booking_date_param:
         try:
-            booking_date = parse_date(booking_date_param)
+            booking_date = parse_date(booking_date_param, '%Y-%m-%d')
             start_of_day = combine_date_time(
                 booking_date,
                 datetime.min.time()
@@ -159,6 +273,8 @@ def get_booking_dashboard(current_user):
 
         snapshot_payments = booking_snapshot.get('payments') or []
         issues = _calculate_booking_issues(booking, snapshot_payments)
+        ticket_issue_flags = _calculate_ticket_issue_flags(booking_snapshot)
+        issues.update(ticket_issue_flags)
 
         for key, value in issues.items():
             if value:
@@ -229,3 +345,96 @@ def get_booking_dashboard(current_user):
     }
 
     return jsonify(response), 200
+
+
+@admin_required
+def get_booking_ticket_refund_details(current_user, booking_id, ticket_id):
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
+        booking_id,
+        ticket_id,
+    )
+
+    payload = _build_ticket_refund_payload(
+        booking,
+        ticket,
+        booking_flight_passenger,
+    )
+
+    return jsonify(payload), 200
+
+
+@admin_required
+def confirm_booking_ticket_refund(current_user, booking_id, ticket_id):
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
+        booking_id,
+        ticket_id,
+    )
+
+    if not booking_flight_passenger:
+        return jsonify({'message': BookingMessages.TICKET_NOT_FOUND}), 404
+
+    status = booking_flight_passenger.status
+    if status != BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress:
+        return jsonify({'message': BookingMessages.TICKET_REFUND_STATUS_NOT_ALLOWED}), 400
+
+    try:
+        payment = refund_payment(booking, ticket)
+
+        updated_bfp = BookingFlightPassenger.update(
+            booking_flight_passenger.id,
+            status=BOOKING_FLIGHT_PASSENGER_STATUS.refunded,
+            refund_decision_at=datetime.now(),
+            commit=False,
+        )
+
+        if booking_flight_passenger.booking_passenger.category in PASSENGER_WITH_SEAT_CATEGORIES:
+            updated_bf = BookingFlight.update(
+                booking_flight.id,
+                seats_number=booking_flight.seats_number - 1,
+                commit=True,
+            )
+
+    except ValueError as exc:
+        return jsonify({'message': str(exc)}), 400
+
+    payload = _build_ticket_refund_payload(
+        booking,
+        ticket,
+        updated_bfp,
+    )
+
+    return jsonify({**payload, 'success': True, 'action': 'confirm'}), 200
+
+
+@admin_required
+def reject_booking_ticket_refund(current_user, booking_id, ticket_id):
+    booking, ticket, booking_flight_passenger, booking_flight = _get_booking_ticket_context(
+        booking_id,
+        ticket_id,
+    )
+
+    if not booking_flight_passenger:
+        return jsonify({'message': BookingMessages.TICKET_NOT_FOUND}), 404
+
+    if booking_flight_passenger.status != BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress:
+        return jsonify({'message': BookingMessages.TICKET_REFUND_STATUS_NOT_ALLOWED}), 400
+
+    request_data = request.get_json() or {}
+    rejection_reason = request_data.get('rejection_reason', '').strip()
+
+    updated_bfp = BookingFlightPassenger.update(
+        booking_flight_passenger.id,
+        status=BOOKING_FLIGHT_PASSENGER_STATUS.refund_rejected,
+        refund_decision_at=datetime.now(),
+        commit=True,
+    )
+
+    _send_ticket_refund_rejected_email(booking, ticket, rejection_reason)
+
+    payload = _build_ticket_refund_payload(
+        booking,
+        ticket,
+        updated_bfp,
+    )
+
+    return jsonify({**payload, 'success': True, 'action': 'reject'}), 200

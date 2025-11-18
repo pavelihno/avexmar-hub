@@ -23,6 +23,8 @@ STORAGE_SUBDIRS=(
   "images/carousel"
   "seo"
   "seo/prerender"
+  "tickets"
+  "tickets/imports"
 )
 
 mkdir -p "$SCHEDULE_DIR"

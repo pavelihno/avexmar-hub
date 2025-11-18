@@ -1,6 +1,6 @@
 from collections.abc import Iterable
-from datetime import date
-from typing import Any, TYPE_CHECKING
+from datetime import date, datetime, timedelta
+from typing import Any
 
 from sqlalchemy import and_, or_, false, true
 from sqlalchemy.orm import aliased, Session
@@ -15,9 +15,6 @@ from app.models.route import Route
 from app.models.tariff import Tariff
 from app.models._base_model import NotFoundError
 from app.constants.messages import SearchMessages
-
-if TYPE_CHECKING:
-    from app.models.flight_tariff import FlightTariff
 
 
 def get_flight_seat_availability(
@@ -65,7 +62,11 @@ def get_flight_seat_availability(
         .all()
     )
 
-    taken_map = {row.flight_tariff_id: int(row.taken or 0) for row in taken_rows}
+    taken_map = {
+        row.flight_tariff_id: int(
+            row.taken or 0
+        ) for row in taken_rows
+    }
 
     if flight_tariffs is None:
         flight_tariffs = (
@@ -179,12 +180,18 @@ def query_flights(
             Flight.flight_number == flight_number,
         )
 
-    today = func.current_date()
+    # Exclude flights departing within 24 hours
+    min_departure_datetime = datetime.now() + timedelta(hours=24)
+
     if is_exact:
         if date_from:
             query = query.filter(
                 Flight.scheduled_departure == date_from,
-                Flight.scheduled_departure >= today,
+                (
+                    Flight.scheduled_departure + func.coalesce(
+                        Flight.scheduled_departure_time, '00:00:00'
+                    )
+                ) >= min_departure_datetime,
             )
         else:
             query = query.filter(false())
@@ -192,12 +199,20 @@ def query_flights(
         if date_from and date_to:
             query = query.filter(
                 Flight.scheduled_departure.between(date_from, date_to),
-                Flight.scheduled_departure >= today,
+                (
+                    Flight.scheduled_departure + func.coalesce(
+                        Flight.scheduled_departure_time, '00:00:00'
+                    )
+                ) >= min_departure_datetime,
             )
         elif date_from:
             query = query.filter(
                 Flight.scheduled_departure >= date_from,
-                Flight.scheduled_departure >= today,
+                (
+                    Flight.scheduled_departure + func.coalesce(
+                        Flight.scheduled_departure_time, '00:00:00'
+                    )
+                ) >= min_departure_datetime,
             )
         else:
             query = query.filter(false())
@@ -254,7 +269,8 @@ def query_flights(
 def build_schedule(origin_code: str, dest_code: str, include_return: bool = True) -> list[dict[str, Any]]:
     """Return schedule flights for both directions for a date"""
 
-    today = date.today()
+    # Exclude flights departing within 24 hours
+    min_departure_date = (datetime.now() + timedelta(hours=24)).date()
 
     flights: list[dict[str, Any]] = []
 
@@ -262,7 +278,7 @@ def build_schedule(origin_code: str, dest_code: str, include_return: bool = True
         query_flights(
             origin_code=origin_code,
             dest_code=dest_code,
-            date_from=today,
+            date_from=min_departure_date,
             is_exact=False,
             direction='outbound',
         )
@@ -273,7 +289,7 @@ def build_schedule(origin_code: str, dest_code: str, include_return: bool = True
             query_flights(
                 origin_code=dest_code,
                 dest_code=origin_code,
-                date_from=today,
+                date_from=min_departure_date,
                 is_exact=False,
                 direction='return',
             )
@@ -288,13 +304,22 @@ def upcoming_routes(limit: int | None = None) -> Iterable[tuple[str, str]]:
     origin = aliased(Airport)
     dest = aliased(Airport)
 
+    # Exclude flights departing within 24 hours
+    min_departure_datetime = datetime.now() + timedelta(hours=24)
+
     query = (
         db.session.query(origin.iata_code, dest.iata_code)
         .select_from(Flight)
         .join(Route, Flight.route_id == Route.id)
         .join(origin, Route.origin_airport_id == origin.id)
         .join(dest, Route.destination_airport_id == dest.id)
-        .filter(Flight.scheduled_departure >= func.current_date())
+        .filter(
+            (
+                Flight.scheduled_departure + func.coalesce(
+                    Flight.scheduled_departure_time, '00:00:00'
+                )
+            ) >= min_departure_datetime,
+        )
         .group_by(origin.iata_code, dest.iata_code)
         .order_by(func.min(Flight.scheduled_departure))
     )

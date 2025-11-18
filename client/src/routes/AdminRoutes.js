@@ -11,10 +11,11 @@ import DiscountManagement from '../components/admin/management/DiscountManagemen
 import FeeManagement from '../components/admin/management/FeeManagement';
 import FlightManagement from '../components/admin/management/FlightManagement';
 import FlightPassengerExport from '../components/admin/dashboard/FlightPassengerExport';
-import BookingDashboard from '../components/admin/dashboard/BookingDashboard';
+import BookingDashboard from '../components/admin/dashboard/booking/BookingDashboard';
 import TariffManagement from '../components/admin/management/TariffManagement';
 import BookingManagement from '../components/admin/management/BookingManagement';
 import PassengerManagement from '../components/admin/management/PassengerManagement';
+import TicketManagement from '../components/admin/management/TicketManagement';
 import UserManagement from '../components/admin/management/UserManagement';
 import PaymentManagement from '../components/admin/management/PaymentManagement';
 import ConsentDocManagement from '../components/admin/management/ConsentDocManagement';
@@ -22,6 +23,7 @@ import ConsentEventManagement from '../components/admin/management/ConsentEventM
 import CarouselSlideManagement from '../components/admin/management/CarouselSlideManagement';
 
 import ProtectedRoute from './ProtectedRoute';
+import TicketImport from '../components/admin/dashboard/TicketImport';
 
 const AdminRoutes = ({ currentUser }) => {
 	const isAdmin = currentUser?.role === 'admin';
@@ -83,6 +85,10 @@ const AdminRoutes = ({ currentUser }) => {
 			element: <ProtectedRoute children={<PassengerManagement />} condition={isAdmin} />,
 		},
 		{
+			path: '/admin/tickets',
+			element: <ProtectedRoute children={<TicketManagement />} condition={isAdmin} />,
+		},
+		{
 			path: '/admin/users',
 			element: <ProtectedRoute children={<UserManagement />} condition={isAdmin} />,
 		},
@@ -101,6 +107,10 @@ const AdminRoutes = ({ currentUser }) => {
 		{
 			path: '/admin/dashboard/flight-passengers',
 			element: <ProtectedRoute children={<FlightPassengerExport />} condition={isAdmin} />,
+		},
+		{
+			path: '/admin/dashboard/tickets',
+			element: <ProtectedRoute children={<TicketImport />} condition={isAdmin} />,
 		},
 		{
 			path: '/admin/dashboard/bookings',

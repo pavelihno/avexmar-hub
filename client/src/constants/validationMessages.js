@@ -49,6 +49,9 @@ export const VALIDATION_MESSAGES = {
 		icao_code: {
 			LENGTH: 'Код ICAO должен содержать 4 символа',
 		},
+		internal_code: {
+			LENGTH: 'Внутренний код должен содержать 3 символа',
+		},
 		city_code: {
 			REQUIRED: 'Код города обязателен',
 		},
@@ -170,6 +173,24 @@ export const VALIDATION_MESSAGES = {
 		},
 	},
 
+	TICKET: {
+		ticket_number: {
+			REQUIRED: 'Номер билета обязателен',
+		},
+		flight_id: {
+			REQUIRED: 'Рейс обязателен',
+		},
+		booking_id: {
+			REQUIRED: 'Бронирование обязательно',
+		},
+		passenger_id: {
+			REQUIRED: 'Пассажир обязателен',
+		},
+		booking_flight_passenger_id: {
+			REQUIRED: 'Необходимо выбрать пассажира на рейсе',
+		},
+	},
+
 	BOOKING: {
 		email_address: {
 			REQUIRED: 'Введите электронную почту',
@@ -195,6 +216,9 @@ export const VALIDATION_MESSAGES = {
 		icao_code: {
 			REQUIRED: 'Код ICAO обязателен',
 			LENGTH: 'Код ICAO должен содержать 3 символа',
+		},
+		internal_code: {
+			LENGTH: 'Внутренний код должен содержать 2 символа',
 		},
 		name: {
 			REQUIRED: 'Название авиакомпании обязательно',

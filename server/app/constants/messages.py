@@ -31,6 +31,14 @@ class BookingMessages:
     BOOKING_DETAILS_REQUIRED = 'Требуются номер бронирования, фамилия и имя'
     BOOKING_NOT_FOUND = 'Бронирование не найдено'
     BOOKING_FOUND = 'Бронирование найдено'
+    TICKET_NOT_FOUND = 'Билет не найден'
+    ITINERARY_RECEIPT_NOT_FOUND = 'Маршрутная квитанция не найдена'
+    BOOKING_REFUND_NOT_ALLOWED = 'Возврат возможен только для подтвержденных бронирований'
+    TARIFF_REFUND_NOT_ALLOWED = 'Возврат запрещен условиями тарифа'
+    PERIOD_REFUND_NOT_ALLOWED = 'Возврат невозможен: истек период для возврата'
+    TICKET_REFUND_ALREADY_REQUESTED = 'Возврат уже запрошен по данному билету'
+    TICKET_ALREADY_REFUNDED = 'Возврат по билету уже выполнен'
+    TICKET_REFUND_STATUS_NOT_ALLOWED = 'Возврат доступен только для выписанных билетов'
 
     @staticmethod
     def illegal_transition(from_status: str, to_status: str) -> str:
@@ -51,6 +59,9 @@ class ConsentMessages:
 
 class PassengerMessages:
     FLIGHT_REQUIRED = 'Требуется указать рейс'
+    INVALID_DATE_RANGE = 'Некорректный период дат'
+    INVALID_FLIGHT_IDS = 'Неверные идентификаторы рейсов'
+    NO_PENDING_PASSENGERS = 'Нет пассажиров для выгрузки'
 
 
 class CountryMessages:
@@ -127,6 +138,7 @@ class FileMessages:
     FILE_NOT_FOUND = 'Файл не найден'
     IMPORT_COMPLETED = 'Импорт успешно завершен'
     FILENAME_REQUIRED = 'Требуется указать имя файла'
+    XLS_NOT_SUPPORTED = 'XLS файлы не поддерживаются'
 
     @staticmethod
     def unsupported_content_type(content_type) -> str:
@@ -181,3 +193,28 @@ class XlsxMessages:
     @staticmethod
     def upload_not_supported(model_name: str) -> str:
         return f'{model_name} не поддерживает загрузку из файла'
+
+
+class TicketMessages:
+    BOOKING_REQUIRED = 'Необходимо указать бронирование'
+    PASSENGER_REQUIRED = 'Необходимо указать пассажира'
+    FLIGHT_REQUIRED = 'Необходимо указать рейс'
+    BOOKING_FLIGHT_PASSENGER_REQUIRED = 'Необходимо указать связь бронирование-рейс-пассажир'
+
+    IMPORT_NO_HEADER = 'Не удалось найти таблицу пассажиров в файле'
+    IMPORT_NO_PASSENGERS = 'В файле не найдено ни одного пассажира'
+    IMPORT_FLIGHT_NOT_FOUND = 'Не удалось найти рейс по указанным данным'
+    IMPORT_MULTIPLE_FLIGHTS_FOUND = 'Найдено несколько рейсов по указанным данным'
+    IMPORT_BOOKINGS_NOT_FOUND = 'Не удалось найти бронирования по указанным пассажирам'
+    IMPORT_PASSENGERS_NOT_MATCHED = 'Не удалось сопоставить пассажиров из файла с пассажирами в бронированиях'
+    IMPORT_PASSENGERS_MULTIPLE_MATCHES = 'Найдено несколько бронирований по заданным пассажирам'
+
+    IMPORT_PASSENGERS_PAYLOAD_REQUIRED = 'Список пассажиров обязателен для подтверждения импорта'
+    IMPORT_BOOKING_REQUIRED = 'Необходимо указать бронирование'
+    IMPORT_FLIGHT_REQUIRED = 'Необходимо указать рейс'
+    IMPORT_BOOKING_FLIGHT_NOT_FOUND = 'Не удалось найти связь бронирование-рейс'
+    IMPORT_TICKETS_DUPLICATE_NUMBER = 'Невозможно создать билет: номер уже используется'
+
+    @staticmethod
+    def import_summary(created: int, skipped: int) -> str:
+        return f'Создано билетов: {created}. Пропущено: {skipped}'
