@@ -248,6 +248,10 @@ const BookingDashboard = () => {
 				error: null,
 			}));
 
+			if (hasSearched && appliedFilters) {
+				dispatch(fetchBookingDashboard(mapFiltersToParams(appliedFilters)));
+			}
+
 			refundDialogTimeoutRef.current = setTimeout(() => {
 				forceCloseRefundDialog();
 			}, 2500);

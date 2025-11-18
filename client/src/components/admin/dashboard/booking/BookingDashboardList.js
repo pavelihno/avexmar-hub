@@ -502,12 +502,7 @@ const BookingDashboardList = ({
 																		1
 																	);
 																	const canDownloadItinerary = Boolean(
-																		bookingSnapshot.public_id &&
-																			flight.booking_flight_id &&
-																			flight.tickets?.some(
-																				(ticket) =>
-																					ticket.can_download_itinerary
-																			)
+																		flight.can_download_itinerary
 																	);
 																	const flightHeader =
 																		buildFlightTicketHeader(flight) ||

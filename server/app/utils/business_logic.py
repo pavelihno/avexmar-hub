@@ -539,7 +539,10 @@ def get_booking_snapshot(booking) -> dict:
     booking_flights = booking.booking_flights.order_by(BookingFlight.id).all()
 
     flight_to_bf = {
-        bf.flight_tariff.flight_id: bf for bf in booking_flights
+        bf.flight_tariff.flight_id: bf.id for bf in booking_flights
+    }
+    booking_flight_itinerary = {
+        bf.id: bool(bf.itinerary_receipt_path) for bf in booking_flights
     }
 
     booking_flight_passengers = BookingFlightPassenger.query.options(
@@ -552,8 +555,7 @@ def get_booking_snapshot(booking) -> dict:
 
     booking_flights_tickets = {}
     for bfp in booking_flight_passengers:
-        bf = flight_to_bf.get(bfp.flight_id)
-        bf_id = bf.id
+        bf_id = flight_to_bf.get(bfp.flight_id)
         if bf_id is None:
             continue
 
@@ -564,7 +566,6 @@ def get_booking_snapshot(booking) -> dict:
         booking_flights_tickets[bf_id].append({
             'id': ticket.id if ticket else None,
             'ticket_number': ticket.ticket_number if ticket else None,
-            'can_download_itinerary': bool(bf.itinerary_receipt_path),
             'passenger': bfp.booking_passenger.passenger.to_dict(),
             'booking_flight_passenger_id': bfp.id,
             'status': bfp.status.value if bfp.status else None,
@@ -576,6 +577,10 @@ def get_booking_snapshot(booking) -> dict:
         {
             **flight,
             'tickets': booking_flights_tickets.get(flight.get('booking_flight_id'), []),
+            'can_download_itinerary': booking_flight_itinerary.get(
+                flight.get('booking_flight_id'),
+                False,
+            ),
         }
         for flight in snapshot.get('flights', [])
     ]

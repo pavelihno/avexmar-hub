@@ -167,7 +167,7 @@ const Completion = () => {
 											<Button
 												key={flight.id || index}
 												variant='outlined'
-												disabled={flight.tickets.length === 0}
+												disabled={!Boolean(flight.can_download_itinerary)}
 												onClick={() => handleDownloadItineraryPdf(flight)}
 											>
 												{UI_LABELS.BOOKING.completion.download_itinerary_pdf}{' '}

@@ -702,7 +702,7 @@ export const UI_LABELS = {
 				ticket_number: 'Номер билета',
 				passenger: 'Пассажир',
 				document: 'Документ',
-				refund: 'Возврат',
+				status: 'Статус',
 			},
 			refund: {
 				link: 'Запросить возврат',

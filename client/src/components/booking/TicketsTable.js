@@ -352,7 +352,7 @@ const TicketsTable = ({ flights = [], publicId, accessToken, currencySymbol }) =
 							<TableCell>{UI_LABELS.BOOKING.confirmation.ticket_columns.ticket_number}</TableCell>
 							<TableCell>{UI_LABELS.BOOKING.confirmation.ticket_columns.passenger}</TableCell>
 							<TableCell>{UI_LABELS.BOOKING.confirmation.ticket_columns.document}</TableCell>
-							<TableCell>{UI_LABELS.BOOKING.confirmation.ticket_columns.refund}</TableCell>
+							<TableCell>{UI_LABELS.BOOKING.confirmation.ticket_columns.status}</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
