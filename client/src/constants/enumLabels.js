@@ -45,7 +45,7 @@ export const ENUM_LABELS = {
 		infant_seat: 'Младенец с местом',
 	},
 	BOOKING_FLIGHT_PASSENGER_STATUS: {
-		created: 'Создан',
+		created: 'Пассажир создан',
 		ticket_in_progress: 'Билет оформляется',
 		ticketed: 'Билет оформлен',
 		refund_in_progress: 'Возврат обрабатывается',

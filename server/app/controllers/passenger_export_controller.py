@@ -468,6 +468,9 @@ def get_pending_ticket_passengers_flights_by_route(current_user, route_id):
     for f in flights:
         counts = _get_flight_passenger_counts(f.id)
 
+        if counts['total_passenger_count'] <= 0:
+            continue
+
         data.append({
             'id': f.id,
             'airline_flight_number': f.airline_flight_number,

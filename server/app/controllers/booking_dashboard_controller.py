@@ -77,7 +77,6 @@ def _calculate_ticket_issue_flags(booking_snapshot):
                 refund_requested = True
 
             if status in {
-                BOOKING_FLIGHT_PASSENGER_STATUS.created.value,
                 BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress.value,
             }:
                 issuing_in_progress = True
