@@ -1,0 +1,42 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build server image
+        run: docker build -t pavelihno/avexmar-hub:server-latest ./server
+
+      - name: Push server image
+        run: docker push pavelihno/avexmar-hub:server-latest
+
+      - name: Build client image
+        run: docker build -t pavelihno/avexmar-hub:client-latest ./client
+
+      - name: Push client image
+        run: docker push pavelihno/avexmar-hub:client-latest
+
+      - name: Pull application images
+        run: docker compose pull
+
+      - name: Deploy stack
+        run: docker compose up -d --remove-orphans

@@ -20,7 +20,7 @@ services:
 
   server-app:
     container_name: server-app
-    image: pavelihno/avexmar-hub:server-v1.0.0
+    image: pavelihno/avexmar-hub:server-latest
     restart: unless-stopped
     env_file:
       - ./server/.env
@@ -49,7 +49,7 @@ services:
 
   client-app:
     container_name: client-app
-    image: pavelihno/avexmar-hub:client-v1.0.0
+    image: pavelihno/avexmar-hub:client-latest
     restart: unless-stopped
     env_file:
       - ./client/.env
