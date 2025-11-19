@@ -145,10 +145,12 @@ jobs:
         run: docker compose up -d --remove-orphans
 
       - name: Clean up environment files
-        if: always()
+        if: failure()
         run: |
           rm -f ./client/.env
           rm -f ./server/.env
           rm -f ./caddy/.env
           rm -f ./redis/.env
           rm -f ./monitoring/grafana/.env
+          rm -f ./db/pgbouncer/userlist.txt
+          rm -f ./db/pgbouncer/pgbouncer.ini
