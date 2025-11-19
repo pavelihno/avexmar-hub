@@ -13,6 +13,41 @@ concurrency:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      # Client environment variables
+      REACT_APP_APP_ENV: ${{ secrets.REACT_APP_APP_ENV }}
+      REACT_APP_SERVER_URL: ${{ secrets.REACT_APP_SERVER_URL }}
+
+      # Server environment variables
+      SERVER_APP_ENV: ${{ secrets.SERVER_APP_ENV }}
+      SERVER_CLIENT_URL: ${{ secrets.SERVER_CLIENT_URL }}
+      SERVER_STORAGE_URL: ${{ secrets.SERVER_STORAGE_URL }}
+      SERVER_DEFAULT_TIMEZONE: ${{ secrets.SERVER_DEFAULT_TIMEZONE }}
+      SERVER_SECRET_KEY: ${{ secrets.SERVER_SECRET_KEY }}
+      SERVER_DATABASE_URI: ${{ secrets.SERVER_DATABASE_URI }}
+      SERVER_CELERY_BROKER_URL: ${{ secrets.SERVER_CELERY_BROKER_URL }}
+      SERVER_LIMITER_STORAGE_URI: ${{ secrets.SERVER_LIMITER_STORAGE_URI }}
+      YOOKASSA_SHOP_ID: ${{ secrets.YOOKASSA_SHOP_ID }}
+      YOOKASSA_SECRET_KEY: ${{ secrets.YOOKASSA_SECRET_KEY }}
+      SERVER_MAIL_SERVER: ${{ secrets.SERVER_MAIL_SERVER }}
+      SERVER_MAIL_PORT: ${{ secrets.SERVER_MAIL_PORT }}
+      SERVER_MAIL_USE_TLS: ${{ secrets.SERVER_MAIL_USE_TLS }}
+      SERVER_MAIL_USE_SSL: ${{ secrets.SERVER_MAIL_USE_SSL }}
+      SERVER_MAIL_DEFAULT_USERNAME: ${{ secrets.SERVER_MAIL_DEFAULT_USERNAME }}
+      SERVER_MAIL_DEFAULT_PASSWORD: ${{ secrets.SERVER_MAIL_DEFAULT_PASSWORD }}
+      SERVER_MAIL_NOREPLY_USERNAME: ${{ secrets.SERVER_MAIL_NOREPLY_USERNAME }}
+      SERVER_MAIL_NOREPLY_PASSWORD: ${{ secrets.SERVER_MAIL_NOREPLY_PASSWORD }}
+
+      # Caddy environment variables
+      CADDY_DOMAIN: ${{ secrets.CADDY_DOMAIN }}
+
+      # Redis environment variables
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+
+      # Grafana environment variables
+      GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
+      GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,6 +57,42 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create environment files
+        run: |
+          # Create client .env file
+          echo "REACT_APP_APP_ENV='$REACT_APP_APP_ENV'" > ./client/.env
+          echo "REACT_APP_SERVER_URL='$REACT_APP_SERVER_URL'" >> ./client/.env
+
+          # Create server .env file
+          echo "SERVER_APP_ENV='$SERVER_APP_ENV'" > ./server/.env
+          echo "SERVER_CLIENT_URL='$SERVER_CLIENT_URL'" >> ./server/.env
+          echo "SERVER_STORAGE_URL='$SERVER_STORAGE_URL'" >> ./server/.env
+          echo "SERVER_DEFAULT_TIMEZONE='$SERVER_DEFAULT_TIMEZONE'" >> ./server/.env
+          echo "SERVER_SECRET_KEY='$SERVER_SECRET_KEY'" >> ./server/.env
+          echo "SERVER_DATABASE_URI='$SERVER_DATABASE_URI'" >> ./server/.env
+          echo "SERVER_CELERY_BROKER_URL='$SERVER_CELERY_BROKER_URL'" >> ./server/.env
+          echo "SERVER_LIMITER_STORAGE_URI='$SERVER_LIMITER_STORAGE_URI'" >> ./server/.env
+          echo "YOOKASSA_SHOP_ID='$YOOKASSA_SHOP_ID'" >> ./server/.env
+          echo "YOOKASSA_SECRET_KEY='$YOOKASSA_SECRET_KEY'" >> ./server/.env
+          echo "SERVER_MAIL_SERVER='$SERVER_MAIL_SERVER'" >> ./server/.env
+          echo "SERVER_MAIL_PORT='$SERVER_MAIL_PORT'" >> ./server/.env
+          echo "SERVER_MAIL_USE_TLS='$SERVER_MAIL_USE_TLS'" >> ./server/.env
+          echo "SERVER_MAIL_USE_SSL='$SERVER_MAIL_USE_SSL'" >> ./server/.env
+          echo "SERVER_MAIL_DEFAULT_USERNAME='$SERVER_MAIL_DEFAULT_USERNAME'" >> ./server/.env
+          echo "SERVER_MAIL_DEFAULT_PASSWORD='$SERVER_MAIL_DEFAULT_PASSWORD'" >> ./server/.env
+          echo "SERVER_MAIL_NOREPLY_USERNAME='$SERVER_MAIL_NOREPLY_USERNAME'" >> ./server/.env
+          echo "SERVER_MAIL_NOREPLY_PASSWORD='$SERVER_MAIL_NOREPLY_PASSWORD'" >> ./server/.env
+
+          # Create caddy .env file
+          echo "CADDY_DOMAIN=$CADDY_DOMAIN" > ./caddy/.env
+
+          # Create redis .env file
+          echo "REDIS_PASSWORD='$REDIS_PASSWORD'" > ./redis/.env
+
+          # Create grafana .env file
+          echo "GF_SECURITY_ADMIN_USER=$GF_SECURITY_ADMIN_USER" > ./monitoring/grafana/.env
+          echo "GF_SECURITY_ADMIN_PASSWORD=$GF_SECURITY_ADMIN_PASSWORD" >> ./monitoring/grafana/.env
 
       - name: Build server image
         run: docker build -t pavelihno/avexmar-hub:server-latest ./server
@@ -40,3 +111,12 @@ jobs:
 
       - name: Deploy stack
         run: docker compose up -d --remove-orphans
+
+      - name: Clean up environment files
+        if: always()
+        run: |
+          rm -f ./client/.env
+          rm -f ./server/.env
+          rm -f ./caddy/.env
+          rm -f ./redis/.env
+          rm -f ./monitoring/grafana/.env
