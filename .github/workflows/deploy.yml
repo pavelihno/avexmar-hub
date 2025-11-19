@@ -60,6 +60,9 @@ jobs:
 
       - name: Create environment files
         run: |
+          # Ensure directories exist
+          mkdir -p ./client ./server ./caddy ./redis ./monitoring/grafana
+
           # Create client .env file
           echo "REACT_APP_APP_ENV='$REACT_APP_APP_ENV'" > ./client/.env
           echo "REACT_APP_SERVER_URL='$REACT_APP_SERVER_URL'" >> ./client/.env
