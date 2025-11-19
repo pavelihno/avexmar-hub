@@ -48,6 +48,13 @@ jobs:
       GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
       GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
 
+      # PgBouncer environment variables
+      PGBOUNCER_DATABASE_HOST: ${{ secrets.PGBOUNCER_DATABASE_HOST }}
+      PGBOUNCER_DATABASE_PORT: ${{ secrets.PGBOUNCER_DATABASE_PORT }}
+      PGBOUNCER_DATABASE_NAME: ${{ secrets.PGBOUNCER_DATABASE_NAME }}
+      PGBOUNCER_AUTH_USER: ${{ secrets.PGBOUNCER_AUTH_USER }}
+      PGBOUNCER_AUTH_PASSWORD: ${{ secrets.PGBOUNCER_AUTH_PASSWORD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -61,7 +68,7 @@ jobs:
       - name: Create environment files
         run: |
           # Ensure directories exist
-          mkdir -p ./client ./server ./caddy ./redis ./monitoring/grafana
+          mkdir -p ./client ./server ./caddy ./redis ./monitoring/grafana ./db/pgbouncer
 
           # Create client .env file
           echo "REACT_APP_APP_ENV='$REACT_APP_APP_ENV'" > ./client/.env
@@ -96,6 +103,28 @@ jobs:
           # Create grafana .env file
           echo "GF_SECURITY_ADMIN_USER=$GF_SECURITY_ADMIN_USER" > ./monitoring/grafana/.env
           echo "GF_SECURITY_ADMIN_PASSWORD=$GF_SECURITY_ADMIN_PASSWORD" >> ./monitoring/grafana/.env
+
+          # Create PgBouncer configuration files
+          echo "\"$PGBOUNCER_AUTH_USER\" \"$PGBOUNCER_AUTH_PASSWORD\"" > ./db/pgbouncer/userlist.txt
+
+          cat > ./db/pgbouncer/pgbouncer.ini << EOF
+          [databases]
+          $PGBOUNCER_DATABASE_NAME = host=$PGBOUNCER_DATABASE_HOST port=$PGBOUNCER_DATABASE_PORT dbname=$PGBOUNCER_DATABASE_NAME
+
+          [pgbouncer]
+          listen_addr = 0.0.0.0
+          listen_port = 6432
+          auth_type = md5
+          auth_file = /etc/pgbouncer/userlist.txt
+          pool_mode = transaction
+          max_client_conn = 100
+          default_pool_size = 20
+          ignore_startup_parameters = extra_float_digits
+          admin_users = pgbouncer
+          stats_users = pgbouncer
+          log_connections = 1
+          log_disconnections = 1
+          EOF
 
       - name: Build server image
         run: docker build -t pavelihno/avexmar-hub:server-latest ./server
