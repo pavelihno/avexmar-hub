@@ -148,5 +148,5 @@ jobs:
           echo "PWD=$(pwd)"
           ls -ld db db/pgbouncer db/pgbouncer/pgbouncer.ini db/pgbouncer/userlist.txt || true
 
-			- name: Deploy stack
+      - name: Deploy stack
         run: docker compose up -d --remove-orphans
