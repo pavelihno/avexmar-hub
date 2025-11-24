@@ -113,8 +113,18 @@ export const formatNumber = (value, formatString = DEFAULT_NUMBER_FORMAT) => {
 const _dateOnlyToLocalDate = (s) => {
 	const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
 	const m2 = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
-	if (m1) return new Date(+m1[1], +m1[2] - 1, +m1[3]);
-	if (m2) return new Date(+m2[3], +m2[2] - 1, +m2[1]);
+	if (m1) {
+		const date = new Date(0);
+		date.setFullYear(+m1[1], +m1[2] - 1, +m1[3]);
+		date.setHours(0, 0, 0, 0);
+		return date;
+	}
+	if (m2) {
+		const date = new Date(0);
+		date.setFullYear(+m2[3], +m2[2] - 1, +m2[1]);
+		date.setHours(0, 0, 0, 0);
+		return date;
+	}
 	return null;
 };
 
