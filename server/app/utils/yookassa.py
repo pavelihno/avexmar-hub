@@ -47,14 +47,15 @@ def __generate_receipt(booking: Booking) -> Dict[str, Any]:
 
         for passenger in direction.get('passengers', []):
             price = passenger.get('price', 0.0)
-            full_name = passenger.get('full_name', '')
+            passenger_name = f"{passenger.get('last_name', '')} {passenger.get('first_name', '')}".strip()
             description = YOOKASSA_RECEIPT_DESCRIPTION_TEMPLATE.format(
                 origin=origin,
                 destination=dest,
                 seat_class=seat_class,
                 date=date_str,
-                passenger=full_name,
-            )
+                passenger=passenger_name,
+            )[0:128]
+
             items.append(
                 {
                     'description': description,
