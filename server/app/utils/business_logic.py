@@ -243,15 +243,14 @@ def calculate_receipt_details(booking):
     passengers_map = {}
     for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
         passenger = bp.passenger
-        full_name = __get_passenger_full_name(
-            passenger.last_name,
-            passenger.first_name,
-            passenger.patronymic_name
-        )
         passengers_map.setdefault(
             BookingPassenger.get_plural_category(bp.category).value,
             []
-        ).append(full_name)
+        ).append({
+            'last_name': passenger.last_name,
+            'first_name': passenger.first_name,
+            'patronymic_name': passenger.patronymic_name
+        })
 
     directions = []
     for direction in price_details.get('directions', []):
@@ -262,11 +261,20 @@ def calculate_receipt_details(booking):
         dir_passengers = []
 
         for p in direction.get('passengers', []):
-            names = passengers_map.get(p['category'], [])
+            passengers = passengers_map.get(p['category'], [])
             unit_final_price = p.get('unit_final_price', 0.0)
-            for name in names:
+            for passenger in passengers:
+                full_name = __get_passenger_full_name(
+                    passenger.get('last_name'),
+                    passenger.get('first_name'),
+                    passenger.get('patronymic_name')
+                )
                 dir_passengers.append(
-                    {'full_name': name, 'price': unit_final_price}
+                    {
+                        **passenger,
+                        'full_name': full_name,
+                        'price': unit_final_price
+                    }
                 )
 
         directions.append({
