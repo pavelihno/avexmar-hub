@@ -57,11 +57,12 @@ class Airline(BaseModel):
         return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -73,6 +74,24 @@ class Airline(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        airlines = cls.get_all()
+        for airline in airlines:
+            country_code = airline.country.code_a2 if airline.country else None
+            rows.append(
+                {
+                    'name': airline.name,
+                    'iata_code': airline.iata_code,
+                    'icao_code': airline.icao_code,
+                    'internal_code': airline.internal_code,
+                    'country_code': country_code,
+                }
+            )
+
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(

@@ -19,7 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AdminDataTable from './AdminDataTable';
 import FlightTariffManagement from './FlightTariffManagement';
 
-import { downloadTemplate, uploadFile } from '../../../api';
+import { downloadTemplate, downloadData, uploadFile } from '../../../api';
 import { FILE_NAMES } from '../../../constants/files';
 
 import {
@@ -150,6 +150,10 @@ const FlightManagement = () => {
 
 	const handleGetTemplate = async () => {
 		await downloadTemplate('flights', FILE_NAMES.FLIGHTS_TEMPLATE);
+	};
+
+	const handleDownloadData = async () => {
+		await downloadData('flights', FILE_NAMES.FLIGHTS_DATA);
 	};
 
 	const FIELDS = {
@@ -428,6 +432,8 @@ const FlightManagement = () => {
 				uploadButtonText={UI_LABELS.ADMIN.modules.flights.upload_button}
 				uploadTemplateButtonText={UI_LABELS.ADMIN.modules.flights.upload_template_button}
 				getUploadTemplate={handleGetTemplate}
+				downloadButtonText={UI_LABELS.ADMIN.modules.flights.download_button}
+				onDownload={handleDownloadData}
 				onUpload={handleUpload}
 				isLoading={
 					isLoading ||

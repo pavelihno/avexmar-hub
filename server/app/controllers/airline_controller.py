@@ -1,6 +1,6 @@
 from flask import request, jsonify, send_file
 
-from app.constants.files import AIRLINES_TEMPLATE_FILENAME, UPLOAD_ERRORS_FILENAME
+from app.constants.files import AIRLINES_TEMPLATE_FILENAME, AIRLINES_DATA_FILENAME, UPLOAD_ERRORS_FILENAME
 from app.constants.messages import FileMessages
 from app.models.airline import Airline
 
@@ -11,6 +11,7 @@ from app.utils.xlsx import is_xlsx_file
 def get_airlines():
     airlines = Airline.get_all()
     return jsonify([a.to_dict() for a in airlines]), 200
+
 
 def get_airline(airline_id):
     airline = Airline.get_or_404(airline_id)
@@ -45,6 +46,18 @@ def get_airline_template(current_user):
         xlsx,
         as_attachment=True,
         download_name=AIRLINES_TEMPLATE_FILENAME,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ), 200
+
+
+@admin_required
+def download_airlines(current_user):
+    xlsx = Airline.get_upload_xlsx_data()
+    xlsx.seek(0)
+    return send_file(
+        xlsx,
+        as_attachment=True,
+        download_name=AIRLINES_DATA_FILENAME,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ), 200
 

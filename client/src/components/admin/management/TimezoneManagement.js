@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { downloadTemplate, uploadFile } from '../../../api';
+import { downloadTemplate, downloadData, uploadFile } from '../../../api';
 import { FILE_NAMES } from '../../../constants/files';
 import {
 	fetchTimezones,
@@ -64,6 +64,10 @@ const TimezoneManagement = () => {
 		await downloadTemplate('timezones', FILE_NAMES.TIMEZONES_TEMPLATE);
 	};
 
+	const handleDownloadData = async () => {
+		await downloadData('timezones', FILE_NAMES.TIMEZONES_DATA);
+	};
+
 	const formatted = timezones.map(adminManager.toUiFormat);
 
 	return (
@@ -81,6 +85,8 @@ const TimezoneManagement = () => {
 			uploadButtonText={UI_LABELS.ADMIN.modules.timezones.upload_button}
 			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.timezones.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
+			downloadButtonText={UI_LABELS.ADMIN.modules.timezones.download_button}
+			onDownload={handleDownloadData}
 			onUpload={handleUpload}
 			isLoading={isLoading}
 			error={errors}

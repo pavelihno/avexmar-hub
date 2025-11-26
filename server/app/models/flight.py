@@ -180,6 +180,7 @@ class Flight(BaseModel):
             model_class=cls,
             required_fields=cls.upload_required_fields,
             external_fields=cls.EXTERNAL_UPLOAD_FIELDS,
+            data=None,
         )
 
     @classmethod
@@ -191,6 +192,46 @@ class Flight(BaseModel):
             cls.EXTERNAL_UPLOAD_FIELDS,
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        flights = cls.get_all()
+        rows = []
+
+        for flight in flights:
+            route = flight.route
+            airline = flight.airline
+            origin = route.origin_airport if route else None
+            destination = route.destination_airport if route else None
+            tariffs = []
+
+            for flight_tariff in flight.tariffs.order_by(FlightTariff.id).all():
+                tariff = flight_tariff.tariff
+                tariffs.append(
+                    {
+                        'seat_class': tariff.seat_class.value if tariff and tariff.seat_class else None,
+                        'order_number': tariff.order_number if tariff else None,
+                        'seats_number': flight_tariff.seats_number,
+                    }
+                )
+
+            rows.append(
+                {
+                    'airline_code': airline.iata_code if airline else None,
+                    'flight_number': flight.flight_number,
+                    'origin_airport_code': origin.iata_code if origin else None,
+                    'destination_airport_code': destination.iata_code if destination else None,
+                    'aircraft': flight.aircraft.type if flight.aircraft else None,
+                    'note': flight.note,
+                    'scheduled_departure': flight.scheduled_departure,
+                    'scheduled_departure_time': flight.scheduled_departure_time,
+                    'scheduled_arrival': flight.scheduled_arrival,
+                    'scheduled_arrival_time': flight.scheduled_arrival_time,
+                    'external_data': [tariffs[:4]],
+                }
+            )
+
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(

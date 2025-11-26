@@ -93,10 +93,13 @@ def _get_upload_xlsx_template_wb(
     model_class: Type,
     required_fields: list = [],
     external_fields: List[Tuple[Dict[Type, Dict[str, str]], int]] = [],
-    data: list = [],
+    data: list | None = None,
+    *,
+    include_errors: bool = False,
 ) -> Workbook:
     wb = Workbook()
 
+    data = data or []
     all_fields = {**fields}
     external_fields_keys = set()
     field_analysis = analyze_model_fields(model_class, fields)
@@ -137,7 +140,7 @@ def _get_upload_xlsx_template_wb(
     is_data_provided = len(data) > 0
 
     # Add header row
-    if is_data_provided:
+    if is_data_provided and include_errors:
         all_fields.update({'error': 'ERROR'})
     headers = list(all_fields.values())
     ws_data.append(headers)
@@ -165,7 +168,8 @@ def _get_upload_xlsx_template_wb(
             # Add external fields
             external_data = item.get('external_data', [])
             for ext_idx, (ext_fields_dict, _count) in enumerate(external_fields):
-                sub_items = external_data[ext_idx] if ext_idx < len(external_data) else []
+                sub_items = external_data[ext_idx] if ext_idx < len(
+                    external_data) else []
                 for i in range(_count):
                     sub_item = sub_items[i] if i < len(sub_items) else {}
                     for model_class, ext_fields in ext_fields_dict.items():
@@ -178,7 +182,8 @@ def _get_upload_xlsx_template_wb(
                             row_values.append(val if val is not None else '')
 
             # Add error column
-            row_values.append(item.get('error', ''))
+            if include_errors:
+                row_values.append(item.get('error', ''))
 
             ws_data.append(row_values)
 
@@ -229,7 +234,8 @@ def _get_upload_xlsx_template_wb(
     for key, display_name in all_fields.items():
         rules = []
 
-        base_key, _ = (_extract_external_field(key)) if key in external_fields_keys else (key, 0)
+        base_key, _ = (_extract_external_field(
+            key)) if key in external_fields_keys else (key, 0)
 
         if base_key in enum_fields:
             rules.append(
@@ -278,7 +284,7 @@ def get_upload_xlsx_report(
     data: list = [],
 ) -> BytesIO:
     wb = _get_upload_xlsx_template_wb(
-        fields, model_class, required_fields, external_fields, data
+        fields, model_class, required_fields, external_fields, data, include_errors=True
     )
 
     output = BytesIO()
@@ -291,11 +297,12 @@ def get_upload_xlsx_template(
     fields: dict,
     model_class: Type,
     required_fields: list = [],
-    external_fields: List[Tuple[Dict[Type, Dict[str, str]], int]] = []
+    external_fields: List[Tuple[Dict[Type, Dict[str, str]], int]] = [],
+    data: list | None = None,
 ) -> BytesIO:
 
     wb = _get_upload_xlsx_template_wb(
-        fields, model_class, required_fields, external_fields
+        fields, model_class, required_fields, external_fields, data
     )
 
     output = BytesIO()
@@ -375,7 +382,8 @@ def parse_upload_xlsx_template(
                     continue
 
                 is_external = key in external_fields_key_indices
-                base_key, item_index = (_extract_external_field(key)) if is_external else (key, 0)
+                base_key, item_index = (_extract_external_field(
+                    key)) if is_external else (key, 0)
 
                 if base_key in date_fields:
                     value = parse_date_formats(value)
@@ -383,7 +391,8 @@ def parse_upload_xlsx_template(
                     value = parse_time_formats(value)
 
                 if is_external:
-                    item['external_data'][external_fields_key_indices[key]][item_index - 1][base_key] = value
+                    item['external_data'][external_fields_key_indices[key]
+                                          ][item_index - 1][base_key] = value
                 else:
                     item[base_key] = value
 
@@ -393,7 +402,8 @@ def parse_upload_xlsx_template(
                     for f in required_fields if not item.get(f)
                 ]
                 if missing:
-                    item['error'] = XlsxMessages.missing_required_fields(missing)
+                    item['error'] = XlsxMessages.missing_required_fields(
+                        missing)
 
         except Exception as e:
             item['error'] = str(e.with_traceback(None))

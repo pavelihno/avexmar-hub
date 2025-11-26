@@ -37,6 +37,20 @@ export const downloadTemplate = async (endpoint, filename) => {
 	window.URL.revokeObjectURL(url);
 };
 
+export const downloadData = async (endpoint, filename) => {
+	const res = await serverApi.get(`/${endpoint}/download`, {
+		responseType: 'blob',
+	});
+	const url = window.URL.createObjectURL(new Blob([res.data]));
+	const link = document.createElement('a');
+	link.href = url;
+	link.setAttribute('download', filename);
+	document.body.appendChild(link);
+	link.click();
+	link.remove();
+	window.URL.revokeObjectURL(url);
+};
+
 export const uploadFile = async (endpoint, file) => {
 	const formData = new FormData();
 	formData.append('file', file);

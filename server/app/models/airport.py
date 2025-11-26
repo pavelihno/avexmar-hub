@@ -78,11 +78,12 @@ class Airport(BaseModel):
         return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -94,6 +95,29 @@ class Airport(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        airports = cls.get_all()
+        for airport in airports:
+            country_code = airport.country.code_a2 if airport.country else None
+            timezone_name = airport.timezone.name if airport.timezone else None
+            rows.append(
+                {
+                    'name': airport.name,
+                    'city_name': airport.city_name,
+                    'city_name_en': airport.city_name_en,
+                    'iata_code': airport.iata_code,
+                    'icao_code': airport.icao_code,
+                    'internal_code': airport.internal_code,
+                    'city_code': airport.city_code,
+                    'country_code': country_code,
+                    'timezone': timezone_name,
+                }
+            )
+
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(

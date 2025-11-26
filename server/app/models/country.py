@@ -59,11 +59,12 @@ class Country(BaseModel):
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -75,6 +76,21 @@ class Country(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        countries = cls.get_all()
+        for country in countries:
+            rows.append(
+                {
+                    'name': country.name,
+                    'name_en': country.name_en,
+                    'code_a2': country.code_a2,
+                    'code_a3': country.code_a3,
+                }
+            )
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def get_by_code(cls, code):

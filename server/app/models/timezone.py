@@ -37,11 +37,12 @@ class Timezone(BaseModel):
         return super().get_all(sort_by=['name'], descending=False)
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -53,6 +54,12 @@ class Timezone(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        timezones = cls.get_all()
+        rows = [{'name': tz.name} for tz in timezones]
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(
