@@ -99,13 +99,33 @@ class Country(BaseModel):
         )
 
         def process_row(row, row_session: Session):
+            code_a2 = str(row.get('code_a2')).upper()
+            code_a3 = str(row.get('code_a3')).upper()
+            payload = {
+                'name': str(row.get('name')),
+                'name_en': str(row.get('name_en')),
+                'code_a2': code_a2,
+                'code_a3': code_a3,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.code_a2 == code_a2) | (cls.code_a3 == code_a3))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                name=str(row.get('name')),
-                name_en=str(row.get('name_en')),
-                code_a2=str(row.get('code_a2')),
-                code_a3=str(row.get('code_a3')),
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)

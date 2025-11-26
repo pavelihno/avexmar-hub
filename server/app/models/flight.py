@@ -312,34 +312,73 @@ class Flight(BaseModel):
             if validation_errors:
                 raise ValueError('\n'.join(validation_errors))
 
-            # Create flight if no validation errors
-            flight = cls.create(
-                row_session,
-                flight_number=str(row.get('flight_number')),
-                airline_id=airline.id,
-                route_id=route.id,
-                aircraft_id=aircraft_id,
-                note=row.get('note'),
-                scheduled_departure=parse_date_formats(row.get('scheduled_departure')),
-                scheduled_departure_time=parse_time_formats(
-                    row.get('scheduled_departure_time')
-                ),
-                scheduled_arrival=parse_date_formats(row.get('scheduled_arrival')),
-                scheduled_arrival_time=parse_time_formats(
-                    row.get('scheduled_arrival_time')
-                ),
-                commit=False,
+            scheduled_departure = parse_date_formats(row.get('scheduled_departure'))
+            scheduled_departure_time = parse_time_formats(
+                row.get('scheduled_departure_time')
+            )
+            scheduled_arrival = parse_date_formats(row.get('scheduled_arrival'))
+            scheduled_arrival_time = parse_time_formats(
+                row.get('scheduled_arrival_time')
             )
 
-            # Create flight tariffs
-            for tariff_data in validated_tariffs:
-                FlightTariff.create(
-                    row_session,
-                    flight_id=flight.id,
-                    tariff_id=tariff_data['tariff_id'],
-                    seats_number=tariff_data['seats_number'],
-                    commit=False,
+            payload = {
+                'flight_number': str(row.get('flight_number')),
+                'airline_id': airline.id,
+                'route_id': route.id,
+                'aircraft_id': aircraft_id,
+                'note': row.get('note'),
+                'scheduled_departure': scheduled_departure,
+                'scheduled_departure_time': scheduled_departure_time,
+                'scheduled_arrival': scheduled_arrival,
+                'scheduled_arrival_time': scheduled_arrival_time,
+            }
+
+            existing_flight = (
+                row_session.query(cls)
+                .filter(
+                    cls.flight_number == payload['flight_number'],
+                    cls.airline_id == airline.id,
+                    cls.route_id == route.id,
+                    cls.scheduled_departure == scheduled_departure,
                 )
+                .one_or_none()
+            )
+
+            if existing_flight:
+                flight = cls.update(
+                    existing_flight.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+            else:
+                flight = cls.create(
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
+            existing_tariffs = {
+                ft.tariff_id: ft for ft in flight.tariffs.all()
+            } if flight.id else {}
+
+            for tariff_data in validated_tariffs:
+                existing_tariff = existing_tariffs.get(tariff_data['tariff_id'])
+                if existing_tariff:
+                    FlightTariff.update(
+                        existing_tariff.id,
+                        row_session,
+                        seats_number=tariff_data['seats_number'],
+                        commit=False,
+                    )
+                else:
+                    FlightTariff.create(
+                        row_session,
+                        flight_id=flight.id,
+                        tariff_id=tariff_data['tariff_id'],
+                        seats_number=tariff_data['seats_number'],
+                        commit=False,
+                    )
 
             return flight
 

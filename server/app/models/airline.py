@@ -95,14 +95,34 @@ class Airline(BaseModel):
             if not country:
                 raise ValueError(CountryMessages.INVALID_COUNTRY_CODE)
 
+            iata_code = str(row.get('iata_code'))
+            icao_code = str(row.get('icao_code'))
+            payload = {
+                'iata_code': iata_code,
+                'icao_code': icao_code,
+                'internal_code': str(row.get('internal_code')) if row.get('internal_code') is not None else None,
+                'name': str(row.get('name')),
+                'country_id': country.id,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.iata_code == iata_code) | (cls.icao_code == icao_code))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                iata_code=str(row.get('iata_code')),
-                icao_code=str(row.get('icao_code')),
-                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
-                name=str(row.get('name')),
-                country_id=country.id,
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)

@@ -121,18 +121,38 @@ class Airport(BaseModel):
                     Timezone.name == tz_name
                 ).one_or_none()
 
+            iata_code = str(row.get('iata_code'))
+            icao_code = str(row.get('icao_code'))
+            payload = {
+                'name': str(row.get('name')),
+                'city_name': str(row.get('city_name')),
+                'city_name_en': str(row.get('city_name_en')),
+                'iata_code': iata_code,
+                'icao_code': icao_code,
+                'internal_code': str(row.get('internal_code')) if row.get('internal_code') is not None else None,
+                'city_code': str(row.get('city_code')),
+                'country_id': country.id,
+                'timezone_id': tz.id if tz else None,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.iata_code == iata_code) | (cls.icao_code == icao_code))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                name=str(row.get('name')),
-                city_name=str(row.get('city_name')),
-                city_name_en=str(row.get('city_name_en')),
-                iata_code=str(row.get('iata_code')),
-                icao_code=str(row.get('icao_code')),
-                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
-                city_code=str(row.get('city_code')),
-                country_id=country.id,
-                timezone_id=tz.id if tz else None,
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)
