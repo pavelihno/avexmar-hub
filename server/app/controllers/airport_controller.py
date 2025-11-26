@@ -1,6 +1,6 @@
 from flask import request, jsonify, send_file
 
-from app.constants.files import AIRPORTS_TEMPLATE_FILENAME, UPLOAD_ERRORS_FILENAME
+from app.constants.files import AIRPORTS_TEMPLATE_FILENAME, AIRPORTS_DATA_FILENAME, UPLOAD_ERRORS_FILENAME
 from app.constants.messages import FileMessages
 from app.models.airport import Airport
 from app.middlewares.auth_middleware import admin_required
@@ -45,6 +45,18 @@ def get_airport_template(current_user):
         xlsx,
         as_attachment=True,
         download_name=AIRPORTS_TEMPLATE_FILENAME,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ), 200
+
+
+@admin_required
+def download_airports(current_user):
+    xlsx = Airport.get_upload_xlsx_data()
+    xlsx.seek(0)
+    return send_file(
+        xlsx,
+        as_attachment=True,
+        download_name=AIRPORTS_DATA_FILENAME,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ), 200
 

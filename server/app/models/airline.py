@@ -57,11 +57,12 @@ class Airline(BaseModel):
         return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -73,6 +74,24 @@ class Airline(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        airlines = cls.get_all()
+        for airline in airlines:
+            country_code = airline.country.code_a2 if airline.country else None
+            rows.append(
+                {
+                    'name': airline.name,
+                    'iata_code': airline.iata_code,
+                    'icao_code': airline.icao_code,
+                    'internal_code': airline.internal_code,
+                    'country_code': country_code,
+                }
+            )
+
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(
@@ -95,14 +114,34 @@ class Airline(BaseModel):
             if not country:
                 raise ValueError(CountryMessages.INVALID_COUNTRY_CODE)
 
+            iata_code = str(row.get('iata_code'))
+            icao_code = str(row.get('icao_code'))
+            payload = {
+                'iata_code': iata_code,
+                'icao_code': icao_code,
+                'internal_code': str(row.get('internal_code')) if row.get('internal_code') is not None else None,
+                'name': str(row.get('name')),
+                'country_id': country.id,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.iata_code == iata_code) | (cls.icao_code == icao_code))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                iata_code=str(row.get('iata_code')),
-                icao_code=str(row.get('icao_code')),
-                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
-                name=str(row.get('name')),
-                country_id=country.id,
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)

@@ -78,11 +78,12 @@ class Airport(BaseModel):
         return cls.query.filter(cls.iata_code == code).one_or_none()
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -94,6 +95,29 @@ class Airport(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        airports = cls.get_all()
+        for airport in airports:
+            country_code = airport.country.code_a2 if airport.country else None
+            timezone_name = airport.timezone.name if airport.timezone else None
+            rows.append(
+                {
+                    'name': airport.name,
+                    'city_name': airport.city_name,
+                    'city_name_en': airport.city_name_en,
+                    'iata_code': airport.iata_code,
+                    'icao_code': airport.icao_code,
+                    'internal_code': airport.internal_code,
+                    'city_code': airport.city_code,
+                    'country_code': country_code,
+                    'timezone': timezone_name,
+                }
+            )
+
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def upload_from_file(
@@ -121,18 +145,38 @@ class Airport(BaseModel):
                     Timezone.name == tz_name
                 ).one_or_none()
 
+            iata_code = str(row.get('iata_code'))
+            icao_code = str(row.get('icao_code'))
+            payload = {
+                'name': str(row.get('name')),
+                'city_name': str(row.get('city_name')),
+                'city_name_en': str(row.get('city_name_en')),
+                'iata_code': iata_code,
+                'icao_code': icao_code,
+                'internal_code': str(row.get('internal_code')) if row.get('internal_code') is not None else None,
+                'city_code': str(row.get('city_code')),
+                'country_id': country.id,
+                'timezone_id': tz.id if tz else None,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.iata_code == iata_code) | (cls.icao_code == icao_code))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                name=str(row.get('name')),
-                city_name=str(row.get('city_name')),
-                city_name_en=str(row.get('city_name_en')),
-                iata_code=str(row.get('iata_code')),
-                icao_code=str(row.get('icao_code')),
-                internal_code=str(row.get('internal_code')) if row.get('internal_code') is not None else None,
-                city_code=str(row.get('city_code')),
-                country_id=country.id,
-                timezone_id=tz.id if tz else None,
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)

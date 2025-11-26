@@ -146,6 +146,7 @@ export const UI_LABELS = {
 				edit_button: 'Редактировать аэропорт',
 				upload_button: 'Загрузить аэропорты',
 				upload_template_button: 'Скачать шаблон загрузки',
+				download_button: 'Скачать аэропорты',
 			},
 			airlines: {
 				title: 'Авиакомпании',
@@ -155,6 +156,7 @@ export const UI_LABELS = {
 				edit_button: 'Редактировать авиакомпанию',
 				upload_button: 'Загрузить авиакомпании',
 				upload_template_button: 'Скачать шаблон загрузки',
+				download_button: 'Скачать авиакомпании',
 			},
 			aircrafts: {
 				title: 'Воздушные суда',
@@ -171,6 +173,7 @@ export const UI_LABELS = {
 				edit_button: 'Редактировать страну',
 				upload_button: 'Загрузить страны',
 				upload_template_button: 'Скачать шаблон загрузки',
+				download_button: 'Скачать страны',
 			},
 			timezones: {
 				title: 'Часовые пояса',
@@ -180,6 +183,7 @@ export const UI_LABELS = {
 				edit_button: 'Редактировать часовой пояс',
 				upload_button: 'Загрузить часовые пояса',
 				upload_template_button: 'Скачать шаблон загрузки',
+				download_button: 'Скачать часовые пояса',
 			},
 			routes: {
 				title: 'Маршруты',
@@ -226,6 +230,7 @@ export const UI_LABELS = {
 				manage_tariffs: 'Изменить тарифы',
 				upload_button: 'Загрузить рейсы',
 				upload_template_button: 'Скачать шаблон загрузки',
+				download_button: 'Скачать рейсы',
 			},
 			bookings: {
 				title: 'Бронирования',

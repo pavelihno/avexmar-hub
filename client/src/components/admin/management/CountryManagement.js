@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdminDataTable from './AdminDataTable';
-import { downloadTemplate, uploadFile } from '../../../api';
+import { downloadTemplate, downloadData, uploadFile } from '../../../api';
 import { FILE_NAMES } from '../../../constants/files';
 import {
 	fetchCountries,
@@ -96,6 +96,10 @@ const CountryManagement = () => {
 		await downloadTemplate('countries', FILE_NAMES.COUNTRIES_TEMPLATE);
 	};
 
+	const handleDownloadData = async () => {
+		await downloadData('countries', FILE_NAMES.COUNTRIES_DATA);
+	};
+
 	const formatted = countries.map(adminManager.toUiFormat);
 
 	return (
@@ -113,6 +117,8 @@ const CountryManagement = () => {
 			uploadButtonText={UI_LABELS.ADMIN.modules.countries.upload_button}
 			uploadTemplateButtonText={UI_LABELS.ADMIN.modules.countries.upload_template_button}
 			getUploadTemplate={handleGetTemplate}
+			downloadButtonText={UI_LABELS.ADMIN.modules.countries.download_button}
+			onDownload={handleDownloadData}
 			onUpload={handleUpload}
 			isLoading={isLoading}
 			error={errors}

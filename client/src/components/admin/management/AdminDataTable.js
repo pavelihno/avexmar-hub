@@ -66,6 +66,8 @@ const AdminDataTable = ({
 	addButtonText = null,
 	uploadButtonText = null,
 	uploadTemplateButtonText = null,
+	downloadButtonText = null,
+	onDownload = null,
 	isLoading = false,
 }) => {
 	const [openDialog, setOpenDialog] = useState(false);
@@ -452,6 +454,22 @@ const AdminDataTable = ({
 								{uploadButtonText}
 							</Button>
 						</>
+					)}
+
+					{downloadButtonText && onDownload && (
+						<Button
+							variant='outlined'
+							color='success'
+							startIcon={<DownloadIcon />}
+							onClick={() => onDownload()}
+							sx={{
+								flexShrink: 0,
+								width: { xs: '100%', md: 'auto' },
+								minHeight: 48,
+							}}
+						>
+							{downloadButtonText}
+						</Button>
 					)}
 
 					{onDeleteAll && (

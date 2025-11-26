@@ -59,11 +59,12 @@ class Country(BaseModel):
         return super().create(session, commit=commit, **kwargs)
 
     @classmethod
-    def get_upload_xlsx_template(cls):
+    def get_upload_xlsx_template(cls, data=None):
         return get_upload_xlsx_template(
             cls.upload_fields,
             model_class=cls,
             required_fields=cls.upload_required_fields,
+            data=data,
         )
 
     @classmethod
@@ -75,6 +76,21 @@ class Country(BaseModel):
             [],
             error_rows
         )
+
+    @classmethod
+    def get_upload_xlsx_data(cls):
+        rows = []
+        countries = cls.get_all()
+        for country in countries:
+            rows.append(
+                {
+                    'name': country.name,
+                    'name_en': country.name_en,
+                    'code_a2': country.code_a2,
+                    'code_a3': country.code_a3,
+                }
+            )
+        return cls.get_upload_xlsx_template(data=rows)
 
     @classmethod
     def get_by_code(cls, code):
@@ -99,13 +115,33 @@ class Country(BaseModel):
         )
 
         def process_row(row, row_session: Session):
+            code_a2 = str(row.get('code_a2')).upper()
+            code_a3 = str(row.get('code_a3')).upper()
+            payload = {
+                'name': str(row.get('name')),
+                'name_en': str(row.get('name_en')),
+                'code_a2': code_a2,
+                'code_a3': code_a3,
+            }
+
+            existing = (
+                row_session.query(cls)
+                .filter((cls.code_a2 == code_a2) | (cls.code_a3 == code_a3))
+                .one_or_none()
+            )
+
+            if existing:
+                return cls.update(
+                    existing.id,
+                    row_session,
+                    commit=False,
+                    **payload,
+                )
+
             return cls.create(
                 row_session,
-                name=str(row.get('name')),
-                name_en=str(row.get('name_en')),
-                code_a2=str(row.get('code_a2')),
-                code_a3=str(row.get('code_a3')),
                 commit=False,
+                **payload,
             )
 
         return super()._process_upload_rows(rows, process_row, session=session)

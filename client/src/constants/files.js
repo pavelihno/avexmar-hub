@@ -4,6 +4,11 @@ export const FILE_NAMES = {
 	TIMEZONES_TEMPLATE: 'Шаблон часовых поясов.xlsx',
 	COUNTRIES_TEMPLATE: 'Шаблон стран.xlsx',
 	AIRPORTS_TEMPLATE: 'Шаблон аэропортов.xlsx',
+	AIRLINES_DATA: 'Авиакомпании.xlsx',
+	FLIGHTS_DATA: 'Рейсы.xlsx',
+	TIMEZONES_DATA: 'Часовые пояса.xlsx',
+	COUNTRIES_DATA: 'Страны.xlsx',
+	AIRPORTS_DATA: 'Аэропорты.xlsx',
 	UPLOAD_ERRORS: 'Ошибки загрузки.xlsx',
 };
 

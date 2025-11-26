@@ -105,6 +105,7 @@ def __create_app(_config_class, _db):
     app.route('/airports/<int:airport_id>', methods=['DELETE'])(delete_airport)
     app.route('/airports/upload', methods=['POST'])(upload_airport)
     app.route('/airports/template', methods=['GET'])(get_airport_template)
+    app.route('/airports/download', methods=['GET'])(download_airports)
 
     # aircrafts
     app.route('/aircrafts', methods=['GET'])(get_aircrafts)
@@ -121,6 +122,7 @@ def __create_app(_config_class, _db):
     app.route('/airlines/<int:airline_id>', methods=['DELETE'])(delete_airline)
     app.route('/airlines/upload', methods=['POST'])(upload_airline)
     app.route('/airlines/template', methods=['GET'])(get_airline_template)
+    app.route('/airlines/download', methods=['GET'])(download_airlines)
 
     # countries
     app.route('/countries', methods=['GET'])(get_countries)
@@ -130,6 +132,7 @@ def __create_app(_config_class, _db):
     app.route('/countries/<int:country_id>', methods=['DELETE'])(delete_country)
     app.route('/countries/upload', methods=['POST'])(upload_country)
     app.route('/countries/template', methods=['GET'])(get_country_template)
+    app.route('/countries/download', methods=['GET'])(download_countries)
 
     # timezones
     app.route('/timezones', methods=['GET'])(get_timezones)
@@ -139,6 +142,7 @@ def __create_app(_config_class, _db):
     app.route('/timezones/<int:timezone_id>', methods=['DELETE'])(delete_timezone)
     app.route('/timezones/upload', methods=['POST'])(upload_timezone)
     app.route('/timezones/template', methods=['GET'])(get_timezone_template)
+    app.route('/timezones/download', methods=['GET'])(download_timezones)
 
     # routes
     app.route('/routes', methods=['GET'])(get_routes)
@@ -163,6 +167,7 @@ def __create_app(_config_class, _db):
     app.route('/flights/<int:flight_id>', methods=['DELETE'])(delete_flight)
     app.route('/flights/upload', methods=['POST'])(upload_flight)
     app.route('/flights/template', methods=['GET'])(get_flight_template)
+    app.route('/flights/download', methods=['GET'])(download_flights)
 
     # tariffs
     app.route('/tariffs', methods=['GET'])(get_tariffs)
