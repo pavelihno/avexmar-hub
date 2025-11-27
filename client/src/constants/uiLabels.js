@@ -443,7 +443,9 @@ export const UI_LABELS = {
 					route: 'Маршрут',
 					flight: 'Рейс',
 					buyer: 'Покупатель / контакт',
-					bookingDate: 'Дата бронирования',
+					bookingDateRange: 'Период бронирования',
+					bookingDateFrom: 'Дата бронирования с',
+					bookingDateTo: 'Дата бронирования по',
 					reset: 'Очистить фильтры',
 				},
 				summary: {

@@ -20,7 +20,7 @@ from app.utils.enum import (
     BOOKING_STATUS,
     BOOKING_FLIGHT_PASSENGER_STATUS,
 )
-from app.utils.datetime import parse_date, combine_date_time
+from app.utils.datetime import parse_date_formats, combine_date_time
 from app.utils.yookassa import refund_payment
 from app.utils.passenger_categories import PASSENGER_WITH_SEAT_CATEGORIES
 
@@ -171,6 +171,12 @@ def get_booking_dashboard(current_user):
     flight_id = params.get('flight_id', type=int)
     buyer_query = (params.get('buyer_query') or '').strip()
     booking_date_param = (params.get('booking_date') or '').strip()
+    booking_date_from_param = (params.get('booking_date_from') or '').strip()
+    booking_date_to_param = (params.get('booking_date_to') or '').strip()
+
+    if booking_date_param and not (booking_date_from_param or booking_date_to_param):
+        booking_date_from_param = booking_date_param
+        booking_date_to_param = booking_date_param
 
     query = Booking.query.options(
         joinedload(Booking.user),
@@ -237,18 +243,33 @@ def get_booking_dashboard(current_user):
             joined_flight_tariffs = True
         query = query.filter(FlightTariff.flight_id == flight_id)
 
-    if booking_date_param:
+    if booking_date_from_param or booking_date_to_param:
         try:
-            booking_date = parse_date(booking_date_param, '%Y-%m-%d')
+            booking_date_from = parse_date_formats(booking_date_from_param)
+            booking_date_to = parse_date_formats(booking_date_to_param)
+
             start_of_day = combine_date_time(
-                booking_date,
+                booking_date_from,
                 datetime.min.time()
-            )
-            end_of_day = start_of_day + timedelta(days=1)
-            query = query.filter(
-                Booking.created_at >= start_of_day,
-                Booking.created_at < end_of_day,
-            )
+            ) if booking_date_from else None
+            end_of_day = combine_date_time(
+                booking_date_to,
+                datetime.min.time()
+            ) + timedelta(days=1) if booking_date_to else None
+
+            if start_of_day and end_of_day:
+                query = query.filter(
+                    Booking.created_at >= start_of_day,
+                    Booking.created_at < end_of_day,
+                )
+            elif start_of_day:
+                query = query.filter(
+                    Booking.created_at >= start_of_day,
+                )
+            elif end_of_day:
+                query = query.filter(
+                    Booking.created_at < end_of_day,
+                )
         except ValueError:
             pass
 

@@ -47,10 +47,11 @@ const Header = () => {
 		setDrawerOpen(false);
 	};
 
-	const handleLogout = () => {
-		dispatch(logout());
-		setDrawerOpen(false);
-	};
+        const handleLogout = () => {
+                dispatch(logout());
+                setDrawerOpen(false);
+                navigate('/');
+        };
 
 	const toggleDrawer = (openState) => () => {
 		setDrawerOpen(openState);

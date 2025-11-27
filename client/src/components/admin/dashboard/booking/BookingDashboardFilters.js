@@ -36,13 +36,14 @@ const BookingDashboardFilters = ({
 	routeSelectOptions,
 	flightSelectOptions,
 	renderBookingNumberField,
-	renderRouteField,
-	renderFlightField,
-	renderBuyerField,
-	renderBookingDateField,
-	onFilterChange,
-	onApplyFilters,
-	onResetFilters,
+        renderRouteField,
+        renderFlightField,
+        renderBuyerField,
+        renderBookingDateFromField,
+        renderBookingDateToField,
+        onFilterChange,
+        onApplyFilters,
+        onResetFilters,
 	isResetDisabled,
 	isLoading,
 }) => (
@@ -102,26 +103,40 @@ const BookingDashboardFilters = ({
 							disabled: !filters.routeId || flightsLoading || flightSelectOptions.length <= 1,
 						})}
 					</Grid2>
-					<Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-						{renderBuyerField({
-							value: filters.buyerQuery,
-							onChange: (val) => onFilterChange('buyerQuery', val),
-							fullWidth: true,
-							size: 'small',
-						})}
-					</Grid2>
-					<Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-						{renderBookingDateField({
-							value: filters.bookingDate,
-							onChange: (val) => onFilterChange('bookingDate', val),
-							fullWidth: true,
-							size: 'small',
-							textFieldProps: {
-								fullWidth: true,
-								InputLabelProps: { shrink: true },
-							},
-						})}
-					</Grid2>
+                                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                                                {renderBuyerField({
+                                                        value: filters.buyerQuery,
+                                                        onChange: (val) => onFilterChange('buyerQuery', val),
+                                                        fullWidth: true,
+                                                        size: 'small',
+                                                })}
+                                        </Grid2>
+                                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                                                {renderBookingDateFromField({
+                                                        value: filters.bookingDateFrom,
+                                                        onChange: (val) => onFilterChange('bookingDateFrom', val),
+                                                        fullWidth: true,
+                                                        size: 'small',
+                                                        maxDate: filters.bookingDateTo,
+                                                        textFieldProps: {
+                                                                fullWidth: true,
+                                                                InputLabelProps: { shrink: true },
+                                                        },
+                                                })}
+                                        </Grid2>
+                                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                                                {renderBookingDateToField({
+                                                        value: filters.bookingDateTo,
+                                                        onChange: (val) => onFilterChange('bookingDateTo', val),
+                                                        fullWidth: true,
+                                                        size: 'small',
+                                                        minDate: filters.bookingDateFrom,
+                                                        textFieldProps: {
+                                                                fullWidth: true,
+                                                                InputLabelProps: { shrink: true },
+                                                        },
+                                                })}
+                                        </Grid2>
 				</Grid2>
 				<Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='flex-end' spacing={{ xs: 1, sm: 1.5 }}>
 					<Button
