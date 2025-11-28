@@ -73,10 +73,9 @@ def delete_expired_bookings():
     expiration_threshold = datetime.now() - timedelta(days=Config.BOOKING_EXP_DELETION_DAYS)
     expired_bookings = (
         Booking.query
-        .join(BookingHold)
         .filter(
             Booking.status == BOOKING_STATUS.expired,
-            BookingHold.expires_at < expiration_threshold
+            Booking.created_at < expiration_threshold
         )
         .with_for_update()
         .all()
