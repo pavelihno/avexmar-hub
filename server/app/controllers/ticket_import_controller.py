@@ -4,7 +4,7 @@ import unicodedata
 import xlrd
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from flask import jsonify, request
 from sqlalchemy import and_, func, or_
@@ -252,6 +252,7 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
         .filter(
             and_(
                 BookingFlightPassenger.flight_id.in_(flight_ids),
+                BookingFlightPassenger.status.in_([BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress]),
                 Booking.status.in_([BOOKING_STATUS.completed]),
             )
         ).all()
