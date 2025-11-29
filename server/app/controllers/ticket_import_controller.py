@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from flask import jsonify, request
 from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, aliased
 
 from app.constants.messages import FileMessages, TicketMessages
 from app.constants.files import ITINERARY_PDF_FILENAME_TEMPLATE
@@ -23,8 +23,10 @@ from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.booking_passenger import BookingPassenger
 from app.models.flight import Flight
 from app.models.flight_tariff import FlightTariff
+from app.models.route import Route
 from app.models.passenger import Passenger
 from app.models.ticket import Ticket
+from app.models.airport import Airport
 from app.utils.datetime import parse_date, format_date, format_time
 from app.utils.email import send_email, EMAIL_TYPE
 from app.utils.storage import TicketManager
@@ -107,6 +109,14 @@ def _extract_ticket_data(sheet: xlrd.sheet.Sheet) -> Dict[str, Any]:
     route_value = route_line.split(
         ':', 1
     )[-1].strip() if ':' in route_line else route_line
+    origin_code = None
+    destination_code = None
+
+    if route_value:
+        cleaned_route = re.sub(r'\s+', '', route_value).upper()
+        route_parts = re.split(r'[-–—]', cleaned_route)
+        if len(route_parts) >= 2 and route_parts[0] and route_parts[1]:
+            origin_code, destination_code = route_parts[0], route_parts[1]
 
     departure_line = _clean_string(get_cell(2, 0))
     departure_date_raw = departure_line.split(
@@ -165,7 +175,11 @@ def _extract_ticket_data(sheet: xlrd.sheet.Sheet) -> Dict[str, Any]:
             'flight_number': flight_number,
             'departure_date': departure_date,
             'departure_date_raw': departure_date_raw,
-            'route': route_value,
+            'route': {
+                'raw': route_value,
+                'origin_code': origin_code,
+                'destination_code': destination_code,
+            },
         },
         'passengers': passengers,
     }
@@ -177,6 +191,9 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
     departure_date = flight_info.get('departure_date')
     flight_number = (flight_info.get('flight_number') or '').strip()
     airline_code = (flight_info.get('airline_code') or '').strip().upper()
+    route_info = flight_info.get('route') or {}
+    origin_code = (route_info.get('origin_code') or '').upper()
+    destination_code = (route_info.get('destination_code') or '').upper()
 
     session = db.session
 
@@ -205,6 +222,27 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
             or_(
                 func.upper(Airline.iata_code) == airline_code,
                 func.upper(Airline.internal_code) == airline_code,
+            )
+        )
+
+    if origin_code and destination_code:
+        origin_airport = aliased(Airport)
+        destination_airport = aliased(Airport)
+
+        query = (
+            query.join(Route, Flight.route_id == Route.id)
+            .join(
+                origin_airport,
+                Route.origin_airport_id == origin_airport.id,
+            )
+            .join(
+                destination_airport,
+                Route.destination_airport_id == destination_airport.id,
+            )
+            .filter(
+                func.upper(origin_airport.internal_code) == origin_code,
+                func.upper(
+                    destination_airport.internal_code) == destination_code,
             )
         )
 
@@ -252,7 +290,9 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
         .filter(
             and_(
                 BookingFlightPassenger.flight_id.in_(flight_ids),
-                BookingFlightPassenger.status.in_([BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress]),
+                BookingFlightPassenger.status.in_(
+                    [BOOKING_FLIGHT_PASSENGER_STATUS.ticket_in_progress]
+                ),
                 Booking.status.in_([BOOKING_STATUS.completed]),
             )
         ).all()

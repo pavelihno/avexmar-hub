@@ -7,6 +7,7 @@ from app.constants.files import BOOKING_PDF_FILENAME_TEMPLATE, ITINERARY_PDF_FIL
 from app.constants.messages import BookingMessages, ExportMessages
 from app.database import db
 from app.config import Config
+from app.constants.branding import CURRENCY_LABELS
 
 from app.models.booking import Booking
 from app.models.booking_passenger import BookingPassenger
@@ -35,6 +36,7 @@ from app.utils.storage import TicketManager
 from app.utils.consent import create_booking_consent
 from app.utils.pdf import generate_booking_pdf
 from app.utils.datetime import format_date
+from app.utils.email import EMAIL_TYPE, send_email, EmailError
 
 
 @current_user
@@ -353,6 +355,37 @@ def get_booking_process_payment(current_user, public_id):
     return jsonify(payment.to_dict()), 200
 
 
+def _send_refund_requested_email(booking, refund_details):
+    recipient = booking.email_address
+    if not recipient:
+        return False
+
+    refund_amount = (refund_details or {}).get('refund_amount')
+    currency_code = (refund_details or {}).get('currency')
+    currency_label = CURRENCY_LABELS.get(
+        currency_code,
+        (currency_code or '').upper(),
+    )
+
+    passenger = (refund_details or {}).get('passenger', {}) or {}
+    ticket = (refund_details or {}).get('ticket', {}) or {}
+
+    try:
+        send_email(
+            EMAIL_TYPE.ticket_refund_requested,
+            recipients=[recipient],
+            booking_number=booking.booking_number,
+            ticket_number=ticket.get('ticket_number', ''),
+            refund_amount=f"{refund_amount:.2f}" if refund_amount is not None else '',
+            currency_label=currency_label,
+            passenger_name=passenger.get('full_name', ''),
+        )
+    except EmailError:
+        return False
+
+    return True
+
+
 def _get_request_refund_details(current_user, public_id, ticket_id, send_request=False):
     token = request.args.get('access_token')
     booking = Booking.get_if_has_access(current_user, public_id, token)
@@ -416,6 +449,8 @@ def _get_request_refund_details(current_user, public_id, ticket_id, send_request
             refund_request_at=datetime.now(),
             commit=True,
         )
+        if isinstance(refund_details, dict):
+            _send_refund_requested_email(booking, refund_details)
 
     return jsonify({
         'success': True,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -20,12 +20,12 @@ import BookingRefundDialog from './BookingRefundDialog';
 const LABELS = UI_LABELS.ADMIN.dashboard.bookings;
 
 const initialFilters = {
-        bookingNumber: '',
-        routeId: '',
-        flightId: '',
-        buyerQuery: '',
-        bookingDateFrom: '',
-        bookingDateTo: '',
+	bookingNumber: '',
+	routeId: '',
+	flightId: '',
+	buyerQuery: '',
+	bookingDateFrom: '',
+	bookingDateTo: '',
 };
 
 const bookingStatusColors = {
@@ -49,13 +49,13 @@ const issueColors = {
 
 const mapFiltersToParams = (filters) => {
 	const params = {};
-        if (filters.bookingNumber) params.booking_number = filters.bookingNumber.trim();
-        if (filters.routeId) params.route_id = Number(filters.routeId);
-        if (filters.flightId) params.flight_id = Number(filters.flightId);
-        if (filters.buyerQuery) params.buyer_query = filters.buyerQuery.trim();
-        if (filters.bookingDateFrom) params.booking_date_from = filters.bookingDateFrom;
-        if (filters.bookingDateTo) params.booking_date_to = filters.bookingDateTo;
-        return params;
+	if (filters.bookingNumber) params.booking_number = filters.bookingNumber.trim();
+	if (filters.routeId) params.route_id = Number(filters.routeId);
+	if (filters.flightId) params.flight_id = Number(filters.flightId);
+	if (filters.buyerQuery) params.buyer_query = filters.buyerQuery.trim();
+	if (filters.bookingDateFrom) params.booking_date_from = filters.bookingDateFrom;
+	if (filters.bookingDateTo) params.booking_date_to = filters.bookingDateTo;
+	return params;
 };
 
 const normalizeFilters = (filters) => ({
@@ -115,7 +115,6 @@ const BookingDashboard = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [expandedBookings, setExpandedBookings] = useState({});
 	const [refundDialogState, setRefundDialogState] = useState(() => createInitialRefundConfirmationState());
-	const refundDialogTimeoutRef = useRef(null);
 
 	const triggerFileDownload = (fileData, filename) => {
 		if (!fileData) return;
@@ -163,31 +162,17 @@ const BookingDashboard = () => {
 		}
 	};
 
-	const clearRefundDialogTimer = () => {
-		if (refundDialogTimeoutRef.current) {
-			clearTimeout(refundDialogTimeoutRef.current);
-			refundDialogTimeoutRef.current = null;
-		}
-	};
-
 	const resetRefundDialogState = () => {
 		setRefundDialogState(createInitialRefundConfirmationState());
 	};
 
 	const handleCloseRefundDialog = () => {
-		if (refundDialogState.submitting || refundDialogState.success) return;
-		clearRefundDialogTimer();
-		resetRefundDialogState();
-	};
-
-	const forceCloseRefundDialog = () => {
-		clearRefundDialogTimer();
+		if (refundDialogState.submitting) return;
 		resetRefundDialogState();
 	};
 
 	const handleOpenTicketRefundDialog = async (bookingItem, ticket, bookingNumberLabel) => {
 		if (!bookingItem?.id || !ticket?.id) return;
-		clearRefundDialogTimer();
 		setRefundDialogState({
 			...createInitialRefundConfirmationState(),
 			open: true,
@@ -247,16 +232,13 @@ const BookingDashboard = () => {
 				...prev,
 				submitting: false,
 				success: true,
+				showRejectionReason: false,
 				error: null,
 			}));
 
 			if (hasSearched && appliedFilters) {
 				dispatch(fetchBookingDashboard(mapFiltersToParams(appliedFilters)));
 			}
-
-			refundDialogTimeoutRef.current = setTimeout(() => {
-				forceCloseRefundDialog();
-			}, 2500);
 		} catch (err) {
 			setRefundDialogState((prev) => ({
 				...prev,
@@ -328,15 +310,6 @@ const BookingDashboard = () => {
 	}, [appliedFilters]);
 
 	const isResetDisabled = !hasSearched;
-
-	useEffect(() => {
-		return () => {
-			if (refundDialogTimeoutRef.current) {
-				clearTimeout(refundDialogTimeoutRef.current);
-				refundDialogTimeoutRef.current = null;
-			}
-		};
-	}, []);
 
 	useEffect(() => {
 		if (!hasSearched || !appliedFilters) return;
@@ -486,16 +459,14 @@ const BookingDashboard = () => {
 			parts.push(`${LABELS.filters.buyer}: ${normalized.buyerQuery}`);
 		}
 
-                if (normalized.bookingDateFrom || normalized.bookingDateTo) {
-                        const formattedFrom = normalized.bookingDateFrom
-                                ? formatDate(normalized.bookingDateFrom)
-                                : '';
-                        const formattedTo = normalized.bookingDateTo ? formatDate(normalized.bookingDateTo) : '';
-                        const rangeLabel = `${formattedFrom || normalized.bookingDateFrom || '—'} — ${
-                                formattedTo || normalized.bookingDateTo || '—'
-                        }`;
-                        parts.push(`${LABELS.filters.bookingDateRange}: ${rangeLabel}`);
-                }
+		if (normalized.bookingDateFrom || normalized.bookingDateTo) {
+			const formattedFrom = normalized.bookingDateFrom ? formatDate(normalized.bookingDateFrom) : '';
+			const formattedTo = normalized.bookingDateTo ? formatDate(normalized.bookingDateTo) : '';
+			const rangeLabel = `${formattedFrom || normalized.bookingDateFrom || '—'} — ${
+				formattedTo || normalized.bookingDateTo || '—'
+			}`;
+			parts.push(`${LABELS.filters.bookingDateRange}: ${rangeLabel}`);
+		}
 
 		return parts.length ? parts.join(' • ') : '—';
 	}, [appliedFilters, hasSearched, routesOptions, flightsOptions]);
@@ -578,28 +549,28 @@ const BookingDashboard = () => {
 		return entries.sort((a, b) => b.count - a.count);
 	}, [summary.issue_counts, issueFilter]);
 
-        const handleFilterValueChange = (field, value = '') => {
-                setFilters((prev) => {
-                        const next = { ...prev, [field]: value ?? '' };
-                        if (field === 'routeId') {
-                                next.flightId = '';
-                        }
+	const handleFilterValueChange = (field, value = '') => {
+		setFilters((prev) => {
+			const next = { ...prev, [field]: value ?? '' };
+			if (field === 'routeId') {
+				next.flightId = '';
+			}
 
-                        if (field === 'bookingDateFrom' && next.bookingDateTo) {
-                                if (new Date(value) > new Date(next.bookingDateTo)) {
-                                        next.bookingDateTo = '';
-                                }
-                        }
+			if (field === 'bookingDateFrom' && next.bookingDateTo) {
+				if (new Date(value) > new Date(next.bookingDateTo)) {
+					next.bookingDateTo = '';
+				}
+			}
 
-                        if (field === 'bookingDateTo' && next.bookingDateFrom) {
-                                if (new Date(value) < new Date(next.bookingDateFrom)) {
-                                        next.bookingDateFrom = '';
-                                }
-                        }
+			if (field === 'bookingDateTo' && next.bookingDateFrom) {
+				if (new Date(value) < new Date(next.bookingDateFrom)) {
+					next.bookingDateFrom = '';
+				}
+			}
 
-                        return next;
-                });
-        };
+			return next;
+		});
+	};
 
 	const handleApplyFilters = () => {
 		setFiltersError(null);
@@ -693,23 +664,23 @@ const BookingDashboard = () => {
 		[LABELS.filters.flight]
 	);
 
-        const renderBookingDateFromField = useMemo(
-                () =>
-                        createFieldRenderer({
-                                label: LABELS.filters.bookingDateFrom,
-                                type: FIELD_TYPES.DATE,
-                        }),
-                [LABELS.filters.bookingDateFrom]
-        );
+	const renderBookingDateFromField = useMemo(
+		() =>
+			createFieldRenderer({
+				label: LABELS.filters.bookingDateFrom,
+				type: FIELD_TYPES.DATE,
+			}),
+		[LABELS.filters.bookingDateFrom]
+	);
 
-        const renderBookingDateToField = useMemo(
-                () =>
-                        createFieldRenderer({
-                                label: LABELS.filters.bookingDateTo,
-                                type: FIELD_TYPES.DATE,
-                        }),
-                [LABELS.filters.bookingDateTo]
-        );
+	const renderBookingDateToField = useMemo(
+		() =>
+			createFieldRenderer({
+				label: LABELS.filters.bookingDateTo,
+				type: FIELD_TYPES.DATE,
+			}),
+		[LABELS.filters.bookingDateTo]
+	);
 
 	return (
 		<Base>
@@ -749,14 +720,14 @@ const BookingDashboard = () => {
 						routeSelectOptions={routeSelectOptions}
 						flightSelectOptions={flightSelectOptions}
 						renderBookingNumberField={renderBookingNumberField}
-                                                renderRouteField={renderRouteField}
-                                                renderFlightField={renderFlightField}
-                                                renderBuyerField={renderBuyerField}
-                                                renderBookingDateFromField={renderBookingDateFromField}
-                                                renderBookingDateToField={renderBookingDateToField}
-                                                onFilterChange={handleFilterValueChange}
-                                                onApplyFilters={handleApplyFilters}
-                                                onResetFilters={handleResetFilters}
+						renderRouteField={renderRouteField}
+						renderFlightField={renderFlightField}
+						renderBuyerField={renderBuyerField}
+						renderBookingDateFromField={renderBookingDateFromField}
+						renderBookingDateToField={renderBookingDateToField}
+						onFilterChange={handleFilterValueChange}
+						onApplyFilters={handleApplyFilters}
+						onResetFilters={handleResetFilters}
 						isResetDisabled={isResetDisabled}
 						isLoading={isLoading}
 					/>

@@ -47,6 +47,19 @@ const TicketImport = () => {
 	const parsedFlight = useMemo(() => result?.parsed_flight || {}, [result]);
 	const matchedFlight = useMemo(() => result?.flight || null, [result]);
 	const matchedBooking = useMemo(() => result?.booking || null, [result]);
+	const displayRoute = useMemo(() => {
+		const route = parsedFlight.route;
+		if (!route) return '—';
+		if (typeof route === 'string') return route || '—';
+
+		const raw = route.raw || '';
+		if (raw) return raw;
+
+		const origin = route.origin_code || '';
+		const destination = route.destination_code || '';
+		if (origin && destination) return `${origin} - ${destination}`;
+		return origin || destination || '—';
+	}, [parsedFlight]);
 	const hasReadyPassengers = useMemo(
 		() =>
 			passengers.some((passenger) => {
@@ -347,7 +360,7 @@ const TicketImport = () => {
 												{LABELS.results.fields.route}
 											</Typography>
 											<Typography variant='body2' sx={{ fontWeight: 500 }}>
-												{parsedFlight.route || '—'}
+												{displayRoute}
 											</Typography>
 										</Box>
 										<Box sx={{ flex: 1, minWidth: 120 }}>

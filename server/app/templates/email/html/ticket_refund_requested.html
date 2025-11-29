@@ -1,0 +1,32 @@
+{% extends 'email/html/_base.html' %}
+
+{% block subject %}Запрос на возврат по билету № {{ ticket_number }} — Бронирование № {{ booking_number }} — {{ brand_name }}{% endblock %}
+{% block preheader %}Запрос на возврат получен{% endblock %}
+
+{% block title %}
+  <h1 style="margin:0 0 12px; font-size:20px; line-height:1.3;">Запрос на возврат получен</h1>
+{% endblock %}
+
+{% block content %}
+  <p style="margin:0 0 16px;">Добрый день!</p>
+
+  <p style="margin:0 0 16px;">
+    Мы приняли запрос на возврат по вашему бронированию <strong>№ {{ booking_number }}</strong> на билет
+    <strong>№ {{ ticket_number }}</strong>. Возврат будет оформлен в течение 24 часов.
+  </p>
+
+  <div style="margin:0 0 20px; padding:16px; background-color:#f8f9fa; border-radius:8px; border-left:4px solid #17a2b8;">
+    <p style="margin:0 0 12px; font-weight:600; color:#0c5460;">Сумма к возврату:</p>
+    <p style="margin:0 0 12px; font-size:18px; font-weight:700; color:#0c5460;">{{ refund_amount }} {{ currency_label }}</p>
+    <p style="margin:0; color:#495057;">Сумма поступит на тот же способ оплаты, который использовался при покупке, в срок до 10 рабочих дней.</p>
+  </div>
+
+  <div style="margin:0; padding:16px; background-color:#fff3cd; border-radius:8px; border-left:4px solid #ffc107;">
+    <p style="margin:0; color:#856404; line-height:1.5;">
+      Если нужно уточнить детали, свяжитесь с нами по адресу
+      <a href="mailto:{{ support_email }}" style="color:#0084FF; text-decoration:none; font-weight:600;">{{ support_email }}</a>,
+      указав номер бронирования и ФИО плательщика.
+    </p>
+  </div>
+
+{% endblock %}
