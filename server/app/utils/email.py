@@ -54,6 +54,10 @@ class EMAIL_TYPE(enum.Enum):
         EMAIL_TEMPLATES['ticket_refund'],
         EMAIL_SUBJECTS['ticket_refund'],
     )
+    ticket_refund_requested = (
+        EMAIL_TEMPLATES['ticket_refund_requested'],
+        EMAIL_SUBJECTS['ticket_refund_requested'],
+    )
     ticket_refund_rejected = (
         EMAIL_TEMPLATES['ticket_refund_rejected'],
         EMAIL_SUBJECTS['ticket_refund_rejected'],

@@ -104,11 +104,7 @@ const TicketsTable = ({ flights = [], publicId, accessToken, currencySymbol }) =
 	};
 
 	const handleCloseRefundDialog = () => {
-		if (refundState.submitting || refundState.success) return;
-		setRefundState(createInitialRefundState());
-	};
-
-	const forceCloseRefundDialog = () => {
+		if (refundState.submitting) return;
 		setRefundState(createInitialRefundState());
 	};
 
@@ -178,10 +174,7 @@ const TicketsTable = ({ flights = [], publicId, accessToken, currencySymbol }) =
 				error: null,
 			}));
 
-			setTimeout(() => {
-				forceCloseRefundDialog();
-				dispatch(fetchBookingDetails({ publicId, accessToken }));
-			}, 3000);
+			dispatch(fetchBookingDetails({ publicId, accessToken }));
 		} catch (err) {
 			setRefundState((prev) => ({
 				...prev,
@@ -431,10 +424,10 @@ const TicketRefundDialog = ({ state, onClose, onSubmit, onAcceptChange, currency
 	return (
 		<Dialog
 			open={open}
-			onClose={submitting || success ? undefined : onClose}
+			onClose={submitting ? undefined : onClose}
 			maxWidth='sm'
 			fullWidth
-			disableEscapeKeyDown={submitting || success}
+			disableEscapeKeyDown={submitting}
 		>
 			<DialogTitle>{dialogLabels.title}</DialogTitle>
 
@@ -541,7 +534,7 @@ const TicketRefundDialog = ({ state, onClose, onSubmit, onAcceptChange, currency
 				</Box>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose} disabled={submitting || success}>
+				<Button onClick={onClose} disabled={submitting}>
 					{UI_LABELS.BUTTONS.close}
 				</Button>
 				{!success && (

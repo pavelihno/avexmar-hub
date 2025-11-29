@@ -91,10 +91,10 @@ const BookingRefundDialog = ({
 	return (
 		<Dialog
 			open={Boolean(open)}
-			onClose={submitting || success ? undefined : onClose}
+			onClose={submitting ? undefined : onClose}
 			maxWidth='sm'
 			fullWidth
-			disableEscapeKeyDown={submitting || success}
+			disableEscapeKeyDown={submitting}
 		>
 			<DialogTitle>{dialogLabels.title}</DialogTitle>
 			<Box sx={{ px: 3, pt: 1 }}>
@@ -197,16 +197,11 @@ const BookingRefundDialog = ({
 							})}
 						</Box>
 					)}
-					{success && (
-						<Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-							<CircularProgress size={32} />
-						</Box>
-					)}
 				</Stack>
 			</DialogContent>
 			<DialogActions sx={{ gap: 1 }}>
 				{!showRejectionReason && (
-					<Button onClick={onClose} disabled={submitting || success}>
+					<Button onClick={onClose} disabled={submitting}>
 						{closeLabel}
 					</Button>
 				)}
@@ -231,7 +226,7 @@ const BookingRefundDialog = ({
 							variant='contained'
 							color='error'
 							onClick={handleRejectionReasonSubmit}
-							disabled={!rejectionReason || !rejectionReason.trim() || submitting}
+							disabled={!rejectionReason || !rejectionReason.trim() || submitting || success}
 						>
 							{submitting && actionType === 'reject' && <CircularProgress size={20} sx={{ mr: 1 }} />}
 							{dialogLabels.reject}
