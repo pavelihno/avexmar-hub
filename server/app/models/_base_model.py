@@ -27,6 +27,7 @@ class NotFoundError(Exception):
 
 class BaseModel(db.Model):
     __abstract__ = True
+    __verbose_name__ = None
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
@@ -209,6 +210,7 @@ class BaseModel(db.Model):
                     None,
                 )
                 if target_cls is not None and session.get(target_cls, value) is None:
+                    verbose_name = getattr(target_cls, '__verbose_name__', target_cls.__name__)
                     raise NotFoundError(
                         ModelMessages.not_found(verbose_name)
                     )
@@ -255,7 +257,8 @@ class BaseModel(db.Model):
         session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
-            raise NotFoundError(ModelMessages.not_found(cls.__name__))
+            verbose_name = getattr(cls, '__verbose_name__', cls.__name__)
+            raise NotFoundError(ModelMessages.not_found(verbose_name))
         return instance
 
     @classmethod

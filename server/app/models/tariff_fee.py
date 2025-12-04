@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.tariff import Tariff
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
 
 class TariffFee(BaseModel):
     __tablename__ = 'tariff_fees'
+    __verbose_name__ = ModelVerboseNames.TariffFee
 
     tariff_id = db.Column(db.Integer, db.ForeignKey(
         'tariffs.id', ondelete='CASCADE'), nullable=False

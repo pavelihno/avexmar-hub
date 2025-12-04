@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped
 from app.utils.enum import FEE_APPLICATION, FEE_TERM, DEFAULT_FEE_APPLICATION, DEFAULT_FEE_TERM
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.tariff import Tariff
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 class Fee(BaseModel):
     __tablename__ = 'fees'
+    __verbose_name__ = ModelVerboseNames.Fee
 
     name = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String, nullable=True)

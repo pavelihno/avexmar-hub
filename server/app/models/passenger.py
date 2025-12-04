@@ -4,6 +4,7 @@ from sqlalchemy import Index, and_
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.models.country import Country
 from app.utils.enum import GENDER, DOCUMENT_TYPE, DEFAULT_CITIZENSHIP_CODE
 
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 
 class Passenger(BaseModel):
     __tablename__ = 'passengers'
+    __verbose_name__ = ModelVerboseNames.Passenger
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     first_name = db.Column(db.String, nullable=False)

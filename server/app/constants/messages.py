@@ -1,7 +1,11 @@
 class ModelMessages:
     LIST_OF_IDS_REQUIRED = 'Требуется список идентификаторов'
     IDS_MUST_BE_INTEGERS = 'Идентификаторы должны быть целыми числами'
-    MUST_BE_UNIQUE = 'должно быть уникальным'
+    MUST_BE_UNIQUE = 'Поле должно быть уникальным'
+
+    @staticmethod
+    def children_exist(related_records: list[str]) -> str:
+        return f'Существуют связанные записи: {", ".join(related_records)}'
 
     @staticmethod
     def not_found(model_name: str) -> str:

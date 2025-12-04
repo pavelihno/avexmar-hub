@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import (
     PAYMENT_METHOD,
     PAYMENT_STATUS,
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
 
 class Payment(BaseModel):
     __tablename__ = 'payments'
+    __verbose_name__ = ModelVerboseNames.Payment
 
     # Payment details
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False)

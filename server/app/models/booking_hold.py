@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
 
 class BookingHold(BaseModel):
     __tablename__ = 'booking_holds'
+    __verbose_name__ = ModelVerboseNames.BookingHold
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id', ondelete='CASCADE'), nullable=False, index=True, unique=True)
     expires_at = db.Column(db.DateTime, nullable=False)

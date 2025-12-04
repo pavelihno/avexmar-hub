@@ -2,6 +2,7 @@ from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 
 from app.constants.messages import CountryMessages
+from app.constants.models import ModelVerboseNames
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
@@ -15,6 +16,7 @@ from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template,
 
 class Airport(BaseModel):
     __tablename__ = 'airports'
+    __verbose_name__ = ModelVerboseNames.Airport
 
     iata_code = db.Column(db.String(3), unique=True, nullable=False)
     icao_code = db.Column(db.String(4), unique=True, nullable=False)

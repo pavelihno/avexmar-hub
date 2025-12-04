@@ -4,6 +4,7 @@ from typing import List, TYPE_CHECKING
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from sqlalchemy.orm import Session, Mapped
 from app.utils.enum import USER_ROLE, DEFAULT_USER_ROLE
 from app.config import Config
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 
 class User(BaseModel):
     __tablename__ = 'users'
+    __verbose_name__ = ModelVerboseNames.User
 
     email = db.Column(db.String, unique=True, index=True, nullable=False)
     password = db.Column(db.String, nullable=False)

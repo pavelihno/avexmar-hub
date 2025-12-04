@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import SEAT_CLASS, CURRENCY, DEFAULT_CURRENCY
 
 if TYPE_CHECKING:
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 class Tariff(BaseModel):
     __tablename__ = 'tariffs'
+    __verbose_name__ = ModelVerboseNames.Tariff
 
     seat_class = db.Column(db.Enum(SEAT_CLASS), nullable=False)
     order_number = db.Column(db.Integer, nullable=False)

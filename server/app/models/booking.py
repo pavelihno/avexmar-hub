@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.database import db
 from app.models._base_model import BaseModel
 from app.constants.messages import BookingMessages
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import (
     USER_ROLE,
     BOOKING_STATUS,
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
+    __verbose_name__ = ModelVerboseNames.Booking
 
     # Booking details
     public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)

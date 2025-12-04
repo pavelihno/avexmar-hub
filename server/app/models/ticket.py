@@ -5,6 +5,7 @@ from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.constants.messages import TicketMessages
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.booking_flight_passenger import BookingFlightPassenger
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 class Ticket(BaseModel):
     __tablename__ = 'tickets'
+    __verbose_name__ = ModelVerboseNames.Ticket
 
     ticket_number = db.Column(db.String(20), unique=True, nullable=False)
 

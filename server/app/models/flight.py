@@ -20,6 +20,7 @@ from app.constants.messages import (
     FlightTariffMessages,
     RouteMessages,
 )
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
 
 class Flight(BaseModel):
     __tablename__ = 'flights'
+    __verbose_name__ = ModelVerboseNames.Flight
 
     flight_number = db.Column(db.String, nullable=False)
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=False)

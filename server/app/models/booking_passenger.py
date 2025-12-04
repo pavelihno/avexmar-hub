@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.models.passenger import Passenger
 from app.utils.enum import PASSENGER_CATEGORY, PASSENGER_PLURAL_CATEGORY
 from app.utils.passenger_categories import (
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
 
 class BookingPassenger(BaseModel):
     __tablename__ = 'booking_passengers'
+    __verbose_name__ = ModelVerboseNames.BookingPassenger
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     passenger_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)
