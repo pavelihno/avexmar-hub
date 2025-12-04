@@ -126,7 +126,7 @@ const BookingsTab = () => {
 											}}
 										>
 											<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-												{row.bookingNumber || '—'}
+												{row.bookingNumber || UI_LABELS.DOC.not_available}
 											</Typography>
 											<Chip
 												size='small'
@@ -139,7 +139,7 @@ const BookingsTab = () => {
 												{row.segments.map((s, idx) => (
 													<Box key={s.key || idx} sx={{ ...(idx > 0 ? { mt: 0.75 } : {}) }}>
 														<Typography variant='body2' sx={{ fontWeight: 'bold' }}>
-															{s.routeText || '—'}
+															{s.routeText || UI_LABELS.DOC.not_available}
 														</Typography>
 														{s.timeText && (
 															<Typography variant='caption' color='text.secondary'>
@@ -151,7 +151,7 @@ const BookingsTab = () => {
 											</Box>
 										) : (
 											<Typography variant='body2' noWrap sx={{ color: 'text.secondary' }}>
-												—
+												{UI_LABELS.DOC.not_available}
 											</Typography>
 										)}
 
@@ -236,7 +236,7 @@ const BookingsTab = () => {
 											<TableRow key={row.id}>
 												<TableCell sx={{ whiteSpace: 'nowrap' }}>
 													<Typography variant='subtitle1' sx={{ fontWeight: 'bold' }}>
-														{row.bookingNumber || '—'}
+														{row.bookingNumber || UI_LABELS.DOC.not_available}
 													</Typography>
 													<Box sx={{ mt: 0.5 }}>
 														<Chip
@@ -264,7 +264,7 @@ const BookingsTab = () => {
 														</Box>
 													) : (
 														<Typography variant='body2' color='text.secondary'>
-															—
+															{UI_LABELS.DOC.not_available}
 														</Typography>
 													)}
 												</TableCell>

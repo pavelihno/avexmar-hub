@@ -44,13 +44,19 @@ CATEGORY_ORDER = {
 }
 
 
-def _format_passenger_name(passenger: Passenger | None) -> str:
+def _get_passenger_attr(passenger, field: str, default=None):
+    if isinstance(passenger, dict):
+        return passenger.get(field, default)
+    return getattr(passenger, field, default)
+
+
+def _format_passenger_name(passenger) -> str:
     if not passenger:
         return ''
     parts = [
-        passenger.last_name or '',
-        passenger.first_name or '',
-        passenger.patronymic_name or '',
+        _get_passenger_attr(passenger, 'last_name') or '',
+        _get_passenger_attr(passenger, 'first_name') or '',
+        _get_passenger_attr(passenger, 'patronymic_name') or '',
     ]
     return ' '.join(part for part in parts if part).strip()
 
@@ -157,7 +163,7 @@ def _group_pending_flights(unticketed_records):
 
     for booking_flight_passenger in unticketed_records:
         booking_passenger = booking_flight_passenger.booking_passenger
-        passenger = booking_passenger.passenger if booking_passenger else None
+        passenger = booking_passenger.get_passenger_details() if booking_passenger else None
         booking = booking_passenger.booking if booking_passenger else None
         flight = booking_flight_passenger.flight
 
@@ -329,7 +335,7 @@ def _create_flight_passenger_workbook(flight, booking_flights, allowed_booking_p
             ), None
         )
         for bp in passengers:
-            p = bp.passenger
+            p = bp.get_passenger_details()
 
             # Column 0: Counter
             value = str(counter)
@@ -342,18 +348,20 @@ def _create_flight_passenger_workbook(flight, booking_flights, allowed_booking_p
             col_widths[1] = max(col_widths[1], len(value))
 
             # Column 2: Gender
-            gender_key = p.gender.value if p and p.gender else None
+            gender_val = _get_passenger_attr(p, 'gender')
+            gender_key = gender_val.value if hasattr(gender_val, 'value') else gender_val
             value = GENDER_LABELS.get(gender_key, '') if gender_key else ''
             ws.write(row, 2, value, text_style)
             col_widths[2] = max(col_widths[2], len(str(value)))
 
             # Column 3: Birth date
-            value = format_date(p.birth_date) if p else ''
+            birth_date = _get_passenger_attr(p, 'birth_date')
+            value = format_date(birth_date) if birth_date else ''
             ws.write(row, 3, value, text_style)
             col_widths[3] = max(col_widths[3], len(str(value)))
 
             # Column 4: Document number
-            value = p.document_number if p else ''
+            value = _get_passenger_attr(p, 'document_number') or ''
             ws.write(row, 4, value, text_style)
             col_widths[4] = max(col_widths[4], len(str(value)))
 
@@ -368,12 +376,17 @@ def _create_flight_passenger_workbook(flight, booking_flights, allowed_booking_p
             col_widths[5] = max(col_widths[5], len(str(value)))
 
             # Column 6: Citizenship
-            value = p.citizenship.code_a2 if p and p.citizenship else ''
+            citizenship = _get_passenger_attr(p, 'citizenship') or {}
+            if isinstance(citizenship, dict):
+                value = citizenship.get('code_a2') or citizenship.get('code_a3') or ''
+            else:
+                value = getattr(citizenship, 'code_a2', '') or getattr(citizenship, 'code_a3', '')
             ws.write(row, 6, value, text_style)
             col_widths[6] = max(col_widths[6], len(str(value)))
 
             # Column 7: Document expiry
-            value = format_date(p.document_expiry_date) if p else ''
+            expiry_date = _get_passenger_attr(p, 'document_expiry_date')
+            value = format_date(expiry_date) if expiry_date else ''
             ws.write(row, 7, value, text_style)
             col_widths[7] = max(col_widths[7], len(str(value)))
 

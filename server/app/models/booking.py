@@ -174,7 +174,7 @@ class Booking(BaseModel):
         )
 
     @classmethod
-    def save_details_snapshot(
+    def save_snapshot(
         cls,
         id,
         session: Session | None = None,
@@ -184,6 +184,13 @@ class Booking(BaseModel):
         """Generates and saves a reusable booking snapshot"""
         session = session or db.session
         booking = cls.get_or_404(id, session)
+        from app.models.booking_passenger import BookingPassenger
+
+        BookingPassenger.save_passenger_snapshot(
+            booking.id,
+            session=session,
+            commit=False,
+        )
         snapshot = build_booking_snapshot(booking)
 
         return cls.update(
@@ -396,9 +403,18 @@ class Booking(BaseModel):
                 BookingMessages.illegal_transition(from_status.value, to_status.value)
             )
 
-        return cls.update(
+        booking = cls.update(
             id,
             session=session,
             commit=commit,
             status=to_status,
         )
+
+        if to_status == BOOKING_STATUS.completed:
+            cls.save_snapshot(
+                id,
+                session=session,
+                commit=commit,
+            )
+
+        return booking

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
@@ -28,6 +28,7 @@ const ConsentEventManagement = () => {
 	const { bookings, isLoading: bookingsLoading } = useSelector((state) => state.bookings);
 	const { consentDocs, isLoading: docsLoading } = useSelector((state) => state.consentDocs);
 	const { passengers, isLoading: passengersLoading } = useSelector((state) => state.passengers);
+	const activePassengers = useMemo(() => (passengers || []).filter((p) => !p.deleted), [passengers]);
 
 	const theme = useTheme();
 
@@ -50,11 +51,6 @@ const ConsentEventManagement = () => {
 	const docOptions = (consentDocs || []).map((d) => ({
 		value: d.id,
 		label: `${ENUM_LABELS.CONSENT_DOC_TYPE[d.type]} v${d.version}`,
-	}));
-
-	const passengerOptions = (passengers || []).map((p) => ({
-		value: p.id,
-		label: `${p.last_name} ${p.first_name}`,
 	}));
 
 	const FIELDS = {
@@ -129,7 +125,7 @@ const ConsentEventManagement = () => {
 			excludeFromForm: true,
 			renderField: (item) => {
 				const ids = Array.isArray(item?.subject_ids) ? item.subject_ids : [];
-				const linked = ids.map((id) => passengers.find((p) => p.id === id)).filter(Boolean);
+				const linked = ids.map((id) => activePassengers.find((p) => p.id === id)).filter(Boolean);
 				return (
 					<Box
 						sx={{

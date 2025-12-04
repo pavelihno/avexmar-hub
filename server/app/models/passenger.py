@@ -1,7 +1,6 @@
-import datetime
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
-from sqlalchemy import Index
+from sqlalchemy import Index, and_
 
 from app.database import db
 from app.models._base_model import BaseModel
@@ -28,6 +27,7 @@ class Passenger(BaseModel):
     document_number = db.Column(db.String, nullable=False)
     document_expiry_date = db.Column(db.Date, nullable=True)
     citizenship_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+    deleted = db.Column(db.Boolean, nullable=False, default=False, server_default='false')
 
     owner_user: Mapped['User'] = db.relationship('User', back_populates='passengers')
     citizenship: Mapped['Country'] = db.relationship('Country', back_populates='passengers')
@@ -35,7 +35,7 @@ class Passenger(BaseModel):
         'BookingPassenger', back_populates='passenger', lazy='dynamic', cascade='all, delete-orphan'
     )
     consent_event_subjects: Mapped[List['ConsentEventSubject']] = db.relationship(
-        'ConsentEventSubject', back_populates='subject', lazy='dynamic'
+        'ConsentEventSubject', back_populates='subject', lazy='dynamic', cascade='all, delete-orphan'
     )
 
     __table_args__ = (
@@ -48,7 +48,7 @@ class Passenger(BaseModel):
             document_type,
             document_number,
             unique=True,
-            postgresql_where=owner_user_id.isnot(None)
+            postgresql_where=and_(owner_user_id.isnot(None), deleted.is_(False)),
         ),
     )
 
@@ -67,11 +67,12 @@ class Passenger(BaseModel):
             'document_expiry_date': self.document_expiry_date.isoformat() if self.document_expiry_date else None,
             'citizenship': self.citizenship.to_dict(return_children) if return_children else {},
             'citizenship_id': self.citizenship_id,
+            'deleted': bool(self.deleted),
         }
 
     @classmethod
     def get_all(cls):
-        return super().get_all(sort_by=['last_name'], descending=False)
+        return cls.query.filter(cls.deleted.is_(False)).order_by(cls.last_name.asc()).all()
 
     @classmethod
     def __normalize_docs(cls, kwargs: dict) -> dict:
@@ -132,9 +133,31 @@ class Passenger(BaseModel):
                 cls.birth_date == kwargs['birth_date'],
                 cls.document_type == kwargs['document_type'],
                 cls.document_number == kwargs['document_number'],
+                cls.deleted.is_(False),
             ).one_or_none()
 
         return None
+
+    @classmethod
+    def delete_or_404(
+        cls,
+        _id,
+        session: Session | None = None,
+        *,
+        commit: bool = False,
+    ):
+        session = session or db.session
+        passenger = cls.get_or_404(_id, session)
+
+        if passenger.booking_passengers.count() > 0:
+            passenger.deleted = True
+            if commit:
+                session.commit()
+            else:
+                session.flush()
+            return passenger.to_dict()
+
+        return super().delete_or_404(_id, session, commit=commit)
 
     @classmethod
     def create(

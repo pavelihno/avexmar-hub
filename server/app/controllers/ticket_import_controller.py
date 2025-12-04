@@ -321,19 +321,19 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
 
     for bfp in booking_flight_passengers:
         booking_passenger = bfp.booking_passenger
-        passenger_entity = booking_passenger.passenger if booking_passenger else None
+        passenger_data = booking_passenger.get_passenger_details() if booking_passenger else {}
         booking = booking_passenger.booking if booking_passenger else None
 
         if booking:
             bookings.setdefault(booking.id, booking)
 
-        if passenger_entity:
+        if passenger_data:
             db_key = _make_passenger_key({
-                'last_name': passenger_entity.last_name or '',
-                'first_name': passenger_entity.first_name or '',
-                'patronymic_name': passenger_entity.patronymic_name or '',
-                'document_number': passenger_entity.document_number or '',
-                'birth_date': passenger_entity.birth_date.isoformat() if passenger_entity.birth_date else '',
+                'last_name': passenger_data.get('last_name') or '',
+                'first_name': passenger_data.get('first_name') or '',
+                'patronymic_name': passenger_data.get('patronymic_name') or '',
+                'document_number': passenger_data.get('document_number') or '',
+                'birth_date': passenger_data.get('birth_date') or '',
             })
             matches_by_key.setdefault(db_key, []).append(bfp)
 

@@ -643,6 +643,8 @@ export const UI_LABELS = {
 		passenger_details: 'Данные пассажира',
 		more_details: 'Подробнее',
 		passenger_added: 'Пассажир успешно добавлен',
+		passenger_updated: 'Данные пассажира успешно обновлены',
+		delete_passenger_confirm: 'Удалить пассажира?',
 		personal_data: 'Личные данные',
 	},
 	HOME: {

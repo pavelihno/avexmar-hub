@@ -35,3 +35,27 @@ export const createUserPassenger = createAsyncThunk(
 		}
 	}
 );
+
+export const updateUserPassenger = createAsyncThunk(
+	'passengers/updateUserPassenger',
+	async ({ userId, passengerId, data }, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.put(`/users/${userId}/passengers/${passengerId}`, data);
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);
+
+export const deleteUserPassenger = createAsyncThunk(
+	'passengers/deleteUserPassenger',
+	async ({ userId, passengerId }, { rejectWithValue }) => {
+		try {
+			const res = await serverApi.delete(`/users/${userId}/passengers/${passengerId}`);
+			return { id: passengerId, data: res.data };
+		} catch (err) {
+			return rejectWithValue(getErrorData(err));
+		}
+	}
+);

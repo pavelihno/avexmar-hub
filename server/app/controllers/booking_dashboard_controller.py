@@ -106,11 +106,8 @@ def _get_booking_ticket_context(booking_id: int, ticket_id: int):
 
 
 def _build_ticket_refund_payload(booking, ticket, booking_flight_passenger):
-    passenger = (
-        booking_flight_passenger.booking_passenger.passenger
-        if booking_flight_passenger.booking_passenger
-        else None
-    )
+    booking_passenger = booking_flight_passenger.booking_passenger if booking_flight_passenger else None
+    passenger = booking_passenger.get_passenger_details() if booking_passenger else {}
     flight = booking_flight_passenger.flight
 
     return {
@@ -137,9 +134,7 @@ def _build_ticket_refund_payload(booking, ticket, booking_flight_passenger):
                 if booking_flight_passenger.refund_decision_at
                 else None
             ),
-            'passenger': passenger.to_dict(return_children=True)
-            if passenger
-            else {},
+            'passenger': passenger,
             'flight': flight.to_dict(return_children=True) if flight else {},
         },
     }

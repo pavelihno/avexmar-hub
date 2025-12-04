@@ -8,6 +8,8 @@ import {
 	deletePassenger,
 	fetchUserPassengers,
 	createUserPassenger,
+	updateUserPassenger,
+	deleteUserPassenger,
 } from '../actions/passenger';
 import { addCrudCases, handlePending, handleRejected } from '../utils';
 
@@ -48,7 +50,20 @@ const passengerSlice = createSlice({
 				state.passengers.push(action.payload);
 				state.isLoading = false;
 			})
-			.addCase(createUserPassenger.rejected, handleRejected);
+			.addCase(createUserPassenger.rejected, handleRejected)
+			.addCase(updateUserPassenger.pending, handlePending)
+			.addCase(updateUserPassenger.fulfilled, (state, action) => {
+				state.passengers = state.passengers.map((p) => (p.id === action.payload.id ? action.payload : p));
+				state.isLoading = false;
+			})
+			.addCase(updateUserPassenger.rejected, handleRejected)
+			.addCase(deleteUserPassenger.pending, handlePending)
+			.addCase(deleteUserPassenger.fulfilled, (state, action) => {
+				const id = action.payload?.id;
+				state.passengers = state.passengers.filter((p) => p.id !== id);
+				state.isLoading = false;
+			})
+			.addCase(deleteUserPassenger.rejected, handleRejected);
 	},
 });
 
