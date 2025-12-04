@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import (
     BOOKING_FLIGHT_PASSENGER_STATUS,
     DEFAULT_BOOKING_FLIGHT_PASSENGER_STATUS,
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 
 class BookingFlightPassenger(BaseModel):
     __tablename__ = 'booking_flight_passengers'
+    __verbose_name__ = ModelVerboseNames.BookingFlightPassenger
 
     booking_passenger_id = db.Column(
         db.Integer,
@@ -47,6 +49,7 @@ class BookingFlightPassenger(BaseModel):
     ticket: Mapped['Ticket'] = db.relationship(
         'Ticket',
         back_populates='booking_flight_passenger',
+        cascade='all, delete-orphan',
     )
 
     __table_args__ = (

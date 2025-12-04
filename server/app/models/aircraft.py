@@ -1,11 +1,13 @@
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.constants.messages import AircraftMessages
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import SEAT_CLASS
 
 
 class Aircraft(BaseModel):
     __tablename__ = 'aircrafts'
+    __verbose_name__ = ModelVerboseNames.Aircraft
 
     type = db.Column(db.String, nullable=False, unique=True)
     economy_seats = db.Column(db.Integer, nullable=False, default=0)

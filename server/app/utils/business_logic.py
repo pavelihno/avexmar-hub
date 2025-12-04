@@ -242,14 +242,14 @@ def calculate_receipt_details(booking):
 
     passengers_map = {}
     for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
-        passenger = bp.passenger
+        passenger = bp.get_passenger_details()
         passengers_map.setdefault(
             BookingPassenger.get_plural_category(bp.category).value,
             []
         ).append({
-            'last_name': passenger.last_name,
-            'first_name': passenger.first_name,
-            'patronymic_name': passenger.patronymic_name
+            'last_name': passenger.get('last_name'),
+            'first_name': passenger.get('first_name'),
+            'patronymic_name': passenger.get('patronymic_name')
         })
 
     directions = []
@@ -294,7 +294,7 @@ def _extract_passengers_data(booking):
     """Extract and normalize passenger data from booking"""
     passengers = []
     for bp in booking.booking_passengers:
-        p = bp.passenger.to_dict(return_children=True)
+        p = bp.get_passenger_details()
         p['category'] = bp.category.value if bp.category else None
         passengers.append(p)
 
@@ -571,10 +571,11 @@ def get_booking_snapshot(booking) -> dict:
             booking_flights_tickets[bf_id] = []
 
         ticket = bfp.ticket
+        passenger_data = bfp.booking_passenger.get_passenger_details() if bfp.booking_passenger else {}
         booking_flights_tickets[bf_id].append({
             'id': ticket.id if ticket else None,
             'ticket_number': ticket.ticket_number if ticket else None,
-            'passenger': bfp.booking_passenger.passenger.to_dict(),
+            'passenger': passenger_data,
             'booking_flight_passenger_id': bfp.id,
             'status': bfp.status.value if bfp.status else None,
             'refund_request_at': bfp.refund_request_at.isoformat() if bfp.refund_request_at else None,
@@ -604,7 +605,6 @@ def calculate_refund_details(booking, ticket):
 
     bfp = ticket.booking_flight_passenger
     bp = bfp.booking_passenger
-    passenger = bp.passenger
 
     booking_flight_ids = BookingFlight.query.with_entities(BookingFlight.id).filter_by(
         booking_id=booking.id
@@ -675,11 +675,12 @@ def calculate_refund_details(booking, ticket):
     total_refund_amount = max(unit_price - total_penalty_fees, 0.0)
 
     # Passenger details
+    passenger = bp.get_passenger_details() if bp else {}
     passenger_details = {
         'full_name': __get_passenger_full_name(
-            passenger.last_name,
-            passenger.first_name,
-            passenger.patronymic_name
+            passenger.get('last_name'),
+            passenger.get('first_name'),
+            passenger.get('patronymic_name')
         ),
     }
 

@@ -141,7 +141,11 @@ def get_user_bookings(current_user, user_id):
 def get_user_passengers(current_user, user_id):
     if current_user.id != user_id and current_user.role != USER_ROLE.admin:
         return jsonify({'message': BookingMessages.FORBIDDEN}), 403
-    passengers = Passenger.query.filter_by(owner_user_id=user_id).all()
+    passengers = (
+        Passenger.query.filter_by(owner_user_id=user_id)
+        .filter(Passenger.deleted.is_(False))
+        .all()
+    )
     return jsonify([p.to_dict(return_children=True) for p in passengers]), 200
 
 
@@ -177,6 +181,53 @@ def create_user_passenger(current_user, user_id):
     session.commit()
 
     return jsonify(passenger.to_dict()), 201
+
+
+@login_required
+def update_user_passenger(current_user, user_id, passenger_id):
+    if current_user.id != user_id and current_user.role != USER_ROLE.admin:
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
+
+    body = request.json or {}
+    session = db.session
+
+    passenger = Passenger.get_or_404(passenger_id, session)
+    if passenger.owner_user_id != user_id:
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
+
+    # Ensure ID is not provided in the body
+    body.pop('id', None)
+    body['owner_user_id'] = user_id
+
+    passenger = Passenger.get_existing_passenger(
+        session,
+        body,
+    )
+
+    if passenger and passenger.id != passenger_id:
+        return jsonify({'message': UserMessages.PASSENGER_ALREADY_EXISTS}), 400
+
+    updated = Passenger.update(
+        passenger_id,
+        session=session,
+        commit=True,
+        **body,
+    )
+
+    return jsonify(updated.to_dict(return_children=True)), 200
+
+
+@login_required
+def delete_user_passenger(current_user, user_id, passenger_id):
+    if current_user.id != user_id and current_user.role != USER_ROLE.admin:
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
+
+    passenger = Passenger.get_or_404(passenger_id)
+    if passenger.owner_user_id != user_id:
+        return jsonify({'message': BookingMessages.FORBIDDEN}), 403
+
+    deleted = Passenger.delete_or_404(passenger_id, commit=True)
+    return jsonify(deleted), 200
 
 
 @login_required

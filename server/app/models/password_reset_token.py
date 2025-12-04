@@ -5,10 +5,12 @@ from sqlalchemy.orm import Mapped, Session
 from app.database import db
 from app.config import Config
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.models.user import User
 
 class PasswordResetToken(BaseModel):
     __tablename__ = 'password_reset_tokens'
+    __verbose_name__ = ModelVerboseNames.PasswordResetToken
 
     token = db.Column(db.String, unique=True, index=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)

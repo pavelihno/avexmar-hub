@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.database import db
 from app.models._base_model import BaseModel
 from app.constants.messages import BookingMessages
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import (
     USER_ROLE,
     BOOKING_STATUS,
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
 
 class Booking(BaseModel):
     __tablename__ = 'bookings'
+    __verbose_name__ = ModelVerboseNames.Booking
 
     # Booking details
     public_id = db.Column(UUID(as_uuid=True), unique=True, nullable=False, default=uuid.uuid4, index=True)
@@ -174,7 +176,7 @@ class Booking(BaseModel):
         )
 
     @classmethod
-    def save_details_snapshot(
+    def save_snapshot(
         cls,
         id,
         session: Session | None = None,
@@ -184,6 +186,13 @@ class Booking(BaseModel):
         """Generates and saves a reusable booking snapshot"""
         session = session or db.session
         booking = cls.get_or_404(id, session)
+        from app.models.booking_passenger import BookingPassenger
+
+        BookingPassenger.save_passenger_snapshot(
+            booking.id,
+            session=session,
+            commit=False,
+        )
         snapshot = build_booking_snapshot(booking)
 
         return cls.update(
@@ -396,9 +405,18 @@ class Booking(BaseModel):
                 BookingMessages.illegal_transition(from_status.value, to_status.value)
             )
 
-        return cls.update(
+        booking = cls.update(
             id,
             session=session,
             commit=commit,
             status=to_status,
         )
+
+        if to_status == BOOKING_STATUS.completed:
+            cls.save_snapshot(
+                id,
+                session=session,
+                commit=commit,
+            )
+
+        return booking

@@ -3,6 +3,7 @@ from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Session, Mapped
 
 from app.constants.messages import CountryMessages
+from app.constants.models import ModelVerboseNames
 from app.database import db
 from app.models._base_model import BaseModel
 from app.models.country import Country
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 class Airline(BaseModel):
     __tablename__ = 'airlines'
+    __verbose_name__ = ModelVerboseNames.Airline
 
     iata_code = db.Column(db.String(2), unique=True, nullable=False)
     icao_code = db.Column(db.String(3), unique=True, nullable=False)

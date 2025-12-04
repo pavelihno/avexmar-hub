@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.models.airport import Airport
 
 if TYPE_CHECKING:
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 class Route(BaseModel):
     __tablename__ = 'routes'
+    __verbose_name__ = ModelVerboseNames.Route
 
     origin_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)
     destination_airport_id = db.Column(db.Integer, db.ForeignKey('airports.id', ondelete='RESTRICT'), nullable=False)

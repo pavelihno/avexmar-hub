@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.utils.enum import (
     CONSENT_DOC_TYPE,
     CONSENT_EVENT_TYPE,
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
 
 class ConsentDoc(BaseModel):
     __tablename__ = 'consent_docs'
+    __verbose_name__ = ModelVerboseNames.ConsentDoc
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     type = db.Column(db.Enum(CONSENT_DOC_TYPE), nullable=False)
@@ -98,6 +100,7 @@ class ConsentDoc(BaseModel):
 
 class ConsentEvent(BaseModel):
     __tablename__ = 'consent_events'
+    __verbose_name__ = ModelVerboseNames.ConsentEvent
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     type = db.Column(db.Enum(CONSENT_EVENT_TYPE), nullable=False)
@@ -167,6 +170,7 @@ class ConsentEvent(BaseModel):
 
 class ConsentEventSubject(BaseModel):
     __tablename__ = 'consent_event_subjects'
+    __verbose_name__ = ModelVerboseNames.ConsentEventSubject
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     subject_id = db.Column(db.Integer, db.ForeignKey('passengers.id'), nullable=False)

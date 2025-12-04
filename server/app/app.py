@@ -95,6 +95,8 @@ def __create_app(_config_class, _db):
     app.route('/users/<int:user_id>/bookings', methods=['GET'])(get_user_bookings)
     app.route('/users/<int:user_id>/passengers', methods=['GET'])(get_user_passengers)
     app.route('/users/<int:user_id>/passengers', methods=['POST'])(create_user_passenger)
+    app.route('/users/<int:user_id>/passengers/<int:passenger_id>', methods=['PUT'])(update_user_passenger)
+    app.route('/users/<int:user_id>/passengers/<int:passenger_id>', methods=['DELETE'])(delete_user_passenger)
     app.route('/users/change_password', methods=['PUT'])(change_password)
 
     # airports

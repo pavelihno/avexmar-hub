@@ -27,6 +27,7 @@ class NotFoundError(Exception):
 
 class BaseModel(db.Model):
     __abstract__ = True
+    __verbose_name__ = None
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
@@ -209,16 +210,55 @@ class BaseModel(db.Model):
                     None,
                 )
                 if target_cls is not None and session.get(target_cls, value) is None:
+                    verbose_name = getattr(target_cls, '__verbose_name__', target_cls.__name__)
                     raise NotFoundError(
-                        ModelMessages.not_found(target_cls.__name__)
+                        ModelMessages.not_found(verbose_name)
                     )
+
+    @classmethod
+    def __check_children_exist(
+        cls,
+        session: Session,
+        instance_id: int,
+    ) -> None:
+        """Ensure that no child rows reference the given instance ID"""
+        mapper = inspect(cls)
+
+        pk_col = mapper.primary_key[0]
+
+        linked_model_names = []
+
+        for rel in mapper.relationships:
+            if rel.direction.name not in ('ONETOMANY', 'ONETOONE'):
+                continue
+
+            if 'delete-orphan' in rel.cascade:
+                continue
+
+            child_cls = rel.mapper.class_
+
+            query = (
+                session.query(child_cls)
+                .join(getattr(cls, rel.key))   # join child -> parent
+                .filter(pk_col == instance_id)
+            )
+
+            if query.first() is not None:
+                verbose_name = getattr(child_cls, '__verbose_name__', child_cls.__name__)
+                linked_model_names.append(verbose_name)
+        
+        if linked_model_names:
+            raise ModelValidationError({
+                'message': ModelMessages.children_exist(linked_model_names)
+            })
 
     @classmethod
     def get_or_404(cls, _id, session: Session | None = None) -> Optional['BaseModel']:
         session = session or db.session
         instance = cls.get_by_id(_id)
         if not instance:
-            raise NotFoundError(ModelMessages.not_found(cls.__name__))
+            verbose_name = getattr(cls, '__verbose_name__', cls.__name__)
+            raise NotFoundError(ModelMessages.not_found(verbose_name))
         return instance
 
     @classmethod
@@ -232,8 +272,8 @@ class BaseModel(db.Model):
         session = session or db.session
         instance = cls.get_or_404(_id, session)
 
-        if hasattr(instance, 'prepare_for_deletion'):
-            instance.prepare_for_deletion()
+        # Uncomment to prevent exception related to foreign key violations
+        # cls.__check_children_exist(session, _id)
 
         instance_dict = instance.to_dict() if hasattr(instance, 'to_dict') else None
 
@@ -246,7 +286,7 @@ class BaseModel(db.Model):
             return instance_dict
         except IntegrityError as e:
             session.rollback()
-            raise ModelValidationError({"message": str(e)}) from e
+            raise ModelValidationError({'message': str(e)}) from e
 
     @classmethod
     def create(

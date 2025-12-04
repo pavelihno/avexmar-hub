@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, Session
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.models.flight import Flight
 from app.models.flight_tariff import FlightTariff
 from app.models.tariff import Tariff
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 class CarouselSlide(BaseModel):
     __tablename__ = 'carousel_slides'
+    __verbose_name__ = ModelVerboseNames.CarouselSlide
 
     title = db.Column(db.String, nullable=False)
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id', ondelete='RESTRICT'), nullable=True)

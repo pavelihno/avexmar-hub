@@ -55,6 +55,7 @@ const Passengers = () => {
 	const { countries } = useSelector((state) => state.countries);
 	const { currentUser } = useSelector((state) => state.auth);
 	const userPassengers = useSelector((state) => state.passengers.passengers);
+	const activeUserPassengers = useMemo(() => (userPassengers || []).filter((p) => !p.deleted), [userPassengers]);
 
 	const accessToken = useMemo(() => new URLSearchParams(location.search).get('access_token'), [location.search]);
 
@@ -99,10 +100,10 @@ const Passengers = () => {
 	}, [existingPassengerData, passengersExist]);
 
 	useEffect(() => {
-		if (currentUser) {
-			dispatch(fetchUserPassengers(currentUser.id));
+		if (booking && booking.user_id) {
+			dispatch(fetchUserPassengers(booking.user_id));
 		}
-	}, [dispatch, currentUser]);
+	}, [dispatch, booking]);
 
 	useEffect(() => {
 		dispatch(fetchBookingDetails({ publicId, accessToken }));
@@ -334,8 +335,8 @@ const Passengers = () => {
 									citizenshipOptions={citizenshipOptions}
 									ref={(el) => (passengerRefs.current[index] = el)}
 									prefillOptions={
-										currentUser && userPassengers.length > 0
-											? userPassengers
+										currentUser && activeUserPassengers.length > 0
+											? activeUserPassengers
 													.map((up) => ({ up, mapped: fromApiPassenger(up) }))
 													.map(({ up, mapped }) => ({
 														id: up.id,

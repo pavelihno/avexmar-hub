@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session, Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 from app.utils.xlsx import parse_upload_xlsx_template, get_upload_xlsx_template, get_upload_xlsx_report
 
 if TYPE_CHECKING:
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 class Timezone(BaseModel):
     __tablename__ = 'timezones'
+    __verbose_name__ = ModelVerboseNames.Timezone
 
     name = db.Column(db.String, nullable=False, unique=True)
 

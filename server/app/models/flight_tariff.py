@@ -4,6 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, Session
 
 from app.constants.messages import FlightTariffMessages
+from app.constants.models import ModelVerboseNames
 from app.database import db
 from app.models._base_model import BaseModel, ModelValidationError
 from app.models.tariff import Tariff
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 
 class FlightTariff(BaseModel):
     __tablename__ = 'flight_tariffs'
+    __verbose_name__ = ModelVerboseNames.FlightTariff
 
     flight_id = db.Column(db.Integer, db.ForeignKey('flights.id', ondelete='CASCADE'), nullable=False)
     tariff_id = db.Column(db.Integer, db.ForeignKey('tariffs.id', ondelete='CASCADE'), nullable=False)

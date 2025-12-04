@@ -531,7 +531,7 @@ def handle_yookassa_webhook(payload: Dict[str, Any]) -> None:
             session=session,
             commit=False,
         )
-        Booking.save_details_snapshot(
+        Booking.save_snapshot(
             id=booking.id,
             session=session,
             commit=True,

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped
 
 from app.database import db
 from app.models._base_model import BaseModel
+from app.constants.models import ModelVerboseNames
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
 
 class BookingFlight(BaseModel):
     __tablename__ = 'booking_flights'
+    __verbose_name__ = ModelVerboseNames.BookingFlight
 
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False)
     flight_tariff_id = db.Column(db.Integer, db.ForeignKey('flight_tariffs.id'), nullable=False)
