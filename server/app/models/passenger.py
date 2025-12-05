@@ -135,7 +135,6 @@ class Passenger(BaseModel):
                 cls.birth_date == kwargs['birth_date'],
                 cls.document_type == kwargs['document_type'],
                 cls.document_number == kwargs['document_number'],
-                cls.deleted.is_(False),
             ).one_or_none()
 
         return None

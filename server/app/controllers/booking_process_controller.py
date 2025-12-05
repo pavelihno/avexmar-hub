@@ -164,6 +164,7 @@ def create_booking_process_passengers(current_user):
     for pdata in passengers:
         category = pdata.get('category')
 
+        pdata.pop('id', None)
         pdata['owner_user_id'] = current_user.id if current_user else None
 
         passenger = Passenger.get_existing_passenger(
@@ -173,9 +174,17 @@ def create_booking_process_passengers(current_user):
 
         if passenger is None:
             passenger = Passenger.create(
-                session,
+                session=session,
                 commit=False,
-                **pdata
+                **pdata,
+            )
+        elif passenger is not None and passenger.deleted:
+            Passenger.update(
+                passenger.id,
+                session=session,
+                commit=False,
+                **pdata,
+                deleted=False,
             )
 
         bp = BookingPassenger.create(

@@ -541,6 +541,7 @@ export const UI_LABELS = {
 					failed_payment: 'Ошибка оплаты',
 					ticket_refund: 'Возврат билета',
 					ticket_in_progress: 'Билет оформляется',
+					ticket_to_issue: 'Требуется оформить билет',
 				},
 				chips: {
 					user: 'Пользователь',

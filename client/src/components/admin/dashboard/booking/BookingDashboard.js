@@ -45,6 +45,7 @@ const issueColors = {
 	failed_payment: 'error',
 	ticket_refund: 'error',
 	ticket_in_progress: 'info',
+	ticket_to_issue: 'warning',
 };
 
 const mapFiltersToParams = (filters) => {

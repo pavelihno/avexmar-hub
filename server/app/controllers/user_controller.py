@@ -155,8 +155,9 @@ def create_user_passenger(current_user, user_id):
         return jsonify({'message': BookingMessages.FORBIDDEN}), 403
     body = request.json or {}
 
+    # Ensure ID is not provided in the body
+    body.pop('id', None)
     body['owner_user_id'] = user_id
-
     consent = body.pop('consent', False)
     if not consent:
         return jsonify({'message': UserMessages.CONSENT_REQUIRED}), 400
@@ -165,10 +166,19 @@ def create_user_passenger(current_user, user_id):
 
     passenger = Passenger.get_existing_passenger(session, body)
 
-    if passenger is not None:
-        return jsonify({'message': UserMessages.PASSENGER_ALREADY_EXISTS}), 400
-
-    passenger = Passenger.create(session=session, commit=False, **body)
+    if passenger is not None: 
+        if passenger.deleted:
+            Passenger.update(
+                passenger.id,
+                session=session,
+                commit=False,
+                **body,
+                deleted=False,
+            )
+        else:
+            return jsonify({'message': UserMessages.PASSENGER_ALREADY_EXISTS}), 400
+    else:
+        passenger = Passenger.create(session=session, commit=False, **body)
 
     create_user_consent(
         current_user,
