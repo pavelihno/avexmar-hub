@@ -63,6 +63,7 @@ def _calculate_ticket_issue_flags(booking_snapshot):
     flights = (booking_snapshot or {}).get('flights') or []
     refund_requested = False
     issuing_in_progress = False
+    tickets_to_issue = False
 
     for flight in flights:
         tickets = (flight or {}).get('tickets') or []
@@ -70,6 +71,11 @@ def _calculate_ticket_issue_flags(booking_snapshot):
             status = (ticket or {}).get('status')
             if not status:
                 continue
+
+            if status in {
+                BOOKING_FLIGHT_PASSENGER_STATUS.created.value,
+            }:
+                tickets_to_issue = True
 
             if status in {
                 BOOKING_FLIGHT_PASSENGER_STATUS.refund_in_progress.value,
@@ -81,12 +87,13 @@ def _calculate_ticket_issue_flags(booking_snapshot):
             }:
                 issuing_in_progress = True
 
-        if refund_requested and issuing_in_progress:
+        if refund_requested and issuing_in_progress and tickets_to_issue:
             break
 
     return {
         'ticket_refund': refund_requested,
         'ticket_in_progress': issuing_in_progress,
+        'ticket_to_issue': tickets_to_issue,
     }
 
 
