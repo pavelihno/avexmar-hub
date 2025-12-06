@@ -17,14 +17,14 @@ import { UI_LABELS, ENUM_LABELS } from '../../constants';
 import { formatNumber } from '../utils';
 
 const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetails = true }) => {
-	if (!priceDetails) {
-		return null;
-	}
-
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.down('sm'));
 
 	const directionsData = React.useMemo(() => {
+		if (!priceDetails) {
+			return [];
+		}
+
 		return (priceDetails.directions || []).map((dir) => {
 			const info = flightMap[dir.direction] || {};
 			const passengersData = dir.passengers.map((p) => ({
@@ -54,7 +54,11 @@ const PriceDetailsTable = ({ priceDetails, currencySymbol, flightMap, showDetail
 				passengers: passengersData,
 			};
 		});
-	}, [priceDetails.directions, flightMap, currencySymbol]);
+	}, [priceDetails, flightMap, currencySymbol]);
+
+	if (!priceDetails) {
+		return null;
+	}
 
 	const summarySection = (
 		<>
