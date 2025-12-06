@@ -14,8 +14,10 @@ from app.utils.passenger_categories import (
 from app.utils.datetime import combine_date_time
 from app.models.flight_tariff import FlightTariff
 from app.models.fee import Fee
+from app.models.airline import Airline
 from app.models.discount import Discount
 from app.models.flight import Flight
+from app.models.route import Route
 from app.models.booking_passenger import BookingPassenger
 from app.models.booking_flight import BookingFlight
 from app.models.booking_flight_passenger import BookingFlightPassenger
@@ -295,7 +297,6 @@ def _extract_passengers_data(booking):
     passengers = []
     for bp in booking.booking_passengers:
         p = bp.get_passenger_details()
-        p['category'] = bp.category.value if bp.category else None
         passengers.append(p)
 
     passengers_exist = len(passengers) > 0
@@ -373,8 +374,7 @@ def _check_consent(booking):
 def build_booking_snapshot(booking) -> dict:
     """Build a reusable snapshot of booking details for documents and UI"""
 
-    # Extract base data using helper functions
-    passengers, passengers_exist = _extract_passengers_data(booking)
+    # Extract base booking data
     flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id = _extract_flights_tariffs(
         booking
     )
@@ -391,61 +391,22 @@ def build_booking_snapshot(booking) -> dict:
         passenger_counts,
     )
 
-    # Transform passengers to snapshot format
-    passengers_details = []
-    for p in passengers:
-        citizenship = p.get('citizenship', {})
-        passengers_details.append({
-            'id': p.get('id'),
-            'first_name': p.get('first_name'),
-            'last_name': p.get('last_name'),
-            'patronymic_name': p.get('patronymic_name'),
-            'gender': p.get('gender'),
-            'birth_date': p.get('birth_date'),
-            'document_type': p.get('document_type'),
-            'document_number': p.get('document_number'),
-            'document_expiry_date': p.get('document_expiry_date'),
-            'citizenship': {'name': citizenship.get('name'), 'code_a3': citizenship.get('code_a3')},
-            'citizenship_id': citizenship.get('id'),
-            'category': p.get('category'),
-        })
-
     # Transform flights to snapshot format
     flights_details = []
     for i, f in enumerate(flights):
         route = f.get('route', {})
-        origin = route.get('origin_airport', {})
-        destination = route.get('destination_airport', {})
         airline = f.get('airline', {})
         booking_flight = booking_flights[i]
 
         flights_details.append({
             'id': f.get('id'),
             'booking_flight_id': booking_flight.id,
-            'airline_flight_number': f.get('airline_flight_number'),
-            'scheduled_departure': f.get('scheduled_departure'),
-            'scheduled_departure_time': f.get('scheduled_departure_time'),
-            'scheduled_arrival': f.get('scheduled_arrival'),
-            'scheduled_arrival_time': f.get('scheduled_arrival_time'),
-            'route': {
-                'id': route.get('id'),
-                'origin_airport': {
-                    'city_name': origin.get('city_name'),
-                    'iata_code': origin.get('iata_code'),
-                },
-                'destination_airport': {
-                    'city_name': destination.get('city_name'),
-                    'iata_code': destination.get('iata_code'),
-                },
-            },
-            'airline': {
-                'name': airline.get('name'),
-                'iata_code': airline.get('iata_code'),
-            },
+            'route_id': route.get('id'),
+            'airline_id': airline.get('id'),
         })
 
     # Build routes and tariffs maps
-    routes_map = {f['id']: f['route'] for f in flights_details}
+    routes_map = {f['id']: f['route_id'] for f in flights_details}
     tariffs_map = {}
     for bf in booking_flights:
         ft = bf.flight_tariff
@@ -468,7 +429,7 @@ def build_booking_snapshot(booking) -> dict:
         price_directions.append({
             'direction': direction.get('direction'),
             'flight_id': flight_id,
-            'route': routes_map.get(flight_id, {}),
+            'route_id': routes_map.get(flight_id, None),
             'tariff': tariffs_map.get(flight_id, {}),
             'passengers': [
                 {
@@ -514,10 +475,8 @@ def build_booking_snapshot(booking) -> dict:
     snapshot = {
         **booking.to_dict(),
         'passenger_counts': passenger_counts,
-        'passengers_exist': passengers_exist,
         'consent': consent_exists,
         'flights': flights_details,
-        'passengers': passengers_details,
         'price_details': price_details,
         'payments': payments_details,
     }
@@ -529,15 +488,22 @@ def get_booking_snapshot(booking) -> dict:
     """Return a stored snapshot if possible, otherwise build a fresh one"""
 
     snapshot = booking.details_snapshot or {}
-    required_keys = {
-        'flights',
-        'passengers',
-        'price_details',
-        'payments',
+
+    if not snapshot:
+        snapshot = build_booking_snapshot(booking)
+
+    # Extract route details
+    flights = snapshot.get('flights', [])
+    routes_details = {
+        route_id: Route.get_or_404(route_id).to_dict(return_children=True)
+        for route_id in {f.get('route_id') for f in flights}
     }
 
-    if not snapshot or any(key not in snapshot for key in required_keys):
-        snapshot = build_booking_snapshot(booking)
+    # Extract airline details
+    airlines_details = {
+        airline_id: Airline.get_or_404(airline_id).to_dict()
+        for airline_id in {f.get('airline_id') for f in flights}
+    }
 
     # Extend flight details with tickets and itinerary info
     booking_passenger_ids = [
@@ -556,11 +522,16 @@ def get_booking_snapshot(booking) -> dict:
     booking_flight_passengers = BookingFlightPassenger.query.options(
         joinedload(BookingFlightPassenger.ticket),
         joinedload(BookingFlightPassenger.booking_passenger).joinedload(
-            BookingPassenger.passenger)
+            BookingPassenger.passenger
+        )
     ).filter(
         BookingFlightPassenger.booking_passenger_id.in_(booking_passenger_ids)
     ).all()
 
+    # Extract passengers details
+    passengers_details, passengers_exist = _extract_passengers_data(booking)
+
+    # Extract ticket statuses
     booking_flights_tickets = {}
     for bfp in booking_flight_passengers:
         bf_id = flight_to_bf.get(bfp.flight_id)
@@ -571,28 +542,76 @@ def get_booking_snapshot(booking) -> dict:
             booking_flights_tickets[bf_id] = []
 
         ticket = bfp.ticket
-        passenger_data = bfp.booking_passenger.get_passenger_details() if bfp.booking_passenger else {}
+        bfp_data = bfp.to_dict()
+
         booking_flights_tickets[bf_id].append({
             'id': ticket.id if ticket else None,
             'ticket_number': ticket.ticket_number if ticket else None,
-            'passenger': passenger_data,
-            'booking_flight_passenger_id': bfp.id,
-            'status': bfp.status.value if bfp.status else None,
-            'refund_request_at': bfp.refund_request_at.isoformat() if bfp.refund_request_at else None,
-            'refund_decision_at': bfp.refund_decision_at.isoformat() if bfp.refund_decision_at else None,
+            'passenger': bfp.booking_passenger.get_passenger_details(),
+            'booking_flight_passenger_id': bfp_data.get('id'),
+            'status': bfp_data.get('status'),
+            'refund_request_at': bfp_data.get('refund_request_at'),
+            'refund_decision_at': bfp_data.get('refund_decision_at'),
         })
 
-    snapshot['flights'] = [
+    # Extract flights details
+    flights_details = []
+    for f in flights:
+        flight_id = f.get('id', None)
+        route_id = f.get('route_id', None)
+        airline_id = f.get('airline_id', None)
+        booking_flight_id = f.get('booking_flight_id', None)
+
+        flight = Flight.get_or_404(flight_id).to_dict()
+        route = routes_details.get(route_id, {})
+        origin = route.get('origin_airport', {})
+        destination = route.get('destination_airport', {})
+        airline = airlines_details.get(airline_id, {})
+        tickets = booking_flights_tickets.get(booking_flight_id, [])        
+
+        flights_details.append({
+            'id': flight.get('id'),
+            'airline_flight_number': flight.get('airline_flight_number'),
+            'scheduled_departure': flight.get('scheduled_departure'),
+            'scheduled_departure_time': flight.get('scheduled_departure_time'),
+            'scheduled_arrival': flight.get('scheduled_arrival'),
+            'scheduled_arrival_time': flight.get('scheduled_arrival_time'),
+            'route': {
+                'id': route.get('id'),
+                'origin_airport': {
+                    'city_name': origin.get('city_name'),
+                    'iata_code': origin.get('iata_code'),
+                },
+                'destination_airport': {
+                    'city_name': destination.get('city_name'),
+                    'iata_code': destination.get('iata_code'),
+                },
+            },
+            'airline': {
+                'name': airline.get('name'),
+                'iata_code': airline.get('iata_code'),
+            },
+            'tickets': tickets,
+            'can_download_itinerary': booking_flight_itinerary.get(booking_flight_id, False),
+        })
+
+    # Extend price details
+    price_details = snapshot.get('price_details', {})
+    price_details['directions'] = [
         {
-            **flight,
-            'tickets': booking_flights_tickets.get(flight.get('booking_flight_id'), []),
-            'can_download_itinerary': booking_flight_itinerary.get(
-                flight.get('booking_flight_id'),
-                False,
-            ),
+            **direction,
+            'route': routes_details.get(direction.get('route_id'), {}),
         }
-        for flight in snapshot.get('flights', [])
+        for direction in price_details.get('directions', [])
     ]
+
+    snapshot = {
+        **snapshot,
+        'flights': flights_details,
+        'price_details': price_details,
+        'passengers': passengers_details,
+        'passengers_exist': passengers_exist,
+    }
 
     return snapshot
 

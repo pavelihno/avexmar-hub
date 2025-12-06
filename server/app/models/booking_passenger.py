@@ -95,6 +95,7 @@ class BookingPassenger(BaseModel):
                 'code_a3': citizenship.get('code_a3'),
             },
             'citizenship_id': passenger.citizenship_id,
+            'category': self.category.value if self.category else None,
             'deleted': bool(passenger.deleted),
         }
 
@@ -103,7 +104,7 @@ class BookingPassenger(BaseModel):
         if self.passenger_snapshot:
             return dict(self.passenger_snapshot)
         if self.passenger:
-            return self.passenger.to_dict(return_children=True)
+            return self.build_passenger_snapshot()
         return {}
 
     @classmethod
