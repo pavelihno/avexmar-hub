@@ -244,7 +244,7 @@ def calculate_receipt_details(booking):
 
     passengers_map = {}
     for bp in booking.booking_passengers.order_by(BookingPassenger.id).all():
-        passenger = bp.get_passenger_details()
+        passenger = get_booking_passenger_details(bp)
         passengers_map.setdefault(
             BookingPassenger.get_plural_category(bp.category).value,
             []
@@ -296,7 +296,7 @@ def _extract_passengers_data(booking):
     """Extract and normalize passenger data from booking"""
     passengers = []
     for bp in booking.booking_passengers:
-        p = bp.get_passenger_details()
+        p = get_booking_passenger_details(bp)
         passengers.append(p)
 
     passengers_exist = len(passengers) > 0
@@ -371,6 +371,44 @@ def _check_consent(booking):
     )
 
 
+def build_booking_passenger_snapshot(booking_passenger) -> dict:
+    """Serialize the linked passenger into a snapshot payload"""
+    passenger = booking_passenger.passenger
+    if not passenger:
+        return None
+
+    citizenship = passenger.citizenship.to_dict(return_children=True) if passenger.citizenship else {}
+
+    return {
+        'id': passenger.id,
+        'first_name': passenger.first_name,
+        'last_name': passenger.last_name,
+        'patronymic_name': passenger.patronymic_name,
+        'gender': passenger.gender.value if passenger.gender else None,
+        'birth_date': passenger.birth_date.isoformat() if passenger.birth_date else None,
+        'document_type': passenger.document_type.value if passenger.document_type else None,
+        'document_number': passenger.document_number,
+        'document_expiry_date': passenger.document_expiry_date.isoformat() if passenger.document_expiry_date else None,
+        'citizenship': {
+            'id': citizenship.get('id'),
+            'name': citizenship.get('name'),
+            'code_a3': citizenship.get('code_a3'),
+        },
+        'citizenship_id': passenger.citizenship_id,
+        'category': booking_passenger.category.value if booking_passenger.category else None,
+        'deleted': bool(passenger.deleted),
+    }
+
+
+def get_booking_passenger_details(booking_passenger) -> dict:
+    """Return passenger details preferring stored snapshot"""
+    if booking_passenger.passenger_snapshot:
+        return dict(booking_passenger.passenger_snapshot)
+    if booking_passenger.passenger:
+        return build_booking_passenger_snapshot(booking_passenger)
+    return {}
+
+
 def build_booking_snapshot(booking) -> dict:
     """Build a reusable snapshot of booking details for documents and UI"""
 
@@ -378,7 +416,6 @@ def build_booking_snapshot(booking) -> dict:
     flights, booking_flights, outbound_id, outbound_tariff_id, return_id, return_tariff_id = _extract_flights_tariffs(
         booking
     )
-    payments = _extract_payment_data(booking)
     consent_exists = _check_consent(booking)
 
     # Calculate price details
@@ -457,34 +494,18 @@ def build_booking_snapshot(booking) -> dict:
         'final_price': price_details.get('final_price'),
     }
 
-    # Transform payment data to snapshot format
-    payments_details = []
-    for payment in payments:
-        payments_details.append({
-            'payment_status': payment.get('payment_status'),
-            'payment_method': payment.get('payment_method'),
-            'payment_type': payment.get('payment_type'),
-            'amount': payment.get('amount'),
-            'currency': payment.get('currency'),
-            'paid_at': payment.get('paid_at'),
-            'expires_at': payment.get('expires_at'),
-            'provider_payment_id': payment.get('provider_payment_id'),
-        })
-
     # Build final snapshot
     snapshot = {
-        **booking.to_dict(),
         'passenger_counts': passenger_counts,
         'consent': consent_exists,
         'flights': flights_details,
         'price_details': price_details,
-        'payments': payments_details,
     }
 
     return snapshot
 
 
-def get_booking_snapshot(booking) -> dict:
+def get_booking_details(booking) -> dict:
     """Return a stored snapshot if possible, otherwise build a fresh one"""
 
     snapshot = booking.details_snapshot or {}
@@ -547,7 +568,7 @@ def get_booking_snapshot(booking) -> dict:
         booking_flights_tickets[bf_id].append({
             'id': ticket.id if ticket else None,
             'ticket_number': ticket.ticket_number if ticket else None,
-            'passenger': bfp.booking_passenger.get_passenger_details(),
+            'passenger': get_booking_passenger_details(bfp.booking_passenger),
             'booking_flight_passenger_id': bfp_data.get('id'),
             'status': bfp_data.get('status'),
             'refund_request_at': bfp_data.get('refund_request_at'),
@@ -605,12 +626,29 @@ def get_booking_snapshot(booking) -> dict:
         for direction in price_details.get('directions', [])
     ]
 
+    # Extract payments details
+    payments = _extract_payment_data(booking)
+    payments_details = []
+    for payment in payments:
+        payments_details.append({
+            'payment_status': payment.get('payment_status'),
+            'payment_method': payment.get('payment_method'),
+            'payment_type': payment.get('payment_type'),
+            'amount': payment.get('amount'),
+            'currency': payment.get('currency'),
+            'paid_at': payment.get('paid_at'),
+            'expires_at': payment.get('expires_at'),
+            'provider_payment_id': payment.get('provider_payment_id'),
+        })
+
     snapshot = {
+        **booking.to_dict(),
         **snapshot,
         'flights': flights_details,
         'price_details': price_details,
         'passengers': passengers_details,
         'passengers_exist': passengers_exist,
+        'payments': payments_details,
     }
 
     return snapshot
@@ -694,7 +732,7 @@ def calculate_refund_details(booking, ticket):
     total_refund_amount = max(unit_price - total_penalty_fees, 0.0)
 
     # Passenger details
-    passenger = bp.get_passenger_details() if bp else {}
+    passenger = get_booking_passenger_details(bp)
     passenger_details = {
         'full_name': __get_passenger_full_name(
             passenger.get('last_name'),

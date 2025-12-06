@@ -21,7 +21,7 @@ from app.models.ticket import Ticket
 from app.middlewares.auth_middleware import current_user
 from app.utils.business_logic import (
     calculate_price_details,
-    get_booking_snapshot,
+    get_booking_details,
     get_seats_number,
     calculate_refund_details,
 )
@@ -282,7 +282,7 @@ def get_booking_process_details(current_user, public_id):
     if not booking:
         return jsonify({'message': BookingMessages.BOOKING_NOT_FOUND}), 404
 
-    result = get_booking_snapshot(booking)
+    result = get_booking_details(booking)
 
     return jsonify(result), 200
 

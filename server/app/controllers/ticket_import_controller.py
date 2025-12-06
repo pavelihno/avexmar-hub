@@ -32,7 +32,7 @@ from app.utils.email import send_email, EMAIL_TYPE
 from app.utils.storage import TicketManager
 from app.utils.enum import BOOKING_STATUS, BOOKING_FLIGHT_PASSENGER_STATUS
 from app.utils.passenger_categories import PASSENGER_CATEGORY_LABELS
-from app.utils.business_logic import get_booking_snapshot
+from app.utils.business_logic import get_booking_details, get_booking_passenger_details
 
 
 def _clean_string(value) -> str:
@@ -321,7 +321,7 @@ def _find_booking_matches(parsed: Dict[str, Any]) -> Dict[str, Any]:
 
     for bfp in booking_flight_passengers:
         booking_passenger = bfp.booking_passenger
-        passenger_data = booking_passenger.get_passenger_details() if booking_passenger else {}
+        passenger_data = get_booking_passenger_details(booking_passenger)
         booking = booking_passenger.booking if booking_passenger else None
 
         if booking:
@@ -614,7 +614,7 @@ def confirm_import_tickets(current_user):
         'departure': f"{format_date(flight.scheduled_departure)} {format_time(flight.scheduled_departure_time)}",
         'arrival': f"{format_date(flight.scheduled_arrival)} {format_time(flight.scheduled_arrival_time)}",
     }
-    details = get_booking_snapshot(booking)
+    details = get_booking_details(booking)
 
     passengers = []
     for p in details.get('passengers', []):
