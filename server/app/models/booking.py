@@ -19,7 +19,7 @@ from app.utils.enum import (
     DEFAULT_BOOKING_STATUS,
     DEFAULT_CURRENCY,
 )
-from app.utils.business_logic import build_booking_snapshot
+from app.utils.business_logic import build_booking_passenger_snapshot, build_booking_snapshot
 
 if TYPE_CHECKING:
     from app.models.payment import Payment
@@ -186,13 +186,14 @@ class Booking(BaseModel):
         """Generates and saves a reusable booking snapshot"""
         session = session or db.session
         booking = cls.get_or_404(id, session)
+
         from app.models.booking_passenger import BookingPassenger
 
-        BookingPassenger.save_passenger_snapshot(
-            booking.id,
-            session=session,
-            commit=False,
-        )
+        booking_passengers = session.query(BookingPassenger).filter(BookingPassenger.booking_id == booking.id).all()
+
+        for bp in booking_passengers:
+            bp.passenger_snapshot = build_booking_passenger_snapshot(bp)
+
         snapshot = build_booking_snapshot(booking)
 
         return cls.update(

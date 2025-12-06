@@ -30,6 +30,7 @@ from app.utils.enum import (
     PASSENGER_CATEGORY,
     SEAT_CLASS,
 )
+from app.utils.business_logic import get_booking_passenger_details
 
 SEAT_CLASS_CODES = {
     SEAT_CLASS.economy: 'Y',
@@ -163,7 +164,7 @@ def _group_pending_flights(unticketed_records):
 
     for booking_flight_passenger in unticketed_records:
         booking_passenger = booking_flight_passenger.booking_passenger
-        passenger = booking_passenger.get_passenger_details() if booking_passenger else None
+        passenger = get_booking_passenger_details(booking_passenger)
         booking = booking_passenger.booking if booking_passenger else None
         flight = booking_flight_passenger.flight
 
@@ -335,7 +336,7 @@ def _create_flight_passenger_workbook(flight, booking_flights, allowed_booking_p
             ), None
         )
         for bp in passengers:
-            p = bp.get_passenger_details()
+            p = get_booking_passenger_details(bp)
 
             # Column 0: Counter
             value = str(counter)

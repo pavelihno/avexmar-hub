@@ -13,7 +13,7 @@ from app.database import db
 from app.models.booking import Booking
 from app.models.payment import Payment
 from app.models.ticket import Ticket
-from app.utils.business_logic import calculate_receipt_details, calculate_refund_details, get_booking_snapshot
+from app.utils.business_logic import calculate_receipt_details, calculate_refund_details, get_booking_details
 from app.utils.datetime import format_date, format_time, parse_datetime
 from app.utils.enum import (
     PAYMENT_METHOD,
@@ -164,7 +164,7 @@ def __send_confirmation_email(booking: Booking) -> bool:
         f'{Config.CLIENT_URL}/booking/{booking.public_id}/completion'
         f'?access_token={booking.access_token}'
     )
-    details = get_booking_snapshot(booking)
+    details = get_booking_details(booking)
 
     flights = []
     for f in details.get('flights', []):

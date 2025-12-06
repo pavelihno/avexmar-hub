@@ -13,7 +13,7 @@ from app.models.booking_flight_passenger import BookingFlightPassenger
 from app.models.flight_tariff import FlightTariff
 from app.models.flight import Flight
 from app.models.ticket import Ticket
-from app.utils.business_logic import get_booking_snapshot
+from app.utils.business_logic import get_booking_details, get_booking_passenger_details
 from app.utils.email import EMAIL_TYPE, send_email, EmailError
 from app.utils.enum import (
     PAYMENT_STATUS,
@@ -114,7 +114,7 @@ def _get_booking_ticket_context(booking_id: int, ticket_id: int):
 
 def _build_ticket_refund_payload(booking, ticket, booking_flight_passenger):
     booking_passenger = booking_flight_passenger.booking_passenger if booking_flight_passenger else None
-    passenger = booking_passenger.get_passenger_details() if booking_passenger else {}
+    passenger = get_booking_passenger_details(booking_passenger)
     flight = booking_flight_passenger.flight
 
     return {
@@ -288,7 +288,7 @@ def get_booking_dashboard(current_user):
     items = []
 
     for booking in bookings:
-        booking_snapshot = get_booking_snapshot(booking)
+        booking_snapshot = get_booking_details(booking)
         booking_status = booking.status.value if booking.status else None
         if booking_status:
             status_counts[booking_status] += 1
