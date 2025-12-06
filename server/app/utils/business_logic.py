@@ -380,7 +380,6 @@ def build_booking_passenger_snapshot(booking_passenger) -> dict:
     citizenship = passenger.citizenship.to_dict(return_children=True) if passenger.citizenship else {}
 
     return {
-        'id': passenger.id,
         'first_name': passenger.first_name,
         'last_name': passenger.last_name,
         'patronymic_name': passenger.patronymic_name,
@@ -390,13 +389,11 @@ def build_booking_passenger_snapshot(booking_passenger) -> dict:
         'document_number': passenger.document_number,
         'document_expiry_date': passenger.document_expiry_date.isoformat() if passenger.document_expiry_date else None,
         'citizenship': {
-            'id': citizenship.get('id'),
             'name': citizenship.get('name'),
             'code_a3': citizenship.get('code_a3'),
         },
         'citizenship_id': passenger.citizenship_id,
         'category': booking_passenger.category.value if booking_passenger.category else None,
-        'deleted': bool(passenger.deleted),
     }
 
 

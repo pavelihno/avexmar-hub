@@ -187,7 +187,9 @@ class Booking(BaseModel):
         session = session or db.session
         booking = cls.get_or_404(id, session)
 
-        booking_passengers = session.query(cls).filter(cls.booking_id == booking.id).all()
+        from app.models.booking_passenger import BookingPassenger
+
+        booking_passengers = session.query(BookingPassenger).filter(BookingPassenger.booking_id == booking.id).all()
 
         for bp in booking_passengers:
             bp.passenger_snapshot = build_booking_passenger_snapshot(bp)
